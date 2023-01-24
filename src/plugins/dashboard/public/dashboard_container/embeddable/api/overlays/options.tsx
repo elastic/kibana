@@ -13,18 +13,13 @@ import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { useDashboardContainerContext } from '../../../dashboard_container_renderer';
 
 export const DashboardOptions = () => {
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setUseMargins, setSyncCursor, setSyncColors, setSyncTooltips, setHidePanelTitles },
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const { embeddableInstance: dashboard } = useDashboardContainerContext();
 
-  const useMargins = select((state) => state.explicitInput.useMargins);
-  const syncColors = select((state) => state.explicitInput.syncColors);
-  const syncCursor = select((state) => state.explicitInput.syncCursor);
-  const syncTooltips = select((state) => state.explicitInput.syncTooltips);
-  const hidePanelTitles = select((state) => state.explicitInput.hidePanelTitles);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
+  const syncColors = dashboard.select((state) => state.explicitInput.syncColors);
+  const syncCursor = dashboard.select((state) => state.explicitInput.syncCursor);
+  const syncTooltips = dashboard.select((state) => state.explicitInput.syncTooltips);
+  const hidePanelTitles = dashboard.select((state) => state.explicitInput.hidePanelTitles);
 
   return (
     <EuiForm data-test-subj="dashboardOptionsMenu">
@@ -34,7 +29,7 @@ export const DashboardOptions = () => {
             defaultMessage: 'Use margins between panels',
           })}
           checked={useMargins}
-          onChange={(event) => dispatch(setUseMargins(event.target.checked))}
+          onChange={(event) => dashboard.dispatch.setUseMargins(event.target.checked)}
           data-test-subj="dashboardMarginsCheckbox"
         />
       </EuiFormRow>
@@ -45,7 +40,7 @@ export const DashboardOptions = () => {
             defaultMessage: 'Show panel titles',
           })}
           checked={!hidePanelTitles}
-          onChange={(event) => dispatch(setHidePanelTitles(!event.target.checked))}
+          onChange={(event) => dashboard.dispatch.setHidePanelTitles(!event.target.checked)}
           data-test-subj="dashboardPanelTitlesCheckbox"
         />
       </EuiFormRow>
@@ -57,7 +52,7 @@ export const DashboardOptions = () => {
                 defaultMessage: 'Sync color palettes across panels',
               })}
               checked={syncColors}
-              onChange={(event) => dispatch(setSyncColors(event.target.checked))}
+              onChange={(event) => dashboard.dispatch.setSyncColors(event.target.checked)}
               data-test-subj="dashboardSyncColorsCheckbox"
             />
           </EuiFormRow>
@@ -67,7 +62,7 @@ export const DashboardOptions = () => {
                 defaultMessage: 'Sync cursor across panels',
               })}
               checked={syncCursor}
-              onChange={(event) => dispatch(setSyncCursor(event.target.checked))}
+              onChange={(event) => dashboard.dispatch.setSyncCursor(event.target.checked)}
               data-test-subj="dashboardSyncCursorCheckbox"
             />
           </EuiFormRow>
@@ -81,7 +76,7 @@ export const DashboardOptions = () => {
               )}
               checked={syncTooltips}
               disabled={!Boolean(syncCursor)}
-              onChange={(event) => dispatch(setSyncTooltips(event.target.checked))}
+              onChange={(event) => dashboard.dispatch.setSyncTooltips(event.target.checked)}
               data-test-subj="dashboardSyncTooltipsCheckbox"
             />
           </EuiFormRow>

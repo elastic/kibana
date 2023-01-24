@@ -133,9 +133,9 @@ export const DashboardGridItem: FC<Props> = (props: Props) => {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
 
-  const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const { embeddableInstance: dashboard } = useDashboardContainerContext();
 
-  const isPrintMode = select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
+  const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
   const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
 
   return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;

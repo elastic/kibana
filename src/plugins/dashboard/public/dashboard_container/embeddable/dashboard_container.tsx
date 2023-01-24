@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import React, { createContext } from 'react';
-import { createSelectorHook } from 'react-redux';
-import { debounceTime, Observable, Subject, Subscription, switchMap } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import {
@@ -22,7 +20,6 @@ import {
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AnyAction, Middleware } from '@reduxjs/toolkit';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -42,29 +39,19 @@ import {
   showPlaceholderUntil,
   addOrUpdateEmbeddable,
 } from './api';
-import {
-  getUnsavedChanges,
-  startSyncingDashboardDataViews,
-  keysNotConsideredUnsavedChanges,
-  backupUnsavedChanges,
-  reducersToIgnore,
-  updateUnsavedChangesState,
-  combineDashboardFiltersWithControlGroupFilters,
-} from './integrations';
+
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { createPanelState } from '../component/panel';
 import { pluginServices } from '../../services/plugin_services';
-import {
-  CHANGE_CHECK_DEBOUNCE,
-  DASHBOARD_LOADED_EVENT,
-  DEFAULT_DASHBOARD_INPUT,
-} from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
-import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
+import { dashboardContainerReducers } from './state/dashboard_container_reducers';
+import { startDiffingDashboardState } from './state/diffing/dashboard_diffing_integration';
+import { DASHBOARD_LOADED_EVENT, DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
+import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -82,26 +69,28 @@ export interface InheritedChildInput {
   executionContext?: KibanaExecutionContext;
 }
 
-type SelectorFunction = <Selected extends unknown>(
-  selector: (state: DashboardReduxState) => Selected,
-  equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined
-) => Selected;
+type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
+  DashboardReduxState,
+  typeof dashboardContainerReducers
+>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
+
+  // state management
+  public select: DashboardReduxEmbeddableTools['select'];
+  public getState: DashboardReduxEmbeddableTools['getState'];
+  public dispatch: DashboardReduxEmbeddableTools['dispatchActions'];
+  public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
+
+  // TODO remove this
+  public DashboardReduxWrapper: DashboardReduxEmbeddableTools['Wrapper'];
+
+  public subscriptions: Subscription = new Subscription();
+
   public controlGroup?: ControlGroupContainer;
 
-  public select: SelectorFunction;
-
-  // Dashboard State
-  private onDestroyControlGroup?: () => void;
-  private subscriptions: Subscription = new Subscription();
-
-  public reduxEmbeddableTools: ReduxEmbeddableTools<
-    DashboardReduxState,
-    typeof dashboardContainerReducers
-  >;
-
+  // performance monitoring
   private dashboardCreationStartTime?: number;
   private savedObjectLoadTime?: number;
 
@@ -149,13 +138,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    const diffingMiddleware = this.startCheckingForUnsavedChanges();
-
-    // set up data views integration
-    this.subscriptions.add(startSyncingDashboardDataViews.bind(this)());
+    const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxTools = reduxEmbeddablePackage.createTools<
       DashboardReduxState,
       typeof dashboardContainerReducers
     >({
@@ -172,24 +158,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     });
 
-    // create selector that react components can use
-    this.select = createSelectorHook(
-      createContext({
-        store: this.reduxEmbeddableTools.store,
-        storeState: this.reduxEmbeddableTools.store.getState(),
-      })
-    );
+    this.onStateChange = reduxTools.onStateChange;
+    this.cleanupStateTools = reduxTools.cleanup;
+    this.dispatch = reduxTools.dispatchActions;
+    this.getState = reduxTools.getState;
+    this.select = reduxTools.select;
+
+    // TODO remove this
+    this.DashboardReduxWrapper = reduxTools.Wrapper;
   }
 
   public getDashboardSavedObjectId() {
-    return this.reduxEmbeddableTools.getState().componentState.lastSavedId;
+    return this.getState().componentState.lastSavedId;
   }
 
   public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
     if (this.analyticsService && this.dashboardCreationStartTime) {
-      const panelCount = Object.keys(
-        this.reduxEmbeddableTools.getState().explicitInput.panels
-      ).length;
+      const panelCount = Object.keys(this.getState().explicitInput.panels).length;
       const totalDuration = stats.panelsRenderDoneTime - this.dashboardCreationStartTime;
       reportPerformanceMetricEvent(this.analyticsService, {
         eventName: DASHBOARD_LOADED_EVENT,
@@ -206,47 +191,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
   }
 
-  private startCheckingForUnsavedChanges() {
-    const checkForUnsavedChangesSubject$ = new Subject<null>();
-    this.subscriptions.add(
-      checkForUnsavedChangesSubject$
-        .pipe(
-          debounceTime(CHANGE_CHECK_DEBOUNCE),
-          switchMap(() => {
-            return new Observable((observer) => {
-              const {
-                explicitInput: currentInput,
-                componentState: { lastSavedInput },
-              } = this.reduxEmbeddableTools.getState();
-              getUnsavedChanges
-                .bind(this)(lastSavedInput, currentInput)
-                .then((unsavedChanges) => {
-                  if (observer.closed) return;
-
-                  updateUnsavedChangesState.bind(this)(unsavedChanges);
-                  if (this.creationOptions?.useSessionStorageIntegration) {
-                    backupUnsavedChanges.bind(this)(unsavedChanges);
-                  }
-                });
-            });
-          })
-        )
-        .subscribe()
-    );
-    const diffingMiddleware: Middleware<AnyAction> = (store) => (next) => (action) => {
-      const dispatchedActionName = action.type.split('/')?.[1];
-      if (
-        dispatchedActionName &&
-        dispatchedActionName !== 'updateEmbeddableReduxOutput' && // ignore any generic output updates.
-        !reducersToIgnore.includes(dispatchedActionName)
-      ) {
-        checkForUnsavedChangesSubject$.next(null);
-      }
-      next(action);
-    };
-    return diffingMiddleware;
-  }
-
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
@@ -259,30 +203,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return newPanel;
   }
 
-  public async getExplicitInputIsEqual(lastExplicitInput: DashboardContainerInput) {
-    const currentInput = this.reduxEmbeddableTools.getState().explicitInput;
-    return (
-      omit(
-        Object.keys(await getUnsavedChanges.bind(this)(lastExplicitInput, currentInput)),
-        keysNotConsideredUnsavedChanges
-      ).length > 0
-    );
-  }
-
   public render(dom: HTMLElement) {
     if (this.domNode) {
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
 
-    const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <I18nProvider>
         <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
           <KibanaThemeProvider theme$={this.theme$}>
-            <DashboardReduxWrapper>
+            <this.DashboardReduxWrapper>
               <DashboardViewport />
-            </DashboardReduxWrapper>
+            </this.DashboardReduxWrapper>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
       </I18nProvider>,
@@ -328,20 +261,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // ------------------------------------------------------------------------------------------------------
   // Cleanup
   // ------------------------------------------------------------------------------------------------------
-  private stopDiffingDashboardState?: () => void;
-  private stopSyncingWithUnifiedSearch?: () => void;
-  private dataViewsChangeSubscription?: Subscription = undefined;
-  private stopSyncingDashboardSearchSessions: (() => void) | undefined;
+  public stopSyncingWithUnifiedSearch?: () => void;
+  private cleanupStateTools: () => void;
+  private onDestroyControlGroup?: () => void;
 
   public destroy() {
     super.destroy();
+    this.cleanupStateTools();
     this.onDestroyControlGroup?.();
     this.subscriptions.unsubscribe();
-    this.stopDiffingDashboardState?.();
-    this.reduxEmbeddableTools?.cleanup();
     this.stopSyncingWithUnifiedSearch?.();
-    this.stopSyncingDashboardSearchSessions?.();
-    this.dataViewsChangeSubscription?.unsubscribe();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
@@ -381,29 +310,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh() {
-    const {
-      dispatch,
-      actions: { setLastReloadRequestTimeToNow },
-    } = this.reduxEmbeddableTools;
-    dispatch(setLastReloadRequestTimeToNow({}));
+    this.dispatch.setLastReloadRequestTimeToNow({});
     this.controlGroup?.reload();
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();
 
   public resetToLastSavedState() {
-    const {
-      dispatch,
-      getState,
-      actions: { resetToLastSavedInput },
-    } = this.reduxEmbeddableTools;
-    dispatch(resetToLastSavedInput({}));
+    this.dispatch.resetToLastSavedInput({});
     const {
       explicitInput: { timeRange, refreshInterval },
       componentState: {
         lastSavedInput: { timeRestore: lastSavedTimeRestore },
       },
-    } = getState();
+    } = this.getState();
 
     // if we are using the unified search integration, we need to force reset the time picker.
     if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
@@ -437,8 +357,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public getExpandedPanelId = () => {
-    if (!this.reduxEmbeddableTools) throw new Error();
-    return this.reduxEmbeddableTools.getState().componentState.expandedPanelId;
+    return this.getState().componentState.expandedPanelId;
+  };
+
+  public setExpandedPanelId = (newId?: string) => {
+    this.dispatch.setExpandedPanelId(newId);
   };
 
   public openOverlay = (ref: OverlayRef) => {
@@ -449,15 +372,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public clearOverlays = () => {
     this.controlGroup?.closeAllFlyouts();
     this.overlayRef?.close();
-  };
-
-  public setExpandedPanelId = (newId?: string) => {
-    if (!this.reduxEmbeddableTools) throw new Error();
-    const {
-      actions: { setExpandedPanelId },
-      dispatch,
-    } = this.reduxEmbeddableTools;
-    dispatch(setExpandedPanelId(newId));
   };
 
   public getPanelCount = () => {

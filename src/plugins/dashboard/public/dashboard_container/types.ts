@@ -38,6 +38,8 @@ export interface DashboardRenderPerformanceStats {
   panelsRenderStartTime: number;
 }
 
+export type DashboardContainerInputWithoutId = Omit<DashboardContainerInput, 'id'>;
+
 export interface DashboardContainerOutput extends ContainerOutput {
   usedDataViewIds?: string[];
 }

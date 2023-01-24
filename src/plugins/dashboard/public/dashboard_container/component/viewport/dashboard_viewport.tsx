@@ -22,33 +22,29 @@ export const DashboardViewport = () => {
   } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setFullScreenMode },
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const { embeddableInstance: dashboard } = useDashboardContainerContext();
 
   /**
    * Render Control group
    */
-  const controlGroup = dashboardContainer.controlGroup;
+  const controlGroup = dashboard.controlGroup;
   useEffect(() => {
     if (controlGroup && controlsRoot.current) controlGroup.render(controlsRoot.current);
   }, [controlGroup]);
 
-  const panelCount = Object.keys(select((state) => state.explicitInput.panels)).length;
+  const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
   const controlCount = Object.keys(
-    select((state) => state.explicitInput.controlGroupInput?.panels) ?? {}
+    dashboard.select((state) => state.explicitInput.controlGroupInput?.panels) ?? {}
   ).length;
 
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const dashboardTitle = select((state) => state.explicitInput.title);
-  const useMargins = select((state) => state.explicitInput.useMargins);
-  const description = select((state) => state.explicitInput.description);
-  const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
-  const isEmbeddedExternally = select((state) => state.componentState.isEmbeddedExternally);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
+  const description = dashboard.select((state) => state.explicitInput.description);
+  const isFullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
+  const isEmbeddedExternally = dashboard.select(
+    (state) => state.componentState.isEmbeddedExternally
+  );
 
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
@@ -69,7 +65,7 @@ export const DashboardViewport = () => {
       >
         {isFullScreenMode && (
           <ExitFullScreenButton
-            onExit={() => dispatch(setFullScreenMode(false))}
+            onExit={() => dashboard.dispatch.setFullScreenMode(false)}
             toggleChrome={!isEmbeddedExternally}
           />
         )}

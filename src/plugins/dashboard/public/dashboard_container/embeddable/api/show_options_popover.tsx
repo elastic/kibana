@@ -38,13 +38,12 @@ export function showOptions(this: DashboardContainer, anchorElement: HTMLElement
   }
 
   isOpen = true;
-  const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
 
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
       <KibanaThemeProvider theme$={theme$}>
-        <DashboardReduxWrapper>
+        <this.DashboardReduxWrapper>
           <EuiWrappingPopover
             id="popover"
             button={anchorElement}
@@ -53,7 +52,7 @@ export function showOptions(this: DashboardContainer, anchorElement: HTMLElement
           >
             <DashboardOptions />
           </EuiWrappingPopover>
-        </DashboardReduxWrapper>
+        </this.DashboardReduxWrapper>
       </KibanaThemeProvider>
     </I18nProvider>
   );

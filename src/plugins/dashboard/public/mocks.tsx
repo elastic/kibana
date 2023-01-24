@@ -10,10 +10,10 @@ import { Embeddable, EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/pu
 import { createReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public/redux_embeddables/create_redux_embeddable_tools';
 
 import { DashboardStart } from './plugin';
-import { DashboardContainerByValueInput, DashboardPanelState } from '../common';
+import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainerOutput, DashboardReduxState } from './dashboard_container/types';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
-import { dashboardContainerReducers } from './dashboard_container/state/dashboard_container_reducers';
+import { dashboardContainerReducers } from './dashboard_container/embeddable/state/dashboard_container_reducers';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -73,7 +73,7 @@ export const mockDashboardReduxEmbeddableTools = async (
 ) => {
   const mockDashboard = new DashboardContainer(
     getSampleDashboardInput(partialState?.explicitInput)
-  ) as Embeddable<DashboardContainerByValueInput, DashboardContainerOutput>;
+  ) as Embeddable<DashboardContainerInput, DashboardContainerOutput>;
 
   const mockReduxEmbeddableTools = createReduxEmbeddableTools<DashboardReduxState>({
     embeddable: mockDashboard,
@@ -88,8 +88,8 @@ export const mockDashboardReduxEmbeddableTools = async (
 };
 
 export function getSampleDashboardInput(
-  overrides?: Partial<DashboardContainerByValueInput>
-): DashboardContainerByValueInput {
+  overrides?: Partial<DashboardContainerInput>
+): DashboardContainerInput {
   return {
     // options
     useMargins: true,

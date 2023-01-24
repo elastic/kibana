@@ -40,6 +40,29 @@ export interface ReduxEmbeddablePackage {
 }
 
 /**
+ * The Redux Embeddable Selector is a react redux selector function that can be used to grab values from the state, and to make a component
+ * re-render when those values change.
+ */
+export type ReduxEmbeddableSelect<
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+> = <Selected extends unknown>(
+  selector: (state: ReduxEmbeddableStateType) => Selected,
+  equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined
+) => Selected;
+
+/**
+ * The Redux Embeddable Dispatcher is a collection of functions which dispatch actions to the correct store.
+ */
+export type ReduxEmbeddableDispatch<
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
+  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
+> = {
+  [ReducerKey in keyof ReducerType]: (
+    payload: Parameters<ReducerType[ReducerKey]>[1]['payload']
+  ) => void;
+};
+
+/**
  * The return type from setupReduxEmbeddable. Contains a wrapper which comes with the store provider and provides the context to react components,
  * but also returns the context object to allow the embeddable class to interact with the redux store.
  */
@@ -50,10 +73,16 @@ export interface ReduxEmbeddableTools<
   cleanup: () => void;
   Wrapper: React.FC<PropsWithChildren<{}>>;
   store: EnhancedStore<ReduxEmbeddableStateType, AnyAction>;
-  dispatch: EnhancedStore<ReduxEmbeddableStateType>['dispatch'];
   getState: EnhancedStore<ReduxEmbeddableStateType>['getState'];
   onStateChange: EnhancedStore<ReduxEmbeddableStateType>['subscribe'];
+
+  // TODO remove these, as they've been eclipsed by the new dispatch and select types
+  dispatch: EnhancedStore<ReduxEmbeddableStateType>['dispatch'];
   actions: ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType>['actions'];
+
+  // Here are the new types
+  dispatchActions: ReduxEmbeddableDispatch<ReduxEmbeddableStateType, ReducerType>;
+  select: ReduxEmbeddableSelect<ReduxEmbeddableStateType>;
 }
 
 /**

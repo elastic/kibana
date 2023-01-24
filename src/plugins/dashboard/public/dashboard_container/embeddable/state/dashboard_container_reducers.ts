@@ -7,8 +7,12 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { DashboardPublicState, DashboardReduxState, DashboardStateFromSaveModal } from '../types';
-import { DashboardContainerByValueInput } from '../../../common';
+import { DashboardContainerInput } from '../../../../common';
+import {
+  DashboardPublicState,
+  DashboardReduxState,
+  DashboardStateFromSaveModal,
+} from '../../types';
 
 export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
@@ -16,14 +20,14 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   setControlGroupState: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['controlGroupInput']>
+    action: PayloadAction<DashboardContainerInput['controlGroupInput']>
   ) => {
     state.explicitInput.controlGroupInput = action.payload;
   },
 
   setPanels: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['panels']>
+    action: PayloadAction<DashboardContainerInput['panels']>
   ) => {
     state.explicitInput.panels = action.payload;
   },
@@ -52,35 +56,32 @@ export const dashboardContainerReducers = {
 
   setDescription: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['description']>
+    action: PayloadAction<DashboardContainerInput['description']>
   ) => {
     state.explicitInput.description = action.payload;
   },
 
   setViewMode: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['viewMode']>
+    action: PayloadAction<DashboardContainerInput['viewMode']>
   ) => {
     state.explicitInput.viewMode = action.payload;
   },
 
-  setTags: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['tags']>
-  ) => {
+  setTags: (state: DashboardReduxState, action: PayloadAction<DashboardContainerInput['tags']>) => {
     state.explicitInput.tags = action.payload;
   },
 
   setTitle: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['title']>
+    action: PayloadAction<DashboardContainerInput['title']>
   ) => {
     state.explicitInput.title = action.payload;
   },
 
   setSearchSessionId: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['searchSessionId']>
+    action: PayloadAction<DashboardContainerInput['searchSessionId']>
   ) => {
     state.explicitInput.searchSessionId = action.payload;
   },
@@ -134,7 +135,7 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   setFiltersAndQuery: (
     state: DashboardReduxState,
-    action: PayloadAction<Pick<DashboardContainerByValueInput, 'filters' | 'query'>>
+    action: PayloadAction<Pick<DashboardContainerInput, 'filters' | 'query'>>
   ) => {
     state.explicitInput.filters = action.payload.filters;
     state.explicitInput.query = action.payload.query;
@@ -146,14 +147,14 @@ export const dashboardContainerReducers = {
 
   setFilters: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['filters']>
+    action: PayloadAction<DashboardContainerInput['filters']>
   ) => {
     state.explicitInput.filters = action.payload;
   },
 
   setQuery: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['query']>
+    action: PayloadAction<DashboardContainerInput['query']>
   ) => {
     state.explicitInput.query = action.payload;
   },
@@ -167,28 +168,28 @@ export const dashboardContainerReducers = {
 
   setTimeRestore: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['timeRestore']>
+    action: PayloadAction<DashboardContainerInput['timeRestore']>
   ) => {
     state.explicitInput.timeRestore = action.payload;
   },
 
   setTimeRange: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['timeRange']>
+    action: PayloadAction<DashboardContainerInput['timeRange']>
   ) => {
     state.explicitInput.timeRange = action.payload;
   },
 
   setRefreshInterval: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['refreshInterval']>
+    action: PayloadAction<DashboardContainerInput['refreshInterval']>
   ) => {
     state.explicitInput.refreshInterval = action.payload;
   },
 
   setTimeslice: (
     state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['timeslice']>
+    action: PayloadAction<DashboardContainerInput['timeslice']>
   ) => {
     state.explicitInput.timeslice = action.payload;
   },

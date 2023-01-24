@@ -8,6 +8,7 @@
 
 import {
   AnyAction,
+  CaseReducerActions,
   configureStore,
   createSlice,
   Draft,
@@ -15,8 +16,14 @@ import {
   PayloadAction,
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
-import React, { ReactNode, PropsWithChildren } from 'react';
-import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import React, { ReactNode, PropsWithChildren, createContext } from 'react';
+import {
+  createSelectorHook,
+  Provider,
+  TypedUseSelectorHook,
+  useDispatch,
+  useSelector,
+} from 'react-redux';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
@@ -26,6 +33,7 @@ import {
   ReduxEmbeddableContext,
   ReduxEmbeddableState,
   ReduxEmbeddableSyncSettings,
+  ReduxEmbeddableDispatch,
 } from './types';
 import { syncReduxEmbeddable } from './sync_redux_embeddable';
 import { EmbeddableReduxContext } from './use_redux_embeddable_context';
@@ -88,6 +96,23 @@ export const createReduxEmbeddableTools = <
       getDefaultMiddleware().concat(...(additionalMiddleware ?? [])),
   });
 
+  // this object is the combination of the dispatch for this store with each action so that they don't need to be combined later.
+  const dispatchActions: ReduxEmbeddableDispatch<ReduxEmbeddableStateType, ReducerType> =
+    Object.keys(reducers).reduce((acc, key: keyof ReducerType) => {
+      const sliceAction =
+        slice.actions[key as keyof CaseReducerActions<SliceCaseReducers<ReduxEmbeddableStateType>>];
+      acc[key] = (payload) => store.dispatch(sliceAction(payload));
+      return acc;
+    }, {} as ReduxEmbeddableDispatch<ReduxEmbeddableStateType, ReducerType>);
+
+  // create a selector which can be used by react components to get the latest state values and to re-render when state changes.
+  const select = createSelectorHook(
+    createContext({
+      store,
+      storeState: store.getState(),
+    })
+  );
+
   // create the context which will wrap this embeddable's react components to allow access to update and read from the store.
   const context = {
     embeddableInstance: embeddable,
@@ -116,11 +141,17 @@ export const createReduxEmbeddableTools = <
   // return redux tools for the embeddable class to use.
   return {
     store,
-    Wrapper,
-    actions: context.actions,
-    dispatch: store.dispatch,
+    select,
+    dispatchActions,
     getState: store.getState,
     onStateChange: store.subscribe,
     cleanup: () => stopReduxEmbeddableSync?.(),
+
+    // todo eventually remove wrapper.
+    Wrapper,
+
+    // todo remove actions & dispatch
+    actions: context.actions,
+    dispatch: store.dispatch,
   };
 };

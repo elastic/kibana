@@ -68,36 +68,25 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
-  /**
-   * Unpack dashboard state from redux
-   */
-  const {
-    useEmbeddableDispatch,
-    actions: { setSavedQueryId },
-    useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const { embeddableInstance: dashboard } = useDashboardContainerContext();
   const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
-  const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
-  const fullScreenMode = select((state) => state.componentState.fullScreenMode);
-  const savedQueryId = select((state) => state.componentState.savedQueryId);
-  const lastSavedId = select((state) => state.componentState.lastSavedId);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const query = select((state) => state.explicitInput.query);
-  const title = select((state) => state.explicitInput.title);
+  const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
+  const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
+  const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
+  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const query = dashboard.select((state) => state.explicitInput.query);
+  const title = dashboard.select((state) => state.explicitInput.title);
 
   // store data views in state & subscribe to dashboard data view changes.
-  const [allDataViews, setAllDataViews] = useState<DataView[]>(
-    dashboardContainer.getAllDataViews()
-  );
+  const [allDataViews, setAllDataViews] = useState<DataView[]>(dashboard.getAllDataViews());
   useEffect(() => {
-    const subscription = dashboardContainer.onDataViewsUpdate$.subscribe((dataViews) =>
+    const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
       setAllDataViews(dataViews)
     );
     return () => subscription.unsubscribe();
-  }, [dashboardContainer]);
+  }, [dashboard]);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -233,17 +222,17 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       className: fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
       onQuerySubmit: (_payload, isUpdate) => {
         if (isUpdate === false) {
-          dashboardContainer.forceRefresh();
+          dashboard.forceRefresh();
         }
       },
       onSavedQueryIdChange: (newId: string | undefined) => {
-        dispatch(setSavedQueryId(newId));
+        dashboard.dispatch.setSavedQueryId(newId);
       },
     };
   };
 
   UseUnmount(() => {
-    dashboardContainer.clearOverlays();
+    dashboard.clearOverlays();
   });
 
   return (

@@ -25,7 +25,7 @@ import { DashboardReduxState } from './types';
 import { DashboardContainerInput } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardContainer } from './embeddable/dashboard_container';
-import { dashboardContainerReducers } from './state/dashboard_container_reducers';
+import { dashboardContainerReducers } from './embeddable/state/dashboard_container_reducers';
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;

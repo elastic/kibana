@@ -51,7 +51,6 @@ beforeEach(async () => {
     .fn()
     .mockReturnValue(mockEmbeddableFactory);
   container = new DashboardContainer(input);
-  await container.untilInitialized();
 
   const refOrValContactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

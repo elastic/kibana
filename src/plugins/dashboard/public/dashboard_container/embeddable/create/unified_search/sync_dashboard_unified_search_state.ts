@@ -31,19 +31,12 @@ export function syncUnifiedSearchState(
   const { queryString, timefilter } = queryService;
   const { timefilter: timefilterService } = timefilter;
 
-  const {
-    getState,
-    dispatch,
-    onStateChange,
-    actions: { setFiltersAndQuery, setTimeRange, setRefreshInterval },
-  } = this.reduxEmbeddableTools;
-
   // get Observable for when the dashboard's saved filters or query change.
   const OnFiltersChange$ = new Subject<{ filters: Filter[]; query: Query }>();
-  const unsubscribeFromSavedFilterChanges = onStateChange(() => {
+  const unsubscribeFromSavedFilterChanges = this.onStateChange(() => {
     const {
       explicitInput: { filters, query },
-    } = getState();
+    } = this.getState();
     OnFiltersChange$.next({
       filters: filters ?? [],
       query: query ?? queryString.getDefaultQuery(),
@@ -53,7 +46,7 @@ export function syncUnifiedSearchState(
   // starts syncing app filters between dashboard state and filterManager
   const {
     explicitInput: { filters, query },
-  } = getState();
+  } = this.getState();
   const intermediateFilterState: { filters: Filter[]; query: Query } = {
     query: query ?? queryString.getDefaultQuery(),
     filters: filters ?? [],
@@ -66,7 +59,7 @@ export function syncUnifiedSearchState(
       set: ({ filters: newFilters, query: newQuery }) => {
         intermediateFilterState.filters = cleanFiltersForSerialize(newFilters);
         intermediateFilterState.query = newQuery;
-        dispatch(setFiltersAndQuery(intermediateFilterState));
+        this.dispatch.setFiltersAndQuery(intermediateFilterState);
       },
       state$: OnFiltersChange$.pipe(distinctUntilChanged()),
     },
@@ -78,11 +71,11 @@ export function syncUnifiedSearchState(
 
   const timeUpdateSubscription = timefilterService
     .getTimeUpdate$()
-    .subscribe(() => dispatch(setTimeRange(timefilterService.getTime())));
+    .subscribe(() => this.dispatch.setTimeRange(timefilterService.getTime()));
 
   const refreshIntervalSubscription = timefilterService
     .getRefreshIntervalUpdate$()
-    .subscribe(() => dispatch(setRefreshInterval(timefilterService.getRefreshInterval())));
+    .subscribe(() => this.dispatch.setRefreshInterval(timefilterService.getRefreshInterval()));
 
   const autoRefreshSubscription = timefilterService
     .getAutoRefreshFetch$()

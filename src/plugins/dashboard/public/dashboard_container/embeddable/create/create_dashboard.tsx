@@ -14,33 +14,40 @@ import {
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
-import { ErrorEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainerInput } from '../../../common';
-import { DashboardContainer } from './dashboard_container';
-import { pluginServices } from '../../services/plugin_services';
-import { DashboardCreationOptions } from './dashboard_container_factory';
-import { startSyncingDashboardControlGroup } from './integrations/controls/dashboard_control_group_integration';
-import { syncUnifiedSearchState } from './integrations/unified_search/sync_dashboard_unified_search_state';
+import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../../../services/plugin_services';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { DashboardCreationOptions } from '../dashboard_container_factory';
+import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
+import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
+import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
+import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 
 /**
  *
  * @param creationOptions
  */
-export const buildDashboard = async (
+export const createDashboard = async (
   creationOptions?: DashboardCreationOptions,
   dashboardCreationStartTime?: number,
   savedObjectId?: string
-): Promise<DashboardContainer | ErrorEmbeddable> => {
+): Promise<DashboardContainer> => {
   // --------------------------------------------------------------------------------------
   // Unpack services & Options
   // --------------------------------------------------------------------------------------
   const {
     dashboardSessionStorage,
     embeddable: { getEmbeddableFactory },
-    data: { dataViews, query: queryService },
+    data: {
+      dataViews,
+      query: queryService,
+      search: { session },
+    },
     dashboardSavedObject: { loadDashboardStateFromSavedObject },
   } = pluginServices.getServices();
 
@@ -51,6 +58,7 @@ export const buildDashboard = async (
   } = queryService;
 
   const {
+    searchSessionSettings,
     unifiedSearchSettings,
     validateLoadedSavedObject,
     useUnifiedSearchIntegration,
@@ -59,7 +67,19 @@ export const buildDashboard = async (
   } = creationOptions ?? {};
 
   // --------------------------------------------------------------------------------------
-  // Lazy load required systems and Dashboard saved object
+  // Create method which allows work to be done on the dashboard container when it's ready.
+  // --------------------------------------------------------------------------------------
+  const dashboardContainerReady$ = new Subject<DashboardContainer>();
+  const untilDashboardReady = () =>
+    new Promise<DashboardContainer>((resolve) => {
+      const subscription = dashboardContainerReady$.subscribe((container) => {
+        subscription.unsubscribe();
+        resolve(container);
+      });
+    });
+
+  // --------------------------------------------------------------------------------------
+  // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
 
   const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
@@ -75,7 +95,7 @@ export const buildDashboard = async (
   ]);
 
   // --------------------------------------------------------------------------------------
-  // Validations
+  // Run validations.
   // --------------------------------------------------------------------------------------
   if (!defaultDataView) {
     throw new Error('Dashboard requires at least one data view before it can be initialized.');
@@ -90,7 +110,7 @@ export const buildDashboard = async (
   }
 
   // --------------------------------------------------------------------------------------
-  // Gather input from session storage if integration is used
+  // Gather input from session storage if integration is used.
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
@@ -98,9 +118,10 @@ export const buildDashboard = async (
   })();
 
   // --------------------------------------------------------------------------------------
-  // Combine input from saved object, session storage, & passed input.
+  // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
   const initialInput: DashboardContainerInput = cloneDeep({
+    ...DEFAULT_DASHBOARD_INPUT,
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
     ...overrideInput,
@@ -112,19 +133,7 @@ export const buildDashboard = async (
   };
 
   // --------------------------------------------------------------------------------------
-  // Method which allows work to be done on the dashboard container when it's ready
-  // --------------------------------------------------------------------------------------
-  const dashboardContainerReady$ = new Subject<DashboardContainer>();
-  const untilDashboardReady = () =>
-    new Promise<DashboardContainer>((resolve) => {
-      const subscription = dashboardContainerReady$.subscribe((container) => {
-        subscription.unsubscribe();
-        resolve(container);
-      });
-    });
-
-  // --------------------------------------------------------------------------------------
-  // Set up unified search integration
+  // Set up unified search integration.
   // --------------------------------------------------------------------------------------
   if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
     const { filters, query, timeRestore, timeRange, refreshInterval } = initialInput;
@@ -151,10 +160,10 @@ export const buildDashboard = async (
     untilDashboardReady().then((dashboardContainer) => {
       const stopSyncingUnifiedSearchState =
         syncUnifiedSearchState.bind(dashboardContainer)(kbnUrlStateStorage);
-      //   setCleanupFunction(() => {
-      //     stopSyncingQueryServiceStateWithUrl?.();
-      //     stopSyncingUnifiedSearchState?.();
-      //   });
+      dashboardContainer.stopSyncingWithUnifiedSearch = () => {
+        stopSyncingUnifiedSearchState();
+        stopSyncingQueryServiceStateWithUrl();
+      };
     });
     if (initialTimeRange) initialInput.timeRange = initialTimeRange;
   }
@@ -193,7 +202,34 @@ export const buildDashboard = async (
   }
 
   // --------------------------------------------------------------------------------------
-  // Start the control group integration
+  // Set up search sessions integration.
+  // --------------------------------------------------------------------------------------
+  if (searchSessionSettings) {
+    const { sessionIdToRestore } = searchSessionSettings;
+
+    // if this incoming embeddable has a session, continue it.
+    if (incomingEmbeddable?.searchSessionId) {
+      session.continue(incomingEmbeddable.searchSessionId);
+    }
+    if (sessionIdToRestore) {
+      session.restore(sessionIdToRestore);
+    }
+    const existingSession = session.getSessionId();
+
+    const initialSearchSessionId =
+      sessionIdToRestore ??
+      (existingSession && incomingEmbeddable ? existingSession : session.start());
+
+    untilDashboardReady().then((container) => {
+      startDashboardSearchSessionIntegration.bind(container)(
+        creationOptions?.searchSessionSettings
+      );
+    });
+    initialInput.searchSessionId = initialSearchSessionId;
+  }
+
+  // --------------------------------------------------------------------------------------
+  // Start the control group integration.
   // --------------------------------------------------------------------------------------
   const controlsGroupFactory = getEmbeddableFactory<
     ControlGroupInput,
@@ -220,13 +256,24 @@ export const buildDashboard = async (
   });
   await controlGroup.untilInitialized();
 
+  // --------------------------------------------------------------------------------------
+  // Start the data views integration.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    dashboardContainer.subscriptions.add(startSyncingDashboardDataViews.bind(dashboardContainer)());
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Build and return the dashboard container.
+  // --------------------------------------------------------------------------------------
   const dashboardContainer = new DashboardContainer(
     initialInput,
     reduxEmbeddablePackage,
     savedObjectResult?.dashboardInput,
     dashboardCreationStartTime,
     undefined,
-    creationOptions
+    creationOptions,
+    savedObjectId
   );
   dashboardContainerReady$.next(dashboardContainer);
   return dashboardContainer;

@@ -40,15 +40,10 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
   if (!this.controlGroup) return;
   const subscriptions = new Subscription();
 
-  const {
-    actions: { setControlGroupState },
-    dispatch,
-  } = this.getReduxEmbeddableTools();
-
   const isControlGroupInputEqual = () =>
     persistableControlGroupInputIsEqual(
       this.controlGroup!.getInput(),
-      this.getInputAsValueType().controlGroupInput
+      this.getInput().controlGroupInput
     );
 
   // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
@@ -70,9 +65,12 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
         const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
           this.controlGroup!.getInput();
         if (!isControlGroupInputEqual()) {
-          dispatch(
-            setControlGroupState({ panels, controlStyle, chainingSystem, ignoreParentSettings })
-          );
+          this.dispatch.setControlGroupState({
+            panels,
+            controlStyle,
+            chainingSystem,
+            ignoreParentSettings,
+          });
         }
       })
   );
@@ -99,12 +97,9 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
         const newInput: { [key: string]: unknown } = {};
         (Object.keys(dashboardRefetchDiff) as DashboardControlGroupCommonKeys[]).forEach((key) => {
           if (
-            !dashboardRefetchDiff[key]?.(
-              this.getInputAsValueType()[key],
-              this.controlGroup!.getInput()[key]
-            )
+            !dashboardRefetchDiff[key]?.(this.getInput()[key], this.controlGroup!.getInput()[key])
           ) {
-            newInput[key] = this.getInputAsValueType()[key];
+            newInput[key] = this.getInput()[key];
           }
         });
         if (Object.keys(newInput).length > 0) {
@@ -119,12 +114,12 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
       .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
       .subscribe(() => {
         if (!isControlGroupInputEqual()) {
-          if (!this.getInputAsValueType().controlGroupInput) {
+          if (!this.getInput().controlGroupInput) {
             this.controlGroup!.updateInput(getDefaultControlGroupInput());
             return;
           }
           this.controlGroup!.updateInput({
-            ...this.getInputAsValueType().controlGroupInput,
+            ...this.getInput().controlGroupInput,
           });
         }
       })

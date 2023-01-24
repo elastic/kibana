@@ -77,7 +77,6 @@ test('DashboardContainer initializes embeddables', (done) => {
 
 test('DashboardContainer.addNewEmbeddable', async () => {
   const container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -150,7 +149,6 @@ test('Container view mode change propagates to existing children', async () => {
     },
   });
   const container = new DashboardContainer(initialInput);
-  await container.untilInitialized();
 
   const embeddable = await container.untilEmbeddableLoaded('123');
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
@@ -160,7 +158,6 @@ test('Container view mode change propagates to existing children', async () => {
 
 test('Container view mode change propagates to new children', async () => {
   const container = new DashboardContainer(getSampleDashboardInput());
-  await container.untilInitialized();
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -181,7 +178,6 @@ test('searchSessionId propagates to children', async () => {
   const container = new DashboardContainer(
     getSampleDashboardInput({ searchSessionId: searchSessionId1 })
   );
-  await container.untilInitialized();
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -207,7 +203,6 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
   const container = new DashboardContainer(initialInput);
-  await container.untilInitialized();
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

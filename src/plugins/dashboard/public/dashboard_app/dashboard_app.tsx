@@ -167,7 +167,7 @@ export function DashboardApp({
    * dashboard's redux state.
    */
   const DashboardReduxWrapper = useMemo(
-    () => dashboardContainer?.reduxEmbeddableTools.Wrapper,
+    () => dashboardContainer?.DashboardReduxWrapper,
     [dashboardContainer]
   );
 

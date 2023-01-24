@@ -21,7 +21,7 @@ import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
-import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
+import { getPanelLayoutsAreEqual } from '../../embeddable/state/diffing/dashboard_diffing_utils';
 
 let lastValidGridSize = 0;
 
@@ -119,18 +119,12 @@ const getDefaultPerformanceTracker: () => DashboardRenderPerformanceTracker = ()
 });
 
 export const DashboardGrid = () => {
-  const {
-    actions: { setPanels },
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const { embeddableInstance: dashboard } = useDashboardContainerContext();
 
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const useMargins = select((state) => state.explicitInput.useMargins);
-  const expandedPanelId = select((state) => state.componentState.expandedPanelId);
+  const panels = dashboard.select((state) => state.explicitInput.panels);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
+  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
 
   const layout = useMemo(() => Object.values(panels).map((panel) => panel.gridData), [panels]);
   const panelsInOrder = useMemo(
@@ -158,11 +152,11 @@ export const DashboardGrid = () => {
         performanceRefs.current.doneCount++;
         if (performanceRefs.current.doneCount === panelsInOrder.length) {
           performanceRefs.current.panelsRenderDoneTime = performance.now();
-          dashboardContainer.reportPerformanceMetrics(performanceRefs.current);
+          dashboard.reportPerformanceMetrics(performanceRefs.current);
         }
       }
     },
-    [dashboardContainer, panelsInOrder.length]
+    [dashboard, panelsInOrder.length]
   );
 
   const onLayoutChange = useCallback(
@@ -179,10 +173,10 @@ export const DashboardGrid = () => {
       );
       // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dispatch(setPanels(updatedPanels));
+        dashboard.dispatch.setPanels(updatedPanels);
       }
     },
-    [dispatch, panels, setPanels]
+    [dashboard, panels]
   );
 
   const dashboardPanels = useMemo(() => {
