@@ -289,11 +289,10 @@ const getSavedObjectTypes = (
             data_stream: { type: 'keyword' },
             features: {
               type: 'nested',
+              dynamic: false,
               properties: {
                 synthetic_source: { type: 'boolean' },
                 tsdb: { type: 'boolean' },
-                doc_value_only_numeric: { type: 'boolean' },
-                doc_value_only_other: { type: 'boolean' },
               },
             },
           },
