@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
 
-  describe('dashboard integration', () => {
+  describe.only('dashboard integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
@@ -154,6 +154,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
+        await listingTable.selectFilterTags('tag-3');
+        const itemNames = await listingTable.getAllItemsNames();
+        expect(itemNames).to.contain('dashboard 4 with real data (tag-1)');
+      });
+
+      it('retains dashboard saved object tags after quicksave', async () => {
+        // edit and save dashboard
+        await PageObjects.dashboard.gotoDashboardEditMode('dashboard 4 with real data (tag-1)');
+        await PageObjects.dashboard.useMargins(false); // turn margins off to cause quicksave to be enabled
+        await PageObjects.dashboard.clickQuickSave();
+
+        // verify dashboard still has original tags
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
         await listingTable.selectFilterTags('tag-3');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('dashboard 4 with real data (tag-1)');
