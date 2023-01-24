@@ -21,8 +21,8 @@ import {
   updateComment,
   getConfigurationRequest,
   updateConfiguration,
-  getCaseUserActions,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

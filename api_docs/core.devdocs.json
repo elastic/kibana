@@ -1777,12 +1777,10 @@
             "parentPluginId": "core",
             "id": "def-public.AppMountParameters.onAppLeave",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "onAppLeave",
             "description": [
-              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n"
+              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n\n"
             ],
             "signature": [
               "(handler: ",
@@ -1796,83 +1794,8 @@
               ") => void"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-application-browser-internal",
-                "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-              },
-              {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/components/visualize_top_nav.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/components/visualize_editor_common.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/app.tsx"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_app/types.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/plugin.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/map_page/map_app/map_app.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/routes/map_page/map_page.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/render_app.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/app/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/plugin.tsx"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "core",
@@ -8304,6 +8227,14 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -8514,6 +8445,30 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-status-server-internal",
@@ -19708,9 +19663,7 @@
         "parentPluginId": "core",
         "id": "def-public.AppLeaveHandler",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": [],
         "label": "AppLeaveHandler",
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
@@ -19734,119 +19687,8 @@
           }
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-        "deprecated": true,
-        "removeBy": "8.8.0",
+        "deprecated": false,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser",
-            "path": "packages/core/application/core-application-browser/index.ts"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_router.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/ui/app_router.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_leave.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_leave.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_service.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_service.tsx"
-          },
-          {
-            "plugin": "@kbn/core-application-browser-internal",
-            "path": "packages/core/application/core-application-browser-internal/src/application_service.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/flyout/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/routes.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
-          }
-        ],
         "returnComment": [],
         "children": [
           {
@@ -21891,6 +21733,18 @@
             "path": "x-pack/plugins/cases/server/common/types.ts"
           },
           {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
+          },
+          {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
           },
@@ -21961,6 +21815,50 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
             "plugin": "fleet",
@@ -23826,6 +23724,14 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/share_action.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server-internal",
@@ -37660,6 +37566,14 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -37870,6 +37784,30 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-status-server-internal",
@@ -45416,6 +45354,32 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ISavedObjectTypeRegistry.getVisibleToHttpApisTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisibleToHttpApisTypes",
+            "description": [
+              "\nReturns all visible {@link SavedObjectsType | types} exposed to the global SO HTTP APIs\n\nA visibleToHttpApis type is a type that doesn't explicitly define `hidden=true` nor `hiddenFromHttpApis=true` during registration."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ISavedObjectTypeRegistry.getAllTypes",
             "type": "Function",
             "tags": [],
@@ -45621,6 +45585,40 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.ISavedObjectTypeRegistry.isHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ISavedObjectTypeRegistry.isHiddenFromHttpApis",
+            "type": "Function",
+            "tags": [],
+            "label": "isHiddenFromHttpApis",
+            "description": [
+              "\nReturns the `hiddenFromHttpApis` property for a given type, or `false` if\nthe type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.ISavedObjectTypeRegistry.isHiddenFromHttpApis.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -50552,9 +50550,7 @@
             "parentPluginId": "core",
             "id": "def-server.OpsMetrics.process",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "process",
             "description": [
               "\nProcess related metrics."
@@ -50569,79 +50565,8 @@
               }
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.ts"
-              },
-              {
-                "plugin": "@kbn/core-metrics-server-internal",
-                "path": "packages/core/metrics/core-metrics-server-internal/src/ops_metrics_collector.ts"
-              },
-              {
-                "plugin": "@kbn/core-metrics-server-internal",
-                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
-              },
-              {
-                "plugin": "@kbn/core-status-server-internal",
-                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
-              },
-              {
-                "plugin": "@kbn/core-status-server-internal",
-                "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
-              },
-              {
-                "plugin": "@kbn/core-usage-data-server-internal",
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-usage-data-server-internal",
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
-              },
-              {
-                "plugin": "@kbn/core-usage-data-server-internal",
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
-              },
-              {
-                "plugin": "monitoring",
-                "path": "x-pack/plugins/monitoring/server/kibana_monitoring/bulk_uploader.ts"
-              },
-              {
-                "plugin": "kibanaUsageCollection",
-                "path": "src/plugins/kibana_usage_collection/server/collectors/ops_stats/ops_stats_collector.ts"
-              },
-              {
-                "plugin": "@kbn/core-metrics-server-internal",
-                "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-apps-browser-internal",
-                "path": "packages/core/apps/core-apps-browser-internal/src/status/lib/load_status.test.ts"
-              }
-            ]
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "core",
@@ -60648,63 +60573,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.SavedObjectsMigrationLogger.warning",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "warning",
-            "description": [],
-            "signature": [
-              "(msg: string) => void"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/server/saved_objects/saved_object_migrations.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/migrations/migrate_to_730/migrations_730.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migration_logger.ts"
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-server.SavedObjectsMigrationLogger.warning.$1",
-                "type": "string",
-                "tags": [],
-                "label": "msg",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.SavedObjectsMigrationLogger.warn",
             "type": "Function",
             "tags": [],
@@ -62902,6 +62770,22 @@
             "label": "hidden",
             "description": [
               "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsType.hiddenFromHttpApis",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hiddenFromHttpApis",
+            "description": [
+              "\nIs the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.\nIt is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
