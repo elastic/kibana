@@ -37,14 +37,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      describe('propagates context for Discover', () => {
-        it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
-          await assertLogContains({
-            description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: (record) =>
-              Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
-            retry,
-          });
+      it('propagates context for Discover', async () => {
+        await assertLogContains({
+          description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
+          predicate: (record) =>
+            Boolean(record.http?.request?.id?.includes('kibana:application:discover')),
+          retry,
         });
 
         await assertLogContains({
