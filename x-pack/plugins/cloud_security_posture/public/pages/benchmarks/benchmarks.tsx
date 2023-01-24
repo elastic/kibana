@@ -116,11 +116,12 @@ const BenchmarkSearchField = ({
     <EuiFlexGroup>
       <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
+          fullWidth
           onSearch={setLocalValue}
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'e.g. benchmark name' }
+            { defaultMessage: 'Search integration name' }
           )}
           incremental
         />
