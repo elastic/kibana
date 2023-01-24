@@ -6,7 +6,7 @@
  */
 
 const MAX_CAPACITY = 20;
-const MAX_FLAP_COUNT = 4;
+export const MAX_FLAP_COUNT = 4;
 
 export function updateFlappingHistory(flappingHistory: boolean[], state: boolean) {
   const updatedFlappingHistory = flappingHistory.concat(state).slice(MAX_CAPACITY * -1);
