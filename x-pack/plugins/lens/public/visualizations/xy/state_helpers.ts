@@ -12,12 +12,8 @@ import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { validateQuery } from '../../shared_components';
-import type {
-  FramePublicAPI,
-  DatasourcePublicAPI,
-  VisualizationDimensionGroupConfig,
-  VisualizeEditorContext,
-} from '../../types';
+import { DataViewsState } from '../../state_management';
+import type { FramePublicAPI, DatasourcePublicAPI, VisualizeEditorContext } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -27,7 +23,6 @@ import {
   YConfig,
   XYState,
   XYPersistedState,
-  State,
   XYAnnotationLayerConfig,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
@@ -177,29 +172,18 @@ function getIndexPatternIdFromInitialContext(
   }
 }
 
-export function validateColumn(
-  state: State,
-  frame: Pick<FramePublicAPI, 'dataViews'>,
-  layerId: string,
+export function getAnnotationLayerErrors(
+  layer: XYAnnotationLayerConfig,
   columnId: string,
-  group?: VisualizationDimensionGroupConfig
-): { invalid: boolean; invalidMessages?: string[] } {
-  if (group?.invalid) {
-    return {
-      invalid: true,
-      invalidMessages: group.invalidMessage ? [group.invalidMessage] : undefined,
-    };
-  }
-  const validColumn = { invalid: false };
-  const layer = state.layers.find((l) => l.layerId === layerId);
-  if (!layer || !isAnnotationsLayer(layer)) {
-    return validColumn;
+  dataViews: DataViewsState
+): string[] {
+  if (!layer) {
+    return [];
   }
   const annotation = layer.annotations.find(({ id }) => id === columnId);
   if (!annotation || !isQueryAnnotationConfig(annotation)) {
-    return validColumn;
+    return [];
   }
-  const { dataViews } = frame || {};
   const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
 
   const invalidMessages: string[] = [];
@@ -255,11 +239,5 @@ export function validateColumn(
     }
   }
 
-  if (!invalidMessages.length) {
-    return validColumn;
-  }
-  return {
-    invalid: true,
-    invalidMessages,
-  };
+  return invalidMessages;
 }
