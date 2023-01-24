@@ -67,12 +67,12 @@ describe('When using the `useGetFileInfo()` hook', () => {
   });
 
   it('should allow specific agent id to be set on input', async () => {
-    await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock, 'abc'));
+    await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock, 'agent-a'));
 
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
-        file_id: '123.abc',
+        file_id: '123.agent-a',
       }),
     });
   });
