@@ -48,6 +48,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -230,6 +235,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {
@@ -424,6 +434,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -614,6 +629,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {
@@ -854,6 +874,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -1047,6 +1072,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {

@@ -85,6 +85,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "csp_rule",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "file-upload-telemetry",
                 },
               },

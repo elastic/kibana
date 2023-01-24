@@ -41,6 +41,8 @@ export const REMOVED_TYPES: string[] = [
   'application_usage_transactional',
   // Removed in 7.8.1 / 7.9.0 https://github.com/elastic/kibana/pull/69871
   'maps-telemetry',
+  // Deprecated, no longer used since 8.7 https://github.com/elastic/kibana/pull/148530
+  'csp_rule',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes
