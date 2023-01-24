@@ -19,7 +19,7 @@ describe('useBrowserRunOnceMonitors', function () {
         timed_out: false,
         _shards: { total: 8, successful: 8, skipped: 2, failed: 0 },
         hits: {
-          total: 3,
+          total: { value: 3, relation: 'eq' },
           max_score: null,
           hits: [],
         },
