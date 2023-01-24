@@ -79,18 +79,18 @@ export function AxisBoundsControl({
           label={' '}
           helpText={
             shouldIncludeZero && (!inclusiveZeroError || boundaryError)
-              ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
+              ? i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
                   defaultMessage: 'Bounds must include zero.',
                 })
               : undefined
           }
           error={
             boundaryError
-              ? i18n.translate('xpack.lens.xyChart.boundaryError', {
+              ? i18n.translate('xpack.lens.axisExtent.boundaryError', {
                   defaultMessage: 'Lower bound has to be larger than upper bound',
                 })
               : shouldIncludeZero && inclusiveZeroError
-              ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
+              ? i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
                   defaultMessage: 'Bounds must include zero.',
                 })
               : undefined
@@ -162,12 +162,12 @@ function MetricAxisBoundsControl({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
+        label={i18n.translate('xpack.lens.axisExtent.label', {
           defaultMessage: 'Bounds',
         })}
         helpText={
           shouldIncludeZero
-            ? i18n.translate('xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage', {
+            ? i18n.translate('xpack.lens.axisExtent.disabledDataBoundsMessage', {
                 defaultMessage: 'Only line charts can be fit to the data bounds',
               })
             : undefined
@@ -175,7 +175,7 @@ function MetricAxisBoundsControl({
       >
         <EuiButtonGroup
           isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
+          legend={i18n.translate('xpack.lens.axisExtent.label', {
             defaultMessage: 'Bounds',
           })}
           data-test-subj={`${testSubjPrefix}_axisBounds_groups`}
@@ -184,14 +184,14 @@ function MetricAxisBoundsControl({
           options={[
             {
               id: `${idPrefix}full`,
-              label: i18n.translate('xpack.lens.xyChart.axisExtent.full', {
+              label: i18n.translate('xpack.lens.axisExtent.full', {
                 defaultMessage: 'Full',
               }),
               'data-test-subj': `${testSubjPrefix}_axisExtent_groups_full'`,
             },
             {
               id: `${idPrefix}dataBounds`,
-              label: i18n.translate('xpack.lens.xyChart.axisExtent.dataBounds', {
+              label: i18n.translate('xpack.lens.axisExtent.axisExtent.dataBounds', {
                 defaultMessage: 'Data',
               }),
               'data-test-subj': `${testSubjPrefix}_axisExtent_groups_DataBounds'`,
@@ -199,7 +199,7 @@ function MetricAxisBoundsControl({
             },
             {
               id: `${idPrefix}custom`,
-              label: i18n.translate('xpack.lens.xyChart.axisExtent.custom', {
+              label: i18n.translate('xpack.lens.axisExtent.axisExtent.custom', {
                 defaultMessage: 'Custom',
               }),
               'data-test-subj': `${testSubjPrefix}_axisExtent_groups_custom'`,
