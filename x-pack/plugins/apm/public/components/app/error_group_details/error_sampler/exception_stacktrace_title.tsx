@@ -25,7 +25,6 @@ export function ExceptionStacktraceTitle({
     case 'c#':
     case 'javascript':
     case 'php':
-    case 'python':
       title = `${type}: ${message}`;
       break;
     case 'java':
@@ -35,6 +34,7 @@ export function ExceptionStacktraceTitle({
       title = `${type} (${message ? message : type})`;
       break;
     case 'go':
+    case 'python':
     default:
       break;
   }
