@@ -59,7 +59,7 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
-  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => voiåd;
   featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -70,6 +70,7 @@ export interface ActionAccordionFormProps {
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
   hasSummary?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -97,6 +98,7 @@ export const ActionForm = ({
   hideActionHeader,
   hideNotifyWhen,
   hasSummary,
+  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -400,6 +402,7 @@ export const ActionForm = ({
               }}
               hideNotifyWhen={hideNotifyWhen}
               hasSummary={hasSummary}
+              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}

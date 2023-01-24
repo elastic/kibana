@@ -129,6 +129,8 @@ interface ActionNotifyWhenProps {
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
   onSummaryChange: (summary: boolean) => void;
   hasSummary?: boolean;
+  showMinimumThrottleWarning?: boolean;
+  showMinimumThrottleUnitWarning?: boolean;
 }
 
 export const ActionNotifyWhen = ({
@@ -140,6 +142,9 @@ export const ActionNotifyWhen = ({
   onThrottleChange,
   onSummaryChange,
 }: ActionNotifyWhenProps) => {
+  showMinimumThrottleWarning,
+  showMinimumThrottleUnitWarning,
+}: RuleNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
     hasSummary
@@ -309,6 +314,7 @@ export const ActionNotifyWhen = ({
                   <EuiFlexItem style={{ flexGrow: 0.1 }} />
                   <EuiFlexItem grow={2}>
                     <EuiFieldNumber
+                      isInvalid={showMinimumThrottleWarning}
                       min={1}
                       value={throttle ?? 1}
                       name="throttle"
@@ -334,6 +340,7 @@ export const ActionNotifyWhen = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={3}>
                     <EuiSelect
+                      isInvalid={showMinimumThrottleUnitWarning}
                       data-test-subj="throttleUnitInput"
                       value={throttleUnit}
                       options={getTimeOptions(throttle ?? 1)}
@@ -344,6 +351,20 @@ export const ActionNotifyWhen = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFormRow>
+              {(showMinimumThrottleWarning || showMinimumThrottleUnitWarning) && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="danger">
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning',
+                      {
+                        defaultMessage:
+                          "Custom action intervals cannot be shorter than the rule's check interval",
+                      }
+                    )}
+                  </EuiText>
+                </>
+              )}
             </>
           )}
         </EuiFlexItem>

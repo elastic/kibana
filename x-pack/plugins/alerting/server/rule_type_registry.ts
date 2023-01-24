@@ -33,6 +33,7 @@ import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
+import { AlertsService } from './alerts_service/alerts_service';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -42,6 +43,7 @@ export interface ConstructorOptions {
   licensing: LicensingPluginSetup;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   inMemoryMetrics: InMemoryMetrics;
+  alertsService?: AlertsService;
 }
 
 export interface RegistryRuleType
@@ -139,6 +141,7 @@ export class RuleTypeRegistry {
   private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
   private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly alertsService?: AlertsService;
 
   constructor({
     logger,
@@ -148,6 +151,7 @@ export class RuleTypeRegistry {
     licensing,
     minimumScheduleInterval,
     inMemoryMetrics,
+    alertsService,
   }: ConstructorOptions) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -156,6 +160,7 @@ export class RuleTypeRegistry {
     this.licensing = licensing;
     this.minimumScheduleInterval = minimumScheduleInterval;
     this.inMemoryMetrics = inMemoryMetrics;
+    this.alertsService = alertsService;
   }
 
   public has(id: string) {
@@ -277,6 +282,11 @@ export class RuleTypeRegistry {
           >(normalizedRuleType, context, this.inMemoryMetrics),
       },
     });
+
+    if (this.alertsService && ruleType.alerts) {
+      this.alertsService.register(ruleType.alerts);
+    }
+
     // No need to notify usage on basic alert types
     if (ruleType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
