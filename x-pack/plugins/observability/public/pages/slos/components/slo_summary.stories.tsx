@@ -13,7 +13,7 @@ import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
-import { anSLO } from '../../../data/slo/slo';
+import { createSLO } from '../../../data/slo/slo';
 import { SloSummary as Component, Props } from './slo_summary';
 
 export default {
@@ -25,9 +25,13 @@ export default {
 const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
-  slo: anSLO,
+  slo: createSLO(),
   historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
+  historicalSummaryLoading: false,
 };
 
-export const SloSummaryStats = Template.bind({});
-SloSummaryStats.args = defaultProps;
+export const WithHistoricalData = Template.bind({});
+WithHistoricalData.args = { ...defaultProps };
+
+export const WithLoadingData = Template.bind({});
+WithLoadingData.args = { ...defaultProps, historicalSummaryLoading: true };

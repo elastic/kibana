@@ -40,7 +40,7 @@ export function SloSparkline({ chart, data, id, loading, state }: Props) {
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
   if (loading) {
-    return <EuiLoadingChart size="m" />;
+    return <EuiLoadingChart size="m" mono />;
   }
 
   return (
