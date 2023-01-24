@@ -8,14 +8,12 @@
 
 import { from, merge, EMPTY } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
-import { snakeCase } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { PluginType } from '@kbn/core-base-common';
-import { PluginManifest } from '@kbn/core-plugins-server';
 import { getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
+import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
 import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
@@ -82,37 +80,23 @@ export function discover({
     ),
     map((pkg) => {
       log.debug(`Successfully discovered plugin package "${pkg.id}"`);
-      const opaqueId = Symbol(pkg.id);
+      const manifest = pluginManifestFromPluginPackage(
+        coreContext.env.packageInfo.version,
+        pkg.manifest
+      );
+      const initializerContext = createPluginInitializerContext({
+        coreContext,
+        opaqueId: Symbol(pkg.id),
+        manifest,
+        instanceInfo,
+        nodeInfo,
+      });
 
-      const pg = pkg.manifest.plugin;
-      const manifest: PluginManifest = {
-        type: pg.type === 'preboot' ? PluginType.preboot : PluginType.standard,
-        id: pg.id,
-        version: '1.0.0',
-        enabledOnAnonymousPages: pg.enabledOnAnonymousPages,
-        serviceFolders: pkg.manifest.serviceFolders,
-        kibanaVersion: coreContext.env.packageInfo.version,
-        optionalPlugins: pg.optionalPlugins ?? [],
-        requiredBundles: pg.requiredBundles ?? [],
-        requiredPlugins: pg.requiredPlugins ?? [],
-        owner: {
-          name: pkg.manifest.owner.join(' & '),
-        },
-        server: pkg.manifest.plugin.server,
-        ui: pkg.manifest.plugin.browser,
-        configPath: pkg.manifest.plugin.configPath ?? snakeCase(pg.id),
-      };
       return new PluginWrapper({
         path: pkg.directory,
         manifest,
-        opaqueId,
-        initializerContext: createPluginInitializerContext({
-          coreContext,
-          opaqueId,
-          manifest,
-          instanceInfo,
-          nodeInfo,
-        }),
+        opaqueId: initializerContext.opaqueId,
+        initializerContext,
       });
     })
   );
