@@ -499,10 +499,6 @@ export const getDatatableVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
-    return undefined;
-  },
-
   getRenderEventCounters(state) {
     const events = {
       color_by_value: false,

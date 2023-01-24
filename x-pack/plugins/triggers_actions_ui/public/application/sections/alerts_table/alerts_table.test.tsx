@@ -322,7 +322,7 @@ describe('AlertsTable', () => {
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
-          mockedFn.mock.calls[0][3](true);
+          mockedFn.mock.calls[0][0].setIsActionLoading(true);
 
           expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
           const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
@@ -351,7 +351,7 @@ describe('AlertsTable', () => {
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
-          mockedFn.mock.calls[0][3](false);
+          mockedFn.mock.calls[0][0].setIsActionLoading(false);
 
           expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
         });
