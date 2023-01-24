@@ -48,12 +48,9 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
-import { AdvancedPivotEditor } from '../advanced_pivot_editor';
-import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
 import { DatePickerApplySwitch } from '../date_picker_apply_switch';
-import { PivotConfiguration } from '../pivot_configuration';
 import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
@@ -61,6 +58,7 @@ import { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
+import { PivotFunctionForm } from './pivot_function_form';
 
 const advancedEditorsSidebarWidth = '220px';
 
@@ -91,11 +89,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
 
-  const {
-    advancedEditorConfig,
-    isAdvancedPivotEditorEnabled,
-    isAdvancedPivotEditorApplyButtonEnabled,
-  } = stepDefineForm.advancedPivotEditor.state;
+  const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
     advancedEditorSourceConfig,
     isAdvancedSourceEditorEnabled,
@@ -115,14 +109,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       ? stepDefineForm.pivotConfig.state
       : stepDefineForm.latestFunctionConfig;
 
-  const previewRequest = getPreviewTransformRequestBody(
-    dataView,
-    pivotQuery,
-    requestPayload,
-    runtimeMappings,
-    timeRangeMs
-  );
-
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
@@ -131,7 +117,15 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     }
   );
 
-  const copyToClipboardPivot = getPivotPreviewDevConsoleStatement(previewRequest);
+  const copyToClipboardPreviewRequest = getPreviewTransformRequestBody(
+    dataView,
+    pivotQuery,
+    requestPayload,
+    runtimeMappings,
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
+  );
+
+  const copyToClipboardPivot = getPivotPreviewDevConsoleStatement(copyToClipboardPreviewRequest);
   const copyToClipboardPivotDescription = i18n.translate(
     'xpack.transform.pivotPreview.copyClipboardTooltip',
     {
@@ -203,7 +197,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.advancedPivotEditor.actions.setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
-  const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
+  const { esQueryDsl } = useDocumentationLinks();
 
   const hasValidTimeField = useMemo(
     () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
@@ -417,80 +411,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
       <EuiForm>
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            {/* Flex Column #1: Pivot Config Form / Advanced Pivot Config Editor */}
-            <EuiFlexItem>
-              {!isAdvancedPivotEditorEnabled && (
-                <PivotConfiguration {...stepDefineForm.pivotConfig} />
-              )}
-              {isAdvancedPivotEditorEnabled && (
-                <AdvancedPivotEditor {...stepDefineForm.advancedPivotEditor} />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
-              <EuiFlexGroup gutterSize="xs" direction="column" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <AdvancedPivotEditorSwitch {...stepDefineForm} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiCopy
-                          beforeMessage={copyToClipboardPivotDescription}
-                          textToCopy={copyToClipboardPivot}
-                        >
-                          {(copy: () => void) => (
-                            <EuiButtonIcon
-                              onClick={copy}
-                              iconType="copyClipboard"
-                              aria-label={copyToClipboardPivotDescription}
-                            />
-                          )}
-                        </EuiCopy>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {isAdvancedPivotEditorEnabled && (
-                  <EuiFlexItem style={{ width: advancedEditorsSidebarWidth }}>
-                    <EuiSpacer size="s" />
-                    <EuiText size="xs">
-                      <>
-                        {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpText', {
-                          defaultMessage:
-                            'The advanced editor allows you to edit the pivot configuration of the transform.',
-                        })}{' '}
-                        <EuiLink href={esTransformPivot} target="_blank">
-                          {i18n.translate(
-                            'xpack.transform.stepDefineForm.advancedEditorHelpTextLink',
-                            {
-                              defaultMessage: 'Learn more about available options.',
-                            }
-                          )}
-                        </EuiLink>
-                      </>
-                    </EuiText>
-                    <EuiSpacer size="s" />
-                    <EuiButton
-                      style={{ width: 'fit-content' }}
-                      size="s"
-                      fill
-                      onClick={applyPivotChangesHandler}
-                      disabled={!isAdvancedPivotEditorApplyButtonEnabled}
-                    >
-                      {i18n.translate(
-                        'xpack.transform.stepDefineForm.advancedEditorApplyButtonText',
-                        {
-                          defaultMessage: 'Apply changes',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <PivotFunctionForm
+            {...{
+              applyPivotChangesHandler,
+              copyToClipboardPivot,
+              copyToClipboardPivotDescription,
+              stepDefineForm,
+            }}
+          />
         ) : null}
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
           <LatestFunctionForm
