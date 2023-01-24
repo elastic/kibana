@@ -14,14 +14,15 @@ import {
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 import { get } from 'lodash';
-import { APMPlugin, APMRouteHandlerResources } from '../..';
-import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { APMConfig, APMPlugin, APMRouteHandlerResources } from '../..';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 import {
   AGENT_CONFIG_API_KEY_PATH,
   SOURCE_MAP_API_KEY_PATH,
 } from './get_package_policy_decorators';
+import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
 export async function registerFleetPolicyCallbacks({
   logger,
@@ -43,12 +44,12 @@ export async function registerFleetPolicyCallbacks({
 
   fleetPluginStart.registerExternalCallback(
     'packagePolicyUpdate',
-    onPackagePolicyCreateOrUpdate({ fleetPluginStart, config })
+    onPackagePolicyCreateOrUpdate({ fleetPluginStart, config, coreStart })
   );
 
   fleetPluginStart.registerExternalCallback(
     'packagePolicyCreate',
-    onPackagePolicyCreateOrUpdate({ fleetPluginStart, config })
+    onPackagePolicyCreateOrUpdate({ fleetPluginStart, config, coreStart })
   );
 
   fleetPluginStart.registerExternalCallback(
@@ -144,23 +145,27 @@ function onPackagePolicyPostCreate({
 function onPackagePolicyCreateOrUpdate({
   fleetPluginStart,
   config,
+  coreStart,
 }: {
   fleetPluginStart: FleetStartContract;
-  config: NonNullable<APMPlugin['currentConfig']>;
+  config: APMConfig;
+  coreStart: CoreStart;
 }): PutPackagePolicyUpdateCallback & PostPackagePolicyCreateCallback {
-  return async (packagePolicy, context, request) => {
+  return async (packagePolicy) => {
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
 
+    const { asInternalUser } = coreStart.elasticsearch.client;
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
     const internalESClient = await createInternalESClient({
-      context: context as any,
       debug: false,
-      request,
       config,
+      savedObjectsClient,
+      elasticsearchClient: asInternalUser,
     });
 
-    return await decoratePackagePolicyWithAgentConfigAndSourceMap({
+    return decoratePackagePolicyWithAgentConfigAndSourceMap({
       internalESClient,
       fleetPluginStart,
       packagePolicy,
