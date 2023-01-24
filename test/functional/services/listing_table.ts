@@ -19,6 +19,14 @@ export class ListingTableService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly tagManagement = this.ctx.getPageObject('tagManagement');
+
+  
+  private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
+    name: 'Tag Popover',
+    menuTestSubject: 'tagSelectableList',
+    toggleButtonTestSubject: 'tagFilterPopoverButton',
+  });
 
   private async getSearchFilter() {
     return await this.testSubjects.find('tableListSearchBox');
@@ -72,6 +80,7 @@ export class ListingTableService extends FtrService {
       } else {
         throw new Error('Waiting');
       }
+      await this.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -92,10 +101,35 @@ export class ListingTableService extends FtrService {
       );
       if (morePages) {
         await this.testSubjects.click('pagerNextButton');
-        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilTableIsLoaded();
       }
     }
     return visualizationNames;
+  }
+
+  /**
+   * Select tags in the searchbar's tag filter.
+   */
+  public async selectFilterTags(...tagNames: string[]): Promise<void> {
+    await this.openTagPopover();
+    // select the tags
+    for (const tagName of tagNames) {
+      await this.testSubjects.click(
+        `tag-searchbar-option-${this.tagManagement.testSubjFriendly(tagName)}`
+      );
+    }
+    await this.closeTagPopover();
+    await this.waitUntilTableIsLoaded();
+  };
+
+  public async openTagPopover(): Promise<void> {
+    this.log.debug('ListingTable.openTagPopover');
+    await this.tagPopoverToggle.open();
+  }
+
+  public async closeTagPopover(): Promise<void> {
+    this.log.debug('ListingTable.closeTagPopover');
+    await this.tagPopoverToggle.close();
   }
 
   /**
@@ -112,7 +146,7 @@ export class ListingTableService extends FtrService {
       );
       if (morePages) {
         await this.testSubjects.click('pagerNextButton');
-        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilTableIsLoaded();
       }
     }
     return visualizationNames;
@@ -154,7 +188,7 @@ export class ListingTableService extends FtrService {
       await this.common.pressEnterKey();
     });
 
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilTableIsLoaded();
   }
 
   /**

@@ -15,25 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['maps', 'tagManagement', 'common', 'visualize']);
-
-  /**
-   * Select tags in the searchbar's tag filter.
-   */
-  const selectFilterTags = async (...tagNames: string[]) => {
-    // open the filter dropdown
-    const filterButton = await find.byCssSelector(TAGFILTER_DROPDOWN_SELECTOR);
-    await filterButton.click();
-    // select the tags
-    for (const tagName of tagNames) {
-      await testSubjects.click(
-        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
-      );
-    }
-    // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
-    await searchFilter.click();
-  };
+  const PageObjects = getPageObjects(['maps', 'common', 'tagManagement', 'visualize']);
 
   describe('maps integration', () => {
     before(async () => {
@@ -64,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
-        await selectFilterTags('tag-3');
+        await listingTable.selectFilterTags('tag-3');
 
         await listingTable.expectItemsCount('map', 2);
         const itemNames = await listingTable.getAllItemsNames();
@@ -72,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to filter by multiple tags', async () => {
-        await selectFilterTags('tag-2', 'tag-3');
+        await listingTable.selectFilterTags('tag-2', 'tag-3');
 
         await listingTable.expectItemsCount('map', 3);
         const itemNames = await listingTable.getAllItemsNames();
@@ -90,7 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.maps.gotoMapListingPage();
         await listingTable.waitUntilTableIsLoaded();
-        await selectFilterTags('tag-1');
+        await listingTable.selectFilterTags('tag-1');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('my-new-map');
       });
@@ -127,7 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.maps.gotoMapListingPage();
         await listingTable.waitUntilTableIsLoaded();
-        await selectFilterTags('my-new-tag');
+        await listingTable.selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('map-with-new-tag');
       });
@@ -143,11 +125,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to select tags for an existing map', async () => {
         await listingTable.clickItemLink('map', 'map 4 (tag-1)');
 
-        await PageObjects.maps.saveMap('map 4 (tag-1)', true, true, ['tag-3']);
+        await PageObjects.maps.saveMap('map 4 (tag-1)', true, false, ['tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await listingTable.waitUntilTableIsLoaded();
-        await selectFilterTags('tag-3');
+        await listingTable.selectFilterTags('tag-3');
         const itemNames = await listingTable.getAllItemsNames();
         expect(itemNames).to.contain('map 4 (tag-1)');
       });

@@ -25,26 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
 
-  /**
-   * Select tags in the searchbar's tag filter.
-   */
-  const selectFilterTags = async (...tagNames: string[]) => {
-    // open the filter dropdown
-    const filterButton = await find.byCssSelector(TAGFILTER_DROPDOWN_SELECTOR);
-    await filterButton.click();
-    // select the tags
-    for (const tagName of tagNames) {
-      await testSubjects.click(
-        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
-      );
-    }
-    // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
-    await searchFilter.click();
-    // wait until the table refreshes
-    await listingTable.waitUntilTableIsLoaded();
-  };
-
   const selectSavedObjectTags = async (...tagNames: string[]) => {
     await testSubjects.click('savedObjectTagSelector');
     for (const tagName of tagNames) {
@@ -120,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
-        await selectFilterTags('tag-1');
+        await listingTable.selectFilterTags('tag-1');
 
         await listingTable.expectItemsCount('visualize', 2);
         const itemNames = await listingTable.getAllSelectableItemsNames();
@@ -128,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to filter by multiple tags', async () => {
-        await selectFilterTags('tag-2', 'tag-3');
+        await listingTable.selectFilterTags('tag-2', 'tag-3');
 
         await listingTable.expectItemsCount('visualize', 2);
         const itemNames = await listingTable.getAllSelectableItemsNames();
@@ -153,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('myextratag');
+        await listingTable.selectFilterTags('myextratag');
         const itemNames = await listingTable.getAllSelectableItemsNames();
         expect(itemNames).to.contain('My new markdown viz');
       });
@@ -197,7 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('my-new-tag');
+        await listingTable.selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllSelectableItemsNames();
         expect(itemNames).to.contain('vis-with-new-tag');
       });
@@ -232,7 +212,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('myextratag');
+        await listingTable.selectFilterTags('myextratag');
         const itemNames = await listingTable.getAllSelectableItemsNames();
         expect(itemNames).to.contain('MarkdownViz');
       });
