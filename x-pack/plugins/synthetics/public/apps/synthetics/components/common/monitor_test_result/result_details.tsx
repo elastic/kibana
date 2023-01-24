@@ -54,10 +54,10 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
         <EuiLoadingContent lines={1} />
       ) : (
         <ThresholdIndicator
-          currentFormatted={formatMillisecond(item.value, 1)}
+          currentFormatted={formatMillisecond(item.value, { digits: 1 })}
           current={Number(item.value.toFixed(1))}
           previous={Number(prevValue.toFixed(1))}
-          previousFormatted={formatMillisecond(prevValue, 1)}
+          previousFormatted={formatMillisecond(prevValue, { digits: 1 })}
         />
       ),
     };

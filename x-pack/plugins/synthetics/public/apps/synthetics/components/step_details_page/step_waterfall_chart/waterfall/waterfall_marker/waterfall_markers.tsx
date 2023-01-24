@@ -99,7 +99,7 @@ export function WaterfallChartMarkers() {
               {
                 dataValue: offset,
                 details: label,
-                header: formatMillisecond(offset, 4000),
+                header: formatMillisecond(offset, { maxMillis: 4000 }),
               },
             ]}
             marker={<WaterfallMarkerIcon field={field} label={label} />}
