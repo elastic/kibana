@@ -12,6 +12,7 @@ export const cspRuleTemplateMetadataSchema = rt.object({
     name: rt.string(),
     id: rt.string(),
     version: rt.string(),
+    rule_number: rt.maybe(rt.string()),
   }),
   default_value: rt.maybe(rt.string()),
   description: rt.string(),
