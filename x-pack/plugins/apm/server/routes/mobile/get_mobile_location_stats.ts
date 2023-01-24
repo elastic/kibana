@@ -17,6 +17,7 @@ import {
   SERVICE_TARGET_TYPE,
   EVENT_NAME,
   CLIENT_GEO_COUNTRY_NAME,
+  TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -57,6 +58,7 @@ interface Props {
   end: number;
   locationField?: string;
   offset?: string;
+  transactionType?: string;
 }
 
 async function getMobileLocationStats({
@@ -68,6 +70,7 @@ async function getMobileLocationStats({
   end,
   locationField = CLIENT_GEO_COUNTRY_NAME,
   offset,
+  transactionType,
 }: Props) {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -130,6 +133,7 @@ async function getMobileLocationStats({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
