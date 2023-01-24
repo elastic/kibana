@@ -45,4 +45,18 @@ export const AlertSuppression = t.intersection([
   ),
 ]);
 
+export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
+export const AlertSuppressionCamel = t.intersection([
+  t.exact(
+    t.type({
+      groupBy: AlertSuppressionGroupBy,
+    })
+  ),
+  t.exact(
+    t.partial({
+      duration: AlertSuppressionDuration,
+    })
+  ),
+]);
+
 export const minimumLicenseForSuppression = 'platinum';
