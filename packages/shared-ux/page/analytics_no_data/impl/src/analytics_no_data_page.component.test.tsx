@@ -14,11 +14,14 @@ import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
+import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 describe('AnalyticsNoDataPageComponent', () => {
   const services = getAnalyticsNoDataPageServicesMock();
   const onDataViewCreated = jest.fn();
+  const customBrandingService = new CustomBrandingService();
+  const { hasCustomBranding$ } = customBrandingService.start();
 
   it('renders correctly', async () => {
     const component = mountWithIntl(
@@ -27,6 +30,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         <AnalyticsNoDataPage
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
+          hasCustomBranding$={hasCustomBranding$}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -50,6 +54,7 @@ describe('AnalyticsNoDataPageComponent', () => {
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
           allowAdHocDataView={true}
+          hasCustomBranding$={hasCustomBranding$}
         />
       </AnalyticsNoDataPageProvider>
     );
