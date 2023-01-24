@@ -98,9 +98,7 @@ describe('experimental_datastream_features', () => {
             template: {
               settings: {},
               mappings: {
-                _source: {
-                  mode: 'stored',
-                } as any, // Type removed in elasticsearch-js 8.6.0-canary.3
+                _source: {},
                 properties: {
                   test_dimension: {
                     type: 'keyword',

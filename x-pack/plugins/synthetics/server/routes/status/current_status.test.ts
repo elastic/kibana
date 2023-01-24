@@ -171,9 +171,11 @@ describe('current status route', () => {
           uptimeEsClient,
           ['Europe - Germany', 'Asia/Pacific - Japan'],
           { from: 140000, to: 'now' },
-          ['id1', 'id2']
+          ['id1', 'id2'],
+          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] }
         )
       ).toEqual({
+        pending: 0,
         down: 1,
         enabledIds: ['id1', 'id2'],
         up: 2,
@@ -324,9 +326,11 @@ describe('current status route', () => {
           uptimeEsClient,
           times(10000).map((n) => 'Europe - Germany' + n),
           { from: 2500, to: 'now' },
-          ['id1', 'id2']
+          ['id1', 'id2'],
+          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] }
         )
       ).toEqual({
+        pending: 0,
         down: 1,
         enabledIds: ['id1', 'id2'],
         up: 2,
