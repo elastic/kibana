@@ -33,7 +33,7 @@ export const getServicesMock = (params?: Partial<Params>) => {
       ? params.hasUserDataView
       : defaultParams.hasUserDataView;
 
-  const hasCustomBranding = params && params.hasCustomBranding !== undefined ? true : false;
+  const hasCustomBranding = Boolean(params?.hasCustomBranding);
 
   const services: KibanaNoDataPageServices = {
     ...getNoDataCardServicesMock(),
