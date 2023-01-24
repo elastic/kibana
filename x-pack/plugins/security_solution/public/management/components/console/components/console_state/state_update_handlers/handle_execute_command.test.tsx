@@ -226,7 +226,7 @@ describe('When a Console command is entered by the user', () => {
     const cmd1Definition = commands.find((command) => command.name === 'cmd1');
 
     if (!cmd1Definition) {
-      throw new Error('cmd1 defintion not found');
+      throw new Error('cmd1 definition not found');
     }
 
     cmd1Definition.validate = () => 'command is invalid';
@@ -236,6 +236,25 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+        'command is invalid'
+      );
+    });
+  });
+
+  it('should show error for --help if command definition `validate()` callback return a message', async () => {
+    const cmd1Definition = commands.find((command) => command.name === 'cmd1');
+
+    if (!cmd1Definition) {
+      throw new Error('cmd1 definition not found');
+    }
+
+    cmd1Definition.validate = () => 'command is invalid';
+
+    render();
+    enterCommand('cmd1 --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'command is invalid'
       );
     });
