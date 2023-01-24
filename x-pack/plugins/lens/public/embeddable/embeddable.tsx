@@ -552,9 +552,8 @@ export class Embeddable
 
     if (addedMessageIds.length) {
       this.additionalUserMessages = newMessageMap;
+      this.renderBadgeMessages();
     }
-
-    this.reload();
 
     return () => {
       const withMessagesRemoved = {
@@ -712,15 +711,11 @@ export class Embeddable
 
     const newActiveData = adapters?.tables?.tables;
 
-    if (!fastIsEqual(this.activeData, newActiveData)) {
-      // we check equality because this.addUserMessage triggers a render, so we get an infinite loop
-      // if we just execute without checking if the data has changed
-      this.removeActiveDataWarningMessages();
-      const searchWarningMessages = this.getSearchWarningMessages(adapters);
-      this.removeActiveDataWarningMessages = this.addUserMessages(
-        searchWarningMessages.filter(isMessageRemovable)
-      );
-    }
+    this.removeActiveDataWarningMessages();
+    const searchWarningMessages = this.getSearchWarningMessages(adapters);
+    this.removeActiveDataWarningMessages = this.addUserMessages(
+      searchWarningMessages.filter(isMessageRemovable)
+    );
 
     this.activeData = newActiveData;
   };
@@ -880,6 +875,10 @@ export class Embeddable
       domNode
     );
 
+    this.renderBadgeMessages();
+  }
+
+  private renderBadgeMessages() {
     const warningsToDisplay = this.getUserMessages('embeddableBadge', {
       severity: 'warning',
     });
