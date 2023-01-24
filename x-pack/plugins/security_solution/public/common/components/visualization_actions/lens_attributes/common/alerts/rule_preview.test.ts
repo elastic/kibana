@@ -5,14 +5,18 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { wrapper } from '../../../mocks';
+import { mockRulePreviewFilter, wrapper } from '../../../mocks';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useLensAttributes } from '../../../use_lens_attributes';
 
-import { getAlertsHistogramLensAttributes } from './alerts_histogram';
+import { getRulePreviewLensAttributes } from './rule_preview';
+const mockLayerId = 'mockLayerId';
+const mockInternalReferenceId = 'mockInternalReferenceId';
+const mockRuleId = 'mockRuleId';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75'),
+  v4: jest.fn(),
 }));
 
 jest.mock('../../../../../containers/sourcerer', () => ({
@@ -26,19 +30,21 @@ jest.mock('../../../../../containers/sourcerer', () => ({
 jest.mock('../../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
-      detailName: 'mockRule',
-      pageName: 'rules',
-      tabName: 'alerts',
+      pageName: 'alerts',
     },
   ]),
 }));
 
-describe('getAlertsHistogramLensAttributes', () => {
+describe('getRulePreviewLensAttributes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (uuidv4 as jest.Mock).mockReturnValueOnce(mockLayerId).mockReturnValue(mockInternalReferenceId);
+  });
   it('should render without extra options', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          getLensAttributes: getAlertsHistogramLensAttributes,
+          getLensAttributes: getRulePreviewLensAttributes,
           stackByField: 'event.category',
         }),
       { wrapper }
@@ -52,37 +58,16 @@ describe('getAlertsHistogramLensAttributes', () => {
       () =>
         useLensAttributes({
           extraOptions: {
-            filters: [
-              {
-                meta: {
-                  type: 'phrases',
-                  key: '_index',
-                  params: ['.alerts-security.alerts-default'],
-                  alias: null,
-                  negate: false,
-                  disabled: false,
-                },
-                query: {
-                  bool: {
-                    should: [
-                      {
-                        match_phrase: {
-                          _index: '.alerts-security.alerts-default',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              },
-            ],
+            ruleId: mockRuleId,
           },
-          getLensAttributes: getAlertsHistogramLensAttributes,
+          getLensAttributes: getRulePreviewLensAttributes,
           stackByField: 'event.category',
         }),
       { wrapper }
     );
 
-    expect(result?.current).toMatchSnapshot();
+    expect(result?.current?.state.filters).toEqual(
+      expect.arrayContaining(mockRulePreviewFilter(mockInternalReferenceId, mockRuleId))
+    );
   });
 });

@@ -29,8 +29,10 @@ import { getAlertsBySeverityTableAttributes } from '../../../../../common/compon
 
 const DONUT_HEIGHT = 150;
 
+type FieldFilter = ({ field, value }: { field: string; value: string | number }) => void;
+
 interface AlertsChartsPanelProps {
-  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  addFilter?: FieldFilter;
   data: ParsedSeverityData;
   filters?: Filter[];
   isLoading: boolean;
@@ -108,7 +110,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
                   extraOptions={extraOptions}
                   height="135px"
                   getLensAttributes={getAlertsBySeverityTableAttributes}
-                  stackByField="kibana.alert.workflow_status"
+                  stackByField="kibana.alert.severity"
                   scopeId={SourcererScopeName.detections}
                   id={`${uniqueQueryId}-table`}
                 />

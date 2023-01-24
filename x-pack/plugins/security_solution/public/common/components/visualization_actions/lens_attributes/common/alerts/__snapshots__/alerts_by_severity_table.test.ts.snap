@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAlertsBySeverityTableAttributes should render without extra options 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "22752b9b-cfcd-43f0-a6ee-27dd4893edcf",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "b9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+            "columnOrder": Array [
+              "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
+              "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+            ],
+            "columns": Object {
+              "21cc4a49-3780-4b1a-be28-f02fa5303d24": Object {
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "",
+                },
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "a9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Filters",
+                "operationType": "filters",
+                "params": Object {
+                  "filters": Array [
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "kibana.alert.severity: \\"critical\\"",
+                      },
+                      "label": "Critical",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "kibana.alert.severity : \\"high\\"",
+                      },
+                      "label": "High",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "kibana.alert.severity: \\"medium\\"",
+                      },
+                      "label": "Medium",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "kibana.alert.severity : \\"low\\"",
+                      },
+                      "label": "Low",
+                    },
+                  ],
+                },
+                "scale": "ordinal",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
+        },
+        Object {
+          "columnId": "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+        },
+      ],
+      "headerRowHeight": "custom",
+      "headerRowHeightLines": 0.6,
+      "layerId": "b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+      "layerType": "data",
+      "rowHeight": "custom",
+      "rowHeightLines": 0.8,
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;
