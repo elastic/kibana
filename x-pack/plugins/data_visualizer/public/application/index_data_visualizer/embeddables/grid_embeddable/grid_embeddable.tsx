@@ -38,7 +38,7 @@ import {
 } from '../../../common/components/stats_table';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import type { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common/types';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
@@ -46,7 +46,7 @@ import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridInput {
   dataView: DataView;
-  savedSearch?: SavedSearch | SavedSearchSavedObject | null;
+  savedSearch?: SavedSearch | null;
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];

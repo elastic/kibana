@@ -16,11 +16,12 @@ import {
   buildEsQuery,
   Query,
   Filter,
+  AggregateQuery,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/discover-plugin/public';
-import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
+import { getEsQueryConfig, isQuery, SearchSource } from '@kbn/data-plugin/common';
 import { FilterManager, mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
@@ -74,14 +75,14 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
  * Should also form a valid query if only the query or filters is provided
  */
 export function createMergedEsQuery(
-  query?: Query,
+  query?: Query | AggregateQuery | undefined,
   filters?: Filter[],
   dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
   let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
-  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+  if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, dataView);
@@ -213,8 +214,9 @@ export function getEsQueryFromSavedSearch({
 
     return {
       searchQuery: combinedQuery,
-      searchString: currentQuery.query,
-      queryLanguage: currentQuery.language as SearchQueryLanguage,
+      searchString: currentQuery?.query,
+      queryLanguage: currentQuery?.language as SearchQueryLanguage,
+      queryOrAggregateQuery: currentQuery,
     };
   }
 }

@@ -156,7 +156,6 @@ export function getEsQueryFromSavedSearch({
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
-  console.log('getEsQueryFromSavedSearch', savedSearch);
   if (!dataView || !savedSearch) return;
 
   const userQuery = query;
@@ -187,11 +186,6 @@ export function getEsQueryFromSavedSearch({
       queryLanguage: userQuery.language as SearchQueryLanguage,
     };
   }
-
-  // @TODO: remove
-  // If saved search is an json object with the original query and filter
-  // retrieve the parsed query and filter
-  // const savedSearchData = savedSearch; // getQueryFromSavedSearchObject(savedSearch);
 
   // If no saved search available, use user's query and filters
   if (!savedSearch && userQuery) {

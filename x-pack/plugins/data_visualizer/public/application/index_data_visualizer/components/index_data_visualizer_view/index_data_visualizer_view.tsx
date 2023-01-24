@@ -180,12 +180,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
-    if (dataVisualizerProps?.currentSavedSearch !== undefined) {
-      setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
-    }
-  }, [dataVisualizerProps?.currentSavedSearch]);
-
-  useEffect(() => {
     if (!currentDataView.isTimeBased()) {
       toasts.addWarning({
         title: i18n.translate(

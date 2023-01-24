@@ -50,7 +50,6 @@ export const explainLogRateSpikesRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps, ...restProps }) => {
-  console.log('deps.getSavedSearchDeps', deps.getSavedSearchDeps);
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
