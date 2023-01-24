@@ -89,7 +89,7 @@ export const setupOptionsListSuggestionsRoute = (
      * Build ES Query
      */
     const { runPastTimeout, filters, runtimeFieldMap, allowExpensiveQueries } = request;
-    // console.log('ALLOW EXPENSIVE QUERIES???', allowExpensiveQueries);
+    console.log('ALLOW EXPENSIVE QUERIES???', allowExpensiveQueries);
     const { terminateAfter, timeout } = getAutocompleteSettings();
     const timeoutSettings = runPastTimeout
       ? {}

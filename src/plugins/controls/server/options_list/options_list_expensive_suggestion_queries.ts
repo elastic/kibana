@@ -79,8 +79,6 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       return textOrKeywordQuery;
     },
     parse: (rawEsResult) => {
-      console.log(rawEsResult);
-
       const isNested = Boolean(get(rawEsResult, 'aggregations.suggestions.nestedSuggestions'));
       const basePath = isNested
         ? 'aggregations.suggestions.nestedSuggestions'

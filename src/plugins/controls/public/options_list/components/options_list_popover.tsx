@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 
-import { EuiPopoverTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPopoverTitle } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -19,6 +20,7 @@ import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
+import { pluginServices } from '../../services';
 
 export interface OptionsListPopoverProps {
   width: number;
@@ -51,6 +53,20 @@ export const OptionsListPopover = ({
   const id = select((state) => state.explicitInput.id);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [allowExpensiveQueries, setAllowExpensiveQueries] = useState(false);
+
+  // Controls Services Context
+  const {
+    optionsList: { getAllowExpensiveQueries },
+  } = pluginServices.getServices();
+
+  useEffect(() => {
+    const waitForAllowExpensiveQueries = async () => {
+      const allow = await getAllowExpensiveQueries();
+      setAllowExpensiveQueries(allow);
+    };
+    waitForAllowExpensiveQueries();
+  }, [getAllowExpensiveQueries]);
 
   return (
     <>
@@ -60,12 +76,35 @@ export const OptionsListPopover = ({
         data-test-subj={`optionsList-control-popover`}
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="s">
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+            {!allowExpensiveQueries && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  aria-label="Warning"
+                  type="alert"
+                  color="warning"
+                  content={
+                    <FormattedMessage
+                      id="controls.optionsList.popover.allowExpensiveQueriesWarning"
+                      defaultMessage="{allowExpensiveQueriesSetting} is off, so some features have been disabled."
+                      values={{
+                        allowExpensiveQueriesSetting: <code>search.allow_expensive_queries</code>,
+                      }}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
 
         {field?.type !== 'boolean' && !hideActionBar && (
           <OptionsListPopoverActionBar
             showOnlySelected={showOnlySelected}
             updateSearchString={updateSearchString}
+            allowExpensiveQueries={allowExpensiveQueries}
           />
         )}
         <div

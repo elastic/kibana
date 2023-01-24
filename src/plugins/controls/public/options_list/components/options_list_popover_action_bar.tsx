@@ -25,12 +25,14 @@ import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
+  allowExpensiveQueries: boolean;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   updateSearchString,
+  allowExpensiveQueries,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
@@ -40,9 +42,8 @@ export const OptionsListPopoverActionBar = ({
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const totalCardinality = select((state) => state.componentState.totalCardinality);
+  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = select((state) => state.componentState.searchString);
-
   const hideSort = select((state) => state.explicitInput.hideSort);
 
   return (
@@ -68,9 +69,7 @@ export const OptionsListPopoverActionBar = ({
               autoFocus={true}
             />
           </EuiFlexItem>
-          {totalCardinality && (
-            // totalCardinality will be undefined when `allowExpensiveQueries` is false; so, we should not show
-            // the badge in this case
+          {allowExpensiveQueries && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}

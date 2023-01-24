@@ -306,6 +306,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
+
       const { suggestions, invalidSelections, totalCardinality, rejected } =
         await this.optionsListService.runOptionsListRequest(
           {
@@ -326,6 +327,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       if (rejected) {
         // This prevents a rejected request (which can happen, for example, when a user types a search string too quickly)
         // from prematurely setting loading to `false` and updating the suggestions to show "No results"
+        // console.log('REJECTED!!!!');
+        // this.onFatalError({ name: 'test', message: 'test' });
         return;
       }
 
