@@ -242,7 +242,15 @@ export const PingType = t.intersection([
   }),
 ]);
 
+export const PingStateType = t.type({
+  timestamp: t.string,
+  '@timestamp': t.string,
+  monitor: MonitorType,
+  docId: t.string,
+  state: ErrorStateCodec,
+});
 export type Ping = t.TypeOf<typeof PingType>;
+export type PingState = t.TypeOf<typeof PingStateType>;
 
 export const PingStatusType = t.intersection([
   t.type({
