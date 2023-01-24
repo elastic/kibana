@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -59,63 +59,61 @@ export const useLensAttributes = ({
     return visualizationAttributes;
   }, [dataView, formulaAPI, options, type]);
 
-  const injectData = useCallback(
-    (data: { filters: Filter[]; query: Query; title?: string }): LensAttributes | null => {
-      if (!attributes) {
-        return null;
-      }
+  const injectData = (data: {
+    filters: Filter[];
+    query: Query;
+    title?: string;
+  }): LensAttributes | null => {
+    if (!attributes) {
+      return null;
+    }
 
-      return {
-        ...attributes,
-        ...(!!data.title ? { title: data.title } : {}),
-        state: {
-          ...attributes.state,
-          query: data.query,
-          filters: [...attributes.state.filters, ...data.filters],
+    return {
+      ...attributes,
+      ...(!!data.title ? { title: data.title } : {}),
+      state: {
+        ...attributes.state,
+        query: data.query,
+        filters: [...attributes.state.filters, ...data.filters],
+      },
+    };
+  };
+
+  const getExtraActions = (currentAttributes: LensAttributes | null, timeRange: TimeRange) => {
+    return {
+      openInLens: {
+        id: 'openInLens',
+
+        getDisplayName(_context: ActionExecutionContext): string {
+          return i18n.translate('xpack.infra.hostsTable.tabs.metricsCharts.acitons.openInLines', {
+            defaultMessage: 'Open in Lens',
+          });
         },
-      };
-    },
-    [attributes]
-  );
-
-  const getExtraActions = useCallback(
-    (currentAttributes: LensAttributes | null, timeRange: TimeRange) => {
-      return {
-        openInLens: {
-          id: 'openInLens',
-
-          getDisplayName(_context: ActionExecutionContext): string {
-            return i18n.translate('xpack.infra.hostsTable.tabs.metricsCharts.acitons.openInLines', {
-              defaultMessage: 'Open in Lens',
-            });
-          },
-          getIconType(_context: ActionExecutionContext): string | undefined {
-            return 'visArea';
-          },
-          type: 'actionButton',
-          async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
-            return true;
-          },
-          async execute(_context: ActionExecutionContext): Promise<void> {
-            if (currentAttributes) {
-              navigateToPrefilledEditor(
-                {
-                  id: '',
-                  timeRange,
-                  attributes: currentAttributes,
-                },
-                {
-                  openInNewTab: true,
-                }
-              );
-            }
-          },
-          order: 100,
+        getIconType(_context: ActionExecutionContext): string | undefined {
+          return 'visArea';
         },
-      };
-    },
-    [navigateToPrefilledEditor]
-  );
+        type: 'actionButton',
+        async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
+          return true;
+        },
+        async execute(_context: ActionExecutionContext): Promise<void> {
+          if (currentAttributes) {
+            navigateToPrefilledEditor(
+              {
+                id: '',
+                timeRange,
+                attributes: currentAttributes,
+              },
+              {
+                openInNewTab: true,
+              }
+            );
+          }
+        },
+        order: 100,
+      },
+    };
+  };
 
   return { attributes, injectData, getExtraActions };
 };

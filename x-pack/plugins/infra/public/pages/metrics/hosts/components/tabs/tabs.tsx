@@ -37,5 +37,5 @@ export const Tabs = () => {
     },
   ];
 
-  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} autoFocus="selected" />;
+  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />;
 };

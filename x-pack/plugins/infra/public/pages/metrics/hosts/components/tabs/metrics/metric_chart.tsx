@@ -16,13 +16,13 @@ import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostLensAttributesTypes } from '../../../../../../common/visualizations';
 
-interface Props {
+export interface MetricChartProps {
   title: string;
   type: HostLensAttributesTypes;
   breakdownSize: number;
 }
 
-export const MetricChart = ({ title, type, breakdownSize }: Props) => {
+export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
   const {
     unifiedSearchDateRange,
     unifiedSearchQuery,
