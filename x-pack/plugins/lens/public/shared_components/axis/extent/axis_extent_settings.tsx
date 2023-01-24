@@ -38,7 +38,7 @@ export function AxisBoundsControl({
   const { inclusiveZeroError, boundaryError } = validateExtent(shouldIncludeZero, extent);
   // Bucket type does not have the "full" mode
   const modeForNiceValues = type === 'metric' ? 'full' : 'dataBounds';
-  const canShowNiceValues = canHaveNiceValues && (!extent || extent?.mode === modeForNiceValues);
+  const canShowNiceValues = canHaveNiceValues && extent.mode === modeForNiceValues;
 
   const canShowCustomRanges =
     extent?.mode === 'custom' && (type === 'bucket' || !disableCustomRange);
@@ -60,12 +60,13 @@ export function AxisBoundsControl({
             label={i18n.translate('xpack.lens.fullExtent.niceValues', {
               defaultMessage: 'Round to nice values',
             })}
-            checked={Boolean(!extent || extent.niceValues)}
+            data-test-subj={`${testSubjPrefix}_axisExtent_niceValues`}
+            checked={Boolean(extent.niceValues == null || extent.niceValues)}
             onChange={() => {
               setExtent({
                 ...extent,
                 mode: modeForNiceValues,
-                niceValues: !Boolean(!extent || extent.niceValues),
+                niceValues: !Boolean(extent.niceValues == null || extent.niceValues),
               });
             }}
             compressed
