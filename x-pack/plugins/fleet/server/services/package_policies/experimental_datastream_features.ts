@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type {
-  MappingProperty,
-  PropertyName,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
@@ -16,14 +12,15 @@ import { merge } from 'lodash';
 
 import { getRegistryDataStreamAssetBaseName } from '../../../common/services';
 
-import type {
-  ExperimentalIndexingFeature,
-  ExperimentalDataStreamFeature,
-} from '../../../common/types';
+import type { ExperimentalIndexingFeature } from '../../../common/types';
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 import { prepareTemplate } from '../epm/elasticsearch/template/install';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
+import {
+  applyDocOnlyValueToMapping,
+  forEachMappings,
+} from '../experimental_datastream_features_helper';
 
 export async function handleExperimentalDatastreamFeatureOptIn({
   soClient,
@@ -190,57 +187,3 @@ export async function handleExperimentalDatastreamFeatureOptIn({
   // Delete the experimental features map from the package policy so it doesn't get persisted
   delete packagePolicy.package.experimental_data_stream_features;
 }
-
-const forEachMappings = (
-  mappingProperties: Record<PropertyName, MappingProperty>,
-  process: (prop: MappingProperty) => void
-) => {
-  Object.keys(mappingProperties).forEach((mapping) => {
-    const property = mappingProperties[mapping] as any;
-    if (property.properties) {
-      forEachMappings(property.properties, process);
-    } else {
-      process(property);
-    }
-  });
-};
-
-const applyDocOnlyValueToMapping = (
-  mappingProp: MappingProperty,
-  featureMap: ExperimentalDataStreamFeature,
-  isDocValueOnlyNumericChanged: boolean,
-  isDocValueOnlyOtherChanged: boolean
-) => {
-  const mapping = mappingProp as any;
-
-  // TODO is there a built in way to do check if numeric type?
-  const numericTypes = [
-    'long',
-    'integer',
-    'short',
-    'byte',
-    'double',
-    'float',
-    'half_float',
-    'scaled_float',
-    'unsigned_long',
-  ];
-  if (isDocValueOnlyNumericChanged && numericTypes.includes(mapping.type ?? '')) {
-    updateMapping(mapping, featureMap.features.doc_value_only_numeric);
-  }
-
-  // is this all or only wildcard not supported?
-  const otherSupportedTypes = ['date', 'boolean', 'ip', 'geo_point', 'keyword']; // date_nanos
-  if (isDocValueOnlyOtherChanged && otherSupportedTypes.includes(mapping.type ?? '')) {
-    updateMapping(mapping, featureMap.features.doc_value_only_other);
-  }
-};
-
-const updateMapping = (mapping: { index?: boolean }, featureValue: boolean) => {
-  if (featureValue === false && mapping.index === false) {
-    delete mapping.index;
-  }
-  if (featureValue && !mapping.index) {
-    mapping.index = false;
-  }
-};
