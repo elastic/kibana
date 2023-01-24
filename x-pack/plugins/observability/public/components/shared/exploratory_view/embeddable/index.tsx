@@ -78,7 +78,6 @@ export function getExploratoryViewEmbeddable(
     const embedProps = { ...props };
     if (props.sparklineMode) {
       embedProps.axisTitlesVisibility = { x: false, yRight: false, yLeft: false };
-      embedProps.gridlinesVisibilitySettings = { x: false, yRight: false, yLeft: false };
       embedProps.legendIsVisible = false;
       embedProps.hideTicks = true;
     }

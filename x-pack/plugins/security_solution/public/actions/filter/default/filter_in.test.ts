@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { createFilterInAction } from './filter_in';
 
