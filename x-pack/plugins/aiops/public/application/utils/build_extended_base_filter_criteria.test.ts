@@ -9,7 +9,7 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from '../../components/spike_analysis_table/types';
 
-import { buildBaseFilterCriteria } from './query_utils';
+import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 
 const selectedChangePointMock: ChangePoint = {
   doc_count: 53408,
@@ -41,9 +41,9 @@ const selectedGroupMock: GroupTableItem = {
 };
 
 describe('query_utils', () => {
-  describe('buildBaseFilterCriteria', () => {
+  describe('buildExtendedBaseFilterCriteria', () => {
     it('returns range filter based on minimum supplied arguments', () => {
-      const baseFilterCriteria = buildBaseFilterCriteria('the-time-field-name', 1234, 5678);
+      const baseFilterCriteria = buildExtendedBaseFilterCriteria('the-time-field-name', 1234, 5678);
 
       expect(baseFilterCriteria).toEqual([
         {
@@ -59,7 +59,7 @@ describe('query_utils', () => {
     });
 
     it('returns filters including default query with supplied arguments provided via UI', () => {
-      const baseFilterCriteria = buildBaseFilterCriteria(
+      const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
@@ -81,7 +81,7 @@ describe('query_utils', () => {
     });
 
     it('includes a term filter when including a selectedChangePoint', () => {
-      const baseFilterCriteria = buildBaseFilterCriteria(
+      const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
@@ -105,7 +105,7 @@ describe('query_utils', () => {
     });
 
     it('includes a term filter with must_not when excluding a selectedChangePoint', () => {
-      const baseFilterCriteria = buildBaseFilterCriteria(
+      const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
@@ -130,7 +130,7 @@ describe('query_utils', () => {
     });
 
     it('includes multiple term filters when including a selectedGroupMock', () => {
-      const baseFilterCriteria = buildBaseFilterCriteria(
+      const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
@@ -185,7 +185,7 @@ describe('query_utils', () => {
     });
 
     it('includes a must_not with nested term filters when excluding a selectedGroup', () => {
-      const baseFilterCriteria = buildBaseFilterCriteria(
+      const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
