@@ -6,6 +6,7 @@
  */
 
 import { getBreadcrumbs } from './get_breadcrumbs';
+import { ScopedHistory } from '@kbn/core/public';
 
 jest.mock('../../../kibana_services', () => {});
 jest.mock('../../../render_app', () => {});
@@ -14,11 +15,16 @@ const getHasUnsavedChanges = () => {
   return false;
 };
 
+const mockHistory = {
+  push: () => {},
+} as unknown as ScopedHistory;
+
 test('should get breadcrumbs "Maps / mymap"', () => {
   const breadcrumbs = getBreadcrumbs({
     pageTitle: 'mymap',
     getHasUnsavedChanges,
     isByValue: false,
+    history: mockHistory,
   });
   expect(breadcrumbs.length).toBe(2);
   expect(breadcrumbs[0].text).toBe('Maps');
@@ -34,6 +40,7 @@ test('should get breadcrumbs "Dashboard / mymap" with originatingApp and by valu
     getAppNameFromId: (appId) => {
       return 'Dashboard';
     },
+    history: mockHistory,
   });
   expect(breadcrumbs.length).toBe(2);
   expect(breadcrumbs[0].text).toBe('Dashboard');
@@ -49,6 +56,7 @@ test('should get breadcrumbs "Dashboard / Maps / mymap" with originatingApp and 
     getAppNameFromId: (appId) => {
       return 'Dashboard';
     },
+    history: mockHistory,
   });
   expect(breadcrumbs.length).toBe(3);
   expect(breadcrumbs[0].text).toBe('Dashboard');

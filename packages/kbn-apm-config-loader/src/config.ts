@@ -111,7 +111,7 @@ export class ApmConfiguration {
   /**
    * Override some config values when specific environment variables are used
    */
-  private getConfigFromEnv(): AgentConfigOptions {
+  private getConfigFromEnv(configFromKibanaConfig: AgentConfigOptions): AgentConfigOptions {
     const config: AgentConfigOptions = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
@@ -124,8 +124,15 @@ export class ApmConfiguration {
       config.contextPropagationOnly = false;
     }
 
-    if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
-      config.environment = process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV;
+    if (process.env.ELASTIC_APM_ENVIRONMENT) {
+      config.environment = process.env.ELASTIC_APM_ENVIRONMENT;
+    } else {
+      // We check NODE_ENV in a different way so that, unlike
+      // ELASTIC_APM_ENVIRONMENT, it does not override any explicit value set
+      // in the config file.
+      if (!configFromKibanaConfig.environment && process.env.NODE_ENV) {
+        config.environment = process.env.NODE_ENV;
+      }
     }
 
     if (process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE) {
@@ -256,7 +263,9 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const config = merge({}, this.getConfigFromKibanaConfig(), this.getConfigFromEnv());
+    const configFromKibanaConfig = this.getConfigFromKibanaConfig();
+    const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
+    const config = merge({}, configFromKibanaConfig, configFromEnv);
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(
