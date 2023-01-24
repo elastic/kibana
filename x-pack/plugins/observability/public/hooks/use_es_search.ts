@@ -37,7 +37,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
               params,
             },
             {
-              legacyHitsTotal: true,
+              legacyHitsTotal: false,
             }
           )
           .subscribe({

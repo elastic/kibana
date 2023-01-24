@@ -7,6 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiProgress, EuiSpacer, EuiLoadingContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFailedTestByStep } from '../hooks/use_failed_tests_by_step';
 
 export const FailedTestsByStep = ({ time }: { time: { to: string; from: string } }) => {
@@ -23,7 +24,14 @@ export const FailedTestsByStep = ({ time }: { time: { to: string; from: string }
         {failedSteps?.map((item) => (
           <Fragment key={item.name}>
             <EuiProgress
-              valueText={<span>{item.count}</span>}
+              valueText={
+                <span>
+                  {i18n.translate('xpack.synthetics.monitorDetails.summary.failedTests.count', {
+                    defaultMessage: 'Failed {count}',
+                    values: { count: item.count },
+                  })}
+                </span>
+              }
               max={100}
               color="danger"
               size="l"
