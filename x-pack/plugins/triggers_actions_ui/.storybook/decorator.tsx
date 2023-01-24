@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { v4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
@@ -29,7 +29,7 @@ const queryClient = new QueryClient();
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);
-  return { id: v4() };
+  return { id: uuidv4() };
 };
 
 const notifications: NotificationsStart = {

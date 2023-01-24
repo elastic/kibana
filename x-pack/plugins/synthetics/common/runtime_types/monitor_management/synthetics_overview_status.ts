@@ -23,6 +23,7 @@ export const OverviewStatusCodec = t.interface({
   projectMonitorsCount: t.number,
   up: t.number,
   down: t.number,
+  pending: t.number,
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
