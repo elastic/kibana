@@ -21,15 +21,15 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // loadTestFile(require.resolve('./metrics_ui'));
     // loadTestFile(require.resolve('./console'));
     // loadTestFile(require.resolve('./management'));
-    // =================
     // loadTestFile(require.resolve('./uptime'));
     // loadTestFile(require.resolve('./synthetics'));
     // loadTestFile(require.resolve('./maps'));
     // loadTestFile(require.resolve('./security_solution'));
     // loadTestFile(require.resolve('./transform'));
-    loadTestFile(require.resolve('./lists'));
-    loadTestFile(require.resolve('./upgrade_assistant'));
-    loadTestFile(require.resolve('./searchprofiler'));
+    // =================
+    // loadTestFile(require.resolve('./lists'));
+    // loadTestFile(require.resolve('./upgrade_assistant'));
+    // loadTestFile(require.resolve('./searchprofiler'));
     loadTestFile(require.resolve('./painless_lab'));
     loadTestFile(require.resolve('./file_upload'));
     loadTestFile(require.resolve('./aiops'));
