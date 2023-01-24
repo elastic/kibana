@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../',
   roots: ['<rootDir>/x-pack/plugins/threat_intelligence'],
+  transform: {
+    '^.+\\.(js|tsx?)$': '@swc/jest',
+  },
 };
