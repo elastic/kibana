@@ -17,6 +17,16 @@
           "ignore_above": 256,
           "type": "keyword"
         },
+        "host.disk.read.bytes": {
+          "type": "long"
+        },
+        "host.network.egress.bytes": {
+          "type": "long"
+        },
+        "host.cpu.usage": {
+          "type": "scaled_float",
+          "scaling_factor": 100
+        },
         "value": {
           "type": "long"
         }

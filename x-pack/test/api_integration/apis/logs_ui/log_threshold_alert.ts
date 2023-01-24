@@ -207,6 +207,9 @@ export default function ({ getService }: FtrProviderContext) {
                   reason: '1 log entry in the last 5 mins for host-01. Alert when ≥ 1.',
                   host: {
                     name: 'host-01',
+                    disk: {},
+                    network: {},
+                    cpu: {},
                   },
                 },
               },
@@ -214,10 +217,54 @@ export default function ({ getService }: FtrProviderContext) {
             {
               host: {
                 name: 'host-01',
+                disk: {},
+                network: {},
+                cpu: {},
               },
             },
           ]);
           expect(alertLimit.setLimitReached.calledOnceWith(true)).to.be(true);
+        });
+
+        it('alert context should not have excluded fields when group by host.name', async () => {
+          const timestamp = new Date(DATES['alert-test-data'].gauge.max);
+          const alertFactory = sinon.fake() as SinonSpyOf<LogThresholdAlertFactory>;
+          const alertLimit = {
+            getValue: sinon.fake.returns(1),
+            setLimitReached: sinon.fake(),
+          } as SinonSpiesOf<LogThresholdAlertLimit>;
+          const ruleParams = {
+            count: {
+              comparator: Comparator.GT_OR_EQ,
+              value: 1,
+            },
+            timeUnit: 'm' as TimeUnit,
+            timeSize: 5,
+            groupBy: ['host.name'],
+            criteria: [
+              {
+                field: 'env',
+                comparator: Comparator.NOT_EQ,
+                value: 'test',
+              },
+            ],
+          };
+
+          await executeAlert(
+            ruleParams,
+            '@timestamp',
+            'alerts-test-data',
+            {},
+            esClient,
+            alertFactory,
+            alertLimit,
+            timestamp.valueOf()
+          );
+
+          expect(alertFactory.callCount).to.equal(1);
+          expect(alertFactory.getCall(0).args[5]?.host.disk).to.be.empty();
+          expect(alertFactory.getCall(0).args[5]?.host.network).to.be.empty();
+          expect(alertFactory.getCall(0).args[5]?.host.cpu).to.be.empty();
         });
 
         it('should limit alerts to the alert limit', async () => {
