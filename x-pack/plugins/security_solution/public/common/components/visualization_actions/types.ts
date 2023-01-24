@@ -15,7 +15,7 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (
-  stackByField?: string,
+  stackByField: string,
   alertsOptions?: ExtraOptions
 ) => LensAttributes;
 

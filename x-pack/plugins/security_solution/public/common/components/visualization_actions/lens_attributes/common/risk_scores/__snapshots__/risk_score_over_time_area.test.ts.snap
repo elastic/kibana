@@ -21,12 +21,33 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
+          "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+            "columnOrder": Array [
+              "69f92e26-0438-40b7-8bba-cbf48d336d6c",
+            ],
+            "columns": Object {
+              "69f92e26-0438-40b7-8bba-cbf48d336d6c": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "isStaticValue": true,
+                "label": "Risky threshold",
+                "operationType": "static_value",
+                "params": Object {
+                  "value": "70",
+                },
+                "references": Array [],
+                "scale": "ratio",
+              },
+            },
+            "incompleteColumns": Object {},
+            "linkToLayers": Array [],
+            "sampling": 1,
+          },
           "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
             "columnOrder": Array [
               "02a55c97-d7a4-440d-ac77-33b941c16189",
               "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
-              "df9461a3-db14-4196-932c-6404dabfd11a",
-              "df9461a3-db14-4196-932c-6404dabfd11aX0",
             ],
             "columns": Object {
               "02a55c97-d7a4-440d-ac77-33b941c16189": Object {
@@ -47,7 +68,7 @@ Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Risk score",
-                "operationType": "average",
+                "operationType": "max",
                 "params": Object {
                   "emptyAsNull": true,
                   "format": Object {
@@ -59,33 +80,6 @@ Object {
                 },
                 "scale": "ratio",
                 "sourceField": "host.risk.calculated_score_norm",
-              },
-              "df9461a3-db14-4196-932c-6404dabfd11a": Object {
-                "customLabel": true,
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Risky threshold",
-                "operationType": "formula",
-                "params": Object {
-                  "formula": "70",
-                  "isFormulaBroken": false,
-                },
-                "references": Array [
-                  "df9461a3-db14-4196-932c-6404dabfd11aX0",
-                ],
-                "scale": "ratio",
-              },
-              "df9461a3-db14-4196-932c-6404dabfd11aX0": Object {
-                "customLabel": true,
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Part of Risky threshold",
-                "operationType": "math",
-                "params": Object {
-                  "tinymathAst": 70,
-                },
-                "references": Array [],
-                "scale": "ratio",
               },
             },
             "incompleteColumns": Object {},
@@ -139,6 +133,11 @@ Object {
         "name": "indexpattern-datasource-layer-d594baeb-5eca-480c-8885-ba79eaf41372",
         "type": "index-pattern",
       },
+      Object {
+        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "indexpattern-datasource-layer-1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "type": "index-pattern",
+      },
     ],
     "query": Object {
       "language": "kql",
@@ -148,13 +147,17 @@ Object {
       "axisTitlesVisibilitySettings": Object {
         "x": false,
         "yLeft": false,
-        "yRight": true,
+        "yRight": false,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
       },
       "layers": Array [
         Object {
           "accessors": Array [
             "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
-            "df9461a3-db14-4196-932c-6404dabfd11a",
           ],
           "layerId": "d594baeb-5eca-480c-8885-ba79eaf41372",
           "layerType": "data",
@@ -164,8 +167,26 @@ Object {
           "xAccessor": "02a55c97-d7a4-440d-ac77-33b941c16189",
           "yConfig": Array [
             Object {
-              "color": "#c06060",
-              "forAccessor": "df9461a3-db14-4196-932c-6404dabfd11a",
+              "axisMode": "right",
+              "forAccessor": "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
+            },
+          ],
+        },
+        Object {
+          "accessors": Array [
+            "69f92e26-0438-40b7-8bba-cbf48d336d6c",
+          ],
+          "layerId": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+          "layerType": "referenceLine",
+          "yConfig": Array [
+            Object {
+              "axisMode": "right",
+              "color": "#aa6556",
+              "fill": "none",
+              "forAccessor": "69f92e26-0438-40b7-8bba-cbf48d336d6c",
+              "icon": "alert",
+              "lineWidth": 2,
+              "textVisibility": true,
             },
           ],
         },
@@ -175,9 +196,21 @@ Object {
         "position": "right",
       },
       "preferredSeriesType": "line",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
       "title": "Empty XY chart",
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "xTitle": "",
+      "yRightExtent": Object {
+        "lowerBound": 0,
+        "mode": "custom",
+        "upperBound": 100,
+      },
+      "yRightTitle": "",
       "yTitle": "",
     },
   },
