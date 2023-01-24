@@ -199,7 +199,8 @@ export function getEsQueryFromSavedSearch({
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const globalFilters = filterManager?.getGlobalFilters();
-    const currentQuery = userQuery ?? savedSearchSource.getField('query');
+    // @TODO: Add support for AggregateQuery type
+    const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     const currentFilters =
       userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);
     if (filterManager) filterManager.setFilters(currentFilters);
@@ -214,8 +215,8 @@ export function getEsQueryFromSavedSearch({
 
     return {
       searchQuery: combinedQuery,
-      searchString: currentQuery?.query,
-      queryLanguage: currentQuery?.language as SearchQueryLanguage,
+      searchString: currentQuery?.query ?? '',
+      queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
       queryOrAggregateQuery: currentQuery,
     };
   }
