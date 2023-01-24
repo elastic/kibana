@@ -404,7 +404,7 @@
 /src/plugins/dev_tools/ @elastic/platform-deployment-management
 /src/plugins/console/  @elastic/platform-deployment-management
 /src/plugins/es_ui_shared/  @elastic/platform-deployment-management
-/src/plugins/management/ @elastic/platform-deployment-management
+/src/plugins/management/ @elastic/appex-sharedux
 /x-pack/plugins/cross_cluster_replication/  @elastic/platform-deployment-management
 /x-pack/plugins/index_lifecycle_management/  @elastic/platform-deployment-management
 /x-pack/plugins/grokdebugger/  @elastic/platform-deployment-management
