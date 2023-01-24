@@ -175,12 +175,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                 )}
                 {renderCustomActionsRow &&
                   alerts[visibleRowIndex] &&
-                  renderCustomActionsRow(
-                    alerts[visibleRowIndex],
-                    handleFlyoutAlert,
-                    props.id,
-                    getSetIsActionLoadingCallback(visibleRowIndex)
-                  )}
+                  renderCustomActionsRow({
+                    alert: alerts[visibleRowIndex],
+                    setFlyoutAlert: handleFlyoutAlert,
+                    id: props.id,
+                    setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                  })}
               </EuiFlexGroup>
             );
           },
