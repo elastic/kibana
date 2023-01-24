@@ -96,11 +96,12 @@ export function getCombinedProperties(
 }
 
 export const usePivotData = (
-  dataViewTitle: SearchItems['dataView']['title'],
+  dataView: SearchItems['dataView'],
   query: PivotQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
+  timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): UseIndexDataReturnType => {
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
@@ -166,10 +167,11 @@ export const usePivotData = (
     setStatus(INDEX_STATUS.LOADING);
 
     const previewRequest = getPreviewTransformRequestBody(
-      dataViewTitle,
+      dataView,
       query,
       requestPayload,
-      combinedRuntimeMappings
+      combinedRuntimeMappings,
+      timeRangeMs
     );
     const resp = await api.getTransformsPreview(previewRequest);
 
@@ -238,7 +240,10 @@ export const usePivotData = (
     getPreviewData();
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [dataViewTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
+  }, [
+    dataView.getIndexPattern(),
+    JSON.stringify([requestPayload, query, combinedRuntimeMappings, timeRangeMs]),
+  ]);
 
   if (sortingColumns.length > 0) {
     const sortingColumnsWithTypes = sortingColumns.map((c) => ({

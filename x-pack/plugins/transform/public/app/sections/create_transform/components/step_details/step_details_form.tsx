@@ -134,7 +134,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
         const pivotQuery = getPivotQuery(searchQuery);
         const previewRequest = getPreviewTransformRequestBody(
-          searchItems.dataView.getIndexPattern(),
+          searchItems.dataView,
           pivotQuery,
           partialPreviewRequest,
           stepDefineState.runtimeMappings

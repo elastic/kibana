@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -171,17 +172,36 @@ export const getRequestPayload = (
 };
 
 export function getPreviewTransformRequestBody(
-  dataViewTitle: DataView['title'],
-  query: PivotQuery,
-  partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
-  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+  dataView: DataView,
+  pivotQuery: PivotQuery,
+  partialRequest?: StepDefineExposedState['previewRequest'],
+  runtimeMappings?: StepDefineExposedState['runtimeMappings'],
+  timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): PostTransformsPreviewRequestSchema {
+  const dataViewTitle = dataView.getIndexPattern();
   const index = dataViewTitle.split(',').map((name: string) => name.trim());
+
+  const hasValidTimeField = dataView.timeFieldName !== undefined && dataView.timeFieldName !== '';
+
+  const baseFilterCriteria = buildBaseFilterCriteria(
+    dataView.timeFieldName,
+    timeRangeMs?.from,
+    timeRangeMs?.to,
+    pivotQuery
+  );
+
+  const queryWithBaseFilterCriteria = {
+    bool: {
+      filter: baseFilterCriteria,
+    },
+  };
+
+  const query = hasValidTimeField ? queryWithBaseFilterCriteria : matchAllQuery;
 
   return {
     source: {
       index,
-      ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
+      ...(isDefaultQuery(query) ? {} : { query }),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(partialRequest ?? {}),
@@ -212,12 +232,12 @@ export const getCreateTransformSettingsRequestBody = (
 };
 
 export const getCreateTransformRequestBody = (
-  dataViewTitle: DataView['title'],
+  dataView: DataView,
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
-    dataViewTitle,
+    dataView,
     getPivotQuery(pivotState.searchQuery),
     pivotState.previewRequest,
     pivotState.runtimeMappings

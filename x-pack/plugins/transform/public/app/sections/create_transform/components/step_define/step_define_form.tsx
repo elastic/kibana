@@ -16,10 +16,10 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -64,6 +64,16 @@ import { LatestFunctionForm } from './latest_function_form';
 
 const advancedEditorsSidebarWidth = '220px';
 
+export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiTitle size="xs">
+      <span>{title}</span>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+  </>
+);
+
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
@@ -91,15 +101,12 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     isAdvancedSourceEditorEnabled,
     isAdvancedSourceEditorApplyButtonEnabled,
   } = stepDefineForm.advancedSourceEditor.state;
-  const pivotQuery = stepDefineForm.searchBar.state.pivotQuery;
+  const { isDatePickerApplyEnabled, timeRangeMs } = stepDefineForm.datePicker.state;
+  const { pivotQuery } = stepDefineForm.searchBar.state;
+  const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
   const indexPreviewProps = {
-    ...useIndexData(
-      dataView,
-      stepDefineForm.searchBar.state.pivotQuery,
-      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings,
-      stepDefineForm.datePicker.state.timeRangeMs
-    ),
+    ...useIndexData(dataView, pivotQuery, runtimeMappings, timeRangeMs),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -109,12 +116,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       : stepDefineForm.latestFunctionConfig;
 
   const previewRequest = getPreviewTransformRequestBody(
-    indexPattern,
+    dataView,
     pivotQuery,
-    stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
-      ? stepDefineForm.pivotConfig.state.requestPayload
-      : stepDefineForm.latestFunctionConfig.requestPayload,
-    stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
+    requestPayload,
+    runtimeMappings,
+    timeRangeMs
   );
 
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern);
@@ -135,16 +141,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const pivotPreviewProps = {
     ...usePivotData(
-      indexPattern,
+      dataView,
       pivotQuery,
       validationStatus,
       requestPayload,
-      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
+      runtimeMappings,
+      timeRangeMs
     ),
     dataTestSubj: 'transformPivotPreview',
-    title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
-      defaultMessage: 'Transform preview',
-    }),
     toastNotifications,
     ...(stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST
       ? {
@@ -255,6 +259,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
             onChange={stepDefineForm.setTransformFunction}
           />
         </EuiFormRow>
+
+        <ConfigSectionTitle title="Source data" />
 
         {searchItems.savedSearch === undefined && (
           <EuiFormRow
@@ -406,7 +412,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           </>
         </EuiFormRow>
       </EuiForm>
-      <EuiHorizontalRule margin="m" />
+
+      <ConfigSectionTitle title="Transform configuration" />
+
       <EuiForm>
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -495,10 +503,17 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       <EuiSpacer size="m" />
       {(stepDefineForm.transformFunction !== TRANSFORM_FUNCTION.LATEST ||
         stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
-        <>
-          <DataGrid {...pivotPreviewProps} />
-          <EuiSpacer size="m" />
-        </>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.transform.stepDefineForm.pivotPreviewLabel', {
+            defaultMessage: 'Preview',
+          })}
+        >
+          <>
+            <DataGrid {...pivotPreviewProps} />
+            <EuiSpacer size="m" />
+          </>
+        </EuiFormRow>
       )}
     </div>
   );

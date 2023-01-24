@@ -45,7 +45,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
     : transformConfig.source.index;
 
   const pivotPreviewProps = usePivotData(
-    dataViewTitle,
+    { getIndexPattern: () => dataViewTitle },
     pivotQuery,
     validationStatus,
     previewRequest,
