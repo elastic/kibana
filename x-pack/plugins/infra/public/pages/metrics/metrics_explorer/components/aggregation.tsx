@@ -9,6 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
+import { xor } from 'lodash';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import {
@@ -21,6 +22,8 @@ interface Props {
   fullWidth: boolean;
   onChange: (aggregation: MetricsExplorerAggregation) => void;
 }
+
+type MetricsExplorerAggregationWithoutCustom = Exclude<MetricsExplorerAggregation, 'custom'>;
 
 export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) => {
   const AGGREGATION_LABELS = {
@@ -66,14 +69,18 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     defaultMessage: 'Select an aggregation',
   });
 
+  const METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM = xor(METRIC_EXPLORER_AGGREGATIONS, [
+    'custom',
+  ]) as MetricsExplorerAggregationWithoutCustom[];
+
   return (
     <EuiSelect
       aria-label={placeholder}
       placeholder={placeholder}
       fullWidth
       value={options.aggregation}
-      options={METRIC_EXPLORER_AGGREGATIONS.map((k) => ({
-        text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
+      options={METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM.map((k) => ({
+        text: AGGREGATION_LABELS[k as MetricsExplorerAggregationWithoutCustom],
         value: k,
       }))}
       onChange={handleChange}
