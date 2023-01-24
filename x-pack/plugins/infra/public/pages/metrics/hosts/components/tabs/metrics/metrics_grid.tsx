@@ -19,7 +19,7 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
     type: 'load',
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.load', {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpu', {
       defaultMessage: 'CPU Usage',
     }),
     type: 'cpu',

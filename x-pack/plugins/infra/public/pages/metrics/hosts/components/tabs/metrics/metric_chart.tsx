@@ -9,7 +9,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiPanel } from '@elastic/eui';
+import { EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { EuiI18n } from '@elastic/eui';
 import { InfraClientSetupDeps } from '../../../../../../types';
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
@@ -21,6 +25,8 @@ export interface MetricChartProps {
   type: HostLensAttributesTypes;
   breakdownSize: number;
 }
+
+const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
   const {
@@ -37,7 +43,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const EmbeddableComponent = lens.EmbeddableComponent;
 
-  const { injectData, getExtraActions } = useLensAttributes({
+  const { injectData, getExtraActions, error } = useLensAttributes({
     type,
     dataView: metricsDataView,
     options: {
@@ -66,31 +72,53 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   };
 
   return (
-    injectedLensAttributes && (
-      <EuiPanel
-        borderRadius="m"
-        hasShadow={false}
-        hasBorder
-        paddingSize="none"
-        style={{ minHeight: 300 }}
-        data-test-subj={`hostsView-metricChart-${type}`}
-      >
-        <EmbeddableComponent
-          id={`hostsViewsmetricsChart-${type}`}
-          style={{ height: 300 }}
-          attributes={injectedLensAttributes}
-          viewMode={ViewMode.VIEW}
-          timeRange={unifiedSearchDateRange}
-          query={unifiedSearchQuery}
-          filters={unifiedSearchFilters}
-          extraActions={extraAction}
-          executionContext={{
-            type: 'infrastructure_observability_hosts_view',
-            name: `Hosts View ${type} Chart`,
-          }}
-          onBrushEnd={handleBrushEnd}
-        />
-      </EuiPanel>
-    )
+    <EuiPanel
+      borderRadius="m"
+      hasShadow={false}
+      hasBorder
+      paddingSize={error ? 'm' : 'none'}
+      style={{ minHeight: MIN_HEIGHT }}
+      data-test-subj={`hostsView-metricChart-${type}`}
+    >
+      {error ? (
+        <EuiFlexGroup
+          style={{ minHeight: MIN_HEIGHT, alignContent: 'center' }}
+          gutterSize="xs"
+          justifyContent="center"
+          alignItems="center"
+          direction="column"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" textAlign="center">
+              <EuiI18n
+                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
+                default="There was an error trying to load Lens Plugin."
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        injectedLensAttributes && (
+          <EmbeddableComponent
+            id={`hostsViewsmetricsChart-${type}`}
+            style={{ height: MIN_HEIGHT }}
+            attributes={injectedLensAttributes}
+            viewMode={ViewMode.VIEW}
+            timeRange={unifiedSearchDateRange}
+            query={unifiedSearchQuery}
+            filters={unifiedSearchFilters}
+            extraActions={extraAction}
+            executionContext={{
+              type: 'infrastructure_observability_hosts_view',
+              name: `Hosts View ${type} Chart`,
+            }}
+            onBrushEnd={handleBrushEnd}
+          />
+        )
+      )}
+    </EuiPanel>
   );
 };

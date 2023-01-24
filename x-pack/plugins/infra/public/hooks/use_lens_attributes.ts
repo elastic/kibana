@@ -37,13 +37,18 @@ export const useLensAttributes = ({
   } = useKibana<InfraClientSetupDeps>();
   const { navigateToPrefilledEditor } = lens;
   const [formulaAPI, setFormulaAPI] = useState<FormulaPublicApi>();
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    const getFormulaApi = async () => {
-      const { formula } = await lens.stateHelperApi();
-      return setFormulaAPI(formula);
-    };
-    getFormulaApi();
+    lens
+      .stateHelperApi()
+      .then(({ formula }) => {
+        setError(false);
+        setFormulaAPI(formula);
+      })
+      .catch(() => {
+        setError(true);
+      });
   }, [lens]);
 
   const attributes: LensAttributes | null = useMemo(() => {
@@ -115,5 +120,5 @@ export const useLensAttributes = ({
     };
   };
 
-  return { attributes, injectData, getExtraActions };
+  return { attributes, injectData, getExtraActions, error };
 };
