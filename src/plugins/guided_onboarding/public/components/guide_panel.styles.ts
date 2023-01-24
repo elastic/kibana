@@ -36,7 +36,7 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
       }
     `,
     flyoutBody: css`
-      overflow: scroll;
+      overflow: auto;
       .euiFlyoutBody__overflowContent {
         width: 480px;
         padding-top: 10px;
