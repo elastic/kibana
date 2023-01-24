@@ -35,9 +35,11 @@ import type {
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkDeleteParams,
+  AuthorizeBulkGetParams,
   AuthorizeBulkUpdateParams,
   AuthorizeCheckConflictsParams,
   AuthorizeDeleteParams,
+  AuthorizeGetParams,
   AuthorizeObject,
   AuthorizeUpdateSpacesParams,
   InternalAuthorizeOptions,
@@ -335,7 +337,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     if (params.types.size === 0) {
       throw new Error('No types specified for authorization');
     }
-    if (params.spaces.has('')) params.spaces.delete('');
+    if (params.spaces.has('')) params.spaces.delete(''); // Not sure we need this anymore now that the level above throws an error on an empty space
     if (params.spaces.size === 0) {
       throw new Error('No spaces specified for authorization');
     }
@@ -617,6 +619,100 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         objects,
       },
     });
+  }
+
+  async authorizeGet(
+    params: AuthorizeGetParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const { namespace, object, objectNotFound } = params;
+    const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
+    const existingNamespaces = object.existingNamespaces ?? [];
+
+    return await this.authorize({
+      actions: new Set([SecurityAction.GET]),
+      types: new Set([object.type]),
+      spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
+      enforceMap: new Map([[object.type, spacesToEnforce]]),
+      auditOptions: { objects: [object], bypassOnSuccess: objectNotFound }, // Do not audit on success if the object was not found
+    });
+  }
+
+  async authorizeBulkGet(
+    params: AuthorizeBulkGetParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const action = SecurityAction.BULK_GET;
+    const namespace = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const { objects } = params;
+
+    if (objects.length === 0) {
+      throw new Error(
+        `No objects specified for ${
+          this.actionMap.get(action)?.authzAction ?? 'unknown'
+        } authorization`
+      );
+    }
+
+    const successAuditObjects = new Array<{ type: string; id: string }>();
+    const enforceMap = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>([namespace]); // Always check authZ for the active space
+
+    for (const obj of objects) {
+      const spacesToEnforce = enforceMap.get(obj.type) ?? new Set([namespace]); // Always enforce authZ for the active space
+
+      // Object namespaces are passed into the repo's bulkGet method per object
+      for (const space of obj.objectNamespaces ?? []) {
+        spacesToEnforce.add(space);
+        enforceMap.set(obj.type, spacesToEnforce);
+        spacesToAuthorize.add(space);
+      }
+
+      // Existing namespaces are populated fom the bulkGet response docs
+      for (const space of obj.existingNamespaces ?? []) {
+        spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+      }
+
+      // We only log success events for objects that were actually found (and are being returned to the user)
+      // If enforce fails, we audit for all objects
+      if (!obj.error) {
+        successAuditObjects.push(obj);
+      }
+    }
+
+    const authorizationResult = await this.authorize({
+      actions: new Set([action]),
+      types: new Set(enforceMap.keys()),
+      spaces: spacesToAuthorize,
+      enforceMap,
+      // ToDo: need to handle this case!
+      // auditCallback: (error) => {
+      //   for (const { type, id, error: bulkError } of result.saved_objects) {
+      //     if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
+      //     this._securityExtension!.addAuditEvent({
+      //       action: AuditAction.GET,
+      //       savedObject: { type, id },
+      //       error,
+      //     });
+      //   }
+      // },
+      auditOptions: {
+        objects,
+        useSuccessOutcome: true,
+        bypassOnSuccess: true, // We will override the success case below
+      }, // ToDo: why is this array empty in out unit testing? Because we forgot a mock?
+      // Answer: likely because we're stripping objecs with errors above for either success or fail cases
+    });
+
+    // if we made it here, enforce was a success, so let's audit...
+    const { auditAction } = this.decodeSecurityAction(SecurityAction.BULK_GET);
+    if (auditAction) {
+      this.auditHelper({
+        action: auditAction,
+        objects: successAuditObjects.length ? successAuditObjects : undefined,
+        useSuccessOutcome: true,
+      });
+    }
+
+    return authorizationResult;
   }
 
   async authorizeCheckConflicts(

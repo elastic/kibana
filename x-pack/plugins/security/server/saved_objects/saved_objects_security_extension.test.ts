@@ -8,7 +8,10 @@
 import type { BulkResolveError } from '@kbn/core-saved-objects-common';
 import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-saved-objects-server';
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
-import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
+import type {
+  AuthorizeBulkGetObject,
+  AuthorizeObject,
+} from '@kbn/core-saved-objects-server/src/extensions/security';
 import type {
   EcsEventOutcome,
   SavedObjectReferenceWithContext,
@@ -2992,6 +2995,562 @@ describe('delete', () => {
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to delete ${obj.type} [id=${obj.id}]`,
+        });
+      }
+    });
+  });
+});
+
+describe('get', () => {
+  const namespace = 'x';
+
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  describe(`#authorizeGet`, () => {
+    const actionString = 'get';
+
+    test('throws an error when `namespace` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      await expect(
+        securityExtension.authorizeGet({
+          namespace: '',
+          object: obj1,
+        })
+      ).rejects.toThrowError('namespace cannot be an empty string');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        securityExtension.authorizeGet({ namespace, object: obj1 })
+      ).rejects.toThrowError('Oh no!');
+    });
+
+    test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj3.type, actionString, true);
+
+      await securityExtension.authorizeGet({
+        namespace,
+        object: obj3,
+      });
+
+      expect(authorizeSpy).toHaveBeenCalledTimes(1);
+      const expectedActions = new Set([SecurityAction.GET]);
+      const expectedSpaces = new Set([namespace, ...obj3.existingNamespaces]);
+      const expectedTypes = new Set([obj3.type]);
+      const expectedEnforceMap = new Map<string, Set<string>>();
+      expectedEnforceMap.set(obj3.type, new Set([namespace])); // obj3.existingNamespaces should NOT be included
+      expect(authorizeSpy).toHaveBeenCalledWith({
+        actions: expectedActions,
+        types: expectedTypes,
+        spaces: expectedSpaces,
+        enforceMap: expectedEnforceMap,
+        auditOptions: {
+          bypassOnSuccess: undefined,
+          objects: [obj3],
+        },
+      });
+
+      expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+        actions: new Set([actionString]),
+        spaces: expectedSpaces,
+        types: expectedTypes,
+        options: { allowGlobalResource: false },
+      });
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(
+        [`mock-saved_object:${obj3.type}/${actionString}`, 'login:'],
+        [...expectedSpaces]
+      );
+
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+        action: SecurityAction.GET,
+        typesAndSpaces: expectedEnforceMap,
+        typeMap: new Map().set(obj3.type, {
+          get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+        auditOptions: {
+          bypassOnSuccess: undefined,
+          objects: [obj3],
+        },
+      });
+    });
+
+    test(`returns result when partially authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue({
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            { privilege: 'mock-saved_object:a/get', authorized: true },
+            { privilege: 'login:', authorized: true },
+          ],
+        },
+      } as CheckPrivilegesResponse);
+      // setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      const result = await securityExtension.authorizeGet({
+        namespace,
+        object: obj1,
+      });
+      expect(result).toEqual({
+        status: 'partially_authorized',
+        typeMap: new Map().set(obj1.type, {
+          get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      });
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`returns result when fully authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      const result = await securityExtension.authorizeGet({
+        namespace,
+        object: obj1,
+      });
+      expect(result).toEqual({
+        status: 'fully_authorized',
+        typeMap: new Map().set(obj1.type, {
+          get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      });
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`adds a single audit event when successful`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      await securityExtension.authorizeGet({
+        namespace,
+        object: obj1,
+      });
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: undefined,
+        event: {
+          action: AuditAction.GET,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: obj1.type, id: obj1.id },
+        },
+        message: `User is accessing ${obj1.type} [id=${obj1.id}]`,
+      });
+    });
+
+    test(`does not add an audit event when successful if object is not found`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      await securityExtension.authorizeGet({
+        namespace,
+        object: obj1,
+        objectNotFound: true,
+      });
+
+      expect(auditHelperSpy).not.toHaveBeenCalled();
+      expect(addAuditEventSpy).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    test(`throws when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, false);
+
+      await expect(
+        securityExtension.authorizeGet({
+          namespace,
+          object: obj1,
+        })
+      ).rejects.toThrow(`Unable to get ${obj1.type}`);
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`adds a single audit event when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, false);
+
+      await expect(
+        securityExtension.authorizeGet({
+          namespace,
+          object: obj1,
+        })
+      ).rejects.toThrow(`Unable to get ${obj1.type}`);
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: 'Unable to get a',
+        },
+        event: {
+          action: AuditAction.GET,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: obj1.type, id: obj1.id },
+        },
+        message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
+      });
+    });
+
+    test(`adds an audit event when unauthorized even if object is not found`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, false);
+
+      await expect(
+        securityExtension.authorizeGet({
+          namespace,
+          object: obj1,
+          objectNotFound: true,
+        })
+      ).rejects.toThrow(`Unable to get ${obj1.type}`);
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: 'Unable to get a',
+        },
+        event: {
+          action: AuditAction.GET,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: obj1.type, id: obj1.id },
+        },
+        message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
+      });
+    });
+  });
+
+  describe(`#authorizeBulkGet`, () => {
+    const actionString = 'bulk_get';
+
+    const objA = {
+      ...obj1,
+      objectNamespaces: ['y', namespace], // include multiple spaces
+    };
+    const objB = { ...obj2, objectNamespaces: ['z'], existingNamespaces: ['y'] }; // use a different namespace than the options namespace;
+
+    const objects = [objA, objB];
+
+    const fullyAuthorizedCheckPrivilegesResponse = {
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/bulk_get', authorized: true },
+          { privilege: 'login:', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+          { resource: 'y', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+          { resource: 'z', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse;
+
+    const expectedTypes = new Set(objects.map((obj) => obj.type));
+    const expectedActions = new Set([SecurityAction.BULK_GET]);
+    const expectedSpaces = new Set([namespace, ...objA.objectNamespaces, ...objB.objectNamespaces]);
+
+    const expectedEnforceMap = new Map([
+      [obj1.type, new Set([namespace, ...objA.objectNamespaces])],
+      [obj2.type, new Set([namespace, ...objB.objectNamespaces])],
+    ]);
+
+    const expectedTypeMap = new Map()
+      .set('a', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      })
+      .set('b', {
+        bulk_get: {
+          authorizedSpaces: ['x', 'y', 'z'],
+        },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      });
+
+    test('throws an error when `objects` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      const emptyObjects: AuthorizeBulkGetObject[] = [];
+
+      await expect(
+        securityExtension.authorizeBulkGet({
+          namespace,
+          objects: emptyObjects,
+        })
+      ).rejects.toThrowError('No objects specified for bulk_get authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when `namespace` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.authorizeBulkGet({
+          namespace: '',
+          objects,
+        })
+      ).rejects.toThrowError('namespace cannot be an empty string');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(securityExtension.authorizeBulkGet({ namespace, objects })).rejects.toThrowError(
+        'Oh no!'
+      );
+    });
+
+    test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+      await securityExtension.authorizeBulkGet({
+        namespace,
+        objects,
+      });
+
+      expect(authorizeSpy).toHaveBeenCalledTimes(1);
+      expect(authorizeSpy).toHaveBeenCalledWith({
+        actions: expectedActions,
+        types: expectedTypes,
+        spaces: expectedSpaces,
+        enforceMap: expectedEnforceMap,
+        auditOptions: { bypassOnSuccess: true, objects, useSuccessOutcome: true },
+      });
+
+      expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+        actions: new Set([actionString]),
+        spaces: expectedSpaces,
+        types: expectedTypes,
+        options: { allowGlobalResource: false },
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(
+        [
+          `mock-saved_object:${objA.type}/${actionString}`,
+          `mock-saved_object:${objB.type}/${actionString}`,
+          'login:',
+        ],
+        [...expectedSpaces]
+      );
+
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+        action: SecurityAction.BULK_GET,
+        typesAndSpaces: expectedEnforceMap,
+        typeMap: expectedTypeMap,
+        auditOptions: { bypassOnSuccess: true, objects, useSuccessOutcome: true },
+      });
+    });
+
+    test(`returns result when fully authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      const result = await securityExtension.authorizeBulkGet({
+        namespace,
+        objects,
+      });
+      expect(result).toEqual({
+        status: 'fully_authorized',
+        typeMap: expectedTypeMap,
+      });
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`returns result when partially authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue({
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            { privilege: 'mock-saved_object:a/bulk_get', authorized: true },
+            { privilege: 'login:', authorized: true },
+            { resource: 'x', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+            { resource: 'y', privilege: 'mock-saved_object:b/bulk_get', authorized: false },
+            { resource: 'z', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+          ],
+        },
+      } as CheckPrivilegesResponse);
+
+      const result = await securityExtension.authorizeBulkGet({
+        namespace,
+        objects,
+      });
+      expect(result).toEqual({
+        status: 'partially_authorized',
+        typeMap: new Map()
+          .set(objA.type, {
+            bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          })
+          .set(objB.type, {
+            bulk_get: { authorizedSpaces: ['x', 'z'] },
+            ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          }),
+      });
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`adds an audit event per object when successful`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await securityExtension.authorizeBulkGet({
+        namespace,
+        objects,
+      });
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+      expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      for (const obj of objects) {
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: undefined,
+          event: {
+            action: AuditAction.GET,
+            category: ['database'],
+            outcome: 'success',
+            type: ['access'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: { type: obj.type, id: obj.id },
+          },
+          message: `User has accessed ${obj.type} [id=${obj.id}]`,
+        });
+      }
+    });
+
+    test(`does not add an audit event for objects with an error when successful`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await securityExtension.authorizeBulkGet({
+        namespace,
+        objects: [objA, { ...objB, error: true }],
+      });
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: undefined,
+        event: {
+          action: AuditAction.GET,
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: { type: objA.type, id: objA.id },
+        },
+        message: `User has accessed ${objA.type} [id=${objA.id}]`,
+      });
+    });
+
+    test(`throws when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue({
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            { privilege: 'mock-saved_object:a/bulk_get', authorized: true },
+            { privilege: 'login:', authorized: true },
+            { resource: 'x', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+            { resource: 'y', privilege: 'mock-saved_object:b/bulk_get', authorized: true },
+            { resource: 'z', privilege: 'mock-saved_object:b/bulk_get', authorized: false },
+          ],
+        },
+      } as CheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.authorizeBulkGet({
+          namespace,
+          objects,
+        })
+      ).rejects.toThrow(`Unable to bulk_get ${objB.type}`);
+      expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test(`adds an audit event per object when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'bulk_delete', false);
+
+      await expect(
+        securityExtension.authorizeBulkGet({
+          namespace,
+          objects: [objA, { ...objB, error: true }], // setting error here to test the case that even err'd objects get an audit on failure
+        })
+      ).rejects.toThrow(`Unable to bulk_get ${obj1.type},${obj2.type}`);
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+      expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      for (const obj of objects) {
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: {
+            code: 'Error',
+            message: `Unable to bulk_get ${objA.type},${objB.type}`,
+          },
+          event: {
+            action: AuditAction.GET,
+            category: ['database'],
+            outcome: 'failure',
+            type: ['access'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: { type: obj.type, id: obj.id },
+          },
+          message: `Failed attempt to access ${obj.type} [id=${obj.id}]`,
         });
       }
     });

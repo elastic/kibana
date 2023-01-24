@@ -148,6 +148,7 @@ export interface UpdateSpacesAuditOptions extends AuditOptions {
  * The AuthorizeParams interface contains settings for checking
  * & enforcing authorization via the ISavedObjectsSecurityExtension.
  */
+// ToDo: change to InternalAuthorizeParams
 export interface AuthorizeParams<A extends string> {
   /**
    * A set of actions to check.
@@ -353,6 +354,11 @@ export interface AuthorizeUpdateObject extends AuthorizeObject {
   objectNamespace?: string;
 }
 
+export interface AuthorizeBulkGetObject extends AuthorizeObject {
+  objectNamespaces?: string[];
+  error?: boolean;
+}
+
 export interface AuthorizeBulkCreateParams {
   namespace: string | undefined;
   objects: AuthorizeCreateObject[];
@@ -381,6 +387,17 @@ export interface AuthorizeDeleteParams {
 export interface AuthorizeBulkDeleteParams {
   namespace: string | undefined;
   objects: AuthorizeObject[];
+}
+
+export interface AuthorizeGetParams {
+  namespace: string | undefined;
+  object: AuthorizeObject;
+  objectNotFound?: boolean;
+}
+
+export interface AuthorizeBulkGetParams {
+  namespace: string | undefined;
+  objects: AuthorizeBulkGetObject[];
 }
 
 export interface AuthorizeCheckConflictsParams {
@@ -439,6 +456,14 @@ export interface ISavedObjectsSecurityExtension {
 
   authorizeBulkDelete: (
     params: AuthorizeBulkDeleteParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeGet: (
+    params: AuthorizeGetParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeBulkGet: (
+    params: AuthorizeBulkGetParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
   authorizeCheckConflicts: (

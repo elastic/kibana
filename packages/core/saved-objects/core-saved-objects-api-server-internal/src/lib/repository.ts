@@ -75,6 +75,7 @@ import {
   SecurityAction,
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
+  type AuthorizeBulkGetObject,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, type DecoratedError } from '@kbn/core-saved-objects-common';
@@ -1612,11 +1613,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    const typesAndSpaces = new Map<string, Set<string>>();
-    const spacesToAuthorize = new Set<string>([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check authZ for the active space
+    // const typesAndSpaces = new Map<string, Set<string>>();
+    // const spacesToAuthorize = new Set<string>([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check authZ for the active space
+    const authObjects = new Array<AuthorizeBulkGetObject>();
     const result = {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
+          const { type, id, error: resultError } = expectedResult.value;
+          authObjects.push({ type, id, error: !!resultError });
           return expectedResult.value as any;
         }
 
@@ -1628,21 +1632,23 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         } = expectedResult.value;
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
-        const spacesToEnforce =
-          typesAndSpaces.get(type) ?? new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always enforce authZ for the active space
-        for (const space of namespaces) {
-          spacesToEnforce.add(space);
-          typesAndSpaces.set(type, spacesToEnforce);
-          spacesToAuthorize.add(space);
-        }
+        // const spacesToEnforce =
+        //   typesAndSpaces.get(type) ?? new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always enforce authZ for the active space
+        // for (const space of namespaces) {
+        //   spacesToEnforce.add(space);
+        //   typesAndSpaces.set(type, spacesToEnforce);
+        //   spacesToAuthorize.add(space);
+        // }
 
-        // @ts-expect-error MultiGetHit._source is optional
-        for (const space of doc?._source?.namespaces ?? []) {
-          spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
-        }
+        // // @ts-expect-error MultiGetHit._source is optional
+        // for (const space of doc?._source?.namespaces ?? []) {
+        //   spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+        // }
 
         // @ts-expect-error MultiGetHit._source is optional
         if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
+          // const { type, id, error } = expectedResult.value;
+          authObjects.push({ type, id, error: true });
           return {
             id,
             type,
@@ -1650,39 +1656,50 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           } as any as SavedObject<T>;
         }
 
+        authObjects.push({
+          type,
+          id,
+          objectNamespaces: namespaces,
+          // @ts-expect-error MultiGetHit._source is optional
+          existingNamespaces: doc?._source?.namespaces,
+        });
         // @ts-expect-error MultiGetHit._source is optional
         return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
 
-    const auditObjects = new Array<{ type: string; id: string }>();
-    for (const { type, id, error: bulkError } of result.saved_objects) {
-      // Only log success events for objects that were actually found (and are being returned to the user)
-      if (!bulkError) {
-        auditObjects.push({ type, id });
-      }
-    }
+    // const auditObjects = new Array<{ type: string; id: string }>();
+    // for (const { type, id, error: bulkError } of result.saved_objects) {
+    //   // Only log success events for objects that were actually found (and are being returned to the user)
+    //   if (!bulkError) {
+    //     auditObjects.push({ type, id });
+    //   }
+    // }
 
-    const authorizationResult = await this._securityExtension?.authorize({
-      actions: new Set([SecurityAction.BULK_GET]),
-      types: new Set(typesAndSpaces.keys()),
-      spaces: spacesToAuthorize,
-      enforceMap: typesAndSpaces,
-      // ToDo: need to handle this case!
-      // auditCallback: (error) => {
-      //   for (const { type, id, error: bulkError } of result.saved_objects) {
-      //     if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
-      //     this._securityExtension!.addAuditEvent({
-      //       action: AuditAction.GET,
-      //       savedObject: { type, id },
-      //       error,
-      //     });
-      //   }
-      // },
-      auditOptions: {
-        objects: auditObjects.length ? auditObjects : undefined,
-        useSuccessOutcome: true,
-      }, // ToDo: why is this array empty in out unit testing? Because we forgot a mock?
+    // const authorizationResult = await this._securityExtension?.authorize({
+    //   actions: new Set([SecurityAction.BULK_GET]),
+    //   types: new Set(typesAndSpaces.keys()),
+    //   spaces: spacesToAuthorize,
+    //   enforceMap: typesAndSpaces,
+    //   // ToDo: need to handle this case!
+    //   // auditCallback: (error) => {
+    //   //   for (const { type, id, error: bulkError } of result.saved_objects) {
+    //   //     if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
+    //   //     this._securityExtension!.addAuditEvent({
+    //   //       action: AuditAction.GET,
+    //   //       savedObject: { type, id },
+    //   //       error,
+    //   //     });
+    //   //   }
+    //   // },
+    //   auditOptions: {
+    //     objects: auditObjects.length ? auditObjects : undefined,
+    //     useSuccessOutcome: true,
+    //   }, // ToDo: why is this array empty in out unit testing? Because we forgot a mock?
+    // });
+    const authorizationResult = await this._securityExtension?.authorizeBulkGet({
+      namespace,
+      objects: authObjects,
     });
 
     return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap);
@@ -1749,39 +1766,38 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
 
-    const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
-    const existingNamespaces = body?._source?.namespaces || [];
+    const objectNotFound =
+      !isFoundGetResponse(body) || indexNotFound || !this.rawDocExistsInNamespace(body, namespace);
 
-    const authorizationResult = await this._securityExtension?.authorize({
-      actions: new Set([SecurityAction.GET]),
-      types: new Set([type]),
-      spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
-      enforceMap: new Map([[type, spacesToEnforce]]),
-      // auditCallback: (error) => {
-      //   if (error) {
-      //     this._securityExtension!.addAuditEvent({
-      //       action: AuditAction.GET,
-      //       savedObject: { type, id },
-      //       error,
-      //     });
-      //   }
-      // },
-      auditOptions: { objects: [{ type, id }], bypassOnSuccess: true }, // Audit event for success case is added separately below
+    // const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
+    // const existingNamespaces = body?._source?.namespaces || [];
+
+    // const authorizationResult = await this._securityExtension?.authorize({
+    //   actions: new Set([SecurityAction.GET]),
+    //   types: new Set([type]),
+    //   spaces: new Set([...spacesToEnforce, ...existingNamespaces]), // existing namespaces are included so we can later redact if necessary
+    //   enforceMap: new Map([[type, spacesToEnforce]]),
+    //   auditOptions: { objects: [{ type, id }], bypassOnSuccess: true }, // Audit event for success case is added separately below
+    // });
+    const authorizationResult = await this._securityExtension?.authorizeGet({
+      namespace,
+      object: {
+        type,
+        id,
+        existingNamespaces: body?._source?.namespaces,
+      },
+      objectNotFound,
     });
 
-    if (
-      !isFoundGetResponse(body) ||
-      indexNotFound ||
-      !this.rawDocExistsInNamespace(body, namespace)
-    ) {
+    if (objectNotFound) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     // Only log a success event if the object was actually found (and is being returned to the user)
-    this._securityExtension?.addAuditEvent({
-      action: AuditAction.GET,
-      savedObject: { type, id },
-    });
+    // this._securityExtension?.addAuditEvent({
+    //   action: AuditAction.GET,
+    //   savedObject: { type, id },
+    // });
 
     const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
 

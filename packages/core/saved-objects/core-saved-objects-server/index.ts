@@ -82,6 +82,7 @@ export type {
   ISavedObjectsSecurityExtension,
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
+  AuthorizeBulkGetObject,
   AuditOptions,
   UpdateSpacesAuditOptions,
   AuditHelperParams,
@@ -90,6 +91,8 @@ export type {
   AuthorizeUpdateParams,
   AuthorizeAndRedactMultiNamespaceReferencesParams,
   AuthorizeAndRedactInternalBulkResolveParams,
+  AuthorizeGetParams,
+  AuthorizeBulkGetParams,
 } from './src/extensions/security';
 export { AuditAction, SecurityAction } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
