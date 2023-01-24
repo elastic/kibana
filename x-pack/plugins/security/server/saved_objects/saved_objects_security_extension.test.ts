@@ -3810,6 +3810,215 @@ describe(`#authorizeCheckConflicts`, () => {
   });
 });
 
+describe(`#authorizeRemoveReferences`, () => {
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  const namespace = 'x';
+  const actionString = 'delete';
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/delete', authorized: true },
+        { privilege: 'login:', authorized: true },
+      ],
+    },
+  } as CheckPrivilegesResponse;
+
+  const expectedTypes = new Set([obj1.type]);
+  const expectedSpaces = new Set([namespace]);
+  const expectedEnforceMap = new Map([[obj1.type, new Set([namespace])]]);
+
+  const expectedTypeMap = new Map().set('a', {
+    delete: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+  });
+
+  test('throws an error when `namespace` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeRemoveReferences({
+        namespace: '',
+        object: obj1,
+      })
+    ).rejects.toThrowError('namespace cannot be an empty string');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when checkAuthorization fails', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+    await expect(
+      securityExtension.authorizeRemoveReferences({ namespace, object: obj1 })
+    ).rejects.toThrowError('Oh no!');
+  });
+
+  test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+    await securityExtension.authorizeRemoveReferences({
+      namespace,
+      object: obj1,
+    });
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: new Set([SecurityAction.REMOVE_REFERENCES]),
+      types: expectedTypes,
+      spaces: expectedSpaces,
+      enforceMap: expectedEnforceMap,
+      auditOptions: {
+        objects: [obj1],
+      },
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces: expectedSpaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: false },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [`mock-saved_object:${obj1.type}/${actionString}`, 'login:'],
+      [...expectedSpaces]
+    );
+
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledWith({
+      action: SecurityAction.REMOVE_REFERENCES,
+      typesAndSpaces: expectedEnforceMap,
+      typeMap: expectedTypeMap,
+      auditOptions: { objects: [obj1] },
+    });
+  });
+
+  test(`returns result when fully authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeRemoveReferences({
+      namespace,
+      object: obj1,
+    });
+    expect(result).toEqual({
+      status: 'fully_authorized',
+      typeMap: expectedTypeMap,
+    });
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`returns result when partially authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/delete', authorized: true },
+          { privilege: 'login:', authorized: false },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeRemoveReferences({
+      namespace,
+      object: obj1,
+    });
+    expect(result).toEqual({
+      status: 'partially_authorized',
+      typeMap: new Map().set(obj1.type, {
+        delete: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeRemoveReferences({
+      namespace,
+      object: obj1,
+    });
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      error: undefined,
+      event: {
+        action: AuditAction.REMOVE_REFERENCES,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['change'],
+      },
+      kibana: {
+        add_to_spaces: undefined,
+        delete_from_spaces: undefined,
+        saved_object: { type: obj1.type, id: obj1.id },
+      },
+      message: `User is removing references to ${obj1.type} [id=${obj1.id}]`,
+    });
+  });
+
+  test(`throws when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'delete', false);
+
+    await expect(
+      securityExtension.authorizeRemoveReferences({
+        namespace,
+        object: obj1,
+      })
+    ).rejects.toThrow(`Unable to delete ${obj1.type}`);
+    expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test(`adds audit event when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'delete', false);
+
+    await expect(
+      securityExtension.authorizeRemoveReferences({
+        namespace,
+        object: obj1,
+      })
+    ).rejects.toThrow(`Unable to delete ${obj1.type}`);
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      error: { code: 'Error', message: `Unable to delete ${obj1.type}` },
+      event: {
+        action: AuditAction.REMOVE_REFERENCES,
+        category: ['database'],
+        outcome: 'failure',
+        type: ['change'],
+      },
+      kibana: {
+        add_to_spaces: undefined,
+        delete_from_spaces: undefined,
+        saved_object: { type: obj1.type, id: obj1.id },
+      },
+      message: `Failed attempt to remove references to ${obj1.type} [id=${obj1.id}]`,
+    });
+  });
+});
+
 describe('#authorizeAndRedactMultiNamespaceReferences', () => {
   const namespace = 'x';
 

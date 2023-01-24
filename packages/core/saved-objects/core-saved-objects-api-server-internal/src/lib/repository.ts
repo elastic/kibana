@@ -719,21 +719,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
 
     const validObjects = expectedBulkGetResults.filter(isRight);
-    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    // const typesAndSpaces = new Map<string, Set<string>>();
-    // for (const { value } of validObjects) {
-    //   typesAndSpaces.set(value.type, new Set([namespaceString])); // Always enforce authZ for the active space
-    // }
-    // await this._securityExtension?.authorize({
-    //   actions: new Set([SecurityAction.CHECK_CONFLICTS]),
-    //   types: new Set(typesAndSpaces.keys()),
-    //   spaces: new Set([namespaceString]), // Always check authZ for the active space
-    //   enforceMap: typesAndSpaces,
-    //   // auditing is intentionally bypassed, this function in the previous Security SOC wrapper implementation
-    //   // did not have audit logging. This is primarily because it is only used by Kibana and is not exposed in a
-    //   // public HTTP API
-    //   auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
-    // });
     await this._securityExtension?.authorizeCheckConflicts({
       namespace,
       objects: validObjects.map((element) => ({ type: element.value.type, id: element.value.id })),
@@ -1614,8 +1599,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    // const typesAndSpaces = new Map<string, Set<string>>();
-    // const spacesToAuthorize = new Set<string>([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check authZ for the active space
     const authObjects = new Array<AuthorizeBulkGetObject>();
     const result = {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
@@ -1632,19 +1615,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           esRequestIndex,
         } = expectedResult.value;
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
-
-        // const spacesToEnforce =
-        //   typesAndSpaces.get(type) ?? new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always enforce authZ for the active space
-        // for (const space of namespaces) {
-        //   spacesToEnforce.add(space);
-        //   typesAndSpaces.set(type, spacesToEnforce);
-        //   spacesToAuthorize.add(space);
-        // }
-
-        // // @ts-expect-error MultiGetHit._source is optional
-        // for (const space of doc?._source?.namespaces ?? []) {
-        //   spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
-        // }
 
         // @ts-expect-error MultiGetHit._source is optional
         if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
@@ -2296,16 +2266,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const namespace = this.getCurrentNamespace(options.namespace);
     const { refresh = true } = options;
 
-    // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
-
-    const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
-    await this._securityExtension?.authorize({
-      actions: new Set([SecurityAction.REMOVE_REFERENCES]),
-      types: new Set([type]),
-      spaces,
-      enforceMap: new Map([[type, spaces]]),
-      auditOptions: { objects: [{ type, id }] },
-    });
+    await this._securityExtension?.authorizeRemoveReferences({ namespace, object: { type, id } });
 
     const allTypes = this._registry.getAllTypes().map((t) => t.name);
 

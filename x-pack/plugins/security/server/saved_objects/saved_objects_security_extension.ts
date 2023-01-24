@@ -746,6 +746,21 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
+  async authorizeRemoveReferences(
+    params: AuthorizeDeleteParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
+    const { namespace, object } = params;
+    const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
+    return this.authorize({
+      actions: new Set([SecurityAction.REMOVE_REFERENCES]),
+      types: new Set([object.type]),
+      spaces,
+      enforceMap: new Map([[object.type, spaces]]),
+      auditOptions: { objects: [object] },
+    });
+  }
+
   /**
    * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
    * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the

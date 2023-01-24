@@ -28,11 +28,6 @@ import {
   SecurityAction,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
-import {
-  setMapsAreEqual,
-  arrayMapsAreEqual,
-  setsAreEqual,
-} from '@kbn/core-saved-objects-utils-server';
 import { kibanaMigratorMock } from '../mocks';
 import {
   createRegistry,
@@ -49,7 +44,6 @@ import {
   updateSuccess,
   deleteSuccess,
   removeReferencesToSuccess,
-  REMOVE_REFS_COUNT,
   checkConflictsSuccess,
   findSuccess,
   mockTimestampFields,
@@ -67,7 +61,6 @@ import {
   setupAuthorizeFullyAuthorized,
   setupAuthorizePartiallyAuthorized,
   setupAuthorizeUnauthorized,
-  setupAuthorizeEnforceFailure,
   setupAuthorizeCreate,
   setupAuthorizeUpdate,
   setupAuthorizeBulkUpdate,
@@ -77,8 +70,11 @@ import {
   setupAuthorizeCheckConflicts,
   setupAuthorizeGet,
   setupAuthorizeBulkGet,
+  setupAuthorizeRemoveReferences,
+  REMOVE_REFS_COUNT,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { arrayMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -535,60 +531,78 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#removeReferencesTo', () => {
-    test(`propagates decorated error when authorize rejects promise`, async () => {
-      mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeRemoveReferences rejects promise`, async () => {
+      mockSecurityExt.authorizeRemoveReferences.mockRejectedValueOnce(checkAuthError);
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeEnforceFailure(mockSecurityExt);
+      setupAuthorizeRemoveReferences(mockSecurityExt, 'unauthorized');
 
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeRemoveReferences(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
       expect(client.updateByQuery).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expect.objectContaining({ updated: REMOVE_REFS_COUNT }));
     });
 
-    test(`calls authorize with correct actions, types, spaces, and enforce map`, async () => {
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeRemoveReferences(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
+
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
+      expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ updated: REMOVE_REFS_COUNT }));
+    });
+
+    test(`calls authorizeRemoveReferences with correct parameters`, async () => {
       await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set([SecurityAction.REMOVE_REFERENCES]);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
-      const expectedEnforceMap = new Map<string, Set<string>>();
-      expectedEnforceMap.set(type, new Set([namespace]));
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledWith({
+        namespace,
+        object: {
+          id,
+          type,
+        },
+      });
+      // const expectedActions = new Set([SecurityAction.REMOVE_REFERENCES]);
+      // const expectedSpaces = new Set([namespace]);
+      // const expectedTypes = new Set([type]);
+      // const expectedEnforceMap = new Map<string, Set<string>>();
+      // expectedEnforceMap.set(type, new Set([namespace]));
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-        enforceMap: actualEnforceMap,
-        options: actualOptions,
-        auditOptions: actualAuditOptions,
-      } = mockSecurityExt.authorize.mock.calls[0][0];
+      // const {
+      //   actions: actualActions,
+      //   spaces: actualSpaces,
+      //   types: actualTypes,
+      //   enforceMap: actualEnforceMap,
+      //   options: actualOptions,
+      //   auditOptions: actualAuditOptions,
+      // } = mockSecurityExt.authorize.mock.calls[0][0];
 
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
-      expect(actualOptions).toBeUndefined();
-      expect(actualAuditOptions).toEqual({ objects: [{ type, id }] });
+      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      // expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      // expect(actualOptions).toBeUndefined();
+      // expect(actualAuditOptions).toEqual({ objects: [{ type, id }] });
     });
   });
 

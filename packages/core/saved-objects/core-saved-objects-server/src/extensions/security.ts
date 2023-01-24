@@ -471,6 +471,10 @@ export interface ISavedObjectsSecurityExtension {
     params: AuthorizeCheckConflictsParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
+  authorizeRemoveReferences: (
+    params: AuthorizeDeleteParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
   /**
    * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
    * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the

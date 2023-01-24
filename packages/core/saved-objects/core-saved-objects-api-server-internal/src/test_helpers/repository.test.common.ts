@@ -371,6 +371,18 @@ export const setupAuthorizeCheckConflicts = (
   );
 };
 
+export const setupAuthorizeRemoveReferences = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeRemoveReferences.mockImplementation(
+    (params: AuthorizeDeleteParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
 export const setupAuthorizeUpdateSpaces = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
