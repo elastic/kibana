@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
@@ -32,7 +32,7 @@ export function LatencyMap({
 }) {
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
@@ -44,11 +44,14 @@ export function LatencyMap({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {comparisonEnabled && (
-            <EuiBadge color="warning">
-              {i18n.translate('xpack.apm.comparison.not.support', {
-                defaultMessage: 'comparison not supported',
+            <EuiIconTip
+              content={i18n.translate('xpack.apm.comparison.not.support', {
+                defaultMessage: 'Comparison is not supported',
               })}
-            </EuiBadge>
+              size="m"
+              type="alert"
+              color="warning"
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

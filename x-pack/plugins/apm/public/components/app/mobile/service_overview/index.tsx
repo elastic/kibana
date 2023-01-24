@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
-  EuiBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -173,8 +173,8 @@ export function MobileServiceOverview() {
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
                   <EuiFlexGroup
-                    direction={rowDirection}
                     justifyContent="spaceBetween"
+                    alignItems="center"
                   >
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
@@ -190,11 +190,17 @@ export function MobileServiceOverview() {
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {comparisonEnabled && (
-                        <EuiBadge color="warning">
-                          {i18n.translate('xpack.apm.comparison.not.support', {
-                            defaultMessage: 'comparison not supported',
-                          })}
-                        </EuiBadge>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.apm.comparison.not.support',
+                            {
+                              defaultMessage: 'Comparison is not supported',
+                            }
+                          )}
+                          size="m"
+                          type="alert"
+                          color="warning"
+                        />
                       )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
