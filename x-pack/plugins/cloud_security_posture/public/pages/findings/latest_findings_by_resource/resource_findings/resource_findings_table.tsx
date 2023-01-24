@@ -57,8 +57,8 @@ const ResourceFindingsTableComponent = ({
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
       baseFindingsColumns['@timestamp'],
     ],
