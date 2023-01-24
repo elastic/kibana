@@ -62,6 +62,7 @@ export function fetchAll(
   } = fetchDeps;
 
   try {
+    console.log('*** fetchAll()');
     const dataView = searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);

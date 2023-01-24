@@ -40,6 +40,7 @@ export const loadFieldExisting: LoadFieldExistingHandler = async ({
   dataView,
 }) => {
   const includeFrozen = uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+  // this needs to go higher up the chain
   const useSampling = uiSettingsClient.get(FIELD_EXISTENCE_SETTING);
   const metaFields = uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
 

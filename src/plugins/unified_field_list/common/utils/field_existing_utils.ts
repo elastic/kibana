@@ -76,6 +76,7 @@ export async function fetchFieldExistence({
   });
   return {
     indexPatternTitle: dataView.getIndexPattern(),
+    // todo - what does this do?
     existingFieldNames: existingFields(existingFieldList, allFields),
   };
 }

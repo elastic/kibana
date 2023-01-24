@@ -11,9 +11,11 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
+// this applies source filterts and adds unmapped fields
 export function getDataViewFieldList(
   dataView: DataView | undefined | null,
-  fieldCounts: Record<string, number> | undefined | null,
+  // could be boolean
+  fieldCounts: Record<string, number> = {},
   isPlainRecord: boolean
 ): DataViewField[] | null {
   if (isPlainRecord && !fieldCounts) {
@@ -23,18 +25,17 @@ export function getDataViewFieldList(
 
   console.log('*** getDataViewFieldList', fieldCounts);
 
-  const currentFieldCounts = fieldCounts || {};
   const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
   let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];
 
   if (sourceFiltersValues) {
     const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
     dataViewFields = dataViewFields.filter((field) => {
-      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries, selected fields)
+      return filter(field.name) || fieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries, selected fields)
     });
   }
 
-  const fieldNamesInDocs = Object.keys(currentFieldCounts);
+  const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInDataView = dataViewFields.map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
 
@@ -55,9 +56,7 @@ export function getDataViewFieldList(
   });
 
   return [
-    ...(isPlainRecord
-      ? dataViewFields.filter((field) => currentFieldCounts[field.name])
-      : dataViewFields),
+    ...(isPlainRecord ? dataViewFields.filter((field) => fieldCounts[field.name]) : dataViewFields),
     ...unknownFields,
   ];
 }

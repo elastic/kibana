@@ -94,6 +94,7 @@ export function discoverSidebarReducer(
       return {
         ...state,
         fieldCounts: null,
+        // what is this?
         allFields: action.payload.isPlainRecord ? null : state.allFields,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       };

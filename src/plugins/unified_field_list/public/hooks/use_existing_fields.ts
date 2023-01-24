@@ -77,7 +77,7 @@ let lastFetchId: string = ''; // persist last fetch id to skip older requests/re
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
-  console.log('*** useExistingFieldsFetcher');
+  console.log('*** useExistingFieldsFetcher - loads fields');
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
@@ -109,7 +109,8 @@ export const useExistingFieldsFetcher = (
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
       const dataView = await dataViews.get(dataViewId);
 
-      if (!dataView?.title) {
+      // when does this happen?
+      if (!dataView?.getIndexPattern()) {
         return;
       }
 

@@ -27,7 +27,10 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
+  loadFieldExisting,
 } from '@kbn/unified-field-list-plugin/public';
+import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
@@ -44,7 +47,8 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
-import { useSavedSearch } from '../../hooks/use_saved_search';
+
+const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -110,8 +114,6 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
-
-  // fetch$: ReturnType<typeof useSavedSearch>['fetch$'];
 }
 
 /**
@@ -136,35 +138,56 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
   // todo verify if is correct
-  const useLegacy = services.uiSettings.get<boolean>('discover:sampleSize');
+  const useLegacy = services.uiSettings.get<boolean>('lens:useFieldExistenceSampling');
 
-  /*
-  useEffect(() => {
-    // if (useLegacy) {
-    //  return;
-    // }
-    const subscription = props.fetch$.subscribe(() => {
-      console.log('new fetch started');
-      dispatchSidebarStateAction({
-        type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
-        payload: {
-          // I'm not sure why this exists
-          isPlainRecord: false,
-        },
-      });
+  const querySubscriberResult = useQuerySubscriber({ data });
+
+  const fetchFields = useCallback(async () => {
+    console.log('*** fetchFields is firing');
+    const existingFieldList = await loadFieldExisting({
+      data,
+      dataView: sidebarState.dataView!,
+      fromDate: querySubscriberResult.fromDate || '',
+      toDate: querySubscriberResult.toDate || '',
+      // dslQuery: querySubscriberResult.query || {},
+      dslQuery: await buildSafeEsQuery(
+        sidebarState.dataView!,
+        querySubscriberResult.query!,
+        querySubscriberResult.filters || [],
+        getEsQueryConfig(core.uiSettings)
+      ),
+      timeFieldName: sidebarState.dataView?.timeFieldName,
+      dataViewsService: dataViews,
+      uiSettingsClient: core.uiSettings,
     });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [props.fetch$, useLegacy]);
-  */
+
+    dispatchSidebarStateAction({
+      type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+      payload: {
+        dataView: selectedDataViewRef.current,
+        fieldCounts: existingFieldList.existingFieldNames.reduce((collector, fieldName) => {
+          collector[fieldName] = 1;
+          return collector;
+        }, {} as Record<string, number>),
+        isPlainRecord: false,
+      },
+    });
+  }, [
+    core.uiSettings,
+    data,
+    dataViews,
+    querySubscriberResult.fromDate,
+    querySubscriberResult.query,
+    querySubscriberResult.toDate,
+    sidebarState.dataView,
+    querySubscriberResult.filters,
+  ]);
 
   useEffect(() => {
-    // if (!useLegacy) {
-    //   return;
-    // }
     const subscription = props.documents$.subscribe((documentState) => {
+      console.log('*** documents$ is firing', documentState.recordRawType);
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
+      const fieldsFromResults = useLegacy || isPlainRecordType;
 
       // todo - make this parallel to fetch - what triggers new docs?
       switch (documentState?.fetchStatus) {
@@ -177,22 +200,37 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
-            payload: {
-              isPlainRecord: isPlainRecordType,
-            },
-          });
+          console.log(
+            '*** fetchStatus.LOADING is firing ',
+            fieldsFromResults,
+            useLegacy,
+            isPlainRecordType
+          );
+          if (fieldsFromResults) {
+            console.log('*** BOO OLDDDD');
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+              payload: {
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          } else {
+            console.log('*** YES NEEEWWW');
+            fetchFields();
+          }
           break;
         case FetchStatus.COMPLETE:
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-            payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: calcFieldCounts(documentState.result),
-              isPlainRecord: isPlainRecordType,
-            },
-          });
+          if (fieldsFromResults) {
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+              payload: {
+                dataView: selectedDataViewRef.current,
+                // might simplify this in another PR
+                fieldCounts: calcFieldCounts(documentState.result),
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          }
           break;
         case FetchStatus.ERROR:
           dispatchSidebarStateAction({
@@ -209,7 +247,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, useLegacy]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, useLegacy, fetchFields]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -223,8 +261,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
-  const querySubscriberResult = useQuerySubscriber({ data });
   const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
+  // this is doing the work
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
     dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
@@ -437,4 +475,27 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       </EuiShowFor>
     </>
   );
+}
+
+// copied from use_existing_fields.ts
+// Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// returning a query dsl object not matching anything
+async function buildSafeEsQuery(
+  dataView: DataView,
+  query: Query | AggregateQuery,
+  filters: Filter[],
+  queryConfig: EsQueryConfig
+) {
+  const buildEsQuery = await getBuildEsQueryAsync();
+  try {
+    return buildEsQuery(dataView, query, filters, queryConfig);
+  } catch (e) {
+    return {
+      bool: {
+        must_not: {
+          match_all: {},
+        },
+      },
+    };
+  }
 }
