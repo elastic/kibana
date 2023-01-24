@@ -9,7 +9,7 @@ import { getRoutePaths } from '../common';
 import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
 import { TopNFunctions } from '../common/functions';
 import { TopNResponse } from '../common/topn';
-import { AutoAbortedHttpService } from './hooks/use_async';
+import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface Services {
   fetchTopN: (params: {
@@ -33,6 +33,8 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
+  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<{ has_setup: boolean }>;
+  postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
 }
 
 export function getServices(): Services {
@@ -76,6 +78,21 @@ export function getServices(): Services {
         };
         const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
         return createFlameGraph(baseFlamegraph);
+      } catch (e) {
+        return e;
+      }
+    },
+    fetchHasSetup: async ({ http }) => {
+      try {
+        const hasSetup = (await http.get(paths.HasSetupESResources, {})) as boolean;
+        return hasSetup;
+      } catch (e) {
+        return e;
+      }
+    },
+    postSetupResources: async ({ http }) => {
+      try {
+        await http.post(paths.HasSetupESResources, {});
       } catch (e) {
         return e;
       }

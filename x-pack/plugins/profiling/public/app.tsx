@@ -21,6 +21,7 @@ import { Services } from './services';
 import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 import { TimeRangeContextProvider } from './components/contexts/time_range_context';
+import { CheckSetup } from './components/check_setup';
 
 interface Props {
   profilingFetchServices: Services;
@@ -67,11 +68,13 @@ function App({
             <RouterProvider router={profilingRouter as any} history={history}>
               <TimeRangeContextProvider>
                 <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                  <RedirectWithDefaultDateRange>
-                    <RouteBreadcrumbsContextProvider>
-                      <RouteRenderer />
-                    </RouteBreadcrumbsContextProvider>
-                  </RedirectWithDefaultDateRange>
+                  <CheckSetup>
+                    <RedirectWithDefaultDateRange>
+                      <RouteBreadcrumbsContextProvider>
+                        <RouteRenderer />
+                      </RouteBreadcrumbsContextProvider>
+                    </RedirectWithDefaultDateRange>
+                  </CheckSetup>
                 </ProfilingDependenciesContextProvider>
               </TimeRangeContextProvider>
             </RouterProvider>

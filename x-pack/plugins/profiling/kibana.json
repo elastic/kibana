@@ -19,7 +19,9 @@
     "kibanaReact",
     "unifiedSearch",
     "dataViews",
-    "charts"
+    "charts",
+    "spaces",
+    "cloud"
   ],
   "optionalPlugins": [],
   "configPath": [

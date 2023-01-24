@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   observability: ObservabilityPluginSetup;
   features: FeaturesPluginSetup;
+  spaces: SpacesPluginStart;
+  cloud: CloudSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -22,4 +26,4 @@ export interface ProfilingPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfilingPluginStart {}
 
-export type ProfilingRequestHandlerContext = RequestHandlerContext;
+export type ProfilingRequestHandlerContext = CustomRequestHandlerContext<{}>;

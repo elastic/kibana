@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { applySetup, configureFleetPolicy } from '../utils/mappings/setup';
-import { getClient } from './compat';
-import { getRoutePaths } from '../../common';
+import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
+import { eachSeries } from 'async';
 import { RouteRegisterParameters } from '.';
+import { getRoutePaths } from '../../common';
+import { getProfilingSetupSteps } from '../lib/setup/steps';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { hasProfilingData, hasProfilingSetupCompleted } from '../utils/init/preconditions';
+import { hasProfilingData } from '../utils/init/preconditions';
+import { getClient } from './compat';
 
 export function registerSetupRoute({
   router,
   logger,
   services: { createProfilingEsClient },
+  dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   // Check if ES resources needed for Universal Profiling to work exist
@@ -28,14 +29,31 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        logger.info('checking if profiling ES configurations are installed');
+        logger.debug('checking if profiling ES configurations are installed');
+        const core = await context.core;
 
-        const done = await hasProfilingSetupCompleted(esClient);
+        const steps = getProfilingSetupSteps({
+          client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
+          logger,
+          packagePolicyClient: packagePolicyService,
+          soClient: core.savedObjects.client,
+          spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
+          isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+        });
+
+        const stepCompletionResults = await Promise.all(
+          steps.map(async (step) => ({ name: step.name, completed: await step.hasCompleted() }))
+        );
 
         // Reply to clients if we have already created all 12 events template indices.
         // This is kind of simplistic but can be a good first step to ensure
         // Profiling resources will be created.
-        return response.ok({ body: { has_setup: done.length === 12 } });
+        return response.ok({
+          body: {
+            has_setup: stepCompletionResults.every((step) => step.completed),
+            steps: stepCompletionResults,
+          },
+        });
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }
@@ -50,16 +68,25 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        // FIXME
-        // @dgieselaar: not sure how to get the client...
-        const soClient = (await context.core).savedObjects.client;
-        logger.info('applying initial setup of Elasticsearch resources');
+        logger.info('Applying initial setup of Elasticsearch resources');
+        const steps = getProfilingSetupSteps({
+          client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
+          logger,
+          packagePolicyClient: packagePolicyService,
+          soClient: (await context.core).savedObjects.client,
+          spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
+          isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+        });
 
-        return await applySetup(esClient)
-          .then((_) => configureFleetPolicy(esClient, soClient))
-          .then((_) => {
-            return response.ok();
-          });
+        await eachSeries(steps, (step, cb) => {
+          logger.debug(`Executing step ${step.name}`);
+          step
+            .init()
+            .then(() => cb())
+            .catch(cb);
+        });
+
+        return response.ok();
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }

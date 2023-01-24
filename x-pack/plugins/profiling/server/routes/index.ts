@@ -37,6 +37,7 @@ export interface RouteRegisterParameters {
     createProfilingEsClient: (params: {
       request: KibanaRequest;
       esClient: ElasticsearchClient;
+      useDefaultAuth?: boolean;
     }) => ProfilingESClient;
   };
 }
