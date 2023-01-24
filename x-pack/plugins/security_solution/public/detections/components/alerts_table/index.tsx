@@ -157,7 +157,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   filterGroup,
   runtimeMappings,
   signalIndexName,
-  selectedEventIds,
+  columns,
+  itemsPerPage,
+  itemsPerPageOptions,
+  selectAll,
+  sort,
+  sessionViewConfig,
+  graphEventId,
 }) => {
   const dispatch = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string | undefined>(
@@ -446,7 +452,21 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     uniqueQueryId,
   });
 
-  const [options, setOptions] = useState(defaultGroupingOptions);
+  const [options, setOptions] = useState(
+    defaultGroupingOptions.find((o) => o.key === selectedGroup)
+      ? defaultGroupingOptions
+      : [
+          ...defaultGroupingOptions,
+          ...(selectedGroup
+            ? [
+                {
+                  key: selectedGroup,
+                  label: selectedGroup,
+                },
+              ]
+            : []),
+        ]
+  );
 
   const groupsSelector = useMemo(
     () => (
@@ -471,6 +491,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         onClearSelected={() => {
           setSelectedGroup(undefined);
           setOptions(defaultGroupingOptions);
+          storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, undefined);
         }}
         fields={indexPatterns.fields}
         options={options}
@@ -546,7 +567,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const bulkActionItems = useBulkActionItems({
     indexName: indexPatterns.title,
-    eventIds: Object.keys(selectedEventIds),
+    eventIds: [],
     currentStatus: filterGroup as AlertWorkflowStatus,
     setEventsLoading,
     setEventsDeleted,
@@ -557,18 +578,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     customBulkActions: bulkActions.customBulkActions as unknown as CustomBulkActionProp[],
   });
 
-  const onOpenGroupAction = useCallback(
-    (bucket: RawBucket, isOpen: boolean) => {
-      if (isOpen) {
-        setSelectedBucket(bucket);
-        dispatch(dataTableActions.setDataTableSelectAll({ id: tableId, selectAll: true }));
-      } else {
-        setSelectedBucket(undefined);
-        dispatch(dataTableActions.setDataTableSelectAll({ id: tableId, selectAll: false }));
-      }
-    },
-    [tableId, dispatch]
-  );
+  const onOpenGroupAction = useCallback((bucket: RawBucket, isOpen: boolean) => {
+    if (isOpen) {
+      setSelectedBucket(bucket);
+    } else {
+      setSelectedBucket(undefined);
+    }
+  }, []);
 
   const unitCountText = useMemo(() => {
     const countBuckets = alertsGroupsData?.aggregations?.alertsCount?.buckets;
@@ -590,6 +606,35 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     setActivePage(pageNumber);
   };
 
+  useEffect(
+    () => {
+      if (Object.keys(trigger).length < 2) {
+        return;
+      }
+      const curr =
+        selectedBucket && isArray(selectedBucket.key) ? selectedBucket.key[0] : selectedBucket?.key;
+      console.log(curr);
+      const n = Object.keys(trigger).reduce(
+        (
+          acc: Record<
+            string,
+            {
+              state: 'open' | 'closed' | undefined;
+              selectedBucket: RawBucket;
+            }
+          >,
+          key: string
+        ) => {
+          acc[key] = { ...trigger[key], state: `group0-${curr}` === key ? 'open' : 'closed' };
+          return acc;
+        },
+        {}
+      );
+      setTrigger(n);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columns, itemsPerPage, itemsPerPageOptions, selectAll, sort, sessionViewConfig, graphEventId]
+  );
   if (loading || isLoadingGroups || isEmpty(selectedPatterns)) {
     return null;
   }
@@ -642,12 +687,26 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           </EuiFlexGroup>
           <GroupsContainer>
             {alertsGroupsData?.aggregations?.stackByMupltipleFields0?.buckets?.map(
-              (field0Bucket) => (
+              (field0Bucket: RawBucket) => (
                 <>
                   <EuiAccordion
-                    id={`group0-${field0Bucket.key[0]}`}
+                    id={`group0-${
+                      isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
+                    }`}
                     className="euiAccordionForm"
                     buttonClassName="euiAccordionForm__button"
+                    forceState={
+                      trigger[
+                        `group0-${
+                          isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
+                        }`
+                      ] &&
+                      trigger[
+                        `group0-${
+                          isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
+                        }`
+                      ].state
+                    }
                     buttonContent={getSelectedGroupButtonContent(selectedGroup, field0Bucket)}
                     extraAction={
                       <GroupRightPanel
@@ -665,17 +724,25 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                     onToggle={(isOpen) => {
                       setTrigger({
                         ...trigger,
-                        [`group0-${field0Bucket.key[0]}`]: {
+                        [`group0-${
+                          isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key
+                        }`]: {
                           state: isOpen ? 'open' : 'closed',
                           selectedBucket: field0Bucket,
                         },
                       });
+                      if (isOpen) {
+                        setSelectedBucket(field0Bucket);
+                      }
                     }}
                   >
-                    {trigger[`group0-${field0Bucket.key[0]}`] &&
-                    trigger[`group0-${field0Bucket.key[0]}`].state === 'open' ? (
+                    {trigger[
+                      `group0-${isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key}`
+                    ] &&
+                    trigger[
+                      `group0-${isArray(field0Bucket.key) ? field0Bucket.key[0] : field0Bucket.key}`
+                    ].state === 'open' ? (
                       <StatefulEventsViewer
-                        additionalFilters={additionalFiltersComponent}
                         currentFilter={filterGroup as AlertWorkflowStatus}
                         defaultCellActions={defaultCellActions}
                         defaultModel={getAlertsDefaultModel(license)}
@@ -696,20 +763,56 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                               key: selectedGroup,
                               params: {
                                 query: isArray(
-                                  trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key
+                                  trigger[
+                                    `group0-${
+                                      isArray(field0Bucket.key)
+                                        ? field0Bucket.key[0]
+                                        : field0Bucket.key
+                                    }`
+                                  ].selectedBucket.key
                                 )
-                                  ? trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key[0]
-                                  : trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key,
+                                  ? trigger[
+                                      `group0-${
+                                        isArray(field0Bucket.key)
+                                          ? field0Bucket.key[0]
+                                          : field0Bucket.key
+                                      }`
+                                    ].selectedBucket.key[0]
+                                  : trigger[
+                                      `group0-${
+                                        isArray(field0Bucket.key)
+                                          ? field0Bucket.key[0]
+                                          : field0Bucket.key
+                                      }`
+                                    ].selectedBucket.key,
                               },
                             },
                             query: {
                               match_phrase: {
                                 [selectedGroup]: {
                                   query: isArray(
-                                    trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key
+                                    trigger[
+                                      `group0-${
+                                        isArray(field0Bucket.key)
+                                          ? field0Bucket.key[0]
+                                          : field0Bucket.key
+                                      }`
+                                    ].selectedBucket.key
                                   )
-                                    ? trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key[0]
-                                    : trigger[`group0-${field0Bucket.key[0]}`].selectedBucket.key,
+                                    ? trigger[
+                                        `group0-${
+                                          isArray(field0Bucket.key)
+                                            ? field0Bucket.key[0]
+                                            : field0Bucket.key
+                                        }`
+                                      ].selectedBucket.key[0]
+                                    : trigger[
+                                        `group0-${
+                                          isArray(field0Bucket.key)
+                                            ? field0Bucket.key[0]
+                                            : field0Bucket.key
+                                        }`
+                                      ].selectedBucket.key,
                                 },
                               },
                             },
@@ -763,7 +866,18 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
     const { tableId } = ownProps;
     const table = getDataTable(state, tableId) ?? tableDefaults;
-    const { isSelectAllChecked, loadingEventIds, selectedEventIds } = table;
+    const {
+      isSelectAllChecked,
+      loadingEventIds,
+      selectedEventIds,
+      columns,
+      itemsPerPage,
+      itemsPerPageOptions,
+      selectAll,
+      sort,
+      sessionViewConfig,
+      graphEventId,
+    } = table;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
@@ -773,6 +887,13 @@ const makeMapStateToProps = () => {
       isSelectAllChecked,
       loadingEventIds,
       selectedEventIds,
+      columns,
+      itemsPerPage,
+      itemsPerPageOptions,
+      selectAll,
+      sort,
+      sessionViewConfig,
+      graphEventId,
     };
   };
   return mapStateToProps;
