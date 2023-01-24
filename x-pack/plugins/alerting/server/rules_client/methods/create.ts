@@ -125,7 +125,15 @@ export async function create<Params extends RuleTypeParams = never>(
     params: updatedParams,
     actions,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, data.actions, validatedAlertTypeParams)
+    extractReferences(
+      context,
+      ruleType,
+      data.actions.map((action) => ({
+        ...action,
+        uuid: v4(),
+      })),
+      validatedAlertTypeParams
+    )
   );
 
   const createTime = Date.now();
@@ -138,10 +146,7 @@ export async function create<Params extends RuleTypeParams = never>(
     ...data,
     ...apiKeyAsAlertAttributes(createdAPIKey, username),
     legacyId,
-    actions: actions.map((action) => ({
-      ...action,
-      uuid: v4(),
-    })),
+    actions,
     createdBy: username,
     updatedBy: username,
     createdAt: new Date(createTime).toISOString(),

@@ -24,17 +24,24 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { NormalizedAlertActionOptionalUuid, RulesClientContext } from '../types';
+import {
+  NormalizedAlertActionOptionalUuid,
+  NormalizedAlertAction,
+  RulesClientContext,
+} from '../types';
 import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
-export interface UpdateOptions<Params extends RuleTypeParams> {
+export interface UpdateOptions<
+  Params extends RuleTypeParams,
+  Actions = NormalizedAlertActionOptionalUuid[]
+> {
   id: string;
   data: {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
-    actions: NormalizedAlertActionOptionalUuid[];
+    actions: Actions;
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
@@ -100,12 +107,20 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-  data.actions = data.actions.map((action) => ({
-    ...action,
-    uuid: action.uuid || v4(),
-  }));
-
-  const updateResult = await updateAlert<Params>(context, { id, data }, alertSavedObject);
+  const updateResult = await updateAlert<Params>(
+    context,
+    {
+      id,
+      data: {
+        ...data,
+        actions: data.actions.map((action) => ({
+          ...action,
+          uuid: action.uuid || v4(),
+        })),
+      },
+    },
+    alertSavedObject
+  );
 
   await Promise.all([
     alertSavedObject.attributes.apiKey
@@ -144,7 +159,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>,
+  { id, data }: UpdateOptions<Params, NormalizedAlertAction[]>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
