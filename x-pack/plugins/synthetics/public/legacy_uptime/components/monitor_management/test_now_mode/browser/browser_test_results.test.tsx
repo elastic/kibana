@@ -58,7 +58,7 @@ describe('BrowserTestRunResult', function () {
           size: 1000,
         },
       },
-      {}
+      { legacyHitsTotal: true }
     );
   });
 
