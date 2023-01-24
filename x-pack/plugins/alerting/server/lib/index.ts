@@ -40,3 +40,5 @@ export { convertEsSortToEventLogSort } from './convert_es_sort_to_event_log_sort
 export * from './snooze';
 export { determineAlertsToPersist } from './determine_alerts_to_persist';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
+export { getAlertsForNotification } from './get_alerts_for_notification';
+export { trimRecoveredAlerts } from './trim_recovered_alerts';
