@@ -117,13 +117,13 @@ export const getTestSyntheticsPolicy = (
             'check.response.status': ['200', '201'],
             ...(isTLSEnabled
               ? {
-                'ssl.certificate': 't.string',
-                'ssl.certificate_authorities': 't.string',
-                'ssl.key': 't.string',
-                'ssl.key_passphrase': 't.string',
-                'ssl.verification_mode': 'certificate',
-                'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
-              }
+                  'ssl.certificate': 't.string',
+                  'ssl.certificate_authorities': 't.string',
+                  'ssl.key': 't.string',
+                  'ssl.key_passphrase': 't.string',
+                  'ssl.verification_mode': 'certificate',
+                  'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
+                }
               : {}),
             processors: [
               {
