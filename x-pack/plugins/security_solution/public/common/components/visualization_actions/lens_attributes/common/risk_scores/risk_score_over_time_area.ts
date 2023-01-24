@@ -13,6 +13,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
 ) => {
   const layerIds = [uuidv4(), uuidv4()];
   const internalReferenceId = uuidv4();
+  const layer2ColumnId = uuidv4();
   return {
     title: `${stackByField} risk score over time`,
     description: '',
@@ -45,10 +46,10 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
           {
             layerId: layerIds[1],
             layerType: 'referenceLine',
-            accessors: ['69f92e26-0438-40b7-8bba-cbf48d336d6c'],
+            accessors: [layer2ColumnId],
             yConfig: [
               {
-                forAccessor: '69f92e26-0438-40b7-8bba-cbf48d336d6c',
+                forAccessor: layer2ColumnId,
                 axisMode: 'right',
                 lineWidth: 2,
                 color: '#aa6556',
@@ -136,7 +137,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
             [layerIds[1]]: {
               linkToLayers: [],
               columns: {
-                '69f92e26-0438-40b7-8bba-cbf48d336d6c': {
+                [layer2ColumnId]: {
                   label: 'Risky threshold',
                   dataType: 'number',
                   operationType: 'static_value',
@@ -150,7 +151,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
                   customLabel: true,
                 },
               },
-              columnOrder: ['69f92e26-0438-40b7-8bba-cbf48d336d6c'],
+              columnOrder: [layer2ColumnId],
               sampling: 1,
               incompleteColumns: {},
             },

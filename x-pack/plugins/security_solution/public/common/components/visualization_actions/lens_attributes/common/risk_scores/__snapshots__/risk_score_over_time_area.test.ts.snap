@@ -6,11 +6,11 @@ Object {
   "references": Array [],
   "state": Object {
     "adHocDataViews": Object {
-      "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+      "e614baeb-5eca-480c-8885-ba79eaf41372": Object {
         "allowNoIndex": false,
         "fieldAttrs": Object {},
         "fieldFormats": Object {},
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "id": "e614baeb-5eca-480c-8885-ba79eaf41372",
         "name": "ml_host_risk_score_mockSpaceId",
         "runtimeFieldMap": Object {},
         "sourceFilters": Array [],
@@ -21,12 +21,12 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+          "c604baeb-5eca-480c-8885-ba79eaf41372": Object {
             "columnOrder": Array [
-              "69f92e26-0438-40b7-8bba-cbf48d336d6c",
+              "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
             ],
             "columns": Object {
-              "69f92e26-0438-40b7-8bba-cbf48d336d6c": Object {
+              "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
                 "customLabel": true,
                 "dataType": "number",
                 "isBucketed": false,
@@ -129,13 +129,13 @@ Object {
     ],
     "internalReferences": Array [
       Object {
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "id": "e614baeb-5eca-480c-8885-ba79eaf41372",
         "name": "indexpattern-datasource-layer-d594baeb-5eca-480c-8885-ba79eaf41372",
         "type": "index-pattern",
       },
       Object {
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
-        "name": "indexpattern-datasource-layer-1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "id": "e614baeb-5eca-480c-8885-ba79eaf41372",
+        "name": "indexpattern-datasource-layer-c604baeb-5eca-480c-8885-ba79eaf41372",
         "type": "index-pattern",
       },
     ],
@@ -174,16 +174,16 @@ Object {
         },
         Object {
           "accessors": Array [
-            "69f92e26-0438-40b7-8bba-cbf48d336d6c",
+            "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
           ],
-          "layerId": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+          "layerId": "c604baeb-5eca-480c-8885-ba79eaf41372",
           "layerType": "referenceLine",
           "yConfig": Array [
             Object {
               "axisMode": "right",
               "color": "#aa6556",
               "fill": "none",
-              "forAccessor": "69f92e26-0438-40b7-8bba-cbf48d336d6c",
+              "forAccessor": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
               "icon": "alert",
               "lineWidth": 2,
               "textVisibility": true,
