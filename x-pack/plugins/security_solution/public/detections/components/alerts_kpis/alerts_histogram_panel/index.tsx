@@ -188,13 +188,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-    const extraVisualizationOptions = useMemo(
-      () => ({
-        filters,
-      }),
-      [filters]
-    );
-
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -425,7 +418,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}
-                extraOptions={extraVisualizationOptions}
+                extraOptions={{
+                  filters,
+                }}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
                 id={`alerts-histogram-embeddable-${uniqueQueryId}`}

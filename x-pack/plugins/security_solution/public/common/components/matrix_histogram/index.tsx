@@ -70,7 +70,7 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
   ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
-const ChartHeight = '150px';
+const CHART_HEIGHT = '150px';
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -302,7 +302,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 getLensAttributes={getLensAttributes}
-                height={ChartHeight}
+                height={CHART_HEIGHT}
                 id={`${id}-embeddable`}
                 inspectTitle={title as string}
                 stackByField={selectedStackByOption.value}

@@ -56,7 +56,7 @@ interface AlertsCountPanelProps {
   stackByWidth?: number;
   title?: React.ReactNode;
 }
-const ChartHeight = '180px';
+const CHART_HEIGHT = '180px';
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -221,7 +221,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
                 extraActions={extraActions}
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}
-                height={ChartHeight}
+                height={CHART_HEIGHT}
                 id={`${uniqueQueryId}-embeddable`}
                 inspectTitle={inspectTitle}
                 scopeId={SourcererScopeName.detections}

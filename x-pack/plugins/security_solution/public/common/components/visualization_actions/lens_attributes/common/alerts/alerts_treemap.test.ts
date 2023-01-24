@@ -11,6 +11,10 @@ import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsTreemapLensAttributes } from './alerts_treemap';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b'),
+}));
+
 jest.mock('../../../../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     dataViewId: 'security-solution-my-test',
