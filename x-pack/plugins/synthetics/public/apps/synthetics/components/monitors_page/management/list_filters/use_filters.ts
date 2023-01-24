@@ -5,33 +5,41 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { useMemo } from 'react';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../../../../common/types/saved_objects';
+import { SyntheticsFilterField } from './filter_labels';
 
 const aggs = {
-  types: {
+  monitorTypes: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.type.keyword`,
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
     },
   },
   tags: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.tags`,
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.TAGS}`,
       size: 10000,
     },
   },
   locations: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.locations.id`,
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.LOCATIONS}.id`,
       size: 10000,
     },
   },
   projects: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.project_id`,
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}`,
+      size: 10000,
+    },
+  },
+  schedules: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.${ConfigKey.SCHEDULE}.number`,
       size: 10000,
     },
   },
@@ -43,7 +51,7 @@ type Buckets = Array<{
 }>;
 
 interface AggsResponse {
-  types: {
+  monitorTypes: {
     buckets: Buckets;
   };
   locations: {
@@ -55,9 +63,15 @@ interface AggsResponse {
   projects: {
     buckets: Buckets;
   };
+  schedules: {
+    buckets: Buckets;
+  };
 }
 
-export const useFilters = () => {
+export const useFilters = (): Record<
+  SyntheticsFilterField,
+  Array<{ label: string; count: number }>
+> => {
   const { savedObjects } = useKibana().services;
 
   const { data } = useFetcher(async () => {
@@ -69,10 +83,11 @@ export const useFilters = () => {
   }, []);
 
   return useMemo(() => {
-    const { types, tags, locations, projects } = (data?.aggregations as AggsResponse) ?? {};
+    const { monitorTypes, tags, locations, projects, schedules } =
+      (data?.aggregations as AggsResponse) ?? {};
     return {
-      types:
-        types?.buckets?.map(({ key, doc_count: count }) => ({
+      monitorTypes:
+        monitorTypes?.buckets?.map(({ key, doc_count: count }) => ({
           label: key,
           count,
         })) ?? [],
@@ -93,6 +108,11 @@ export const useFilters = () => {
             label: key,
             count,
           })) ?? [],
+      schedules:
+        schedules?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          count,
+        })) ?? [],
     };
   }, [data]);
 };

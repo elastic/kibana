@@ -12,7 +12,7 @@ import { SearchField } from '../../common/search_field';
 
 export function ListFilters() {
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={2}>
         <SearchField />
       </EuiFlexItem>

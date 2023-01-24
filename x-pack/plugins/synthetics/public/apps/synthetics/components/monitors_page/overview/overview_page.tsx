@@ -43,7 +43,14 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { query, tags, monitorType, locations: locationFilters, projects } = useGetUrlParams();
+  const {
+    query,
+    tags,
+    monitorTypes,
+    locations: locationFilters,
+    projects,
+    schedules,
+  } = useGetUrlParams();
   const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
@@ -61,15 +68,16 @@ export const OverviewPage: React.FC = () => {
       ...pageState,
       query,
       tags,
-      monitorType,
+      monitorTypes,
       projects,
+      schedules,
       locations: locationFilters,
     };
     if (hasPageStateChanged(pageState, newPageState)) {
       dispatch(fetchMonitorOverviewAction.get({ ...pageState, ...newPageState }));
       dispatch(setOverviewPageStateAction(newPageState));
     }
-  }, [dispatch, locationFilters, monitorType, pageState, projects, query, tags]);
+  }, [dispatch, locationFilters, monitorTypes, pageState, projects, query, tags, schedules]);
 
   // fetch overview for all other page state changes
   useEffect(() => {
@@ -110,7 +118,7 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
         </EuiFlexItem>

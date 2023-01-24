@@ -7,10 +7,10 @@
 
 import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-plugin/public';
-import { FilterItem } from './filter_group';
+import { getSyntheticsFilterKeyForLabel, SyntheticsFilterItem } from './filter_labels';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 
-export const FilterButton = ({ filter }: { filter: FilterItem }) => {
+export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {
   const { label, values, field } = filter;
 
   const [query, setQuery] = useState('');
@@ -34,7 +34,9 @@ export const FilterButton = ({ filter }: { filter: FilterItem }) => {
         updateUrlParams({
           [field]:
             selectedValues && selectedValues.length > 0
-              ? JSON.stringify(selectedValues)
+              ? JSON.stringify(
+                  selectedValues.map((value) => getSyntheticsFilterKeyForLabel(value, field))
+                )
               : undefined,
         });
       }}

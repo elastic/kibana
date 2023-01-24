@@ -12,9 +12,10 @@ export interface MonitorOverviewPageState {
   perPage: number;
   query?: string;
   tags?: string[];
-  monitorType?: string[];
+  monitorTypes?: string[];
   locations?: string[];
   projects?: string[];
+  schedules?: string[];
   sortOrder: 'asc' | 'desc';
   sortField: string;
 }

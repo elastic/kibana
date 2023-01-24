@@ -46,7 +46,7 @@ describe('useMonitorList', () => {
       ...state.monitorList.pageState,
       query: '',
       locations: [],
-      monitorType: [],
+      monitorTypes: [],
       tags: [],
     };
   });
@@ -86,11 +86,11 @@ describe('useMonitorList', () => {
   it('dispatches correct action for filter url param', async () => {
     const tags = ['abc', 'xyz'];
     const locations = ['loc1', 'loc1'];
-    const monitorType = ['browser'];
+    const monitorTypes = ['browser'];
 
     const url = `/monitor/1?tags=${JSON.stringify(tags)}&locations=${JSON.stringify(
       locations
-    )}&monitorType=${JSON.stringify(monitorType)}`;
+    )}&monitorTypes=${JSON.stringify(monitorTypes)}`;
 
     jest.useFakeTimers().setSystemTime(Date.now());
     const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
@@ -104,7 +104,7 @@ describe('useMonitorList', () => {
     renderHook(() => useMonitorList(), { wrapper: WrapperWithState });
 
     expect(dispatchMockFn).toHaveBeenCalledWith(
-      fetchMonitorListAction.get({ ...defaultPageState, tags, locations, monitorType })
+      fetchMonitorListAction.get({ ...defaultPageState, tags, locations, monitorTypes })
     );
   });
 });

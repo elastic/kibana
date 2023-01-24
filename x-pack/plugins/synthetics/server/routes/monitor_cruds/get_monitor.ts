@@ -8,7 +8,11 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
-import { ConfigKey, MonitorOverviewItem } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  MonitorOverviewItem,
+} from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -18,6 +22,7 @@ import {
   getMonitorFilters,
   getMonitors,
   isMonitorsQueryFiltered,
+  MonitorsQuery,
   QuerySchema,
   SEARCH_FIELDS,
 } from '../common';
@@ -97,7 +102,12 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: QuerySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { sortField, sortOrder, query } = request.query;
+    const {
+      sortField,
+      sortOrder,
+      query,
+      locations: queriedLocations,
+    } = request.query as MonitorsQuery;
 
     const filtersStr = getMonitorFilters({
       ...request.query,
@@ -118,24 +128,12 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     const allMonitors: MonitorOverviewItem[] = [];
 
     for (const { attributes } of allMonitorConfigs) {
-      const id = attributes[ConfigKey.MONITOR_QUERY_ID];
       const configId = attributes[ConfigKey.CONFIG_ID];
       allMonitorIds.push(configId);
 
-      /* for each location, add a config item */
-      const locations = attributes[ConfigKey.LOCATIONS];
-      locations.forEach((location) => {
-        const config = {
-          id,
-          configId,
-          name: attributes[ConfigKey.NAME],
-          location,
-          isEnabled: attributes[ConfigKey.ENABLED],
-          isStatusAlertEnabled: isStatusEnabled(attributes[ConfigKey.ALERT_CONFIG]),
-        };
-        allMonitors.push(config);
-        total++;
-      });
+      const monitorConfigsPerLocation = getOverviewConfigsPerLocation(attributes, queriedLocations);
+      allMonitors.push(...monitorConfigsPerLocation);
+      total += monitorConfigsPerLocation.length;
     }
 
     return {
@@ -145,3 +143,34 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     };
   },
 });
+
+function getOverviewConfigsPerLocation(
+  attributes: EncryptedSyntheticsMonitor,
+  queriedLocations: string | string[] | undefined
+) {
+  const id = attributes[ConfigKey.MONITOR_QUERY_ID];
+  const configId = attributes[ConfigKey.CONFIG_ID];
+
+  /* for each location, add a config item */
+  const locations = attributes[ConfigKey.LOCATIONS];
+  const queriedLocationsArray =
+    queriedLocations && !Array.isArray(queriedLocations) ? [queriedLocations] : queriedLocations;
+
+  /* exclude nob matching locations if location filter is present */
+  const filteredLocations = queriedLocationsArray?.length
+    ? locations.filter(
+        (loc) =>
+          (loc.label && queriedLocationsArray.includes(loc.label)) ||
+          queriedLocationsArray.includes(loc.id)
+      )
+    : locations;
+
+  return filteredLocations.map((location) => ({
+    id,
+    configId,
+    name: attributes[ConfigKey.NAME],
+    location,
+    isEnabled: attributes[ConfigKey.ENABLED],
+    isStatusAlertEnabled: isStatusEnabled(attributes[ConfigKey.ALERT_CONFIG]),
+  }));
+}
