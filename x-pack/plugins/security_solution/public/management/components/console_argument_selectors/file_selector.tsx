@@ -16,14 +16,7 @@ import {
 } from '@elastic/eui';
 import type { EuiFilePickerProps } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
-
-const ArgumentFileSelectorContainer = styled.div`
-  .popoverAnchor {
-    display: block;
-  }
-`;
 
 const INITIAL_DISPLAY_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.fileSelector.initialDisplayLabel',
@@ -75,7 +68,7 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
     );
 
     return (
-      <ArgumentFileSelectorContainer>
+      <div>
         <EuiPopover
           isOpen={isPopoverOpen}
           closePopover={handleClosePopover}
@@ -109,7 +102,7 @@ export const ArgumentFileSelector = memo<CommandArgumentValueSelectorProps<File>
             />
           )}
         </EuiPopover>
-      </ArgumentFileSelectorContainer>
+      </div>
     );
   }
 );

@@ -21,7 +21,7 @@ export interface CommandArgDefinition {
   /**
    * If the argument is required to be entered by the user. NOTE that this will only validate that
    * the user has entered the argument name - it does not validate that the argument must have a
-   * value. Argument's that have no value entered by the user have (by default) a value of
+   * value. Arguments that have no value entered by the user have (by default) a value of
    * `true` boolean.
    */
   required: boolean;

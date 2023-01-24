@@ -19,16 +19,6 @@ export const executionTranslations = Object.freeze({
     });
   },
 
-  mustHaveNonBlankValue: (argName: string): string => {
-    return i18n.translate(
-      'xpack.securitySolution.console.commandValidation.mustHaveNonBlankValue',
-      {
-        defaultMessage: 'Argument --${argName} must have a value',
-        values: { argName },
-      }
-    );
-  },
-
   mustBeNumber: (argName: string): string => {
     return i18n.translate('xpack.securitySolution.console.commandValidation.mustBeNumber', {
       defaultMessage: 'Argument --${argName} value must be a number',

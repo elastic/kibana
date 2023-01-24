@@ -339,7 +339,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   argDefinition.mustHaveValue === 'non-empty-string' &&
                   argValue.trim().length === 0
                 ) {
-                  dataValidationError = executionTranslations.mustHaveNonBlankValue(argName);
+                  dataValidationError = executionTranslations.mustHaveValue(argName);
                 }
                 break;
 
