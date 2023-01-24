@@ -141,10 +141,9 @@ export const ActionNotifyWhen = ({
   onNotifyWhenChange,
   onThrottleChange,
   onSummaryChange,
-}: ActionNotifyWhenProps) => {
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
-}: RuleNotifyWhenProps) => {
+}: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
     hasSummary
