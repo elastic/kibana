@@ -63,7 +63,11 @@ export const ControlSettings = ({ policy, onChange }: SettingsDeps) => {
         </EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ControlGeneralView show={isGeneralViewSelected} policy={policy} onChange={onChanges} />
+        {/** general view removed from DOM for performance and to avoid errors when invalid yaml is passed to it**/}
+        {isGeneralViewSelected && (
+          <ControlGeneralView show={isGeneralViewSelected} policy={policy} onChange={onChanges} />
+        )}
+        {/** yaml view is kept in the dom at all times to prevent some sizing/rendering issues **/}
         <ControlYamlView show={isYamlViewSelected} policy={policy} onChange={onChanges} />
       </EuiFlexItem>
     </EuiFlexGroup>
