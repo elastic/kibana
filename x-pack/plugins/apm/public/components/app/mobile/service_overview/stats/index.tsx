@@ -6,30 +6,23 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { MetricItem } from './metric_item';
 import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
+import { isEmpty } from 'lodash';
 
 const valueFormatter = (value: number, suffix = '') => {
   return `${value} ${suffix}`;
 };
-
-const getIcon =
-  (type: string) =>
-  ({
-    width = 20,
-    height = 20,
-    color,
-  }: {
-    width: number;
-    height: number;
-    color: string;
-  }) =>
-    <EuiIcon type={type} width={width} height={height} fill={color} />;
 
 export function MobileStats({
   start,
@@ -84,18 +77,38 @@ export function MobileStats({
     [comparisonEnabled, previousPeriodLabel]
   );
 
+  const getIcon = useCallback(
+    (type: string) =>
+      ({
+        width = 20,
+        height = 20,
+        color,
+      }: {
+        width: number;
+        height: number;
+        color: string;
+      }) => {
+        return status === FETCH_STATUS.LOADING ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <EuiIcon type={type} width={width} height={height} fill={color} />
+        );
+      },
+    [status]
+  );
+
   const metrics: MetricDatum[] = [
     {
       color: euiTheme.eui.euiColorDisabled,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
-        defaultMessage: 'Crash Rate',
+        defaultMessage: 'Crash Rate (Crash per minute)',
       }),
       subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
         defaultMessage: 'Coming Soon',
       }),
       icon: getIcon('bug'),
       value: 'N/A',
-      valueFormatter: (value: number) => valueFormatter(value, 'cpm'),
+      valueFormatter: (value: number) => valueFormatter(value),
       trend: [],
       trendShape: MetricTrendShape.Area,
     },
@@ -146,7 +159,8 @@ export function MobileStats({
           <MetricItem
             id={key}
             data={[metric]}
-            isLoading={status === FETCH_STATUS.LOADING}
+            hasData={!isEmpty(data)}
+            status={status}
           />
         </EuiFlexItem>
       ))}
