@@ -24,7 +24,7 @@ import {
   ALERT_NEW_TERMS,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
-import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import { AGENT_STATUS_FIELD_NAME, QUARANTINED_PATH_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { AlertSummaryRow } from './helpers';
 import { getEnrichedFieldInfo } from './helpers';
 import type { EventSummaryField, EnrichedFieldInfo } from './types';
@@ -130,6 +130,10 @@ function getFieldsByEventCode(
     case EventCode.MEMORY_SIGNATURE:
       // Resolve more fields based on the source event
       return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
+    case EventCode.MALICIOUS_FILE:
+      return [
+        { id: 'file.Ext.quarantine_path', overrideField: QUARANTINED_PATH_FIELD_NAME, label: i18n.QUARANTINED_FILE_PATH },
+      ]
     default:
       return [];
   }
