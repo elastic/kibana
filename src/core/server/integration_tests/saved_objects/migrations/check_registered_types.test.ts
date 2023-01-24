@@ -123,6 +123,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "osquery-pack-asset": "de8783298eb33a577bf1fa0caacd42121dcfae91",
         "osquery-saved-query": "7b213b4b7a3e59350e99c50e8df9948662ed493a",
         "query": "4640ef356321500a678869f24117b7091a911cb6",
+        "rules-settings": "1af4c9abd4b40a154e233c2af4867df7aab7ac24",
         "sample-data-telemetry": "8b10336d9efae6f3d5593c4cc89fb4abcdf84e04",
         "search": "c48f5ab5d94545780ea98de1bff9e39f17f3606b",
         "search-session": "ba383309da68a15be3765977f7a44c84f0ec7964",

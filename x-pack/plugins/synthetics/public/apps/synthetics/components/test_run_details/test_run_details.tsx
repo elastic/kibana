@@ -38,10 +38,12 @@ export const TestRunDetails = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const selectedLocation = useSelectedLocation();
 
+  const stateId = stepsData?.details?.summary?.state?.id;
+
   return (
     <>
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
           <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={true}>
@@ -72,7 +74,7 @@ export const TestRunDetails = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <StepScreenshotDetails stepIndex={stepIndex} step={step} />
+            <StepScreenshotDetails stepIndex={stepIndex} step={step} stateId={stateId} />
             <EuiSpacer size="m" />
             <StepTabs stepsData={stepsData} step={step} loading={stepsLoading} />
           </EuiPanel>

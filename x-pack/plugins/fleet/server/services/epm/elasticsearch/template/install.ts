@@ -61,10 +61,11 @@ import { buildDefaultSettings } from './default_settings';
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
 export const prepareToInstallTemplates = (
-  installablePackage: InstallablePackage,
+  installablePackage: InstallablePackage | PackageInfo,
   paths: string[],
   esReferences: EsAssetReference[],
-  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = []
+  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
+  onlyForDataStreams?: RegistryDataStream[]
 ): {
   assetsToAdd: EsAssetReference[];
   assetsToRemove: EsAssetReference[];
@@ -78,7 +79,7 @@ export const prepareToInstallTemplates = (
   );
 
   // build templates per data stream from yml files
-  const dataStreams = installablePackage.data_streams;
+  const dataStreams = onlyForDataStreams || installablePackage.data_streams;
   if (!dataStreams) return { assetsToAdd: [], assetsToRemove, install: () => Promise.resolve([]) };
 
   const templates = dataStreams.map((dataStream) => {
@@ -343,7 +344,6 @@ async function installDataStreamComponentTemplates({
   logger: Logger;
   componentTemplates: TemplateMap;
 }) {
-  // TODO: Check return values for errors
   await Promise.all(
     Object.entries(componentTemplates).map(async ([name, body]) => {
       if (isUserSettingsTemplate(name)) {

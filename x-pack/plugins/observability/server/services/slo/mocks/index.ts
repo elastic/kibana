@@ -29,6 +29,7 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
   return {
     save: jest.fn(),
     findById: jest.fn(),
+    findAllByIds: jest.fn(),
     deleteById: jest.fn(),
     find: jest.fn(),
   };
