@@ -29,6 +29,7 @@ import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/lo
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { LogViewsService } from './services/log_views';
+import { TelemetryService } from './services/telemetry';
 import {
   InfraClientCoreSetup,
   InfraClientCoreStart,
@@ -43,6 +44,7 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private logViews: LogViewsService;
+  private telemetry: TelemetryService;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
@@ -51,6 +53,7 @@ export class Plugin implements InfraClientPluginClass {
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
     });
+    this.telemetry = new TelemetryService();
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -254,6 +257,9 @@ export class Plugin implements InfraClientPluginClass {
         return renderApp(params);
       },
     });
+
+    // Setup telemetry events
+    this.telemetry.setup({ analytics: core.analytics });
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
@@ -265,8 +271,11 @@ export class Plugin implements InfraClientPluginClass {
       search: plugins.data.search,
     });
 
+    const telemetry = this.telemetry.start();
+
     const startContract: InfraClientStartExports = {
       logViews,
+      telemetry,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
       HostMetricsTable: createLazyHostMetricsTable(getStartServices),
       PodMetricsTable: createLazyPodMetricsTable(getStartServices),
