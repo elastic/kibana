@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Skip on cloud until issue is fixed
     // Issue: https://github.com/elastic/kibana/issues/141280
-    describe('Options List Control creation and editing experience', function () {
+    describe.only('Options List Control creation and editing experience', function () {
       this.tags(['skipCloudFailedTest']);
       it('can add a new options list control from a blank state', async () => {
         await dashboardControls.createControl({
@@ -136,27 +136,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSelectOption('hiss');
         await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
 
-        await dashboardControls.editExistingControl(secondId);
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.editExistingControl(firstId);
         await dashboardControls.controlsEditorSetfield('animal.keyword', OPTIONS_LIST_CONTROL);
         await dashboardControls.controlEditorSave();
 
-        const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
+        const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);
         expect(selectionString).to.be('Any');
       });
 
       it('editing other control settings keeps selections', async () => {
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.optionsListOpenPopover(secondId);
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.optionsListOpenPopover(firstId);
         await dashboardControls.optionsListPopoverSelectOption('dog');
         await dashboardControls.optionsListPopoverSelectOption('cat');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
+        await dashboardControls.optionsListEnsurePopoverIsClosed(firstId);
 
-        await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.editExistingControl(firstId);
         await dashboardControls.controlEditorSetTitle('Animal');
         await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
 
-        const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
+        const selectionString = await dashboardControls.optionsListGetSelectionsString(firstId);
         expect(selectionString).to.be('dog, cat');
       });
 

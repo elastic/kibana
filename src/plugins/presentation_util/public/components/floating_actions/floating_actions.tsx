@@ -9,6 +9,7 @@ import React, { FC, ReactElement, useCallback, useRef, useState } from 'react';
 
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useMount from 'react-use/lib/useMount';
 
 export interface FloatingActionsProps {
   className?: string;
@@ -31,14 +32,13 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
 
   const showFloatingActions = useCallback(
-    () => isEnabled && setFloatingActionsVisible(true),
-    [isEnabled, setFloatingActionsVisible]
+    () => setFloatingActionsVisible(true),
+    [setFloatingActionsVisible]
   );
   const hideFloatingActions = useCallback(
-    () => isEnabled && setFloatingActionsVisible(false),
-    [isEnabled, setFloatingActionsVisible]
+    () => setFloatingActionsVisible(false),
+    [setFloatingActionsVisible]
   );
-
   const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
   const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
 
@@ -73,6 +73,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       <span
         className="floatingActions__anchor"
         ref={anchorRef}
+        onMouseEnter={showFloatingActions}
         onMouseOver={showFloatingActions}
         onFocus={showFloatingActions}
         onMouseLeave={hideFloatingActions}
