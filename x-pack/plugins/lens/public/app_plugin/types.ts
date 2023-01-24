@@ -13,6 +13,7 @@ import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
+  CoreStart,
   CoreTheme,
   ExecutionContextStart,
   HttpStart,
@@ -50,6 +51,7 @@ import type {
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
+  UserMessagesGetter,
 } from '../types';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
@@ -82,6 +84,7 @@ export interface LensAppProps {
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   theme$: Observable<CoreTheme>;
+  coreStart: CoreStart;
 }
 
 export type RunSave = (
@@ -121,6 +124,7 @@ export interface LensTopNavMenuProps {
   theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
+  getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;
 }

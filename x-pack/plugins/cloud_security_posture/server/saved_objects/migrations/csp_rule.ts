@@ -28,7 +28,7 @@ function migrateCspRuleMetadata(
       policy_id,
       metadata: {
         ...metadata,
-        benchmark: { ...benchmark, id: 'cis_k8s' },
+        benchmark: { ...benchmark, id: 'cis_k8s', rule_number: '' },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,
