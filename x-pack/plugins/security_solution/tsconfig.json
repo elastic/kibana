@@ -137,5 +137,6 @@
     "@kbn/core-saved-objects-common",
     "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
+    "@kbn/cell-actions",
   ]
 }
