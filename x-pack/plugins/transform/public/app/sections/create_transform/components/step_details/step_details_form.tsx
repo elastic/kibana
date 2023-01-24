@@ -47,7 +47,7 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
 import {
-  getPivotQuery,
+  getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
@@ -132,10 +132,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
         const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
-        const pivotQuery = getPivotQuery(searchQuery);
+        const transformConfigQuery = getTransformConfigQuery(searchQuery);
         const previewRequest = getPreviewTransformRequestBody(
           searchItems.dataView,
-          pivotQuery,
+          transformConfigQuery,
           partialPreviewRequest,
           stepDefineState.runtimeMappings
         );

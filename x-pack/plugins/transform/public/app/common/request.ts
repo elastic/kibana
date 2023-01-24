@@ -54,9 +54,9 @@ export interface FilterBasedSimpleQuery {
   };
 }
 
-export type PivotQuery = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
+export type TransformConfigQuery = FilterBasedSimpleQuery | SimpleQuery | SavedSearchQuery;
 
-export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
+export function getTransformConfigQuery(search: string | SavedSearchQuery): TransformConfigQuery {
   if (typeof search === 'string') {
     return {
       query_string: {
@@ -93,8 +93,8 @@ export function isMatchAllQuery(query: unknown): boolean {
   );
 }
 
-export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
-export function isDefaultQuery(query: PivotQuery): boolean {
+export const defaultQuery: TransformConfigQuery = { query_string: { query: '*' } };
+export function isDefaultQuery(query: TransformConfigQuery): boolean {
   return (
     (isSimpleQuery(query) && query.query_string.query === '*') ||
     (isFilterBasedSimpleQuery(query) && query.bool.filter[0].query_string.query === '*')
@@ -192,7 +192,7 @@ export const getRequestPayload = (
 
 export function getPreviewTransformRequestBody(
   dataView: DataView,
-  pivotQuery: PivotQuery,
+  transformConfigQuery: TransformConfigQuery,
   partialRequest?: StepDefineExposedState['previewRequest'],
   runtimeMappings?: StepDefineExposedState['runtimeMappings'],
   timeRangeMs?: StepDefineExposedState['timeRangeMs']
@@ -206,7 +206,7 @@ export function getPreviewTransformRequestBody(
     dataView.timeFieldName,
     timeRangeMs?.from,
     timeRangeMs?.to,
-    pivotQuery
+    transformConfigQuery
   );
 
   const queryWithBaseFilterCriteria = {
@@ -252,14 +252,14 @@ export const getCreateTransformSettingsRequestBody = (
 
 export const getCreateTransformRequestBody = (
   dataView: DataView,
-  pivotState: StepDefineExposedState,
+  transformConfigState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     dataView,
-    getPivotQuery(pivotState.searchQuery),
-    pivotState.previewRequest,
-    pivotState.runtimeMappings
+    getTransformConfigQuery(transformConfigState.searchQuery),
+    transformConfigState.previewRequest,
+    transformConfigState.runtimeMappings
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''

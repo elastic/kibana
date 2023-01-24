@@ -43,7 +43,7 @@ import {
 } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
-import { usePivotData } from '../../../../hooks/use_pivot_data';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
@@ -96,11 +96,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     isAdvancedSourceEditorApplyButtonEnabled,
   } = stepDefineForm.advancedSourceEditor.state;
   const { isDatePickerApplyEnabled, timeRangeMs } = stepDefineForm.datePicker.state;
-  const { pivotQuery } = stepDefineForm.searchBar.state;
+  const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
   const indexPreviewProps = {
-    ...useIndexData(dataView, pivotQuery, runtimeMappings, timeRangeMs),
+    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -109,7 +109,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       ? stepDefineForm.pivotConfig.state
       : stepDefineForm.latestFunctionConfig;
 
-  const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern);
+  const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
     {
@@ -119,7 +119,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const copyToClipboardPreviewRequest = getPreviewTransformRequestBody(
     dataView,
-    pivotQuery,
+    transformConfigQuery,
     requestPayload,
     runtimeMappings,
     isDatePickerApplyEnabled ? timeRangeMs : undefined
@@ -133,10 +133,10 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     }
   );
 
-  const pivotPreviewProps = {
-    ...usePivotData(
+  const previewProps = {
+    ...useTransformConfigData(
       dataView,
-      pivotQuery,
+      transformConfigQuery,
       validationStatus,
       requestPayload,
       runtimeMappings,
@@ -433,12 +433,12 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
         <EuiFormRow
           fullWidth
-          label={i18n.translate('xpack.transform.stepDefineForm.pivotPreviewLabel', {
+          label={i18n.translate('xpack.transform.stepDefineForm.previewLabel', {
             defaultMessage: 'Preview',
           })}
         >
           <>
-            <DataGrid {...pivotPreviewProps} />
+            <DataGrid {...previewProps} />
             <EuiSpacer size="m" />
           </>
         </EuiFormRow>

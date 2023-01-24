@@ -7,11 +7,13 @@
 
 import React, { useMemo, FC } from 'react';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { getPivotQuery } from '../../../../common';
-import { usePivotData } from '../../../../hooks/use_pivot_data';
+import { getTransformConfigQuery } from '../../../../common';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
@@ -38,15 +40,15 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
     [transformConfig]
   );
 
-  const pivotQuery = useMemo(() => getPivotQuery(searchQuery), [searchQuery]);
+  const transformConfigQuery = useMemo(() => getTransformConfigQuery(searchQuery), [searchQuery]);
 
   const dataViewTitle = Array.isArray(transformConfig.source.index)
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
-  const pivotPreviewProps = usePivotData(
-    { getIndexPattern: () => dataViewTitle },
-    pivotQuery,
+  const pivotPreviewProps = useTransformConfigData(
+    { getIndexPattern: () => dataViewTitle } as DataView,
+    transformConfigQuery,
     validationStatus,
     previewRequest,
     runtimeMappings

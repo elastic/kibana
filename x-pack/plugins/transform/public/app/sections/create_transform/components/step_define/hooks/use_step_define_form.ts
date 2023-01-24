@@ -42,7 +42,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
 
   const previewRequest = getPreviewTransformRequestBody(
     dataView,
-    searchBar.state.pivotQuery,
+    searchBar.state.transformConfigQuery,
     pivotConfig.state.requestPayload,
     defaults?.runtimeMappings
   );
@@ -61,7 +61,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     if (!advancedSourceEditor.state.isAdvancedSourceEditorEnabled) {
       const previewRequestUpdate = getPreviewTransformRequestBody(
         dataView,
-        searchBar.state.pivotQuery,
+        searchBar.state.transformConfigQuery,
         pivotConfig.state.requestPayload,
         runtimeMappings
       );

@@ -27,7 +27,7 @@ import {
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
-import { getPreviewTransformRequestBody, PivotQuery } from '../common';
+import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
@@ -95,9 +95,9 @@ export function getCombinedProperties(
   };
 }
 
-export const usePivotData = (
+export const useTransformConfigData = (
   dataView: SearchItems['dataView'],
-  query: PivotQuery,
+  query: TransformConfigQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],

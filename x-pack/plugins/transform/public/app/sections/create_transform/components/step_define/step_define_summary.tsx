@@ -14,13 +14,13 @@ import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from 
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import {
-  getPivotQuery,
+  getTransformConfigQuery,
   getPivotPreviewDevConsoleStatement,
   getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
-import { usePivotData } from '../../../../hooks/use_pivot_data';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AggListSummary } from '../aggregation_list';
@@ -53,18 +53,18 @@ export const StepDefineSummary: FC<Props> = ({
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
-  const pivotQuery = getPivotQuery(searchQuery);
+  const transformConfigQuery = getTransformConfigQuery(searchQuery);
 
   const previewRequest = getPreviewTransformRequestBody(
     searchItems.dataView,
-    pivotQuery,
+    transformConfigQuery,
     partialPreviewRequest,
     runtimeMappings
   );
 
-  const pivotPreviewProps = usePivotData(
+  const pivotPreviewProps = useTransformConfigData(
     searchItems.dataView,
-    pivotQuery,
+    transformConfigQuery,
     validationStatus,
     partialPreviewRequest,
     runtimeMappings
@@ -72,8 +72,8 @@ export const StepDefineSummary: FC<Props> = ({
 
   const isModifiedQuery =
     typeof searchString === 'undefined' &&
-    !isDefaultQuery(pivotQuery) &&
-    !isMatchAllQuery(pivotQuery);
+    !isDefaultQuery(transformConfigQuery) &&
+    !isMatchAllQuery(transformConfigQuery);
 
   let uniqueKeys: string[] = [];
   let sortField = '';
@@ -117,7 +117,7 @@ export const StepDefineSummary: FC<Props> = ({
                   overflowHeight={300}
                   isCopyable
                 >
-                  {JSON.stringify(pivotQuery, null, 2)}
+                  {JSON.stringify(transformConfigQuery, null, 2)}
                 </EuiCodeBlock>
               </EuiFormRow>
             )}

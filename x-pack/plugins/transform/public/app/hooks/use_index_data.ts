@@ -27,7 +27,7 @@ import { isRuntimeMappings } from '../../../common/shared_imports';
 
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
-import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
+import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
@@ -36,7 +36,7 @@ import { useApi } from './use_api';
 
 export const useIndexData = (
   dataView: SearchItems['dataView'],
-  query: PivotQuery,
+  query: TransformConfigQuery,
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
   timeRangeMs?: TimeRangeMs
 ): UseIndexDataReturnType => {

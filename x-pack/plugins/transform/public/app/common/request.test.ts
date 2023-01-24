@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { PivotGroupByConfig } from '.';
@@ -19,19 +21,19 @@ import {
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
-  getPivotQuery,
+  getTransformConfigQuery,
   getMissingBucketConfig,
   getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,
   matchAllQuery,
-  PivotQuery,
+  type TransformConfigQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
-const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
+const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
 
 const groupByTerms: PivotGroupByConfig = {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
@@ -66,8 +68,8 @@ describe('Transform: Common', () => {
     expect(isDefaultQuery(simpleQuery)).toBe(false);
   });
 
-  test('getPivotQuery()', () => {
-    const query = getPivotQuery('the-query');
+  test('getTransformConfigQuery()', () => {
+    const query = getTransformConfigQuery('the-query');
 
     expect(query).toEqual({
       query_string: {
@@ -78,14 +80,18 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody()', () => {
-    const query = getPivotQuery('the-query');
+    const query = getTransformConfigQuery('the-query');
 
-    const request = getPreviewTransformRequestBody('the-data-view-title', query, {
-      pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-      },
-    });
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
 
     expect(request).toEqual({
       pivot: {
@@ -100,13 +106,17 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
-    const query = getPivotQuery('the-query');
-    const request = getPreviewTransformRequestBody('the-data-view-title,the-other-title', query, {
-      pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-      },
-    });
+    const query = getTransformConfigQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title,the-other-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
 
     expect(request).toEqual({
       pivot: {
@@ -172,9 +182,9 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody() with missing_buckets config', () => {
-    const query = getPivotQuery('the-query');
+    const query = getTransformConfigQuery('the-query');
     const request = getPreviewTransformRequestBody(
-      'the-data-view-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       query,
       getRequestPayload([aggsAvg], [{ ...groupByTerms, ...{ missing_bucket: true } }])
     );
@@ -194,11 +204,12 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformRequestBody() skips default values', () => {
-    const pivotState: StepDefineExposedState = {
+    const transformConfigState: StepDefineExposedState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
@@ -239,8 +250,8 @@ describe('Transform: Common', () => {
     };
 
     const request = getCreateTransformRequestBody(
-      'the-data-view-title',
-      pivotState,
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      transformConfigState,
       transformDetailsState
     );
 
@@ -278,6 +289,7 @@ describe('Transform: Common', () => {
       groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
@@ -319,7 +331,7 @@ describe('Transform: Common', () => {
     };
 
     const request = getCreateTransformRequestBody(
-      'the-data-view-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       pivotState,
       transformDetailsState
     );
