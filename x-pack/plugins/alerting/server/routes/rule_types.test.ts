@@ -111,6 +111,7 @@ describe('ruleTypesRoute', () => {
             "default_schedule_interval": "10m",
             "does_set_recovery_context": false,
             "enabled_in_license": true,
+            "has_get_summarized_alerts": undefined,
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",
