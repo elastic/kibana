@@ -750,12 +750,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('project monitors - handles editing with spaces', async () => {
-      const project = `test-project-${uuid.v4()}`;
+      const project = `test-project-${uuidv4()}`;
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       try {
         await security.role.create(roleName, {

@@ -385,8 +385,8 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       };
 
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       let monitorId = '';
 
       try {
