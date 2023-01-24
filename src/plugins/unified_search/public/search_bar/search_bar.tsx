@@ -176,7 +176,7 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     if (isOfQueryType(stateQuery) && isOfQueryType(query)) {
       if (stateQuery?.language !== query?.language) {
         setStateQuery({ query: '', language: query.language });
-      } else {
+      } else if (stateQuery.query !== query.query) {
         setStateQuery({ ...query });
       }
     }
