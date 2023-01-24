@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -17,38 +17,53 @@ export interface SloStatusProps {
 
 export function SloStatusBadge({ slo }: SloStatusProps) {
   return (
-    <div>
-      {slo.summary.status === 'NO_DATA' && (
-        <EuiBadge color={euiLightVars.euiColorDisabled}>
-          {i18n.translate('xpack.observability.slos.slo.state.noData', {
-            defaultMessage: 'No data',
-          })}
-        </EuiBadge>
-      )}
+    <>
+      <EuiFlexItem grow={false}>
+        <div>
+          {slo.summary.status === 'NO_DATA' && (
+            <EuiBadge color={euiLightVars.euiColorDisabled}>
+              {i18n.translate('xpack.observability.slos.slo.state.noData', {
+                defaultMessage: 'No data',
+              })}
+            </EuiBadge>
+          )}
 
-      {slo.summary.status === 'HEALTHY' && (
-        <EuiBadge color={euiLightVars.euiColorSuccess}>
-          {i18n.translate('xpack.observability.slos.slo.state.healthy', {
-            defaultMessage: 'Healthy',
-          })}
-        </EuiBadge>
-      )}
+          {slo.summary.status === 'HEALTHY' && (
+            <EuiBadge color={euiLightVars.euiColorSuccess}>
+              {i18n.translate('xpack.observability.slos.slo.state.healthy', {
+                defaultMessage: 'Healthy',
+              })}
+            </EuiBadge>
+          )}
 
-      {slo.summary.status === 'DEGRADING' && (
-        <EuiBadge color={euiLightVars.euiColorWarning}>
-          {i18n.translate('xpack.observability.slos.slo.state.degrading', {
-            defaultMessage: 'Degrading',
-          })}
-        </EuiBadge>
-      )}
+          {slo.summary.status === 'DEGRADING' && (
+            <EuiBadge color={euiLightVars.euiColorWarning}>
+              {i18n.translate('xpack.observability.slos.slo.state.degrading', {
+                defaultMessage: 'Degrading',
+              })}
+            </EuiBadge>
+          )}
 
-      {slo.summary.status === 'VIOLATED' && (
-        <EuiBadge color={euiLightVars.euiColorDanger}>
-          {i18n.translate('xpack.observability.slos.slo.state.violated', {
-            defaultMessage: 'Violated',
-          })}
-        </EuiBadge>
+          {slo.summary.status === 'VIOLATED' && (
+            <EuiBadge color={euiLightVars.euiColorDanger}>
+              {i18n.translate('xpack.observability.slos.slo.state.violated', {
+                defaultMessage: 'Violated',
+              })}
+            </EuiBadge>
+          )}
+        </div>
+      </EuiFlexItem>
+      {slo.summary.errorBudget.isEstimated && (
+        <EuiFlexItem grow={false}>
+          <div>
+            <EuiBadge color={euiLightVars.euiColorDisabled}>
+              {i18n.translate('xpack.observability.slos.slo.state.forecasted', {
+                defaultMessage: 'Forecasted',
+              })}
+            </EuiBadge>
+          </div>
+        </EuiFlexItem>
       )}
-    </div>
+    </>
   );
 }

@@ -26,6 +26,13 @@ With7DaysRolling.args = { slo: createSLO({ timeWindow: { duration: '7d', isRolli
 export const With30DaysRolling = Template.bind({});
 With30DaysRolling.args = { slo: createSLO({ timeWindow: { duration: '30d', isRolling: true } }) };
 
+export const WithMonthlyCalendarStartingToday = Template.bind({});
+WithMonthlyCalendarStartingToday.args = {
+  slo: createSLO({
+    timeWindow: { duration: '1M', calendar: { startTime: new Date().toISOString() } },
+  }),
+};
+
 export const WithMonthlyCalendar = Template.bind({});
 WithMonthlyCalendar.args = {
   slo: createSLO({
