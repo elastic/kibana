@@ -8,7 +8,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useKibana } from '../../common/lib/kibana';
-import { mockAlertSummaryResponse, mockAlertSummaryTimeRange } from '../mock/alert_summary_widget';
+import {
+  mockedAlertSummaryResponse,
+  mockedAlertSummaryTimeRange,
+} from '../mock/alert_summary_widget';
 import { useLoadAlertSummary } from './use_load_alert_summary';
 
 jest.mock('../../common/lib/kibana');
@@ -28,13 +31,13 @@ describe('useLoadAlertSummary', () => {
 
   it('should return the mocked data from API', async () => {
     mockedPostAPI.mockResolvedValue({
-      ...mockAlertSummaryResponse,
+      ...mockedAlertSummaryResponse,
     });
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
         featureIds,
-        timeRange: mockAlertSummaryTimeRange,
+        timeRange: mockedAlertSummaryTimeRange,
       })
     );
     expect(result.current).toEqual({
@@ -51,27 +54,27 @@ describe('useLoadAlertSummary', () => {
 
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
-      ...mockAlertSummaryResponse,
+      ...mockedAlertSummaryResponse,
     });
     expect(error).toBeFalsy();
   });
 
   it('should call API with correct input', async () => {
     const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
-    const { utcFrom, utcTo, fixedInterval } = mockAlertSummaryTimeRange;
+    const { utcFrom, utcTo, fixedInterval } = mockedAlertSummaryTimeRange;
     const filter = {
       term: {
         'kibana.alert.rule.uuid': ruleId,
       },
     };
     mockedPostAPI.mockResolvedValue({
-      ...mockAlertSummaryResponse,
+      ...mockedAlertSummaryResponse,
     });
 
     const { waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
         featureIds,
-        timeRange: mockAlertSummaryTimeRange,
+        timeRange: mockedAlertSummaryTimeRange,
         filter,
       })
     );
@@ -100,7 +103,7 @@ describe('useLoadAlertSummary', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLoadAlertSummary({
         featureIds,
-        timeRange: mockAlertSummaryTimeRange,
+        timeRange: mockedAlertSummaryTimeRange,
       })
     );
 
