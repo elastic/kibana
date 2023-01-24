@@ -41,7 +41,7 @@ export const ColorPalette = ({
   valueWidth?: number;
 }) => {
   const getToolTipContent = () => {
-    return i18n.translate('xpack.synthetics.stepDetails.palette.tooltip', {
+    return i18n.translate('xpack.synthetics.stepDetails.palette.tooltip.label', {
       defaultMessage: 'Value is {deltaLabel} compared to steps in previous 24 hours.',
       values: {
         deltaLabel:
