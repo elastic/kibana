@@ -31,7 +31,7 @@ import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
-import { CustomMetricEditor } from './custom_metric';
+import { CustomEquationEditor } from './custom_equation';
 
 const customComparators = {
   ...builtInComparators,
@@ -316,7 +316,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <>
               <EuiSpacer size={'m'} />
               <StyledExpressionRow>
-                <CustomMetricEditor
+                <CustomEquationEditor
                   expression={expression}
                   fields={normalizedFields}
                   aggregationTypes={aggregationType}

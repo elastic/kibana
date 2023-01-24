@@ -7,38 +7,25 @@
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiButtonIcon,
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSelect,
-  EuiComboBox,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import { omit, range, first, xor, debounce, get } from 'lodash';
-import { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { omit, range, first, xor, debounce } from 'lodash';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   Aggregators,
   CustomMetricAggTypes,
   MetricExpressionCustomMetric,
-} from '../../../../common/alerting/metrics';
-import { MetricExpression } from '../types';
-
-interface NormalizedField {
-  name: string;
-  normalizedType: string;
-}
-
-type NormalizedFields = NormalizedField[];
-
-interface AggregationTypes {
-  [x: string]: AggregationType;
-}
+} from '../../../../../common/alerting/metrics';
+import { MetricExpression } from '../../types';
+import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
+import { MetricRowWithAgg } from './metric_row_with_agg';
+import { MetricRowWithCount } from './metric_row_with_count';
 
 interface Props {
   onChange: (expression: MetricExpression) => void;
@@ -48,12 +35,10 @@ interface Props {
   errors: IErrorObject;
 }
 
-type CustomMetrics = MetricExpression['customMetrics'];
-
 const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
 const VAR_NAMES = range(65, 65 + 26).map((c) => String.fromCharCode(c));
 
-export const CustomMetricEditor: React.FC<Props> = ({
+export const CustomEquationEditor: React.FC<Props> = ({
   onChange,
   expression,
   fields,
@@ -235,237 +220,5 @@ export const CustomMetricEditor: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
-  );
-};
-
-interface MetricRowBaseProps {
-  name: string;
-  onAdd: () => void;
-  onDelete: (name: string) => void;
-  disableDelete: boolean;
-  disableAdd: boolean;
-  onChange: (metric: MetricExpressionCustomMetric) => void;
-  aggregationTypes: AggregationTypes;
-  errors: IErrorObject;
-}
-
-interface MetricRowControlProps {
-  onDelete: () => void;
-  disableDelete: boolean;
-}
-
-const MetricRowControls: React.FC<MetricRowControlProps> = ({ onDelete, disableDelete }) => {
-  return (
-    <>
-      <EuiFlexItem grow={0}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          style={{ marginBottom: '0.2em' }}
-          onClick={onDelete}
-          disabled={disableDelete}
-          title={i18n.translate(
-            'xpack.infra.metrics.alertFlyout.customEquationEditor.deleteRowButton',
-            { defaultMessage: 'Delete' }
-          )}
-        />
-      </EuiFlexItem>
-    </>
-  );
-};
-
-interface MetricRowWithAggProps extends MetricRowBaseProps {
-  aggType?: CustomMetricAggTypes;
-  field?: string;
-  fields: NormalizedFields;
-}
-
-const MetricRowWithAgg: React.FC<MetricRowWithAggProps> = ({
-  name,
-  aggType = Aggregators.AVERAGE,
-  field,
-  onDelete,
-  disableDelete,
-  fields,
-  aggregationTypes,
-  onChange,
-  errors,
-}) => {
-  const handleDelete = useCallback(() => {
-    onDelete(name);
-  }, [name, onDelete]);
-
-  const fieldOptions = useMemo(
-    () =>
-      fields.reduce((acc, fieldValue) => {
-        if (
-          aggType &&
-          aggregationTypes[aggType].validNormalizedTypes.includes(fieldValue.normalizedType)
-        ) {
-          acc.push({ label: fieldValue.name });
-        }
-        return acc;
-      }, [] as Array<{ label: string }>),
-    [fields, aggregationTypes, aggType]
-  );
-
-  const aggOptions = useMemo(
-    () =>
-      Object.values(aggregationTypes).map((a) => ({
-        text: a.text,
-        value: a.value,
-      })),
-    [aggregationTypes]
-  );
-
-  const handleFieldChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      onChange({
-        name,
-        field: (selectedOptions.length && selectedOptions[0].label) || undefined,
-        aggType,
-      });
-    },
-    [name, aggType, onChange]
-  );
-
-  const handleAggChange = useCallback(
-    (el: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange({
-        name,
-        field,
-        aggType: el.target.value as CustomMetricAggTypes,
-      });
-    },
-    [name, field, onChange]
-  );
-
-  const isAggInvalid = get(errors, ['customMetrics', name, 'aggType']) != null;
-  const isFieldInvalid = get(errors, ['customMetrics', name, 'field']) != null;
-
-  return (
-    <>
-      <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel',
-              { defaultMessage: 'Aggregation {name}', values: { name } }
-            )}
-            isInvalid={isAggInvalid}
-          >
-            <EuiSelect
-              compressed
-              options={aggOptions}
-              value={aggType}
-              isInvalid={isAggInvalid}
-              onChange={handleAggChange}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.fieldLabel',
-              { defaultMessage: 'Field {name}', values: { name } }
-            )}
-            isInvalid={isFieldInvalid}
-          >
-            <EuiComboBox
-              fullWidth
-              compressed
-              isInvalid={isFieldInvalid}
-              singleSelection={{ asPlainText: true }}
-              options={fieldOptions}
-              selectedOptions={field ? [{ label: field }] : []}
-              onChange={handleFieldChange}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-    </>
-  );
-};
-
-interface MetricRowWithCountProps extends MetricRowBaseProps {
-  agg?: Aggregators;
-  filter?: string;
-}
-
-const MetricRowWithCount: React.FC<MetricRowWithCountProps> = ({
-  name,
-  agg,
-  filter,
-  onDelete,
-  disableDelete,
-  onChange,
-  aggregationTypes,
-}) => {
-  const aggOptions = useMemo(
-    () =>
-      Object.values(aggregationTypes)
-        .filter((aggType) => aggType.value !== Aggregators.CUSTOM)
-        .map((aggType) => ({
-          text: aggType.text,
-          value: aggType.value,
-        })),
-    [aggregationTypes]
-  );
-
-  const handleDelete = useCallback(() => {
-    onDelete(name);
-  }, [name, onDelete]);
-
-  const handleAggChange = useCallback(
-    (el: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange({
-        name,
-        filter,
-        aggType: el.target.value as CustomMetricAggTypes,
-      });
-    },
-    [name, filter, onChange]
-  );
-
-  const handleFilterChange = useCallback(
-    (el: React.ChangeEvent<HTMLInputElement>) => {
-      onChange({
-        name,
-        filter: el.target.value,
-        aggType: agg as CustomMetricAggTypes,
-      });
-    },
-    [name, agg, onChange]
-  );
-
-  return (
-    <>
-      <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <EuiFlexItem style={{ maxWidth: 145 }}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel',
-              { defaultMessage: 'Aggregation {name}', values: { name } }
-            )}
-          >
-            <EuiSelect compressed options={aggOptions} value={agg} onChange={handleAggChange} />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.filterLabel',
-              { defaultMessage: 'KQL Filter {name}', values: { name } }
-            )}
-          >
-            <EuiFieldText compressed value={filter} onChange={handleFilterChange} />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-    </>
   );
 };
