@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { version as uuidVersion, validate as uuidValidate } from 'uuid';
+import { validate as uuidValidate } from 'uuid';
 
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
@@ -553,7 +553,7 @@ export const constructSearch = (
     return undefined;
   }
 
-  if (uuidValidate(search) && uuidVersion(search) === 1) {
+  if (uuidValidate(search)) {
     const rawId = savedObjectsSerializer.generateRawId(
       spaceIdToNamespace(spaceId),
       CASE_SAVED_OBJECT,

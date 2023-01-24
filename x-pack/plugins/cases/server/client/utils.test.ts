@@ -926,8 +926,8 @@ describe('utils', () => {
   describe('constructSearchById', () => {
     const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
-    it('returns the rootSearchFields and search with correct values when given a uuidv1', () => {
-      const uuid = uuidv1();
+    it('returns the rootSearchFields and search with correct values when given a uuid', () => {
+      const uuid = uuidv1(); // the specific version is irrelevant
 
       expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
         .toMatchInlineSnapshot(`
@@ -940,7 +940,7 @@ describe('utils', () => {
       `);
     });
 
-    it('search value not changed and no rootSearchFields when search is non-uuidv1', () => {
+    it('search value not changed and no rootSearchFields when search is non-uuid', () => {
       const search = 'foobar';
       const result = constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer);
 
