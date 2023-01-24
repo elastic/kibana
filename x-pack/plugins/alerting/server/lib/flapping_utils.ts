@@ -46,5 +46,5 @@ export function atCapacity(
   flappingSettings: RulesSettingsFlapping,
   flappingHistory: boolean[] = []
 ): boolean {
-  return flappingSettings.enabled && flappingHistory.length >= flappingSettings.lookBackWindow;
+  return flappingHistory.length >= flappingSettings.lookBackWindow;
 }

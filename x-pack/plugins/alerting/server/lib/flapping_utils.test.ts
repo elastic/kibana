@@ -62,11 +62,6 @@ describe('flapping utils', () => {
       const flappingHistory = new Array(15).fill(false);
       expect(atCapacity(flappingSettings, flappingHistory)).toEqual(false);
     });
-
-    test('returns false if flappingHistory > set capacity and flapping is disabled', () => {
-      const flappingHistory = new Array(25).fill(false);
-      expect(atCapacity({ ...flappingSettings, enabled: false }, flappingHistory)).toEqual(false);
-    });
   });
 
   describe('isFlapping', () => {
