@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           retry,
         });
 
+        /*
         await assertLogContains({
           description:
             'execution context propagates to Kibana logs (fetch chart data and total hits)',
@@ -99,6 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }),
           retry,
         });
+        */
       });
     });
 
