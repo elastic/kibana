@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import sinon from 'sinon';
 import { MockSyncContext } from '../../__fixtures__/mock_sync_context';
