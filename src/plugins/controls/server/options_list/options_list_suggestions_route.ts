@@ -7,6 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { get } from 'lodash';
 
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
@@ -15,10 +16,10 @@ import { SearchRequest } from '@kbn/data-plugin/common';
 import { schema } from '@kbn/config-schema';
 
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';
-import {
-  getSuggestionAggregationBuilder,
-  getValidationAggregationBuilder,
-} from './options_list_queries';
+import { getValidationAggregationBuilder } from './options_list_validation_queries';
+import { getExpensiveSuggestionAggregationBuilder } from './options_list_expensive_suggestion_queries';
+import { getCheapSuggestionAggregationBuilder } from './options_list_cheap_suggestion_queries';
+import { OptionsListSuggestionAggregationBuilder } from './types';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
@@ -91,7 +92,22 @@ export const setupOptionsListSuggestionsRoute = (
     const timeoutSettings = runPastTimeout
       ? {}
       : { timeout: `${timeout}ms`, terminate_after: terminateAfter };
-    const suggestionBuilder = getSuggestionAggregationBuilder(request);
+
+    const allowExpensiveQueries =
+      get(
+        await esClient.cluster.getSettings({
+          include_defaults: true,
+          filter_path: '**.allow_expensive_queries',
+        }),
+        'transient.search.allow_expensive_queries'
+      ) === 'true';
+
+    let suggestionBuilder: OptionsListSuggestionAggregationBuilder;
+    if (allowExpensiveQueries) {
+      suggestionBuilder = getExpensiveSuggestionAggregationBuilder(request);
+    } else {
+      suggestionBuilder = getCheapSuggestionAggregationBuilder(request);
+    }
     const validationBuilder = getValidationAggregationBuilder();
 
     const builtSuggestionAggregation = suggestionBuilder.buildAggregation(request);
@@ -122,11 +138,11 @@ export const setupOptionsListSuggestionsRoute = (
         ...runtimeFieldMap,
       },
     };
-    // console.log(JSON.stringify(body));
 
     /**
      * Run ES query
      */
+
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
     /**
@@ -134,7 +150,6 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult);
     const totalCardinality = results.totalCardinality;
-    // const remainingSuggestionCount = totalCardinality - ((request.page ?? 1) - 1) * 10;
     const invalidSelections = validationBuilder.parse(rawEsResult);
     return {
       suggestions: results.suggestions,

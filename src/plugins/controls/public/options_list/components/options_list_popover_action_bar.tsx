@@ -40,7 +40,7 @@ export const OptionsListPopoverActionBar = ({
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
+  const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
 
   const hideSort = select((state) => state.explicitInput.hideSort);
@@ -68,15 +68,19 @@ export const OptionsListPopoverActionBar = ({
               autoFocus={true}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}
-            >
-              <EuiBadge className="optionsList__cardinalityBadge">
-                {totalCardinality.toLocaleString()}
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {totalCardinality && (
+            // totalCardinality will be undefined when `allowExpensiveQueries` is false; so, we should not show
+            // the badge in this case
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}
+              >
+                <EuiBadge className="optionsList__cardinalityBadge">
+                  {totalCardinality.toLocaleString()}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             {(invalidSelections?.length ?? 0) > 0 && (
               <EuiToolTip

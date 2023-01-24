@@ -34,7 +34,7 @@ export interface OptionsListSuggestions {
 
 export interface OptionsListSuggestionResult {
   suggestions: OptionsListSuggestions;
-  totalCardinality: number;
+  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
 }
 
 /**
@@ -43,7 +43,7 @@ export interface OptionsListSuggestionResult {
 export interface OptionsListResponse {
   rejected: boolean;
   suggestions: OptionsListSuggestions;
-  totalCardinality: number;
+  totalCardinality?: number;
   invalidSelections?: string[];
 }
 

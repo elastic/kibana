@@ -21,6 +21,7 @@ import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
 import { ControlsPluginStartDeps } from '../../types';
 import { ControlsOptionsListService } from './types';
+import { CoreStart } from '@kbn/core/server';
 
 class OptionsListService implements ControlsOptionsListService {
   private data: ControlsDataService;
@@ -113,6 +114,7 @@ class OptionsListService implements ControlsOptionsListService {
 export interface OptionsListServiceRequiredServices {
   data: ControlsDataService;
   http: ControlsHTTPService;
+  elasticsearch: CoreStart['elasticsearch'];
 }
 
 export type OptionsListServiceFactory = KibanaPluginServiceFactory<

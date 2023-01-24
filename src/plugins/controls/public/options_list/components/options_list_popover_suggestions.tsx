@@ -39,7 +39,7 @@ export const OptionsListPopoverSuggestions = ({
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
-  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
+  const totalCardinality = select((state) => state.componentState.totalCardinality);
   const searchString = select((state) => state.componentState.searchString);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
@@ -53,7 +53,10 @@ export const OptionsListPopoverSuggestions = ({
   const listRef = useRef<HTMLDivElement>(null);
 
   const canLoadMoreSuggestions = useMemo(
-    () => Object.keys(availableOptions ?? {}).length < Math.min(totalCardinality, 1000),
+    () =>
+      totalCardinality
+        ? Object.keys(availableOptions ?? {}).length < Math.min(totalCardinality, 1000)
+        : false,
     [availableOptions, totalCardinality]
   );
 
@@ -132,7 +135,7 @@ export const OptionsListPopoverSuggestions = ({
     const { scrollTop, scrollHeight, clientHeight } = listbox;
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
       // reached the bottom of the list
-      loadMoreSuggestions(totalCardinality);
+      loadMoreSuggestions(totalCardinality ?? 1000);
     }
   }, [loadMoreSuggestions, totalCardinality]);
 

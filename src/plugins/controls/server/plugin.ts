@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
@@ -15,6 +15,7 @@ import { controlGroupContainerPersistableStateServiceFactory } from './control_g
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
 import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
+import { get } from 'lodash';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -23,6 +24,8 @@ interface SetupDeps {
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
+  // private allowExpensiveQueries: boolean = false;
+
   public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)
@@ -30,12 +33,22 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
-
     setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
     return {};
   }
 
-  public start() {
+  public async start(core: CoreStart) {
+    // const esClient = core.elasticsearch.client.asInternalUser;
+    // this.allowExpensiveQueries =
+    //   get(
+    //     await esClient.cluster.getSettings({
+    //       include_defaults: true,
+    //       filter_path: '**.allow_expensive_queries',
+    //     }),
+    //     'transient.search.allow_expensive_queries'
+    //   ) === 'true';
+    // console.log('!!!!!!!! allowExpensiveQueries?', this.allowExpensiveQueries);
+    // return { allowExpensiveQueries: this.allowExpensiveQueries };
     return {};
   }
 
