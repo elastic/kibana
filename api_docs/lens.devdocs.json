@@ -183,6 +183,57 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getUserMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserMessages",
+            "description": [],
+            "signature": [
+              "(locationId: \"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\")[] | undefined, filters: ",
+              "UserMessageFilters",
+              ") => ",
+              "UserMessage",
+              "[]"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.getUserMessages.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "locationId",
+                "description": [],
+                "signature": [
+                  "\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\")[] | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.getUserMessages.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "UserMessageFilters"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.reportsEmbeddableLoad",
             "type": "Function",
             "tags": [],
@@ -6394,7 +6445,7 @@
               "\nRenders dimension trigger. Used only for noDatasource layers"
             ],
             "signature": [
-              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; invalid?: boolean | undefined; invalidMessage?: string | undefined; }) => JSX.Element | null) | undefined"
+              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; invalid?: boolean | undefined; invalidMessage?: React.ReactNode; }) => JSX.Element | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6464,12 +6515,12 @@
                   {
                     "parentPluginId": "lens",
                     "id": "def-public.Visualization.renderDimensionTrigger.$1.invalidMessage",
-                    "type": "string",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "invalidMessage",
                     "description": [],
                     "signature": [
-                      "string | undefined"
+                      "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                     ],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
@@ -6794,17 +6845,19 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.getErrorMessages",
+            "id": "def-public.Visualization.getUserMessages",
             "type": "Function",
             "tags": [],
-            "label": "getErrorMessages",
+            "label": "getUserMessages",
             "description": [
               "\nThe frame will call this function on all visualizations at few stages (pre-build/build error) in order\nto provide more context to the error and show it to the user"
             ],
             "signature": [
-              "(state: T, frame?: Pick<",
+              "((state: T, deps: { frame: ",
               "FramePublicAPI",
-              ", \"dataViews\" | \"datasourceLayers\"> | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
+              "; }) => ",
+              "UserMessage",
+              "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6812,7 +6865,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getErrorMessages.$1",
+                "id": "def-public.Visualization.getUserMessages.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -6827,170 +6880,30 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.getErrorMessages.$2",
+                "id": "def-public.Visualization.getUserMessages.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "frame",
+                "label": "deps",
                 "description": [],
-                "signature": [
-                  "Pick<",
-                  "FramePublicAPI",
-                  ", \"dataViews\" | \"datasourceLayers\"> | undefined"
-                ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Visualization.validateColumn",
-            "type": "Function",
-            "tags": [],
-            "label": "validateColumn",
-            "description": [],
-            "signature": [
-              "((state: T, frame: Pick<",
-              "FramePublicAPI",
-              ", \"dataViews\">, layerId: string, columnId: string, group?: ",
-              "VisualizationDimensionGroupConfig",
-              " | undefined) => { invalid: boolean; invalidMessage?: string | undefined; }) | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.validateColumn.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.validateColumn.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "frame",
-                "description": [],
-                "signature": [
-                  "Pick<",
-                  "FramePublicAPI",
-                  ", \"dataViews\">"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.validateColumn.$3",
-                "type": "string",
-                "tags": [],
-                "label": "layerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.validateColumn.$4",
-                "type": "string",
-                "tags": [],
-                "label": "columnId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.validateColumn.$5",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "group",
-                "description": [],
-                "signature": [
-                  "VisualizationDimensionGroupConfig",
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Visualization.getWarningMessages",
-            "type": "Function",
-            "tags": [],
-            "label": "getWarningMessages",
-            "description": [
-              "\nThe frame calls this function to display warnings about visualization"
-            ],
-            "signature": [
-              "((state: T, frame: ",
-              "FramePublicAPI",
-              ") => React.ReactNode[] | undefined) | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.getWarningMessages.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.getWarningMessages.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "frame",
-                "description": [],
-                "signature": [
-                  "FramePublicAPI"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.Visualization.getUserMessages.$2.frame",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "frame",
+                    "description": [],
+                    "signature": [
+                      "FramePublicAPI"
+                    ],
+                    "path": "x-pack/plugins/lens/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []

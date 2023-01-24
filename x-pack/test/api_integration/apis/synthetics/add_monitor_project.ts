@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
         .post('/api/fleet/epm/packages/synthetics/0.11.4')
@@ -286,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -299,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
@@ -354,7 +356,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -406,6 +408,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -419,7 +422,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-${project}-default`,
@@ -460,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -1469,6 +1472,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'http',
                 tags: 'tag2,tag2',
                 urls: ['http://localhost:9200'],
+                'ssl.verification_mode': 'strict',
               },
               reason: 'Cannot update monitor to different type.',
             },
