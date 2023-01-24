@@ -14,9 +14,9 @@ import { useHistory } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideId } from '@kbn/guided-onboarding';
+import type { GuideFilterValues, GuideId } from '@kbn/guided-onboarding';
 
-import { GuideCards } from '@kbn/guided-onboarding';
+import { GuideCards, GuideFilters } from '@kbn/guided-onboarding';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -35,10 +35,10 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  console.log('rendering getting started');
   const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
   const history = useHistory();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [filter, setFilter] = useState<GuideFilterValues>('all');
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -115,10 +115,13 @@ export const GettingStarted = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
+        <GuideFilters activeFilter={filter} setActiveFilter={setFilter} />
+        <EuiSpacer size="xxl" />
         <GuideCards
           activateGuide={activateGuide}
           navigateToApp={application.navigateToApp}
           isLoading={isLoading}
+          activeFilter={filter}
         />
         <EuiSpacer />
         <div className="eui-textCenter">

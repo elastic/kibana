@@ -6,27 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { GuideId } from '../../..';
+import { GuideCardSolutions } from './guide_cards';
 
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { GuideId } from '../../types';
-
-const cardCss = css`
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-`;
 interface GuideCardConstants {
-  solution: 'search' | 'observability' | 'security';
+  solution: GuideCardSolutions;
   title: string;
   // if present, guideId indicates which guide is opened when clicking the card
   guideId?: GuideId;
@@ -42,7 +27,7 @@ interface GuideCardConstants {
   order: number;
 }
 
-const guideCards: GuideCardConstants[] = [
+export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.appSearch.title', {
@@ -55,7 +40,7 @@ const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.websiteSearch.title', {
-      defaultMessage: 'Add search to your website',
+      defaultMessage: 'Add search to my website',
     }),
     guideId: 'search',
     telemetryId: 'guided-onboarding--search--website',
@@ -73,11 +58,11 @@ const guideCards: GuideCardConstants[] = [
   {
     solution: 'observability',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.logsObservability.title', {
-      defaultMessage: 'Monitor logs',
+      defaultMessage: 'Collect and analyze my logs',
     }),
     navigateTo: {
-      appId: 'observability',
-      path: '/overview',
+      appId: 'integrations',
+      path: '/browse?q=log',
     },
     telemetryId: 'guided-onboarding--observability--logs',
     order: 2,
@@ -85,11 +70,11 @@ const guideCards: GuideCardConstants[] = [
   {
     solution: 'observability',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.apmObservability.title', {
-      defaultMessage: 'Monitor my application performance (APM/tracing)',
+      defaultMessage: 'Monitor my application performance (APM / tracing)',
     }),
     navigateTo: {
-      appId: 'observability',
-      path: '/overview',
+      appId: 'home',
+      path: '#/tutorial/apm',
     },
     telemetryId: 'guided-onboarding--observability--apm',
     order: 5,
@@ -97,11 +82,11 @@ const guideCards: GuideCardConstants[] = [
   {
     solution: 'observability',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.hostsObservability.title', {
-      defaultMessage: 'Monitor hosts',
+      defaultMessage: 'Monitor my host metrics',
     }),
     navigateTo: {
-      appId: 'observability',
-      path: '/overview',
+      appId: 'integrations',
+      path: '/browse/os_system',
     },
     telemetryId: 'guided-onboarding--observability--hosts',
     order: 8,
@@ -130,11 +115,11 @@ const guideCards: GuideCardConstants[] = [
   {
     solution: 'security',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.hostsSecurity.title', {
-      defaultMessage: 'Secure my hosts',
+      defaultMessage: 'Secure my hosts with endpoint security',
     }),
     navigateTo: {
-      appId: 'securitySolutionUI',
-      path: '/overview',
+      appId: 'integrations',
+      path: '/detail/endpoint/overview',
     },
     telemetryId: 'guided-onboarding--security--hosts',
     order: 6,
@@ -142,57 +127,13 @@ const guideCards: GuideCardConstants[] = [
   {
     solution: 'security',
     title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.cloudSecurity.title', {
-      defaultMessage: 'Secure my cloud assets',
+      defaultMessage: 'Secure my cloud assets with posture management',
     }),
     navigateTo: {
-      appId: 'securitySolutionUI',
-      path: '/overview',
+      appId: 'integrations',
+      path: '/detail/cloud_security_posture/overview',
     },
     telemetryId: 'guided-onboarding--security--cloud',
     order: 9,
   },
 ].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];
-
-export interface GuideCardsProps {
-  isLoading: boolean;
-  activateGuide: (guideId: GuideId) => Promise<void>;
-  navigateToApp: ApplicationStart['navigateToApp'];
-}
-export const GuideCards = ({ isLoading, activateGuide, navigateToApp }: GuideCardsProps) => {
-  return (
-    <EuiFlexGroup wrap responsive justifyContent="center">
-      {guideCards.map((card, index) => {
-        const onClick = async () => {
-          console.log('card onclick handler');
-          if (card.guideId) {
-            await activateGuide(card.guideId);
-          } else if (card.navigateTo) {
-            await navigateToApp(card.navigateTo?.appId, {
-              path: card.navigateTo.path,
-            });
-          }
-        };
-        return (
-          <EuiFlexItem key={index} grow={false}>
-            <EuiCard
-              isDisabled={isLoading}
-              onClick={onClick}
-              css={cardCss}
-              title={
-                <>
-                  <EuiSpacer size="s" />
-                  <h3 style={{ fontWeight: 600 }}>{card.title}</h3>
-                </>
-              }
-              titleSize="xs"
-              betaBadgeProps={{
-                label: card.solution,
-              }}
-            />
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
-  );
-};

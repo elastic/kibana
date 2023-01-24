@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { GuideCards } from './guide_card';
+export { GuideCards } from './guide_cards';
+export { GuideFilters } from './guide_filters';
+export type { GuideFilterValues } from './guide_filters';
