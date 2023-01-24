@@ -17,8 +17,12 @@ import {
 } from '@kbn/utils';
 import Boom from '@hapi/boom';
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsExportResultDetails } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObject,
+  ISavedObjectTypeRegistry,
+  SavedObjectsExportResultDetails,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -82,3 +86,69 @@ export const catchAndReturnBoomErrors: RequestHandlerWrapper = (handler) => {
     }
   };
 };
+
+/**
+ *
+ * @param {string[]} exposedVisibleTypes all registered types with hidden:false and hiddenFromHttpApis:false|undefined
+ * @param {string[]} typesToCheck saved object types provided to the httpApi request
+ */
+export function throwOnGloballyHiddenTypes(
+  allHttpApisVisibleTypes: string[],
+  typesToCheck: string[]
+) {
+  if (!typesToCheck.length) {
+    return;
+  }
+  const denyRequestForTypes = typesToCheck.filter(
+    (type: string) => !allHttpApisVisibleTypes.includes(type)
+  );
+  if (denyRequestForTypes.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Unsupported saved object type(s): ${denyRequestForTypes.join(', ')}`
+    );
+  }
+}
+/**
+ * @param {string[]} unsupportedTypes saved object types registered with hidden=false and hiddenFromHttpApis=true
+ */
+
+export function throwOnHttpHiddenTypes(unsupportedTypes: string[]) {
+  if (unsupportedTypes.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Unsupported saved object type(s): ${unsupportedTypes.join(', ')}`
+    );
+  }
+}
+/**
+ * @param {string[]} type saved object type
+ * @param {ISavedObjectTypeRegistry} registry the saved object type registry
+ */
+
+export function throwIfTypeNotVisibleByAPI(type: string, registry: ISavedObjectTypeRegistry) {
+  if (!type) return;
+  const fullType = registry.getType(type);
+  if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+    throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+  }
+}
+
+export function throwIfAnyTypeNotVisibleByAPI(
+  typesToCheck: string[],
+  registry: ISavedObjectTypeRegistry
+) {
+  const unsupportedTypes = typesToCheck.filter((tname) => {
+    const fullType = registry.getType(tname);
+    if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+      return fullType.name;
+    }
+  });
+  if (unsupportedTypes.length > 0) {
+    throwOnHttpHiddenTypes(unsupportedTypes);
+  }
+}
+export interface BulkGetItem {
+  type: string;
+  id: string;
+  fields?: string[];
+  namespaces?: string[];
+}

@@ -8,7 +8,7 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "common/*"
+    "common/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -38,6 +38,7 @@
     "@kbn/apm-utils",
     "@kbn/data-views-plugin",
     "@kbn/share-plugin",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

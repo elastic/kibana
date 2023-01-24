@@ -68,6 +68,7 @@
     "@kbn/slo-schema",
     "@kbn/guided-onboarding",
     "@kbn/charts-plugin",
+    "@kbn/securitysolution-ecs",
   ],
   "exclude": [
     "target/**/*",
