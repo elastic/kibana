@@ -89,7 +89,7 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem grow={1}>
                 <ObjectWeightList />
               </EuiFlexItem>
