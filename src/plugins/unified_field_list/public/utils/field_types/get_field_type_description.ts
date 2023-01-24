@@ -36,6 +36,10 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameDescription.recordField', {
         defaultMessage: 'Count of records.',
       });
+    case KNOWN_FIELD_TYPES.BINARY:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.binaryField', {
+        defaultMessage: 'Binary value encoded as a Base64 string.',
+      });
     case KNOWN_FIELD_TYPES.BOOLEAN:
       return i18n.translate('unifiedFieldList.fieldNameDescription.booleanField', {
         defaultMessage: 'True and false values.',
@@ -56,6 +60,10 @@ export function getFieldTypeDescription(type?: string) {
     case KNOWN_FIELD_TYPES.DATE_RANGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.dateRangeField', {
         defaultMessage: 'Range of date values.',
+      });
+    case KNOWN_FIELD_TYPES.DENSE_VECTOR:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.denseVectorField', {
+        defaultMessage: 'Records dense vectors of float values.',
       });
     case KNOWN_FIELD_TYPES.GAUGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.gaugeField', {
@@ -82,6 +90,10 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('unifiedFieldList.fieldNameDescription.ipAddressRangeField', {
         defaultMessage: 'Range of ip values supporting either IPv4 or IPv6 (or mixed) addresses.',
       });
+    case KNOWN_FIELD_TYPES.FLATTENED:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.flattenedField', {
+        defaultMessage: 'An entire JSON object as a single field value.',
+      });
     case KNOWN_FIELD_TYPES.MURMUR3:
       return i18n.translate('unifiedFieldList.fieldNameDescription.murmur3Field', {
         defaultMessage: 'Field that computes and stores hashes of values.',
@@ -89,6 +101,18 @@ export function getFieldTypeDescription(type?: string) {
     case KNOWN_FIELD_TYPES.NUMBER:
       return i18n.translate('unifiedFieldList.fieldNameDescription.numberField', {
         defaultMessage: 'Long, integer, short, byte, double, and float values.',
+      });
+    case KNOWN_FIELD_TYPES.RANK_FEATURE:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.rankFeatureField', {
+        defaultMessage: 'Records a numeric feature to boost hits at query time.',
+      });
+    case KNOWN_FIELD_TYPES.RANK_FEATURES:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.rankFeaturesField', {
+        defaultMessage: 'Records numeric features to boost hits at query time.',
+      });
+    case KNOWN_FIELD_TYPES.SHAPE:
+      return i18n.translate('unifiedFieldList.fieldNameDescription.shapeField', {
+        defaultMessage: 'Arbitrary cartesian geometries.',
       });
     case KNOWN_FIELD_TYPES.STRING:
       return i18n.translate('unifiedFieldList.fieldNameDescription.stringField', {

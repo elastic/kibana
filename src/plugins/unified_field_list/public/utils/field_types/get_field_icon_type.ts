@@ -9,6 +9,7 @@
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldListItem, GetCustomFieldType } from '../../types';
 import { getFieldType } from './get_field_type';
+import { isKnownFieldType } from './field_types';
 
 /**
  * Returns an icon type for a field
@@ -24,6 +25,9 @@ export function getFieldIconType<T extends FieldListItem = DataViewField>(
   const esType = field.esTypes?.[0] || null;
   if (esType && ['_id', '_index'].includes(esType)) {
     return type;
+  }
+  if (type === 'unknown' && esType && isKnownFieldType(esType)) {
+    return esType;
   }
   return type === 'string' && esType ? esType : type;
 }
