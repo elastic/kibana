@@ -61,11 +61,11 @@ export const MetricsGrid = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="hostsView-metricChart">
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" wrap={false} alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false} style={{ flex: 1 }}>
             <EuiText size="xs">
               <EuiI18n
-                token="xpack.infra.hostsViewPage.tabs.metricsCharts.cpuCores"
+                token="xpack.infra.hostsViewPage.tabs.metricsCharts.sortingCriteria"
                 default="Showing for Top {maxHosts} hosts by {attribute}"
                 values={{
                   maxHosts: <strong>{DEFAULT_BREAKDOWN_SIZE}</strong>,

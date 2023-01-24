@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import useAsync from 'react-use/lib/useAsync';
 import { InfraClientSetupDeps, LensAttributes, LensOptions } from '../types';
 import {
   buildLensAttributes,
@@ -36,20 +36,8 @@ export const useLensAttributes = ({
     services: { lens },
   } = useKibana<InfraClientSetupDeps>();
   const { navigateToPrefilledEditor } = lens;
-  const [formulaAPI, setFormulaAPI] = useState<FormulaPublicApi>();
-  const [error, setError] = useState<boolean>(false);
-
-  useEffect(() => {
-    lens
-      .stateHelperApi()
-      .then(({ formula }) => {
-        setError(false);
-        setFormulaAPI(formula);
-      })
-      .catch(() => {
-        setError(true);
-      });
-  }, [lens]);
+  const { value, error } = useAsync(lens.stateHelperApi, [lens]);
+  const { formula: formulaAPI } = value ?? {};
 
   const attributes: LensAttributes | null = useMemo(() => {
     if (!dataView || !formulaAPI) {
@@ -90,9 +78,12 @@ export const useLensAttributes = ({
         id: 'openInLens',
 
         getDisplayName(_context: ActionExecutionContext): string {
-          return i18n.translate('xpack.infra.hostsTable.tabs.metricsCharts.acitons.openInLines', {
-            defaultMessage: 'Open in Lens',
-          });
+          return i18n.translate(
+            'xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines',
+            {
+              defaultMessage: 'Open in Lens',
+            }
+          );
         },
         getIconType(_context: ActionExecutionContext): string | undefined {
           return 'visArea';

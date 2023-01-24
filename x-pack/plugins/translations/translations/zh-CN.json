@@ -16522,6 +16522,7 @@
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "名称",
     "xpack.infra.hostsViewPage.table.numberOfCpusColumnHeader": "# 个 CPU",
     "xpack.infra.hostsViewPage.table.operatingSystemColumnHeader": "操作系统",
+    "xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines": "在 Lens 中打开",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.title": "指标",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.cpu": "CPU 使用率",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.memory": "内存利用率",
