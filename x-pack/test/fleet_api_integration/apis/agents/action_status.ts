@@ -57,7 +57,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent1', 'agent2', 'agent3'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2099-09-16T10:00:00.000Z',
             data: {
               version: '8.5.0',
             },
@@ -73,7 +72,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent4', 'agent5'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2099-09-16T10:00:00.000Z',
           },
         });
         // Action 3 complete
@@ -195,7 +193,6 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             nbAgentsActioned: 5,
             status: 'IN_PROGRESS',
-            expiration: '2099-09-16T10:00:00.000Z',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
           },

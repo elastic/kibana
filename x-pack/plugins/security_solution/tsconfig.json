@@ -14,6 +14,10 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+  ],
   "kbn_references": [
     "@kbn/core",
     { "path": "../../../src/setup_node_env/tsconfig.json" },
@@ -129,8 +133,8 @@
     "@kbn/cypress-config",
     "@kbn/controls-plugin",
     "@kbn/shared-ux-utility",
-  ],
-  "exclude": [
-    "target/**/*",
+    "@kbn/user-profile-components",
+    "@kbn/guided-onboarding",
+    "@kbn/securitysolution-ecs",
   ]
 }

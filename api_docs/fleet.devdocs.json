@@ -2580,7 +2580,7 @@
             "label": "integrations_all",
             "description": [],
             "signature": [
-              "({ searchTerm, category }: { searchTerm?: string | undefined; category?: string | undefined; }) => [string, string]"
+              "({ searchTerm, category, subCategory, }: { searchTerm?: string | undefined; category?: string | undefined; subCategory?: string | undefined; }) => [string, string]"
             ],
             "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
             "deprecated": false,
@@ -2591,7 +2591,7 @@
                 "id": "def-public.pagePathGetters.integrations_all.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ searchTerm, category }",
+                "label": "{\n    searchTerm,\n    category,\n    subCategory,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
                 "deprecated": false,
@@ -2617,6 +2617,20 @@
                     "type": "string",
                     "tags": [],
                     "label": "category",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-public.pagePathGetters.integrations_all.$1.subCategory",
+                    "type": "string",
+                    "tags": [],
+                    "label": "subCategory",
                     "description": [],
                     "signature": [
                       "string | undefined"
@@ -7077,8 +7091,8 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.DeletePackagePoliciesResponse",
-                "text": "DeletePackagePoliciesResponse"
+                "section": "def-common.PostDeletePackagePoliciesResponse",
+                "text": "PostDeletePackagePoliciesResponse"
               },
               ">"
             ],
@@ -7711,13 +7725,15 @@
             "label": "runExternalCallbacks",
             "description": [],
             "signature": [
-              "<A extends \"packagePolicyCreate\" | \"packagePolicyPostCreate\" | \"postPackagePolicyDelete\" | \"packagePolicyUpdate\">(externalCallbackType: A, packagePolicy: A extends \"postPackagePolicyDelete\" ? ",
+              "<A extends \"packagePolicyCreate\" | \"packagePolicyPostCreate\" | \"packagePolicyDelete\" | \"packagePolicyPostDelete\" | \"packagePolicyUpdate\">(externalCallbackType: A, packagePolicy: A extends \"packagePolicyDelete\" ? ",
+              "DeletePackagePoliciesResponse",
+              " : A extends \"packagePolicyPostDelete\" ? ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.DeletePackagePoliciesResponse",
-                "text": "DeletePackagePoliciesResponse"
+                "section": "def-common.PostDeletePackagePoliciesResponse",
+                "text": "PostDeletePackagePoliciesResponse"
               },
               " : A extends \"packagePolicyPostCreate\" ? ",
               {
@@ -7751,7 +7767,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => Promise<A extends \"postPackagePolicyDelete\" ? void : A extends \"packagePolicyPostCreate\" ? ",
+              "<unknown, unknown, unknown, any>) => Promise<A extends \"packagePolicyDelete\" ? void : A extends \"packagePolicyPostDelete\" ? void : A extends \"packagePolicyPostCreate\" ? ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -7796,13 +7812,15 @@
                 "label": "packagePolicy",
                 "description": [],
                 "signature": [
-                  "A extends \"postPackagePolicyDelete\" ? ",
+                  "A extends \"packagePolicyDelete\" ? ",
+                  "DeletePackagePoliciesResponse",
+                  " : A extends \"packagePolicyPostDelete\" ? ",
                   {
                     "pluginId": "fleet",
                     "scope": "common",
                     "docId": "kibFleetPluginApi",
-                    "section": "def-common.DeletePackagePoliciesResponse",
-                    "text": "DeletePackagePoliciesResponse"
+                    "section": "def-common.PostDeletePackagePoliciesResponse",
+                    "text": "PostDeletePackagePoliciesResponse"
                   },
                   " : A extends \"packagePolicyPostCreate\" ? ",
                   {
@@ -7881,13 +7899,7 @@
             "description": [],
             "signature": [
               "(deletedPackagePolicies: ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.DeletePackagePoliciesResponse",
-                "text": "DeletePackagePoliciesResponse"
-              },
+              "DeletePackagePoliciesResponse",
               ") => Promise<void>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
@@ -7902,12 +7914,52 @@
                 "label": "deletedPackagePolicies",
                 "description": [],
                 "signature": [
+                  "DeletePackagePoliciesResponse"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackagePolicyClient.runPostDeleteExternalCallbacks",
+            "type": "Function",
+            "tags": [],
+            "label": "runPostDeleteExternalCallbacks",
+            "description": [],
+            "signature": [
+              "(deletedPackagePolicies: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PostDeletePackagePoliciesResponse",
+                "text": "PostDeletePackagePoliciesResponse"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyClient.runPostDeleteExternalCallbacks.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "deletedPackagePolicies",
+                "description": [],
+                "signature": [
                   {
                     "pluginId": "fleet",
                     "scope": "common",
                     "docId": "kibFleetPluginApi",
-                    "section": "def-common.DeletePackagePoliciesResponse",
-                    "text": "DeletePackagePoliciesResponse"
+                    "section": "def-common.PostDeletePackagePoliciesResponse",
+                    "text": "PostDeletePackagePoliciesResponse"
                   }
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
@@ -8107,6 +8159,8 @@
           " | ",
           "ExternalCallbackDelete",
           " | ",
+          "ExternalCallbackPostDelete",
+          " | ",
           "ExternalCallbackUpdate"
         ],
         "path": "x-pack/plugins/fleet/server/types/extensions.ts",
@@ -8263,17 +8317,9 @@
         "label": "PostPackagePolicyDeleteCallback",
         "description": [],
         "signature": [
-          "(deletedPackagePolicies: ",
-          "_DeepReadonlyArray",
-          "<{ id: string; name?: string | undefined; success: boolean; package?: ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicyPackage",
-            "text": "PackagePolicyPackage"
-          },
-          " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }>) => Promise<void>"
+          "(packagePolicies: ",
+          "DeletePackagePoliciesResponse",
+          ") => Promise<void>"
         ],
         "path": "x-pack/plugins/fleet/server/types/extensions.ts",
         "deprecated": false,
@@ -8283,21 +8329,19 @@
           {
             "parentPluginId": "fleet",
             "id": "def-server.PostPackagePolicyDeleteCallback.$1",
-            "type": "Object",
+            "type": "Array",
             "tags": [],
-            "label": "deletedPackagePolicies",
+            "label": "packagePolicies",
             "description": [],
             "signature": [
-              "_DeepReadonlyArray",
-              "<{ id: string; name?: string | undefined; success: boolean; package?: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicyPackage",
-                "text": "PackagePolicyPackage"
+                "section": "def-common.PackagePolicy",
+                "text": "PackagePolicy"
               },
-              " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }>"
+              "[]"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
             "deprecated": false,
@@ -8409,6 +8453,57 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/plugins/fleet/server/types/extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.PostPackagePolicyPostDeleteCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "PostPackagePolicyPostDeleteCallback",
+        "description": [],
+        "signature": [
+          "(deletedPackagePolicies: ",
+          "_DeepReadonlyArray",
+          "<{ id: string; name?: string | undefined; success: boolean; package?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackagePolicyPackage",
+            "text": "PackagePolicyPackage"
+          },
+          " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }>) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/fleet/server/types/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PostPackagePolicyPostDeleteCallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "deletedPackagePolicies",
+            "description": [],
+            "signature": [
+              "_DeepReadonlyArray",
+              "<{ id: string; name?: string | undefined; success: boolean; package?: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackagePolicyPackage",
+                "text": "PackagePolicyPackage"
+              },
+              " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }>"
             ],
             "path": "x-pack/plugins/fleet/server/types/extensions.ts",
             "deprecated": false,
@@ -8802,32 +8897,6 @@
     "functions": [
       {
         "parentPluginId": "fleet",
-        "id": "def-common.createFleetAuthzMock",
-        "type": "Function",
-        "tags": [],
-        "label": "createFleetAuthzMock",
-        "description": [
-          "\nCreates mock `authz` object"
-        ],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.FleetAuthz",
-            "text": "FleetAuthz"
-          }
-        ],
-        "path": "x-pack/plugins/fleet/common/mocks.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.decodeCloudId",
         "type": "Function",
         "tags": [],
@@ -9086,6 +9155,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Agent.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "AgentMetrics",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9166,7 +9250,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"inactive\" | \"active\""
+              "\"active\" | \"inactive\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -12487,6 +12571,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/output.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewOutput.shipper",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shipper",
+            "description": [],
+            "signature": [
+              "ShipperOutput",
+              " | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -13692,6 +13791,28 @@
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryElasticsearch",
+                "text": "RegistryElasticsearch"
+              },
+              ", \"index_template.settings\" | \"index_template.mappings\"> | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -14106,6 +14227,21 @@
             "description": [],
             "signature": [
               "MappingTypeMapping",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.index_template.data_stream",
+            "type": "Object",
+            "tags": [],
+            "label": "'index_template.data_stream'",
+            "description": [],
+            "signature": [
+              "RegistryDataStreamProperties",
               " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -15104,29 +15240,6 @@
             "text": "PackagePolicy"
           },
           ">"
-        ],
-        "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.DeletePackagePoliciesResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "DeletePackagePoliciesResponse",
-        "description": [],
-        "signature": [
-          "{ id: string; name?: string | undefined; success: boolean; package?: ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicyPackage",
-            "text": "PackagePolicyPackage"
-          },
-          " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }[]"
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
         "deprecated": false,
@@ -16229,6 +16342,29 @@
           "\"fleet\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PostDeletePackagePoliciesResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PostDeletePackagePoliciesResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; name?: string | undefined; success: boolean; package?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.PackagePolicyPackage",
+            "text": "PackagePolicyPackage"
+          },
+          " | undefined; policy_id?: string | undefined; statusCode?: number | undefined; body?: { message: string; } | undefined; }[]"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/package_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

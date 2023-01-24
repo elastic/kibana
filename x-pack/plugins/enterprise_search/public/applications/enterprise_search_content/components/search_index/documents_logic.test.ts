@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -100,22 +100,6 @@ describe('DocumentsLogic', () => {
         });
         jest.useRealTimers();
       });
-    });
-    it('calls flashAPIErrors on apiError', () => {
-      DocumentsLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-    });
-    it('calls flashAPIErrors on mappingsApiError', () => {
-      DocumentsLogic.actions.mappingsApiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-    });
-    it('clears flash messages on new makeRequest', () => {
-      DocumentsLogic.actions.makeRequest({
-        indexName: 'index',
-        pagination: convertMetaToPagination(INDEX_DOCUMENTS_META_DEFAULT),
-        query: '',
-      });
-      expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
   });
   describe('selectors', () => {

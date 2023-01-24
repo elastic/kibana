@@ -30,6 +30,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/status/get_status'));
     loadTestFile(require.resolve('./cases/tags/get_tags'));
     loadTestFile(require.resolve('./user_actions/get_all_user_actions'));
+    loadTestFile(require.resolve('./user_actions/find_user_actions'));
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
@@ -44,6 +45,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      */
 
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
+    loadTestFile(require.resolve('./internal/bulk_get_cases'));
 
     /**
      * Attachments framework

@@ -27,7 +27,7 @@ import {
 export const extractItems = (data: NetworkEvent[]): NetworkEvent[] => {
   // NOTE: This happens client side as the "payload" property is mapped
   // in such a way it can't be queried (or sorted on) via ES.
-  return data.sort((a: NetworkEvent, b: NetworkEvent) => {
+  return [...data].sort((a: NetworkEvent, b: NetworkEvent) => {
     return a.requestSentTime - b.requestSentTime;
   });
 };
@@ -491,9 +491,12 @@ export const colourPalette: ColourPalette = { ...TIMING_PALETTE, ...MIME_TYPE_PA
 export const formatTooltipHeading = (index: number, fullText: string): string =>
   isNaN(index) ? fullText : `${index}. ${fullText}`;
 
-export const formatMillisecond = (ms: number) => {
-  if (ms < 1000) {
-    return `${ms.toFixed(0)} ms`;
+export const formatMillisecond = (
+  ms: number,
+  { maxMillis = 1000, digits }: { digits?: number; maxMillis?: number }
+) => {
+  if (ms < maxMillis) {
+    return `${ms.toFixed(digits ?? 0)} ms`;
   }
-  return `${(ms / 1000).toFixed(1)} s`;
+  return `${(ms / 1000).toFixed(digits ?? 1)} s`;
 };

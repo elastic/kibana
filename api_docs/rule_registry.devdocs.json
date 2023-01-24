@@ -1547,9 +1547,9 @@
           },
           "<Params, ",
           "WrappedLifecycleRuleState",
-          "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<",
+          "<State>, InstanceState, InstanceContext, ActionGroupIds>) => Promise<{ state: ",
           "WrappedLifecycleRuleState",
-          "<State>>"
+          "<State>; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
@@ -1793,7 +1793,7 @@
             "section": "def-common.WithoutReservedActionGroups",
             "text": "WithoutReservedActionGroups"
           },
-          "<TActionGroupIds, never>>) => Promise<void | TState>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
+          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -1803,7 +1803,9 @@
           },
           ") => Promise<{ new: { count: number; data: {}[]; }; ongoing: { count: number; data: {}[]; }; recovered: { count: number; data: {}[]; }; }>; name: string; validate?: { params?: ",
           "RuleTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; id: string; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; id: string; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
+          "IRuleTypeAlerts",
+          " | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1859,7 +1861,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; }"
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -3174,7 +3176,7 @@
             "description": [],
             "signature": [
               "(T & ",
-              "CommonAlertFields800",
+              "CommonAlertFields870",
               " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
@@ -3719,7 +3721,7 @@
             "section": "def-server.LifecycleAlertServices",
             "text": "LifecycleAlertServices"
           },
-          "<InstanceState, InstanceContext, ActionGroupIds>>) => Promise<void | State>"
+          "<InstanceState, InstanceContext, ActionGroupIds>>) => Promise<{ state: State; }>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
         "deprecated": false,
@@ -3919,7 +3921,7 @@
             "section": "def-server.PersistenceServices",
             "text": "PersistenceServices"
           },
-          "; }) => Promise<void | TState>; }"
+          "; }) => Promise<{ state: TState; }>; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
