@@ -97,7 +97,7 @@ export const ErrorsList = ({
       },
       render: (value: string, item: PingState) => {
         if (!isBrowserType) {
-          return <EuiText size="s">{item.error?.message ?? '--'}</EuiText>;
+          return <EuiText size="s">{item.error.message ?? '--'}</EuiText>;
         }
         const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
         if (!failedStep) {
