@@ -82,29 +82,29 @@ export const useResolver = (
           savedSearch: null,
           dataView: null,
         };
-        let _savedSearch;
+        let savedSearch;
 
         if (savedSearchId !== undefined) {
           // @todo: use better name
-          _savedSearch = await getSavedSearch(savedSearchId, getSavedSearchDeps);
+          savedSearch = await getSavedSearch(savedSearchId, getSavedSearchDeps);
           dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
         } else if (dataViewId !== undefined) {
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
 
-        const { savedSearch, dataView } = dataViewAndSavedSearch;
+        const { savedSearch: savedSearchSimpleObj, dataView } = dataViewAndSavedSearch;
 
         const { combinedQuery } = createSearchItems(
           config,
           dataView !== null ? dataView : undefined,
-          savedSearch
+          savedSearchSimpleObj
         );
 
         setContext({
           combinedQuery,
           currentDataView: dataView,
-          currentSavedSearch: savedSearch,
-          _savedSearch,
+          currentSavedSearch: savedSearchSimpleObj,
+          savedSearch,
           dataViewsContract,
           kibanaConfig: config,
         });

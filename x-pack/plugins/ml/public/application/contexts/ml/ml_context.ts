@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import type { MlServicesContext } from '../../app';
 
@@ -14,6 +15,7 @@ export interface MlContextValue {
   combinedQuery: any;
   currentDataView: DataView; // TODO this should be DataView or null
   currentSavedSearch: SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;
   kibanaVersion: string;

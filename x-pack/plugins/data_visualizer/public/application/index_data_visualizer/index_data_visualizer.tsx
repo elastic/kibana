@@ -190,7 +190,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       }
     };
     getDataView();
-  }, [savedObjectsClient, toasts, dataViews, urlSearchString]);
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search]);
 
   const setUrlState: SetUrlState = useCallback(
     (

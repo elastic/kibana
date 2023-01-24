@@ -25,8 +25,7 @@ export const LogCategorizationPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  // @todo: rename context._savedSearch
-  const savedSearch = context._savedSearch;
+  const savedSearch = context.savedSearch;
 
   return (
     <>
