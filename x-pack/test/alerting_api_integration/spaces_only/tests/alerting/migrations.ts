@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
@@ -32,8 +32,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerting/rule/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
       );
 
-      expect(response.status).to.eql(200);
-      expect(response.body.consumer).to.equal('alerts');
+      expect(response.status).toBe(200);
+      expect(response.body.consumer).toEqual('alerts');
     });
 
     it('7.10.0 migrates the `metrics` consumer to be the `infrastructure`', async () => {
@@ -41,8 +41,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerting/rule/74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4`
       );
 
-      expect(response.status).to.eql(200);
-      expect(response.body.consumer).to.equal('infrastructure');
+      expect(response.status).toEqual(200);
+      expect(response.body.consumer).toEqual('infrastructure');
     });
 
     it('7.10.0 migrates PagerDuty actions to have a default dedupKey', async () => {
@@ -50,10 +50,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerting/rule/b6087f72-994f-46fb-8120-c6e5c50d0f8f`
       );
 
-      expect(response.status).to.eql(200);
+      expect(response.status).toEqual(200);
 
-      expect(response.body.actions).to.eql([
-        {
+      expect(response.body.actions).toEqual([
+        expect.objectContaining({
           connector_type_id: '.pagerduty',
           id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
           group: 'default',
@@ -62,8 +62,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             eventAction: 'trigger',
             summary: 'fired {{alertInstanceId}}',
           },
-        },
-        {
+        }),
+        expect.objectContaining({
           connector_type_id: '.pagerduty',
           id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
           group: 'default',
@@ -73,8 +73,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             eventAction: 'resolve',
             summary: 'fired {{alertInstanceId}}',
           },
-        },
-        {
+        }),
+        expect.objectContaining({
           connector_type_id: '.pagerduty',
           id: 'a6a8ab7a-35cf-445e-ade3-215a029c2ee3',
           group: 'default',
@@ -84,7 +84,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             eventAction: 'resolve',
             summary: 'fired {{alertInstanceId}}',
           },
-        },
+        }),
       ]);
     });
 
@@ -93,8 +93,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerting/rule/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
       );
 
-      expect(response.status).to.eql(200);
-      expect(response.body.updated_at).to.eql('2020-06-17T15:35:39.839Z');
+      expect(response.status).toEqual(200);
+      expect(response.body.updated_at).toEqual('2020-06-17T15:35:39.839Z');
     });
 
     it('7.11.0 migrates alerts to contain `notifyWhen` field', async () => {
@@ -102,8 +102,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerting/rule/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
       );
 
-      expect(response.status).to.eql(200);
-      expect(response.body.notify_when).to.eql('onActiveAlert');
+      expect(response.status).toEqual(200);
+      expect(response.body.notify_when).toEqual('onActiveAlert');
     });
 
     it('7.11.2 migrates alerts with case actions, case fields are nested in an incident object', async () => {
@@ -111,9 +111,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         `${getUrlPrefix(``)}/api/alerting/rule/99f3e6d7-b7bb-477d-ac28-92ee22726969`
       );
 
-      expect(response.status).to.eql(200);
-      expect(response.body.actions).to.eql([
-        {
+      expect(response.status).toEqual(200);
+      expect(response.body.actions).toEqual([
+        expect.objectContaining({
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           connector_type_id: '.servicenow',
           group: 'threshold met',
@@ -130,8 +130,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               comments: [{ commentId: '1', comment: 'sn comment' }],
             },
           },
-        },
-        {
+        }),
+        expect.objectContaining({
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           connector_type_id: '.jira',
           group: 'threshold met',
@@ -154,8 +154,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               ],
             },
           },
-        },
-        {
+        }),
+        expect.objectContaining({
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           connector_type_id: '.resilient',
           group: 'threshold met',
@@ -176,7 +176,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               ],
             },
           },
-        },
+        }),
       ]);
     });
 
@@ -189,8 +189,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.references).to.eql([
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.references).toEqual([
         {
           name: 'param:exceptionsList_0',
           id: 'endpoint_list',
@@ -218,10 +218,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(searchResult.statusCode).to.equal(200);
-      expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
+      expect(searchResult.statusCode).toEqual(200);
+      expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).toEqual(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).legacyId).to.equal(
+      expect((hit!._source!.alert! as RawRule).legacyId).toEqual(
         '74f3e6d7-b7bb-477d-ac28-92ee22728e6e'
       );
     });
@@ -240,31 +240,31 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(searchResult.statusCode).to.equal(200);
-      expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
+      expect(searchResult.statusCode).toEqual(200);
+      expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).toEqual(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).actions! as RawRuleAction[]).to.eql([
-        {
+      expect((hit!._source!.alert! as RawRule).actions! as RawRuleAction[]).toEqual([
+        expect.objectContaining({
           actionRef: 'action_0',
           actionTypeId: 'test.noop',
           group: 'default',
           params: {},
-        },
-        {
+        }),
+        expect.objectContaining({
           actionRef: 'preconfigured:my-slack1',
           actionTypeId: '.slack',
           group: 'default',
           params: {
             message: 'something happened!',
           },
-        },
+        }),
       ]);
-      expect(hit!._source!.references!).to.eql([
-        {
+      expect(hit!._source!.references!).toEqual([
+        expect.objectContaining({
           id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
           name: 'action_0',
           type: 'action',
-        },
+        }),
       ]);
     });
 
@@ -277,8 +277,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.references).to.eql([
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.references).toEqual([
         {
           name: 'param:alert_0',
           id: '1a4ed6ae-3c89-44b2-999d-db554144504c',
@@ -301,8 +301,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.threatIndicatorPath).to.eql(
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).toEqual(
         FILEBEAT_7X_INDICATOR_PATH
       );
     });
@@ -321,8 +321,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.threatIndicatorPath).to.eql(
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).toEqual(
         'custom.indicator.path'
       );
     });
@@ -341,8 +341,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.threatIndicatorPath).not.to.eql(
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).not.toEqual(
         FILEBEAT_7X_INDICATOR_PATH
       );
     });
@@ -355,8 +355,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.actions?.[0].group).to.be(
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.actions?.[0].group).toBe(
         'metrics.inventory_threshold.fired'
       );
     });
@@ -369,9 +369,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.alertTypeId).to.be('siem.queryRule');
-      expect(response.body._source?.alert?.enabled).to.be(false);
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.alertTypeId).toBe('siem.queryRule');
+      expect(response.body._source?.alert?.enabled).toBe(false);
     });
 
     it('8.0.1 migrates and adds tags to disabled rules in 8.0', async () => {
@@ -382,7 +382,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(responseEnabledBeforeMigration.statusCode).to.eql(200);
+      expect(responseEnabledBeforeMigration.statusCode).toEqual(200);
       const responseDisabledBeforeMigration = await es.get<{ alert: RawRule }>(
         {
           index: '.kibana',
@@ -390,17 +390,17 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(responseDisabledBeforeMigration.statusCode).to.eql(200);
+      expect(responseDisabledBeforeMigration.statusCode).toEqual(200);
 
       // Both should be disabled
-      expect(responseEnabledBeforeMigration.body._source?.alert?.enabled).to.be(false);
-      expect(responseDisabledBeforeMigration.body._source?.alert?.enabled).to.be(false);
+      expect(responseEnabledBeforeMigration.body._source?.alert?.enabled).toBe(false);
+      expect(responseDisabledBeforeMigration.body._source?.alert?.enabled).toBe(false);
 
       // Only the rule that was enabled should be tagged
-      expect(responseEnabledBeforeMigration.body._source?.alert?.tags).to.eql([
+      expect(responseEnabledBeforeMigration.body._source?.alert?.tags).toEqual([
         'auto_disabled_8.0',
       ]);
-      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([]);
+      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).toEqual([]);
     });
 
     it('8.2.0 migrates params to mapped_params for specific params properties', async () => {
@@ -412,8 +412,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         { meta: true }
       );
 
-      expect(response.statusCode).to.equal(200);
-      expect(response.body._source?.alert?.mapped_params).to.eql({
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.mapped_params).toEqual({
         risk_score: 90,
         severity: '80-critical',
       });
@@ -427,8 +427,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.equal(200);
-      expect(response.body._source?.alert?.params.searchType).to.eql('esQuery');
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params.searchType).toEqual('esQuery');
     });
 
     it('8.3.0 removes internal tags in Security Solution rule', async () => {
@@ -440,8 +440,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         { meta: true }
       );
 
-      expect(response.statusCode).to.equal(200);
-      expect(response.body._source?.alert?.tags).to.eql(['test-tag-1', 'foo-tag']);
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.tags).toEqual(['test-tag-1', 'foo-tag']);
     });
 
     it('8.4.1 removes IsSnoozedUntil', async () => {
@@ -459,9 +459,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         { meta: true }
       );
 
-      expect(searchResult.statusCode).to.equal(200);
+      expect(searchResult.statusCode).toEqual(200);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).isSnoozedUntil).to.be(undefined);
+      expect((hit!._source!.alert! as RawRule).isSnoozedUntil).toBe(undefined);
     });
 
     it('8.5.0 removes runtime and field params from older ES Query rules', async () => {
@@ -478,8 +478,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.esQuery).to.eql(
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params?.esQuery).toEqual(
         JSON.stringify({ query: { match_all: {} } }, null, 4)
       );
     });
@@ -498,8 +498,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.esQuery).to.eql(
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params?.esQuery).toEqual(
         '{\n\t"query":\n{\n\t"match_all":\n\t{}\n}\n}'
       );
     });
@@ -518,8 +518,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
-      expect(response.body._source?.alert?.params?.esQuery).to.eql('{"query":}');
+      expect(response.statusCode).toEqual(200);
+      expect(response.body._source?.alert?.params?.esQuery).toEqual('{"query":}');
     });
 
     it('8.6.0 migrates executionStatus and monitoring', async () => {
@@ -532,7 +532,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
       const alert = response.body._source?.alert;
 
-      expect(alert?.monitoring).to.eql({
+      expect(alert?.monitoring).toEqual({
         run: {
           history: [
             {
@@ -556,14 +556,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(alert?.lastRun).to.eql({
+      expect(alert?.lastRun).toEqual({
         outcome: 'succeeded',
         outcomeMsg: null,
         warning: null,
         alertsCount: {},
       });
 
-      expect(alert?.nextRun).to.eql(undefined);
+      expect(alert?.nextRun).toEqual(undefined);
     });
 
     it('8.6 migrates executionStatus warnings and errors', async () => {
@@ -577,9 +577,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       const alert = response.body._source?.alert;
 
-      expect(alert?.lastRun?.outcome).to.eql('warning');
-      expect(alert?.lastRun?.warning).to.eql('warning reason');
-      expect(alert?.lastRun?.outcomeMsg).to.eql('warning message');
+      expect(alert?.lastRun?.outcome).toEqual('warning');
+      expect(alert?.lastRun?.warning).toEqual('warning reason');
+      expect(alert?.lastRun?.outcomeMsg).toEqual('warning message');
     });
 
     it('8.7.0 adds aggType and groupBy to ES query rules', async () => {
@@ -602,11 +602,42 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         },
         { meta: true }
       );
-      expect(response.statusCode).to.eql(200);
+      expect(response.statusCode).toEqual(200);
       response.body.hits.hits.forEach((hit) => {
-        expect((hit?._source?.alert as RawRule)?.params?.aggType).to.eql('count');
-        expect((hit?._source?.alert as RawRule)?.params?.groupBy).to.eql('all');
+        expect((hit?._source?.alert as RawRule)?.params?.aggType).toEqual('count');
+        expect((hit?._source?.alert as RawRule)?.params?.groupBy).toEqual('all');
       });
+    });
+
+    it('8.7 adds uuid to the actions', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
+        },
+        { meta: true }
+      );
+
+      const alert = response.body._source?.alert;
+
+      expect(alert?.actions).toEqual([
+        {
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          group: 'default',
+          params: {},
+          uuid: expect.any(String),
+        },
+        {
+          actionRef: 'preconfigured:my-slack1',
+          actionTypeId: '.slack',
+          group: 'default',
+          params: {
+            message: 'something happened!',
+          },
+          uuid: expect.any(String),
+        },
+      ]);
     });
   });
 }
