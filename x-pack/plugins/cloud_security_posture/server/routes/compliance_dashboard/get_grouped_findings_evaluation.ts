@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { calculatePostureScore } from './get_stats';
+import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 
