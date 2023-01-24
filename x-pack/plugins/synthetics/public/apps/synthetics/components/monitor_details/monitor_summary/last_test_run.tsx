@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,14 +32,13 @@ import {
   Ping,
   SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
-import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
+import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
@@ -108,7 +107,7 @@ export const LastTestRunComponent = ({
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                monitorId: monitor?.id!,
+                configId: monitor?.id!,
                 locationId: selectedLocation!.id,
                 stateId: latestPing.state?.id!,
               })}
@@ -128,6 +127,7 @@ export const LastTestRunComponent = ({
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
           showStepNumber={true}
+          showExpand={false}
         />
       ) : (
         <SinglePingResult ping={latestPing} loading={loading} />
@@ -153,12 +153,7 @@ const PanelHeader = ({
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const format = useKibanaDateFormat();
-
-  const lastRunTimestamp = useMemo(
-    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp, format) : ''),
-    [latestPing?.timestamp, format]
-  );
+  const lastRunTimestamp = useFormatTestRunAt(latestPing?.timestamp);
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
