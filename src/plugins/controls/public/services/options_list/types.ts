@@ -15,4 +15,5 @@ export interface ControlsOptionsListService {
   ) => Promise<OptionsListResponse>;
   clearOptionsListCache: () => void;
   getAllowExpensiveQueries: () => Promise<boolean>;
+  optionsListResponseWasSuccessful: (response: OptionsListResponse) => boolean;
 }

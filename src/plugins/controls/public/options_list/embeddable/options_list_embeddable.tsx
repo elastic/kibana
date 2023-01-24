@@ -40,7 +40,10 @@ import { getDefaultComponentState, optionsListReducers } from '../options_list_r
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { ControlsHTTPService } from '../../services/http/types';
+import {
+  OptionsListFailureResponse,
+  OptionsListSuccessResponse,
+} from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -307,31 +310,36 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             }
           : globalTimeRange;
 
-      const { suggestions, invalidSelections, totalCardinality, rejected } =
-        await this.optionsListService.runOptionsListRequest(
-          {
-            sort,
-            size,
-            field,
-            query,
-            filters,
-            dataView,
-            timeRange,
-            runPastTimeout,
-            selectedOptions,
-            searchString: searchString.value,
-            allowExpensiveQueries: this.allowExpensiveQueries,
-          },
-          this.abortController.signal
-        );
-      if (rejected) {
-        // This prevents a rejected request (which can happen, for example, when a user types a search string too quickly)
-        // from prematurely setting loading to `false` and updating the suggestions to show "No results"
-        // console.log('REJECTED!!!!');
-        // this.onFatalError({ name: 'test', message: 'test' });
+      const response = await this.optionsListService.runOptionsListRequest(
+        {
+          sort,
+          size,
+          field,
+          query,
+          filters,
+          dataView,
+          timeRange,
+          runPastTimeout,
+          selectedOptions,
+          searchString: searchString.value,
+          allowExpensiveQueries: this.allowExpensiveQueries,
+        },
+        this.abortController.signal
+      );
+      if (!this.optionsListService.optionsListResponseWasSuccessful(response)) {
+        const error = (response as OptionsListFailureResponse).error;
+        if (error === 'aborted') {
+          // This prevents an aborted request (which can happen, for example, when a user types a search string too quickly)
+          // from prematurely setting loading to `false` and updating the suggestions to show "No results"
+          return;
+        }
+        dispatch(setLoading(false));
+        this.onFatalError(error);
         return;
       }
 
+      const { suggestions, invalidSelections, totalCardinality } =
+        response as OptionsListSuccessResponse;
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||

@@ -16,6 +16,8 @@ import {
   OptionsListRequest,
   OptionsListResponse,
   OptionsListRequestBody,
+  OptionsListSuccessResponse,
+  OptionsListFailureResponse,
 } from '../../../common/options_list/types';
 import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
@@ -112,13 +114,20 @@ class OptionsListService implements ControlsOptionsListService {
     }
   };
 
+  public optionsListResponseWasSuccessful = (
+    response: OptionsListResponse
+  ): response is OptionsListSuccessResponse => {
+    return Boolean((response as OptionsListSuccessResponse).suggestions);
+  };
+
   public runOptionsListRequest = async (request: OptionsListRequest, abortSignal: AbortSignal) => {
     try {
       return await this.cachedOptionsListRequest(request, abortSignal);
-    } catch (error) {
+    } catch (error: any) {
       // Remove rejected results from memoize cache
       this.cachedOptionsListRequest.cache.delete(this.optionsListCacheResolver(request));
-      return { rejected: true } as OptionsListResponse;
+      if (error.name === 'AbortError') return { error: 'aborted' } as OptionsListFailureResponse;
+      return { error } as OptionsListFailureResponse;
     }
   };
 

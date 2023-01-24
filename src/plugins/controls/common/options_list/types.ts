@@ -40,12 +40,17 @@ export interface OptionsListSuggestionResult {
 /**
  * The Options list response is returned from the serverside Options List route.
  */
-export interface OptionsListResponse {
-  rejected: boolean;
+export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
   totalCardinality?: number;
   invalidSelections?: string[];
 }
+
+export interface OptionsListFailureResponse {
+  error: 'aborted' | Error;
+}
+
+export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailureResponse;
 
 /**
  * The Options list request type taken in by the public Options List service.
