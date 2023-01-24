@@ -369,6 +369,50 @@ describe('blocks', () => {
         .toCompileTo('');
     });
 
+    describe('return values', () => {
+      for (const [desc, template, result] of [
+        ['non-block', '{{*decorator}}cont{{*decorator}}ent', 'content'],
+        ['block', '{{#*decorator}}con{{/decorator}}tent', 'tent'],
+      ]) {
+        describe(desc, () => {
+          const falsy = [undefined, null, false, 0, ''];
+          const truthy = [true, 42, 'foo', {}];
+
+          // Falsy return values from decorators are simply ingored and the
+          // execution falls back to default behavior which is to render the
+          // other parts of the template.
+          for (const value of falsy) {
+            it(`falsy value (type ${typeof value}): ${JSON.stringify(value)}`, () => {
+              expectTemplate(template)
+                .withDecorator('decorator', () => value)
+                .toCompileTo(result);
+            });
+          }
+
+          // Truthy return values from decorators are expected to be functions
+          // and the program will attempt to call them. We expect an error to
+          // be thrown in this case.
+          for (const value of truthy) {
+            it(`non-falsy value (type ${typeof value}): ${JSON.stringify(value)}`, () => {
+              expectTemplate(template)
+                .withDecorator('decorator', () => value)
+                .toThrow('is not a function');
+            });
+          }
+
+          // If the decorator return value is a custom function, its return
+          // value will be the final content of the template.
+          for (const value of [...falsy, ...truthy]) {
+            it(`function returning ${typeof value}: ${JSON.stringify(value)}`, () => {
+              expectTemplate(template)
+                .withDecorator('decorator', () => () => value)
+                .toCompileTo(value as string);
+            });
+          }
+        });
+      }
+    });
+
     describe('custom return function should be called with expected arguments and its return value should be rendered in the template', () => {
       it('root decorator', () => {
         expectTemplate('{{*decorator}}world')

@@ -331,7 +331,15 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const result = main(this.context, options);
     this.output.push(result);
 
-    return this.output.join('');
+    // This is a workaround to support decorators that returns a custom
+    // function which itself doesn't return a string, in which case joining as
+    // strings will result in an unexpected output.
+    //
+    // It should be enough to only concern ourselfs with output arrays of
+    // length one, as decorators alsways should control the entire output. So
+    // we shouldn't have situations where non-strings exists in output arrays
+    // larger than one (fingers crossed!).
+    return this.output.length === 1 ? this.output[0] : this.output.join('');
   }
 
   // ********************************************** //
