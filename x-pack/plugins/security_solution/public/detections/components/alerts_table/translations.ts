@@ -316,10 +316,24 @@ export const STATS_GROUP_HOSTS = i18n.translate(
   }
 );
 
+export const STATS_GROUP_IPS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.hostsCount',
+  {
+    defaultMessage: `IP's:`,
+  }
+);
+
 export const STATS_GROUP_USERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.stats.usersCount',
   {
     defaultMessage: 'Users:',
+  }
+);
+
+export const STATS_GROUP_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.rulesCount',
+  {
+    defaultMessage: 'Rules:',
   }
 );
 

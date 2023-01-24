@@ -5,36 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import { EuiIcon } from '@elastic/eui';
+import React from 'react';
+import type {
+  BadgeMetric,
+  CustomMetric,
+} from '../../../common/components/grouping/accordion_panel';
 import type { RawBucket } from '../../../common/components/grouping';
 import * as i18n from './translations';
-
-export const StatsContainer = styled.span`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  padding-right: ${({ theme }) => theme.eui.euiSizeM};
-  .smallDot {
-    width: 3px !important;
-    display: inline-block;
-  }
-  .euiBadge__text {
-    text-align: center;
-    width: 100%;
-  }
-`;
 
 const getSingleGroupSeverity = (severity?: string) => {
   switch (severity) {
@@ -70,120 +48,98 @@ const getSingleGroupSeverity = (severity?: string) => {
   return null;
 };
 
-export const GroupRightPanel = React.memo<{
-  bucket: RawBucket;
-  actionItems: JSX.Element[];
-  onClick?: (isOpen: boolean) => void;
-}>(({ bucket, actionItems, onClick }) => {
-  const [isPopoverOpen, setPopover] = useState(false);
+export const getSelectedGroupBadgeMetrics = (
+  selectedGroup: string,
+  bucket: RawBucket
+): BadgeMetric[] => {
+  const defaultBadges = [
+    {
+      title: i18n.STATS_GROUP_ALERTS,
+      value: bucket.doc_count,
+      width: 50,
+      color: '#a83632',
+    },
+  ];
+  switch (selectedGroup) {
+    case 'kibana.alert.rule.name':
+      return [
+        {
+          title: i18n.STATS_GROUP_USERS,
+          value: bucket.usersCountAggregation?.value ?? 0,
+        },
+        {
+          title: i18n.STATS_GROUP_HOSTS,
+          value: bucket.hostsCountAggregation?.value ?? 0,
+        },
+        ...defaultBadges,
+      ];
+    case 'host.name':
+      return [
+        {
+          title: i18n.STATS_GROUP_USERS,
+          value: bucket.usersCountAggregation?.value ?? 0,
+        },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          value: bucket.rulesCountAggregation?.value ?? 0,
+        },
+        ...defaultBadges,
+      ];
+    case 'user.name':
+      return [
+        {
+          title: i18n.STATS_GROUP_IPS,
+          value: bucket.hostsCountAggregation?.value ?? 0,
+        },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          value: bucket.rulesCountAggregation?.value ?? 0,
+        },
+        ...defaultBadges,
+      ];
+  }
+  return [
+    {
+      title: i18n.STATS_GROUP_RULES,
+      value: bucket.rulesCountAggregation?.value ?? 0,
+    },
+    ...defaultBadges,
+  ];
+};
 
-  const onButtonClick = () => {
-    if (onClick) {
-      onClick(isPopoverOpen);
-    }
-    setPopover(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setPopover(false);
-  };
-
-  const takeActionsButton = (
-    <EuiButtonEmpty onClick={onButtonClick} iconType="arrowDown" iconSide="right">
-      {i18n.TAKE_ACTION}
-    </EuiButtonEmpty>
-  );
-
+export const getSelectedGroupCustomMetrics = (
+  selectedGroup: string,
+  bucket: RawBucket
+): CustomMetric[] => {
   const singleSeverityComponent =
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
       ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key)
       : null;
-
-  return (
-    <EuiFlexGroup key={`stats-${bucket.key[0]}`} gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          {bucket.countSeveritySubAggregation?.value &&
-          bucket.countSeveritySubAggregation?.value > 1 ? (
-            <>
-              {i18n.STATS_GROUP_SEVERITY}
-              <span className="smallDot">
-                <EuiIcon type="dot" color="#54b399" />
-              </span>
-              <span className="smallDot">
-                <EuiIcon type="dot" color="#d6bf57" />
-              </span>
-              <span className="smallDot">
-                <EuiIcon type="dot" color="#da8b45" />
-              </span>
-
-              <span>
-                <EuiIcon type="dot" color="#e7664c" />
-              </span>
-              {i18n.STATS_GROUP_SEVERITY_MULTI}
-            </>
-          ) : (
-            <>
-              {i18n.STATS_GROUP_SEVERITY}
-              {singleSeverityComponent}
-            </>
-          )}
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          <>
-            {i18n.STATS_GROUP_USERS}
-            <EuiToolTip position="top" content={bucket.usersCountAggregation?.value}>
-              <EuiBadge color="hollow" style={{ marginLeft: 10, width: 35 }}>
-                {bucket.usersCountAggregation?.value && bucket.usersCountAggregation?.value > 99
-                  ? '99+'
-                  : bucket.usersCountAggregation?.value}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          <>
-            {i18n.STATS_GROUP_HOSTS}
-            <EuiToolTip position="top" content={bucket.hostsCountAggregation?.value}>
-              <EuiBadge color="hollow" style={{ marginLeft: 10, width: 35 }}>
-                {bucket.hostsCountAggregation?.value && bucket.hostsCountAggregation?.value > 99
-                  ? '99+'
-                  : bucket.hostsCountAggregation?.value}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <StatsContainer>
-          <>
-            {i18n.STATS_GROUP_ALERTS}
-            <EuiToolTip position="top" content={bucket.doc_count}>
-              <EuiBadge style={{ marginLeft: 10, width: 50 }} color="#a83632">
-                {bucket.doc_count > 999 ? '999+' : bucket.doc_count}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        </StatsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="contextMenuExample"
-          button={takeActionsButton}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel items={actionItems} />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
-
-GroupRightPanel.displayName = 'GroupRightPanel';
+  if (!singleSeverityComponent) {
+    return [];
+  }
+  switch (selectedGroup) {
+    case 'kibana.alert.rule.name':
+      return [
+        {
+          title: i18n.STATS_GROUP_SEVERITY,
+          customStatRenderer: singleSeverityComponent,
+        },
+      ];
+    case 'host.name':
+      return [
+        {
+          title: i18n.STATS_GROUP_SEVERITY,
+          customStatRenderer: singleSeverityComponent,
+        },
+      ];
+    case 'user.name':
+      return [
+        {
+          title: i18n.STATS_GROUP_SEVERITY,
+          customStatRenderer: singleSeverityComponent,
+        },
+      ];
+  }
+  return [];
+};

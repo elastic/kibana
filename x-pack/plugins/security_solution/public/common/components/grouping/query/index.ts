@@ -126,6 +126,7 @@ export const getGroupingQuery = ({
         : {
             terms: {
               field: stackByMupltipleFields0[0],
+              size: 10000,
             },
           }),
       aggs: {

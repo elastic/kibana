@@ -25,6 +25,9 @@ export type RawBucket = GenericBuckets & {
   hostsCountAggregation?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
   };
+  rulesCountAggregation?: {
+    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
+  };
   ruleTags?: {
     doc_count_error_upper_bound?: number;
     sum_other_doc_count?: number;

@@ -22,6 +22,8 @@ import {
   EuiTablePagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { GroupRightPanel } from '../../../common/components/grouping/accordion_panel/group_stats';
 import { GROUPS_UNIT } from '../../../common/components/grouping/translations';
 import { defaultUnit, UnitCount } from '../../../common/components/toolbar/unit';
 import { useBulkActionItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
@@ -68,11 +70,12 @@ import { useAddBulkToTimelineAction } from './timeline_actions/use_add_bulk_to_t
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getSelectedGroupButtonContent } from './groups_buttons_renderers';
-import { GroupRightPanel } from './groups_stats';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { getSelectedGroupBadgeMetrics, getSelectedGroupCustomMetrics } from './groups_stats';
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
+const storage = new Storage(localStorage);
 
 export const GroupsContainer = styled.div`
   .euiAccordion__childWrapper {
@@ -157,7 +160,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   selectedEventIds,
 }) => {
   const dispatch = useDispatch();
-  const [selectedGroup, setSelectedGroup] = useState<string | undefined>();
+  const [selectedGroup, setSelectedGroup] = useState<string | undefined>(
+    storage.get(ALERTS_TABLE_GROUPS_SELECTION_KEY)
+  );
 
   const {
     browserFields,
@@ -316,7 +321,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const [activePage, setActivePage] = useState<number>(0);
   const [groupsPageSize, setShowPerPageOptions] = useState<number>(25);
-  const [groupsPagesCount, setGroupsPagesCount] = useState<number>(0);
 
   const queryGroups = useMemo(
     () =>
@@ -390,6 +394,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               },
             },
           },
+          {
+            rulesCountAggregation: {
+              cardinality: {
+                field: 'kibana.alert.rule.rule_id',
+              },
+            },
+          },
         ],
         stackByMupltipleFields0Size: groupsPageSize,
         stackByMupltipleFields0From: activePage * groupsPageSize,
@@ -442,6 +453,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       <GroupsSelector
         groupSelected={selectedGroup}
         onGroupChange={(groupSelection?: string) => {
+          storage.set(ALERTS_TABLE_GROUPS_SELECTION_KEY, groupSelection);
+          setActivePage(0);
           setSelectedGroup(groupSelection);
           if (groupSelection && !options.find((o) => o.key === groupSelection)) {
             setOptions([
@@ -455,8 +468,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             setOptions(defaultGroupingOptions);
           }
         }}
-        localStorageGroupKey={ALERTS_TABLE_GROUPS_SELECTION_KEY}
-        onClearSelected={() => setSelectedGroup(undefined)}
+        onClearSelected={() => {
+          setSelectedGroup(undefined);
+          setOptions(defaultGroupingOptions);
+        }}
         fields={indexPatterns.fields}
         options={options}
       />
@@ -637,8 +652,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                     extraAction={
                       <GroupRightPanel
                         bucket={field0Bucket}
-                        actionItems={bulkActionItems}
-                        onClick={(isOpen) => onOpenGroupAction(field0Bucket, isOpen)}
+                        badgeMetricStats={getSelectedGroupBadgeMetrics(selectedGroup, field0Bucket)}
+                        customMetricStats={getSelectedGroupCustomMetrics(
+                          selectedGroup,
+                          field0Bucket
+                        )}
+                        takeActionItems={bulkActionItems}
+                        onTakeActionsOpen={() => onOpenGroupAction(field0Bucket, true)}
                       />
                     }
                     paddingSize="l"

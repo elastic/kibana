@@ -10,14 +10,11 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiButtonEmpty, EuiPopover, EuiBadge, EuiContextMenu } from '@elastic/eui';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
-
-const storage = new Storage(localStorage);
 
 export type GroupSelection = 'kibana.alert.rule.name' | 'user.name' | 'host.name' | 'source.ip';
 
@@ -32,7 +29,6 @@ const StyledContextMenu = euiStyled(EuiContextMenu)`
 interface GroupSelectorProps {
   onGroupChange: (groupSelection?: string) => void;
   groupSelected?: string;
-  localStorageGroupKey?: string;
   onClearSelected: () => void;
   fields: FieldSpec[];
   options: Array<{ key: string; label: string }>;
@@ -41,7 +37,6 @@ interface GroupSelectorProps {
 const GroupsSelectorComponent = ({
   groupSelected,
   onGroupChange,
-  localStorageGroupKey,
   onClearSelected,
   fields,
   options,
@@ -92,7 +87,6 @@ const GroupsSelectorComponent = ({
 
   const selectedOption = options.filter((groupOption) => groupOption.key === groupSelected);
 
-  // add local storage group value
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
