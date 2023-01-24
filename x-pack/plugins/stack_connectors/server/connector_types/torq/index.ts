@@ -93,7 +93,7 @@ function renderParameterTemplates(
 ): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(params.body, variables, 'none'),
   };
 }
 
