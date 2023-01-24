@@ -54,16 +54,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getMobileStats({ serviceName: 'foo' });
-        expect(
-          response.currentPeriod.sessions.timeseries.every(
-            (item: { x: number; y?: number | null }) => item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.requests.timeseries.every(
-            (item: { x: number; y?: number | null }) => item.y === 0
-          )
-        ).to.eql(true);
+        expect(response.currentPeriod.sessions.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
       });
     });
   });
@@ -113,16 +109,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.sessions.value).to.eql(0);
         expect(response.currentPeriod.requests.value).to.eql(0);
 
-        expect(
-          response.currentPeriod.sessions.timeseries.every(
-            (item: { x: number; y?: number | null }) => item.y === 0
-          )
-        ).to.eql(true);
-        expect(
-          response.currentPeriod.requests.timeseries.every(
-            (item: { x: number; y?: number | null }) => item.y === 0
-          )
-        ).to.eql(true);
+        expect(response.currentPeriod.sessions.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
       });
 
       it('returns the correct values when single filter is applied', async () => {
