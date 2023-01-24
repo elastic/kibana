@@ -21,8 +21,6 @@ import {
 import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import * as curl from '../sense_editor/curl';
 import smartResize from './smart_resize';
-
-// @ts-ignore
 import * as InputMode from './mode/input';
 
 const _AceRange = ace.acequire('ace/range').Range;
