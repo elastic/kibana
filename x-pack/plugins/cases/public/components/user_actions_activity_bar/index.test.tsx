@@ -98,7 +98,7 @@ describe('UserActionsActivityBar ', () => {
     await waitFor(() =>
       expect(onUserActionsActivityChanged).toHaveBeenCalledWith({ ...params, sortOrder: 'desc' })
     );
-    
+
     expect(
       res
         .getByTestId('user-actions-filter-activity-button-all')
