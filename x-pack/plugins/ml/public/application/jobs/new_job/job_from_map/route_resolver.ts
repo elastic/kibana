@@ -21,10 +21,12 @@ export async function resolver(
   geoField: string,
   splitField: string,
   fromRisonString: string,
-  toRisonString: string
+  toRisonString: string,
+  layer?: string
 ) {
   let decodedDashboard;
   let decodedEmbeddable;
+  let decodedLayer;
   let splitFieldDecoded;
   let dvId;
 
@@ -44,6 +46,14 @@ export async function resolver(
     decodedEmbeddable = rison.decode(embeddable) as { query: Query; filters: Filter[] };
   } catch (error) {
     decodedEmbeddable = { query: getDefaultQuery(), filters: [] };
+  }
+
+  if (layer) {
+    try {
+      decodedLayer = rison.decode(layer) as { query: Query };
+    } catch (error) {
+      decodedLayer = { query: getDefaultQuery(), filters: [] };
+    }
   }
 
   try {
@@ -76,6 +86,7 @@ export async function resolver(
     decodedEmbeddable.query,
     decodedEmbeddable.filters,
     geoField,
-    splitFieldDecoded
+    splitFieldDecoded,
+    decodedLayer?.query
   );
 }
