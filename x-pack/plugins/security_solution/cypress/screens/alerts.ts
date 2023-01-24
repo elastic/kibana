@@ -12,7 +12,7 @@ export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-excepti
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
   '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
 
-export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
+export const ALERT_CHECKBOX = '[data-test-subj="bulk-actions-row-cell"].euiCheckbox__input';
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
@@ -132,7 +132,4 @@ export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control
 
 export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
 
-export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="events-container-loading-true"]';
-
-export const EVENT_CONTAINER_TABLE_NOT_LOADING =
-  '[data-test-subj="events-container-loading-false"]';
+export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="internalAlertsPageLoading"]';

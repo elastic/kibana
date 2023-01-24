@@ -57,6 +57,13 @@ const registerAlertsTableConfiguration = (
     useBulkActions: useBulkActionHook,
     useCellActions,
     usePersistentControls,
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
+        },
+      },
+    ],
   });
 
   registry.register({
@@ -69,6 +76,13 @@ const registerAlertsTableConfiguration = (
     useBulkActions: useBulkActionHook,
     useCellActions,
     usePersistentControls,
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
+        },
+      },
+    ],
   });
 };
 

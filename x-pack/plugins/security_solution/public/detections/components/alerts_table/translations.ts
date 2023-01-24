@@ -294,3 +294,7 @@ export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const SESSIONS_TITLE = i18n.translate('xpack.securitySolution.sessionsView.sessionsTitle', {
+  defaultMessage: 'Sessions',
+});

@@ -10,12 +10,14 @@ import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import type { FC } from 'react';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { dataTableActions } from '../../../common/store/data_table';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
@@ -42,6 +44,7 @@ import { getColumnHeaders } from '../../../common/components/data_table/column_h
 import { buildTimeRangeFilter } from './helpers';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import type { State } from '../../../common/store';
+import * as i18n from './translations';
 
 const storage = new Storage(localStorage);
 
@@ -89,7 +92,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
   flyoutSize,
   inputFilters,
-  tableId,
+  tableId = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
   from,
   to,
@@ -105,6 +108,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   });
   const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
 
+  const dispatch = useDispatch();
   const getGlobalInputs = inputsSelectors.globalSelector();
   const globalInputs = useSelector((state) => getGlobalInputs(state));
   const { query: globalQuery, filters: globalFilters } = globalInputs;
@@ -218,6 +222,19 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       finalBrowserFields,
     ]
   );
+
+  useEffect(() => {
+    dispatch(
+      dataTableActions.initializeDataTableSettings({
+        id: tableId,
+        title: i18n.SESSIONS_TITLE,
+        defaultColumns: eventsDefaultModel.columns.map((c) => ({
+          ...c,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+        })),
+      })
+    );
+  }, [dispatch, tableId]);
 
   const {
     dataTable: {

@@ -29,9 +29,9 @@ import {
   ALERTS_HISTOGRAM_PANEL_LOADER,
   ALERTS_CONTAINER_LOADING_BAR,
   DATAGRID_CHANGES_IN_PROGRESS,
-  EVENT_CONTAINER_TABLE_NOT_LOADING,
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
+  EVENT_CONTAINER_TABLE_LOADING,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -260,9 +260,12 @@ export const markAcknowledgedFirstAlert = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  const click = ($el: JQuery<HTMLElement>) => {
+    return $el.trigger('click');
+  };
   waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    cy.get(ALERT_CHECKBOX).eq(i).click({ force: true });
+    cy.get(ALERT_CHECKBOX).eq(i).pipe(click).should('have.attr', 'checked', 'true');
   }
 };
 
@@ -283,7 +286,7 @@ export const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
-  cy.get(EVENT_CONTAINER_TABLE_NOT_LOADING).should('be.visible');
+  cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
