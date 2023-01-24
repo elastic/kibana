@@ -112,9 +112,7 @@ export class ListingTableService extends FtrService {
     await this.openTagPopover();
     // select the tags
     for (const tagName of tagNames) {
-      await this.testSubjects.click(
-        `tag-searchbar-option-${tagName.replace(' ', '_')}`
-      );
+      await this.testSubjects.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
     }
     await this.closeTagPopover();
     await this.waitUntilTableIsLoaded();
