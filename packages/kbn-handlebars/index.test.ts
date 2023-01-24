@@ -369,6 +369,119 @@ describe('blocks', () => {
         .toCompileTo('');
     });
 
+    describe('custom return function should be called with expected arguments and its return value should be rendered in the template', () => {
+      it('root decorator', () => {
+        expectTemplate('{{*decorator}}world')
+          .withInput({ me: 'my' })
+          .withDecorator(
+            'decorator',
+            (fn): Handlebars.TemplateDelegate =>
+              (context, options) => {
+                expect(context).toMatchInlineSnapshot(`
+              Object {
+                "me": "my",
+              }
+            `);
+                expect(options).toMatchInlineSnapshot(`
+              Object {
+                "decorators": Object {
+                  "decorator": [Function],
+                },
+                "helpers": Object {},
+              }
+            `);
+                return `hello ${context.me} ${fn()}!`;
+              }
+          )
+          .toCompileTo('hello my world!');
+      });
+
+      it('decorator nested inside of array-helper', () => {
+        expectTemplate('{{#arr}}{{*decorator}}world{{/arr}}')
+          .withInput({ arr: ['my'] })
+          .withDecorator(
+            'decorator',
+            (fn): Handlebars.TemplateDelegate =>
+              (context, options) => {
+                expect(context).toMatchInlineSnapshot(`"my"`);
+                expect(options).toMatchInlineSnapshot(`
+              Object {
+                "blockParams": Array [
+                  "my",
+                  0,
+                ],
+                "data": Object {
+                  "_parent": Object {
+                    "root": Object {
+                      "arr": Array [
+                        "my",
+                      ],
+                    },
+                  },
+                  "first": true,
+                  "index": 0,
+                  "key": 0,
+                  "last": true,
+                  "root": Object {
+                    "arr": Array [
+                      "my",
+                    ],
+                  },
+                },
+              }
+            `);
+                return `hello ${context} ${fn()}!`;
+              }
+          )
+          .toCompileTo('hello my world!');
+      });
+
+      it('decorator nested inside of custom helper', () => {
+        expectTemplate('{{#helper}}{{*decorator}}world{{/helper}}')
+          .withHelper('helper', function (options: Handlebars.HelperOptions) {
+            return options.fn('my', { foo: 'bar' } as any);
+          })
+          .withDecorator(
+            'decorator',
+            (fn): Handlebars.TemplateDelegate =>
+              (context, options) => {
+                expect(context).toMatchInlineSnapshot(`"my"`);
+                expect(options).toMatchInlineSnapshot(`
+              Object {
+                "foo": "bar",
+              }
+            `);
+                return `hello ${context} ${fn()}!`;
+              }
+          )
+          .toCompileTo('hello my world!');
+      });
+    });
+
+    it('should call multiple decorators in the same program body in the expected order and get the expected output', () => {
+      let decoratorCall = 0;
+      let progCall = 0;
+      expectTemplate('{{*decorator}}con{{*decorator}}tent')
+        .beforeRender(() => {
+          // ensure the counters are reset between EVAL/AST render calls
+          decoratorCall = 0;
+          progCall = 0;
+        })
+        .withInput({
+          decoratorCall: 0,
+          progCall: 0,
+        })
+        .withDecorator('decorator', (fn) => {
+          const decoratorCallOrder = ++decoratorCall;
+          const ret: Handlebars.TemplateDelegate = () => {
+            const progCallOrder = ++progCall;
+            return `(decorator: ${decoratorCallOrder}, prog: ${progCallOrder}, fn: "${fn()}")`;
+          };
+          return ret;
+        })
+        .toCompileTo('(decorator: 2, prog: 1, fn: "(decorator: 1, prog: 2, fn: "content")")');
+    });
+
     describe('registration', () => {
       beforeEach(() => {
         global.kbnHandlebarsEnv = Handlebars.create();
