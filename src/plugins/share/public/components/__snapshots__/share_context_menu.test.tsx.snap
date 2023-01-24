@@ -50,7 +50,7 @@ exports[`shareContextMenuExtensions should render a custom panel title when prov
               "panel": 2,
             },
             Object {
-              "data-test-subj": "sharePanel-Getlinks",
+              "data-test-subj": "sharePanel-Permalinks",
               "disabled": false,
               "icon": "link",
               "name": "Get links",
@@ -110,7 +110,7 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
           "id": 4,
           "items": Array [
             Object {
-              "data-test-subj": "sharePanel-Getlinks",
+              "data-test-subj": "sharePanel-Permalinks",
               "disabled": false,
               "icon": "link",
               "name": "Get links",
@@ -172,7 +172,7 @@ exports[`should disable the share URL when set 1`] = `
               "panel": 2,
             },
             Object {
-              "data-test-subj": "sharePanel-Getlinks",
+              "data-test-subj": "sharePanel-Permalinks",
               "disabled": true,
               "icon": "link",
               "name": "Get links",
@@ -247,7 +247,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
               "panel": 2,
             },
             Object {
-              "data-test-subj": "sharePanel-Getlinks",
+              "data-test-subj": "sharePanel-Permalinks",
               "disabled": false,
               "icon": "link",
               "name": "Get links",
