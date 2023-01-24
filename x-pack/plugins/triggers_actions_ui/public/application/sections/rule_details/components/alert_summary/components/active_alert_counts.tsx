@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { ACTIVE_ALERT_LABEL } from './constants';
 
-interface AlertCountsProps {
+interface Props {
   activeAlertCount: number;
 }
 
-export const ActiveAlertCounts = ({ activeAlertCount }: AlertCountsProps) => {
+export const ActiveAlertCounts = ({ activeAlertCount }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (

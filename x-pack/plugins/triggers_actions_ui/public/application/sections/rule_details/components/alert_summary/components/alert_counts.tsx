@@ -11,7 +11,7 @@ import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
 import { ActiveAlertCounts } from './active_alert_counts';
 import { AllAlertCounts } from './all_alert_counts';
 
-interface AlertCountsProps {
+interface Props {
   activeAlertCount: number;
   recoveredAlertCount: number;
   onActiveClick?: (
@@ -20,11 +20,7 @@ interface AlertCountsProps {
   ) => void;
 }
 
-export const AlertCounts = ({
-  activeAlertCount,
-  recoveredAlertCount,
-  onActiveClick,
-}: AlertCountsProps) => {
+export const AlertCounts = ({ activeAlertCount, recoveredAlertCount, onActiveClick }: Props) => {
   return (
     <EuiFlexGroup gutterSize="l" responsive={false}>
       <EuiFlexItem style={{ minWidth: 50, wordWrap: 'break-word' }} grow={false}>
