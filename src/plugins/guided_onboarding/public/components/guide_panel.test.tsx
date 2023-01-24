@@ -14,9 +14,10 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 
 import type { PluginState } from '../../common';
-import { API_BASE_PATH, testGuideConfig, testGuideId } from '../../common';
+import { API_BASE_PATH } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {

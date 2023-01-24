@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../helpers';
@@ -43,8 +43,8 @@ export const createFilterOutAction = ({
     getDisplayNameTooltip: () => FILTER_OUT,
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) && field.name != null && field.value != null,
-    execute: async ({ field, metadata }) => {
-      const makeFilter = (currentVal: string | null | undefined) =>
+    execute: async ({ field }) => {
+      const makeFilter = (currentVal?: string[] | string | null) =>
         currentVal == null || currentVal?.length === 0
           ? createFilter(field.name, null, false)
           : createFilter(field.name, currentVal, true);

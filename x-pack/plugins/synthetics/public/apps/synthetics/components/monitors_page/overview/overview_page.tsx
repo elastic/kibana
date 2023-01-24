@@ -98,7 +98,7 @@ export const OverviewPage: React.FC = () => {
 
   if (
     !search &&
-    enablementLoading &&
+    !enablementLoading &&
     isEnabled &&
     !monitorsLoading &&
     syntheticsMonitors.length === 0
