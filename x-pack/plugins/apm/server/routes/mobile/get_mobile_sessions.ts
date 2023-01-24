@@ -22,10 +22,11 @@ import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
+import { Maybe } from '../../../typings/common';
 
 export interface SessionsTimeseries {
-  currentPeriod: Coordinate[];
-  previousPeriod: Coordinate[];
+  currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
+  previousPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
 }
 
 interface Props {
@@ -61,13 +62,15 @@ async function getSessionTimeseries({
     minBucketSize: 60,
   });
 
-  const response = await apmEventClient.search('get_sessions_chart', {
+  const aggs = {
+    sessions: {
+      cardinality: { field: SESSION_ID },
+    },
+  };
+
+  const response = await apmEventClient.search('get_mobile_sessions', {
     apm: {
-      events: [
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.span,
-      ],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       track_total_hits: false,
@@ -92,27 +95,28 @@ async function getSessionTimeseries({
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
-          aggs: {
-            sessions: {
-              cardinality: { field: SESSION_ID },
-            },
-          },
+          aggs,
         },
+        ...aggs,
       },
     },
   });
 
-  return (
+  const timeseries =
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.doc_count ?? 0,
+        y: bucket.sessions.value,
       };
-    }) ?? []
-  );
+    }) ?? [];
+
+  return {
+    timeseries,
+    value: response.aggregations?.sessions?.value,
+  };
 }
 
-export async function getSessionsChart({
+export async function getMobileSessions({
   kuery,
   apmEventClient,
   serviceName,
@@ -143,7 +147,7 @@ export async function getSessionsChart({
         end,
         offset,
       })
-    : [];
+    : { timeseries: [], value: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
@@ -152,9 +156,12 @@ export async function getSessionsChart({
 
   return {
     currentPeriod,
-    previousPeriod: offsetPreviousPeriodCoordinates({
-      currentPeriodTimeseries: currentPeriod,
-      previousPeriodTimeseries: previousPeriod,
-    }),
+    previousPeriod: {
+      timeseries: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: currentPeriod.timeseries,
+        previousPeriodTimeseries: previousPeriod.timeseries,
+      }),
+      value: previousPeriod?.value,
+    },
   };
 }
