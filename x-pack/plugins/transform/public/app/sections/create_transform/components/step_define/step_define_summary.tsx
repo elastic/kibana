@@ -37,6 +37,8 @@ interface Props {
 
 export const StepDefineSummary: FC<Props> = ({
   formState: {
+    isDatePickerApplyEnabled,
+    timeRangeMs,
     runtimeMappings,
     searchString,
     searchQuery,
@@ -49,7 +51,7 @@ export const StepDefineSummary: FC<Props> = ({
   searchItems,
 }) => {
   const {
-    ml: { DataGrid },
+    ml: { formatHumanReadableDateTimeSeconds, DataGrid },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
@@ -59,7 +61,8 @@ export const StepDefineSummary: FC<Props> = ({
     searchItems.dataView,
     transformConfigQuery,
     partialPreviewRequest,
-    runtimeMappings
+    runtimeMappings,
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
   const pivotPreviewProps = useTransformConfigData(
@@ -67,7 +70,8 @@ export const StepDefineSummary: FC<Props> = ({
     transformConfigQuery,
     validationStatus,
     partialPreviewRequest,
-    runtimeMappings
+    runtimeMappings,
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
   const isModifiedQuery =
@@ -94,6 +98,18 @@ export const StepDefineSummary: FC<Props> = ({
             >
               <span>{searchItems.dataView.getIndexPattern()}</span>
             </EuiFormRow>
+            {isDatePickerApplyEnabled && timeRangeMs && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineSummary.timeRangeLabel', {
+                  defaultMessage: 'Time range',
+                })}
+              >
+                <span>
+                  {formatHumanReadableDateTimeSeconds(timeRangeMs.from)} -{' '}
+                  {formatHumanReadableDateTimeSeconds(timeRangeMs.to)}
+                </span>
+              </EuiFormRow>
+            )}
             {typeof searchString === 'string' && (
               <EuiFormRow
                 label={i18n.translate('xpack.transform.stepDefineSummary.queryLabel', {

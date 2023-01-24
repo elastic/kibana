@@ -101,12 +101,14 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
       runtimeMappings,
       runtimeMappingsUpdated: runtimeMappingsEditor.state.runtimeMappingsUpdated,
       isRuntimeMappingsEditorEnabled: runtimeMappingsEditor.state.isRuntimeMappingsEditorEnabled,
+      timeRangeMs: datePicker.state.timeRangeMs,
     });
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     JSON.stringify(advancedPivotEditor.state),
     JSON.stringify(advancedSourceEditor.state),
+    JSON.stringify(datePicker.state),
     pivotConfig.state,
     JSON.stringify(searchBar.state),
     JSON.stringify([
