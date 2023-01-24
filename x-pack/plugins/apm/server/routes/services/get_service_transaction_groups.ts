@@ -76,7 +76,18 @@ export async function getServiceTransactionGroups({
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'transaction.name': '_other',
+                      },
+                    },
+                    { term: { [TRANSACTION_TYPE]: transactionType } },
+                  ],
+                },
+              },
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
@@ -95,6 +106,11 @@ export async function getServiceTransactionGroups({
               order: { _count: 'desc' },
             },
             aggs: {
+              overflow_count: {
+                max: {
+                  field: 'transaction.aggregation.overflow_count',
+                },
+              },
               transaction_group_total_duration: {
                 sum: { field },
               },
@@ -136,6 +152,7 @@ export async function getServiceTransactionGroups({
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration
           : 0,
+        overflowCount: bucket.overflow_count.value ?? 0,
       };
     }) ?? [];
 

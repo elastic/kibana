@@ -8044,7 +8044,6 @@
     "xpack.apm.transactions.latency.chart.95thPercentileLabel": "第 95 个百分位",
     "xpack.apm.transactions.latency.chart.99thPercentileLabel": "第 99 个百分位",
     "xpack.apm.transactions.latency.chart.averageLabel": "平均值",
-    "xpack.apm.transactionsTable.cardinalityWarning.title": "此视图显示已报告事务的子集。",
     "xpack.apm.transactionsTable.errorMessage": "无法提取",
     "xpack.apm.transactionsTable.linkText": "查看事务",
     "xpack.apm.transactionsTable.title": "事务",

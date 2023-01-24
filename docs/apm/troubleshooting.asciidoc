@@ -101,11 +101,11 @@ You can always add additional metadata to your transactions using {apm-guide-ref
 After ensuring you've correctly named your transactions,
 you might still see errors in the APM app related to transaction group limit reached:
 
-`The transaction group limit in APM Server has been reached. Excess groups have been captured in **_other**. Please see the {apm-guide-ref}/transaction-metrics.html#transactions-max_groups[APM Server docs] for **aggregation.transaction.max_groups** to increase this limit`
+`The number of transaction groups has been reached. Current APM server capacity for handling unique transaction groups has been reached. There are at least X transactions missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server.`
 
-You will see this warning if an agent is creating too many transaction groups. This could indicate incorrect instrumentation which will have to be fixed in your application. Alternatively you can increase the limit in {apm-guide-ref}/transaction-metrics.html#transactions-max_groups[APM Server docs].
+You will see this warning if an agent is creating too many transaction groups. This could indicate incorrect instrumentation which will have to be fixed in your application. Alternatively you can increase the memory of the APM server.
 
-`The transaction group limit in Kibana has been reached. Excess groups have been omitted. Try narrowing down your results using the query bar.`
+`Number of transaction groups exceed the allowed maximum(1,000) that are displayed. The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar..`
 
 You will see this warning if your results have more than `1000` unique transaction groups. Alternatively you can use the query bar to reduce the number of unique transaction groups in your results.
 

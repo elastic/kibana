@@ -34,6 +34,7 @@ interface Props extends APMLinkExtendProps {
   environment?: string;
   comparisonEnabled?: boolean;
   offset?: string;
+  overflowCount?: number;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
@@ -51,6 +52,7 @@ export function TransactionDetailLink({
   environment,
   comparisonEnabled,
   offset = '1d',
+  overflowCount,
   ...rest
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
@@ -88,7 +90,9 @@ export function TransactionDetailLink({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false} style={{ fontStyle: 'italic' }}>
-        {txGroupsDroppedBucketName}
+        {i18n.translate('xpack.apm.transactionDetail.remainingServices', {
+          defaultMessage: 'Remaining Transactions',
+        })}
       </EuiFlexItem>
       <EuiFlexItem>
         <PopoverTooltip
@@ -98,7 +102,9 @@ export function TransactionDetailLink({
           iconType="alert"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
-            <TransactionDetailMaxGroupsMessage />
+            <TransactionDetailMaxGroupsMessage
+              remainingTransactions={overflowCount ?? 0}
+            />
           </EuiText>
         </PopoverTooltip>
       </EuiFlexItem>

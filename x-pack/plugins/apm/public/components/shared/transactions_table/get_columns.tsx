@@ -36,7 +36,7 @@ import { getLatencyColumnLabel } from './get_latency_column_label';
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-type ServiceTransactionGroupItem = ValuesType<
+export type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupMainStatistics['transactionGroups']
 >;
 type TransactionGroupDetailedStatistics =
@@ -68,7 +68,7 @@ export function getColumns({
         { defaultMessage: 'Name' }
       ),
       width: '30%',
-      render: (_, { name, transactionType: type }) => {
+      render: (_, { name, transactionType: type, overflowCount }) => {
         return (
           <TransactionDetailLink
             serviceName={serviceName}
@@ -77,6 +77,7 @@ export function getColumns({
             latencyAggregationType={latencyAggregationType}
             comparisonEnabled={comparisonEnabled}
             offset={offset}
+            overflowCount={overflowCount}
           >
             {name}
           </TransactionDetailLink>

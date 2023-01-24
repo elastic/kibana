@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { range as lodashRange } from 'lodash';
-import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
@@ -52,11 +52,21 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
                     (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
                   );
 
+                  if (groupId === '_other') {
+                    return instance
+                      .transaction(groupId)
+                      .timestamp(timestamp)
+                      .duration(duration)
+                      .defaults({
+                        'transaction.aggregation.overflow_count': 10,
+                      });
+                  }
+
                   return instance
                     .transaction(groupId, TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length])
                     .timestamp(timestamp)
                     .duration(duration)
-                    .outcome('success' as const);
+                    .success();
                 })
               );
 

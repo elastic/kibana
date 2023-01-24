@@ -240,7 +240,7 @@ export function TransactionsTable({
     { preservePreviousData: false }
   );
 
-  const otherBucketTransactionGroup = transactionGroups.some(
+  const otherBucketTransactionGroup = transactionGroups.find(
     (item) => item.name === txGroupsDroppedBucketName
   );
 
