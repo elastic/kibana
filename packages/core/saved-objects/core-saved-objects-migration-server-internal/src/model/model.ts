@@ -448,8 +448,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // check the existing mappings to see if we can avoid reindexing
-      if (
+      if (stateP.legacyIndex) {
+        // we are performing a migration from a legacy state (< 7.14)
+        // in this scenario we do NOT skip reindexing
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      } else if (
         // source exists
         Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
         // ...and mappings are unchanged
@@ -463,6 +469,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
         const source = stateP.sourceIndex.value;
 
+        // the existing mappings match, we can avoid reindexing
         return {
           ...stateP,
           controlState: 'PREPARE_COMPATIBLE_MIGRATION',
