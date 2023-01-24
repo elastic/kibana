@@ -23,7 +23,7 @@ export const KibanaNoDataPage = ({
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
-  const { hasESData, hasUserDataView, hasCustomBranding } = services;
+  const { hasESData, hasUserDataView, showPlainSpinner } = services;
 
   const [isLoading, setIsLoading] = useState(true);
   const [dataExists, setDataExists] = useState(false);
@@ -43,7 +43,7 @@ export const KibanaNoDataPage = ({
   }, [hasESData, hasUserDataView]);
 
   if (isLoading) {
-    return hasCustomBranding ? (
+    return showPlainSpinner ? (
       <EuiLoadingSpinner css={{ margin: 'auto' }} size="xxl" />
     ) : (
       <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />

@@ -25,7 +25,8 @@ export interface Services {
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
   /** True if the Kibana instance is customly branded */
-  hasCustomBranding?: boolean;
+  showPlainSpinner: boolean;
+  hasCustomBranding$?: CustomBrandingStart['hasCustomBranding$'];
 }
 
 /**
@@ -41,7 +42,8 @@ export interface KibanaDependencies {
     };
   };
   customBranding: {
-    hasCustomBranding: boolean;
+    hasCustomBranding$?: Observable<boolean>;
+    showPlainSpinner?: boolean;
   };
 }
 /**

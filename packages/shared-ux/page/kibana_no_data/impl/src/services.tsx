@@ -19,6 +19,7 @@ import {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
+import { of } from 'rxjs';
 
 const KibanaNoDataPageContext = React.createContext<Services | null>(null);
 
@@ -29,10 +30,10 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
   children,
   ...services
 }) => {
-  const { hasESData, hasUserDataView, hasCustomBranding } = services;
+  const { hasESData, hasUserDataView, showPlainSpinner } = services;
 
   return (
-    <KibanaNoDataPageContext.Provider value={{ hasESData, hasUserDataView, hasCustomBranding }}>
+    <KibanaNoDataPageContext.Provider value={{ hasESData, hasUserDataView, showPlainSpinner }}>
       <NoDataViewsPromptProvider {...services}>
         <NoDataCardProvider {...services}>{children}</NoDataCardProvider>
       </NoDataViewsPromptProvider>
@@ -51,7 +52,9 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,
     hasUserDataView: dataViews.hasData.hasUserDataView,
-    hasCustomBranding: customBranding.hasCustomBranding,
+    showPlainSpinner: customBranding.hasCustomBranding$.subscribe((data: boolean) => {
+      return of(data);
+    }),
   };
 
   return (

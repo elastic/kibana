@@ -15,7 +15,7 @@ import {
  */
 export interface Services {
   kibanaGuideDocLink: string;
-  hasCustomBranding?: boolean;
+  showPlainSpinner: boolean;
 }
 
 /**

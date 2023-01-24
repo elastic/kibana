@@ -13,13 +13,13 @@ import { getNoDataViewsPromptServicesMock } from '@kbn/shared-ux-prompt-no-data-
 interface Params {
   hasESData: boolean;
   hasUserDataView: boolean;
-  hasCustomBranding: boolean;
+  showPlainSpinner: boolean;
 }
 
 const defaultParams = {
   hasESData: true,
   hasUserDataView: true,
-  hasCustomBranding: false,
+  showPlainSpinner: false,
 };
 
 /**
@@ -34,14 +34,14 @@ export const getServicesMock = (params?: Partial<Params>) => {
       ? params.hasUserDataView
       : defaultParams.hasUserDataView;
 
-  const hasCustomBranding = Boolean(params?.hasCustomBranding);
+  const showPlainSpinner = Boolean(params?.showPlainSpinner);
 
   const services: KibanaNoDataPageServices = {
     ...getNoDataCardServicesMock(),
     ...getNoDataViewsPromptServicesMock(),
     hasESData: async () => hasESData,
     hasUserDataView: async () => hasUserDataView,
-    hasCustomBranding,
+    showPlainSpinner,
   };
 
   return services;

@@ -28,7 +28,7 @@ import {
 type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo'>;
 type ServiceArguments = Pick<
   KibanaNoDataPageServices,
-  'hasUserDataView' | 'hasESData' | 'hasCustomBranding'
+  'hasUserDataView' | 'hasESData' | 'showPlainSpinner'
 >;
 
 export type Params = ArgumentParams<PropArguments, ServiceArguments> &
@@ -65,7 +65,7 @@ export class StorybookMock extends AbstractStorybookMock<
       control: 'boolean',
       defaultValue: false,
     },
-    hasCustomBranding: {
+    showPlainSpinner: {
       control: 'boolean',
       defaultValue: false,
     },
@@ -74,7 +74,7 @@ export class StorybookMock extends AbstractStorybookMock<
   dependencies = [noDataViewsMock, noDataCardMock];
 
   getProps(params: Params) {
-    const { logo, solution, hasCustomBranding } = params;
+    const { logo, solution, showPlainSpinner } = params;
     const noDataConfig = {
       solution: solution || 'Analytics',
       logo: logo || 'logoKibana',
@@ -84,7 +84,7 @@ export class StorybookMock extends AbstractStorybookMock<
         },
       },
       docsLink: 'http://docs.elastic.dev',
-      hasCustomBranding,
+      showPlainSpinner,
     };
 
     return { noDataConfig, onDataViewCreated: action('onDataViewCreated') };
@@ -96,7 +96,7 @@ export class StorybookMock extends AbstractStorybookMock<
       ...noDataViewsMock.getServices(params),
       hasESData: () => params.hasESData,
       hasUserDataView: () => params.hasUserDataView,
-      hasCustomBranding: params.hasCustomBranding,
+      showPlainSpinner: params.showPlainSpinner,
     };
   }
 }
