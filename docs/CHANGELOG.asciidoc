@@ -89,7 +89,7 @@ For the Elastic Security 8.6.1 release information, refer to {security-guide}/re
 
 Fleet::
 * Fixes missing policy Id in installation URL for cloud integrations {kibana-pull}149243[#149243]
-* Fixes package install without version {kibana-pull}149193[#149193]
+* Fixes package installation APIs to install packages without a version {kibana-pull}149193[#149193]
 * Fixes for install latest GA bug {kibana-pull}149133[#149133] and {kibana-pull}149104[#149104]
 
 Infrastructure::
