@@ -17,24 +17,24 @@ servers:
 paths:
   '/s/{spaceId}/api/alerting/rule/{ruleId}':
     $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}.yaml'
-# '/s/{spaceId}/api/alerting/rule/{ruleId}/_disable':
-#   $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_disable.yaml'
-# '/s/{spaceId}/api/alerting/rule/{ruleId}/_enable':
-#  $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_enable.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_disable':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_disable.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_enable':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_enable.yaml'
   '/s/{spaceId}/api/alerting/rules/_find':
     $ref: 'paths/s@{spaceid}@api@alerting@rules@_find.yaml'
-#  '/s/{spaceId}/api/alerting/_health':
-#   $ref: paths/s@{spaceid}@api@alerting@_health.yaml
-#  '/s/{spaceId}/api/alerting/rule_types':
-#   $ref: 'paths/s@{spaceid}@api@alerting@rule_types.yaml'
-#  '/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all':
-#   $ref: 'paths/s@{spaceid}@api@rule@{ruleid}@_mute_all.yaml'
-#  '/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all':
-#   $ref: 'paths/s@{spaceid}@api@rule@{ruleid}@_unmute_all.yaml'
-# '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute':
-#    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
-# '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':
-#    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_unmute.yaml'
+  '/s/{spaceId}/api/alerting/_health':
+    $ref: paths/s@{spaceid}@api@alerting@_health.yaml
+  '/s/{spaceId}/api/alerting/rule_types':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule_types.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_mute_all.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_unmute_all.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
+  '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':
+    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_unmute.yaml'
 
 # Deprecated APIs
 #  '/s/{spaceId}/api/alerts/alert/{alertId}':

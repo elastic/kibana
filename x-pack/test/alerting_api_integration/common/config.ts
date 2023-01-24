@@ -11,7 +11,7 @@ import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from './plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
 interface CreateTestConfigOptions {
@@ -88,10 +88,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
     // Find all folders in ./plugins since we treat all them as plugin folder
-    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter((file) =>
-      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
-    );
+    const pluginDir = path.resolve(__dirname, 'plugins');
+    const pluginPaths = fs
+      .readdirSync(pluginDir)
+      .map((n) => path.resolve(pluginDir, n))
+      .filter((p) => fs.statSync(p));
 
     const proxyPort =
       process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
@@ -185,6 +186,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
+          `--xpack.alerting.enableFrameworkAlerts=true`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
@@ -305,10 +307,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...plugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
-          ),
+          ...pluginPaths.map((p) => `--plugin-path=${p}`),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

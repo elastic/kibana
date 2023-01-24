@@ -110,6 +110,8 @@ import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
+import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
+import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -250,6 +252,7 @@ export class LensPlugin {
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
   private initDependenciesForApi: () => void = () => {};
+  private locator?: LensAppLocator;
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -297,6 +300,7 @@ export class LensPlugin {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        coreStart,
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
@@ -322,6 +326,17 @@ export class LensPlugin {
 
     if (embeddable) {
       embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
+    }
+
+    if (share) {
+      this.locator = share.url.locators.create(new LensAppLocatorDefinition());
+
+      share.register(
+        downloadCsvShareProvider({
+          uiSettings: core.uiSettings,
+          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+        })
+      );
     }
 
     visualizations.registerAlias(getLensAliasConfig());
@@ -384,6 +399,7 @@ export class LensPlugin {
           attributeService: getLensAttributeService(coreStart, deps),
           getPresentationUtilContext,
           topNavMenuEntryGenerators: this.topNavMenuEntries,
+          locator: this.locator,
         });
       },
     });

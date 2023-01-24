@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EsQueryFiltersConfig } from '../..';
 import { getFilterField, cleanFilter, Filter } from '../filters';
 import { DataViewBase } from './types';
 import { getDataViewFieldSubtypeNested } from '../utils';
@@ -14,7 +15,7 @@ import { getDataViewFieldSubtypeNested } from '../utils';
 export const fromNestedFilter = (
   filter: Filter,
   indexPattern?: DataViewBase,
-  config: { ignoreUnmapped?: boolean } = {}
+  config: EsQueryFiltersConfig = {}
 ) => {
   if (!indexPattern) return filter;
 
@@ -40,8 +41,8 @@ export const fromNestedFilter = (
       nested: {
         path: subTypeNested.nested.path,
         query: query.query || query,
-        ...(typeof config.ignoreUnmapped === 'boolean' && {
-          ignore_unmapped: config.ignoreUnmapped,
+        ...(typeof config.nestedIgnoreUnmapped === 'boolean' && {
+          ignore_unmapped: config.nestedIgnoreUnmapped,
         }),
       },
     },

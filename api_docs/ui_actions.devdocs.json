@@ -981,10 +981,10 @@
           },
           "<Context> extends Partial<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<",
@@ -1391,10 +1391,10 @@
           },
           "<Context> extends Partial<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<",
@@ -1702,6 +1702,100 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.CellActionExecutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CellActionExecutionContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.CellActionExecutionContext",
+            "text": "CellActionExecutionContext"
+          },
+          " extends ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionExecutionContext",
+            "text": "ActionExecutionContext"
+          },
+          "<object>"
+        ],
+        "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.extraContentNodeRef",
+            "type": "Object",
+            "tags": [],
+            "label": "extraContentNodeRef",
+            "description": [
+              "\nRef to a DOM node where the action can add custom HTML."
+            ],
+            "signature": [
+              "React.MutableRefObject<HTMLDivElement | null>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.nodeRef",
+            "type": "Object",
+            "tags": [],
+            "label": "nodeRef",
+            "description": [
+              "\nRef to the node where the cell action are rendered."
+            ],
+            "signature": [
+              "React.MutableRefObject<HTMLDivElement | null>"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "\nExtra configurations for actions."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.CellActionExecutionContext.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "CellActionField"
+            ],
+            "path": "src/plugins/ui_actions/public/cell_actions/components/cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.Presentable",
         "type": "Interface",
         "tags": [],
@@ -1711,15 +1805,15 @@
         ],
         "signature": [
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<Context>"
         ],
-        "path": "src/plugins/ui_actions/public/util/presentable.ts",
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1732,7 +1826,7 @@
             "description": [
               "\nID that uniquely identifies this object."
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1745,7 +1839,7 @@
             "description": [
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1761,7 +1855,7 @@
             "signature": [
               "React.FC<{ context: Context; }> | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1777,7 +1871,7 @@
             "signature": [
               "(context: Context) => string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1791,7 +1885,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1811,7 +1905,7 @@
             "signature": [
               "(context: Context) => string"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1825,7 +1919,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1845,7 +1939,7 @@
             "signature": [
               "((context: Context) => string) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1859,7 +1953,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1879,7 +1973,7 @@
             "signature": [
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1893,7 +1987,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1913,7 +2007,7 @@
             "signature": [
               "(context: Context) => Promise<boolean>"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1927,7 +2021,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/util/presentable.ts",
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1946,15 +2040,15 @@
             ],
             "signature": [
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.PresentableGrouping",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGrouping",
                 "text": "PresentableGrouping"
               },
               "<Context> | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/util/presentable.ts",
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2370,10 +2464,16 @@
         "label": "PresentableGrouping",
         "description": [],
         "signature": [
-          "PresentableGroup",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.PresentableGroup",
+            "text": "PresentableGroup"
+          },
           "<Context>[]"
         ],
-        "path": "src/plugins/ui_actions/public/util/presentable.ts",
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

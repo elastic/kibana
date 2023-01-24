@@ -25,13 +25,13 @@ import {
   deleteAllCaseItems,
   createCase,
   createComment,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromSavedObject,
   bulkCreateAttachments,
   updateComment,
   getSOFromKibanaIndex,
   getReferenceFromEsResponse,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   /**
    * Attachment types are being registered in
-   * x-pack/test/cases_api_integration/common/fixtures/plugins/cases/server/plugin.ts
+   * x-pack/test/cases_api_integration/common/plugins/cases/server/plugin.ts
    */
   describe('External references', () => {
     afterEach(async () => {

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Subject, BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
@@ -25,10 +25,9 @@ import {
   AvailableFields$,
   DataDocuments$,
   DataMain$,
-  DataRefetch$,
   DataTotalHits$,
   RecordRawType,
-} from '../../hooks/use_saved_search';
+} from '../../services/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -58,7 +57,9 @@ function mountComponent(
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,
   } as unknown as DiscoverServices;
-
+  services.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
@@ -90,7 +91,7 @@ function mountComponent(
     result: Number(esHits.length),
   }) as DataTotalHits$;
 
-  const savedSearchData$ = {
+  stateContainer.dataState.data$ = {
     main$,
     documents$,
     totalHits$,
@@ -112,8 +113,6 @@ function mountComponent(
     onUpdateQuery: jest.fn(),
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
-    savedSearchData$,
-    savedSearchRefetch$: new Subject() as DataRefetch$,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
     stateContainer,

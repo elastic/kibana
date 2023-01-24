@@ -42,7 +42,7 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  sortDirection: 'desc',
+  sortDirection: 'asc',
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
@@ -179,7 +179,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               });
             }}
             sorting={{
-              sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+              sort: { field: 'compliance_score', direction: urlQuery.sortDirection },
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
