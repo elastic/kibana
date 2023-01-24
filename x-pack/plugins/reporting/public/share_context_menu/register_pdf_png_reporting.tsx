@@ -132,7 +132,6 @@ export const reportingScreenshotShareProvider = ({
         icon: 'document',
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled,
-        ['data-test-subj']: 'pngReportMenuItem',
         sortOrder: 10,
       },
       panel: {
@@ -167,7 +166,6 @@ export const reportingScreenshotShareProvider = ({
         icon: 'document',
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled,
-        ['data-test-subj']: 'pdfReportMenuItem',
         sortOrder: 10,
       },
       panel: {
