@@ -132,26 +132,29 @@ export const EmbeddedMapComponent = ({
     };
   }, []);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const apiResponse = await Promise.all(
-        availableDataViews.map(async ({ title }) =>
-          isFieldInIndexPattern(title, getRequiredMapsFields(title))
-        )
-      );
-      // ensures only index patterns with maps fields are passed
-      const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
-      if (isMountedRef.current) {
-        setMapDataViews(goodDataViews);
+  const fetchData = useCallback(
+    async (dataViews: SourcererDataView[]) => {
+      try {
+        const apiResponse = await Promise.all(
+          dataViews.map(async ({ title }) =>
+            isFieldInIndexPattern(title, getRequiredMapsFields(title))
+          )
+        );
+        // ensures only index patterns with maps fields are passed
+        const goodDataViews = dataViews.filter((_, i) => apiResponse[i] ?? false);
+        if (isMountedRef.current) {
+          setMapDataViews(goodDataViews);
+        }
+      } catch (e) {
+        if (isMountedRef.current) {
+          setMapDataViews([]);
+          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
+          setIsError(true);
+        }
       }
-    } catch (e) {
-      if (isMountedRef.current) {
-        setMapDataViews([]);
-        addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
-        setIsError(true);
-      }
-    }
-  }, [addError, availableDataViews, isFieldInIndexPattern]);
+    },
+    [addError, isFieldInIndexPattern]
+  );
 
   useEffect(() => {
     const dataViews = kibanaDataViews.filter((dataView) =>
@@ -162,7 +165,7 @@ export const EmbeddedMapComponent = ({
     }
     if (!isEqual(availableDataViews, dataViews)) {
       setAvailableDataViews(dataViews);
-      fetchData();
+      fetchData(dataViews);
     }
   }, [availableDataViews, fetchData, kibanaDataViews, selectedPatterns]);
 
