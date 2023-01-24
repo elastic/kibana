@@ -9,12 +9,12 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Pagination, EuiText } from '@elastic/eui';
 
-export type RuleEventLogPaginationStatusProps = Pick<
+export type EventLogPaginationStatusProps = Pick<
   Pagination,
   'pageIndex' | 'pageSize' | 'totalItemCount'
 >;
 
-export const RuleEventLogPaginationStatus = (props: RuleEventLogPaginationStatusProps) => {
+export const EventLogPaginationStatus = (props: EventLogPaginationStatusProps) => {
   const { pageIndex, pageSize, totalItemCount } = props;
 
   const paginationStatusRange = useMemo(() => {
@@ -22,7 +22,7 @@ export const RuleEventLogPaginationStatus = (props: RuleEventLogPaginationStatus
       return (
         <strong>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogPaginationStatus.paginationResultsRangeNoResult"
+            id="xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsRangeNoResult"
             defaultMessage="0"
           />
         </strong>
@@ -33,7 +33,7 @@ export const RuleEventLogPaginationStatus = (props: RuleEventLogPaginationStatus
     return (
       <strong>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogPaginationStatus.paginationResultsRange"
+          id="xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsRange"
           defaultMessage="{start, number} - {end, number}"
           values={{
             start: pageIndex * pageSize + 1,
@@ -45,9 +45,9 @@ export const RuleEventLogPaginationStatus = (props: RuleEventLogPaginationStatus
   }, [pageSize, pageIndex, totalItemCount]);
 
   return (
-    <EuiText data-test-subj="ruleEventLogPaginationStatus" size="xs">
+    <EuiText data-test-subj="eventLogPaginationStatus" size="xs">
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogPaginationStatus.paginationResults"
+        id="xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResults"
         defaultMessage="Showing {range} of {total, number} {type}"
         values={{
           range: paginationStatusRange,
@@ -55,7 +55,7 @@ export const RuleEventLogPaginationStatus = (props: RuleEventLogPaginationStatus
           type: (
             <strong>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogPaginationStatus.paginationResultsType"
+                id="xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsType"
                 defaultMessage="log {total, plural, one {entry} other {entries}}"
                 values={{ total: totalItemCount }}
               />

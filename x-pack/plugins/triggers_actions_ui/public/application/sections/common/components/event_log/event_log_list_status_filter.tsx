@@ -9,17 +9,17 @@ import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { RuleEventLogListStatus } from './rule_event_log_list_status';
+import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
+import { EventLogListStatus } from './event_log_list_status';
 
 const statusFilters: RuleAlertingOutcome[] = ['success', 'failure', 'warning', 'unknown'];
 
-interface RuleEventLogListStatusFilterProps {
+interface EventLogListStatusFilterProps {
   selectedOptions: string[];
   onChange: (selectedValues: string[]) => void;
 }
 
-export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilterProps) => {
+export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) => {
   const { selectedOptions = [], onChange = () => {} } = props;
 
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
@@ -48,7 +48,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
         closePopover={() => setIsPopoverOpen(false)}
         button={
           <EuiFilterButton
-            data-test-subj="ruleEventLogStatusFilterButton"
+            data-test-subj="eventLogStatusFilterButton"
             iconType="arrowDown"
             hasActiveFilters={selectedOptions.length > 0}
             numActiveFilters={selectedOptions.length}
@@ -56,7 +56,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
             onClick={onClick}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.eventLogStatusFilterLabel"
+              id="xpack.triggersActionsUI.sections.eventLogStatusFilterLabel"
               defaultMessage="Response"
             />
           </EuiFilterButton>
@@ -67,11 +67,11 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
             return (
               <EuiFilterSelectItem
                 key={status}
-                data-test-subj={`ruleEventLogStatusFilter-${status}`}
+                data-test-subj={`eventLogStatusFilter-${status}`}
                 onClick={onFilterItemClick(status)}
                 checked={selectedOptions.includes(status) ? 'on' : undefined}
               >
-                <RuleEventLogListStatus
+                <EventLogListStatus
                   status={status}
                   useExecutionStatus={isRuleUsingExecutionStatus}
                 />
