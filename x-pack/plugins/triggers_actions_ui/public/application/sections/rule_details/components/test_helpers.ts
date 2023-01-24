@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 } from 'uuid';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 
 export const getMockLogResponse = () => {
   return {
-    id: uuid.v4(),
+    id: v4(),
     timestamp: '2022-03-20T07:40:44-07:00',
     duration: 5000000,
     status: 'success',
@@ -36,9 +36,9 @@ export const mockLogResponse: any = {
 
 export function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: v4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${v4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',
