@@ -485,7 +485,7 @@ export const XyToolbar = memo(function XyToolbar(
               orientation={labelsOrientation.yLeft}
               setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
-              extent={state?.yLeftExtent || { mode: 'full', niceValues: true }}
+              extent={state?.yLeftExtent || { mode: 'full' }}
               setExtent={setLeftExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
@@ -521,11 +521,7 @@ export const XyToolbar = memo(function XyToolbar(
             useMultilayerTimeAxis={
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
-            extent={
-              hasNumberHistogram
-                ? state?.xExtent || { mode: 'dataBounds', niceValues: true }
-                : undefined
-            }
+            extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
             setExtent={setXExtent}
             dataBounds={xDataBounds}
           />
@@ -561,7 +557,7 @@ export const XyToolbar = memo(function XyToolbar(
               setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
-              extent={state?.yRightExtent || { mode: 'full', niceValues: true }}
+              extent={state?.yRightExtent || { mode: 'full' }}
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
