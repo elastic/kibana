@@ -70,22 +70,22 @@ function toDurationLabel(duration: number, durationUnit: string) {
         values: { duration },
       });
     case 'w':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.days', {
+      return i18n.translate('xpack.observability.slos.slo.timeWindow.weeks', {
         defaultMessage: '{duration} weeks',
         values: { duration },
       });
     case 'M':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.days', {
+      return i18n.translate('xpack.observability.slos.slo.timeWindow.months', {
         defaultMessage: '{duration} months',
         values: { duration },
       });
     case 'Q':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.days', {
+      return i18n.translate('xpack.observability.slos.slo.timeWindow.quarterss', {
         defaultMessage: '{duration} quarters',
         values: { duration },
       });
     case 'Y':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.days', {
+      return i18n.translate('xpack.observability.slos.slo.timeWindow.years', {
         defaultMessage: '{duration} years',
         values: { duration },
       });
