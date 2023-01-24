@@ -134,7 +134,7 @@ const StatThreshold = ({
               {title}
               <span style={{ marginLeft: 5 }}>
                 {isSame ? (
-                  <EuiIcon type="minus" size="l" />
+                  <EuiIcon type="minus" size="l" color="subdued" />
                 ) : (
                   <EuiIcon type={isUp ? 'sortUp' : 'sortDown'} size="l" />
                 )}
