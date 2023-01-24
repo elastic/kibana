@@ -21,8 +21,7 @@ import {
   DataTotalHitsMsg,
   RecordRawType,
   SavedSearchData,
-} from '../hooks/use_saved_search';
-
+} from '../services/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
 import { buildDataTableRecord } from '../../../utils/build_data_record';

@@ -2580,7 +2580,7 @@
             "label": "integrations_all",
             "description": [],
             "signature": [
-              "({ searchTerm, category }: { searchTerm?: string | undefined; category?: string | undefined; }) => [string, string]"
+              "({ searchTerm, category, subCategory, }: { searchTerm?: string | undefined; category?: string | undefined; subCategory?: string | undefined; }) => [string, string]"
             ],
             "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
             "deprecated": false,
@@ -2591,7 +2591,7 @@
                 "id": "def-public.pagePathGetters.integrations_all.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ searchTerm, category }",
+                "label": "{\n    searchTerm,\n    category,\n    subCategory,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
                 "deprecated": false,
@@ -2617,6 +2617,20 @@
                     "type": "string",
                     "tags": [],
                     "label": "category",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/public/constants/page_paths.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-public.pagePathGetters.integrations_all.$1.subCategory",
+                    "type": "string",
+                    "tags": [],
+                    "label": "subCategory",
                     "description": [],
                     "signature": [
                       "string | undefined"
@@ -9141,6 +9155,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Agent.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "AgentMetrics",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9221,7 +9250,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"inactive\" | \"active\""
+              "\"active\" | \"inactive\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -14198,6 +14227,21 @@
             "description": [],
             "signature": [
               "MappingTypeMapping",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryElasticsearch.index_template.data_stream",
+            "type": "Object",
+            "tags": [],
+            "label": "'index_template.data_stream'",
+            "description": [],
+            "signature": [
+              "RegistryDataStreamProperties",
               " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
