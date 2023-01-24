@@ -13,7 +13,7 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import React, { Fragment, lazy, Suspense } from 'react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsCount } from './components/alerts_count/alerts_count';
-import { BulkActionsConfig } from '../../../../types';
+import { BulkActionsConfig, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
 
@@ -90,11 +90,12 @@ export const getToolbarVisibility = ({
   onResetColumns,
   browserFields,
   refresh,
+  setIsBulkActionsLoading,
   controls,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
-  rowSelection: Set<number>;
+  rowSelection: RowSelection;
   alerts: EcsFieldsResponse[];
   isLoading: boolean;
   updatedAt: number;
@@ -103,6 +104,7 @@ export const getToolbarVisibility = ({
   onResetColumns: () => void;
   browserFields: any;
   refresh: () => void;
+  setIsBulkActionsLoading: (isLoading: boolean) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
@@ -135,6 +137,7 @@ export const getToolbarVisibility = ({
                 items={bulkActions}
                 alerts={alerts}
                 refresh={refresh}
+                setIsBulkActionsLoading={setIsBulkActionsLoading}
               />
             </Suspense>
           </>

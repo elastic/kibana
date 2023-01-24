@@ -30,6 +30,7 @@ export interface UseBulkActions {
   getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
   bulkActions: BulkActionsConfig[];
+  setIsBulkActionsLoading: (isLoading: boolean) => void;
 }
 
 export function useBulkActions({
@@ -46,10 +47,15 @@ export function useBulkActions({
     updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
   }, [alerts, updateBulkActionsState]);
 
+  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
+    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
+  };
+
   return {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
     bulkActions,
+    setIsBulkActionsLoading,
   };
 }

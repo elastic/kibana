@@ -28,7 +28,7 @@ import {
 import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
-import type { HostEcs } from '../../../../common/ecs/host';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/lib/kibana/kibana_react', () => {

@@ -73,6 +73,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -134,6 +135,7 @@ export type {
   GetFieldTableColumns,
   BrowserFieldItem,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -528,7 +530,8 @@ export interface BulkActionsConfig {
   onClick: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,
-    refresh: () => void
+    refresh: () => void,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
   ) => void | Promise<void>;
 }
 
@@ -548,14 +551,20 @@ export type UseCellActions = (props: {
   disabledCellActions?: string[];
 };
 
-export interface RenderCustomActionsRowProps {
+export interface RenderCustomActionsRowArgs {
   alert: FetchAlertData['ecsAlertsData'][number];
   nonEcsData: FetchAlertData['oldAlertsData'][number];
   rowIndex: number;
   cveProps: EuiDataGridCellValueElementProps;
   setFlyoutAlert: (data: unknown) => void;
   id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
 }
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
+  width?: number;
+};
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
@@ -568,13 +577,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: (
-    ecsData?: FetchAlertData['ecsAlertsData'],
-    oldAlertsData?: FetchAlertData['oldAlertsData']
-  ) => {
-    renderCustomActionsRow: (args: RenderCustomActionsRowProps) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;
   usePersistentControls?: () => {
@@ -589,19 +592,28 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

@@ -18,7 +18,7 @@ import {
   EuiLoadingContent,
   EuiDataGridRefProps,
 } from '@elastic/eui';
-import { useSorting, usePagination, useBulkActions } from './hooks';
+import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
@@ -29,7 +29,7 @@ import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
-const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
+
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
   border: 'none',
@@ -55,17 +55,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
-  const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
-    props.alertsTableConfiguration;
-
-  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
-    useActionsColumn(ecsAlertsData, oldAlertsData);
+  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
+    useActionsColumn({
+      options: props.alertsTableConfiguration.useActionsColumn,
+    });
 
   const {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
     bulkActions,
+    setIsBulkActionsLoading,
   } = useBulkActions({
     alerts,
     query: props.query,
@@ -120,6 +120,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       browserFields,
       refresh,
       controls: props.controls,
+      setIsBulkActionsLoading,
     });
   }, [
     refresh,
@@ -134,6 +135,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onResetColumns,
     browserFields,
     props.controls,
+    setIsBulkActionsLoading,
   ])();
 
   const leadingControlColumns = useMemo(() => {
@@ -186,6 +188,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                     setFlyoutAlert: handleFlyoutAlert,
                     id: props.id,
                     cveProps,
+                    setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
                   })}
               </EuiFlexGroup>
             );
@@ -212,6 +215,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     props.showExpandToDetails,
     renderCustomActionsRow,
     setFlyoutAlertIndex,
+    getSetIsActionLoadingCallback,
   ]);
 
   useEffect(() => {

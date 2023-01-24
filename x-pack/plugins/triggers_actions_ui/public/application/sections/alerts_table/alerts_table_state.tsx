@@ -35,6 +35,7 @@ import {
   AlertsTableProps,
   BulkActionsReducerAction,
   BulkActionsState,
+  RowSelectionState,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
@@ -198,7 +199,7 @@ const AlertsTableState = ({
   }, []);
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
-    rowSelection: new Set<number>(),
+    rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: alerts.length,

@@ -11,7 +11,7 @@ import React, { useState, useCallback, useMemo, useContext, useEffect } from 're
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { BulkActionsConfig, BulkActionsVerbs } from '../../../../../types';
+import { BulkActionsConfig, BulkActionsVerbs, RowSelection } from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
@@ -20,6 +20,7 @@ interface BulkActionsProps {
   items: BulkActionsConfig[];
   alerts: EcsFieldsResponse[];
   refresh: () => void;
+  setIsBulkActionsLoading: (loading: boolean) => void;
 }
 
 // Duplicated just for legacy reasons. Timelines plugin will be removed but
@@ -41,9 +42,9 @@ const containerStyles = { display: 'inline-block', position: 'relative' } as con
 
 const selectedIdsToTimelineItemMapper = (
   alerts: EcsFieldsResponse[],
-  rowSelection: Set<number>
+  rowSelection: RowSelection
 ): TimelineItem[] => {
-  return Array.from(rowSelection.values()).map((rowIndex: number) => {
+  return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
     return {
       _id: alert._id,
@@ -63,7 +64,8 @@ const selectedIdsToTimelineItemMapper = (
 const useBulkActionsToMenuItemMapper = (
   items: BulkActionsConfig[],
   alerts: EcsFieldsResponse[],
-  refresh: () => void
+  refresh: () => void,
+  setIsBulkActionsLoading: (loading: boolean) => void
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
 
@@ -78,14 +80,14 @@ const useBulkActionsToMenuItemMapper = (
             disabled={isDisabled}
             onClick={() => {
               const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
-              item.onClick(selectedAlertIds, isAllSelected, refresh);
+              item.onClick(selectedAlertIds, isAllSelected, refresh, setIsBulkActionsLoading);
             }}
           >
             {isDisabled && item.disabledLabel ? item.disabledLabel : item.label}
           </EuiContextMenuItem>
         );
       }),
-    [alerts, isAllSelected, items, rowSelection, refresh]
+    [alerts, isAllSelected, items, rowSelection, refresh, setIsBulkActionsLoading]
   );
 
   return bulkActionsItems;
@@ -96,12 +98,18 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   items,
   alerts,
   refresh,
+  setIsBulkActionsLoading,
 }) => {
   const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showClearSelection, setShowClearSelectiong] = useState(false);
-  const bulkActionItems = useBulkActionsToMenuItemMapper(items, alerts, refresh);
+  const bulkActionItems = useBulkActionsToMenuItemMapper(
+    items,
+    alerts,
+    refresh,
+    setIsBulkActionsLoading
+  );
 
   useEffect(() => {
     setShowClearSelectiong(isAllSelected);

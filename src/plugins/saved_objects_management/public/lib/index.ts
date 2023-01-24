@@ -18,6 +18,7 @@ export type { ProcessedImportResponse, FailedImport } from './process_import_res
 export { processImportResponse } from './process_import_response';
 export { getDefaultTitle } from './get_default_title';
 export { findObjects } from './find_objects';
+export { bulkDeleteObjects } from './bulk_delete_objects';
 export { bulkGetObjects } from './bulk_get_objects';
 export type { SavedObjectsExportResultDetails } from './extract_export_details';
 export { extractExportDetails } from './extract_export_details';
