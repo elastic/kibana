@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsClient } from '@kbn/core/server';
-import { GuideConfig, GuideId, GuideState, GuideStep} from '@kbn/guided-onboarding';
+import { GuideConfig, GuideId, GuideState, GuideStep } from '@kbn/guided-onboarding';
 import { guideStateSavedObjectsType } from '../saved_objects';
 
 export const findGuideById = async (savedObjectsClient: SavedObjectsClient, guideId: string) => {

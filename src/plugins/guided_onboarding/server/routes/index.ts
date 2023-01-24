@@ -8,7 +8,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { GuidesConfig } from '../../common/types';
-import {registerActivateGuideRoute, registerGetGuideStateRoute} from './guide_state.routes';
+import { registerActivateGuideRoute, registerGetGuideStateRoute } from './guide_state.routes';
 import { registerGetPluginStateRoute, registerPutPluginStateRoute } from './plugin_state.routes';
 import { registerGetConfigRoute } from './config.routes';
 

@@ -15,7 +15,7 @@ import {
   findGuideById,
 } from '../helpers/guide_state.utils';
 import { API_BASE_PATH, GuidesConfig } from '../../common';
-import {findAllGuides, getPluginState, updatePluginStatus} from '../helpers';
+import { findAllGuides, getPluginState, updatePluginStatus } from '../helpers';
 
 export const registerGetGuideStateRoute = (router: IRouter) => {
   // Fetch all guides state
