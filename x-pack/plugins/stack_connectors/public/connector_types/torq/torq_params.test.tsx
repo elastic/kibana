@@ -10,7 +10,7 @@ import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/applicati
 import React from 'react';
 import TorqParamsFields from './torq_params';
 
-const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
+const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock(kibanaReactPath, () => {
   const original = jest.requireActual(kibanaReactPath);

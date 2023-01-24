@@ -8,13 +8,12 @@
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 
-import { getHttpProxyServer } from '../../../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '../../../../../packages/helpers/get_proxy_server';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function torqTest({ getService }: FtrProviderContext) {

@@ -62,7 +62,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: token is required"`
+      `"error validating action type secrets: [token]: expected value of type [string] but got [undefined]"`
     );
   });
 });
@@ -216,26 +216,17 @@ describe('execute Torq action', () => {
   });
 
   test('renders parameter templates as expected', async () => {
-    const rogue = `double-quote:"; line-break->\n`;
+    const templatedObject = `{"material": "rubber", "kind": "band"}`;
 
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
-      body: '{"x": "{{rogue}}"}',
+      body: '{"x": {{obj}}, "y": "{{scalar}}"}',
     };
     const variables = {
-      rogue,
+      obj: templatedObject,
+      scalar: '1970',
     };
     const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let paramsObject: any;
-    try {
-      paramsObject = JSON.parse(`${params.body}`);
-    } catch (err) {
-      expect(err).toBe(null);
-    }
-
-    expect(paramsObject.x).toBe(rogue);
-    expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
+    expect(params.body).toBe(`{"x": ${templatedObject}, "y": "${variables.scalar}"}`);
   });
 });
