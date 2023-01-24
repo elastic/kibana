@@ -10176,7 +10176,6 @@
     "xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel": "查看 CSP 规则 ",
     "xpack.csp.cspEvaluationBadge.failLabel": "失败",
     "xpack.csp.cspEvaluationBadge.passLabel": "通过",
-    "xpack.csp.cspSettings.rules": "CSP 安全规则 - ",
     "xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterPrefixTitle": "显示以下所有结果 ",
     "xpack.csp.dashboard.benchmarkSection.defaultClusterTitle": "集群 ID",
     "xpack.csp.dashboard.benchmarkSection.manageRulesButton": "管理规则",
