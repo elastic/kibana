@@ -27,6 +27,6 @@ export const ALERTS_LABEL = (
 export const ACTIVE_ALERT_LABEL = (
   <FormattedMessage
     id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeNow"
-    defaultMessage="Active Now"
+    defaultMessage="Active now"
   />
 );
