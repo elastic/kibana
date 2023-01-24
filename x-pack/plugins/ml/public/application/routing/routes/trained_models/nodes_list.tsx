@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -18,6 +18,12 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { NodesList } from '../../../trained_models/nodes_overview';
 import { MlPageHeader } from '../../../components/page_header';
 import { TechnicalPreviewBadge } from '../../../components/technical_preview_badge';
+import { JobMemoryTreeMap } from '../../../trained_models/memory_tree_map';
+
+enum TAB {
+  NODE,
+  TREE,
+}
 
 export const nodesListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -48,6 +54,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     deps.dataViewsContract,
     basicResolvers(deps)
   );
+  const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODE);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
   return (
     <PageLoader context={context}>
@@ -64,7 +71,24 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <NodesList />
+
+      <EuiTabs>
+        <EuiTab
+          isSelected={selectedTab === TAB.NODE}
+          onClick={() => setSelectedTab(TAB.NODE)}
+          data-test-subj="mlJobMgmtExportJobsADTab"
+        >
+          <FormattedMessage id="xpack.ml.importExport.exportFlyout.adTab" defaultMessage="Nodes" />
+        </EuiTab>
+        <EuiTab
+          isSelected={selectedTab === TAB.TREE}
+          onClick={() => setSelectedTab(TAB.TREE)}
+          data-test-subj="mlJobMgmtExportJobsADTab"
+        >
+          <FormattedMessage id="xpack.ml.importExport.exportFlyout.adTab" defaultMessage="Memory" />
+        </EuiTab>
+      </EuiTabs>
+      {selectedTab === TAB.NODE ? <NodesList /> : <JobMemoryTreeMap height="400px" />}
     </PageLoader>
   );
 };

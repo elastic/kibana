@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +24,7 @@ import { NodeItem } from './nodes_list';
 import { useListItemsFormatter } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { JobMemoryTreeMap } from '../memory_tree_map';
 
 interface ExpandedRowProps {
   item: NodeItem;
@@ -29,6 +32,7 @@ interface ExpandedRowProps {
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+  const [selectedTab, setSelectedTab] = useState<'details' | 'memory'>('details');
 
   const formatToListItems = useListItemsFormatter();
 
@@ -50,64 +54,87 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         width: 100%;
       `}
     >
-      <EuiFlexGrid columns={2} gutterSize={'s'}>
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.nodesList.expandedRow.detailsTitle"
-                  defaultMessage="Details"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
-            <EuiDescriptionList
-              compressed={true}
-              type="column"
-              listItems={formatToListItems(details)}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
+      <EuiTabs>
+        <EuiTab isSelected={selectedTab === 'details'} onClick={() => setSelectedTab('details')}>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.nodesList.expandedRow.detailsTabTitle"
+            defaultMessage="Details"
+          />
+        </EuiTab>
+        <EuiTab isSelected={selectedTab === 'memory'} onClick={() => setSelectedTab('memory')}>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
+            defaultMessage="Memory"
+          />
+        </EuiTab>
+      </EuiTabs>
 
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.nodesList.expandedRow.attributesTitle"
-                  defaultMessage="Attributes"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
-            <EuiDescriptionList
-              compressed={true}
-              type="column"
-              listItems={formatToListItems(attributes)}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-
-      {allocatedModels.length > 0 ? (
+      {selectedTab === 'details' ? (
         <>
-          <EuiSpacer size={'s'} />
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
-                  defaultMessage="Allocated models"
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={2} gutterSize={'s'}>
+            <EuiFlexItem>
+              <EuiPanel hasShadow={false}>
+                <EuiTitle size={'xs'}>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.nodesList.expandedRow.detailsTitle"
+                      defaultMessage="Details"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSpacer size={'m'} />
+                <EuiDescriptionList
+                  compressed={true}
+                  type="column"
+                  listItems={formatToListItems(details)}
                 />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
+              </EuiPanel>
+            </EuiFlexItem>
 
-            <AllocatedModels models={allocatedModels} />
-          </EuiPanel>
+            <EuiFlexItem>
+              <EuiPanel hasShadow={false}>
+                <EuiTitle size={'xs'}>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.nodesList.expandedRow.attributesTitle"
+                      defaultMessage="Attributes"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSpacer size={'m'} />
+                <EuiDescriptionList
+                  compressed={true}
+                  type="column"
+                  listItems={formatToListItems(attributes)}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGrid>
+          {allocatedModels.length > 0 ? (
+            <>
+              <EuiSpacer size={'s'} />
+              <EuiPanel hasShadow={false}>
+                <EuiTitle size={'xs'}>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.nodesList.expandedRow.allocatedModelsTitle"
+                      defaultMessage="Allocated models"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSpacer size={'m'} />
+
+                <AllocatedModels models={allocatedModels} />
+              </EuiPanel>
+            </>
+          ) : null}
         </>
-      ) : null}
+      ) : (
+        <>
+          <JobMemoryTreeMap height="400px" node={item.name} />
+        </>
+      )}
     </div>
   );
 };

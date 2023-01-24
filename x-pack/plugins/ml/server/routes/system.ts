@@ -13,6 +13,8 @@ import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 import { getMlNodeCount } from '../lib/node_utils';
+import { itemTypeLiterals } from './schemas/saved_objects';
+import { JobSizeService } from '../models/job_service/job_size';
 
 /**
  * System routes
@@ -140,6 +142,44 @@ export function systemRoutes(
       try {
         return response.ok({
           body: await getMlNodeCount(client),
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {get} /api/ml/ml_node_count Get the amount of ML nodes
+   * @apiName MlNodeCount
+   * @apiDescription Returns the amount of ML nodes.
+   */
+  router.get(
+    {
+      path: '/api/ml/job_size',
+      validate: {
+        query: schema.object({
+          type: schema.maybe(itemTypeLiterals),
+          node: schema.maybe(schema.string()),
+          showClosedJobs: schema.maybe(schema.boolean()),
+        }),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDatafeeds'],
+      },
+    },
+
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, request }) => {
+      try {
+        const jobSizeService = new JobSizeService(mlClient);
+        return response.ok({
+          body: await jobSizeService.getMemorySizes(
+            request.query.type,
+            request.query.node,
+            request.query.showClosedJobs
+          ),
         });
       } catch (e) {
         return response.customError(wrapError(e));

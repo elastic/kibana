@@ -169,7 +169,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
           {routeList.map((route) => {
             return (
               <Route
-                key={route.id}
+                key={route.path}
                 path={route.path}
                 exact
                 render={(props) => {
