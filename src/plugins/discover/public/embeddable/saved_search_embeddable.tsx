@@ -423,14 +423,13 @@ export class SavedSearchEmbeddable
     if (!searchProps || !searchProps.dataView) {
       return false;
     }
-    const result =
+    return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(this.prevSort, this.input.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId;
-
-    return result;
+      this.prevSearchSessionId !== this.input.searchSessionId
+    );
   }
 
   private isRerenderRequired(searchProps?: SearchProps) {
@@ -502,7 +501,6 @@ export class SavedSearchEmbeddable
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
-    console.log('renderReactComponent', { searchProps });
     if (!searchProps) {
       return;
     }
@@ -575,8 +573,6 @@ export class SavedSearchEmbeddable
   }
 
   private async load(searchProps: SearchProps, forceFetch = false) {
-    console.log('load', { searchProps, forceFetch });
-
     await this.pushContainerStateParamsToProps(searchProps, { forceFetch });
 
     if (this.node) {
@@ -585,7 +581,6 @@ export class SavedSearchEmbeddable
   }
 
   public reload(forceFetch = true) {
-    console.log('reload', { forceFetch });
     if (this.searchProps) {
       this.load(this.searchProps, forceFetch);
     }

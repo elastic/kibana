@@ -282,7 +282,7 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(search).toHaveBeenCalledTimes(1);
   });
-  it('a should not render and fetch data more often then necessary when the embeddable title changes', async () => {
+  it('should not render and fetch data more often then necessary when the embeddable title changes', async () => {
     const search = jest.fn().mockReturnValue(
       of({
         rawResponse: { hits: { hits: [], total: 0 } },
