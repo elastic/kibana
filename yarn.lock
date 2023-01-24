@@ -2881,10 +2881,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-browser-mocks@link:packages/core/analytics/core-analytics-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-analytics-browser@link:packages/core/analytics/core-analytics-browser":
   version "0.0.0"
   uid ""
@@ -2893,19 +2889,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-mocks@link:packages/core/analytics/core-analytics-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-analytics-server@link:packages/core/analytics/core-analytics-server":
   version "0.0.0"
   uid ""
 
 "@kbn/core-application-browser-internal@link:packages/core/application/core-application-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-application-browser-mocks@link:packages/core/application/core-application-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -2921,19 +2909,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-mocks@link:packages/core/apps/core-apps-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-apps-server-internal@link:packages/core/apps/core-apps-server-internal":
   version "0.0.0"
   uid ""
 
 "@kbn/core-base-browser-internal@link:packages/core/base/core-base-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-base-browser-mocks@link:packages/core/base/core-base-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -2949,15 +2929,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-server-mocks@link:packages/core/base/core-base-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-capabilities-browser-internal@link:packages/core/capabilities/core-capabilities-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-capabilities-browser-mocks@link:packages/core/capabilities/core-capabilities-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -2969,19 +2941,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-mocks@link:packages/core/capabilities/core-capabilities-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-capabilities-server@link:packages/core/capabilities/core-capabilities-server":
   version "0.0.0"
   uid ""
 
 "@kbn/core-chrome-browser-internal@link:packages/core/chrome/core-chrome-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-browser-mocks@link:packages/core/chrome/core-chrome-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3025,10 +2989,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-mocks@link:packages/core/deprecations/core-deprecations-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-deprecations-browser@link:packages/core/deprecations/core-deprecations-browser":
   version "0.0.0"
   uid ""
@@ -3041,19 +3001,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-mocks@link:packages/core/deprecations/core-deprecations-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-deprecations-server@link:packages/core/deprecations/core-deprecations-server":
   version "0.0.0"
   uid ""
 
 "@kbn/core-doc-links-browser-internal@link:packages/core/doc-links/core-doc-links-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-doc-links-browser-mocks@link:packages/core/doc-links/core-doc-links-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3065,10 +3017,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-doc-links-server-mocks@link:packages/core/doc-links/core-doc-links-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-doc-links-server@link:packages/core/doc-links/core-doc-links-server":
   version "0.0.0"
   uid ""
@@ -3077,15 +3025,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-client-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-elasticsearch-server-internal@link:packages/core/elasticsearch/core-elasticsearch-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-elasticsearch-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3097,15 +3037,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-mocks@link:packages/core/environment/core-environment-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-execution-context-browser-internal@link:packages/core/execution-context/core-execution-context-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-execution-context-browser-mocks@link:packages/core/execution-context/core-execution-context-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3121,10 +3053,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-mocks@link:packages/core/execution-context/core-execution-context-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-execution-context-server@link:packages/core/execution-context/core-execution-context-server":
   version "0.0.0"
   uid ""
@@ -3133,19 +3061,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-mocks@link:packages/core/fatal-errors/core-fatal-errors-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-fatal-errors-browser@link:packages/core/fatal-errors/core-fatal-errors-browser":
   version "0.0.0"
   uid ""
 
 "@kbn/core-http-browser-internal@link:packages/core/http/core-http-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-http-browser-mocks@link:packages/core/http/core-http-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3161,10 +3081,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-context-server-mocks@link:packages/core/http/core-http-context-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-http-request-handler-context-server-internal@link:packages/core/http/core-http-request-handler-context-server-internal":
   version "0.0.0"
   uid ""
@@ -3177,10 +3093,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-resources-server-mocks@link:packages/core/http/core-http-resources-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-http-resources-server@link:packages/core/http/core-http-resources-server":
   version "0.0.0"
   uid ""
@@ -3189,15 +3101,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-mocks@link:packages/core/http/core-http-router-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-http-server-internal@link:packages/core/http/core-http-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-http-server-mocks@link:packages/core/http/core-http-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3209,19 +3113,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-mocks@link:packages/core/i18n/core-i18n-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-i18n-browser@link:packages/core/i18n/core-i18n-browser":
   version "0.0.0"
   uid ""
 
 "@kbn/core-i18n-server-internal@link:packages/core/i18n/core-i18n-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-i18n-server-mocks@link:packages/core/i18n/core-i18n-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3233,10 +3129,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-mocks@link:packages/core/injected-metadata/core-injected-metadata-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-injected-metadata-common-internal@link:packages/core/injected-metadata/core-injected-metadata-common-internal":
   version "0.0.0"
   uid ""
@@ -3245,15 +3137,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-mocks@link:packages/core/integrations/core-integrations-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-lifecycle-browser-internal@link:packages/core/lifecycle/core-lifecycle-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-lifecycle-browser-mocks@link:packages/core/lifecycle/core-lifecycle-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3265,19 +3149,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-mocks@link:packages/core/lifecycle/core-lifecycle-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-lifecycle-server@link:packages/core/lifecycle/core-lifecycle-server":
   version "0.0.0"
   uid ""
 
 "@kbn/core-logging-browser-internal@link:packages/core/logging/core-logging-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-logging-browser-mocks@link:packages/core/logging/core-logging-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3289,10 +3165,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-mocks@link:packages/core/logging/core-logging-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-logging-server@link:packages/core/logging/core-logging-server":
   version "0.0.0"
   uid ""
@@ -3301,15 +3173,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-mocks@link:packages/core/metrics/core-metrics-collectors-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-metrics-server-internal@link:packages/core/metrics/core-metrics-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-metrics-server-mocks@link:packages/core/metrics/core-metrics-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3329,10 +3193,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-mocks@link:packages/core/node/core-node-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-node-server@link:packages/core/node/core-node-server":
   version "0.0.0"
   uid ""
@@ -3341,19 +3201,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-mocks@link:packages/core/notifications/core-notifications-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-notifications-browser@link:packages/core/notifications/core-notifications-browser":
   version "0.0.0"
   uid ""
 
 "@kbn/core-overlays-browser-internal@link:packages/core/overlays/core-overlays-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-overlays-browser-mocks@link:packages/core/overlays/core-overlays-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3369,19 +3221,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-mocks@link:packages/core/plugins/core-plugins-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-plugins-browser@link:packages/core/plugins/core-plugins-browser":
   version "0.0.0"
   uid ""
 
 "@kbn/core-plugins-server-internal@link:packages/core/plugins/core-plugins-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-plugins-server-mocks@link:packages/core/plugins/core-plugins-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3393,10 +3237,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-mocks@link:packages/core/preboot/core-preboot-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-preboot-server@link:packages/core/preboot/core-preboot-server":
   version "0.0.0"
   uid ""
@@ -3405,15 +3245,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-rendering-server-internal@link:packages/core/rendering/core-rendering-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-rendering-server-mocks@link:packages/core/rendering/core-rendering-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3433,10 +3265,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-mocks@link:packages/core/saved-objects/core-saved-objects-api-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-saved-objects-api-server@link:packages/core/saved-objects/core-saved-objects-api-server":
   version "0.0.0"
   uid ""
@@ -3445,15 +3273,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-mocks@link:packages/core/saved-objects/core-saved-objects-base-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-saved-objects-browser-internal@link:packages/core/saved-objects/core-saved-objects-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-saved-objects-browser-mocks@link:packages/core/saved-objects/core-saved-objects-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3469,23 +3289,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-import-export-server-mocks@link:packages/core/saved-objects/core-saved-objects-import-export-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-saved-objects-migration-server-internal@link:packages/core/saved-objects/core-saved-objects-migration-server-internal":
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-mocks@link:packages/core/saved-objects/core-saved-objects-migration-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-saved-objects-server-internal@link:packages/core/saved-objects/core-saved-objects-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-saved-objects-server-mocks@link:packages/core/saved-objects/core-saved-objects-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3506,10 +3314,6 @@
   uid ""
 
 "@kbn/core-status-server-internal@link:packages/core/status/core-status-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-status-server-mocks@link:packages/core/status/core-status-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3541,19 +3345,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-mocks@link:packages/core/theme/core-theme-browser-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-theme-browser@link:packages/core/theme/core-theme-browser":
   version "0.0.0"
   uid ""
 
 "@kbn/core-ui-settings-browser-internal@link:packages/core/ui-settings/core-ui-settings-browser-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-ui-settings-browser-mocks@link:packages/core/ui-settings/core-ui-settings-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -3569,10 +3365,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-ui-settings-server-mocks@link:packages/core/ui-settings/core-ui-settings-server-mocks":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-ui-settings-server@link:packages/core/ui-settings/core-ui-settings-server":
   version "0.0.0"
   uid ""
@@ -3582,10 +3374,6 @@
   uid ""
 
 "@kbn/core-usage-data-server-internal@link:packages/core/usage-data/core-usage-data-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-usage-data-server-mocks@link:packages/core/usage-data/core-usage-data-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3816,7 +3604,6 @@
 "@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
   version "0.0.0"
   uid ""
-
 
 "@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
   version "0.0.0"
