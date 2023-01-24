@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DatasourcePublicAPI } from '../../../types';
-import { UnifiedAxisExtentConfig } from './types';
+import type { UnifiedAxisExtentConfig } from './types';
 
 /**
  * Returns true if the provided extent includes 0

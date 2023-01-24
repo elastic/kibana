@@ -10,7 +10,7 @@ import { EuiFormRow, EuiButtonGroup, htmlIdGenerator, EuiSwitch } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { RangeInputField } from '../../range_input_field';
 import { validateExtent } from './helpers';
-import { UnifiedAxisExtentConfig } from './types';
+import type { UnifiedAxisExtentConfig } from './types';
 
 const idPrefix = htmlIdGenerator()();
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
-import { UnifiedAxisExtentConfig } from './types';
+import type { Ast } from '@kbn/interpreter';
+import type { UnifiedAxisExtentConfig } from './types';
 
 // TODO: import it from the expression config directly?
 const CHART_TO_FN_NAME = {
