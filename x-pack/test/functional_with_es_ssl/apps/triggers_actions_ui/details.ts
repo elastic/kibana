@@ -1034,20 +1034,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await refreshButton.click();
 
         // List, date picker, and status picker all exists
-        await testSubjects.existOrFail('ruleEventLogList');
+        await testSubjects.existOrFail('eventLogList');
         await testSubjects.existOrFail('ruleEventLogListDatePicker');
-        await testSubjects.existOrFail('ruleEventLogStatusFilterButton');
+        await testSubjects.existOrFail('eventLogStatusFilterButton');
 
-        let statusFilter = await testSubjects.find('ruleEventLogStatusFilterButton');
+        let statusFilter = await testSubjects.find('eventLogStatusFilterButton');
         let statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
 
         expect(statusNumber.getVisibleText()).to.eql(0);
 
         await statusFilter.click();
-        await testSubjects.click('ruleEventLogStatusFilter-success');
+        await testSubjects.click('eventLogStatusFilter-success');
         await statusFilter.click();
 
-        statusFilter = await testSubjects.find('ruleEventLogStatusFilterButton');
+        statusFilter = await testSubjects.find('eventLogStatusFilterButton');
         statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
 
         expect(statusNumber.getVisibleText()).to.eql(1);

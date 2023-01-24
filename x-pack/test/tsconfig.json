@@ -112,5 +112,6 @@
     "@kbn/journeys",
     "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
+    "@kbn/securitysolution-ecs",
   ]
 }
