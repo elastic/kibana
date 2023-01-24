@@ -23,26 +23,18 @@ export function ExceptionStacktraceTitle({
 
   switch (codeLanguage?.toLowerCase()) {
     case 'c#':
+    case 'javascript':
+    case 'php':
+    case 'python':
       title = `${type}: ${message}`;
-      break;
-    case 'go':
-      title = type ? `${type}: ${message}` : message;
       break;
     case 'java':
       title = message ? `${type}: ${message}` : type;
       break;
-    case 'javascript':
-      title = `${type}: ${message}`;
-      break;
-    case 'php':
-      title = `${type}: ${message}`;
-      break;
-    case 'python':
-      title = `${type}: ${message}`;
-      break;
     case 'ruby':
-      title = type ? `${type}: (${message})` : message;
+      title = `${type} (${message ? message : type})`;
       break;
+    case 'go':
     default:
       break;
   }
