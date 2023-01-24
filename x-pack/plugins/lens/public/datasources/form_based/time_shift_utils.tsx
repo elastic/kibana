@@ -23,10 +23,13 @@ import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
-  return isAbsoluteTimeShift(timeShiftString.trim())
-    ? parseAbsoluteTimeShift(timeShiftString, { from: dateRange.fromDate, to: dateRange.toDate })
-        .value
-    : parseTimeShift(timeShiftString);
+  if (isAbsoluteTimeShift(timeShiftString.trim())) {
+    return parseAbsoluteTimeShift(timeShiftString, {
+      from: dateRange.fromDate,
+      to: dateRange.toDate,
+    }).value;
+  }
+  return parseTimeShift(timeShiftString);
 }
 
 export const timeShiftOptions = [
@@ -142,7 +145,6 @@ export function getDateHistogramInterval(
 
 export function getLayerTimeShiftChecks({
   interval: dateHistogramInterval,
-  hasDateHistogram,
   canShift,
 }: ReturnType<typeof getDateHistogramInterval>) {
   return {
@@ -164,40 +166,9 @@ export function getLayerTimeShiftChecks({
       );
     },
     isInvalid: (parsedValue: ReturnType<typeof parseTimeShiftWrapper>) => {
-      return Boolean(
-        parsedValue === 'invalid' || (hasDateHistogram && parsedValue && parsedValue === 'previous')
-      );
+      return Boolean(parsedValue === 'invalid');
     },
   };
-}
-
-export function getDisallowedPreviousShiftMessage(
-  layer: FormBasedLayer,
-  columnId: string
-): string[] | undefined {
-  const currentColumn = layer.columns[columnId];
-  const hasPreviousShift =
-    currentColumn.timeShift &&
-    !isAbsoluteTimeShift(currentColumn.timeShift) &&
-    parseTimeShift(currentColumn.timeShift) === 'previous';
-  if (!hasPreviousShift) {
-    return;
-  }
-  const hasDateHistogram = Object.values(layer.columns).some(
-    (column) => column.operationType === 'date_histogram'
-  );
-  if (!hasDateHistogram) {
-    return;
-  }
-  return [
-    i18n.translate('xpack.lens.indexPattern.dateHistogramTimeShift', {
-      defaultMessage:
-        'In a single layer, you are unable to combine previous time range shift with date histograms. Either use an explicit time shift duration in "{column}" or replace the date histogram.',
-      values: {
-        column: currentColumn.label,
-      },
-    }),
-  ];
 }
 
 export function getStateTimeShiftWarningMessages(
@@ -346,10 +317,15 @@ function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBa
 export function resolveTimeShift(
   timeShift: string | undefined,
   dateRange: DateRange,
-  targetBars: number
+  targetBars: number,
+  hasDateHistogram: boolean = false
 ) {
   if (timeShift && isAbsoluteTimeShift(timeShift)) {
     return roundAbsoluteInterval(timeShift, dateRange, targetBars);
+  }
+  // Translate a relative "previous" shift into an absolute endAt(<current range start timestamp>)
+  if (timeShift && hasDateHistogram && timeShift === 'previous') {
+    return roundAbsoluteInterval(`endAt(${dateRange.fromDate})`, dateRange, targetBars);
   }
   return timeShift;
 }
