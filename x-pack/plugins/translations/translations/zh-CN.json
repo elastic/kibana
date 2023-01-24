@@ -18308,7 +18308,6 @@
     "xpack.lens.axisExtent.label": "边界",
     "xpack.lens.badge.readOnly.text": "只读",
     "xpack.lens.badge.readOnly.tooltip": "无法将可视化保存到库",
-    "xpack.lens.boundaryError": "下边界必须大于上边界",
     "xpack.lens.breadcrumbsByValue": "编辑可视化",
     "xpack.lens.breadcrumbsCreate": "创建",
     "xpack.lens.breadcrumbsTitle": "Visualize 库",
