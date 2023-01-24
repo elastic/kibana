@@ -15,7 +15,7 @@ import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import {
   getTransformConfigQuery,
-  getPivotPreviewDevConsoleStatement,
+  getTransformPreviewDevConsoleStatement,
   getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
@@ -203,7 +203,7 @@ export const StepDefineSummary: FC<Props> = ({
         <EuiSpacer size="m" />
         <DataGrid
           {...pivotPreviewProps}
-          copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+          copyToClipboard={getTransformPreviewDevConsoleStatement(previewRequest)}
           copyToClipboardDescription={i18n.translate(
             'xpack.transform.pivotPreview.copyClipboardTooltip',
             {

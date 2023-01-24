@@ -8,7 +8,7 @@
 export { isAggName } from './aggregations';
 export {
   getIndexDevConsoleStatement,
-  getPivotPreviewDevConsoleStatement,
+  getTransformPreviewDevConsoleStatement,
   INIT_MAX_COLUMNS,
 } from './data_grid';
 export type { EsDoc, EsDocSource } from './fields';

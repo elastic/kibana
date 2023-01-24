@@ -64,7 +64,7 @@ describe('Transform: Common', () => {
 
   test('isDefaultQuery()', () => {
     expect(isDefaultQuery(defaultQuery)).toBe(true);
-    expect(isDefaultQuery(matchAllQuery)).toBe(false);
+    expect(isDefaultQuery(matchAllQuery)).toBe(true);
     expect(isDefaultQuery(simpleQuery)).toBe(false);
   });
 

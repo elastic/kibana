@@ -96,8 +96,10 @@ export function isMatchAllQuery(query: unknown): boolean {
 export const defaultQuery: TransformConfigQuery = { query_string: { query: '*' } };
 export function isDefaultQuery(query: TransformConfigQuery): boolean {
   return (
+    isMatchAllQuery(query) ||
     (isSimpleQuery(query) && query.query_string.query === '*') ||
-    (isFilterBasedSimpleQuery(query) && query.bool.filter[0].query_string.query === '*')
+    (isFilterBasedSimpleQuery(query) &&
+      (query.bool.filter[0].query_string.query === '*' || isMatchAllQuery(query.bool.filter[0])))
   );
 }
 
@@ -215,7 +217,7 @@ export function getPreviewTransformRequestBody(
     },
   };
 
-  const query = hasValidTimeField ? queryWithBaseFilterCriteria : matchAllQuery;
+  const query = hasValidTimeField ? queryWithBaseFilterCriteria : transformConfigQuery;
 
   return {
     source: {

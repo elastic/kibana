@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCombinedProperties } from './use_pivot_data';
+import { getCombinedProperties } from './use_transform_config_data';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 describe('getCombinedProperties', () => {

@@ -9,12 +9,10 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 
 import { I18nProvider } from '@kbn/i18n-react';
-
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-const startMock = coreMock.createStart();
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -28,11 +26,54 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
 
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
+import { getMlSharedImports } from '../../../../../shared_imports';
+
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../__mocks__/shared_context';
-import { getMlSharedImports } from '../../../../../shared_imports';
+const startMock = coreMock.createStart();
+
+const getMockedTimefilter = () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { of } = require('rxjs');
+  return {
+    timefilter: {
+      disableTimeRangeSelector: jest.fn(),
+      disableAutoRefreshSelector: jest.fn(),
+      enableTimeRangeSelector: jest.fn(),
+      enableAutoRefreshSelector: jest.fn(),
+      getRefreshInterval: jest.fn(),
+      setRefreshInterval: jest.fn(),
+      getActiveBounds: jest.fn(),
+      getTime: jest.fn(),
+      isAutoRefreshSelectorEnabled: jest.fn(),
+      isTimeRangeSelectorEnabled: jest.fn(),
+      getRefreshIntervalUpdate$: jest.fn(),
+      getAutoRefreshFetch$: jest.fn(() => {
+        return of();
+      }),
+      getTimeUpdate$: jest.fn(() => {
+        return of();
+      }),
+      getEnabledUpdated$: jest.fn(() => ({
+        subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+      })),
+    },
+    history: { get: jest.fn() },
+  };
+};
+
+const getMockedDatePickerDependencies = () => {
+  return {
+    data: {
+      query: {
+        timefilter: getMockedTimefilter(),
+      },
+    },
+    notifications: {},
+  } as unknown as DatePickerDependencies;
+};
 
 const createMockWebStorage = () => ({
   clear: jest.fn(),
@@ -75,7 +116,9 @@ describe('Transform: <DefinePivotForm />', () => {
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <MlSharedContext.Provider value={mlSharedImports}>
-            <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+            <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+              <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+            </DatePickerContextProvider>
           </MlSharedContext.Provider>
         </KibanaContextProvider>
       </I18nProvider>

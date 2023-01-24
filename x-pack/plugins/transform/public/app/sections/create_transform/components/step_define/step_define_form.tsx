@@ -32,7 +32,7 @@ import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import {
   getIndexDevConsoleStatement,
-  getPivotPreviewDevConsoleStatement,
+  getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
 import {
   getPreviewTransformRequestBody,
@@ -125,7 +125,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
-  const copyToClipboardPivot = getPivotPreviewDevConsoleStatement(copyToClipboardPreviewRequest);
+  const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
+    copyToClipboardPreviewRequest
+  );
   const copyToClipboardPivotDescription = i18n.translate(
     'xpack.transform.pivotPreview.copyClipboardTooltip',
     {
