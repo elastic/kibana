@@ -33,7 +33,7 @@ export class Mode extends TextMode {
   }
 }
 
-(function (this: any) {
+(function (this: Mode) {
   this.getCompletions = function () {
     // autocomplete is done by the autocomplete module.
     return [];

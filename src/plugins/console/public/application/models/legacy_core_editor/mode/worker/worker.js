@@ -47,7 +47,7 @@
   (hence the redefining of everything).  It is based on the javascript
   mode from the brace distro.
 */
-
+// @ts-nocheck
 (function (window) {
   function resolveModuleId(id, paths) {
     for (let testPath = id, tail = ''; testPath;) {

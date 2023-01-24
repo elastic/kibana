@@ -30,7 +30,7 @@ export function addEOL(
 
 export const mergeTokens = (...args: any[]) => [].concat.apply([], args);
 
-const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
+const TextHighlightRules = ace.acequire('ace/mode/text_highlight_rules').TextHighlightRules;
 
 export class InputHighlightRules extends TextHighlightRules {
   constructor() {
@@ -141,7 +141,7 @@ export class InputHighlightRules extends TextHighlightRules {
 
     this.$rules.json.unshift({ token: 'variable.template', regex: /("\${\w+}")/ });
 
-    if (this.constructor === InputHighlightRules) {
+    if (this instanceof InputHighlightRules) {
       this.normalizeRules();
     }
   }
