@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { ThresholdIndicator } from '../components/thershold_indicator';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
 import { useNetworkTimingsPrevious24Hours } from '../../step_details_page/hooks/use_network_timings_prev';
@@ -50,10 +50,9 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
     const prevValue = prevValueItem?.value ?? 0;
     return {
       title: item.label,
-      description: loading ? (
-        <EuiLoadingContent lines={1} />
-      ) : (
+      description: (
         <ThresholdIndicator
+          loading={loading}
           currentFormatted={formatMillisecond(item.value, { digits: 1 })}
           current={Number(item.value.toFixed(1))}
           previous={Number(prevValue.toFixed(1))}

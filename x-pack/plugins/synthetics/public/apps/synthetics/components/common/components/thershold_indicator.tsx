@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingContent,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 export const getDeltaPercent = (current: number, previous: number) => {
   if (previous === 0) {
     return 0;
@@ -16,16 +23,21 @@ export const getDeltaPercent = (current: number, previous: number) => {
   return Number((((current - previous) / previous) * 100).toFixed(0));
 };
 export const ThresholdIndicator = ({
+  loading,
   current,
   previous,
   previousFormatted,
   currentFormatted,
 }: {
+  loading: boolean;
   current: number;
   previous: number;
   previousFormatted: string;
   currentFormatted: string;
 }) => {
+  if (loading) {
+    return <EuiLoadingContent lines={1} />;
+  }
   const delta = getDeltaPercent(current, previous);
 
   const getToolTipContent = () => {
@@ -60,7 +72,7 @@ export const ThresholdIndicator = ({
   const hasDelta = Math.abs(delta) > 0;
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiText color={getColor()}>
           <strong>{currentFormatted}</strong>
