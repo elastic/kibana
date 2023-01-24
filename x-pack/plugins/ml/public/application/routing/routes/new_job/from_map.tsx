@@ -43,7 +43,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     deps.getSavedSearchDeps,
     {
       redirect: () =>
-      resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
+        resolver(dashboard, dataViewId, embeddable, geoField, splitField, from, to, layer),
     }
   );
   return <PageLoader context={context}>{<Redirect to="/jobs/new_job" />}</PageLoader>;
