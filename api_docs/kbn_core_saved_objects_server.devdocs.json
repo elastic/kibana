@@ -1753,6 +1753,32 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.ISavedObjectTypeRegistry.getVisibleToHttpApisTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisibleToHttpApisTypes",
+            "description": [
+              "\nReturns all visible {@link SavedObjectsType | types} exposed to the global SO HTTP APIs\n\nA visibleToHttpApis type is a type that doesn't explicitly define `hidden=true` nor `hiddenFromHttpApis=true` during registration."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.ISavedObjectTypeRegistry.getAllTypes",
             "type": "Function",
             "tags": [],
@@ -1958,6 +1984,40 @@
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
                 "id": "def-common.ISavedObjectTypeRegistry.isHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.ISavedObjectTypeRegistry.isHiddenFromHttpApis",
+            "type": "Function",
+            "tags": [],
+            "label": "isHiddenFromHttpApis",
+            "description": [
+              "\nReturns the `hiddenFromHttpApis` property for a given type, or `false` if\nthe type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.ISavedObjectTypeRegistry.isHiddenFromHttpApis.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -5422,6 +5482,22 @@
             "label": "hidden",
             "description": [
               "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\nIt is recommended to hide the type for better backward compatibility.\nThe hidden types will not be automatically exposed via the HTTP API.\nTherefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsType.hiddenFromHttpApis",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hiddenFromHttpApis",
+            "description": [
+              "\nIs the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.\nIt is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
