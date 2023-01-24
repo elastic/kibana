@@ -51,9 +51,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -141,9 +138,6 @@ describe('create_signals', () => {
                   minimum_should_match: 1,
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -210,9 +204,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -269,9 +260,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -330,9 +318,6 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -388,9 +373,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -454,9 +436,6 @@ describe('create_signals', () => {
                     format: 'strict_date_optional_time',
                   },
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
