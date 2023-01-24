@@ -64,6 +64,9 @@ export function createVisToADJobAction(
           import('../application/jobs/new_job/job_from_lens'),
           getStartServices(),
         ]);
+      const { isCompatibleMapVisualization } = await import(
+        '../application/jobs/new_job/job_from_map'
+      );
 
       if (
         !coreStart.application.capabilities.ml?.canCreateJob ||
@@ -76,6 +79,8 @@ export function createVisToADJobAction(
         if (embeddableType === 'lens' && lens) {
           const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
           return isCompatibleVisualizationType(chartInfo!);
+        } else if (isMapEmbeddable(context.embeddable)) {
+          return isCompatibleMapVisualization(context.embeddable);
         }
         return true;
       } catch (error) {
