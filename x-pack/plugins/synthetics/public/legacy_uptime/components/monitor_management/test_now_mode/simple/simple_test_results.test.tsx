@@ -43,7 +43,7 @@ describe('SimpleTestResults', function () {
           size: 1000,
         },
       },
-      { legacyHitsTotal: true }
+      { legacyHitsTotal: false }
     );
   });
 
