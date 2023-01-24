@@ -16,7 +16,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./node_detail_advanced'));
     loadTestFile(require.resolve('./node_detail_advanced_mb'));
     loadTestFile(require.resolve('./indices'));
-    loadTestFile(require.resolve('./indices_mb'));
     loadTestFile(require.resolve('./index_detail'));
     loadTestFile(require.resolve('./index_detail_mb'));
     loadTestFile(require.resolve('./ccr'));
