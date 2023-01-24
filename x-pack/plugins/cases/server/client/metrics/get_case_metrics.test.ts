@@ -199,7 +199,7 @@ function createMockClientArgs() {
   const logger = loggingSystemMock.createLogger();
 
   const userActionService = createUserActionServiceMock();
-  userActionService.findStatusChanges.mockImplementation(async () => {
+  userActionService.finder.findStatusChanges.mockImplementation(async () => {
     return [
       createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date('2021-11-23T20:00:43Z')),
     ];
