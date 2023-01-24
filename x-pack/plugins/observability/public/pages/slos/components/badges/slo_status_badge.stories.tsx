@@ -8,13 +8,13 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloStatusBadge as Component, SloStatusProps } from './slo_status_badge';
-import { anSLO } from '../../../data/slo/slo';
+import { anSLO } from '../../../../data/slo/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloStatusBadge',
+  title: 'app/SLO/ListPage/Badges/SloStatusBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 

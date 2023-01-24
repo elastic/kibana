@@ -11,6 +11,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { SloStatusBadge } from './slo_status_badge';
 import { SloForecastedBadge } from './slo_forecasted_badge';
+import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -18,12 +19,15 @@ export interface Props {
 
 export function SloBadges({ slo }: Props) {
   return (
-    <EuiFlexGroup direction="row" responsive={false} gutterSize="m">
+    <EuiFlexGroup direction="row" responsive={false} gutterSize="xs">
       <EuiFlexItem grow={false}>
         <SloStatusBadge slo={slo} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SloForecastedBadge slo={slo} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SloIndicatorTypeBadge slo={slo} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

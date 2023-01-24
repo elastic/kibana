@@ -22,7 +22,7 @@ import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-sche
 import { useKibana } from '../../../utils/kibana_react';
 import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
-import { SloBadges } from './slo_badges';
+import { SloBadges } from './badges/slo_badges';
 import { paths } from '../../../config';
 
 export interface SloListItemProps {
