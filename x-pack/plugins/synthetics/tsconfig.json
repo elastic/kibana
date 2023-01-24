@@ -69,6 +69,7 @@
     "@kbn/bfetch-plugin",
     "@kbn/actions-plugin",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server-mocks",
   ],
   "exclude": [
     "target/**/*",

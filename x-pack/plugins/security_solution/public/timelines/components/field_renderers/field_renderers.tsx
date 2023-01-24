@@ -11,7 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import type { HostEcs } from '../../../../common/ecs/host';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type {
   AutonomousSystem,
   FlowTarget,
