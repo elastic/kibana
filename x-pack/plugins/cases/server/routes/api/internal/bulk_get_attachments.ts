@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { BulkGetCommentsRequest } from '../../../../common/api';
 
 import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants';
@@ -16,6 +17,9 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_BULK_GET_ATTACHMENTS_URL,
   params: {
+    params: schema.object({
+      case_id: schema.string(),
+    }),
     body: escapeHatch,
   },
   handler: async ({ context, request, response }) => {
@@ -26,12 +30,13 @@ export const bulkGetAttachmentsRoute = createCasesRoute({
 
       return response.ok({
         body: await client.attachments.bulkGet({
+          caseID: request.params.case_id,
           attachmentIDs: body.ids,
         }),
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to bulk get attachments in route: ${error}`,
+        message: `Failed to bulk get attachments in route case id: ${request.params.case_id}: ${error}`,
         error,
       });
     }

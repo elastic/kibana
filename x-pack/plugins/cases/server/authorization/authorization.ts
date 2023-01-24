@@ -197,11 +197,13 @@ export class Authorization {
   }
 
   private async _ensureAuthorized(owners: string[], operation: OperationDetails) {
+    const uniqueOwners = Array.from(new Set(owners));
+
     const { securityAuth } = this;
-    const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
+    const areAllOwnersAvailable = uniqueOwners.every((owner) => this.featureCaseOwners.has(owner));
 
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const requiredPrivileges: string[] = owners.map((owner) =>
+      const requiredPrivileges: string[] = uniqueOwners.map((owner) =>
         securityAuth.actions.cases.get(owner, operation.name)
       );
 
@@ -218,14 +220,20 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
+        throw Boom.forbidden(
+          AuthorizationAuditLogger.createFailureMessage({ owners: uniqueOwners, operation })
+        );
       }
 
       if (!hasAllRequested) {
-        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
+        throw Boom.forbidden(
+          AuthorizationAuditLogger.createFailureMessage({ owners: uniqueOwners, operation })
+        );
       }
     } else if (!areAllOwnersAvailable) {
-      throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
+      throw Boom.forbidden(
+        AuthorizationAuditLogger.createFailureMessage({ owners: uniqueOwners, operation })
+      );
     }
 
     // else security is disabled so let the operation proceed

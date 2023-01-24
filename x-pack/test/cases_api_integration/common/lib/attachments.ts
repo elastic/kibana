@@ -15,16 +15,18 @@ import { getSpaceUrlPrefix } from './utils';
 export const bulkGetAttachments = async ({
   supertest,
   attachmentIds,
+  caseId,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   attachmentIds: string[];
+  caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<BulkGetCommentsResponse> => {
   const { body: comments } = await supertest
-    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/attachments/_bulk_get`)
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
     .send({ ids: attachmentIds })
     .set('kbn-xsrf', 'abc')
     .auth(auth.user.username, auth.user.password)

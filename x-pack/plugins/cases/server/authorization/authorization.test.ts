@@ -91,6 +91,7 @@ describe('authorization', () => {
 
   describe('ensureAuthorized', () => {
     const feature = { id: '1', cases: ['a'] };
+    const checkRequestReturningHasAllAsTrue = jest.fn(async () => ({ hasAllRequested: true }));
 
     let securityStart: ReturnType<typeof securityMock.createStart>;
     let featuresStart: jest.Mocked<FeaturesPluginStart>;
@@ -101,7 +102,7 @@ describe('authorization', () => {
       securityStart = securityMock.createStart();
       securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
       securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-        jest.fn(async () => ({ hasAllRequested: true }))
+        checkRequestReturningHasAllAsTrue
       );
 
       featuresStart = featuresPluginMock.createStart();
@@ -119,6 +120,34 @@ describe('authorization', () => {
       });
     });
 
+    it('calls checkRequest with no repeated owners', async () => {
+      expect.assertions(2);
+
+      const casesGet = securityStart.authz.actions.cases.get as jest.Mock;
+      casesGet.mockImplementation((owner, op) => `${owner}/${op}`);
+
+      try {
+        await auth.ensureAuthorized({
+          entities: [
+            { id: '1', owner: 'b' },
+            { id: '2', owner: 'b' },
+          ],
+          operation: Operations.createCase,
+        });
+      } catch (error) {
+        expect(checkRequestReturningHasAllAsTrue).toBeCalledTimes(1);
+        expect(checkRequestReturningHasAllAsTrue.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "kibana": Array [
+                "b/createCase",
+              ],
+            },
+          ]
+        `);
+      }
+    });
+
     it('throws an error when the owner passed in is not included in the features when security is disabled', async () => {
       expect.assertions(1);
       securityStart.authz.mode.useRbacForRequest.mockReturnValue(false);
@@ -126,6 +155,23 @@ describe('authorization', () => {
       try {
         await auth.ensureAuthorized({
           entities: [{ id: '1', owner: 'b' }],
+          operation: Operations.createCase,
+        });
+      } catch (error) {
+        expect(error.message).toBe('Unauthorized to create case with owners: "b"');
+      }
+    });
+
+    it('throws an error with a single owner when the repeated owners passed in are not included in the features when security is disabled', async () => {
+      expect.assertions(1);
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(false);
+
+      try {
+        await auth.ensureAuthorized({
+          entities: [
+            { id: '1', owner: 'b' },
+            { id: '2', owner: 'b' },
+          ],
           operation: Operations.createCase,
         });
       } catch (error) {
@@ -154,12 +200,52 @@ describe('authorization', () => {
       }
     });
 
+    it('throws an error with a single owner when the repeated owners passed in are not included in the features when security undefined', async () => {
+      expect.assertions(1);
+
+      auth = await Authorization.create({
+        request,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+
+      try {
+        await auth.ensureAuthorized({
+          entities: [
+            { id: '1', owner: 'b' },
+            { id: '1', owner: 'b' },
+          ],
+          operation: Operations.createCase,
+        });
+      } catch (error) {
+        expect(error.message).toBe('Unauthorized to create case with owners: "b"');
+      }
+    });
+
     it('throws an error when the owner passed in is not included in the features when security is enabled', async () => {
       expect.assertions(1);
 
       try {
         await auth.ensureAuthorized({
           entities: [{ id: '1', owner: 'b' }],
+          operation: Operations.createCase,
+        });
+      } catch (error) {
+        expect(error.message).toBe('Unauthorized to create case with owners: "b"');
+      }
+    });
+
+    it('throws an error with a single owner when the repeated owners passed in are not included in the features when security is enabled', async () => {
+      expect.assertions(1);
+
+      try {
+        await auth.ensureAuthorized({
+          entities: [
+            { id: '1', owner: 'b' },
+            { id: '2', owner: 'b' },
+          ],
           operation: Operations.createCase,
         });
       } catch (error) {
@@ -247,6 +333,26 @@ describe('authorization', () => {
       try {
         await auth.ensureAuthorized({
           entities: [{ id: '1', owner: 'a' }],
+          operation: Operations.createCase,
+        });
+      } catch (error) {
+        expect(error.message).toBe('Unauthorized to create case with owners: "a"');
+      }
+    });
+
+    it('throws an error with a single owner listed when the user does not have all the requested privileges', async () => {
+      expect.assertions(1);
+
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({ hasAllRequested: false }))
+      );
+
+      try {
+        await auth.ensureAuthorized({
+          entities: [
+            { id: '1', owner: 'a' },
+            { id: '2', owner: 'a' },
+          ],
           operation: Operations.createCase,
         });
       } catch (error) {
