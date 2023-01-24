@@ -69,6 +69,8 @@ import type {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -185,6 +187,58 @@ export interface ViewUnderlyingDataArgs {
   filters: Filter[];
   query: Query | AggregateQuery | undefined;
   columns: string[];
+}
+
+export function VisualizationErrorPanel({
+  errors,
+  canEdit,
+}: {
+  errors: UserMessage[];
+  canEdit: boolean;
+}) {
+  const showMore = errors.length > 1;
+  const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
+  return (
+    <div className="lnsEmbeddedError">
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        data-test-subj="embeddable-lens-failure"
+        body={
+          <>
+            {errors.length ? (
+              <>
+                <p>{errors[0].longMessage}</p>
+                {showMore && !canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.moreErrors"
+                      defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+                {canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.fixErrors"
+                      defaultMessage="Edit in Lens editor to fix the error"
+                    />
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.embeddable.failure"
+                  defaultMessage="Visualization couldn't be displayed"
+                />
+              </p>
+            )}
+          </>
+        }
+      />
+    </div>
+  );
 }
 
 const getExpressionFromDocument = async (
@@ -470,8 +524,14 @@ export class Embeddable
     );
   };
 
+  private get allErrors() {
+    return this.getUserMessages(['visualization', 'visualizationOnEmbeddable', 'embeddableBadge'], {
+      severity: 'error',
+    });
+  }
+
   private get hasAnyErrors() {
-    return this.getUserMessages(undefined, { severity: 'error' }).length > 0;
+    return this.allErrors.length > 0;
   }
 
   private _userMessages: UserMessage[] = [];
@@ -552,7 +612,7 @@ export class Embeddable
 
     if (addedMessageIds.length) {
       this.additionalUserMessages = newMessageMap;
-      this.renderBadgeMessages();
+      this.renderUserMessages();
     }
 
     return () => {
@@ -802,9 +862,7 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
-      severity: 'error',
-    });
+    const errors = this.allErrors;
 
     this.updateOutput({
       loading: true,
@@ -825,60 +883,81 @@ export class Embeddable
 
     const input = this.getInput();
 
-    render(
-      <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-        <ExpressionWrapper
-          ExpressionRenderer={this.expressionRenderer}
-          expression={this.expression || null}
-          errors={errors}
-          lensInspector={this.lensInspector}
-          searchContext={this.getMergedSearchContext()}
-          variables={{
-            embeddableTitle: this.getTitle(),
-            ...(input.palette ? { theme: { palette: input.palette } } : {}),
-          }}
-          searchSessionId={this.externalSearchContext.searchSessionId}
-          handleEvent={this.handleEvent}
-          onData$={this.updateActiveData}
-          onRender$={this.onRender}
-          interactive={!input.disableTriggers}
-          renderMode={input.renderMode}
-          syncColors={input.syncColors}
-          syncTooltips={input.syncTooltips}
-          syncCursor={input.syncCursor}
-          hasCompatibleActions={this.hasCompatibleActions}
-          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
-          className={input.className}
-          style={input.style}
-          executionContext={this.getExecutionContext()}
-          canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={(message) => {
-            this.updateOutput({ error: new Error(message) });
-            this.logError('runtime');
-          }}
-          noPadding={this.visDisplayOptions.noPadding}
-        />
-        <div
-          css={css({
-            position: 'absolute',
-            zIndex: 2,
-            left: 0,
-            bottom: 0,
-          })}
-          ref={(el) => {
-            if (el) {
-              this.warningDomNode = el;
-            }
-          }}
-        />
-      </KibanaThemeProvider>,
-      domNode
-    );
+    if (this.expression && !errors.length) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <ExpressionWrapper
+            ExpressionRenderer={this.expressionRenderer}
+            expression={this.expression || null}
+            lensInspector={this.lensInspector}
+            searchContext={this.getMergedSearchContext()}
+            variables={{
+              embeddableTitle: this.getTitle(),
+              ...(input.palette ? { theme: { palette: input.palette } } : {}),
+            }}
+            searchSessionId={this.externalSearchContext.searchSessionId}
+            handleEvent={this.handleEvent}
+            onData$={this.updateActiveData}
+            onRender$={this.onRender}
+            interactive={!input.disableTriggers}
+            renderMode={input.renderMode}
+            syncColors={input.syncColors}
+            syncTooltips={input.syncTooltips}
+            syncCursor={input.syncCursor}
+            hasCompatibleActions={this.hasCompatibleActions}
+            getCompatibleCellValueActions={this.getCompatibleCellValueActions}
+            className={input.className}
+            style={input.style}
+            executionContext={this.getExecutionContext()}
+            addUserMessages={(messages) => this.addUserMessages(messages)}
+            onRuntimeError={(message) => {
+              this.updateOutput({ error: new Error(message) });
+              this.logError('runtime');
+            }}
+            noPadding={this.visDisplayOptions.noPadding}
+          />
+          <div
+            css={css({
+              position: 'absolute',
+              zIndex: 2,
+              left: 0,
+              bottom: 0,
+            })}
+            ref={(el) => {
+              if (el) {
+                this.warningDomNode = el;
+              }
+            }}
+          />
+        </KibanaThemeProvider>,
+        domNode
+      );
+    }
 
-    this.renderBadgeMessages();
+    this.renderUserMessages();
   }
 
-  private renderBadgeMessages() {
+  private renderUserMessages() {
+    const errors = this.getUserMessages(['visualization', 'visualizationOnEmbeddable'], {
+      severity: 'error',
+    });
+
+    if (errors.length && this.domNode) {
+      render(
+        <>
+          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+            <I18nProvider>
+              <VisualizationErrorPanel
+                errors={errors}
+                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+              />
+            </I18nProvider>
+          </KibanaThemeProvider>
+        </>,
+        this.domNode
+      );
+    }
+
     const warningsToDisplay = this.getUserMessages('embeddableBadge', {
       severity: 'warning',
     });
