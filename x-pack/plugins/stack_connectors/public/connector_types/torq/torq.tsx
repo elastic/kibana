@@ -7,7 +7,7 @@
 
 import {
   ActionTypeModel,
-  GenericValidationResult
+  GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { lazy } from 'react';
 import { TorqActionParams, TorqConfig, TorqSecrets } from '../types';
