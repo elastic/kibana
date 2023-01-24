@@ -167,7 +167,7 @@ Object {
           "xAccessor": "02a55c97-d7a4-440d-ac77-33b941c16189",
           "yConfig": Array [
             Object {
-              "axisMode": "right",
+              "axisMode": "left",
               "forAccessor": "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
             },
           ],
@@ -180,11 +180,12 @@ Object {
           "layerType": "referenceLine",
           "yConfig": Array [
             Object {
-              "axisMode": "right",
+              "axisMode": "left",
               "color": "#aa6556",
               "fill": "none",
               "forAccessor": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
               "icon": "alert",
+              "iconPosition": "left",
               "lineWidth": 2,
               "textVisibility": true,
             },
@@ -192,7 +193,7 @@ Object {
         },
       ],
       "legend": Object {
-        "isVisible": true,
+        "isVisible": false,
         "position": "right",
       },
       "preferredSeriesType": "line",
@@ -205,7 +206,7 @@ Object {
       "valueLabels": "hide",
       "valuesInLegend": true,
       "xTitle": "",
-      "yRightExtent": Object {
+      "yLeftExtent": Object {
         "lowerBound": 0,
         "mode": "custom",
         "upperBound": 100,

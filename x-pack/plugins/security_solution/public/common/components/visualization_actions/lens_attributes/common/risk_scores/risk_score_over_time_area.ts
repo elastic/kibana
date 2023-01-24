@@ -22,7 +22,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
       visualization: {
         title: 'Empty XY chart',
         legend: {
-          isVisible: true,
+          isVisible: false,
           position: 'right',
         },
         valueLabels: 'hide',
@@ -39,7 +39,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
             yConfig: [
               {
                 forAccessor: '8886a925-4419-4d9a-8498-3bda4ecf1b0a',
-                axisMode: 'right',
+                axisMode: 'left',
               },
             ],
           },
@@ -50,12 +50,13 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
             yConfig: [
               {
                 forAccessor: layer2ColumnId,
-                axisMode: 'right',
+                axisMode: 'left',
                 lineWidth: 2,
                 color: '#aa6556',
                 icon: 'alert',
                 textVisibility: true,
                 fill: 'none',
+                iconPosition: 'left',
               },
             ],
           },
@@ -79,7 +80,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = (
           yLeft: true,
           yRight: true,
         },
-        yRightExtent: {
+        yLeftExtent: {
           mode: 'custom',
           lowerBound: 0,
           upperBound: 100,
