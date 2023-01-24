@@ -185,6 +185,11 @@ export const DiscoverTopNav = ({
     ]
   );
 
+  const onEditDataView = async (editedDataView: DataView) => {
+    stateContainer.dataState.fetch();
+    stateContainer.actions.setDataView(editedDataView);
+  };
+
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState, setAppState } = stateContainer;
     if (newSavedQueryId) {
@@ -220,6 +225,7 @@ export const DiscoverTopNav = ({
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,
     savedDataViews,
+    onEditDataView,
   };
 
   const onTextBasedSavedAndExit = useCallback(
