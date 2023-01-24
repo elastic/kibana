@@ -234,6 +234,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.moveRight': i18n.translate('core.euiColumnActions.moveRight', {
       defaultMessage: 'Move right',
     }),
+    'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
+      'core.euiColumnSelector.dragHandleAriaLabel',
+      {
+        defaultMessage: 'Drag handle',
+      }
+    ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
       defaultMessage: 'Hide all',
     }),

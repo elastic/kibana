@@ -26,10 +26,10 @@ import {
   createCase,
   createComment,
   deleteAllCaseItems,
-  getCaseUserActions,
   pushCase,
   updateCase,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseWithConnector,

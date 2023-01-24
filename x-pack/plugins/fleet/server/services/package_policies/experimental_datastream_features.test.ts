@@ -98,9 +98,7 @@ describe('experimental_datastream_features', () => {
             template: {
               settings: {},
               mappings: {
-                _source: {
-                  mode: 'stored',
-                },
+                _source: {},
                 properties: {
                   test_dimension: {
                     type: 'keyword',
