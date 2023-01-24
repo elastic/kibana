@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -44,6 +44,7 @@ export function PalettePicker({
     >
       <>
         <EuiColorPalettePicker
+          fullWidth
           data-test-subj="lns-palettePicker"
           compressed
           palettes={palettesToShow}

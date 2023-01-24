@@ -7,13 +7,14 @@
  */
 
 import React from 'react';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { UrlFormatEditor } from './url';
-import { coreMock } from 'src/core/public/mocks';
-import { createKibanaReactContext } from '../../../../../../kibana_react/public';
+import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
+import { coreMock } from '@kbn/core/public/mocks';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Serializable } from '@kbn/utility-types';
 
 const fieldType = 'string';
 const format = {
@@ -28,7 +29,7 @@ const format = {
     ],
   },
 } as unknown as FieldFormat;
-const formatParams = {
+const formatParams: UrlFormatEditorFormatParams = {
   openLinkInCurrentTab: true,
   urlTemplate: '',
   labelTemplate: '',
@@ -85,7 +86,7 @@ describe('UrlFormatEditor', () => {
   });
 
   it('should append base path to preview images', async () => {
-    let sampleImageUrlTemplate = '';
+    let sampleImageUrlTemplate: Serializable = '';
     const { getByLabelText } = renderWithContext(
       <UrlFormatEditor
         fieldType={fieldType}
@@ -103,7 +104,7 @@ describe('UrlFormatEditor', () => {
     userEvent.selectOptions(getByLabelText('Type'), 'img');
     expect(sampleImageUrlTemplate).toContain(MY_BASE_PATH);
     expect(sampleImageUrlTemplate).toMatchInlineSnapshot(
-      `"my-base-path/plugins/indexPatternManagement/assets/icons/{{value}}.png"`
+      `"my-base-path/plugins/dataViewFieldEditor/assets/icons/{{value}}.png"`
     );
   });
 });

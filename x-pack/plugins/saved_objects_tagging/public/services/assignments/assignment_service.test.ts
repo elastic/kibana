@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createAssignableObject } from '../../../common/test_utils';
 import { TagAssignmentService } from './assignment_service';
 

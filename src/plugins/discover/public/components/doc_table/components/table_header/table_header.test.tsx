@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { SortOrder } from './helpers';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
-import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 
 const defaultUiSettings = {
   get: (key: string) => {
@@ -26,7 +26,7 @@ const defaultUiSettings = {
   },
 };
 
-function getMockIndexPattern() {
+function getMockDataView() {
   return {
     id: 'test',
     title: 'Test',
@@ -59,7 +59,7 @@ function getMockIndexPattern() {
 
 function getMockProps(props = {}) {
   const defaultProps = {
-    indexPattern: getMockIndexPattern(),
+    dataView: getMockDataView(),
     hideTimeColumn: false,
     columns: ['first', 'middle', 'last'],
     defaultSortOrder: 'desc',

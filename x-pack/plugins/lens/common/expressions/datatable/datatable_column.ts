@@ -6,16 +6,11 @@
  */
 
 import type { Direction } from '@elastic/eui';
-import { SortingHint } from '../..';
-import type {
-  CustomPaletteState,
-  PaletteOutput,
-} from '../../../../../../src/plugins/charts/common';
-import type {
-  ExpressionFunctionDefinition,
-  DatatableColumn,
-} from '../../../../../../src/plugins/expressions/common';
-import type { CustomPaletteParams } from '../../types';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SortingHint } from '../..';
+import { CollapseFunction } from '../collapse';
 
 export type LensGridDirection = 'none' | Direction;
 
@@ -36,6 +31,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  oneClickFilter?: boolean;
   isTransposed?: boolean;
   // These flags are necessary to transpose columns and map them back later
   // They are set automatically and are not user-editable
@@ -48,16 +44,18 @@ export interface ColumnState {
   colorMode?: 'none' | 'cell' | 'text';
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
+  collapseFn?: CollapseFunction;
 }
 
 export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
-
-export const datatableColumn: ExpressionFunctionDefinition<
+export type DatatableColumnFunction = ExpressionFunctionDefinition<
   'lens_datatable_column',
   null,
   ColumnState & { sortingHint?: SortingHint },
   DatatableColumnResult
-> = {
+>;
+
+export const datatableColumn: DatatableColumnFunction = {
   name: 'lens_datatable_column',
   aliases: [],
   type: 'lens_datatable_column',
@@ -68,6 +66,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
     alignment: { types: ['string'], help: '' },
     sortingHint: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
+    oneClickFilter: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },

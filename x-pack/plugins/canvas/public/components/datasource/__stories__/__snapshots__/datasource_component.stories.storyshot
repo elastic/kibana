@@ -5,7 +5,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
   className="canvasDataSource__section"
 >
   <button
-    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    className="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton css-9t7nyf-empty-primary"
     disabled={false}
     onClick={[Function]}
     type="button"
@@ -18,35 +18,35 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
         color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      />
+      >
+        
+      </span>
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        />
+        >
+          
+        </span>
         Test Datasource
       </span>
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    className="euiCallOut euiCallOut--warning"
+    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
     <div
-      className="euiText euiText--small"
+      className="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      style={Object {}}
     >
-      <div
-        className="euiTextColor euiTextColor--default"
-        style={Object {}}
-      >
-        <p>
-          The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
-        </p>
-      </div>
+      <p>
+        The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
+      </p>
     </div>
   </div>
 </div>
@@ -57,7 +57,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
   className="canvasDataSource__section"
 >
   <button
-    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    className="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton css-9t7nyf-empty-primary"
     disabled={false}
     onClick={[Function]}
     type="button"
@@ -70,26 +70,30 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
         color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      />
+      >
+        
+      </span>
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        />
+        >
+          
+        </span>
         Test Datasource
       </span>
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
     className="render_to_dom"
   />
   <hr
-    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
   />
   <div
     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -98,7 +102,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -118,21 +122,16 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButton euiButton--success euiButton--small euiButton--fill"
+        className="euiButton emotion-euiButtonDisplay-s-s-fill-success"
         disabled={false}
         onClick={[Function]}
-        style={
-          Object {
-            "minWidth": undefined,
-          }
-        }
         type="button"
       >
         <span
-          className="euiButtonContent euiButton__content"
+          className="emotion-euiButtonDisplayContent"
         >
           <span
-            className="euiButton__text"
+            className="eui-textTruncate"
           >
             Save
           </span>

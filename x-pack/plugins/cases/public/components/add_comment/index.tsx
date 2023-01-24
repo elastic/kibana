@@ -17,14 +17,23 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import {
+  Form,
+  useForm,
+  UseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CommentType } from '../../../common/api';
-import { usePostComment } from '../../containers/use_post_comment';
-import { Case } from '../../containers/types';
-import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
-import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
+import type { Case } from '../../containers/types';
+import type { EuiMarkdownEditorRef } from '../markdown_editor';
+import { MarkdownEditorForm } from '../markdown_editor';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { removeItemFromSessionStorage } from '../utils';
 
 import * as i18n from './translations';
-import { schema, AddCommentFormSchema } from './schema';
+import type { AddCommentFormSchema } from './schema';
+import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
@@ -47,7 +56,6 @@ export interface AddCommentRefObject {
 export interface AddCommentProps {
   id: string;
   caseId: string;
-  userCanCrud?: boolean;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
@@ -57,21 +65,14 @@ export interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      {
-        id,
-        caseId,
-        userCanCrud,
-        onCommentPosted,
-        onCommentSaving,
-        showLoading = true,
-        statusActionButton,
-      },
+      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { owner } = useCasesContext();
-      const { isLoading, postComment } = usePostComment();
+      const { permissions, owner, appId } = useCasesContext();
+      const { isLoading, createAttachments } = useCreateAttachments();
+      const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -112,14 +113,26 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment({
+          createAttachments({
             caseId,
-            data: { ...data, type: CommentType.user, owner: owner[0] },
+            caseOwner: owner[0],
+            data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
-          reset();
+
+          reset({ defaultValue: {} });
         }
-      }, [submit, onCommentSaving, postComment, caseId, owner, onCommentPosted, reset]);
+        removeItemFromSessionStorage(draftStorageKey);
+      }, [
+        submit,
+        onCommentSaving,
+        createAttachments,
+        caseId,
+        owner,
+        onCommentPosted,
+        reset,
+        draftStorageKey,
+      ]);
 
       /**
        * Focus on the text area when a quote has been added.
@@ -156,7 +169,7 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {userCanCrud && (
+          {permissions.create && (
             <Form form={form}>
               <UseField
                 path={fieldName}
@@ -164,6 +177,7 @@ export const AddComment = React.memo(
                 componentProps={{
                   ref: editorRef,
                   id,
+                  draftStorageKey,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
@@ -178,7 +192,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={isLoading}
+                          isDisabled={!comment || isLoading}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

@@ -8,7 +8,8 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/types/timeline';
 
 import { RowRendererContainer } from '../row_renderer';
 import { ZeekDetails } from './zeek_details';
@@ -19,14 +20,9 @@ export const zeekRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'zeek';
   },
-  renderRow: ({ browserFields, data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, scopeId }) => (
     <RowRendererContainer>
-      <ZeekDetails
-        data={data}
-        browserFields={browserFields}
-        isDraggable={isDraggable}
-        timelineId={timelineId}
-      />
+      <ZeekDetails data={data} isDraggable={isDraggable} timelineId={scopeId} />
     </RowRendererContainer>
   ),
 };

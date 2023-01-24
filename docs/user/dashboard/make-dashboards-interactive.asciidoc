@@ -2,12 +2,12 @@
 [[drilldowns]]
 == Make dashboards interactive
 
-:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, drilldowns
+:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, range slider, options list, author, drilldowns
 :description: Add interactive capabilities to your dashboard, such as controls that allow \
 you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
 dashboards and external websites.
 
-Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filters, and drilldowns that allow you to navigate to *Discover*, other dashboards, and external websites. 
+Add interactive capabilities to your dashboard, such as interactive filter controls, and drilldowns that allow you to navigate to *Discover*, other dashboards, and external websites. 
 
 ++++
 <script type="text/javascript" async 
@@ -23,84 +23,182 @@ data-type="inline"
 </br>
 ++++
 
-Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
-
-[float]
 [[add-controls]]
-=== experimental[] Add Controls panels
+=== Filter dashboard data with controls
 
-*Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
+*Controls* are interactive panels you add to your dashboards to filter and display only the data you want to explore.
 
-There are two types of *Controls* you can add to dashboards:
+There are three types of controls:
 
-* *Options list* &mdash; Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. 
-For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
-
-* *Range slider* &mdash; Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a 
-min and max aggregation. For example, use the range slider when you want to filter the sample flight dashboard by a specific average ticket price.
+* *Options list* &mdash; Adds a dropdown that allows you to filter the data with one or more options that you select.
++
+For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs generated from `osx` and `ios` operating systems.
 +
 [role="screenshot"]
-image::images/dashboard-controls.png[]
+image::images/dashboard_controlsOptionsList_8.6.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
 
-To create *Controls* panels:
+* *Range slider* &mdash; Adds a slider that allows you to filter the data within a specified range of values. 
++
+For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add a range slider for the `hour_of_day` field that allows you to display only the log data from 9:00AM to 5:00PM.
++
+[role="screenshot"]
+image::images/dashboard_controlsRangeSlider_8.3.0.png[Range slider control for the `hour_of_day` field with a range of `9` to `17` selected]
 
-. On the dashboard, click *All types*, then select *Controls*.
-
-. Select the control panel type from the dropdown, then click *Add*.
-
-. Enter the *Control Label*, then select the *{data-source-caps}* and *Field*.
-
-. If you are adding a *Range slider*, enter the *Step Size* and *Decimal Places*.
-
-. Click *Options*, then configure the following:
-
-* *Update {kib} filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected, {kib} filters are created only when you click *Apply changes*.
-
-* *Use time filter* &mdash; When selected, the aggregations that generate the options list and time range are connected to the <<set-time-filter,time filter>>.
-
-* *Pin filters for all applications* &mdash; When selected, all filters created by interacting with the inputs are automatically pinned.
-
-. Click *Update*.
+* *Time slider* &mdash; Adds a time range slider that allows you to filter the data within a specified range of time, advance the time range backward and forward, and animate your change in data over the specified time range.
++
+For example, you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, and the global time filter is *Last 7 days*. When you add the time slider, you can click the previous and next buttons to advance the time range backward or forward, and click the play button to watch how the data changes over the last 7 days. 
+[role="screenshot"]
+image::images/dashboard_timeSliderControl_8.5.0.gif[Time slider control for the the Last 7 days]
 
 [float]
-[[save-the-controls-panel]]
-==== Save and add the panel
+[[create-and-add-options-list-and-range-slider-controls]]
+==== Create and add Options list and Range slider controls
 
-Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+To add interactive Options list and Range slider controls, create the controls, then add them to your dashboard.
 
-To save the panel to the *Visualize Library*:
+. Open or create a new dashboard. 
 
-. Click *Save to library*.
+* If you are adding a *Control* to an existing dashboard, click *Edit*, click *Controls* in the dashboard toolbar, then select *Add control*.
 
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+* If you are adding a *Control* to a new dashboard, click *Controls* in the dashboard toolbar, then select *Add control*.
 
-. Make sure that *Add to Dashboard after saving* is selected.
+. From the *Data view* dropdown, select the data view with the field you want to appear in the *Control*.
 
-. Click *Save and return*.
+. In the *Field* list, select the field with the documents you want to filter.
++
+The *Control type* is automatically applied for the field you selected.
 
-To save the panel to the dashboard:
+. In the *Label* field, enter a clear and self-explanatory label.
 
-. Click *Save and return*.
+. Select the control width:
 
-. Add an optional title to the panel.
+* To specify the control size, select the *Minimum width*.
 
-.. In the panel header, click *No Title*.
+* To expand the width of the control to fit the available space on the dashboard, select *Expand width to fit available space*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+. If you are creating an *Options list*, specify the additional settings:
 
-.. Enter the *Panel title*, then click *Save*.
+* To allow multiple options to be selected in the dropdown, select *Allow multiple selections in dropdown*.
+
+* To allow options to be inlcluded or excluded on the dashboard, select *Allow selections to be excluded*.
+
+* To allow an exists query to be created, select *Allow exists query*.
+
+* To populate the entire list of options, even when the list takes longer to populate than expected, select *Ignore timeout for results*.
+
+. Click *Save and close*.
 
 [float]
+[[add-time-slider-controls]]
+==== Add time slider controls
+
+To add interactive time slider controls, create the control, then add it to your dashboard.
+
+. Open or create a new dashboard. 
+
+. In the dashboard toolbar, click *Controls*, then select *Add time slider control*.
+
+. The time slider control uses the time range from the global time filter. To change the time range in the time slider control, <<set-time-filter,change the global time filter>>. 
+
+. Save the dashboard.
+
+[float]
+[[filter-the-data-with-options-list-controls]]
+==== Filter the data with Options list controls
+Filter the data with one or more options that you select.
+
+. Open the Options list dropdown.
+
+. Select the available options.
++
+The *Exists* query returns all documents that contain an indexed value for the field. 
+
+. Select how to filter the options.
+
+* To display only the data for the options you selected, click *Include*.
+
+* To exclude the data for the options you selected, click *Exclude*.
+
+. To clear the selections, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all selected options in the Options list].
+
+. To display only the options you selected in the dropdown, click image:images/dashboard_showOnlySelectedOptions_8.3.0.png[The icon to display only the options you have selected in the Options list].
+
+[float]
+[[filter-the-data-with-range-slider-controls]]
+==== Filter the data with Range slider controls
+Filter the data within a specified range of values.
+
+. On the Range slider, click a value.
+
+. Move the sliders to specify the values you want to display.
++
+The dashboard displays only the data for the range of values you specified.
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[float]
+[[filter-the-data-with-time-slider-controls]]
+==== Filter the data with time slider controls
+Filter the data within a specified range of time.
+
+. To view a different time range, click the time slider, then move the sliders to specify the time range you want to display.
+
+. To advance the time range forward, click image:images/dashboard_timeSliderControl_advanceForward_8.5.0.png[The icon to advance the time range forward].
+
+. To advance the time range backward, click image:images/dashboard_timeSliderControl_advanceBackward_8.5.0.png[The icon to advance the time range backward].
+
+. To animate the data changes over time, click image:images/dashboard_timeSliderControl_animate_8.5.0.png[The icon to clear all specified values in the Range slider].
+
+. To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
+
+[float]
+[[configure-controls-settings]]
+==== Configure the controls settings
+
+. In the dashboard toolbar, click *Controls*, then select *Settings*.
+
+. On the *Control settings* flyout, configure the settings:
+
+* *Label position* &mdash; Specifies where the label appears on the control.
+
+* *Validate user selections* &mdash; When selected, any selected option that results in no data is ignored.
+
+* *Chain controls* &mdash; When selected, any selected options in one control narrows the available options in the next control.
+
+* To remove all controls from the dashboard, click *Delete all*.
+
+. Click *Save and close*.
+
+[float]
+[[edit-controls]]
+==== Edit Options list and Range slider control settings
+
+Change the settings for the Options list and Range slider controls.
+
+. Hover over the control you want to edit, then click image:images/dashboard_controlsEditControl_8.3.0.png[The Edit control icon that opens the Edit control flyout].
+
+. On the *Edit control* flyout, change the options, then click *Save and close*.
+
+[float]
+[[remove-controls]]
+==== Remove controls
+
+Remove controls from your dashboard.
+
+. Hover over the control you want to remove, then click image:images/dashboard_controlsRemoveControl_8.3.0.png[The Remove control icon that removes the control from the dashboard].
+
+. On the *Delete control?* window, click *Delete*.
+
 [[explore-the-underlying-documents]]
 === Open panel data in Discover
 
-You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one {data-view}. 
+You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one data view. 
 
 There are three types of *Discover* interactions you can add to dashboards:
 
 * *Panel interactions* &mdash; Opens panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
 +
-To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
+To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
 +
 To use panel interactions, open the panel menu, then click *Explore underlying data*.
 
@@ -114,17 +212,20 @@ To use series data interactions, click a data series in the panel.
 +
 To use saved search interactions, open the panel menu, then click *More > View saved search*.
 
-[float]
 [[create-drilldowns]]
-=== Create drilldowns
+=== Customize interactions with drilldowns
 
 Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. 
 
-There are two types of drilldowns you can add to dashboards:
+There are three types of drilldowns you can add to dashboards:
 
-* *Dashboard* &mdash; Navigates you from one dashboard to another dashboard. For example, when can create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
+* *Dashboard* &mdash; Navigates you from one dashboard to another dashboard. For example, create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
 
 * *URL* &mdash; Navigates you from a dashboard to an external website. For example, a website with the specific host name as a parameter. 
+
+* *Discover* &mdash; Navigates you from a *Lens* dashboard panel to *Discover*. For example, create a drilldown for a *Lens* visualization that opens the visualization data in *Discover* for further exploration. 
+
+Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 [float]
 [[dashboard-drilldowns]]
@@ -135,7 +236,7 @@ Dashboard drilldowns enable you to open a dashboard from another dashboard, taki
 For example, if you have a dashboard that shows the logs and metrics for multiple data centers, you can create a drilldown that navigates from the dashboard that shows multiple data centers, to a dashboard that shows a single data center or server.
 
 [role="screenshot"]
-image:images/drilldown_on_data_table.gif[Drilldown on data table that navigates to another dashboard]
+image:images/dashboard_drilldownOnDataTable_8.3.gif[Drilldown on data table that navigates to another dashboard]
 
 The panels you create using the following editors support dashboard drilldowns:
 
@@ -166,7 +267,7 @@ Use the <<gs-get-data-into-kibana,*Sample web logs*>> data to create a dashboard
 +
 [%hardbreaks]
 Search: `extension.keyword: ("gz" or "css" or "deb")`
-Filter: `geo.src: CN`
+Filter: `geo.src: US`
 
 [float]
 ===== Create the dashboard drilldown
@@ -190,16 +291,16 @@ Create a drilldown that opens the *Detailed logs* dashboard from the *[Logs] Web
 . In the data table panel, hover over a value, click *+*, then select `View details`.
 +
 [role="screenshot"]
-image::images/drilldown_on_panel.png[Drilldown on data table that navigates to another dashboard]
+image::images/dashboard_drilldownOnPanel_8.3.png[Drilldown on data table that navigates to another dashboard]
 
 [float]
 [[url-drilldowns]]
 ==== Create URL drilldowns
 
-URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown.
+URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown. All panels that you create with the visualization editors support dashboard drilldowns.
 
 [role="screenshot"]
-image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
+image:images/dashboard_urlDrilldownGoToGitHub_8.3.gif[Drilldown on pie chart that navigates to Github]
 
 Some panels support multiple interactions, also known as triggers. 
 The <<url-template-variables,variables>> you use to create a <<url_templating-language, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
@@ -210,19 +311,12 @@ The <<url-template-variables,variables>> you use to create a <<url_templating-la
 
 For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`.
 
-The panels you create using the following editors support dashboard drilldowns:
-
-* *Lens*
-* *Maps*
-* *TSVB*
-* *Aggregation-based* area chart, data table, heat map, horitizontal bar chart, line chart, pie chart, tag cloud, and vertical bar chart
-
 [float]
 ===== Create a URL drilldown
 
 For example, if you have a dashboard that shows data from a Github repository, you can create a URL drilldown that opens Github from the dashboard panel.
 
-. Add the *Sample web logs* data.
+. Add the <<gs-get-data-into-kibana,*Sample web logs*>> data.
 
 . Open the *[Logs] Web Traffic* dashboard.
 
@@ -230,13 +324,11 @@ For example, if you have a dashboard that shows data from a Github repository, y
 
 . Create a donut chart
 
-.. In the toolbar, click *Edit*.
-
 .. Click *Create visualization*.
 
 .. From the *Chart type* dropdown, select *Donut*.
 
-.. From the *Available fields* list, drag and drop the *machine.os.keyword* field onto the visualization builder.
+.. From the *Available fields* list, drag *machine.os.keyword* to the workspace.
 
 .. Click *Save and return*.
 
@@ -264,12 +356,47 @@ https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
 . On the donut chart panel, click any chart slice, then select *Show on Github*.
 +
 [role="screenshot"]
-image:images/url_drilldown_popup.png[URL drilldown popup]
+image:images/dashboard_urlDrilldownPopup_8.3.png[URL drilldown popup]
 
 . In the list of {kib} repository issues, verify that the slice value appears.
 +
 [role="screenshot"]
-image:images/url_drilldown_github.png[Github]
+image:images/dashboard_urlDrilldownGithub_8.3.png[Open ios issues in the elastic/kibana repository on Github]
+
+[float]
+[[discover-drilldowns]]
+==== Create Discover drilldowns
+
+Discover drilldowns enable you to open *Discover* from a *Lens* dashboard panel, taking the time range, filters, and other parameters with you so the context remains the same.
+
+For example, when you create a Discover drilldown for a pie chart, you can click a slice in the pie chart, and only the documents for the slice appear in *Discover*. 
+
+[role="screenshot"]
+image:images/dashboard_discoverDrilldown_8.3.gif[Drilldown on bar vertical stacked chart that navigates to Discover]
+
+NOTE: Discover drilldowns are supported only by *Lens* panels. To open all of the *Lens* dashboard panel data in *Discover*, check <<explore-the-underlying-documents, Open panel data in Discover>>.
+
+[float]
+===== Create the Discover drilldown
+
+Create a drilldown that opens *Discover* from the <<gs-get-data-into-kibana,*Sample web logs*>> data *[Logs] Web Traffic* dashboard.
+
+. Click *Edit*, open the panel menu for the *[Logs] Bytes distribution* bar vertical stacked chart, then select *Create drilldown*.
+
+. Click *Open in Discover*.
+
+. Give the drilldown a name. For example, `View bytes distribution in Discover`.
+
+. To open the Discover drilldown in a new tab, select *Open in new tab*.
+
+. Click *Create drilldown*.
+
+. Save the dashboard.
+
+. On the *[Logs] Bytes distribution* bar vertical stacked chart, click a bar, then select *View bytes distribution in Discover*.
++
+[role="screenshot"]
+image::images/dashboard_discoverDrilldown_8.3.png[Drilldown on bar vertical stacked chart that navigates to Discover]
 
 [float]
 [[manage-drilldowns]]
@@ -287,4 +414,270 @@ Make changes to your drilldowns, make a copy of your drilldowns for another pane
 
 * To delete a drilldown, select the drilldown you want to delete, then click *Delete*.
 
-include::url-drilldown.asciidoc[]
+[float]
+[[url_templating-language]]
+==== URL templating
+
+beta[]
+
+The URL template input uses https://ela.st/handlebars-docs#expressions[Handlebars] — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
+
+[source, bash]
+----
+https://github.com/elastic/kibana/issues?q={{event.value}}
+----
+
+A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
+
+[[helpers]]
+In addition to  https://ela.st/handlebars-helpers[built-in] Handlebars helpers, you can use custom helpers.
+
+Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
+
+|===
+|Custom helper |Use case
+
+|json
+a|Serialize variables in JSON format.
+
+Example:
+
+`{{json event}}` +
+`{{json event.key event.value}}` +
+`{{json filters=context.panel.filters}}`
+
+
+|rison
+a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+
+Example:
+
+`{{rison event}}` +
+`{{rison event.key event.value}}` +
+`{{rison filters=context.panel.filters}}`
+
+
+|date
+a|Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
+
+Example:
+
+`{{date event.from “YYYY MM DD”}}` +
+`{{date “now-15”}}`
+
+|formatNumber
+a|Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
+Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options. 
+
+Example:
+
+`{{formatNumber event.value "0.0"}}`
+
+|lowercase
+a|Converts a string to lower case.
+
+Example:
+
+`{{lowercase event.value}}`
+
+|uppercase
+a|Converts a string to upper case.
+
+Example:
+
+`{{uppercase event.value}}`
+
+|trim
+a|Removes leading and trailing spaces from a string.
+
+Example:
+
+`{{trim event.value}}`
+
+|trimLeft
+a|Removes leading spaces from a string.
+
+Example:
+
+`{{trimLeft event.value}}`
+
+|trimRight
+a|Removes trailing spaces from a string.
+
+Example:
+
+`{{trimRight event.value}}`
+
+|mid
+a|Extracts a substring from a string by start position and number of characters to extract.
+
+Example:
+
+`{{mid event.value 3 5}}` - extracts five characters starting from a third character. 
+
+|left
+a|Extracts a number of characters from a string (starting from left).
+
+Example:
+
+`{{left event.value 3}}`
+
+|right
+a|Extracts a number of characters from a string (starting from right).
+
+Example:
+
+`{{right event.value 3}}`
+
+|concat
+a|Concatenates two or more strings.
+
+Example:
+
+`{{concat event.value "," event.key}}`
+
+|replace
+a|Replaces all substrings within a string.
+
+Example:
+
+`{{replace event.value "stringToReplace" "stringToReplaceWith"}}`
+
+|split
+a|Splits a string using a provided splitter.
+
+Example:
+
+`{{split event.value ","}}`
+
+|encodeURIComponent
+a|Escapes string using built in `encodeURIComponent` function.
+
+|encodeURIQuery
+a|Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
+
+|===
+
+
+[float]
+[[url-template-variables]]
+===== URL template variables
+
+The URL drilldown template has three sources for variables:
+
+* *Global* static variables that don’t change depending on the  place where the URL drilldown is used or which user interaction executed the drilldown. For example: `{{kibanaUrl}}`.
+* *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. For example, `{{context.panel.filters}}` gives access to filters that applied to the current panel.
+* *Event* variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
+
+To ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
+You can access the full list of variables available for the current panel and selected trigger by clicking *Add variable* in the top-right corner of a URL template input.
+
+[float]
+[[variables-reference]]
+===== Variables reference
+
+
+|===
+|Source |Variable |Description
+
+|*Global*
+| kibanaUrl
+| {kib} base URL. Useful for creating URL drilldowns that navigate within {kib}.
+
+| *Context*
+| context.panel
+| Context provided by current dashboard panel.
+
+|
+| context.panel.id
+| ID of a panel.
+
+|
+| context.panel.title
+| Title of a panel.
+
+|
+| context.panel.filters
+| List of {kib} filters applied to a panel. +
+Tip: Use in combination with <<helpers, rison>> helper for
+internal {kib} navigations with carrying over current filters.
+
+|
+| context.panel.query.query
+| Current query string.
+
+|
+| context.panel.query.language
+| Current query language.
+
+|
+| context.panel.timeRange.from +
+context.panel.timeRange.to
+| Current time picker values. +
+Tip: Use in combination with <<helpers, date>> helper to format date.
+
+|
+| context.panel.indexPatternId +
+context.panel.indexPatternIds
+|The {data-source} IDs used by a panel.
+
+|
+| context.panel.savedObjectId
+| ID of saved object behind a panel.
+
+| *Single click*
+
+| event.value
+| Value behind clicked data point.
+
+|
+| event.key
+| Field name behind clicked data point
+
+|
+| event.negate
+| Boolean, indicating whether clicked data point resulted in negative filter.
+
+|
+| event.points
+| Some visualizations have clickable points that emit more than one data point. Use list of data points in case a single value is insufficient. +
+
+Example:
+
+`{{json event.points}}` +
+`{{event.points.[0].key}}` +
+`{{event.points.[0].value}}`
+`{{#each event.points}}key=value&{{/each}}`
+
+Note:
+
+`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
+`{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
+
+| *Row click*
+| event.rowIndex
+| Number, representing the row that was clicked, starting from 0.
+
+|
+| event.values
+| An array of all cell values for the raw on which the action will execute.
+
+|
+| event.keys
+| An array of field names for each column.
+
+|
+| event.columnNames
+| An array of column names.
+
+| *Range selection*
+| event.from +
+event.to
+| `from` and `to` values of the selected range as numbers. +
+Tip: Consider using <<helpers, date>> helper for date formatting.
+
+|
+| event.key
+| Aggregation field behind the selected range, if available.
+
+|===

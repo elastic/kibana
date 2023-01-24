@@ -15,18 +15,25 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiTracker } from '../../../hooks/use_track_metric';
+import { useKibana } from '../../../utils/kibana_react';
 
 export interface ObservabilityStatusBoxProps {
   id: string;
-  dataSourceName: string;
+  title: string;
   hasData: boolean;
   description: string;
   modules: Array<{ name: string; hasData: boolean }>;
-  integrationLink: string;
+  addTitle: string;
+  addLink: string;
   learnMoreLink: string;
+  goToAppTitle: string;
+  goToAppLink: string;
+  weight: number;
 }
 
 export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
@@ -38,12 +45,24 @@ export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
 }
 
 export function CompletedStatusBox({
-  dataSourceName,
+  id,
+  title,
   modules,
-  integrationLink,
+  addLink,
+  addTitle,
+  goToAppTitle,
+  goToAppLink,
 }: ObservabilityStatusBoxProps) {
+  const { application } = useKibana().services;
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
+
+  const goToAddLink = useCallback(() => {
+    trackMetric({ metric: `guided_setup_add_integrations_${id}` });
+    application.navigateToUrl(addLink);
+  }, [addLink, application, trackMetric, id]);
+
   return (
-    <EuiPanel color="subdued">
+    <EuiPanel color="plain" hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <div>
@@ -54,17 +73,23 @@ export function CompletedStatusBox({
               style={{ marginRight: 8 }}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
-              <h2>{dataSourceName}</h2>
+              <h2>{title}</h2>
             </EuiTitle>
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" iconType="plusInCircle" flush="right" href={integrationLink}>
-            <FormattedMessage
-              id="xpack.observability.status.addIntegrationLink"
-              defaultMessage="Add"
-            />
+          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" onClick={goToAddLink}>
+            {addTitle}
           </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.observability.status.dataAvailable"
+            defaultMessage="Data is available."
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -81,50 +106,71 @@ export function CompletedStatusBox({
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButton color="primary" href={goToAppLink}>
+            {goToAppTitle}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }
 
 export function EmptyStatusBox({
-  dataSourceName,
+  id,
+  title,
   description,
   learnMoreLink,
+  addTitle,
+  addLink,
 }: ObservabilityStatusBoxProps) {
+  const { application } = useKibana().services;
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
+
+  const goToAddLink = useCallback(() => {
+    trackMetric({ metric: `guided_setup_add_data_${id}` });
+    application.navigateToUrl(addLink);
+  }, [id, trackMetric, application, addLink]);
+
   return (
-    <EuiPanel color="subdued" style={{ marginBottom: 20 }}>
+    <EuiPanel color="warning" hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <div>
             <EuiIcon
-              type="dot"
+              type="minusInCircleFilled"
               color="warning"
               className="eui-displayInline eui-alignMiddle"
               style={{ marginRight: 8 }}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
-              <h2>{dataSourceName}</h2>
+              <h2>{title}</h2>
             </EuiTitle>
           </div>
         </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText size="s">{description}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="cross" color="text" />
+          <EuiButton color="primary" onClick={goToAddLink} fill>
+            {addTitle}
+          </EuiButton>
         </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText size="xs">{description}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButton color="primary" size="s" href={learnMoreLink}>
+        <EuiFlexItem grow={false}>
+          <EuiLink color="primary" href={learnMoreLink} target="_blank">
             <FormattedMessage
               id="xpack.observability.status.learnMoreButton"
               defaultMessage="Learn more"
             />
-          </EuiButton>
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

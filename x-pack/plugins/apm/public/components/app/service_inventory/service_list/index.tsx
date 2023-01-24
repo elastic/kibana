@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -15,10 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import {
+  ServiceInventoryFieldName,
+  ServiceListItem,
+} from '../../../../../common/service_inventory';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
@@ -29,60 +33,87 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
 import { HealthBadge } from './health_badge';
-import { ServiceListItem } from '../../../../../common/service_inventory';
 
 type ServicesDetailedStatisticsAPIResponse =
-  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const SERVICE_HEALTH_STATUS_ORDER = [
-  ServiceHealthStatus.unknown,
-  ServiceHealthStatus.healthy,
-  ServiceHealthStatus.warning,
-  ServiceHealthStatus.critical,
-];
-
 export function getServiceColumns({
   query,
   showTransactionTypeColumn,
+  comparisonDataLoading,
   comparisonData,
   breakpoints,
   showHealthStatusColumn,
+  showAlertsColumn,
+  link,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
+  showAlertsColumn: boolean;
+  comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
+  link: any;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
 
   return [
+    ...(showAlertsColumn
+      ? [
+          {
+            field: ServiceInventoryFieldName.AlertsCount,
+            name: '',
+            width: `${unit * 5}px`,
+            sortable: true,
+            render: (_, { serviceName, alertsCount }) => {
+              if (!alertsCount) {
+                return null;
+              }
+
+              return (
+                <EuiBadge
+                  iconType="alert"
+                  color="danger"
+                  href={link('/services/{serviceName}/alerts', {
+                    path: { serviceName },
+                    query,
+                  })}
+                >
+                  {alertsCount}
+                </EuiBadge>
+              );
+            },
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
     ...(showHealthStatusColumn
       ? [
           {
-            field: 'healthStatus',
+            field: ServiceInventoryFieldName.HealthStatus,
             name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
               defaultMessage: 'Health',
             }),
@@ -99,7 +130,7 @@ export function getServiceColumns({
         ]
       : []),
     {
-      field: 'serviceName',
+      field: ServiceInventoryFieldName.ServiceName,
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
@@ -121,7 +152,7 @@ export function getServiceColumns({
     ...(showWhenSmallOrGreaterThanLarge
       ? [
           {
-            field: 'environments',
+            field: ServiceInventoryFieldName.Environments,
             name: i18n.translate(
               'xpack.apm.servicesTable.environmentColumnLabel',
               {
@@ -139,7 +170,7 @@ export function getServiceColumns({
     ...(showTransactionTypeColumn && showWhenSmallOrGreaterThanXL
       ? [
           {
-            field: 'transactionType',
+            field: ServiceInventoryFieldName.TransactionType,
             name: i18n.translate(
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
@@ -150,7 +181,7 @@ export function getServiceColumns({
         ]
       : []),
     {
-      field: 'latency',
+      field: ServiceInventoryFieldName.Latency,
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
@@ -162,6 +193,7 @@ export function getServiceColumns({
         );
         return (
           <ListMetric
+            isLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.latency}
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.latency
@@ -176,7 +208,7 @@ export function getServiceColumns({
       align: RIGHT_ALIGNMENT,
     },
     {
-      field: 'throughput',
+      field: ServiceInventoryFieldName.Throughput,
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
@@ -189,6 +221,7 @@ export function getServiceColumns({
 
         return (
           <ListMetric
+            isLoading={comparisonDataLoading}
             series={comparisonData?.currentPeriod[serviceName]?.throughput}
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.throughput
@@ -203,7 +236,7 @@ export function getServiceColumns({
       align: RIGHT_ALIGNMENT,
     },
     {
-      field: 'transactionErrorRate',
+      field: ServiceInventoryFieldName.TransactionErrorRate,
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
@@ -216,6 +249,7 @@ export function getServiceColumns({
         );
         return (
           <ListMetric
+            isLoading={comparisonDataLoading}
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
@@ -236,21 +270,39 @@ export function getServiceColumns({
 
 interface Props {
   items: ServiceListItem[];
+  comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
   isFailure?: boolean;
+  displayHealthStatus: boolean;
+  displayAlerts: boolean;
+  initialSortField: ServiceInventoryFieldName;
+  initialPageSize: number;
+  initialSortDirection: 'asc' | 'desc';
+  sortFn: (
+    sortItems: ServiceListItem[],
+    sortField: ServiceInventoryFieldName,
+    sortDirection: 'asc' | 'desc'
+  ) => ServiceListItem[];
 }
 
 export function ServiceList({
   items,
   noItemsMessage,
+  comparisonDataLoading,
   comparisonData,
   isLoading,
   isFailure,
+  displayHealthStatus,
+  displayAlerts,
+  initialSortField,
+  initialSortDirection,
+  initialPageSize,
+  sortFn,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const displayHealthStatus = items.some((item) => 'healthStatus' in item);
+  const { link } = useApmRouter();
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
@@ -258,7 +310,16 @@ export function ServiceList({
       transactionType !== TRANSACTION_PAGE_LOAD
   );
 
-  const { query } = useApmParams('/services');
+  const {
+    // removes pagination and sort instructions from the query so it won't be passed down to next route
+    query: {
+      page,
+      pageSize,
+      sortDirection: direction,
+      sortField: field,
+      ...query
+    },
+  } = useApmParams('/services');
 
   const { kuery } = query;
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -270,21 +331,24 @@ export function ServiceList({
       getServiceColumns({
         query,
         showTransactionTypeColumn,
+        comparisonDataLoading,
         comparisonData,
         breakpoints,
         showHealthStatusColumn: displayHealthStatus,
+        showAlertsColumn: displayAlerts,
+        link,
       }),
     [
       query,
       showTransactionTypeColumn,
+      comparisonDataLoading,
       comparisonData,
       breakpoints,
       displayHealthStatus,
+      displayAlerts,
+      link,
     ]
   );
-
-  const initialSortField = displayHealthStatus ? 'healthStatus' : 'serviceName';
-  const initialSortDirection = displayHealthStatus ? 'desc' : 'asc';
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -324,7 +388,7 @@ export function ServiceList({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ManagedTable
+        <ManagedTable<ServiceListItem>
           isLoading={isLoading}
           error={isFailure}
           columns={serviceColumns}
@@ -332,41 +396,14 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
-          sortFn={(itemsToSort, sortField, sortDirection) => {
-            // For healthStatus, sort items by healthStatus first, then by name
-            return sortField === 'healthStatus'
-              ? orderBy(
-                  itemsToSort,
-                  [
-                    (item) => {
-                      return item.healthStatus
-                        ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
-                        : -1;
-                    },
-                    (item) => item.serviceName.toLowerCase(),
-                  ],
-                  [sortDirection, sortDirection === 'asc' ? 'desc' : 'asc']
-                )
-              : orderBy(
-                  itemsToSort,
-                  (item) => {
-                    switch (sortField) {
-                      // Use `?? -1` here so `undefined` will appear after/before `0`.
-                      // In the table this will make the "N/A" items always at the
-                      // bottom/top.
-                      case 'latency':
-                        return item.latency ?? -1;
-                      case 'throughput':
-                        return item.throughput ?? -1;
-                      case 'transactionErrorRate':
-                        return item.transactionErrorRate ?? -1;
-                      default:
-                        return item[sortField as keyof typeof item];
-                    }
-                  },
-                  sortDirection
-                );
-          }}
+          initialPageSize={initialPageSize}
+          sortFn={(itemsToSort, sortField, sortDirection) =>
+            sortFn(
+              itemsToSort,
+              sortField as ServiceInventoryFieldName,
+              sortDirection
+            )
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { ArchivePackage, RegistryPackage } from '../../../../common';
-import { appContextService } from '../../';
+import type { ArchivePackage, RegistryPackage, PackageVerificationResult } from '../../../types';
+import { appContextService } from '../..';
 
-import type { ArchiveEntry } from './index';
+import type { ArchiveEntry } from '.';
+
+type SharedKeyString = string;
+
+const sharedKey = ({ name, version }: SharedKey): SharedKeyString => `${name}-${version}`;
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -17,11 +21,21 @@ export const hasArchiveEntry = (key: string) => archiveEntryCache.has(key);
 export const clearArchiveEntries = () => archiveEntryCache.clear();
 export const deleteArchiveEntry = (key: string) => archiveEntryCache.delete(key);
 
+const verificationResultCache: Map<SharedKeyString, PackageVerificationResult> = new Map();
+export const getVerificationResult = (key: SharedKey) =>
+  verificationResultCache.get(sharedKey(key));
+export const setVerificationResult = (key: SharedKey, value: PackageVerificationResult) =>
+  verificationResultCache.set(sharedKey(key), value);
+export const hasVerificationResult = (key: SharedKey) =>
+  verificationResultCache.has(sharedKey(key));
+export const clearVerificationResults = () => verificationResultCache.clear();
+export const deleteVerificationResult = (key: SharedKey) =>
+  verificationResultCache.delete(sharedKey(key));
+
 export interface SharedKey {
   name: string;
   version: string;
 }
-type SharedKeyString = string;
 
 const archiveFilelistCache: Map<SharedKeyString, string[]> = new Map();
 export const getArchiveFilelist = (keyArgs: SharedKey) =>
@@ -38,7 +52,6 @@ export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.delete(sharedKey(keyArgs));
 
 const packageInfoCache: Map<SharedKeyString, ArchivePackage | RegistryPackage> = new Map();
-const sharedKey = ({ name, version }: SharedKey) => `${name}-${version}`;
 
 export const getPackageInfo = (args: SharedKey) => {
   return packageInfoCache.get(sharedKey(args));
@@ -54,6 +67,11 @@ export const getArchivePackage = (args: SharedKey) => {
   };
 };
 
+/*
+ * This cache should only be used to store "full" package info generated from the package archive.
+ * NOT package info from the EPR API. This is because we parse extra fields from the archive
+ * which are not provided by the registry API.
+ */
 export const setPackageInfo = ({
   name,
   version,

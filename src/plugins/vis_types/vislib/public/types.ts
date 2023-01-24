@@ -9,7 +9,7 @@
 import { $Values } from '@kbn/utility-types';
 import { Position } from '@elastic/charts';
 
-import { Labels } from '../../../charts/public';
+import { Labels } from '@kbn/charts-plugin/public';
 import {
   CategoryAxis,
   Dimensions,
@@ -17,7 +17,7 @@ import {
   SeriesParam,
   ThresholdLine,
   ValueAxis,
-} from '../../../vis_types/xy/public';
+} from '@kbn/vis-type-xy-plugin/public';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 
 /**
@@ -37,7 +37,6 @@ export const GaugeType = Object.freeze({
 export type GaugeType = $Values<typeof GaugeType>;
 
 export const VislibChartType = Object.freeze({
-  Pie: 'pie' as const,
   Heatmap: 'heatmap' as const,
   Gauge: 'gauge' as const,
   Goal: 'goal' as const,

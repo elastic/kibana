@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllReportersFindRequest } from '../../../../../common/api';
+import type { AllReportersFindRequest } from '../../../../../common/api';
 import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
@@ -15,7 +15,8 @@ export const getReportersRoute = createCasesRoute({
   path: CASE_REPORTERS_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       const options = request.query as AllReportersFindRequest;
 
       return response.ok({ body: await client.cases.getReporters({ ...options }) });

@@ -16,12 +16,15 @@ import {
   EuiKeyPadMenuItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
+import { OWNER_INFO } from '../../../common/constants';
 
-import { FieldHook, getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 interface OwnerSelectorProps {
@@ -35,7 +38,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const DEFAULT_SELECTABLE_OWNERS = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER] as const;
+const DEFAULT_SELECTABLE_OWNERS = Object.keys(OWNER_INFO) as Array<keyof typeof OWNER_INFO>;
 
 const FIELD_NAME = 'selectedOwner';
 

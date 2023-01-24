@@ -8,7 +8,7 @@
 
 import axios, { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 interface ResponseError extends AxiosError {
   request: any;

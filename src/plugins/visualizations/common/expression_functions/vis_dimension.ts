@@ -12,7 +12,7 @@ import {
   ExpressionValueBoxed,
   Datatable,
   DatatableColumn,
-} from '../../../expressions/common';
+} from '@kbn/expressions-plugin/common';
 import { findAccessorOrFail } from '../utils/accessors';
 
 export interface Arguments {
@@ -32,12 +32,14 @@ export type ExpressionValueVisDimension = ExpressionValueBoxed<
   }
 >;
 
-export const visDimension = (): ExpressionFunctionDefinition<
+export type ExpressionFunctionVisDimension = ExpressionFunctionDefinition<
   'visdimension',
   Datatable,
   Arguments,
   ExpressionValueVisDimension
-> => ({
+>;
+
+export const visDimension = (): ExpressionFunctionVisDimension => ({
   name: 'visdimension',
   help: i18n.translate('visualizations.function.visDimension.help', {
     defaultMessage: 'Generates visConfig dimension object',

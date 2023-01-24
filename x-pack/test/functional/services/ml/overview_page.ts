@@ -78,5 +78,17 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
     async assertJobSyncRequiredWarningNotExists() {
       await testSubjects.missingOrFail('mlJobSyncRequiredWarning', { timeout: 5000 });
     },
+
+    async assertPageNotFoundBannerExists() {
+      await testSubjects.existOrFail('mlPageNotFoundBanner', { timeout: 5000 });
+    },
+
+    async assertPageNotFoundBannerText(pathname: string) {
+      await this.assertPageNotFoundBannerExists();
+      const text = await testSubjects.getVisibleText('mlPageNotFoundBannerText');
+      expect(text).to.eql(
+        `The Machine Learning application doesn't recognize this route: /${pathname}. You've been redirected to the Overview page.`
+      );
+    },
   };
 }

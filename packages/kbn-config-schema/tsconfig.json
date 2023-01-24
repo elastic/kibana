@@ -1,10 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
+    "outDir": "target/types",
     "stripInternal": true,
     "types": [
       "jest",
@@ -12,7 +9,9 @@
     ]
   },
   "include": [
-    "types/joi.d.ts",
-    "src/**/*.ts"
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

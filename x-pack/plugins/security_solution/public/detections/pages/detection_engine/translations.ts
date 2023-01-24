@@ -7,34 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BREADCRUMB_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.detectionsBreadcrumbTitle',
-  {
-    defaultMessage: 'Detections',
-  }
-);
-
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
     defaultMessage: 'Alerts',
   }
 );
-
-export const LAST_ALERT = i18n.translate('xpack.securitySolution.detectionEngine.lastSignalTitle', {
-  defaultMessage: 'Last alert',
-});
-
-export const TOTAL_SIGNAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.totalSignalTitle',
-  {
-    defaultMessage: 'Total',
-  }
-);
-
-export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.signalTitle', {
-  defaultMessage: 'Detected alerts',
-});
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
   defaultMessage: 'Alerts',
@@ -44,32 +22,6 @@ export const BUTTON_MANAGE_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.buttonManageRules',
   {
     defaultMessage: 'Manage rules',
-  }
-);
-
-export const PANEL_SUBTITLE_SHOWING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.panelSubtitleShowing',
-  {
-    defaultMessage: 'Showing',
-  }
-);
-
-export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.emptyTitle', {
-  defaultMessage:
-    'It looks like you don’t have any indices relevant to the detection engine in the Security application',
-});
-
-export const EMPTY_ACTION_BEATS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.emptyActionBeats',
-  {
-    defaultMessage: 'View setup instructions',
-  }
-);
-
-export const EMPTY_ACTION_SECONDARY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.emptyActionSecondary',
-  {
-    defaultMessage: 'Go to documentation',
   }
 );
 
@@ -143,18 +95,3 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
     defaultMessage:
       '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
-
-export const FEATURE_NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.noPermissionsTitle',
-  {
-    defaultMessage: 'Privileges required',
-  }
-);
-
-export const ALERTS_FEATURE_NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.securitySolution.detectionEngine.noPermissionsMessage',
-  {
-    defaultMessage:
-      'To view alerts, you must update privileges. For more information, contact your Kibana administrator.',
-  }
-);

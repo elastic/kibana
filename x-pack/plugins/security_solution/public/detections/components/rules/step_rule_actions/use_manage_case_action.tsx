@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { getAllConnectorsUrl, getCreateConnectorUrl } from '../../../../../../cases/common';
+import { getAllConnectorsUrl, getCreateConnectorUrl } from '@kbn/cases-plugin/common';
 import { convertArrayToCamelCase, KibanaServices } from '../../../../common/lib/kibana';
 
 interface CaseAction {

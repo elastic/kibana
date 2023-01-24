@@ -6,8 +6,8 @@
  */
 
 import { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SavedObjectsClientContract } from '../../../../../../../../src/core/server/';
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
 import { getAllListTypes } from './find_all_exception_list_types';
@@ -26,11 +26,13 @@ import { sortImportResponses } from './sort_import_responses';
  */
 export const importExceptionLists = async ({
   isOverwrite,
+  generateNewListId,
   listsChunks,
   savedObjectsClient,
   user,
 }: {
   isOverwrite: boolean;
+  generateNewListId: boolean;
   listsChunks: ImportExceptionListSchemaDecoded[][];
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
@@ -56,6 +58,7 @@ export const importExceptionLists = async ({
     const { errors, listItemsToDelete, listsToCreate, listsToUpdate } =
       sortExceptionListsToUpdateOrCreate({
         existingLists: foundLists,
+        generateNewListId,
         isOverwrite,
         lists: listChunk,
         user,

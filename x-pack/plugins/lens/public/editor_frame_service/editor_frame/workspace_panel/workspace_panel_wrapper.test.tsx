@@ -17,7 +17,8 @@ import {
   disableAutoApply,
   selectTriggerApplyChanges,
 } from '../../../state_management';
-import { setChangesApplied } from '../../../state_management/lens_slice';
+import { enableAutoApply, setChangesApplied } from '../../../state_management/lens_slice';
+import { LensInspector } from '../../../lens_inspector_service';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -39,6 +40,8 @@ describe('workspace_panel_wrapper', () => {
         datasourceMap={{}}
         datasourceStates={{}}
         isFullscreen={false}
+        lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -60,6 +63,8 @@ describe('workspace_panel_wrapper', () => {
         datasourceMap={{}}
         datasourceStates={{}}
         isFullscreen={false}
+        lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       />
     );
 
@@ -83,19 +88,7 @@ describe('workspace_panel_wrapper', () => {
       }
 
       private get applyChangesButton() {
-        return this._instance.find('button[data-test-subj="lensApplyChanges"]');
-      }
-
-      private get autoApplyToggleSwitch() {
-        return this._instance.find('button[data-test-subj="lensToggleAutoApply"]');
-      }
-
-      toggleAutoApply() {
-        this.autoApplyToggleSwitch.simulate('click');
-      }
-
-      public get autoApplySwitchOn() {
-        return this.autoApplyToggleSwitch.prop('aria-checked');
+        return this._instance.find('button[data-test-subj="lnsApplyChanges__toolbar"]');
       }
 
       applyChanges() {
@@ -126,6 +119,8 @@ describe('workspace_panel_wrapper', () => {
           datasourceMap={{}}
           datasourceStates={{}}
           isFullscreen={false}
+          lensInspector={{} as unknown as LensInspector}
+          getUserMessages={() => []}
         >
           <div />
         </WorkspacePanelWrapper>
@@ -135,28 +130,24 @@ describe('workspace_panel_wrapper', () => {
       harness = new Harness(instance);
     });
 
-    it('toggles auto-apply', async () => {
+    it('shows and hides apply-changes button depending on whether auto-apply is enabled', async () => {
       store.dispatch(disableAutoApply());
       harness.update();
 
-      expect(selectAutoApplyEnabled(store.getState())).toBeFalsy();
-      expect(harness.autoApplySwitchOn).toBeFalsy();
       expect(harness.applyChangesExists).toBeTruthy();
 
-      harness.toggleAutoApply();
+      store.dispatch(enableAutoApply());
+      harness.update();
 
-      expect(selectAutoApplyEnabled(store.getState())).toBeTruthy();
-      expect(harness.autoApplySwitchOn).toBeTruthy();
       expect(harness.applyChangesExists).toBeFalsy();
 
-      harness.toggleAutoApply();
+      store.dispatch(disableAutoApply());
+      harness.update();
 
-      expect(selectAutoApplyEnabled(store.getState())).toBeFalsy();
-      expect(harness.autoApplySwitchOn).toBeFalsy();
       expect(harness.applyChangesExists).toBeTruthy();
     });
 
-    it('apply-changes button works', () => {
+    it('apply-changes button applies changes', () => {
       store.dispatch(disableAutoApply());
       harness.update();
 
@@ -199,13 +190,11 @@ describe('workspace_panel_wrapper', () => {
       harness.update();
 
       expect(harness.applyChangesDisabled).toBeFalsy();
-      expect(harness.autoApplySwitchOn).toBeFalsy();
       expect(harness.applyChangesExists).toBeTruthy();
 
-      // enable auto apply
-      harness.toggleAutoApply();
+      store.dispatch(enableAutoApply());
+      harness.update();
 
-      expect(harness.autoApplySwitchOn).toBeTruthy();
       expect(harness.applyChangesExists).toBeFalsy();
     });
   });

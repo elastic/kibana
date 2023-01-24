@@ -45,7 +45,11 @@ export const getFormActions = (testBed: TestBed) => {
   const selectReviewTab = (tab: 'summary' | 'request') => {
     const tabs = ['summary', 'request'];
 
-    testBed.find('stepReview.content').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
+    testBed
+      .find('stepReview.content')
+      .find('button.euiTab')
+      .at(tabs.indexOf(tab))
+      .simulate('click');
   };
 
   const completeStepLogistics = async ({ name }: { name: string }) => {
@@ -162,5 +166,6 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.requestTab'
   | 'versionField'
   | 'aliasesEditor'
+  | 'mappingsEditor'
   | 'settingsEditor'
   | 'versionField.input';

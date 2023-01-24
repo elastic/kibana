@@ -1,6 +1,6 @@
 {
   "name": "x-pack",
-  "version": "8.2.0",
+  "version": "8.7.0",
   "author": "Elastic",
   "private": true,
   "license": "Elastic-License",
@@ -8,12 +8,10 @@
     "github-checks-reporter": "../node_modules/.bin/github-checks-reporter",
     "kbn": "node ../scripts/kbn",
     "start": "node ../scripts/kibana --dev",
-    "build": "node --preserve-symlinks ../node_modules/.bin/gulp build",
     "test:jest": "node ../scripts/jest"
   },
   "kibana": {
     "build": {
-      "intermediateBuildDirectory": "build/plugin/kibana/x-pack",
       "oss": false
     },
     "clean": {

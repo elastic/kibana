@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import {
-  ContextMenuWithRouterSupport,
-  ContextMenuWithRouterSupportProps,
-} from './context_menu_with_router_support';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ContextMenuWithRouterSupportProps } from './context_menu_with_router_support';
+import { ContextMenuWithRouterSupport } from './context_menu_with_router_support';
 import { act, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { APP_UI_ID } from '../../../../common/constants';
 
@@ -140,6 +139,16 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
       APP_UI_ID,
       expect.objectContaining({ path: '/one/two/three' })
     );
+  });
+
+  it('should NOT navigate after clicked if navigation is disabled', () => {
+    render({ isNavigationDisabled: true });
+    clickMenuTriggerButton();
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('testMenu-item-1'));
+    });
+
+    expect(appTestContext.coreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
 
   it('should display loading state', () => {

@@ -5,21 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { CoreTheme } from 'kibana/public';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { EuiErrorBoundary } from '@elastic/eui';
+import { CoreTheme } from '@kbn/core/public';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { CoreSetup } from '../../../../core/public';
-import {
-  defaultTheme$,
-  getElasticOutline,
-  isValidUrl,
-  withSuspense,
-} from '../../../presentation_util/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
+import { defaultTheme$, getElasticOutline, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { RepeatImageRendererConfig } from '../../common/types';
 
 const strings = {
@@ -33,9 +32,6 @@ const strings = {
     }),
 };
 
-const LazyRepeatImageComponent = lazy(() => import('../components/repeat_image_component'));
-const RepeatImageComponent = withSuspense(LazyRepeatImageComponent, null);
-
 export const getRepeatImageRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$) =>
   (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
@@ -48,6 +44,7 @@ export const getRepeatImageRenderer =
       config: RepeatImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const { RepeatImageComponent } = await import('../components/repeat_image_component');
       const { elasticOutline } = await getElasticOutline();
       const settings = {
         ...config,
@@ -60,11 +57,13 @@ export const getRepeatImageRenderer =
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <I18nProvider>
-            <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
-          </I18nProvider>
-        </KibanaThemeProvider>,
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <I18nProvider>
+              <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
+            </I18nProvider>
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
         domNode
       );
     },

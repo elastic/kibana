@@ -10,14 +10,15 @@ import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
-import { VisualizeInput } from 'src/plugins/visualizations/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { VisualizeInput } from '../..';
 import {
   useChromeVisibility,
   useVisByValue,
   useVisualizeAppState,
   useEditorUpdates,
   useLinkedSearchUpdates,
+  useDataViewUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
@@ -84,6 +85,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visEditorController
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
+  useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -108,6 +110,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
       onAppLeave={onAppLeave}
+      eventEmitter={eventEmitter}
     />
   );
 };

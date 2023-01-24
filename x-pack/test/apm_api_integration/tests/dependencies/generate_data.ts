@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
-import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const dataConfig = {
   rate: 20,
@@ -30,28 +30,29 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const instance = apm.service('synth-go', 'production', 'go').instance('instance-a');
+  const instance = apm
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
+    .instance('instance-a');
   const { rate, transaction, span } = dataConfig;
 
   await synthtraceEsClient.index(
     timerange(start, end)
       .interval('1m')
       .rate(rate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .duration(transaction.duration)
           .success()
           .children(
             instance
-              .span(span.name, span.type, span.subType)
+              .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
               .duration(transaction.duration)
               .success()
               .destination(span.destination)
               .timestamp(timestamp)
           )
-          .serialize()
       )
   );
 }

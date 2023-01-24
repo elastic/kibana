@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import {
   EuiFlyout,
   EuiTitle,
@@ -17,26 +16,32 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FormProvider } from 'react-hook-form';
 
+import { DEFAULT_PLATFORM } from '../../../common/constants';
+import { QueryIdField, IntervalField, VersionField, ResultsTypeField } from '../../form';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
-import { Form, getUseField, Field, useFormData } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
-import { UsePackQueryFormProps, PackFormData, usePackQueryForm } from './use_pack_query_form';
+import type {
+  UsePackQueryFormProps,
+  PackQueryFormData,
+  PackSOQueryFormData,
+} from './use_pack_query_form';
+import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
-import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapping_editor_field';
-
-const CommonUseField = getUseField({ component: Field });
+import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
+import { useKibana } from '../../common/lib/kibana';
+import { overflowCss } from '../utils';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
   defaultValue?: UsePackQueryFormProps['defaultValue'] | undefined;
-  onSave: (payload: PackFormData) => Promise<void>;
+  onSave: (payload: PackSOQueryFormData) => void;
   onClose: () => void;
 }
 
@@ -46,75 +51,49 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
-  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
+  const permissions = useKibana().services.application.capabilities.osquery;
   const [isEditMode] = useState(!!defaultValue);
-  const { form } = usePackQueryForm({
+  const { serializer, idSet, ...hooksForm } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
-    handleSubmit: async (payload, isValid) => {
-      const ecsFieldValue = await ecsFieldRef?.current?.validate();
-
-      return new Promise((resolve) => {
-        if (isValid && ecsFieldValue) {
-          onSave({
-            ...payload,
-            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
-          });
-          onClose();
-        }
-        resolve();
-      });
-    },
   });
 
-  const { submit, setFieldValue, reset, isSubmitting } = form;
-
-  const [{ query }] = useFormData({
-    form,
-    watch: ['query'],
-  });
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    resetField,
+  } = hooksForm;
+  const onSubmit = async (payload: PackQueryFormData) => {
+    const serializedData: PackSOQueryFormData = serializer(payload);
+    await onSave(serializedData);
+    onClose();
+  };
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
-      reset();
-
       if (savedQuery) {
-        setFieldValue('id', savedQuery.id);
-        setFieldValue('query', savedQuery.query);
-
-        if (savedQuery.description) {
-          setFieldValue('description', savedQuery.description);
-        }
-
-        if (savedQuery.interval) {
-          setFieldValue('interval', savedQuery.interval);
-        }
-
-        if (savedQuery.platform) {
-          setFieldValue('platform', savedQuery.platform);
-        }
-
-        if (savedQuery.version) {
-          setFieldValue('version', [savedQuery.version]);
-        }
-
-        if (savedQuery.ecs_mapping) {
-          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
-        }
+        resetField('id', { defaultValue: savedQuery.id });
+        resetField('query', { defaultValue: savedQuery.query });
+        resetField('platform', {
+          defaultValue: savedQuery.platform ? savedQuery.platform : DEFAULT_PLATFORM,
+        });
+        resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
+        resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
+        resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
+        resetField('removed', { defaultValue: savedQuery.removed });
+        resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
       }
     },
-    [setFieldValue, reset]
+    [resetField]
   );
-  /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
-  const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 
   return (
     <EuiFlyout
       size="m"
       onClose={onClose}
       aria-labelledby="flyoutTitle"
+      ownFocus={true}
       outsideClickCloses={false}
-      maskProps={maskProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -134,37 +113,25 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <Form form={form}>
-          {!isEditMode ? (
+        <FormProvider {...hooksForm}>
+          {!isEditMode && permissions.readSavedQueries ? (
             <>
               <SavedQueriesDropdown onChange={handleSetQueryValue} />
               <EuiSpacer />
             </>
           ) : null}
-          <CommonUseField path="id" />
+          <QueryIdField idSet={idSet} />
           <EuiSpacer />
-          <CommonUseField path="query" component={CodeEditorField} />
+          <CodeEditorField />
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <CommonUseField
-                path="interval"
+              <IntervalField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{ append: 's' }}
               />
               <EuiSpacer />
-              <CommonUseField
-                path="version"
-                labelAppend={
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.osquery.queryFlyoutForm.versionFieldOptionalLabel"
-                        defaultMessage="(optional)"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                }
+              <VersionField
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
                   noSuggestions: false,
@@ -176,23 +143,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   onCreateOption: undefined,
                 }}
               />
+              <EuiSpacer />
+              <ResultsTypeField />
             </EuiFlexItem>
             <EuiFlexItem>
-              <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+              <PlatformCheckBoxGroupField />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <CommonUseField
-                path="ecs_mapping"
-                component={ECSMappingEditorField}
-                query={query}
-                fieldRef={ecsFieldRef}
-              />
+            <EuiFlexItem css={overflowCss}>
+              <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </Form>
+        </FormProvider>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -205,7 +169,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton isLoading={isSubmitting} onClick={submit} fill>
+            <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
               <FormattedMessage
                 id="xpack.osquery.queryFlyoutForm.saveButtonLabel"
                 defaultMessage="Save"

@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form, FormHook } from '../../common/shared_imports';
-import { useGetTags } from '../../containers/use_get_tags';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Tags } from './tags';
-import { schema, FormProps } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 import { TestProviders } from '../../common/mock';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
@@ -43,7 +46,7 @@ describe('Tags', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetTagsMock.mockReturnValue({ tags: ['test'] });
+    useGetTagsMock.mockReturnValue({ data: ['test'] });
   });
 
   it('it renders', async () => {

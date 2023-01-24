@@ -9,7 +9,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
@@ -22,12 +22,26 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('CreateUserPage', () => {
   jest.setTimeout(15_000);
 
+  const coreStart = coreMock.createStart();
   const theme$ = themeServiceMock.createTheme$();
+  let history = createMemoryHistory({ initialEntries: ['/create'] });
+  const authc = securityMock.createSetup().authc;
+
+  beforeEach(() => {
+    history = createMemoryHistory({ initialEntries: ['/create'] });
+    authc.getCurrentUser.mockClear();
+    coreStart.http.delete.mockClear();
+    coreStart.http.get.mockClear();
+    coreStart.http.post.mockClear();
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      users: {
+        save: true,
+      },
+    };
+  });
 
   it('creates user when submitting form and redirects back', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/create'] });
-    const authc = securityMock.createSetup().authc;
     coreStart.http.post.mockResolvedValue({});
 
     const { findByRole, findByLabelText } = render(
@@ -57,11 +71,26 @@ describe('CreateUserPage', () => {
     });
   });
 
-  it('validates form', async () => {
-    const coreStart = coreMock.createStart();
-    const history = createMemoryHistory({ initialEntries: ['/create'] });
-    const authc = securityMock.createSetup().authc;
+  it('redirects back when viewing with readonly privileges', async () => {
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      users: {
+        save: false,
+      },
+    };
 
+    render(
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+        <CreateUserPage />
+      </Providers>
+    );
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe('/');
+    });
+  });
+
+  it('validates form', async () => {
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.get.mockResolvedValueOnce([
       {

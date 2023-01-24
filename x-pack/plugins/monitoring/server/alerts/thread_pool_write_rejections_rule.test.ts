@@ -9,7 +9,7 @@ import { ThreadPoolWriteRejectionsRule } from './thread_pool_write_rejections_ru
 import { RULE_THREAD_POOL_WRITE_REJECTIONS } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -256,7 +256,6 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).toHaveBeenCalledWith({
@@ -279,7 +278,6 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;

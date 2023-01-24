@@ -13,7 +13,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsRouter } from './';
+import { AnalyticsRouter } from '.';
 
 describe('AnalyticsRouter', () => {
   // Detailed route testing is better done via E2E tests

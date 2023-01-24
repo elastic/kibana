@@ -35,13 +35,14 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const {
           filter,
           list_id: listId,
           namespace_type: namespaceType,
           page,
           per_page: perPage,
+          search,
           sort_field: sortField,
           sort_order: sortOrder,
         } = request.query;
@@ -59,6 +60,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             page,
             perPage,
             pit: undefined,
+            search,
             searchAfter: undefined,
             sortField,
             sortOrder,

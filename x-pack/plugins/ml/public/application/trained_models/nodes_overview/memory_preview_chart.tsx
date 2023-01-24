@@ -15,12 +15,14 @@ import {
   ScaleType,
   SeriesColorAccessor,
   Settings,
+  LineAnnotation,
+  AnnotationDomainType,
 } from '@elastic/charts';
-import { euiPaletteGray } from '@elastic/eui';
+import { EuiIcon, euiPaletteGray } from '@elastic/eui';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useCurrentEuiTheme } from '../../components/color_range_legend';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
@@ -64,15 +66,11 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         colour: euiPaletteGray(5)[0],
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const chartData = [
-    {
-      x: 0,
-      y: memoryOverview.machine_memory.jvm,
-      g: groups.jvm.name,
-    },
     {
       x: 0,
       y: memoryOverview.trained_models.total,
@@ -98,6 +96,11 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         memoryOverview.anomaly_detection.total,
       g: groups.available.name,
     },
+    {
+      x: 0,
+      y: memoryOverview.machine_memory.jvm,
+      g: groups.jvm.name,
+    },
   ];
 
   const barSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
@@ -109,6 +112,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   return (
     <Chart size={['100%', 50]}>
       <Settings
+        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
         rotation={90}
         tooltip={{
           headerFormatter: ({ value }) =>
@@ -123,6 +127,22 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         position={Position.Bottom}
         hide
         tickFormat={(d: number) => bytesFormatter(d)}
+      />
+
+      <LineAnnotation
+        id="line_annotation"
+        domainType={AnnotationDomainType.YDomain}
+        dataValues={[
+          {
+            dataValue: memoryOverview.ml_max_in_bytes,
+            details: bytesFormatter(memoryOverview.ml_max_in_bytes),
+            header: i18n.translate('xpack.ml.trainedModels.nodesList.mlMaxMemory', {
+              defaultMessage: 'Maximum memory permitted for ML native processes',
+            }),
+          },
+        ]}
+        marker={<EuiIcon type="arrowDown" />}
+        markerPosition={Position.Top}
       />
 
       <BarSeries

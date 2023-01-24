@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { useMemo } from 'react';
-import {
-  DashboardSavedObject,
-  DashboardAppLocator,
-} from '../../../../../../src/plugins/dashboard/public';
+import { DashboardAppLocator } from '@kbn/dashboard-plugin/public';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 
@@ -25,7 +23,7 @@ export function dashboardServiceProvider(
      * Fetches dashboards
      */
     async fetchDashboards(query?: string) {
-      return await savedObjectClient.find<DashboardSavedObject>({
+      return await savedObjectClient.find<DashboardAttributes>({
         type: 'dashboard',
         perPage: 1000,
         search: query ? `${query}*` : '',

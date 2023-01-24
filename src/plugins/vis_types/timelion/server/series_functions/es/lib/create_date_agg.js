@@ -7,7 +7,7 @@
  */
 
 import { buildAggBody } from './agg_body';
-import { search, METRIC_TYPES } from '../../../../../../data/server';
+import { search, METRIC_TYPES } from '@kbn/data-plugin/server';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -17,13 +17,13 @@ export default function createDateAgg(config, tlConfig, scriptFields) {
       meta: { type: 'time_buckets' },
       date_histogram: {
         field: config.timefield,
-        time_zone: tlConfig.time.timezone,
+        time_zone: config.timezone || tlConfig.time.timezone,
         extended_bounds: {
           min: tlConfig.time.from,
           max: tlConfig.time.to,
         },
         min_doc_count: 0,
-        ...dateHistogramInterval(config.interval),
+        ...dateHistogramInterval(config.interval, config.forceFixedInterval),
       },
     },
   };

@@ -6,7 +6,7 @@ NOTE: The Application service is only available client side.
 
 [source,typescript]
 ----
-import { AppMountParameters, CoreSetup, Plugin, DEFAULT_APP_CATEGORIES } from 'kibana/public';
+import { AppMountParameters, CoreSetup, Plugin, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {

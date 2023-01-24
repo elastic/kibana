@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/public';
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { SavedObject } from '@kbn/core/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasWorkpadService, ResolveWorkpadResponse } from '../workpad';
@@ -84,13 +84,12 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
       };
     },
     resolve: async (id: string) => {
-      const { workpad, outcome, aliasId } = await coreStart.http.get<ResolveWorkpadResponse>(
+      const { workpad, ...resolveProps } = await coreStart.http.get<ResolveWorkpadResponse>(
         `${getApiPath()}/resolve/${id}`
       );
 
       return {
-        outcome,
-        aliasId,
+        ...resolveProps,
         workpad: {
           // @ts-ignore: Shimming legacy workpads that might not have CSS
           css: DEFAULT_WORKPAD_CSS,

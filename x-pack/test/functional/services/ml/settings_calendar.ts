@@ -284,7 +284,7 @@ export function MachineLearningSettingsCalendarProvider(
       const subj = 'mlCalendarApplyToAllJobsSwitch';
       if ((await this.getApplyToAllJobsSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertApplyToAllJobsSwitchCheckState(toggle);
         });
       }

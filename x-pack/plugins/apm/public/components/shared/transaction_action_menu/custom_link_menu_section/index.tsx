@@ -21,7 +21,7 @@ import {
   Section,
   SectionSubtitle,
   SectionTitle,
-} from '../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import {
   CustomLink,
@@ -41,7 +41,7 @@ const DEFAULT_LINKS_TO_SHOW = 3;
 export function CustomLinkMenuSection({
   transaction,
 }: {
-  transaction: Transaction;
+  transaction?: Transaction;
 }) {
   const [showAllLinks, setShowAllLinks] = useState(false);
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);

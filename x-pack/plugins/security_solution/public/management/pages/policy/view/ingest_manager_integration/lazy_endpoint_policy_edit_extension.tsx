@@ -6,12 +6,12 @@
  */
 
 import { lazy } from 'react';
-import { CoreStart } from 'kibana/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type {
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
-} from '../../../../../../../fleet/public';
-import { StartPlugins } from '../../../../../types';
+} from '@kbn/fleet-plugin/public';
+import type { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPolicyEditExtension = (
   coreStart: CoreStart,
@@ -19,8 +19,8 @@ export const getLazyEndpointPolicyEditExtension = (
 ) => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyEditExtension }] = await Promise.all([
-      import('./with_security_context'),
-      import('./endpoint_policy_edit_extension'),
+      import('./components/with_security_context/with_security_context'),
+      import('./endpoint_policy_edit_extension/endpoint_policy_edit_extension'),
     ]);
 
     return {

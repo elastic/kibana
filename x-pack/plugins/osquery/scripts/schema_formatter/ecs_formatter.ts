@@ -9,7 +9,7 @@ import { filter, map, partialRight, pick } from 'lodash';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 
 const ECS_COLUMN_SCHEMA_FIELDS = ['field', 'type', 'normalization', 'example', 'description'];
 
@@ -40,7 +40,7 @@ const RESTRICTED_FIELDS = [
 
 run(
   async ({ flags }) => {
-    const schemaPath = path.resolve(`public/common/schemas/ecs/`);
+    const schemaPath = path.resolve(`./public/common/schemas/ecs/`);
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 

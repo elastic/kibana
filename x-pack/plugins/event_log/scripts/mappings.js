@@ -50,12 +50,23 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          outcome: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
         },
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
           rule: {
             properties: {
+              consumer: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               execution: {
                 properties: {
                   uuid: {
@@ -74,6 +85,22 @@ exports.EcsCustomPropertyMappings = {
                       number_of_triggered_actions: {
                         type: 'long',
                       },
+                      number_of_generated_actions: {
+                        type: 'long',
+                      },
+                      alert_counts: {
+                        properties: {
+                          active: {
+                            type: 'long',
+                          },
+                          new: {
+                            type: 'long',
+                          },
+                          recovered: {
+                            type: 'long',
+                          },
+                        },
+                      },
                       number_of_searches: {
                         type: 'long',
                       },
@@ -89,9 +116,37 @@ exports.EcsCustomPropertyMappings = {
                       execution_gap_duration_s: {
                         type: 'long',
                       },
+                      rule_type_run_duration_ms: {
+                        type: 'long',
+                      },
+                      process_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      trigger_actions_duration_ms: {
+                        type: 'long',
+                      },
+                      process_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      claim_to_start_duration_ms: {
+                        type: 'long',
+                      },
+                      prepare_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      total_enrichment_duration_ms: {
+                        type: 'long',
+                      },
                     },
                   },
                 },
+              },
+              rule_type_id: {
+                type: 'keyword',
+                ignore_above: 1024,
               },
             },
           },
@@ -123,6 +178,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {
@@ -131,6 +189,26 @@ exports.EcsCustomPropertyMappings = {
       },
       version: {
         type: 'version',
+      },
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          execution: {
+            properties: {
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },

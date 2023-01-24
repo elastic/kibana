@@ -1,266 +1,260 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ManageData hide dev tools and stack management links if unavailable 1`] = `
-<Fragment>
-  <section
-    aria-labelledby="homDataManage__title"
-    className="homDataManage"
-    data-test-subj="homDataManage"
+<_EuiPageSection
+  aria-labelledby="homDataManage__title"
+  bottomBorder={true}
+  className="homDataManage"
+  data-test-subj="homDataManage"
+  paddingSize="xl"
+>
+  <EuiFlexGroup
+    alignItems="center"
   >
-    <EuiFlexGroup
-      alignItems="center"
+    <EuiFlexItem
+      grow={1}
     >
-      <EuiFlexItem
-        grow={1}
+      <EuiTitle
+        size="s"
       >
-        <EuiTitle
-          size="s"
+        <h2
+          id="homDataManage__title"
         >
-          <h2
-            id="homDataManage__title"
-          >
-            <FormattedMessage
-              defaultMessage="Management"
-              id="home.manageData.sectionTitle"
-              values={Object {}}
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiFlexGroup
-      className="homDataManage__content"
+          <FormattedMessage
+            defaultMessage="Management"
+            id="home.manageData.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer />
+  <EuiFlexGroup
+    className="homDataManage__content"
+  >
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="security"
     >
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="security"
-      >
-        <Synopsis
-          description="Control who has access and what tasks they can perform."
-          iconType="securityApp"
-          id="security"
-          isBeta={false}
-          onClick={[Function]}
-          title="Protect your data"
-          url="path-to-security-roles"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="monitoring"
-      >
-        <Synopsis
-          description="Track the real-time health and performance of your deployment."
-          iconType="monitoringApp"
-          id="monitoring"
-          isBeta={false}
-          onClick={[Function]}
-          title="Monitor the stack"
-          url="path-to-monitoring"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="snapshot_restore"
-      >
-        <Synopsis
-          description="Save snapshots to a backup repository, and restore to recover index and cluster state."
-          iconType="storage"
-          id="snapshot_restore"
-          isBeta={false}
-          onClick={[Function]}
-          title="Store & recover backups"
-          url="path-to-snapshot-restore"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="index_lifecycle_management"
-      >
-        <Synopsis
-          description="Define lifecycle policies to automatically perform operations as an index ages."
-          iconType="indexSettings"
-          id="index_lifecycle_management"
-          isBeta={false}
-          onClick={[Function]}
-          title="Manage index lifecycles"
-          url="path-to-index-lifecycle-management"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </section>
-  <EuiHorizontalRule
-    margin="xxl"
-  />
-</Fragment>
+      <Synopsis
+        description="Control who has access and what tasks they can perform."
+        iconType="securityApp"
+        id="security"
+        isBeta={false}
+        onClick={[Function]}
+        title="Protect your data"
+        url="path-to-security-roles"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="monitoring"
+    >
+      <Synopsis
+        description="Track the real-time health and performance of your deployment."
+        iconType="monitoringApp"
+        id="monitoring"
+        isBeta={false}
+        onClick={[Function]}
+        title="Monitor the stack"
+        url="path-to-monitoring"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="snapshot_restore"
+    >
+      <Synopsis
+        description="Save snapshots to a backup repository, and restore to recover index and cluster state."
+        iconType="storage"
+        id="snapshot_restore"
+        isBeta={false}
+        onClick={[Function]}
+        title="Store & recover backups"
+        url="path-to-snapshot-restore"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="index_lifecycle_management"
+    >
+      <Synopsis
+        description="Define lifecycle policies to automatically perform operations as an index ages."
+        iconType="indexSettings"
+        id="index_lifecycle_management"
+        isBeta={false}
+        onClick={[Function]}
+        title="Manage index lifecycles"
+        url="path-to-index-lifecycle-management"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</_EuiPageSection>
 `;
 
 exports[`ManageData render 1`] = `
-<Fragment>
-  <section
-    aria-labelledby="homDataManage__title"
-    className="homDataManage"
-    data-test-subj="homDataManage"
+<_EuiPageSection
+  aria-labelledby="homDataManage__title"
+  bottomBorder={true}
+  className="homDataManage"
+  data-test-subj="homDataManage"
+  paddingSize="xl"
+>
+  <EuiFlexGroup
+    alignItems="center"
   >
-    <EuiFlexGroup
-      alignItems="center"
+    <EuiFlexItem
+      grow={1}
     >
-      <EuiFlexItem
-        grow={1}
+      <EuiTitle
+        size="s"
       >
-        <EuiTitle
-          size="s"
+        <h2
+          id="homDataManage__title"
         >
-          <h2
-            id="homDataManage__title"
-          >
-            <FormattedMessage
-              defaultMessage="Management"
-              id="home.manageData.sectionTitle"
-              values={Object {}}
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__actions"
-        grow={false}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          responsive={false}
-          wrap={true}
-        >
-          <EuiFlexItem
-            grow={false}
-          >
-            <RedirectAppLinks
-              application={
-                Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "dev_tools": true,
-                      "management": true,
-                    },
-                  },
-                }
-              }
-            >
-              <EuiButtonEmpty
-                className="kbnOverviewPageHeader__actionButton"
-                data-test-subj="homeDevTools"
-                flush="both"
-                href=""
-                iconType="wrench"
-              >
-                <FormattedMessage
-                  defaultMessage="Dev Tools"
-                  id="home.manageData.devToolsButtonLabel"
-                  values={Object {}}
-                />
-              </EuiButtonEmpty>
-            </RedirectAppLinks>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <RedirectAppLinks
-              application={
-                Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "dev_tools": true,
-                      "management": true,
-                    },
-                  },
-                }
-              }
-            >
-              <EuiButtonEmpty
-                className="kbnOverviewPageHeader__actionButton"
-                data-test-subj="homeManage"
-                flush="both"
-                href=""
-                iconType="gear"
-              >
-                <FormattedMessage
-                  defaultMessage="Stack Management"
-                  id="home.manageData.stackManagementButtonLabel"
-                  values={Object {}}
-                />
-              </EuiButtonEmpty>
-            </RedirectAppLinks>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiFlexGroup
-      className="homDataManage__content"
+          <FormattedMessage
+            defaultMessage="Management"
+            id="home.manageData.sectionTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__actions"
+      grow={false}
     >
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="security"
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+        wrap={true}
       >
-        <Synopsis
-          description="Control who has access and what tasks they can perform."
-          iconType="securityApp"
-          id="security"
-          isBeta={false}
-          onClick={[Function]}
-          title="Protect your data"
-          url="path-to-security-roles"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="monitoring"
-      >
-        <Synopsis
-          description="Track the real-time health and performance of your deployment."
-          iconType="monitoringApp"
-          id="monitoring"
-          isBeta={false}
-          onClick={[Function]}
-          title="Monitor the stack"
-          url="path-to-monitoring"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="snapshot_restore"
-      >
-        <Synopsis
-          description="Save snapshots to a backup repository, and restore to recover index and cluster state."
-          iconType="storage"
-          id="snapshot_restore"
-          isBeta={false}
-          onClick={[Function]}
-          title="Store & recover backups"
-          url="path-to-snapshot-restore"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="homDataManage__item"
-        key="index_lifecycle_management"
-      >
-        <Synopsis
-          description="Define lifecycle policies to automatically perform operations as an index ages."
-          iconType="indexSettings"
-          id="index_lifecycle_management"
-          isBeta={false}
-          onClick={[Function]}
-          title="Manage index lifecycles"
-          url="path-to-index-lifecycle-management"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </section>
-  <EuiHorizontalRule
-    margin="xxl"
-  />
-</Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <RedirectAppLinks
+            application={
+              Object {
+                "capabilities": Object {
+                  "navLinks": Object {
+                    "dev_tools": true,
+                    "management": true,
+                  },
+                },
+              }
+            }
+          >
+            <EuiButtonEmpty
+              className="kbnOverviewPageHeader__actionButton"
+              data-test-subj="homeDevTools"
+              flush="both"
+              href=""
+              iconType="wrench"
+            >
+              <FormattedMessage
+                defaultMessage="Dev Tools"
+                id="home.manageData.devToolsButtonLabel"
+                values={Object {}}
+              />
+            </EuiButtonEmpty>
+          </RedirectAppLinks>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <RedirectAppLinks
+            application={
+              Object {
+                "capabilities": Object {
+                  "navLinks": Object {
+                    "dev_tools": true,
+                    "management": true,
+                  },
+                },
+              }
+            }
+          >
+            <EuiButtonEmpty
+              className="kbnOverviewPageHeader__actionButton"
+              data-test-subj="homeManage"
+              flush="both"
+              href=""
+              iconType="gear"
+            >
+              <FormattedMessage
+                defaultMessage="Stack Management"
+                id="home.manageData.stackManagementButtonLabel"
+                values={Object {}}
+              />
+            </EuiButtonEmpty>
+          </RedirectAppLinks>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer />
+  <EuiFlexGroup
+    className="homDataManage__content"
+  >
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="security"
+    >
+      <Synopsis
+        description="Control who has access and what tasks they can perform."
+        iconType="securityApp"
+        id="security"
+        isBeta={false}
+        onClick={[Function]}
+        title="Protect your data"
+        url="path-to-security-roles"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="monitoring"
+    >
+      <Synopsis
+        description="Track the real-time health and performance of your deployment."
+        iconType="monitoringApp"
+        id="monitoring"
+        isBeta={false}
+        onClick={[Function]}
+        title="Monitor the stack"
+        url="path-to-monitoring"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="snapshot_restore"
+    >
+      <Synopsis
+        description="Save snapshots to a backup repository, and restore to recover index and cluster state."
+        iconType="storage"
+        id="snapshot_restore"
+        isBeta={false}
+        onClick={[Function]}
+        title="Store & recover backups"
+        url="path-to-snapshot-restore"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homDataManage__item"
+      key="index_lifecycle_management"
+    >
+      <Synopsis
+        description="Define lifecycle policies to automatically perform operations as an index ages."
+        iconType="indexSettings"
+        id="index_lifecycle_management"
+        isBeta={false}
+        onClick={[Function]}
+        title="Manage index lifecycles"
+        url="path-to-index-lifecycle-management"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</_EuiPageSection>
 `;
 
 exports[`ManageData render null without any features 1`] = `""`;

@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogAlertTests({ getService }: FtrProviderContext) {
@@ -91,9 +91,11 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
       const currentAlertSpan: {
         alertId?: string;
         start?: string;
-        durationToDate?: number;
+        durationToDate?: string;
       } = {};
+      const flapping = [];
       for (let i = 0; i < instanceEvents.length; ++i) {
+        flapping.push(instanceEvents[i]?.kibana?.alert?.flapping);
         switch (instanceEvents[i]?.event?.action) {
           case 'new-instance':
             expect(instanceEvents[i]?.kibana?.alerting?.instance_id).to.equal('instance');
@@ -102,7 +104,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
             currentAlertSpan.alertId = instanceEvents[i]?.kibana?.alerting?.instance_id;
             currentAlertSpan.start = instanceEvents[i]?.event?.start;
-            currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
+            currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'active-instance':
@@ -110,12 +112,13 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
-            if (instanceEvents[i]?.event?.duration! !== 0) {
-              expect(instanceEvents[i]?.event?.duration! > currentAlertSpan.durationToDate!).to.be(
-                true
-              );
+            if (instanceEvents[i]?.event?.duration! !== '0') {
+              expect(
+                BigInt(instanceEvents[i]?.event?.duration!) >
+                  BigInt(currentAlertSpan.durationToDate!)
+              ).to.be(true);
             }
-            currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
+            currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'recovered-instance':
@@ -125,10 +128,13 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(
               new Date(instanceEvents[i]?.event?.end!).valueOf() -
                 new Date(instanceEvents[i]?.event?.start!).valueOf()
-            ).to.equal(instanceEvents[i]?.event?.duration! / 1000 / 1000);
+            ).to.equal(nanosToMillis(instanceEvents[i]?.event?.duration!));
             break;
         }
       }
+      expect(flapping).to.eql(
+        new Array(instanceEvents.length - 4).fill(false).concat([true, true, true, true])
+      );
     });
   });
 }

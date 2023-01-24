@@ -35,7 +35,6 @@ describe('value expression', () => {
       describedByIds={Array []}
       display="row"
       error={Array []}
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={false}
@@ -71,7 +70,6 @@ describe('value expression', () => {
           "value is not valid",
         ]
       }
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       isInvalid={true}
@@ -102,7 +100,7 @@ describe('value expression', () => {
     expect(wrapper.find('[data-test-subj="valueFieldTitle"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="valueFieldNumber"]').exists()).toBeFalsy();
 
-    wrapper.find('[data-test-subj="valueExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -123,7 +121,7 @@ describe('value expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="valueExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

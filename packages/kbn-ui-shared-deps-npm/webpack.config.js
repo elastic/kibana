@@ -11,7 +11,7 @@ const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const UiSharedDepsNpm = require('./src/index');
+const UiSharedDepsNpm = require('.');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
@@ -29,14 +29,17 @@ module.exports = (_, argv) => {
     externals: {
       module: 'module',
     },
-    mode: 'production',
+    mode: process.env.NODE_ENV || 'development',
     entry: {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'regenerator-runtime/runtime',
         'whatwg-fetch',
         'symbol-observable',
+        // Parts of node-libs-browser that are used in many places across Kibana
+        'buffer',
+        'punycode',
+        'util',
 
         /**
          * babel runtime helpers referenced from entry chunks
@@ -46,34 +49,42 @@ module.exports = (_, argv) => {
          *  node scripts/find_babel_runtime_helpers_in_use.js
          */
         '@babel/runtime/helpers/assertThisInitialized',
+        '@babel/runtime/helpers/asyncToGenerator',
         '@babel/runtime/helpers/classCallCheck',
         '@babel/runtime/helpers/classPrivateFieldGet',
         '@babel/runtime/helpers/classPrivateFieldSet',
+        '@babel/runtime/helpers/createClass',
+        '@babel/runtime/helpers/createForOfIteratorHelper',
         '@babel/runtime/helpers/createSuper',
         '@babel/runtime/helpers/defineProperty',
         '@babel/runtime/helpers/extends',
         '@babel/runtime/helpers/inherits',
+        '@babel/runtime/helpers/inheritsLoose',
         '@babel/runtime/helpers/interopRequireDefault',
         '@babel/runtime/helpers/interopRequireWildcard',
         '@babel/runtime/helpers/objectSpread2',
         '@babel/runtime/helpers/objectWithoutProperties',
         '@babel/runtime/helpers/objectWithoutPropertiesLoose',
         '@babel/runtime/helpers/slicedToArray',
-        '@babel/runtime/helpers/toArray',
+        '@babel/runtime/helpers/taggedTemplateLiteralLoose',
         '@babel/runtime/helpers/toConsumableArray',
         '@babel/runtime/helpers/typeof',
         '@babel/runtime/helpers/wrapNativeSuper',
+        '@babel/runtime/regenerator',
 
         // modules from npm
         '@elastic/charts',
         '@elastic/eui',
+        '@elastic/eui/optimize/es/services',
+        '@elastic/eui/optimize/es/services/format',
         '@elastic/eui/dist/eui_charts_theme',
-        '@elastic/eui/lib/services',
-        '@elastic/eui/lib/services/format',
         '@elastic/eui/dist/eui_theme_light.json',
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
+        '@emotion/cache',
         '@emotion/react',
+        '@tanstack/react-query',
+        '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
         'history',
@@ -90,11 +101,11 @@ module.exports = (_, argv) => {
         'react-router-dom',
         'react-router',
         'react',
-        'rison-node',
         'rxjs',
         'rxjs/operators',
         'styled-components',
         'tslib',
+        'uuid',
       ],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],

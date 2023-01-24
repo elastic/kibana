@@ -6,19 +6,22 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
-import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
+import { useQuery } from '@tanstack/react-query';
+import type { CaseUserActions, CaseExternalService } from '../../common/ui/types';
+import type { CaseConnector } from '../../common/api';
+import { ActionTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions } from './api';
-import * as i18n from './translations';
-import { useToasts } from '../common/lib/kibana';
 import {
   isPushedUserAction,
   isConnectorUserAction,
   isCreateCaseUserAction,
 } from '../../common/utils/user_actions';
+import type { ServerError } from '../types';
+import { useToasts } from '../common/lib/kibana';
+import { ERROR_TITLE } from './translations';
+import { casesQueriesKeys } from './constants';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -29,28 +32,6 @@ export interface CaseService extends CaseExternalService {
 
 export interface CaseServices {
   [key: string]: CaseService;
-}
-
-interface CaseUserActionsState {
-  caseServices: CaseServices;
-  caseUserActions: CaseUserActions[];
-  hasDataToPush: boolean;
-  isError: boolean;
-  isLoading: boolean;
-  participants: ElasticUser[];
-}
-
-export const initialData: CaseUserActionsState = {
-  caseServices: {},
-  caseUserActions: [],
-  hasDataToPush: false,
-  isError: false,
-  isLoading: true,
-  participants: [],
-};
-
-export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string, caseConnectorId: string) => Promise<void>;
 }
 
 const groupConnectorFields = (
@@ -228,81 +209,65 @@ export const getPushedInfo = (
   };
 };
 
-export const useGetCaseUserActions = (
-  caseId: string,
-  caseConnectorId: string
-): UseGetCaseUserActions => {
-  const [caseUserActionsState, setCaseUserActionsState] =
-    useState<CaseUserActionsState>(initialData);
-  const abortCtrlRef = useRef(new AbortController());
-  const isCancelledRef = useRef(false);
-  const toasts = useToasts();
-
-  const fetchCaseUserActions = useCallback(
-    async (thisCaseId: string, thisCaseConnectorId: string) => {
-      try {
-        isCancelledRef.current = false;
-        abortCtrlRef.current.abort();
-        abortCtrlRef.current = new AbortController();
-        setCaseUserActionsState({
-          ...caseUserActionsState,
-          isLoading: true,
-        });
-
-        const response = await getCaseUserActions(thisCaseId, abortCtrlRef.current.signal);
-
-        if (!isCancelledRef.current) {
-          // Attention Future developer
-          // We are removing the first item because it will always be the creation of the case
-          // and we do not want it to simplify our life
-          const participants = !isEmpty(response)
-            ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
-            : [];
-
-          const caseUserActions = !isEmpty(response) ? response : [];
-
-          setCaseUserActionsState({
-            caseUserActions,
-            ...getPushedInfo(caseUserActions, thisCaseConnectorId),
-            isLoading: false,
-            isError: false,
-            participants,
-          });
-        }
-      } catch (error) {
-        if (!isCancelledRef.current) {
-          if (error.name !== 'AbortError') {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
-
-          setCaseUserActionsState({
-            caseServices: {},
-            caseUserActions: [],
-            hasDataToPush: false,
-            isError: true,
-            isLoading: false,
-            participants: [],
-          });
-        }
+export const getProfileUids = (userActions: CaseUserActions[]) => {
+  const uids = userActions.reduce<Set<string>>((acc, userAction) => {
+    if (userAction.type === ActionTypes.assignees) {
+      const uidsFromPayload = userAction.payload.assignees.map((assignee) => assignee.uid);
+      for (const uid of uidsFromPayload) {
+        acc.add(uid);
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseUserActionsState]
-  );
-
-  useEffect(() => {
-    if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId, caseConnectorId);
     }
 
-    return () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
-  return { ...caseUserActionsState, fetchCaseUserActions };
+    if (
+      isPushedUserAction<'camelCase'>(userAction) &&
+      userAction.payload.externalService.pushedBy.profileUid != null
+    ) {
+      acc.add(userAction.payload.externalService.pushedBy.profileUid);
+    }
+
+    if (userAction.createdBy.profileUid != null) {
+      acc.add(userAction.createdBy.profileUid);
+    }
+
+    return acc;
+  }, new Set());
+
+  return uids;
 };
+
+export const useGetCaseUserActions = (caseId: string, caseConnectorId: string) => {
+  const toasts = useToasts();
+  const abortCtrlRef = new AbortController();
+  return useQuery(
+    casesQueriesKeys.userActions(caseId, caseConnectorId),
+    async () => {
+      const response = await getCaseUserActions(caseId, abortCtrlRef.signal);
+      const participants = !isEmpty(response)
+        ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
+        : [];
+
+      const caseUserActions = !isEmpty(response) ? response : [];
+      const pushedInfo = getPushedInfo(caseUserActions, caseConnectorId);
+      const profileUids = getProfileUids(caseUserActions);
+
+      return {
+        caseUserActions,
+        participants,
+        profileUids,
+        ...pushedInfo,
+      };
+    },
+    {
+      onError: (error: ServerError) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: ERROR_TITLE }
+          );
+        }
+      },
+    }
+  );
+};
+
+export type UseGetCaseUserActions = ReturnType<typeof useGetCaseUserActions>;

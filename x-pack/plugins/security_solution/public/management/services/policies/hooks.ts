@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryObserverResult, useQuery } from 'react-query';
-import { useHttp } from '../../../common/lib/kibana/hooks';
-import { ServerApiError } from '../../../common/types';
+import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { GetPolicyListResponse } from '../../pages/policy/types';
+import { sendGetEndpointSecurityPackage } from './ingest';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
+import type { ServerApiError } from '../../../common/types';
 
 export function useGetEndpointSpecificPolicies(
   {
@@ -30,13 +34,32 @@ export function useGetEndpointSpecificPolicies(
         query: {
           page,
           perPage,
+          withAgentCount: true,
         },
       });
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      onError,
-    }
+    onError
+      ? {
+          onError,
+        }
+      : undefined
+  );
+}
+
+/**
+ * This hook returns the endpoint security package which contains endpoint version info
+ */
+export function useGetEndpointSecurityPackage({
+  customQueryOptions,
+}: {
+  customQueryOptions?: UseQueryOptions<GetInfoResponse['item'], IHttpFetchError>;
+}): QueryObserverResult<GetInfoResponse['item'], IHttpFetchError> {
+  const http = useHttp();
+  return useQuery<GetInfoResponse['item'], IHttpFetchError>(
+    ['endpointPackageVersion', customQueryOptions],
+    () => {
+      return sendGetEndpointSecurityPackage(http);
+    },
+    customQueryOptions
   );
 }

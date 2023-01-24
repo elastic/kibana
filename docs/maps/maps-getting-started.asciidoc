@@ -34,7 +34,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click the **Create new Maps** icon image:maps/images/app_gis_icon.png[]
+. Click the **Create new Maps** icon image:maps/images/app_gis_icon.png[].
 
 [float]
 [[maps-add-choropleth-layer]]
@@ -46,7 +46,7 @@ and lighter shades will symbolize countries with less traffic.
 
 . Click **Add layer**, and then click **Choropleth**.
 
-. From the **Layer** dropdown menu, select **World Countries**.
+. From the **EMS boundaries** dropdown menu, select **World Countries**.
 
 . In **Statistics source**, set:
 ** **Data view** to **kibana_sample_data_logs**
@@ -62,12 +62,12 @@ and lighter shades will symbolize countries with less traffic.
 . Add a Tooltip field:
 
 ** **ISO 3166-1 alpha-2 code** is added by default.
-** Click **+ Add** to open field select.
+** Click **+ Add** to open the field select.
 ** Select **name** and click *Add*.
 
 . In **Layer style**:
 
-** Set **Fill color: As number** to the grey color ramp.
+** Set **Fill color > As number** to the grey color ramp.
 ** Set **Border color** to white.
 ** Under **Label**, change **By value** to **Fixed**.
 
@@ -76,7 +76,7 @@ and lighter shades will symbolize countries with less traffic.
 Your map now looks like this:
 +
 [role="screenshot"]
-image::maps/images/gs_add_cloropeth_layer.png[]
+image::maps/images/gs_add_cloropeth_layer.png[Map showing the Total Requests by Destination layer]
 
 [float]
 [[maps-add-elasticsearch-layer]]
@@ -107,7 +107,7 @@ The layer is only visible when users zoom in.
 . Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
 **machine.os**, **request**, **response**, and **timestamp**.
 
-. In **Scaling**, set *Limits results to 10,000.*
+. In **Scaling**, enable *Limit results to 10,000.*
 
 . In **Layer style**, set **Fill color** to **#2200FF**.
 
@@ -116,7 +116,7 @@ The layer is only visible when users zoom in.
 Your map will look like this from zoom level 9 to 24:
 +
 [role="screenshot"]
-image::maps/images/gs_add_es_document_layer.png[]
+image::maps/images/gs_add_es_document_layer.png[Map showing what zoom level looks like a level 9]
 
 [float]
 ==== Add a layer for aggregated data
@@ -128,7 +128,7 @@ traffic. Larger circles will symbolize grids with
 more total bytes transferred, and smaller circles will symbolize
 grids with less bytes transferred.
 
-. Click **Add layer**, and select **Clusters and grids**.
+. Click **Add layer**, and select **Clusters**.
 . Set **Data view** to **kibana_sample_data_logs**.
 . Click **Add layer**.
 . In **Layer settings**, set:
@@ -140,14 +140,14 @@ grids with less bytes transferred.
 ** Click **Add metric**.
 ** Set **Aggregation** to **Sum** with **Field** set to **bytes**.
 . In **Layer style**, change **Symbol size**:
-** Set the field select to *sum bytes*.
+** Set *By value* to *sum bytes*.
 ** Set the min size to 7 and the max size to 25 px.
 . Click **Save & close** button.
 +
 Your map will look like this between zoom levels 0 and 9:
 +
 [role="screenshot"]
-image::maps/images/sample_data_web_logs.png[]
+image::maps/images/sample_data_web_logs.png[Map showing what zoom level 3 looks like]
 
 [float]
 [[maps-save]]
@@ -164,10 +164,10 @@ View your geospatial data alongside a heat map and pie chart, and then filter th
 When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
 . Click **Add from library** to open a list of panels that you can add to the dashboard.
-. Add **[Logs] Unique Visitor Heatmap** and **[Logs] Bytes distribution** to the dashboard.
+. Add **[Logs] Unique Destination Heatmap** and **[Logs] Bytes distribution** to the dashboard.
 +
 [role="screenshot"]
-image::maps/images/gs_dashboard_with_map.png[]
+image::maps/images/gs_dashboard_with_map.png[Map in a dashboard with 2 other panels]
 
 . To filter for documents with unusually high byte values, click and drag in the *Bytes distribution* chart.
 
@@ -177,10 +177,15 @@ image::maps/images/gs_dashboard_with_map.png[]
 
 .. Open a tooltip by clicking anywhere in the United States vector.
 
-.. To show only documents where **geo.src** is **US**, click the filter icon in the row for **ISO 3066-1 alpha-2**.
+.. To show only documents where **geo.src** is **US**, click the filter icon image:maps/images/gs-filter-icon.png[filter icon, width=24px]in the row for **ISO 3066-1 alpha-2**.
 +
 [role="screenshot"]
-image::maps/images/gs_dashboard_with_terms_filter.png[]
+image::maps/images/gs_tooltip_filter.png[Tooltip on map, width=75%]
++
+Your filtered map should look similar to this:
++
+[role="screenshot"]
+image::maps/images/gs_map_filtered.png[Map showing filtered data]
 
 [float]
 === What's next?

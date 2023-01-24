@@ -43,7 +43,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
       },
     },
     async (context, request, response) => {
-      const exceptionListsClient = getExceptionListClient(context);
+      const exceptionListsClient = await getExceptionListClient(context);
       const siemResponse = buildSiemResponse(response);
 
       try {
@@ -58,6 +58,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
 
         const importsSummary = await exceptionListsClient.importExceptionListAndItems({
           exceptionsToImport: request.body.file,
+          generateNewListId: request.query.as_new_list,
           maxExceptionsImportSize: config.maxExceptionsImportSize,
           overwrite: request.query.overwrite,
         });

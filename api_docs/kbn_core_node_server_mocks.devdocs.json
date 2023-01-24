@@ -1,0 +1,115 @@
+{
+  "id": "@kbn/core-node-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-node-server-mocks",
+        "id": "def-common.nodeServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "nodeServiceMock",
+        "description": [],
+        "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-mocks",
+            "id": "def-common.nodeServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<NodeServiceContract>"
+            ],
+            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server-mocks",
+            "id": "def-common.nodeServiceMock.createInternalPrebootContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPrebootContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalNodeServicePreboot",
+              ">"
+            ],
+            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server-mocks",
+            "id": "def-common.nodeServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [],
+            "signature": [
+              "({ ui, backgroundTasks, }?: { ui: boolean; backgroundTasks: boolean; }) => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-node-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreNodeServerInternalPluginApi",
+                "section": "def-common.InternalNodeServiceStart",
+                "text": "InternalNodeServiceStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-node-server-mocks",
+                "id": "def-common.nodeServiceMock.createInternalStartContract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ ui: boolean; backgroundTasks: boolean; }"
+                ],
+                "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

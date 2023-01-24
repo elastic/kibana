@@ -9,14 +9,17 @@ import React from 'react';
 import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
-import { ThemeServiceStart } from '../../../../src/core/public';
-import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
-import { Visualization, OperationMetadata } from '../../../plugins/lens/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
+import { layerTypes } from '@kbn/lens-plugin/public';
 import type { RotatingNumberState } from '../common/types';
 import { DEFAULT_COLOR } from '../common/constants';
-import { layerTypes } from '../../../plugins/lens/public';
 
-const toExpression = (state: RotatingNumberState): Ast | null => {
+const toExpression = (
+  state: RotatingNumberState,
+  datasourceExpressionsByLayers?: Record<string, Ast>
+): Ast | null => {
   if (!state.accessor) {
     return null;
   }
@@ -24,6 +27,7 @@ const toExpression = (state: RotatingNumberState): Ast | null => {
   return {
     type: 'expression',
     chain: [
+      ...Object.values(datasourceExpressionsByLayers || {})[0].chain,
       {
         type: 'function',
         function: 'rotating_number',
@@ -75,7 +79,7 @@ export const getRotatingNumberVisualization = ({
   },
 
   getSuggestions: ({ state, table }) => {
-    if (table.columns.length > 1) {
+    if (!table.columns.length || table.columns.length > 1) {
       return [];
     }
     if (state && table.changeType === 'unchanged') {
@@ -149,8 +153,10 @@ export const getRotatingNumberVisualization = ({
     }
   },
 
-  toExpression: (state) => toExpression(state),
-  toPreviewExpression: (state) => toExpression(state),
+  toExpression: (state, _layers, _attributes, datasourceExpression) =>
+    toExpression(state, datasourceExpression),
+  toPreviewExpression: (state, _layers, datasourceExpression) =>
+    toExpression(state, datasourceExpression),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };
@@ -174,10 +180,5 @@ export const getRotatingNumberVisualization = ({
       </KibanaThemeProvider>,
       domElement
     );
-  },
-
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
   },
 });

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AnomalyThresholdSlider } from './index';
+import { AnomalyThresholdSlider } from '.';
 import { useFormFieldMock } from '../../../../common/mock';
 
 describe('AnomalyThresholdSlider', () => {
@@ -20,6 +20,6 @@ describe('AnomalyThresholdSlider', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive().find('EuiRange')).toHaveLength(1);
+    expect(wrapper.dive().find('EuiRangeClass')).toHaveLength(1);
   });
 });

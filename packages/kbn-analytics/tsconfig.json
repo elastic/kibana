@@ -1,16 +1,16 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
     "isolatedModules": true,
-    "outDir": "./target_types",
-    "stripInternal": true,
+    "outDir": "target/types",
     "types": [
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

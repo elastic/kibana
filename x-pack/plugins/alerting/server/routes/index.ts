@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { createRuleRoute } from './create_rule';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
@@ -20,6 +20,11 @@ import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute, findInternalRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { getRuleExecutionLogRoute } from './get_rule_execution_log';
+import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
+import { getActionErrorLogRoute } from './get_action_error_log';
+import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
 import { resolveRuleRoute } from './resolve_rule';
@@ -29,6 +34,16 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
+import { snoozeRuleRoute } from './snooze_rule';
+import { unsnoozeRuleRoute } from './unsnooze_rule';
+import { runSoonRoute } from './run_soon';
+import { bulkDeleteRulesRoute } from './bulk_delete_rules';
+import { bulkEnableRulesRoute } from './bulk_enable_rules';
+import { bulkDisableRulesRoute } from './bulk_disable_rules';
+import { cloneRuleRoute } from './clone_rule';
+import { getFlappingSettingsRoute } from './get_flapping_settings';
+import { updateFlappingSettingsRoute } from './update_flapping_settings';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -53,12 +68,27 @@ export function defineRoutes(opts: RouteOptions) {
   findRulesRoute(router, licenseState, usageCounter);
   findInternalRulesRoute(router, licenseState, usageCounter);
   getRuleAlertSummaryRoute(router, licenseState);
+  getRuleExecutionLogRoute(router, licenseState);
+  getGlobalExecutionLogRoute(router, licenseState);
+  getActionErrorLogRoute(router, licenseState);
+  getRuleExecutionKPIRoute(router, licenseState);
+  getGlobalExecutionKPIRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);
-  muteAllRuleRoute(router, licenseState);
+  muteAllRuleRoute(router, licenseState, usageCounter);
   muteAlertRoute(router, licenseState);
   unmuteAllRuleRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
+  bulkEditInternalRulesRoute(router, licenseState);
+  bulkDeleteRulesRoute({ router, licenseState });
+  bulkEnableRulesRoute({ router, licenseState });
+  bulkDisableRulesRoute({ router, licenseState });
+  snoozeRuleRoute(router, licenseState);
+  unsnoozeRuleRoute(router, licenseState);
+  runSoonRoute(router, licenseState);
+  cloneRuleRoute(router, licenseState);
+  getFlappingSettingsRoute(router, licenseState);
+  updateFlappingSettingsRoute(router, licenseState);
 }

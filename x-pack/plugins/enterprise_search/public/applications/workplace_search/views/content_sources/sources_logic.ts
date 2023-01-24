@@ -15,6 +15,7 @@ import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_message
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
+import { sortByName } from '../../utils';
 
 import { staticSourceData } from './source_data';
 
@@ -50,7 +51,7 @@ export interface IPermissionsModalProps {
   additionalConfiguration: boolean;
 }
 
-type CombinedDataItem = SourceDataItem & ContentSourceDetails;
+type CombinedDataItem = SourceDataItem & Partial<Connector> & { connected: boolean };
 
 export interface ISourcesValues {
   contentSources: ContentSourceDetails[];
@@ -62,6 +63,7 @@ export interface ISourcesValues {
   permissionsModal: IPermissionsModalProps | null;
   dataLoading: boolean;
   serverStatuses: ServerStatuses | null;
+  externalConfigured: boolean;
 }
 
 interface ISourcesServerResponse {
@@ -143,11 +145,23 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   selectors: ({ selectors }) => ({
     availableSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => !configured),
+      (sourceData: CombinedDataItem[]) =>
+        sortByName(
+          sourceData.filter(
+            ({ configured, serviceType, externalConnectorServiceDescribed }) =>
+              !configured && (serviceType !== 'external' || externalConnectorServiceDescribed)
+          )
+        ),
     ],
     configuredSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) => sourceData.filter(({ configured }) => configured),
+      (sourceData: CombinedDataItem[]) =>
+        sortByName(sourceData.filter(({ configured }) => configured)),
+    ],
+    externalConfigured: [
+      () => [selectors.configuredSources],
+      (configuredSources: CombinedDataItem[]) =>
+        !!configuredSources.find((item) => item.serviceType === 'external'),
     ],
     sourceData: [
       () => [selectors.serviceTypes, selectors.contentSources],
@@ -301,18 +315,20 @@ export const mergeServerAndStaticData = (
   serverData: Connector[],
   staticData: SourceDataItem[],
   contentSources: ContentSourceDetails[]
-) => {
-  const combined = [] as CombinedDataItem[];
-  staticData.forEach((staticItem) => {
-    const type = staticItem.serviceType;
-    const serverItem = serverData.find(({ serviceType }) => serviceType === type);
-    const connectedSource = contentSources.find(({ serviceType }) => serviceType === type);
-    combined.push({
+): CombinedDataItem[] => {
+  const unsortedData = staticData.map((staticItem) => {
+    const serverItem = staticItem.baseServiceType
+      ? undefined // static items with base service types will never have matching external connectors, BE doesn't pass us a baseServiceType
+      : serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
+    const connectedSource = contentSources.find(
+      ({ baseServiceType, serviceType }) =>
+        serviceType === staticItem.serviceType && baseServiceType === staticItem.baseServiceType
+    );
+    return {
       ...staticItem,
       ...serverItem,
       connected: !!connectedSource,
-    } as CombinedDataItem);
+    };
   });
-
-  return combined;
+  return sortByName(unsortedData);
 };

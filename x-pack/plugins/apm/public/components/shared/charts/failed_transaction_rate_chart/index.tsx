@@ -8,19 +8,17 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALERT_RULE_TYPE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
-import { AlertType } from '../../../../../common/alert_types';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../time_comparison/get_time_range_comparison';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -51,18 +49,25 @@ const INITIAL_STATE: ErrorRate = {
   },
 };
 
+export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
+  defaultMessage:
+    "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+});
 export function FailedTransactionRateChart({
   height,
   showAnnotations = true,
   kuery,
 }: Props) {
   const {
-    urlParams: { transactionName, comparisonEnabled, comparisonType },
+    urlParams: { transactionName },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -72,15 +77,9 @@ export function FailedTransactionRateChart({
     ApmMlDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType, alerts } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
-  const comparisonChartThem = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
+  const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -99,8 +98,10 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                comparisonStart,
-                comparisonEnd,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }
@@ -115,8 +116,8 @@ export function FailedTransactionRateChart({
       end,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
+      offset,
+      comparisonEnabled,
     ]
   );
 
@@ -124,6 +125,7 @@ export function FailedTransactionRateChart({
     ChartType.FAILED_TRANSACTION_RATE
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data.currentPeriod.timeseries,
@@ -139,10 +141,7 @@ export function FailedTransactionRateChart({
             data: data.previousPeriod.timeseries,
             type: 'area',
             color: previousPeriodColor,
-            title: i18n.translate(
-              'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),
@@ -150,14 +149,23 @@ export function FailedTransactionRateChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.errorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-        </h2>
-      </EuiTitle>
-      <TimeseriesChart
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.apm.errorRate', {
+                defaultMessage: 'Failed transaction rate',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={errorRateI18n} position="right" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <TimeseriesChartWithContext
         id="errorRate"
         height={height}
         showAnnotations={showAnnotations}
@@ -165,12 +173,15 @@ export function FailedTransactionRateChart({
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartThem}
-        anomalyTimeseries={preferredAnomalyTimeseries}
-        alerts={alerts.filter(
-          (alert) =>
-            alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
-        )}
+        customTheme={comparisonChartTheme}
+        anomalyTimeseries={
+          preferredAnomalyTimeseries
+            ? {
+                ...preferredAnomalyTimeseries,
+                color: previousPeriodColor,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );

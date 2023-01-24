@@ -5,64 +5,52 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+
+import { firstValueFrom } from 'rxjs';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
+import type { BucketHistory } from '../alert_suppression/group_and_bulk_create';
+import { groupAndBulkCreate } from '../alert_suppression/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
-import { CompleteRule, SavedQueryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { UnifiedQueryRuleParams } from '../../rule_schema';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { SetupPlugins } from '../../../../plugin_contract';
+import type { RunOpts } from '../../rule_types/types';
 
 export const queryExecutor = async ({
-  completeRule,
-  tuple,
-  listClient,
-  exceptionItems,
+  runOpts,
   experimentalFeatures,
+  eventsTelemetry,
   services,
   version,
-  searchAfterSize,
-  logger,
-  eventsTelemetry,
-  buildRuleMessage,
-  bulkCreate,
-  wrapHits,
+  spaceId,
+  bucketHistory,
+  osqueryCreateAction,
+  licensing,
 }: {
-  completeRule: CompleteRule<QueryRuleParams | SavedQueryRuleParams>;
-  tuple: RuleRangeTuple;
-  listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
+  runOpts: RunOpts<UnifiedQueryRuleParams>;
   experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  version: string;
-  searchAfterSize: number;
-  logger: Logger;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  version: string;
+  spaceId: string;
+  bucketHistory?: BucketHistory[];
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
 }) => {
+  const completeRule = runOpts.completeRule;
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters,
@@ -70,27 +58,58 @@ export const queryExecutor = async ({
       query: ruleParams.query,
       savedId: ruleParams.savedId,
       services,
-      index: inputIndex,
-      lists: exceptionItems,
+      index: runOpts.inputIndex,
+      exceptionFilter: runOpts.exceptionFilter,
     });
 
-    return searchAfterAndBulkCreate({
-      tuple,
-      listClient,
-      exceptionsList: exceptionItems,
-      completeRule,
-      services,
-      logger,
-      eventsTelemetry,
-      id: completeRule.alertId,
-      inputIndexPattern: inputIndex,
-      signalsIndex: ruleParams.outputIndex,
-      filter: esFilter,
-      pageSize: searchAfterSize,
-      buildReasonMessage: buildReasonMessageForQueryAlert,
-      buildRuleMessage,
-      bulkCreate,
-      wrapHits,
-    });
+    const license = await firstValueFrom(licensing.license$);
+    const hasPlatinumLicense = license.hasAtLeast('platinum');
+    const hasGoldLicense = license.hasAtLeast('gold');
+
+    const result =
+      ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
+        ? await groupAndBulkCreate({
+            runOpts,
+            services,
+            spaceId,
+            filter: esFilter,
+            buildReasonMessage: buildReasonMessageForQueryAlert,
+            bucketHistory,
+            groupByFields: ruleParams.alertSuppression.groupBy,
+          })
+        : {
+            ...(await searchAfterAndBulkCreate({
+              tuple: runOpts.tuple,
+              exceptionsList: runOpts.unprocessedExceptions,
+              services,
+              listClient: runOpts.listClient,
+              ruleExecutionLogger: runOpts.ruleExecutionLogger,
+              eventsTelemetry,
+              inputIndexPattern: runOpts.inputIndex,
+              pageSize: runOpts.searchAfterSize,
+              filter: esFilter,
+              buildReasonMessage: buildReasonMessageForQueryAlert,
+              bulkCreate: runOpts.bulkCreate,
+              wrapHits: runOpts.wrapHits,
+              runtimeMappings: runOpts.runtimeMappings,
+              primaryTimestamp: runOpts.primaryTimestamp,
+              secondaryTimestamp: runOpts.secondaryTimestamp,
+            })),
+            state: {},
+          };
+
+    if (hasGoldLicense) {
+      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+        scheduleNotificationResponseActions(
+          {
+            signals: result.createdSignals,
+            responseActions: completeRule.ruleParams.responseActions,
+          },
+          osqueryCreateAction
+        );
+      }
+    }
+
+    return result;
   });
 };

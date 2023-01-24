@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { DataView } from 'src/plugins/data/common';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView } from '@kbn/data-plugin/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
@@ -13,6 +18,7 @@ import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
+import { getAggRange } from '../../util/tile_meta_feature_utils';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {
@@ -60,7 +66,7 @@ export class CountAggField implements IESAggField {
   }
 
   async getLabel(): Promise<string> {
-    return this._label ? this._label : this._source.getAggLabel(AGG_TYPE.COUNT, '');
+    return this._label ? this._label : await this._source.getAggLabel(AGG_TYPE.COUNT, '');
   }
 
   isValid(): boolean {
@@ -99,15 +105,22 @@ export class CountAggField implements IESAggField {
     return false;
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     return null;
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     return null;
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     return null;
   }
 
@@ -116,15 +129,6 @@ export class CountAggField implements IESAggField {
   }
 
   pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
-    const minField = `aggregations._count.min`;
-    const maxField = `aggregations._count.max`;
-    return metaFeature.properties &&
-      typeof metaFeature.properties[minField] === 'number' &&
-      typeof metaFeature.properties[maxField] === 'number'
-      ? {
-          min: metaFeature.properties[minField] as number,
-          max: metaFeature.properties[maxField] as number,
-        }
-      : null;
+    return getAggRange(metaFeature, '_count');
   }
 }

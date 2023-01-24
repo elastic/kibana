@@ -1,3 +1,5 @@
+# Cloud setup
+
 First sign up on https://cloud.elastic.co/ and create a deployment in any convenient region, possibly one close to you.
 
 > **Elasticians**: Please use your work email address when signing up to avoid trial expiration. Also review the (internal) [Cloud First Testing](https://docs.elastic.dev/dev/guides/cloud-first-testing) documentation for additional features available to you.
@@ -8,9 +10,11 @@ For testing purposes, shipping data to the same deployment you just created is f
 
 ![Elasticsearch Service Console showing Logs and Metrics being configured to ship data to "this deployment"](../images/ec_logs_and_metrics_configuration.png)
 
-Once the plan is done you can open Stack Monitoring in the deployment's kibana.
+Once the plan is done you can open Stack Monitoring in the deployment's Kibana.
 
-To connect a locally running instance of kibana to the cloud cluster, you'll need to create a user for it. You can do this via the UI, but here's a curl example for copy-pasting.
+## Connect local Kibana to cloud cluster
+
+To connect a locally running instance of Kibana to the cloud cluster, you'll need to create a user for it. You can do this via the UI, but here's a curl example for copy-pasting.
 
 First, set your endpoint and password as shell variables:
 
@@ -19,7 +23,7 @@ ELASTICSEARCH_ENDPOINT='<<<elasticsearch endpoint shown on cloud.elastic.co>>>'
 ELASTIC_PASSWORD='<<<elastic password displayed during deployment creation>>>'
 ```
 
-Then create a `kibana_dev` user with the same password. `kibana_system` is already in use by the kibana launched by the elasticsearch service:
+Then create a `kibana_dev` user with the same password. `kibana_system` is already in use by the Kibana launched by the elasticsearch service:
 
 ```shell
 curl -X PUT ${ELASTICSEARCH_ENDPOINT}/_security/user/kibana_dev \
@@ -30,7 +34,7 @@ curl -X PUT ${ELASTICSEARCH_ENDPOINT}/_security/user/kibana_dev \
 JSON
 ```
 
-Then create a kibana configuration for the deployment:
+Then create a Kibana configuration for the deployment:
 
 ```shell
 cat > config/kibana.cloud.yml <<YAML
@@ -38,13 +42,18 @@ elasticsearch.hosts: ${ELASTICSEARCH_ENDPOINT}
 elasticsearch.username: kibana_dev
 elasticsearch.password: ${ELASTIC_PASSWORD}
 elasticsearch.ignoreVersionMismatch: true
+monitoring.ui.container.elasticsearch.enabled: true
 YAML
 ```
 
-And start kibana with that config:
+And start Kibana with that config:
 
 ```shell
 yarn start --config config/kibana.cloud.yml
 ```
 
-Note that your local kibana will run data migrations and probably render the cloud created kibana unusable after your local kibana starts up.
+Note that your local Kibana will run data migrations and probably render the cloud created Kibana unusable after your local Kibana starts up.
+
+## Add a remote cluster
+To test use cases for cross cluster search with Stack Monitoring, you'll need to add one or more remote clusters.  
+You'll find instructions for how to do this in the docs [here](https://www.elastic.co/guide/en/cloud/current/ec-configure-as-remote-clusters.html).

@@ -7,14 +7,13 @@
 
 import Boom from '@hapi/boom';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { RequestHandler } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
-import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCreateApiKeyRoutes } from './create';
 
@@ -22,9 +21,9 @@ describe('Create API Key route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
-    return {
+    return coreMock.createCustomRequestHandlerContext({
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-    } as unknown as SecurityRequestHandlerContext;
+    });
   }
 
   let routeHandler: RequestHandler<any, any, any, any>;
@@ -43,6 +42,7 @@ describe('Create API Key route', () => {
   });
 
   describe('failure', () => {
+    test.todo('actually exercise different types of payload validation');
     test('returns result of license checker', async () => {
       const mockContext = getMockContext({ state: 'invalid', message: 'test forbidden message' });
       const response = await routeHandler(
@@ -53,7 +53,7 @@ describe('Create API Key route', () => {
 
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect((await mockContext.licensing).license.check).toHaveBeenCalledWith('security', 'basic');
     });
 
     test('returns error from cluster client', async () => {

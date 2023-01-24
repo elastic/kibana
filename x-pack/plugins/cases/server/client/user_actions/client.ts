@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import { ICaseUserActionsResponse } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
+import type {
+  GetCaseConnectorsResponse,
+  CaseUserActionsResponse,
+  UserActionFindResponse,
+} from '../../../common/api';
+import type { CasesClientArgs } from '../types';
 import { get } from './get';
-
-/**
- * Parameters for retrieving user actions for a particular case
- */
-export interface UserActionGet {
-  /**
-   * The ID of the case
-   */
-  caseId: string;
-}
+import { getConnectors } from './connectors';
+import type { GetConnectorsRequest, UserActionFind, UserActionGet } from './types';
+import { find } from './find';
+import type { CasesClient } from '../client';
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.
  */
 export interface UserActionsSubClient {
+  find(params: UserActionFind): Promise<UserActionFindResponse>;
   /**
    * Retrieves all user actions for a particular case.
    */
-  getAll(clientArgs: UserActionGet): Promise<ICaseUserActionsResponse>;
+  getAll(params: UserActionGet): Promise<CaseUserActionsResponse>;
+  /**
+   * Retrieves all the connectors used within a given case
+   */
+  getConnectors(params: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
 }
 
 /**
  * Creates an API object for interacting with the user action entities
- *
- * @ignore
  */
-export const createUserActionsSubClient = (clientArgs: CasesClientArgs): UserActionsSubClient => {
+export const createUserActionsSubClient = (
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): UserActionsSubClient => {
   const attachmentSubClient: UserActionsSubClient = {
-    getAll: (params: UserActionGet) => get(params, clientArgs),
+    find: (params) => find(params, casesClient, clientArgs),
+    getAll: (params) => get(params, clientArgs),
+    getConnectors: (params) => getConnectors(params, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

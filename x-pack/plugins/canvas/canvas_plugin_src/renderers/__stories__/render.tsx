@@ -15,6 +15,8 @@ export const defaultHandlers: RendererHandlers = {
   getFilter: () => 'filter',
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncCursorEnabled: () => true,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
@@ -26,6 +28,7 @@ export const defaultHandlers: RendererHandlers = {
   reload: action('reload'),
   update: action('update'),
   event: action('event'),
+  getExecutionContext: () => undefined,
 };
 
 /*

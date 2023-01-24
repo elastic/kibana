@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { Panel } from '../../../../common/components/panel';
@@ -29,14 +29,7 @@ export const LoadingHistogram = () => {
         <EuiFlexItem grow={1}>
           <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <>
-            <EuiSpacer />
-            <EuiText size="s" color="subdued">
-              <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
-            </EuiText>
-          </>
-        </EuiFlexItem>
+        <EuiSpacer />
       </EuiFlexGroup>
     </Panel>
   );

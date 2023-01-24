@@ -10,7 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -57,7 +57,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
+      testFiles,
       servers,
       services,
       junit: {
@@ -84,8 +84,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          // TO DO: Remove feature flags once we're good to go
-          '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.security.audit.enabled=true',
           '--xpack.security.audit.appender.type=file',

@@ -16,32 +16,6 @@ export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 export const ACTIONS_THROTTLE_INPUT =
   '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
 
-export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
-
-export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
-
-export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
-
-export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
-
-export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
-
-export const FROM_VALIDATION_ERROR = '.euiFormErrorText';
-
-export const CONNECTOR_NAME_INPUT = '[data-test-subj="nameInput"]';
-
-export const EMAIL_CONNECTOR_FROM_INPUT = '[data-test-subj="emailFromInput"]';
-
-export const EMAIL_CONNECTOR_HOST_INPUT = '[data-test-subj="emailHostInput"]';
-
-export const EMAIL_CONNECTOR_PORT_INPUT = '[data-test-subj="emailPortInput"]';
-
-export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
-
-export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
-
-export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
-
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -52,15 +26,15 @@ export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
-export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
-
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
-
-export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
+export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
+
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
+
+export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
 
 export const THREAT_MAPPING_COMBO_BOX_INPUT =
   '[data-test-subj="threatMatchInput"] [data-test-subj="fieldAutocompleteComboBox"]';
@@ -93,11 +67,16 @@ export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is req
 
 export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
 
+export const DATA_VIEW_COMBO_BOX =
+  '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
+
+export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
+
+export const CONTINUE_BUTTON = '[data-test-subj$=-continue]';
+
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
-
-export const DEFINE_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
 
 export const DEFINE_INDEX_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="input"]';
@@ -148,10 +127,6 @@ export const MITRE_ATTACK_ADD_TECHNIQUE_BUTTON = '[data-test-subj="addMitreAttac
 
 export const MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON = '[data-test-subj="addMitreAttackSubtechnique"]';
 
-export const PREVIEW_HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
-
-export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
-
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';
 
@@ -160,9 +135,6 @@ export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 export const DEFAULT_RISK_SCORE_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
 
-export const DEFAULT_RISK_SCORE_SLIDER =
-  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeSlider';
-
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 
 export const RISK_OVERRIDE =
@@ -170,7 +142,9 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW = '[data-test-subj="rule-preview"]';
+export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-container"]';
+
+export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
 export const RULE_DESCRIPTION_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleDescription"] [data-test-subj="input"]';
@@ -223,8 +197,37 @@ export const TAGS_INPUT =
 export const TAGS_CLEAR_BUTTON =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
 
-export const THRESHOLD_FIELD_SELECTION = '.euiFilterSelectItem';
-
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
+
+export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
+
+export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
+
+export const NEW_TERMS_HISTORY_SIZE =
+  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="interval"]';
+
+export const NEW_TERMS_HISTORY_TIME_TYPE =
+  '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
+
+export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
+  '[data-test-subj="detectionEngineStepDefineRuleShouldLoadQueryDynamically"] input';
+
+export const SHOW_QUERY_BAR_BUTTON = '[data-test-subj="showQueryBarMenu"]';
+
+export const QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
+
+export const LOAD_SAVED_QUERIES_LIST_BUTTON =
+  '[data-test-subj="saved-query-management-load-button"]';
+
+export const savedQueryByName = (savedQueryName: string) =>
+  `[data-test-subj="load-saved-query-${savedQueryName}-button"]`;
+
+export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
+  '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const RULE_INDICES =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';

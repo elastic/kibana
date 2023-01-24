@@ -29,13 +29,15 @@ import {
   ExportExceptionListProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
+  GetExceptionFilterFromExceptionListIdsProps,
+  GetExceptionFilterFromExceptionsProps,
+  ExceptionFilterResponse,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   ENDPOINT_LIST_URL,
+  EXCEPTION_FILTER,
   EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_NAMESPACE,
-  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
@@ -229,14 +231,15 @@ const fetchExceptionLists = async ({
   namespaceTypes,
   pagination,
   signal,
+  sort,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
   const query = {
-    filter: filters,
+    filter: filters || undefined,
     namespace_type: namespaceTypes,
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    sort_field: 'exception-list.created_at',
-    sort_order: 'desc',
+    sort_field: sort?.field ? sort?.field : 'exception-list.created_at',
+    sort_order: sort?.order ? sort?.order : 'desc',
   };
 
   return http.fetch<FoundExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {
@@ -252,6 +255,7 @@ const fetchExceptionListsWithValidation = async ({
   namespaceTypes,
   pagination,
   signal,
+  sort,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> =>
   flow(
     () =>
@@ -263,6 +267,7 @@ const fetchExceptionListsWithValidation = async ({
             namespaceTypes,
             pagination,
             signal,
+            sort,
           }),
         toError
       ),
@@ -324,7 +329,8 @@ export { fetchExceptionListByIdWithValidation as fetchExceptionListById };
  * @param http Kibana http service
  * @param listIds ExceptionList list_ids (not ID)
  * @param namespaceTypes ExceptionList namespace_types
- * @param filterOptions optional - filter by field or tags
+ * @param search optional - simple search string
+ * @param filter optional
  * @param pagination optional
  * @param signal to cancel request
  *
@@ -334,36 +340,20 @@ const fetchExceptionListsItemsByListIds = async ({
   http,
   listIds,
   namespaceTypes,
-  filterOptions,
+  filter,
   pagination,
+  search,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
-  const filters: string = filterOptions
-    .map<string>((filter, index) => {
-      const namespace = namespaceTypes[index];
-      const filterNamespace =
-        namespace === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
-      const formattedFilters = [
-        ...(filter.filter.length
-          ? [`${filterNamespace}.attributes.entries.field:${filter.filter}*`]
-          : []),
-        ...(filter.tags.length
-          ? filter.tags.map((t) => `${filterNamespace}.attributes.tags:${t}`)
-          : []),
-      ];
-
-      return formattedFilters.join(' AND ');
-    })
-    .join(',');
-
   const query = {
     list_id: listIds.join(','),
     namespace_type: namespaceTypes.join(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
+    search,
     sort_field: 'exception-list.created_at',
     sort_order: 'desc',
-    ...(filters.trim() !== '' ? { filter: filters } : {}),
+    filter,
   };
 
   return http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
@@ -374,11 +364,12 @@ const fetchExceptionListsItemsByListIds = async ({
 };
 
 const fetchExceptionListsItemsByListIdsWithValidation = async ({
-  filterOptions,
+  filter,
   http,
   listIds,
   namespaceTypes,
   pagination,
+  search,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> =>
   flow(
@@ -386,11 +377,12 @@ const fetchExceptionListsItemsByListIdsWithValidation = async ({
       tryCatch(
         () =>
           fetchExceptionListsItemsByListIds({
-            filterOptions,
+            filter,
             http,
             listIds,
             namespaceTypes,
             pagination,
+            search,
             signal,
           }),
         toError
@@ -560,5 +552,61 @@ export const exportExceptionList = async ({
   http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
     method: 'POST',
     query: { id, list_id: listId, namespace_type: namespaceType },
+    signal,
+  });
+
+/**
+ * Create a Filter query from an exception list id
+ *
+ * @param exceptionListId The id of the exception list from which create a Filter query
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getExceptionFilterFromExceptionListIds = async ({
+  alias,
+  chunkSize,
+  exceptionListIds,
+  excludeExceptions,
+  http,
+  signal,
+}: GetExceptionFilterFromExceptionListIdsProps): Promise<ExceptionFilterResponse> =>
+  http.fetch(EXCEPTION_FILTER, {
+    method: 'POST',
+    body: JSON.stringify({
+      exception_list_ids: exceptionListIds,
+      type: 'exception_list_ids',
+      alias,
+      exclude_exceptions: excludeExceptions,
+      chunk_size: chunkSize,
+    }),
+    signal,
+  });
+
+/**
+ * Create a Filter query from a list of exceptions
+ *
+ * @param exceptions Exception items to be made into a `Filter` query
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getExceptionFilterFromExceptions = async ({
+  exceptions,
+  alias,
+  excludeExceptions,
+  http,
+  chunkSize,
+  signal,
+}: GetExceptionFilterFromExceptionsProps): Promise<ExceptionFilterResponse> =>
+  http.fetch(EXCEPTION_FILTER, {
+    method: 'POST',
+    body: JSON.stringify({
+      exceptions,
+      type: 'exception_items',
+      alias,
+      exclude_exceptions: excludeExceptions,
+      chunk_size: chunkSize,
+    }),
     signal,
   });

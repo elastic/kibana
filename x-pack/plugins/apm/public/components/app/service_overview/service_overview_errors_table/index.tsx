@@ -14,13 +14,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
-import { getColumns } from './get_columns';
+import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
@@ -30,7 +30,7 @@ interface Props {
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'name' | 'lastSeen' | 'occurrences';
@@ -70,23 +70,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { query } = useApmParams('/services/{serviceName}/overview');
 
-  const {
-    environment,
-    kuery,
-    rangeFrom,
-    rangeTo,
-    comparisonType,
-    comparisonEnabled,
-  } = query;
+  const { environment, kuery, rangeFrom, rangeTo, offset, comparisonEnabled } =
+    query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
@@ -118,7 +105,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           items: currentPageErrorGroups,
           totalItems: response.errorGroups.length,
         };
@@ -134,8 +121,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       pageIndex,
       direction,
       field,
-      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
-      comparisonType,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
@@ -145,11 +132,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+          'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
               path: { serviceName },
@@ -159,11 +147,15 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 start,
                 end,
                 numBuckets: 20,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
+              },
+              body: {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
               },
             },
           }
@@ -176,8 +168,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     { preservePreviousData: false }
   );
 
+  const errorGroupDetailedStatisticsLoading =
+    errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+
   const columns = getColumns({
     serviceName,
+    errorGroupDetailedStatisticsLoading,
     errorGroupDetailedStatistics,
     comparisonEnabled,
     query,
@@ -243,7 +239,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               pageSize: PAGE_SIZE,
               totalItemCount: totalItems,
               pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
+              showPerPageOptions: false,
             }}
             loading={status === FETCH_STATUS.LOADING}
             onChange={(newTableOptions: {

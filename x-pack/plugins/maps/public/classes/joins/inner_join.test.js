@@ -15,13 +15,11 @@ const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
   indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-  indexPatternTitle: 'kibana_sample_data_logs',
   term: 'geo.dest',
   metrics: [{ type: 'count' }],
 };
 
 const mockSource = {
-  getInspectorAdapters() {},
   createField({ fieldName: name }) {
     return {
       getName() {

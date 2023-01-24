@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { Logger, IRouter } from '../../../../../src/core/server';
+import { Logger, IRouter } from '@kbn/core/server';
 import { timeSeriesQuery } from './lib/time_series_query';
 import { registerRoutes } from './routes';
 
 export type { TimeSeriesQuery, CoreQueryParams } from './lib';
 export {
+  TIME_SERIES_BUCKET_SELECTOR_FIELD,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
 } from './lib';
 
 // future enhancement: make these configurable?
-export const MAX_INTERVALS = 1000;
 export const MAX_GROUPS = 1000;
 export const DEFAULT_GROUPS = 100;
 

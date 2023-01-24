@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 
 /** @public */
 export type Freezable = { [k: string]: any } | any[];

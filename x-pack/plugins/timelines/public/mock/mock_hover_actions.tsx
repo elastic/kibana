@@ -7,11 +7,15 @@
 import React from 'react';
 
 export const mockHoverActions = {
-  getAddToTimelineButton: () => <>{'Add To Timeline'}</>,
-  getColumnToggleButton: () => <>{'Column Toggle'}</>,
-  getCopyButton: () => <>{'Copy button'}</>,
-  getFilterForValueButton: () => <>{'Filter button'}</>,
-  getFilterOutValueButton: () => <>{'Filter out button'}</>,
+  getAddToTimelineButton: () => (
+    <span data-test-subj="test-add-to-timeline">{'Add To Timeline'}</span>
+  ),
+  getColumnToggleButton: () => <span data-test-subj="test-column-toggle">{'Column Toggle'}</span>,
+  getCopyButton: () => <span data-test-subj="test-copy-button">{'Copy button'}</span>,
+  getFilterForValueButton: () => <span data-test-subj="test-filter-for">{'Filter button'}</span>,
+  getFilterOutValueButton: () => (
+    <span data-test-subj="test-filter-out">{'Filter out button'}</span>
+  ),
   getOverflowButton: (props: { field: string }) => (
     <div data-test-subj={`more-actions-${props.field}`} {...props}>
       {'Overflow button'}

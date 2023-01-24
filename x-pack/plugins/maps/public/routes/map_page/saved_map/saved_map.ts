@@ -6,16 +6,21 @@
  */
 
 import _ from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
+import { MapSettings } from '../../../../common/descriptor_types';
 import {
   getTimeFilters,
   getMapZoom,
   getMapCenter,
   getLayerListRaw,
+  getLayerList,
   getQuery,
   getFilters,
   getMapSettings,
@@ -31,16 +36,16 @@ import {
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
-import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
   getCoreChrome,
+  getIndexPatternService,
   getToasts,
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
   getTimeFilter,
+  getUsageCollection,
 } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
@@ -48,6 +53,22 @@ import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
+import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
+import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+
+function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
+  const decodedCustomIcons = settings.customIcons
+    ? // base64 decode svg string
+      settings.customIcons.map((icon) => {
+        return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
+      })
+    : [];
+  return setMapSettings({
+    ...settings,
+    customIcons: decodedCustomIcons,
+  });
+}
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -62,6 +83,7 @@ export class SavedMap {
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
+  private _defaultLayerWizard: string;
 
   constructor({
     defaultLayers = [],
@@ -71,6 +93,7 @@ export class SavedMap {
     originatingApp,
     stateTransfer,
     originatingPath,
+    defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
     mapEmbeddableInput?: MapEmbeddableInput;
@@ -79,6 +102,7 @@ export class SavedMap {
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
     originatingPath?: string;
+    defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
     this._mapEmbeddableInput = mapEmbeddableInput;
@@ -88,6 +112,7 @@ export class SavedMap {
     this._originatingPath = originatingPath;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
+    this._defaultLayerWizard = defaultLayerWizard || '';
   }
 
   public getStore() {
@@ -117,13 +142,30 @@ export class SavedMap {
       }
     }
 
+    this._reportUsage();
+
+    if (this._attributes?.mapStateJSON) {
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
+          const dataViewService = getIndexPatternService();
+          const promises = mapState.adHocDataViews.map((spec) => {
+            return dataViewService.create(spec);
+          });
+          await Promise.all(promises);
+        }
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettings(this._mapEmbeddableInput.mapSettings));
+      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
     } else if (this._attributes?.mapStateJSON) {
       try {
         const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
         if (mapState.settings) {
-          this._store.dispatch(setMapSettings(mapState.settings));
+          this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
         }
       } catch (e) {
         // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
@@ -204,6 +246,10 @@ export class SavedMap {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
+
+    if (this._defaultLayerWizard) {
+      this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
+    }
   }
 
   hasUnsavedChanges = () => {
@@ -247,7 +293,40 @@ export class SavedMap {
       : this._attributes!.title;
   }
 
-  setBreadcrumbs() {
+  private _reportUsage(): void {
+    const usageCollector = getUsageCollection();
+    if (!usageCollector || !this._attributes) {
+      return;
+    }
+
+    const mapSettingsStatsCollector = new MapSettingsCollector(this._attributes);
+
+    const layerStatsCollector = new LayerStatsCollector(this._attributes);
+
+    const uiCounterEvents = {
+      layer: layerStatsCollector.getLayerCounts(),
+      scaling: layerStatsCollector.getScalingCounts(),
+      resolution: layerStatsCollector.getResolutionCounts(),
+      join: layerStatsCollector.getJoinCounts(),
+      ems_basemap: layerStatsCollector.getBasemapCounts(),
+      settings: {
+        custom_icons_count: mapSettingsStatsCollector.getCustomIconsCount(),
+      },
+    };
+
+    for (const [eventType, eventTypeMetrics] of Object.entries(uiCounterEvents)) {
+      for (const [eventName, count] of Object.entries(eventTypeMetrics)) {
+        usageCollector.reportUiCounter(
+          APP_ID,
+          METRIC_TYPE.LOADED,
+          `${eventType}_${eventName}`,
+          count
+        );
+      }
+    }
+  }
+
+  setBreadcrumbs(history: ScopedHistory) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
@@ -258,6 +337,7 @@ export class SavedMap {
       getHasUnsavedChanges: this.hasUnsavedChanges,
       originatingApp: this._originatingApp,
       getAppNameFromId: this._getStateTransfer().getAppNameFromId,
+      history,
     });
     getCoreChrome().setBreadcrumbs(breadcrumbs);
   }
@@ -276,6 +356,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  public hasOriginatingApp(): boolean {
+    return !!this._originatingApp;
+  }
+
+  public getOriginatingPath(): string | undefined {
+    return this._originatingPath;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
@@ -285,7 +373,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = !!this._originatingApp;
+    const hasOriginatingApp = this.hasOriginatingApp();
     const isNewMap = !this.getSavedObjectId();
     return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }
@@ -305,6 +393,30 @@ export class SavedMap {
     return this._attributes;
   }
 
+  public getAutoFitToBounds(): boolean {
+    if (
+      this._mapEmbeddableInput &&
+      this._mapEmbeddableInput?.mapSettings?.autoFitToDataBounds !== undefined
+    ) {
+      return this._mapEmbeddableInput.mapSettings.autoFitToDataBounds;
+    }
+
+    if (!this._attributes || !this._attributes.mapStateJSON) {
+      return false;
+    }
+
+    try {
+      const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+      if (mapState?.settings.autoFitToDataBounds !== undefined) {
+        return mapState.settings.autoFitToDataBounds;
+      }
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+    }
+
+    return false;
+  }
+
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
     return this._sharingSavedObjectProps;
   }
@@ -322,11 +434,13 @@ export class SavedMap {
     newTags,
     saveByReference,
     dashboardId,
+    history,
   }: OnSaveProps & {
     returnToOrigin?: boolean;
     newTags?: string[];
     saveByReference: boolean;
     dashboardId?: string | null;
+    history: ScopedHistory;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling save');
@@ -340,7 +454,7 @@ export class SavedMap {
     if (newTags) {
       this._tags = newTags;
     }
-    this._syncAttributesWithStore();
+    await this._syncAttributesWithStore();
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
@@ -414,8 +528,8 @@ export class SavedMap {
     });
 
     getCoreChrome().docTitle.change(newTitle);
-    this.setBreadcrumbs();
-    goToSpecifiedPath(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
+    this.setBreadcrumbs(history);
+    history.push(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
 
     if (this._onSaveCallback) {
       this._onSaveCallback();
@@ -424,13 +538,16 @@ export class SavedMap {
     return;
   }
 
-  private _syncAttributesWithStore() {
+  private async _syncAttributesWithStore() {
     const state: MapStoreState = this._store.getState();
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
     this._attributes!.layerListJSON = JSON.stringify(layerListConfigOnly);
 
+    const mapSettings = getMapSettings(state);
+
     this._attributes!.mapStateJSON = JSON.stringify({
+      adHocDataViews: await this._getAdHocDataViews(),
       zoom: getMapZoom(state),
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
@@ -440,12 +557,34 @@ export class SavedMap {
       },
       query: getQuery(state),
       filters: getFilters(state),
-      settings: getMapSettings(state),
+      settings: {
+        ...mapSettings,
+        // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
+        customIcons: mapSettings.customIcons.map((icon) => {
+          return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+        }),
+      },
     } as SerializedMapState);
 
     this._attributes!.uiStateJSON = JSON.stringify({
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
     } as SerializedUiState);
+  }
+
+  private async _getAdHocDataViews() {
+    const dataViewIds: string[] = [];
+    getLayerList(this._store.getState()).forEach((layer) => {
+      dataViewIds.push(...layer.getIndexPatternIds());
+    });
+
+    const dataViews = await getIndexPatternsFromIds(_.uniq(dataViewIds));
+    return dataViews
+      .filter((dataView) => {
+        return !dataView.isPersisted();
+      })
+      .map((dataView) => {
+        return dataView.toSpec(false);
+      });
   }
 }

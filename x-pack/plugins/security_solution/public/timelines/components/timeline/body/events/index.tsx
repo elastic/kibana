@@ -8,20 +8,19 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 
-import { inputsModel } from '../../../../../common/store';
-import { BrowserFields } from '../../../../../common/containers/source';
-import {
+import type { ControlColumnProps } from '../../../../../../common/types';
+import type { inputsModel } from '../../../../../common/store';
+import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import {
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  ControlColumnProps,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { OnRowSelected } from '../../events';
+import type { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';
@@ -31,7 +30,6 @@ const ARIA_ROW_INDEX_OFFSET = 2;
 
 interface Props {
   actionsColumnWidth: number;
-  browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   data: TimelineItem[];
@@ -55,7 +53,6 @@ interface Props {
 
 const EventsComponent: React.FC<Props> = ({
   actionsColumnWidth,
-  browserFields,
   columnHeaders,
   containerRef,
   data,
@@ -81,7 +78,6 @@ const EventsComponent: React.FC<Props> = ({
       <StatefulEvent
         actionsColumnWidth={actionsColumnWidth}
         ariaRowindex={i + ARIA_ROW_INDEX_OFFSET}
-        browserFields={browserFields}
         columnHeaders={columnHeaders}
         containerRef={containerRef}
         event={event}

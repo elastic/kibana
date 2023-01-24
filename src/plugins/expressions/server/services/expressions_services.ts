@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { ExpressionsService as CommonExpressionsService } from '../../common';
 import { getUiSettingFn } from '../expression_functions';
 

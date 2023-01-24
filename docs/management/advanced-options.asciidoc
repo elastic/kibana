@@ -89,12 +89,13 @@ Set this property to `false` to prevent the filter editor and KQL autocomplete
 from suggesting values for fields.
 
 [[autocomplete-valuesuggestionmethod]]`autocomplete:valueSuggestionMethod`::
-When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range.
-When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
-<<kibana-concepts-searching-your-data, Learn more>>.
+When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range. (Note that this API is incompatible with {ref}/document-level-security.html[Document-Level-Security].)
+When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is
+slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
 
 [[autocomplete-usetimerange]]`autocomplete:useTimeRange`::
-Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. <<kibana-concepts-searching-your-data, Learn more>>.
+Disable this property to get autocomplete suggestions from
+your full dataset, rather than from the current time range.
 
 [[filters-pinnedbydefault]]`filters:pinnedByDefault`::
 Set this property to `true` to make filters have a global state (be pinned) by
@@ -214,7 +215,7 @@ When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
 When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
-_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<defer-loading-panels-below-the-fold,Improve dashboard loading time>>.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
 When enabled, provides access to the experimental *Labs* features for *Dashboard*.
@@ -285,8 +286,8 @@ in the current data view is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover-samplesize]]`discover:sampleSize`::
-The number of rows to show in the *Discover* table.
+[[discover:enableSql]]`discover:enableSql`::
+experimental[] Allows SQL queries for search.
 
 [[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
@@ -294,8 +295,14 @@ Specifies the maximum number of fields to show in the document column of the *Di
 [[discover-modify-columns-on-switch]]`discover:modifyColumnsOnSwitch`::
 When enabled, removes the columns that are not in the new data view.
 
+[[discover-row-height-option]]`discover:rowHeightOption`::
+The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.
+
+[[discover-sampleRowsPerPage]]`discover:sampleRowsPerPage`::
+Limits the number of rows per page in the document table.
+
 [[discover-sample-size]]`discover:sampleSize`::
-Specifies the number of rows to display in the *Discover* table.
+Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
 Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
@@ -306,8 +313,15 @@ When disabled, *Discover* loads fields using the {es} search API's
 Controls whether a search is executed when *Discover* first loads. This setting
 does not have an effect when loading a saved search.
 
+[[discover:showFieldStatistics]]`discover:showFieldStatistics`::
+beta[] Enables the Field statistics view. Examine details such as
+the minimum and maximum values of a numeric field or a map of a geo field.
+
 [[discover:showMultiFields]]`discover:showMultiFields`::
-When enabled, displays multi-fields in the expanded document view.
+Controls the display of multi-fields in the expanded document view.
+
+[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
+To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.
 
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based data views.
@@ -323,6 +337,10 @@ slows requests when working on big documents.
 Controls the way the document table looks and works.
 To use the new *Document Explorer* instead of the classic view, turn off this option.
 The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
+
+[[truncate-max-height]]`truncate:maxHeight`::
+The maximum height that a cell in a table can occupy. To disable truncation, set to 0.
+
 
 [float]
 [[kibana-ml-settings]]
@@ -347,7 +365,7 @@ must contain `from` and `to` values (see
 [horizontal]
 [[notifications-banner]]`notifications:banner`::
 A custom banner intended for temporary notices to all users. Supports
-https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown].
+https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax[Markdown].
 
 [[notifications-lifetime-banner]]`notifications:lifetime:banner`::
 The duration, in milliseconds, for banner notification displays. The default
@@ -373,8 +391,20 @@ value is 10000.
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
+[[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
+preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
+
+[[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
+Enables the comparison feature in the APM app.
+
+[[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
+Enables the Infrastructure view in the APM app.
+
 [[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
 When enabled, allows you to inspect {es} queries in API responses.
+
+[[observability-apm-enable-service-groups]]`observability:enableServiceGroups`::
+preview:[] When enabled, allows users to create Service Groups from the APM Service Inventory page.
 
 [float]
 [[kibana-reporting-settings]]
@@ -429,9 +459,8 @@ Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
 
-[[search-timeout]]`search:timeout`:: Change the maximum timeout for a search
-session or set to 0 to disable the timeout and allow queries to run to
-completion.
+[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for a search
+session. To disable the timeout and allow queries to run to completion, set to 0. The default is 600,000 ms, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]
@@ -448,6 +477,9 @@ events.
 [[securitysolution-threatindices]]`securitySolution:defaultThreatIndex`::
 A comma-delimited list of Threat Intelligence indices from which the {security-app} collects indicators.
 
+[[securitysolution-enableCcsWarning]]`securitySolution:enableCcsWarning`:: Enables
+privilege check warnings in rules for CCS indices.
+
 [[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
 the security news feed on the Security *Overview* page.
 
@@ -463,7 +495,10 @@ The URL from which the security news feed content is retrieved.
 The default refresh interval for the Security time filter, in milliseconds.
 
 [[security-solution-rules-table-refresh]]`securitySolution:rulesTableRefresh`::
-The default period of time in the Security time filter.
+Enables auto refresh on the rules and monitoring tables, in milliseconds.
+
+[[securitySolution-showRelatedIntegrations]]`securitySolution:showRelatedIntegrations`::
+Shows related integrations on the rules and monitoring tables.
 
 [[securitysolution-timedefaults]]`securitySolution:timeDefaults`::
 The default period of time in the Security time filter.
@@ -478,13 +513,6 @@ The default index when using the `.es()` query.
 [[timelion-estimefield]]`timelion:es.timefield`::
 The default field containing a timestamp when using the `.es()` query.
 
-[[timelion-graphite-url]]`timelion:graphite.url`::
-experimental:[]
-Used with graphite queries, this is the URL of your graphite host
-in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can
-be selected from an allow-list configured in the `kibana.yml` under
-`timelion.graphiteUrls`.
-
 [[timelion-maxbuckets]]`timelion:max_buckets`::
 The maximum number of buckets a single data source can return. This value is
 used for calculating automatic intervals in visualizations.
@@ -492,17 +520,9 @@ used for calculating automatic intervals in visualizations.
 [[timelion-mininterval]]`timelion:min_interval`::
 The smallest interval to calculate when using "auto".
 
-[[timelion-quandlkey]]`timelion:quandl.key`::
-experimental:[]
-Used with quandl queries, this is your API key from
-https://www.quandl.com/[www.quandl.com].
-
 [[timelion-targetbuckets]]`timelion:target_buckets`::
 Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
-
-[[timelion-legacyChartsLibrary]]`timelion:legacyChartsLibrary`::
-Enables the legacy charts library for timelion charts in Visualize.
 
 
 [float]
@@ -511,7 +531,7 @@ Enables the legacy charts library for timelion charts in Visualize.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported as of 8.0.**
+**This setting is deprecated and will not be supported in a future version.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
@@ -520,15 +540,16 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
-[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
-
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
+
+[[lens-sampling]]`lens:useFieldExistenceSampling`::
+**This setting is deprecated and will not be supported as of 8.6.**
+If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.
 
 [float]
 [[kibana-telemetry-settings]]

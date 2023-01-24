@@ -26,9 +26,10 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiDescriptionList,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocLinksStart } from '../../../../../core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
@@ -66,10 +67,12 @@ function GroupSelection(props: GroupSelectionProps) {
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="groupModalHeader">
-          <FormattedMessage
-            id="visualizations.newVisWizard.title"
-            defaultMessage="New visualization"
-          />
+          <h1>
+            <FormattedMessage
+              id="visualizations.newVisWizard.title"
+              defaultMessage="New visualization"
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="visNewVisDialogGroupSelection__body">
@@ -94,6 +97,7 @@ function GroupSelection(props: GroupSelectionProps) {
                 <EuiCard
                   titleSize="xs"
                   layout="horizontal"
+                  display="transparent"
                   onClick={() => props.toggleGroups(false)}
                   title={
                     <span data-test-subj="visGroupAggBasedTitle">
@@ -111,7 +115,6 @@ function GroupSelection(props: GroupSelectionProps) {
                     }
                   )}
                   icon={<EuiIcon type="heatmap" size="xl" color="success" />}
-                  className="visNewVisDialog__groupsCard"
                 >
                   <EuiLink
                     data-test-subj="visGroupAggBasedExploreLink"
@@ -185,6 +188,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
     <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
       <EuiCard
         titleSize="xs"
+        hasBorder={true}
         title={
           <span data-test-subj="visTypeTitle">
             {'titleInWizard' in visType && visType.titleInWizard
@@ -204,7 +208,6 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         }
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
-        className="visNewVisDialog__groupsCard"
       />
     </EuiFlexItem>
   );
@@ -224,15 +227,19 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
         <EuiIcon type={visType.icon || 'empty'} size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
+            <EuiLink
+              data-test-subj={`visType-${visType.name}`}
+              data-vis-stage={visType.stage}
+              onClick={onClick}
+            >
               {'titleInWizard' in visType && visType.titleInWizard
                 ? visType.titleInWizard
                 : visType.title}
             </EuiLink>
           </EuiFlexItem>
-          {visType.stage === 'experimental' && (
+          {visType.stage === 'experimental' && !visType.isDeprecated ? (
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 iconType="beaker"
@@ -245,6 +252,14 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
                 })}
               />
             </EuiFlexItem>
+          ) : (
+            visType.isDeprecated && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  <FormattedMessage id="visualizations.deprecatedTag" defaultMessage="Deprecated" />
+                </EuiBadge>
+              </EuiFlexItem>
+            )
           )}
         </EuiFlexGroup>
         <EuiText color="subdued" size="s">

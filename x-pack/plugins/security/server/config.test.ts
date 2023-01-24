@@ -14,7 +14,7 @@ jest.mock('@kbn/utils', () => ({
   getLogsPath: () => '/mock/kibana/logs/path',
 }));
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { ConfigSchema, createConfig } from './config';
 
@@ -1412,6 +1412,40 @@ describe('config schema', () => {
         '[session.cleanupInterval]: the value must be greater or equal to 10 seconds.'
       );
     });
+
+    it('should throw error if xpack.security.session.concurrentSessions.maxSessions is less than 1 or greater than 1000', () => {
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: -1 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 0 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+      );
+
+      expect(() =>
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 1001 } } })
+      ).toThrow(
+        '[session.concurrentSessions.maxSessions]: Value must be equal to or lower than [1000].'
+      );
+    });
+
+    it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
+      expect(ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session)
+        .toMatchInlineSnapshot(`
+        Object {
+          "cleanupInterval": "PT1H",
+          "concurrentSessions": Object {
+            "maxSessions": 3,
+          },
+          "idleTimeout": "PT8H",
+          "lifespan": "P30D",
+        }
+      `);
+    });
   });
 });
 
@@ -1463,6 +1497,40 @@ describe('createConfig()', () => {
                           ],
                         ]
                 `);
+  });
+
+  it('should log a warning if both concurrent sessions limit and HTTP authentication are configured', async () => {
+    const logger = loggingSystemMock.create();
+    const config = createConfig(
+      ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }),
+      logger.get(),
+      { isTLSEnabled: true }
+    );
+    expect(config.session.concurrentSessions?.maxSessions).toBe(3);
+    expect(config.authc.http.enabled).toBe(true);
+
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.",
+        ],
+      ]
+    `);
+
+    loggingSystemMock.clear(logger);
+
+    const configWithoutHTTPAuth = createConfig(
+      ConfigSchema.validate({
+        session: { concurrentSessions: { maxSessions: 3 } },
+        authc: { http: { enabled: false } },
+      }),
+      logger.get(),
+      { isTLSEnabled: true }
+    );
+    expect(configWithoutHTTPAuth.session.concurrentSessions?.maxSessions).toBe(3);
+    expect(configWithoutHTTPAuth.authc.http.enabled).toBe(false);
+
+    expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
@@ -2202,6 +2270,32 @@ describe('createConfig()', () => {
           "lifespan": "PT0.546S",
         }
       `);
+    });
+  });
+
+  describe('Global Access Agreement', () => {
+    it('should require `message` for globally configured `accessAgreement`', () => {
+      expect(() => {
+        createConfig(
+          ConfigSchema.validate({
+            accessAgreement: {},
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: true }
+        );
+      }).toThrow('[accessAgreement.message]: expected value of type [string] but got [undefined]');
+    });
+
+    it('should accept string `message` for globally configured `accessAgreement`', () => {
+      expect(
+        createConfig(
+          ConfigSchema.validate({
+            accessAgreement: { message: 'Foo' },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: true }
+        )?.accessAgreement?.message
+      ).toEqual('Foo');
     });
   });
 });

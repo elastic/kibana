@@ -6,8 +6,9 @@
  */
 
 import { AgentGrouper } from './agent_grouper';
-import { AGENT_GROUP_KEY, Group, GroupedAgent, GroupOptionValue } from './types';
-import uuid from 'uuid';
+import type { Group, GroupedAgent, GroupOptionValue } from './types';
+import { AGENT_GROUP_KEY } from './types';
+import { v4 as uuidv4 } from 'uuid';
 import { ALL_AGENTS_LABEL } from './translations';
 
 type GroupData = {
@@ -16,7 +17,7 @@ type GroupData = {
 export function genGroup(name: string) {
   return {
     name,
-    id: uuid.v4(),
+    id: uuidv4(),
     size: 5,
   };
 }
@@ -40,6 +41,7 @@ export function genAgent(policyId: string, hostname: string, id: string): Groupe
     },
   };
 }
+
 export const groupData: GroupData = {
   [AGENT_GROUP_KEY.Platform]: new Array(3).fill('test platform ').map((el, i) => genGroup(el + i)),
   [AGENT_GROUP_KEY.Policy]: new Array(3).fill('test policy ').map((el, i) => genGroup(el + i)),
@@ -109,6 +111,7 @@ describe('AgentGrouper', () => {
         });
       };
     }
+
     it('should generate policy options', genGroupTest(AGENT_GROUP_KEY.Policy, 'policy'));
     it('should generate platform options', genGroupTest(AGENT_GROUP_KEY.Platform, 'platform'));
   });
@@ -116,10 +119,10 @@ describe('AgentGrouper', () => {
   describe('agents', () => {
     it('should generate agent options', () => {
       const agentGrouper = new AgentGrouper();
-      const policyId = uuid.v4();
+      const policyId = uuidv4();
       const agentData: GroupedAgent[] = [
-        genAgent(policyId, `agent host 1`, uuid.v4()),
-        genAgent(policyId, `agent host 2`, uuid.v4()),
+        genAgent(policyId, `agent host 1`, uuidv4()),
+        genAgent(policyId, `agent host 2`, uuidv4()),
       ];
       agentGrouper.updateGroup(AGENT_GROUP_KEY.Agent, agentData);
 

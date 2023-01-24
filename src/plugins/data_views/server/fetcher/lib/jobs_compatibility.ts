@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { RollupGetRollupIndexCapsRollupJobSummary as RollupJobSummary } from '@elastic/elasticsearch/lib/api/types';
 import { isEqual } from 'lodash';
+import { AggregationRestrictions } from '../../../common';
+import { RollupIndexCapability } from './map_capabilities';
 
 /**
  * Checks if given job configs are compatible by attempting to merge them
@@ -32,17 +35,19 @@ export function areJobsCompatible(jobs = []) {
  * by aggregation, then by field
  *
  * @param jobs
- * @returns {{}}
+ * @returns {{ aggs: Dictionary<unknown> }}
  */
-export function mergeJobConfigurations(jobs = []) {
+export function mergeJobConfigurations(
+  jobs: RollupJobSummary[] = []
+): RollupIndexCapability[string] {
   if (!jobs || !Array.isArray(jobs) || !jobs.length) {
     throw new Error('No capabilities available');
   }
 
-  const allAggs: { [key: string]: any } = {};
+  const allAggs: RollupIndexCapability[string]['aggs'] = {};
 
   // For each job, look through all of its fields
-  jobs.forEach((job: { fields: { [key: string]: any } }) => {
+  jobs.forEach((job) => {
     const fields = job.fields;
     const fieldNames = Object.keys(fields);
 
@@ -51,7 +56,7 @@ export function mergeJobConfigurations(jobs = []) {
       const fieldAggs = fields[fieldName];
 
       // Look through each field's capabilities (aggregations)
-      fieldAggs.forEach((agg: { agg: string; interval: string }) => {
+      fieldAggs.forEach((agg) => {
         const aggName = agg.agg;
         const aggDoesntExist = !allAggs[aggName];
         const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
@@ -62,7 +67,7 @@ export function mergeJobConfigurations(jobs = []) {
         // date histogram field.
         if (aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
           allAggs[aggName] = allAggs[aggName] || {};
-          allAggs[aggName][fieldName] = { ...agg };
+          allAggs[aggName][fieldName] = { ...agg } as AggregationRestrictions[string];
         }
         // If aggregation already exists, attempt to merge it
         else {
@@ -73,6 +78,7 @@ export function mergeJobConfigurations(jobs = []) {
             // new interval and existing interval
             case 'histogram':
               // TODO: Fix this with LCD algorithm
+              // @ts-expect-error - Property 'interval' does not exist on type 'RollupGetRollupIndexCapsRollupJobSummaryField'
               const intervals = [fieldAgg.interval, agg.interval].sort((a, b) => a - b);
               const isMultiple = intervals[1] % intervals[0] === 0;
               fieldAgg.interval = isMultiple ? intervals[1] : intervals[0] * intervals[1];

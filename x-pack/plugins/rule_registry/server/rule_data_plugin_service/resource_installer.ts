@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { firstValueFrom, type Observable } from 'rxjs';
 import { get, isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -20,16 +21,17 @@ import { technicalComponentTemplate } from '../../common/assets/component_templa
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
-import { IndexInfo } from './index_info';
+import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-
+const TOTAL_FIELDS_LIMIT = 1900;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
+  pluginStop$: Observable<void>;
 }
 
 export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
@@ -41,6 +43,7 @@ export class ResourceInstaller {
     installer: () => Promise<void>
   ): Promise<void> {
     try {
+      let timeoutId: NodeJS.Timeout;
       const installResources = async (): Promise<void> => {
         const { logger, isWriteEnabled } = this.options;
         if (!isWriteEnabled) {
@@ -51,14 +54,24 @@ export class ResourceInstaller {
         logger.info(`Installing ${resources}`);
         await installer();
         logger.info(`Installed ${resources}`);
+
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
       };
 
       const throwTimeoutException = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
             reject(new Error(msg));
           }, INSTALLATION_TIMEOUT);
+
+          firstValueFrom(this.options.pluginStop$).then(() => {
+            clearTimeout(timeoutId);
+            const msg = 'Server is stopping; must stop all async operations';
+            reject(new Error(msg));
+          });
         });
       };
 
@@ -82,25 +95,32 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { getResourceName } = this.options;
+      const { getResourceName, logger } = this.options;
 
-      // We can install them in parallel
-      await Promise.all([
-        this.createOrUpdateLifecyclePolicy({
-          name: getResourceName(DEFAULT_ILM_POLICY_ID),
-          body: defaultLifecyclePolicy,
-        }),
+      try {
+        // We can install them in parallel
+        await Promise.all([
+          this.createOrUpdateLifecyclePolicy({
+            name: getResourceName(DEFAULT_ILM_POLICY_ID),
+            body: defaultLifecyclePolicy,
+          }),
 
-        this.createOrUpdateComponentTemplate({
-          name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-          body: technicalComponentTemplate,
-        }),
+          this.createOrUpdateComponentTemplate({
+            name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            body: technicalComponentTemplate,
+          }),
 
-        this.createOrUpdateComponentTemplate({
-          name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
-          body: ecsComponentTemplate,
-        }),
-      ]);
+          this.createOrUpdateComponentTemplate({
+            name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
+            body: ecsComponentTemplate,
+          }),
+        ]);
+      } catch (err) {
+        logger.error(
+          `Error installing common resources in RuleRegistry ResourceInstaller - ${err.message}`
+        );
+        throw err;
+      }
     });
   }
 
@@ -149,8 +169,30 @@ export class ResourceInstaller {
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
+    // Update total field limit setting of found indices
+    await Promise.all(concreteIndices.map((item) => this.updateTotalFieldLimitSetting(item)));
     // Update mappings of the found indices.
     await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
+  }
+
+  private async updateTotalFieldLimitSetting({ index, alias }: ConcreteIndexInfo) {
+    const { logger, getClusterClient } = this.options;
+    const clusterClient = await getClusterClient();
+
+    try {
+      await clusterClient.indices.putSettings({
+        index,
+        body: {
+          'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+        },
+      });
+      return;
+    } catch (err) {
+      logger.error(
+        `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   // NOTE / IMPORTANT: Please note this will update the mappings of backing indices but
@@ -160,10 +202,25 @@ export class ResourceInstaller {
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
-    const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
-      name: index,
-    });
+
+    let simulatedIndexMapping: estypes.IndicesSimulateIndexTemplateResponse;
+    try {
+      simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
+        name: index,
+      });
+    } catch (err) {
+      logger.error(
+        `Ignored PUT mappings for alias ${alias}; error generating simulated mappings: ${err.message}`
+      );
+      return;
+    }
+
     const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
+
+    if (simulatedMapping == null) {
+      logger.error(`Ignored PUT mappings for alias ${alias}; simulated mappings were empty`);
+      return;
+    }
 
     try {
       await clusterClient.indices.putMapping({
@@ -311,12 +368,12 @@ export class ResourceInstaller {
         template: {
           settings: {
             hidden: true,
-            // @ts-expect-error type only defines nested structure
             'index.lifecycle': {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1700,
+            'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+            auto_expand_replicas: '0-1',
           },
           mappings: {
             dynamic: false,
@@ -362,6 +419,9 @@ export class ResourceInstaller {
         },
       });
     } catch (err) {
+      logger.error(
+        `Error creating index ${initialIndexName} as the write index for alias ${primaryNamespacedAlias} in RuleRegistry ResourceInstaller: ${err.message}`
+      );
       // If the index already exists and it's the write index for the alias,
       // something else created it so suppress the error. If it's not the write
       // index, that's bad, throw an error.
@@ -447,6 +507,9 @@ export class ResourceInstaller {
         return createConcreteIndexInfo({});
       }
 
+      logger.error(
+        `Error fetching concrete indices for ${indexPatternForBackingIndices} in RuleRegistry ResourceInstaller - ${err.message}`
+      );
       // A non-404 error is a real problem so we re-throw.
       throw err;
     }

@@ -6,6 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
+import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
@@ -16,15 +17,14 @@ import {
   MATCHED_TYPE,
   FEED_NAME,
 } from '../../../../../common/cti/constants';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import {
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
+import type {
   CtiEnrichment,
   CtiEnrichmentIdentifiers,
   EventFields,
-  isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
+import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
@@ -45,7 +45,7 @@ export const parseExistingEnrichments = (
   return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
     (enrichments, enrichmentString) => {
       try {
-        const enrichment = getDataFromSourceHits(JSON.parse(enrichmentString));
+        const enrichment = getDataFromFieldsHits(JSON.parse(enrichmentString));
         enrichments.push(enrichment);
       } catch (e) {
         // omit failed parse
@@ -126,3 +126,11 @@ export const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}

@@ -5,31 +5,41 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
-import { IRuleDataClient } from '../rule_data_client';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/common';
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
-import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
+import { createLifecycleExecutor, LifecycleAlertServices } from './create_lifecycle_executor';
+import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 
 export const createLifecycleRuleTypeFactory =
   ({ logger, ruleDataClient }: { logger: Logger; ruleDataClient: IRuleDataClient }) =>
   <
-    TParams extends AlertTypeParams,
+    TParams extends RuleTypeParams,
+    TAlertInstanceState extends AlertInstanceState,
     TAlertInstanceContext extends AlertInstanceContext,
-    TServices extends {
-      alertWithLifecycle: LifecycleAlertService<Record<string, any>, TAlertInstanceContext, string>;
-    }
+    TActionGroupIds extends string,
+    TServices extends LifecycleAlertServices<
+      TAlertInstanceState,
+      TAlertInstanceContext,
+      TActionGroupIds
+    >
   >(
-    type: AlertTypeWithExecutor<Record<string, any>, TParams, TAlertInstanceContext, TServices>
-  ): AlertTypeWithExecutor<Record<string, any>, TParams, TAlertInstanceContext, any> => {
+    type: AlertTypeWithExecutor<TAlertInstanceState, TParams, TAlertInstanceContext, TServices>
+  ): AlertTypeWithExecutor<TAlertInstanceState, TParams, TAlertInstanceContext, any> => {
     const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
+    const createGetSummarizedAlerts = createGetSummarizedAlertsFn({
+      ruleDataClient,
+      useNamespace: false,
+      isLifecycleAlert: true,
+    });
     const executor = createBoundLifecycleExecutor<
       TParams,
-      AlertTypeState,
+      RuleTypeState,
       AlertInstanceState,
       TAlertInstanceContext,
       string
@@ -37,5 +47,6 @@ export const createLifecycleRuleTypeFactory =
     return {
       ...type,
       executor: executor as any,
+      getSummarizedAlerts: createGetSummarizedAlerts(),
     };
   };

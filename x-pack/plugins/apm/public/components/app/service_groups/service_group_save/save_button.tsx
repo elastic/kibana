@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { CreateButton } from './create_button';
+import { EditButton } from './edit_button';
 import { SaveGroupModal } from './save_modal';
 
 export function ServiceGroupSaveButton() {
@@ -32,16 +32,18 @@ export function ServiceGroupSaveButton() {
   );
   const savedServiceGroup = data?.serviceGroup;
 
+  function onClick() {
+    setIsModalVisible((state) => !state);
+  }
+
   return (
     <>
-      <EuiButton
-        iconType={isGroupEditMode ? 'pencil' : 'plusInCircle'}
-        onClick={async () => {
-          setIsModalVisible((state) => !state);
-        }}
-      >
-        {isGroupEditMode ? EDIT_GROUP_LABEL : CREATE_GROUP_LABEL}
-      </EuiButton>
+      {isGroupEditMode ? (
+        <EditButton onClick={onClick} />
+      ) : (
+        <CreateButton onClick={onClick} />
+      )}
+
       {isModalVisible && (
         <SaveGroupModal
           savedServiceGroup={savedServiceGroup}
@@ -53,12 +55,3 @@ export function ServiceGroupSaveButton() {
     </>
   );
 }
-
-const CREATE_GROUP_LABEL = i18n.translate(
-  'xpack.apm.serviceGroups.createGroupLabel',
-  { defaultMessage: 'Create group' }
-);
-const EDIT_GROUP_LABEL = i18n.translate(
-  'xpack.apm.serviceGroups.editGroupLabel',
-  { defaultMessage: 'Edit group' }
-);

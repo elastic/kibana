@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { asArrayIfExists } from '../../../../../common/lib/helpers';
 import {
   TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
@@ -19,7 +19,7 @@ import { ID_FIELD_NAME } from '../../../../../common/components/event_details/ev
 import {
   DESTINATION_IP_FIELD_NAME,
   SOURCE_IP_FIELD_NAME,
-} from '../../../../../network/components/ip';
+} from '../../../../../explore/network/components/ip';
 import { JA3_HASH_FIELD_NAME } from '../../../ja3_fingerprint';
 import { Netflow } from '../../../netflow';
 import {
@@ -29,7 +29,7 @@ import {
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
-} from '../../../../../network/components/port/helpers';
+} from '../../../../../explore/network/components/port/helpers';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -41,13 +41,13 @@ import {
   SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME,
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
-} from '../../../../../network/components/source_destination/geo_fields';
+} from '../../../../../explore/network/components/source_destination/geo_fields';
 import {
   DESTINATION_BYTES_FIELD_NAME,
   DESTINATION_PACKETS_FIELD_NAME,
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
-} from '../../../../../network/components/source_destination/source_destination_arrows';
+} from '../../../../../explore/network/components/source_destination/source_destination_arrows';
 import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
@@ -55,7 +55,7 @@ import {
   NETWORK_PACKETS_FIELD_NAME,
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../../../network/components/source_destination/field_names';
+} from '../../../../../explore/network/components/source_destination/field_names';
 
 interface NetflowRendererProps {
   data: Ecs;

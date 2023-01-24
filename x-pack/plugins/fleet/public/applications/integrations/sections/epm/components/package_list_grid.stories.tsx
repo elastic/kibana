@@ -24,12 +24,34 @@ const args: Args = {
   isLoading: false,
   showMissingIntegrationMessage: false,
 };
+const categories = [
+  {
+    title: 'Category One',
+    id: 'category_one',
+    count: 2,
+  },
+  {
+    title: 'Category Two',
+    id: 'category_two',
+    count: 3,
+  },
+  {
+    title: 'Web',
+    id: 'web',
+    count: 1,
+  },
+];
 
 export const EmptyList = (props: Args) => (
   <PackageListGrid
     list={[]}
-    onSearchChange={action('onSearchChange')}
-    setSelectedCategory={action('setSelectedCategory')}
+    searchTerm=""
+    setSearchTerm={action('setSearchTerm')}
+    setCategory={action('setCategory')}
+    categories={categories}
+    selectedCategory=""
+    setUrlandReplaceHistory={action('setUrlandReplaceHistory')}
+    setUrlandPushHistory={action('setUrlandPushHistory')}
     {...props}
   />
 );
@@ -46,8 +68,8 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_two'],
       },
       {
         title: 'Package Two',
@@ -55,22 +77,22 @@ export const List = (props: Args) => (
         name: 'aws',
         release: 'beta',
         id: 'package_two',
-        version: '1.0.0',
+        version: '1.0.0-beta',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_one'],
       },
       {
         title: 'Package Three',
         description: 'Not Installed Description',
         name: 'azure',
-        release: 'experimental',
+        release: 'preview',
         id: 'package_three',
-        version: '1.0.0',
+        version: '0.1.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
+        integration: 'integration',
         categories: ['web'],
       },
       {
@@ -82,8 +104,8 @@ export const List = (props: Args) => (
         version: '1.0.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_one'],
       },
       {
         title: 'Package Five',
@@ -91,27 +113,32 @@ export const List = (props: Args) => (
         name: 'unknown',
         release: 'beta',
         id: 'package_five',
-        version: '1.0.0',
+        version: '1.0.0-beta',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_two'],
       },
       {
         title: 'Package Six',
         description: 'Installed Description',
         name: 'kibana',
-        release: 'experimental',
+        release: 'preview',
         id: 'package_six',
-        version: '1.0.0',
+        version: '0.1.0',
         url: 'https://example.com',
         icons: [],
-        integration: 'integation',
-        categories: ['web'],
+        integration: 'integration',
+        categories: ['category_two'],
       },
     ]}
-    onSearchChange={action('onSearchChange')}
-    setSelectedCategory={action('setSelectedCategory')}
+    searchTerm=""
+    setSearchTerm={action('setSearchTerm')}
+    setCategory={action('setCategory')}
+    categories={categories}
+    selectedCategory=""
+    setUrlandReplaceHistory={action('setUrlandReplaceHistory')}
+    setUrlandPushHistory={action('setUrlandPushHistory')}
     {...props}
   />
 );

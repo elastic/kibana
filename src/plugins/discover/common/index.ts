@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const APP_ID = 'discover';
+export const PLUGIN_ID = 'discover';
+export const APP_ICON = 'discoverApp';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
+export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
@@ -25,3 +27,9 @@ export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
 export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
+export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
+export const SHOW_LEGACY_FIELD_TOP_VALUES = 'discover:showLegacyFieldTopValues';
+export const ENABLE_SQL = 'discover:enableSql';
+
+export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './locator';
+export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';

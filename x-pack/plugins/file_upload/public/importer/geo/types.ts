@@ -7,13 +7,15 @@
 
 import { Feature } from 'geojson';
 import { ReactNode } from 'react';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { IImporter } from '../types';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import type { ImportFailure } from '../../../common/types';
 
 export interface GeoFilePreview {
   features: Feature[];
   hasPoints: boolean;
   hasShapes: boolean;
+  invalidFeatures: ImportFailure[];
   previewCoverage: number;
 }
 
@@ -23,4 +25,5 @@ export interface GeoFileImporter extends IImporter {
   previewFile(rowLimit?: number, sizeLimit?: number): Promise<GeoFilePreview>;
   renderEditor(onChange: () => void): ReactNode;
   setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE): void;
+  setSmallChunks(smallChunks: boolean): void;
 }

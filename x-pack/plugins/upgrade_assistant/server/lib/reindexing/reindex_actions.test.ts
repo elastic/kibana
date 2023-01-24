@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
 import {
@@ -17,7 +16,6 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
@@ -52,7 +50,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(MAJOR_VERSION);
+      versionService.setup('8.0.0');
       client.create.mockResolvedValue();
     });
 
@@ -258,7 +256,6 @@ describe('ReindexActions', () => {
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResponse({
         myIndex: {
-          // @ts-expect-error not full interface
           settings: { 'index.mySetting': '1' },
           mappings: {},
         },

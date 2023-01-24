@@ -10,17 +10,18 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
-import { AppMountParameters } from '../../../../../../../src/core/public';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useVariation } from '../../../common/components/utils';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_DATA_PATH } from '../../../../common/constants';
-import { isDetectionsPath } from '../../../../public/helpers';
+import { ADD_DATA_PATH, ADD_THREAT_INTELLIGENCE_DATA_PATH } from '../../../../common/constants';
+import { isDetectionsPath, isThreatIntelligencePath } from '../../../helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -38,12 +39,13 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const portalNode = useMemo(() => createPortalNode(), []);
+    const portalNode = useMemo(() => createHtmlPortalNode(), []);
     const {
       theme,
       http: {
         basePath: { prepend },
       },
+      cloudExperiments,
     } = useKibana().services;
     const { pathname } = useLocation();
 
@@ -55,7 +57,18 @@ export const GlobalHeader = React.memo(
     const sourcererScope = getScopeFromPath(pathname);
     const showSourcerer = showSourcererByPath(pathname);
 
-    const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
+    const integrationsUrl = isThreatIntelligencePath(pathname)
+      ? ADD_THREAT_INTELLIGENCE_DATA_PATH
+      : ADD_DATA_PATH;
+    const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(integrationsUrl);
+    useVariation(
+      cloudExperiments,
+      'security-solutions.add-integrations-url',
+      integrationsUrl,
+      setAddIntegrationsUrl
+    );
+
+    const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
 
     useEffect(() => {
       setHeaderActionMenu((element) => {
@@ -77,6 +90,7 @@ export const GlobalHeader = React.memo(
               <MlPopover />
             </EuiHeaderSectionItem>
           )}
+
           <EuiHeaderSectionItem>
             <EuiHeaderLinks>
               <EuiHeaderLink

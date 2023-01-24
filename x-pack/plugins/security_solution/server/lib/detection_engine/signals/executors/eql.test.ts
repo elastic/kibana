@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
-import { eqlExecutor } from './eql';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
-import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import dateMath from '@kbn/datemath';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { EqlRuleParams } from '../../schemas/rule_schemas';
+import type { EqlRuleParams } from '../../rule_schema';
+import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { eqlExecutor } from './eql';
 
 jest.mock('../../routes/index/get_index_version');
 
 describe('eql_executor', () => {
   const version = '8.0.0';
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
+  let alertServices: RuleExecutorServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEqlRuleParams();
   const eqlCompleteRule = getCompleteRuleMock<EqlRuleParams>(params);
@@ -31,14 +31,13 @@ describe('eql_executor', () => {
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
-  const searchAfterSize = 7;
 
   beforeEach(() => {
-    alertServices = alertsMock.createAlertServices();
-    logger = loggingSystemMock.createLogger();
-    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue({
+    jest.clearAllMocks();
+    alertServices = alertsMock.createRuleExecutorServices();
+    alertServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
       hits: {
-        total: { value: 10 },
+        total: { relation: 'eq', value: 10 },
         events: [],
       },
     });
@@ -46,21 +45,26 @@ describe('eql_executor', () => {
 
   describe('eqlExecutor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
-      const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
-      const response = await eqlExecutor({
+      const result = await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
         completeRule: eqlCompleteRule,
         tuple,
-        exceptionItems,
-        experimentalFeatures: allowedExperimentalValues,
+        ruleExecutionLogger,
         services: alertServices,
         version,
-        logger,
-        searchAfterSize,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
-      expect(response.warningMessages.length).toEqual(1);
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });

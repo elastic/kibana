@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETTIMERANGE } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export const getTimeRange = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   layout: Layout
 ): Promise<string | null> => {
-  const span = apm.startSpan('get_time_range', 'read');
-  logger.debug('getting timeRange');
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'looking for time range',
+    Actions.GET_TIMERANGE,
+    'read'
+  );
 
-  const timeRange = await browser.evaluate(
+  const timeRange = await browser.evaluate<string[], string>(
     {
       fn: (durationAttribute) => {
         const durationElement = document.querySelector(`[${durationAttribute}]`);
@@ -38,16 +40,14 @@ export const getTimeRange = async (
       args: [layout.selectors.timefilterDurationAttribute],
     },
     { context: CONTEXT_GETTIMERANGE },
-    logger
+    eventLogger.kbnLogger
   );
 
   if (timeRange) {
-    logger.info(`timeRange: ${timeRange}`);
-  } else {
-    logger.debug('no timeRange');
+    eventLogger.kbnLogger.info(`timeRange: ${timeRange}`);
   }
 
-  span?.end();
+  spanEnd();
 
   return timeRange;
 };

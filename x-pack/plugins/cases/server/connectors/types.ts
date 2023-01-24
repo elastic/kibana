@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { CaseResponse, ConnectorMappingsAttributes } from '../../common/api';
-import { CasesClientGetAlertsResponse } from '../client/alerts/types';
-import { CasesClientFactory } from '../client/factory';
-import { RegisterActionType } from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { CaseResponse, ConnectorMappingsAttributes } from '../../common/api';
+import type { CasesClientGetAlertsResponse } from '../client/alerts/types';
+import type { CasesClientFactory } from '../client/factory';
+import type { RegisterActionType } from '../types';
 
 export interface GetActionTypeParams {
   logger: Logger;

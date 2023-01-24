@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "../../../typings/**/*",
@@ -13,8 +10,17 @@
     "server/**/*",
     "storybook/**/*"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../presentation_util/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/logging-mocks",
+    "@kbn/config-schema",
+    "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

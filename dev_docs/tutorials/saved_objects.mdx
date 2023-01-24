@@ -2,7 +2,7 @@
 id: kibDevTutorialSavedObject
 slug: /kibana-dev-docs/tutorials/saved-objects
 title: Register a new saved object type
-summary: Learn how to register a new saved object type.
+description: Learn how to register a new saved object type.
 date: 2021-02-05
 tags: ['kibana','onboarding', 'dev', 'architecture', 'tutorials']
 ---
@@ -18,7 +18,7 @@ import { SavedObjectsType } from 'src/core/server';
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', [1]
-  hidden: false,
+  hidden: true,
   namespaceType: 'multiple-isolated', [2]
   mappings: {
     dynamic: false,
@@ -38,8 +38,8 @@ export const dashboardVisualization: SavedObjectsType = {
 };
 ```
 
-[1] Since the name of a Saved Object type forms part of the url path for the public Saved Objects HTTP API, 
-these should follow our API URL path convention and always be written as snake case.
+[1] Since the name of a Saved Object type forms part of the URL path for the public Saved Objects HTTP API,
+these should follow our API URL path convention and always be written in snake case.
 
 [2] This field determines "space behavior" -- whether these objects can exist in one space, multiple spaces, or all spaces. This value means
 that objects of this type can only exist in a single space. See
@@ -257,3 +257,39 @@ the error should be verbose and informative so that the corrupt document can be 
 ### Testing Migrations
 
 Bugs in a migration function cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-migrations" text="Saved Object migrations section in the plugin testing guide"/>.
+
+### How to opt-out of the global savedObjects APIs?
+
+There are 2 options, depending on the amount of flexibility you need:
+For complete control over your HTTP APIs and custom handling, declare your type as `hidden`, as shown in the example. 
+The other option that allows you to build your own HTTP APIs and still use the client as-is is to declare your type as hidden from the global saved objects HTTP APIs as `hiddenFromHttpApis: true`
+
+```ts
+import { SavedObjectsType } from 'src/core/server';
+
+export const foo: SavedObjectsType = {
+  name: 'foo',
+  hidden: false, [1]
+  hiddenFromHttpApis: true, [2]
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    dynamic: false,
+    properties: {
+      description: {
+        type: 'text',
+      },
+      hits: {
+        type: 'integer',
+      },
+    },
+  },
+  migrations: {
+    '1.0.0': migratedashboardVisualizationToV1,
+    '2.0.0': migratedashboardVisualizationToV2,
+  },
+};
+```
+
+[1] Needs to be `false` to use the `hiddenFromHttpApis` option
+
+[2] Set this to `true` to build your own HTTP API and have complete control over the route handler.

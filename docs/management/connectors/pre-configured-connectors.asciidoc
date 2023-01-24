@@ -2,7 +2,8 @@
 [[pre-configured-connectors]]
 === Preconfigured connectors
 
-You can preconfigure a connector to have all the information it needs prior to startup by adding it to the `kibana.yml` file.
+You can preconfigure a connector to have all the information it needs prior to 
+startup by adding it to the `kibana.yml` file.
 
 Preconfigured connectors offer the following benefits:
 
@@ -11,14 +12,13 @@ action are predefined, including the connector name and ID.
 - Appear in all spaces because they are not saved objects.
 - Cannot be edited or deleted.
 
-NOTE: Preconfigured connectors cannot be used with cases. 
-
 [float]
 [[preconfigured-connector-example]]
 ==== Preconfigured connectors example
 
 This example shows a valid configuration for
-two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
+two out-of-the box connectors: <<slack-action-type, Slack>> and 
+<<webhook-action-type, Webhook>>.
 
 ```js
   xpack.actions.preconfigured:
@@ -49,27 +49,32 @@ two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action
 
 [NOTE]
 ==============================================
-Sensitive properties, such as passwords, can also be stored in the <<creating-keystore, {kib} keystore>>.
+Sensitive properties, such as passwords, can also be stored in the 
+<<creating-keystore, {kib} keystore>>.
 ==============================================
 
 [float]
 [[build-in-preconfigured-connectors]]
 ==== Built-in preconfigured connectors
 
-{kib} provides one built-in preconfigured connector:
+{kib} provides the following built-in preconfigured connectors:
 
 * <<preconfigured-connector-alert-history, Alert history preconfigured {es} index connector>>
+* <<elasticcloud, `Elastic-Cloud-SMTP` preconfigured email connector>>
 
 [float]
 [[managing-pre-configured-connectors]]
 ==== View preconfigured connectors
 
-When you open the main menu, click *Stack Management > Rules and Connectors*. Preconfigured connectors appear on the <<connector-management, *Connectors* tab>>, regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
+When you open the main menu, click *{stack-manage-app} > {connectors-ui}*. 
+Preconfigured connectors appear regardless of which space you are 
+in. They are tagged as “preconfigured”, and you cannot delete them.
 
 [role="screenshot"]
 image::images/pre-configured-connectors-managing.png[Connectors managing tab with pre-configured]
 
-Clicking a preconfigured connector shows the description, but not the configuration. A message indicates that this is a preconfigured connector.
+Clicking a preconfigured connector shows the description, but not the 
+configuration. A message indicates that this is a preconfigured connector.
 
 [role="screenshot"]
 image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]

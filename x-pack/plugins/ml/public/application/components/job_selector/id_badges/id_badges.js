@@ -66,7 +66,7 @@ export function IdBadges({ limit, maps, onLinkClick, selectedIds, showAllBarBadg
       );
     }
 
-    return badges;
+    return <>{badges}</>;
   } else {
     const overFlow = badges.length - limit;
 
@@ -82,7 +82,7 @@ export function IdBadges({ limit, maps, onLinkClick, selectedIds, showAllBarBadg
       </EuiLink>
     );
 
-    return badges;
+    return <>{badges}</>;
   }
 }
 IdBadges.propTypes = {

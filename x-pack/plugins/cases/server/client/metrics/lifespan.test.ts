@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
-import { CaseStatuses, CaseUserActionResponse } from '../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CaseUserActionInjectedAttributesWithoutActionId } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { getStatusInfo } from './lifespan';
+import { createStatusChangeSavedObject } from './test_utils/lifespan';
 
 describe('lifespan', () => {
   describe('getStatusInfo', () => {
     beforeEach(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
     });
 
     afterEach(() => {
@@ -118,7 +120,7 @@ describe('lifespan', () => {
         [
           {
             attributes: { payload: { hello: 1, status: CaseStatuses.closed }, type: 'status' },
-          } as unknown as SavedObject<CaseUserActionResponse>,
+          } as unknown as SavedObject<CaseUserActionInjectedAttributesWithoutActionId>,
         ],
         new Date(0)
       );
@@ -131,7 +133,7 @@ describe('lifespan', () => {
         [
           {
             attributes: { payload: { status: CaseStatuses.closed }, type: 'awesome' },
-          } as unknown as SavedObject<CaseUserActionResponse>,
+          } as unknown as SavedObject<CaseUserActionInjectedAttributesWithoutActionId>,
         ],
         new Date(0)
       );
@@ -147,7 +149,7 @@ describe('lifespan', () => {
               payload: { status: CaseStatuses.closed, created_at: 'blah' },
               type: 'status',
             },
-          } as unknown as SavedObject<CaseUserActionResponse>,
+          } as unknown as SavedObject<CaseUserActionInjectedAttributesWithoutActionId>,
         ],
         new Date(0)
       );
@@ -168,31 +170,3 @@ describe('lifespan', () => {
     });
   });
 });
-
-function createStatusChangeSavedObject(
-  status: CaseStatuses,
-  createdAt: Date
-): SavedObject<CaseUserActionResponse> {
-  return {
-    references: [],
-    id: '',
-    type: '',
-    attributes: {
-      created_at: createdAt.toISOString(),
-      created_by: {
-        username: 'j@j.com',
-        email: null,
-        full_name: null,
-      },
-      owner: 'securitySolution',
-      action: 'update',
-      payload: {
-        status,
-      },
-      type: 'status',
-      action_id: '',
-      case_id: '',
-      comment_id: null,
-    },
-  };
-}

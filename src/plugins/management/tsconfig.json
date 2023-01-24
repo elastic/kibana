@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -12,10 +9,18 @@
     "server/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../home/tsconfig.json"},
-    { "path": "../kibana_react/tsconfig.json"},
-    { "path": "../kibana_utils/tsconfig.json"}
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-page-kibana-template",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

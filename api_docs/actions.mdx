@@ -1,12 +1,15 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibActionsPluginApi
 slug: /kibana-dev-docs/api/actions
 title: "actions"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the actions plugin
-date: 2022-02-28
+description: API docs for the actions plugin
+date: 2023-01-24
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'actions']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 import actionsObj from './actions.devdocs.json';
 
@@ -18,7 +21,15 @@ Contact [Response Ops](https://github.com/orgs/elastic/teams/response-ops) for q
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 125 | 0 | 125 | 11 |
+| 256 | 8 | 251 | 24 |
+
+## Client
+
+### Setup
+<DocDefinitionList data={[actionsObj.client.setup]}/>
+
+### Classes
+<DocDefinitionList data={actionsObj.client.classes}/>
 
 ## Server
 
@@ -31,6 +42,9 @@ Contact [Response Ops](https://github.com/orgs/elastic/teams/response-ops) for q
 ### Functions
 <DocDefinitionList data={actionsObj.server.functions}/>
 
+### Classes
+<DocDefinitionList data={actionsObj.server.classes}/>
+
 ### Interfaces
 <DocDefinitionList data={actionsObj.server.interfaces}/>
 
@@ -38,6 +52,9 @@ Contact [Response Ops](https://github.com/orgs/elastic/teams/response-ops) for q
 <DocDefinitionList data={actionsObj.server.misc}/>
 
 ## Common
+
+### Objects
+<DocDefinitionList data={actionsObj.common.objects}/>
 
 ### Functions
 <DocDefinitionList data={actionsObj.common.functions}/>

@@ -1,16 +1,21 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "allowJs": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./target_types",
-    "rootDir": "src",
+    "outDir": "target/types",
+    "checkJs": true,
     "types": [
       "node",
     ]
   },
   "include": [
-    "src/**/*",
+    "**/*.ts",
+    "**/*.js",
+  ],
+  "exclude": [
+    "**/*.config.js",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/repo-info"
   ]
 }

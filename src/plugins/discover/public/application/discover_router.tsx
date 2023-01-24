@@ -10,37 +10,39 @@ import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
+import { ViewAlertRoute } from './view_alert';
 
-export const discoverRouter = (services: DiscoverServices, history: History) => (
+export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
         <Switch>
-          <Route path="/context/:indexPatternId/:id">
+          <Route path="/context/:dataViewId/:id">
             <ContextAppRoute />
           </Route>
           <Route
-            path="/doc/:indexPattern/:index/:type"
+            path="/doc/:dataView/:index/:type"
             render={(props) => (
-              <Redirect
-                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
-              />
+              <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
             )}
           />
-          <Route path="/doc/:indexPatternId/:index">
+          <Route path="/doc/:dataViewId/:index">
             <SingleDocRoute />
           </Route>
+          <Route path="/viewAlert/:id">
+            <ViewAlertRoute />
+          </Route>
           <Route path="/view/:id">
-            <DiscoverMainRoute />
+            <DiscoverMainRoute isDev={isDev} />
           </Route>
           <Route path="/" exact>
-            <DiscoverMainRoute />
+            <DiscoverMainRoute isDev={isDev} />
           </Route>
           <NotFoundRoute />
         </Switch>

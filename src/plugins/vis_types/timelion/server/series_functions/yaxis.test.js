@@ -7,13 +7,13 @@
  */
 
 import fn from './yaxis';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('yaxis.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('creates the yaxes array', () => {
@@ -83,16 +83,16 @@ describe('yaxis.js', () => {
 
   it('throws an error if currency is not three letter code', () => {
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:abcde']).catch((e) => {
-      expect(e).to.be.an.instanceof(Error);
+      expect(e).to.be.an(Error);
     });
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:12']).catch((e) => {
-      expect(e).to.be.an.instanceof(Error);
+      expect(e).to.be.an(Error);
     });
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:$#']).catch((e) => {
-      expect(e).to.be.an.instanceof(Error);
+      expect(e).to.be.an(Error);
     });
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:ab']).catch((e) => {
-      expect(e).to.be.an.instanceof(Error);
+      expect(e).to.be.an(Error);
     });
   });
 });

@@ -6,10 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TouchedByUsers, TouchedByUsersProps } from './touched_by_users';
-import { EffectScope, EffectScopeProps } from './effect_scope';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { TouchedByUsersProps } from './touched_by_users';
+import { TouchedByUsers } from './touched_by_users';
+import type { EffectScopeProps } from './effect_scope';
+import { EffectScope } from './effect_scope';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export type SubHeaderProps = TouchedByUsersProps &
   EffectScopeProps &

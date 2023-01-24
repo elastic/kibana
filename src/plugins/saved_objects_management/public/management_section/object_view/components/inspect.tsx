@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '../../../../../kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectWithMetadata } from '../../../../common';
 
 export interface InspectProps {

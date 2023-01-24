@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
@@ -26,10 +26,7 @@ import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../components/validated_number_input';
 
 import { getTermsFields } from '../../../../index_pattern_util';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-} from '../../../../kibana_services';
+import { getIndexPatternSelectComponent } from '../../../../kibana_services';
 import type { JoinField } from '../join_editor';
 
 interface Props {
@@ -44,18 +41,12 @@ interface Props {
   // Right source props
   rightSourceIndexPatternId: string;
   rightSourceName: string;
-  onRightSourceChange: ({
-    indexPatternId,
-    indexPatternTitle,
-  }: {
-    indexPatternId: string;
-    indexPatternTitle: string;
-  }) => void;
+  onRightSourceChange: (indexPatternId: string) => void;
 
   // Right field props
   rightValue: string;
   rightSize?: number;
-  rightFields: IndexPatternField[];
+  rightFields: DataViewField[];
   onRightFieldChange: (term?: string) => void;
   onRightSizeChange: (size: number) => void;
 }
@@ -81,20 +72,12 @@ export class JoinExpression extends Component<Props, State> {
     });
   };
 
-  _onRightSourceChange = async (indexPatternId?: string) => {
+  _onRightSourceChange = (indexPatternId?: string) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
-    try {
-      const indexPattern = await getIndexPatternService().get(indexPatternId);
-      this.props.onRightSourceChange({
-        indexPatternId,
-        indexPatternTitle: indexPattern.title,
-      });
-    } catch (err) {
-      // do not call onChange with when unable to get indexPatternId
-    }
+    this.props.onRightSourceChange(indexPatternId);
   };
 
   _onLeftFieldChange = (selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) => {

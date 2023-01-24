@@ -8,8 +8,9 @@
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
-import { MlPluginSetup } from '../../../../ml/server';
+import type { ESSearchResponse } from '@kbn/es-types';
+import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
@@ -17,10 +18,9 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import { Setup } from '../../lib/helpers/setup_request';
+import { MlClient } from '../../lib/helpers/get_ml_client';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 
@@ -33,20 +33,18 @@ export type ServiceAnomaliesResponse = Awaited<
   ReturnType<typeof getServiceAnomalies>
 >;
 export async function getServiceAnomalies({
-  setup,
+  mlClient,
   environment,
   start,
   end,
 }: {
-  setup: Setup;
+  mlClient?: MlClient;
   environment: string;
   start: number;
   end: number;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
-    const { ml } = setup;
-
-    if (!ml) {
+    if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
@@ -108,9 +106,9 @@ export async function getServiceAnomalies({
       // pass an empty array of job ids to anomaly search
       // so any validation is skipped
       withApmSpan('ml_anomaly_search', () =>
-        ml.mlSystem.mlAnomalySearch(params, [])
+        mlClient.mlSystem.mlAnomalySearch(params, [])
       ),
-      getMLJobIds(ml.anomalyDetectors, environment),
+      getMLJobIds(mlClient.anomalyDetectors, environment),
     ]);
 
     const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
@@ -156,15 +154,15 @@ export async function getServiceAnomalies({
 }
 
 export async function getMLJobs(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment: string
+  anomalyDetectors: MlAnomalyDetectors,
+  environment?: string
 ) {
   const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
 
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
   const mlJobs = jobs.filter((job) => job.version >= 2);
-  if (environment !== ENVIRONMENT_ALL.value) {
+  if (environment && environment !== ENVIRONMENT_ALL.value) {
     const matchingMLJob = mlJobs.find((job) => job.environment === environment);
     if (!matchingMLJob) {
       return [];
@@ -175,8 +173,8 @@ export async function getMLJobs(
 }
 
 export async function getMLJobIds(
-  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment: string
+  anomalyDetectors: MlAnomalyDetectors,
+  environment?: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.jobId);

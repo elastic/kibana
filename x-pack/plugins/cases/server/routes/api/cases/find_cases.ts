@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesFindRequest } from '../../../../common/api';
+import type { CasesFindRequest } from '../../../../common/api';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -15,7 +15,8 @@ export const findCaseRoute = createCasesRoute({
   path: `${CASES_URL}/_find`,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const options = request.query as CasesFindRequest;
 
       return response.ok({

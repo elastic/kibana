@@ -6,10 +6,10 @@
  */
 
 import type React from 'react';
-import { AllTimelinesVariables } from '../../containers/all';
-import { TimelineModel } from '../../store/timeline/model';
-import { NoteResult } from '../../../../common/types/timeline/note';
-import {
+import type { AllTimelinesVariables } from '../../containers/all';
+import type { TimelineModel } from '../../store/timeline/model';
+import type { NoteResult } from '../../../../common/types/timeline/note';
+import type {
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
   TimelineStatus,
@@ -78,6 +78,9 @@ export interface EuiSearchBarQuery {
 /** Performs IO to delete the specified timelines */
 export type DeleteTimelines = (timelineIds: string[], variables?: AllTimelinesVariables) => void;
 
+/** Invoked when the user clicks the action create rule from timeline */
+export type OnCreateRuleFromTimeline = (savedObjectId: string) => void;
+
 /** Invoked when the user clicks the action make the selected timelines favorites */
 export type OnAddTimelinesToFavorites = () => void;
 
@@ -97,9 +100,7 @@ export type OnOpenTimeline = ({
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
-export type SetActionTimeline = React.Dispatch<
-  React.SetStateAction<OpenTimelineResult | undefined>
->;
+
 export type EnableExportTimelineDownloader = (selectedItem: OpenTimelineResult) => void;
 /** Invoked when the user presses enters to submit the text in the search input */
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
@@ -128,7 +129,13 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
-export type ActionTimelineToShow = 'createFrom' | 'duplicate' | 'delete' | 'export' | 'selectable';
+export type ActionTimelineToShow =
+  | 'createFrom'
+  | 'duplicate'
+  | 'delete'
+  | 'export'
+  | 'selectable'
+  | 'createRule';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
@@ -143,6 +150,8 @@ export interface OpenTimelineProps {
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   /** Display import timelines modal*/
   importDataModalToggle?: boolean;
+  /** If this callback is specified, a "Create rule from timeline" button will be displayed, and this callback will be invoked when the button is clicked */
+  onCreateRule?: OnCreateRuleFromTimeline;
   /** If this callback is specified, a "Favorite Selected" button will be displayed, and this callback will be invoked when the button is clicked */
   onAddTimelinesToFavorites?: OnAddTimelinesToFavorites;
   /** If this callback is specified, a "Delete Selected" button will be displayed, and this callback will be invoked when the button is clicked */
@@ -198,6 +207,7 @@ export interface OpenTimelineProps {
 export interface ResolveTimelineConfig {
   alias_target_id: SingleTimelineResolveResponse['data']['alias_target_id'];
   outcome: SingleTimelineResolveResponse['data']['outcome'];
+  alias_purpose: SingleTimelineResolveResponse['data']['alias_purpose'];
 }
 export interface UpdateTimeline {
   duplicate: boolean;
@@ -209,6 +219,7 @@ export interface UpdateTimeline {
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
+  ruleAuthor?: string;
 }
 
 export type DispatchUpdateTimeline = ({
@@ -220,6 +231,7 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
   ruleNote,
+  ruleAuthor,
 }: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {

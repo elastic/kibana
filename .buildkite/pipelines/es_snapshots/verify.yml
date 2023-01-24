@@ -22,67 +22,28 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: c2-16
+      queue: n2-16-spot
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
-  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Default CI Group'
-    parallelism: 27
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
     agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 150
-    key: default-cigroup
+      queue: kibana-default
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      LIMIT_CONFIG_TYPE: integration,functional
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Docker CI Group'
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    key: default-cigroup-docker
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
-    label: 'OSS CI Group'
-    parallelism: 11
-    agents:
-      queue: ci-group-4d
-    depends_on: build
-    timeout_in_minutes: 120
-    key: oss-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/test/jest_integration.sh
-    label: 'Jest Integration Tests'
-    parallelism: 3
-    agents:
-      queue: n2-4
-    timeout_in_minutes: 120
-    key: jest-integration
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/test/api_integration.sh
-    label: 'API Integration Tests'
-    agents:
-      queue: n2-2
-    timeout_in_minutes: 120
-    key: api-integration
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
@@ -90,11 +51,8 @@ steps:
     agents:
       queue: kibana-default
     depends_on:
-      - default-cigroup
-      - default-cigroup-docker
-      - oss-cigroup
+      - ftr-configs
       - jest-integration
-      - api-integration
 
   - wait: ~
     continue_on_failure: true

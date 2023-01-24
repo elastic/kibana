@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { ReportingCore } from '../../';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ReportingCore } from '../..';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { getCustomLogo } from './get_custom_logo';
 

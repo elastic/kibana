@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Anomalies, AnomaliesByNetwork, Anomaly, isDestinationOrSource } from '../types';
+import type { Anomalies, AnomaliesByNetwork, Anomaly } from '../types';
+import { isDestinationOrSource } from '../types';
 import { getNetworkFromInfluencers } from '../influencers/get_network_from_influencers';
 
 export const convertAnomaliesToNetwork = (
   anomalies: Anomalies | null,
+  jobNameById: Record<string, string | undefined>,
   ip?: string
 ): AnomaliesByNetwork[] => {
   if (anomalies == null) {
@@ -17,11 +19,27 @@ export const convertAnomaliesToNetwork = (
   } else {
     return anomalies.anomalies.reduce<AnomaliesByNetwork[]>((accum, item) => {
       if (isDestinationOrSource(item.entityName) && getNetworkFromEntity(item, ip)) {
-        return [...accum, { ip: item.entityValue, type: item.entityName, anomaly: item }];
+        return [
+          ...accum,
+          {
+            ip: item.entityValue,
+            type: item.entityName,
+            jobName: jobNameById[item.jobId] ?? item.jobId,
+            anomaly: item,
+          },
+        ];
       } else {
         const network = getNetworkFromInfluencers(item.influencers, ip);
         if (network != null) {
-          return [...accum, { ip: network.ip, type: network.type, anomaly: item }];
+          return [
+            ...accum,
+            {
+              ip: network.ip,
+              type: network.type,
+              jobName: jobNameById[item.jobId] ?? item.jobId,
+              anomaly: item,
+            },
+          ];
         } else {
           return accum;
         }

@@ -14,7 +14,7 @@ import {
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
-} from '../../../../expressions/common';
+} from '@kbn/expressions-plugin/common';
 
 const MARKER = 'EXPRESSIONS_SUGGESTION_MARKER';
 

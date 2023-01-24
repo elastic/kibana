@@ -13,8 +13,8 @@ import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
-  RequestHandlerContext,
-} from 'src/core/server';
+  CustomRequestHandlerContext,
+} from '@kbn/core/server';
 import {
   ISearchOptions,
   ISearchStartSearchSource,
@@ -26,12 +26,8 @@ import {
   SearchSourceService,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
-import { SearchUsage } from './collectors';
-import type { IScopedSearchSessionsClient, ISearchSessionService } from './session';
-
-export interface SearchEnhancements {
-  sessionService: ISearchSessionService;
-}
+import { SearchUsage } from './collectors/search';
+import type { IScopedSearchSessionsClient } from './session';
 
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -59,11 +55,6 @@ export interface ISearchSetup {
    * Used internally for telemetry
    */
   usage?: SearchUsage;
-
-  /**
-   * @internal
-   */
-  __enhance: (enhancements: SearchEnhancements) => void;
 
   searchSource: ReturnType<SearchSourceService['setup']>;
 }
@@ -98,6 +89,7 @@ export interface IScopedSearchClient extends ISearchClient {
   cancelSession: IScopedSearchSessionsClient['cancel'];
   deleteSession: IScopedSearchSessionsClient['delete'];
   extendSession: IScopedSearchSessionsClient['extend'];
+  getSessionStatus: IScopedSearchSessionsClient['status'];
 }
 
 export interface ISearchStart<
@@ -126,8 +118,8 @@ export interface ISearchStart<
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
 
-export interface DataRequestHandlerContext extends RequestHandlerContext {
+export type DataRequestHandlerContext = CustomRequestHandlerContext<{
   search: SearchRequestHandlerContext;
-}
+}>;
 
 export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

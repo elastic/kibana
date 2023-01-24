@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FleetStart } from '../../../../../fleet/public';
-import {
-  dataPluginMock,
-  Start as DataPublicStartMock,
-} from '../../../../../../../src/plugins/data/public/mocks';
-import { fleetMock } from '../../../../../fleet/public/mocks';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { Start as DataPublicStartMock } from '@kbn/data-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
@@ -25,9 +25,6 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
       getUpdates$: jest.Mock;
     };
   };
-  ui: DataPublicStartMock['ui'] & {
-    SearchBar: jest.Mock;
-  };
 };
 
 /**
@@ -36,6 +33,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
 export interface DepsStartMock {
   data: DataMock;
   fleet: FleetStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -54,10 +52,10 @@ export const depsStartMock: () => DepsStartMock = () => {
       }),
     };
   }) as DataMock['query']['filterManager']['getUpdates$'];
-  dataMock.ui.SearchBar = jest.fn();
 
   return {
     data: dataMock,
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     fleet: fleetMock.createStartMock(),
   };
 };

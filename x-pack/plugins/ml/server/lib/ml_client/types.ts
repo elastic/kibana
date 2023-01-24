@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  updateTrainedModelDeployment: (payload: {
+    model_id: string;
+    number_of_allocations: number;
+  }) => Promise<{ acknowledge: boolean }>;
 }
 
 export type MlClientParams =

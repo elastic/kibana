@@ -9,27 +9,38 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { getActionsColumnWidth } from '../../../../../../../timelines/public';
 import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { Sort } from '../sort';
+import type { Sort } from '../sort';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { ColumnHeadersComponent, ColumnHeadersComponentProps } from '.';
+import type { ColumnHeadersComponentProps } from '.';
+import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { getDefaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
-import { HeaderActions } from '../actions/header_actions';
+import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
+import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      timelines: mockTimelines,
+      triggersActionsUi: mockTriggersActionsUi,
+    },
+  }),
+}));
 
-const mockUseCreateFieldButton = jest.fn().mockReturnValue(<></>);
-jest.mock('../../../fields_browser/create_field_button', () => ({
-  useCreateFieldButton: (...params: unknown[]) => mockUseCreateFieldButton(...params),
+const mockUseFieldBrowserOptions = jest.fn();
+jest.mock('../../../fields_browser', () => ({
+  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
 }));
 
 const mockDispatch = jest.fn();
@@ -41,7 +52,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-const timelineId = 'test';
+const timelineId = TimelineId.test;
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
@@ -54,7 +65,8 @@ describe('ColumnHeaders', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];
@@ -111,12 +123,14 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
-        columnType: 'number',
+        columnType: 'date',
+        esTypes: ['date'],
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
-        columnType: 'text',
+        columnType: 'string',
+        esTypes: [],
         sortDirection: Direction.asc,
       },
     ];
@@ -131,12 +145,14 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
-          columnType: 'number',
+          columnType: 'date',
+          esTypes: ['date'],
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
-          columnType: 'text',
+          columnType: 'string',
+          esTypes: [],
           sortDirection: Direction.asc,
         },
       ];
@@ -155,21 +171,29 @@ describe('ColumnHeaders', () => {
         .find('[data-test-subj="header-event.category"] [data-test-subj="header-sort-button"]')
         .first()
         .simulate('click');
+
       expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.updateSort({
           id: timelineId,
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
-              columnType: 'text',
+              columnType: 'string',
+              esTypes: [],
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
+            {
+              columnId: 'event.category',
+              columnType: '',
+              esTypes: [],
+              sortDirection: Direction.desc,
+            },
           ],
         })
       );
@@ -194,10 +218,16 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
+            {
+              columnId: 'host.name',
+              columnType: 'string',
+              esTypes: [],
+              sortDirection: Direction.asc,
+            },
           ],
         })
       );
@@ -220,16 +250,23 @@ describe('ColumnHeaders', () => {
         .find('[data-test-subj="header-host.name"] [data-test-subj="header-sort-button"]')
         .first()
         .simulate('click');
+
       expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.updateSort({
           id: timelineId,
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
+              esTypes: ['date'],
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
+            {
+              columnId: 'host.name',
+              columnType: '',
+              esTypes: [],
+              sortDirection: Direction.desc,
+            },
           ],
         })
       );
@@ -257,9 +294,9 @@ describe('ColumnHeaders', () => {
   describe('Field Editor', () => {
     test('Closes field editor when the timeline is unmounted', () => {
       const mockCloseEditor = jest.fn();
-      mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
-        fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
-        return <></>;
+      mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+        editorActionsRef.current = { closeEditor: mockCloseEditor };
+        return {};
       });
 
       const wrapper = mount(
@@ -275,9 +312,9 @@ describe('ColumnHeaders', () => {
 
     test('Closes field editor when the timeline is closed', () => {
       const mockCloseEditor = jest.fn();
-      mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
-        fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
-        return <></>;
+      mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+        editorActionsRef.current = { closeEditor: mockCloseEditor };
+        return {};
       });
 
       const Proxy = (props: ColumnHeadersComponentProps) => (

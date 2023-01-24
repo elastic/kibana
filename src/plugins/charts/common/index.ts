@@ -13,11 +13,11 @@ export type {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
-  PaletteOutput,
-} from './palette';
-export { defaultCustomColors, palette, systemPalette } from './palette';
+  SystemPaletteExpressionFunctionDefinition,
+} from './expressions/palette';
+export { palette, systemPalette } from './expressions/palette';
 
-export { paletteIds } from './constants';
+export { paletteIds, defaultCustomColors } from './constants';
 export type { ColorSchema, RawColorSchema, ColorMap } from './static';
 export {
   ColorSchemas,
@@ -30,10 +30,6 @@ export {
   LabelRotation,
   defaultCountLabel,
   MULTILAYER_TIME_AXIS_STYLE,
-  checkIsMinContinuity,
-  checkIsMaxContinuity,
 } from './static';
 
-export type { ColorSchemaParams, Labels, Style, PaletteContinuity } from './types';
-
-export { validateOptions } from './utils';
+export type { ColorSchemaParams, Labels, Style } from './types';

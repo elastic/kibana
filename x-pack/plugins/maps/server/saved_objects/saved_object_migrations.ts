@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { extractReferences } from '../../common/migrations/references';
-// @ts-expect-error
 import { emsRasterTileToEmsVectorTile } from '../../common/migrations/ems_raster_tile_to_ems_vector_tile';
-// @ts-expect-error
 import { topHitsTimeToSort } from '../../common/migrations/top_hits_time_to_sort';
-// @ts-expect-error
 import { moveApplyGlobalQueryToSources } from '../../common/migrations/move_apply_global_query';
-// @ts-expect-error
 import { addFieldMetaOptions } from '../../common/migrations/add_field_meta_options';
-// @ts-expect-error
 import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_symbol_style_descriptor';
 import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { migrateJoinAggKey } from '../../common/migrations/join_agg_key';
+import { migrateOtherCategoryColor } from '../../common/migrations/migrate_other_category_color';
 import { removeBoundsFromSavedObject } from '../../common/migrations/remove_bounds';
 import { setDefaultAutoFitToBounds } from '../../common/migrations/set_default_auto_fit_to_bounds';
 import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin';
@@ -32,7 +28,7 @@ function logMigrationWarning(
   errorMsg: string,
   doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>
 ) {
-  context.log.warning(
+  context.log.warn(
     `map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(
       doc
     )}`
@@ -232,6 +228,22 @@ export const savedObjectMigrations = {
   ) => {
     try {
       const attributes = renameLayerTypes(doc);
+
+      return {
+        ...doc,
+        attributes,
+      };
+    } catch (e) {
+      logMigrationWarning(context, e.message, doc);
+      return doc;
+    }
+  },
+  '8.4.0': (
+    doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>,
+    context: SavedObjectMigrationContext
+  ) => {
+    try {
+      const attributes = migrateOtherCategoryColor(doc);
 
       return {
         ...doc,

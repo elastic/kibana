@@ -30,6 +30,7 @@
         "description": [],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -46,6 +47,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -60,6 +62,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -74,6 +77,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -88,6 +92,22 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "snapshotRestore",
+        "id": "def-common.FEATURE_STATES_NONE_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_STATES_NONE_OPTION",
+        "description": [],
+        "signature": [
+          "\"none\""
+        ],
+        "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -102,6 +122,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -117,6 +138,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -132,6 +154,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -147,6 +170,7 @@
         ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -160,6 +184,7 @@
         "description": [],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "snapshotRestore",
@@ -169,7 +194,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "snapshotRestore",
@@ -182,7 +208,8 @@
               "\"basic\""
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "snapshotRestore",
@@ -196,6 +223,7 @@
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "snapshotRestore",
@@ -209,6 +237,7 @@
                 ],
                 "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -226,6 +255,7 @@
         "description": [],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "snapshotRestore",
@@ -245,7 +275,8 @@
               ".hdfs"
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -259,6 +290,7 @@
         "description": [],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "snapshotRestore",
@@ -271,7 +303,8 @@
               "\"d\""
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "snapshotRestore",
@@ -284,7 +317,8 @@
               "\"h\""
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "snapshotRestore",
@@ -297,7 +331,8 @@
               "\"m\""
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "snapshotRestore",
@@ -310,7 +345,8 @@
               "\"s\""
             ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

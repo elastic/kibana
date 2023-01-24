@@ -10,12 +10,12 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { fields } from '../../../../../../../src/plugins/data/common/mocks';
+import { fields } from '@kbn/data-plugin/common/mocks';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../lib/kibana';
 
-import { ThreatMatchComponent } from './';
-import { ThreatMapEntries } from './types';
+import { ThreatMatchComponent } from '.';
+import type { ThreatMapEntries } from './types';
 import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
@@ -25,7 +25,7 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 const getPayLoad = (): ThreatMapEntries[] => [
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
@@ -42,7 +42,7 @@ describe('ThreatMatchComponent', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
+        unifiedSearch: {
           autocomplete: {
             getValueSuggestions: getValueSuggestionsMock,
           },
@@ -239,9 +239,9 @@ describe('ThreatMatchComponent', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="entriesContainer"]').length).toEqual(4);
+    expect(wrapper.find('div[data-test-subj="entriesContainer"]').length).toEqual(2);
     wrapper.find('[data-test-subj="firstRowDeleteButton"] button').simulate('click');
-    expect(wrapper.find('[data-test-subj="entriesContainer"]').length).toEqual(2);
+    expect(wrapper.find('div[data-test-subj="entriesContainer"]').length).toEqual(1);
     wrapper.unmount();
   });
 

@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import moment from 'moment';
 import { isFilterPinned, Filter } from '@kbn/es-query';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
@@ -59,6 +59,7 @@ export function mockDataPlugin(
         getSessionId: jest.fn(() => currentSessionId),
         getSession$: jest.fn(() => sessionIdSubject.asObservable()),
       },
+      showWarnings: jest.fn(),
     };
   }
 
@@ -102,7 +103,7 @@ export function mockDataPlugin(
       extract: (filtersIn: Filter[]) => {
         const state = filtersIn.map((filter) => ({
           ...filter,
-          meta: { ...filter.meta, index: 'extracted!' },
+          meta: { ...filter.meta },
         }));
         return { state, references: [] };
       },
@@ -126,6 +127,17 @@ export function mockDataPlugin(
     },
     indexPatterns: {
       get: jest.fn().mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true })),
+    },
+    dataViews: {
+      getIds: jest.fn().mockImplementation(jest.fn(async () => [])),
+      get: jest.fn().mockImplementation((id) =>
+        Promise.resolve({
+          id,
+          isTimeBased: () => true,
+          isPersisted: () => true,
+          toSpec: () => ({}),
+        })
+      ),
     },
     search: createMockSearchService(),
     nowProvider: {

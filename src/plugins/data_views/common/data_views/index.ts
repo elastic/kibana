@@ -10,3 +10,4 @@ export * from './_pattern_cache';
 export * from './flatten_hit';
 export * from './data_view';
 export * from './data_views';
+export { DataViewPersistableStateService } from './persistable_state';

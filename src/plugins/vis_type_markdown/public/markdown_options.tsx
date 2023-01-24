@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
@@ -43,7 +43,7 @@ function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<Markdo
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
                 <EuiLink
-                  href="https://help.github.com/articles/github-flavored-markdown/"
+                  href="https://docs.github.com/en/get-started/writing-on-github/"
                   target="_blank"
                 >
                   <FormattedMessage

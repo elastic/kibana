@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import type { Query } from 'src/plugins/data/common';
+import { v4 as uuidv4 } from 'uuid';
+import { GeoJsonProperties } from 'geojson';
+import type { Query } from '@kbn/data-plugin/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
@@ -14,7 +15,6 @@ import {
   VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
@@ -27,6 +27,7 @@ import {
 } from '../vector_source';
 import { DataRequest } from '../../util/data_request';
 import { InlineField } from '../../fields/inline_field';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
@@ -37,21 +38,21 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       __rows: descriptor.__rows || [],
       __columns: descriptor.__columns || [],
       term: descriptor.term || '',
-      id: descriptor.id || uuid(),
+      id: descriptor.id || uuidv4(),
     };
   }
 
   readonly _descriptor: TableSourceDescriptor;
 
-  constructor(descriptor: Partial<TableSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<TableSourceDescriptor>) {
     const sourceDescriptor = TableSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
   }
 
   async getDisplayName(): Promise<string> {
     // no need to localize. this is never rendered.
-    return `table source ${uuid()}`;
+    return `table source ${uuidv4()}`;
   }
 
   getSyncMeta(): null {
@@ -106,6 +107,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return new InlineField<TableSource>({
       fieldName: column.name,
+      label: column.label,
       source: this,
       origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
@@ -128,6 +130,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return this._descriptor.__columns.map((column) => {
       return new InlineField<TableSource>({
         fieldName: column.name,
+        label: column.label,
         source: this,
         origin: FIELD_ORIGIN.JOIN,
         dataType: column.type,
@@ -171,6 +174,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return new InlineField<TableSource>({
       fieldName: column.name,
+      label: column.label,
       source: this,
       origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
@@ -206,5 +210,18 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   isBoundsAware(): boolean {
     return false;
+  }
+
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    const tooltipProperties: ITooltipProperty[] = [];
+    for (const key in properties) {
+      if (properties.hasOwnProperty(key)) {
+        const field = this.getFieldByName(key);
+        if (field) {
+          tooltipProperties.push(new TooltipProperty(key, await field.getLabel(), properties[key]));
+        }
+      }
+    }
+    return tooltipProperties;
   }
 }

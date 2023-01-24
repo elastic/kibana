@@ -20,11 +20,12 @@ import {
   EuiToolTip,
   EuiText,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IBasePath } from 'src/core/public';
+import { IBasePath } from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import {
@@ -43,6 +44,7 @@ export interface RelationshipsProps {
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   allowedTypes: SavedObjectManagementTypeInfo[];
+  showPlainSpinner?: boolean;
 }
 
 export interface RelationshipsState {
@@ -215,7 +217,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
   }
 
   renderRelationshipsTable() {
-    const { goInspectObject, basePath, savedObject, allowedTypes } = this.props;
+    const { goInspectObject, basePath, savedObject, allowedTypes, showPlainSpinner } = this.props;
     const { relations, isLoading, error } = this.state;
 
     if (error) {
@@ -223,7 +225,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     }
 
     if (isLoading) {
-      return <EuiLoadingElastic size="xl" />;
+      return showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />;
     }
 
     const columns = [

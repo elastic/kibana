@@ -1,1259 +1,518 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout option 1`] = `
-<EuiForm
-  className="kbnShareContextMenu__finalPanel"
+<div
+  class="euiForm kbnShareContextMenu__finalPanel"
   data-test-subj="shareReportingForm"
 >
   <div
-    className="euiForm kbnShareContextMenu__finalPanel"
-    data-test-subj="shareReportingForm"
+    class="euiText emotion-euiText-s"
   >
-    <EuiText
-      size="s"
+    <p>
+      <span>
+        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
+      </span>
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiText euiText--small"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
-            description="Here 'reportingType' can be 'PDF' or 'CSV'"
-            id="xpack.reporting.panelContent.generationTimeDescription"
-            values={
-              Object {
-                "objectType": "test-object-type",
-                "reportingType": "Analytical App",
-              }
-            }
-          >
-            <span>
-              Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-            </span>
-          </FormattedMessage>
-        </p>
-      </div>
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      helpText={
-        <FormattedMessage
-          defaultMessage="Remove borders and footer logo"
-          id="xpack.reporting.screenCapturePanelContent.canvasLayoutHelpText"
-          values={Object {}}
-        />
-      }
-      labelType="label"
-    >
-      <div
-        className="euiFormRow"
-        id="generated-id-row"
-      >
-        <div
-          className="euiFormRow__fieldWrapper"
-        >
-          <EuiSwitch
-            aria-describedby="generated-id-help-0"
-            checked={false}
-            data-test-subj="reportModeToggle"
-            id="generated-id"
-            label={
-              <FormattedMessage
-                defaultMessage="Full page layout"
-                id="xpack.reporting.screenCapturePanelContent.canvasLayoutLabel"
-                values={Object {}}
-              />
-            }
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-          >
-            <div
-              className="euiSwitch"
-            >
-              <button
-                aria-checked={false}
-                aria-describedby="generated-id-help-0"
-                aria-labelledby="generated-id"
-                className="euiSwitch__button"
-                data-test-subj="reportModeToggle"
-                id="generated-id"
-                onBlur={[Function]}
-                onClick={[Function]}
-                onFocus={[Function]}
-                role="switch"
-                type="button"
-              >
-                <span
-                  className="euiSwitch__body"
-                >
-                  <span
-                    className="euiSwitch__thumb"
-                  />
-                  <span
-                    className="euiSwitch__track"
-                  >
-                    <EuiIcon
-                      className="euiSwitch__icon"
-                      size="m"
-                      type="cross"
-                    >
-                      <span
-                        className="euiSwitch__icon"
-                        data-euiicon-type="cross"
-                        size="m"
-                      />
-                    </EuiIcon>
-                    <EuiIcon
-                      className="euiSwitch__icon euiSwitch__icon--checked"
-                      size="m"
-                      type="check"
-                    >
-                      <span
-                        className="euiSwitch__icon euiSwitch__icon--checked"
-                        data-euiicon-type="check"
-                        size="m"
-                      />
-                    </EuiIcon>
-                  </span>
-                </span>
-              </button>
-              <span
-                className="euiSwitch__label"
-                id="generated-id"
-                onClick={[Function]}
-              >
-                <FormattedMessage
-                  defaultMessage="Full page layout"
-                  id="xpack.reporting.screenCapturePanelContent.canvasLayoutLabel"
-                  values={Object {}}
-                >
-                  <span>
-                    Full page layout
-                  </span>
-                </FormattedMessage>
-              </span>
-            </div>
-          </EuiSwitch>
-          <EuiFormHelpText
-            className="euiFormRow__text"
-            id="generated-id-help-0"
-            key="0"
-          >
-            <div
-              className="euiFormHelpText euiFormRow__text"
-              id="generated-id-help-0"
-            >
-              <FormattedMessage
-                defaultMessage="Remove borders and footer logo"
-                id="xpack.reporting.screenCapturePanelContent.canvasLayoutHelpText"
-                values={Object {}}
-              >
-                <span>
-                  Remove borders and footer logo
-                </span>
-              </FormattedMessage>
-            </div>
-          </EuiFormHelpText>
-        </div>
-      </div>
-    </EuiFormRow>
-    <EuiButton
-      data-test-subj="generateReportButton"
-      disabled={false}
-      fill={true}
-      fullWidth={true}
-      onClick={[Function]}
-      size="s"
-    >
-      <EuiButtonDisplay
-        baseClassName="euiButton"
-        data-test-subj="generateReportButton"
-        disabled={false}
-        element="button"
-        fill={true}
-        fullWidth={true}
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
-        type="button"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
-          className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
-          data-test-subj="generateReportButton"
-          disabled={false}
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
+          aria-checked="false"
+          aria-describedby="generated-id-help-0"
+          aria-labelledby="generated-id"
+          class="euiSwitch__button"
+          data-test-subj="reportModeToggle"
+          id="generated-id"
+          role="switch"
           type="button"
         >
-          <EuiButtonContent
-            className="euiButton__content"
-            iconSide="left"
-            textProps={
-              Object {
-                "className": "euiButton__text",
-              }
-            }
+          <span
+            class="euiSwitch__body"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              class="euiSwitch__thumb"
+            />
+            <span
+              class="euiSwitch__track"
             >
               <span
-                className="euiButton__text"
-              >
-                <FormattedMessage
-                  defaultMessage="Generate {reportingType}"
-                  id="xpack.reporting.panelContent.generateButtonLabel"
-                  values={
-                    Object {
-                      "reportingType": "Analytical App",
-                    }
-                  }
-                >
-                  <span>
-                    Generate Analytical App
-                  </span>
-                </FormattedMessage>
-              </span>
+                class="euiSwitch__icon"
+                data-euiicon-type="cross"
+              />
+              <span
+                class="euiSwitch__icon euiSwitch__icon--checked"
+                data-euiicon-type="check"
+              />
             </span>
-          </EuiButtonContent>
+          </span>
         </button>
-      </EuiButtonDisplay>
-    </EuiButton>
-    <EuiHorizontalRule
-      margin="s"
-      style={
-        Object {
-          "marginLeft": "-16px",
-          "marginRight": "-16px",
-          "width": "auto",
-        }
-      }
-    >
-      <hr
-        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-        style={
-          Object {
-            "marginLeft": "-16px",
-            "marginRight": "-16px",
-            "width": "auto",
-          }
-        }
-      />
-    </EuiHorizontalRule>
-    <EuiAccordion
-      arrowDisplay="left"
-      buttonContent="Advanced options"
-      buttonElement="button"
-      element="div"
-      id="advanced-options"
-      initialIsOpen={false}
-      isLoading={false}
-      isLoadingMessage={false}
-      paddingSize="none"
-    >
+        <span
+          class="euiSwitch__label"
+          id="generated-id"
+        >
+          <span>
+            Full page layout
+          </span>
+        </span>
+      </div>
       <div
-        className="euiAccordion"
+        class="euiFormHelpText euiFormRow__text"
+        id="generated-id-help-0"
       >
-        <div
-          className="euiAccordion__triggerWrapper"
+        <span>
+          Remove borders and footer logo
+        </span>
+      </div>
+    </div>
+  </div>
+  <button
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    data-test-subj="generateReportButton"
+    type="button"
+  >
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span>
+        Generate Analytical App
+      </span>
+    </span>
+  </button>
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
+    style="width: auto; margin-left: -16px; margin-right: -16px;"
+  />
+  <div
+    class="euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+    >
+      <button
+        aria-controls="advanced-options"
+        aria-expanded="false"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="advanced-options"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent"
         >
-          <EuiButtonIcon
-            aria-controls="advanced-options"
-            aria-expanded={false}
-            aria-labelledby="generated-id"
-            className="euiAccordion__iconButton"
-            color="text"
-            iconType="arrowRight"
-            onClick={[Function]}
-            tabIndex={-1}
+          Advanced options
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+      id="advanced-options"
+      role="region"
+      tabindex="-1"
+    >
+      <div>
+        <div
+          class=" emotion-euiAccordion__children"
+        >
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-s"
           >
-            <button
-              aria-controls="advanced-options"
-              aria-expanded={false}
-              aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
-              disabled={false}
-              onClick={[Function]}
-              tabIndex={-1}
-              type="button"
+            <p>
+              <span>
+                Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+              </span>
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+          >
+            <p
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
             >
-              <EuiIcon
+              <span
                 aria-hidden="true"
-                className="euiButtonIcon__icon"
+                class="emotion-euiCallOut__icon"
                 color="inherit"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  aria-hidden="true"
-                  className="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </button>
-          </EuiButtonIcon>
-          <button
-            aria-controls="advanced-options"
-            aria-expanded={false}
-            className="euiAccordion__button"
-            id="generated-id"
-            onClick={[Function]}
-            type="button"
-          >
-            <span
-              className="euiAccordion__buttonContent"
+                data-euiicon-type="alert"
+              />
+              Unsaved work
+            </p>
+            <div
+              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
             >
-              Advanced options
-            </span>
-          </button>
-        </div>
-        <div
-          aria-labelledby="generated-id"
-          className="euiAccordion__childWrapper"
-          id="advanced-options"
-          role="region"
-          tabIndex={-1}
-        >
-          <EuiResizeObserver
-            onResize={[Function]}
-          >
-            <div>
-              <div>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiText
-                  size="s"
-                >
-                  <div
-                    className="euiText euiText--small"
-                  >
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-                        id="xpack.reporting.panelContent.howToCallGenerationDescription"
-                        values={Object {}}
-                      >
-                        <span>
-                          Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-                        </span>
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <ErrorUnsavedWorkPanel>
-                  <EuiCallOut
-                    color="danger"
-                    iconType="alert"
-                    size="s"
-                    title="Unsaved work"
-                  >
-                    <div
-                      className="euiCallOut euiCallOut--danger euiCallOut--small"
-                    >
-                      <div
-                        className="euiCallOutHeader"
-                      >
-                        <EuiIcon
-                          aria-hidden="true"
-                          className="euiCallOutHeader__icon"
-                          color="inherit"
-                          size="m"
-                          type="alert"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="euiCallOutHeader__icon"
-                            color="inherit"
-                            data-euiicon-type="alert"
-                            size="m"
-                          />
-                        </EuiIcon>
-                        <span
-                          className="euiCallOutHeader__title"
-                        >
-                          Unsaved work
-                        </span>
-                      </div>
-                      <EuiText
-                        color="default"
-                        size="xs"
-                      >
-                        <div
-                          className="euiText euiText--extraSmall"
-                        >
-                          <EuiTextColor
-                            color="default"
-                            component="div"
-                          >
-                            <div
-                              className="euiTextColor euiTextColor--default"
-                              style={Object {}}
-                            >
-                              <EuiText
-                                size="s"
-                              >
-                                <div
-                                  className="euiText euiText--small"
-                                >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="Save your work before copying this URL."
-                                      id="xpack.reporting.panelContent.unsavedStateErrorText"
-                                      values={Object {}}
-                                    >
-                                      <span>
-                                        Save your work before copying this URL.
-                                      </span>
-                                    </FormattedMessage>
-                                  </p>
-                                </div>
-                              </EuiText>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </div>
-                          </EuiTextColor>
-                        </div>
-                      </EuiText>
-                    </div>
-                  </EuiCallOut>
-                </ErrorUnsavedWorkPanel>
+              <div
+                class="euiText emotion-euiText-s"
+              >
+                <p>
+                  <span>
+                    Save your work before copying this URL.
+                  </span>
+                </p>
               </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
             </div>
-          </EuiResizeObserver>
+          </div>
         </div>
       </div>
-    </EuiAccordion>
+    </div>
   </div>
-</EuiForm>
+</div>
 `;
 
 exports[`ScreenCapturePanelContent properly renders a view with "print" layout option 1`] = `
-<EuiForm
-  className="kbnShareContextMenu__finalPanel"
+<div
+  class="euiForm kbnShareContextMenu__finalPanel"
   data-test-subj="shareReportingForm"
 >
   <div
-    className="euiForm kbnShareContextMenu__finalPanel"
-    data-test-subj="shareReportingForm"
+    class="euiText emotion-euiText-s"
   >
-    <EuiText
-      size="s"
+    <p>
+      <span>
+        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
+      </span>
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__fieldWrapper"
     >
       <div
-        className="euiText euiText--small"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
-            description="Here 'reportingType' can be 'PDF' or 'CSV'"
-            id="xpack.reporting.panelContent.generationTimeDescription"
-            values={
-              Object {
-                "objectType": "test-object-type",
-                "reportingType": "Analytical App",
-              }
-            }
-          >
-            <span>
-              Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-            </span>
-          </FormattedMessage>
-        </p>
-      </div>
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      helpText={
-        <FormattedMessage
-          defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
-          id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
-          values={Object {}}
-        />
-      }
-      labelType="label"
-    >
-      <div
-        className="euiFormRow"
-        id="generated-id-row"
-      >
-        <div
-          className="euiFormRow__fieldWrapper"
-        >
-          <EuiSwitch
-            aria-describedby="generated-id-help-0"
-            checked={false}
-            data-test-subj="usePrintLayout"
-            id="generated-id"
-            label={
-              <FormattedMessage
-                defaultMessage="Optimize for printing"
-                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
-                values={Object {}}
-              />
-            }
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-          >
-            <div
-              className="euiSwitch"
-            >
-              <button
-                aria-checked={false}
-                aria-describedby="generated-id-help-0"
-                aria-labelledby="generated-id"
-                className="euiSwitch__button"
-                data-test-subj="usePrintLayout"
-                id="generated-id"
-                onBlur={[Function]}
-                onClick={[Function]}
-                onFocus={[Function]}
-                role="switch"
-                type="button"
-              >
-                <span
-                  className="euiSwitch__body"
-                >
-                  <span
-                    className="euiSwitch__thumb"
-                  />
-                  <span
-                    className="euiSwitch__track"
-                  >
-                    <EuiIcon
-                      className="euiSwitch__icon"
-                      size="m"
-                      type="cross"
-                    >
-                      <span
-                        className="euiSwitch__icon"
-                        data-euiicon-type="cross"
-                        size="m"
-                      />
-                    </EuiIcon>
-                    <EuiIcon
-                      className="euiSwitch__icon euiSwitch__icon--checked"
-                      size="m"
-                      type="check"
-                    >
-                      <span
-                        className="euiSwitch__icon euiSwitch__icon--checked"
-                        data-euiicon-type="check"
-                        size="m"
-                      />
-                    </EuiIcon>
-                  </span>
-                </span>
-              </button>
-              <span
-                className="euiSwitch__label"
-                id="generated-id"
-                onClick={[Function]}
-              >
-                <FormattedMessage
-                  defaultMessage="Optimize for printing"
-                  id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
-                  values={Object {}}
-                >
-                  <span>
-                    Optimize for printing
-                  </span>
-                </FormattedMessage>
-              </span>
-            </div>
-          </EuiSwitch>
-          <EuiFormHelpText
-            className="euiFormRow__text"
-            id="generated-id-help-0"
-            key="0"
-          >
-            <div
-              className="euiFormHelpText euiFormRow__text"
-              id="generated-id-help-0"
-            >
-              <FormattedMessage
-                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
-                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
-                values={Object {}}
-              >
-                <span>
-                  Uses multiple pages, showing at most 2 visualizations per page
-                </span>
-              </FormattedMessage>
-            </div>
-          </EuiFormHelpText>
-        </div>
-      </div>
-    </EuiFormRow>
-    <EuiButton
-      data-test-subj="generateReportButton"
-      disabled={false}
-      fill={true}
-      fullWidth={true}
-      onClick={[Function]}
-      size="s"
-    >
-      <EuiButtonDisplay
-        baseClassName="euiButton"
-        data-test-subj="generateReportButton"
-        disabled={false}
-        element="button"
-        fill={true}
-        fullWidth={true}
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
-        type="button"
+        class="euiSwitch emotion-euiSwitch"
       >
         <button
-          className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
-          data-test-subj="generateReportButton"
-          disabled={false}
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
+          aria-checked="false"
+          aria-describedby="generated-id-help-0"
+          aria-labelledby="generated-id"
+          class="euiSwitch__button"
+          data-test-subj="usePrintLayout"
+          id="generated-id"
+          role="switch"
           type="button"
         >
-          <EuiButtonContent
-            className="euiButton__content"
-            iconSide="left"
-            textProps={
-              Object {
-                "className": "euiButton__text",
-              }
-            }
+          <span
+            class="euiSwitch__body"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              class="euiSwitch__thumb"
+            />
+            <span
+              class="euiSwitch__track"
             >
               <span
-                className="euiButton__text"
-              >
-                <FormattedMessage
-                  defaultMessage="Generate {reportingType}"
-                  id="xpack.reporting.panelContent.generateButtonLabel"
-                  values={
-                    Object {
-                      "reportingType": "Analytical App",
-                    }
-                  }
-                >
-                  <span>
-                    Generate Analytical App
-                  </span>
-                </FormattedMessage>
-              </span>
+                class="euiSwitch__icon"
+                data-euiicon-type="cross"
+              />
+              <span
+                class="euiSwitch__icon euiSwitch__icon--checked"
+                data-euiicon-type="check"
+              />
             </span>
-          </EuiButtonContent>
+          </span>
         </button>
-      </EuiButtonDisplay>
-    </EuiButton>
-    <EuiHorizontalRule
-      margin="s"
-      style={
-        Object {
-          "marginLeft": "-16px",
-          "marginRight": "-16px",
-          "width": "auto",
-        }
-      }
-    >
-      <hr
-        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-        style={
-          Object {
-            "marginLeft": "-16px",
-            "marginRight": "-16px",
-            "width": "auto",
-          }
-        }
-      />
-    </EuiHorizontalRule>
-    <EuiAccordion
-      arrowDisplay="left"
-      buttonContent="Advanced options"
-      buttonElement="button"
-      element="div"
-      id="advanced-options"
-      initialIsOpen={false}
-      isLoading={false}
-      isLoadingMessage={false}
-      paddingSize="none"
-    >
+        <span
+          class="euiSwitch__label"
+          id="generated-id"
+        >
+          <span>
+            Optimize for printing
+          </span>
+        </span>
+      </div>
       <div
-        className="euiAccordion"
+        class="euiFormHelpText euiFormRow__text"
+        id="generated-id-help-0"
       >
-        <div
-          className="euiAccordion__triggerWrapper"
+        <span>
+          Uses multiple pages, showing at most 2 visualizations per page
+        </span>
+      </div>
+    </div>
+  </div>
+  <button
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    data-test-subj="generateReportButton"
+    type="button"
+  >
+    <span
+      class="emotion-euiButtonDisplayContent"
+    >
+      <span>
+        Generate Analytical App
+      </span>
+    </span>
+  </button>
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
+    style="width: auto; margin-left: -16px; margin-right: -16px;"
+  />
+  <div
+    class="euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+    >
+      <button
+        aria-controls="advanced-options"
+        aria-expanded="false"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="advanced-options"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent"
         >
-          <EuiButtonIcon
-            aria-controls="advanced-options"
-            aria-expanded={false}
-            aria-labelledby="generated-id"
-            className="euiAccordion__iconButton"
-            color="text"
-            iconType="arrowRight"
-            onClick={[Function]}
-            tabIndex={-1}
+          Advanced options
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+      id="advanced-options"
+      role="region"
+      tabindex="-1"
+    >
+      <div>
+        <div
+          class=" emotion-euiAccordion__children"
+        >
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-s"
           >
-            <button
-              aria-controls="advanced-options"
-              aria-expanded={false}
-              aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
-              disabled={false}
-              onClick={[Function]}
-              tabIndex={-1}
-              type="button"
+            <p>
+              <span>
+                Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+              </span>
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+          >
+            <p
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
             >
-              <EuiIcon
+              <span
                 aria-hidden="true"
-                className="euiButtonIcon__icon"
+                class="emotion-euiCallOut__icon"
                 color="inherit"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  aria-hidden="true"
-                  className="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </button>
-          </EuiButtonIcon>
-          <button
-            aria-controls="advanced-options"
-            aria-expanded={false}
-            className="euiAccordion__button"
-            id="generated-id"
-            onClick={[Function]}
-            type="button"
-          >
-            <span
-              className="euiAccordion__buttonContent"
+                data-euiicon-type="alert"
+              />
+              Unsaved work
+            </p>
+            <div
+              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
             >
-              Advanced options
-            </span>
-          </button>
-        </div>
-        <div
-          aria-labelledby="generated-id"
-          className="euiAccordion__childWrapper"
-          id="advanced-options"
-          role="region"
-          tabIndex={-1}
-        >
-          <EuiResizeObserver
-            onResize={[Function]}
-          >
-            <div>
-              <div>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiText
-                  size="s"
-                >
-                  <div
-                    className="euiText euiText--small"
-                  >
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-                        id="xpack.reporting.panelContent.howToCallGenerationDescription"
-                        values={Object {}}
-                      >
-                        <span>
-                          Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-                        </span>
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <ErrorUnsavedWorkPanel>
-                  <EuiCallOut
-                    color="danger"
-                    iconType="alert"
-                    size="s"
-                    title="Unsaved work"
-                  >
-                    <div
-                      className="euiCallOut euiCallOut--danger euiCallOut--small"
-                    >
-                      <div
-                        className="euiCallOutHeader"
-                      >
-                        <EuiIcon
-                          aria-hidden="true"
-                          className="euiCallOutHeader__icon"
-                          color="inherit"
-                          size="m"
-                          type="alert"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="euiCallOutHeader__icon"
-                            color="inherit"
-                            data-euiicon-type="alert"
-                            size="m"
-                          />
-                        </EuiIcon>
-                        <span
-                          className="euiCallOutHeader__title"
-                        >
-                          Unsaved work
-                        </span>
-                      </div>
-                      <EuiText
-                        color="default"
-                        size="xs"
-                      >
-                        <div
-                          className="euiText euiText--extraSmall"
-                        >
-                          <EuiTextColor
-                            color="default"
-                            component="div"
-                          >
-                            <div
-                              className="euiTextColor euiTextColor--default"
-                              style={Object {}}
-                            >
-                              <EuiText
-                                size="s"
-                              >
-                                <div
-                                  className="euiText euiText--small"
-                                >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="Save your work before copying this URL."
-                                      id="xpack.reporting.panelContent.unsavedStateErrorText"
-                                      values={Object {}}
-                                    >
-                                      <span>
-                                        Save your work before copying this URL.
-                                      </span>
-                                    </FormattedMessage>
-                                  </p>
-                                </div>
-                              </EuiText>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </div>
-                          </EuiTextColor>
-                        </div>
-                      </EuiText>
-                    </div>
-                  </EuiCallOut>
-                </ErrorUnsavedWorkPanel>
+              <div
+                class="euiText emotion-euiText-s"
+              >
+                <p>
+                  <span>
+                    Save your work before copying this URL.
+                  </span>
+                </p>
               </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
             </div>
-          </EuiResizeObserver>
+          </div>
         </div>
       </div>
-    </EuiAccordion>
+    </div>
   </div>
-</EuiForm>
+</div>
 `;
 
 exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
-<EuiForm
-  className="kbnShareContextMenu__finalPanel"
+<div
+  class="euiForm kbnShareContextMenu__finalPanel"
   data-test-subj="shareReportingForm"
 >
   <div
-    className="euiForm kbnShareContextMenu__finalPanel"
-    data-test-subj="shareReportingForm"
+    class="euiText emotion-euiText-s"
   >
-    <EuiText
-      size="s"
+    <p>
+      <span>
+        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
+      </span>
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <button
+    class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-s-fill-primary"
+    data-test-subj="generateReportButton"
+    type="button"
+  >
+    <span
+      class="emotion-euiButtonDisplayContent"
     >
-      <div
-        className="euiText euiText--small"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
-            description="Here 'reportingType' can be 'PDF' or 'CSV'"
-            id="xpack.reporting.panelContent.generationTimeDescription"
-            values={
-              Object {
-                "objectType": "test-object-type",
-                "reportingType": "Analytical App",
-              }
-            }
-          >
-            <span>
-              Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-            </span>
-          </FormattedMessage>
-        </p>
-      </div>
-    </EuiText>
-    <EuiSpacer
-      size="s"
+      <span>
+        Generate Analytical App
+      </span>
+    </span>
+  </button>
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
+    style="width: auto; margin-left: -16px; margin-right: -16px;"
+  />
+  <div
+    class="euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
     >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
-    <EuiButton
-      data-test-subj="generateReportButton"
-      disabled={false}
-      fill={true}
-      fullWidth={true}
-      onClick={[Function]}
-      size="s"
-    >
-      <EuiButtonDisplay
-        baseClassName="euiButton"
-        data-test-subj="generateReportButton"
-        disabled={false}
-        element="button"
-        fill={true}
-        fullWidth={true}
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
+      <button
+        aria-controls="advanced-options"
+        aria-expanded="false"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton"
+        tabindex="-1"
         type="button"
       >
-        <button
-          className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton--fullWidth"
-          data-test-subj="generateReportButton"
-          disabled={false}
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
-          type="button"
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="advanced-options"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent"
         >
-          <EuiButtonContent
-            className="euiButton__content"
-            iconSide="left"
-            textProps={
-              Object {
-                "className": "euiButton__text",
-              }
-            }
+          Advanced options
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+      id="advanced-options"
+      role="region"
+      tabindex="-1"
+    >
+      <div>
+        <div
+          class=" emotion-euiAccordion__children"
+        >
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-s"
           >
-            <span
-              className="euiButtonContent euiButton__content"
+            <p>
+              <span>
+                Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+              </span>
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger emotion-euiPanel-none-s-danger-euiCallOut"
+          >
+            <p
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-danger"
             >
               <span
-                className="euiButton__text"
-              >
-                <FormattedMessage
-                  defaultMessage="Generate {reportingType}"
-                  id="xpack.reporting.panelContent.generateButtonLabel"
-                  values={
-                    Object {
-                      "reportingType": "Analytical App",
-                    }
-                  }
-                >
-                  <span>
-                    Generate Analytical App
-                  </span>
-                </FormattedMessage>
-              </span>
-            </span>
-          </EuiButtonContent>
-        </button>
-      </EuiButtonDisplay>
-    </EuiButton>
-    <EuiHorizontalRule
-      margin="s"
-      style={
-        Object {
-          "marginLeft": "-16px",
-          "marginRight": "-16px",
-          "width": "auto",
-        }
-      }
-    >
-      <hr
-        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
-        style={
-          Object {
-            "marginLeft": "-16px",
-            "marginRight": "-16px",
-            "width": "auto",
-          }
-        }
-      />
-    </EuiHorizontalRule>
-    <EuiAccordion
-      arrowDisplay="left"
-      buttonContent="Advanced options"
-      buttonElement="button"
-      element="div"
-      id="advanced-options"
-      initialIsOpen={false}
-      isLoading={false}
-      isLoadingMessage={false}
-      paddingSize="none"
-    >
-      <div
-        className="euiAccordion"
-      >
-        <div
-          className="euiAccordion__triggerWrapper"
-        >
-          <EuiButtonIcon
-            aria-controls="advanced-options"
-            aria-expanded={false}
-            aria-labelledby="generated-id"
-            className="euiAccordion__iconButton"
-            color="text"
-            iconType="arrowRight"
-            onClick={[Function]}
-            tabIndex={-1}
-          >
-            <button
-              aria-controls="advanced-options"
-              aria-expanded={false}
-              aria-labelledby="generated-id"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
-              disabled={false}
-              onClick={[Function]}
-              tabIndex={-1}
-              type="button"
-            >
-              <EuiIcon
                 aria-hidden="true"
-                className="euiButtonIcon__icon"
+                class="emotion-euiCallOut__icon"
                 color="inherit"
-                size="m"
-                type="arrowRight"
-              >
-                <span
-                  aria-hidden="true"
-                  className="euiButtonIcon__icon"
-                  color="inherit"
-                  data-euiicon-type="arrowRight"
-                  size="m"
-                />
-              </EuiIcon>
-            </button>
-          </EuiButtonIcon>
-          <button
-            aria-controls="advanced-options"
-            aria-expanded={false}
-            className="euiAccordion__button"
-            id="generated-id"
-            onClick={[Function]}
-            type="button"
-          >
-            <span
-              className="euiAccordion__buttonContent"
+                data-euiicon-type="alert"
+              />
+              Unsaved work
+            </p>
+            <div
+              class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
             >
-              Advanced options
-            </span>
-          </button>
-        </div>
-        <div
-          aria-labelledby="generated-id"
-          className="euiAccordion__childWrapper"
-          id="advanced-options"
-          role="region"
-          tabIndex={-1}
-        >
-          <EuiResizeObserver
-            onResize={[Function]}
-          >
-            <div>
-              <div>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiText
-                  size="s"
-                >
-                  <div
-                    className="euiText euiText--small"
-                  >
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-                        id="xpack.reporting.panelContent.howToCallGenerationDescription"
-                        values={Object {}}
-                      >
-                        <span>
-                          Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-                        </span>
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <ErrorUnsavedWorkPanel>
-                  <EuiCallOut
-                    color="danger"
-                    iconType="alert"
-                    size="s"
-                    title="Unsaved work"
-                  >
-                    <div
-                      className="euiCallOut euiCallOut--danger euiCallOut--small"
-                    >
-                      <div
-                        className="euiCallOutHeader"
-                      >
-                        <EuiIcon
-                          aria-hidden="true"
-                          className="euiCallOutHeader__icon"
-                          color="inherit"
-                          size="m"
-                          type="alert"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="euiCallOutHeader__icon"
-                            color="inherit"
-                            data-euiicon-type="alert"
-                            size="m"
-                          />
-                        </EuiIcon>
-                        <span
-                          className="euiCallOutHeader__title"
-                        >
-                          Unsaved work
-                        </span>
-                      </div>
-                      <EuiText
-                        color="default"
-                        size="xs"
-                      >
-                        <div
-                          className="euiText euiText--extraSmall"
-                        >
-                          <EuiTextColor
-                            color="default"
-                            component="div"
-                          >
-                            <div
-                              className="euiTextColor euiTextColor--default"
-                              style={Object {}}
-                            >
-                              <EuiText
-                                size="s"
-                              >
-                                <div
-                                  className="euiText euiText--small"
-                                >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="Save your work before copying this URL."
-                                      id="xpack.reporting.panelContent.unsavedStateErrorText"
-                                      values={Object {}}
-                                    >
-                                      <span>
-                                        Save your work before copying this URL.
-                                      </span>
-                                    </FormattedMessage>
-                                  </p>
-                                </div>
-                              </EuiText>
-                              <EuiSpacer
-                                size="s"
-                              >
-                                <div
-                                  className="euiSpacer euiSpacer--s"
-                                />
-                              </EuiSpacer>
-                            </div>
-                          </EuiTextColor>
-                        </div>
-                      </EuiText>
-                    </div>
-                  </EuiCallOut>
-                </ErrorUnsavedWorkPanel>
+              <div
+                class="euiText emotion-euiText-s"
+              >
+                <p>
+                  <span>
+                    Save your work before copying this URL.
+                  </span>
+                </p>
               </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
             </div>
-          </EuiResizeObserver>
+          </div>
         </div>
       </div>
-    </EuiAccordion>
+    </div>
   </div>
-</EuiForm>
+</div>
 `;

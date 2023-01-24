@@ -29,10 +29,10 @@ export default class RowParser {
       return MODE.BETWEEN_REQUESTS;
     }
     const mode = this.editor.getLineState(lineNumber);
+
     if (!mode) {
       return MODE.BETWEEN_REQUESTS;
     } // shouldn't really happen
-
     // If another "start" mode is added here because we want to allow for new language highlighting
     // please see https://github.com/elastic/kibana/pull/51446 for a discussion on why
     // should consider a different approach.
@@ -40,12 +40,26 @@ export default class RowParser {
       return MODE.IN_REQUEST;
     }
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
-    if (!line || line[0] === '#') {
+
+    // Check if the line has variables, depending on the request type, (e.g. single line, multi doc requests) return the correct mode
+    if (line && /(\${\w+})/.test(line)) {
+      lineNumber++;
+      line = (this.editor.getLineValue(lineNumber) || '').trim();
+
+      if (line.startsWith('{')) {
+        return MODE.REQUEST_START;
+      }
+      // next line is another request
+      // eslint-disable-next-line no-bitwise
+      return MODE.REQUEST_START | MODE.REQUEST_END;
+    }
+    if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('/*')) {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 
-    if (line.indexOf('}', line.length - 1) >= 0) {
-      // check for a multi doc request (must start a new json doc immediately after this one end.
+    // Check for multi doc requests
+    if (line.endsWith('}') && !this.isRequestLine(line)) {
+      // check for a multi doc request must start a new json doc immediately after this one end.
       lineNumber++;
       if (lineNumber < linesCount + 1) {
         line = (this.editor.getLineValue(lineNumber) || '').trim();
@@ -139,5 +153,20 @@ export default class RowParser {
     while ((t || tokenIter.getCurrentPosition().lineNumber > 1) && this.isEmptyToken(t))
       t = tokenIter.stepBackward();
     return t;
+  }
+
+  isCommentToken(token: Token | null) {
+    return (
+      token &&
+      token.type &&
+      (token.type === 'comment.punctuation' ||
+        token.type === 'comment.line' ||
+        token.type === 'comment.block')
+    );
+  }
+
+  isRequestLine(line: string) {
+    const methods = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS'];
+    return methods.some((m) => line.startsWith(m));
   }
 }

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { FlowTarget } from '../../../../../common/search_strategy';
-import { CriteriaFields } from '../types';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import type { CriteriaFields } from '../types';
 
-export const networkToCriteria = (ip: string, flowTarget: FlowTarget): CriteriaFields[] => {
-  if (flowTarget === FlowTarget.source) {
+export const networkToCriteria = (
+  ip: string,
+  flowTarget: FlowTargetSourceDest
+): CriteriaFields[] => {
+  if (flowTarget === FlowTargetSourceDest.source) {
     return [{ fieldName: 'source.ip', fieldValue: ip }];
-  } else if (flowTarget === FlowTarget.destination) {
+  } else if (flowTarget === FlowTargetSourceDest.destination) {
     return [{ fieldName: 'destination.ip', fieldValue: ip }];
   } else {
     return [];

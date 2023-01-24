@@ -5,100 +5,99 @@
  * 2.0.
  */
 
+import { useForm as useHookForm } from 'react-hook-form';
 import { isArray, isEmpty, map } from 'lodash';
-import uuid from 'uuid';
-import { produce } from 'immer';
-import { RefObject, useMemo } from 'react';
-
-import { useForm } from '../../shared_imports';
-import { createFormSchema } from '../../packs/queries/schema';
-import { PackFormData } from '../../packs/queries/use_pack_query_form';
+import type { Draft } from 'immer';
+import produce from 'immer';
+import { useMemo } from 'react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { useSavedQueries } from '../use_saved_queries';
-import { SavedQueryFormRefObject } from '.';
 
-const SAVED_QUERY_FORM_ID = 'savedQueryForm';
-
-interface UseSavedQueryFormProps {
-  defaultValue?: unknown;
-  handleSubmit: (payload: unknown) => Promise<void>;
-  savedQueryFormRef: RefObject<SavedQueryFormRefObject>;
+export interface SavedQuerySOFormData {
+  id?: string;
+  description?: string;
+  query?: string;
+  interval?: string;
+  snapshot?: boolean;
+  removed?: boolean;
+  platform?: string;
+  version?: string | undefined;
+  ecs_mapping?: ECSMapping | undefined;
 }
 
-export const useSavedQueryForm = ({
-  defaultValue,
-  handleSubmit,
-  savedQueryFormRef,
-}: UseSavedQueryFormProps) => {
+export interface SavedQueryFormData {
+  id?: string;
+  description?: string;
+  query?: string;
+  interval?: number;
+  snapshot?: boolean;
+  removed?: boolean;
+  platform?: string;
+  version?: string[];
+  ecs_mapping: ECSMapping | undefined;
+}
+
+interface UseSavedQueryFormProps {
+  defaultValue?: SavedQuerySOFormData;
+}
+
+const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
+  id: payload.id,
+  description: payload.description,
+  query: payload.query,
+  interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  snapshot: payload.snapshot ?? true,
+  removed: payload.removed ?? false,
+  platform: payload.platform,
+  version: payload.version ? [payload.version] : [],
+  ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
+});
+
+export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuerySOFormData =>
+  // @ts-expect-error update types
+  produce<SavedQueryFormData>(payload, (draft: Draft<SavedQuerySOFormData>) => {
+    if (isArray(draft.version)) {
+      if (!draft.version.length) {
+        draft.version = '';
+      } else {
+        draft.version = draft.version[0];
+      }
+    }
+
+    if (isArray(draft.platform) && !draft.platform.length) {
+      delete draft.platform;
+    }
+
+    if (draft.interval) {
+      draft.interval = draft.interval + '';
+    }
+
+    return draft;
+  });
+
+export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
-  const ids: string[] = useMemo<string[]>(
-    () => map(data?.saved_objects, 'attributes.id') ?? [],
-    [data]
-  );
+  const ids: string[] = useMemo<string[]>(() => map(data?.data, 'attributes.id') ?? [], [data]);
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
-    // @ts-expect-error update types
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
+
     return res;
   }, [ids, defaultValue]);
-  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
-    () => createFormSchema(idSet),
-    [idSet]
-  );
-  return useForm({
-    id: SAVED_QUERY_FORM_ID + uuid.v4(),
-    schema: formSchema,
-    onSubmit: async (formData, isValid) => {
-      const ecsFieldValue = await savedQueryFormRef?.current?.validateEcsMapping();
 
-      if (isValid) {
-        try {
-          await handleSubmit({
-            ...formData,
-            ecs_mapping: ecsFieldValue,
-          });
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
-    },
-    // @ts-expect-error update types
-    defaultValue,
-    serializer: (payload) =>
-      produce(payload, (draft) => {
-        // @ts-expect-error update types
-        if (draft.platform?.split(',').length === 3) {
-          // if all platforms are checked then use undefined
-          // @ts-expect-error update types
-          delete draft.platform;
-        }
-        if (isArray(draft.version)) {
-          if (!draft.version.length) {
-            // @ts-expect-error update types
-            delete draft.version;
-          } else {
-            draft.version = draft.version[0];
-          }
-        }
-        if (isEmpty(draft.ecs_mapping)) {
-          // @ts-expect-error update types
-          delete draft.ecs_mapping;
-        }
-        // @ts-expect-error update types
-        draft.interval = draft.interval + '';
-        return draft;
-      }),
-    // @ts-expect-error update types
-    deserializer: (payload) => {
-      if (!payload) return {} as PackFormData;
-
-      return {
-        id: payload.id,
-        description: payload.description,
-        query: payload.query,
-        interval: payload.interval ?? 3600,
-        platform: payload.platform,
-        version: payload.version ? [payload.version] : [],
-        ecs_mapping: payload.ecs_mapping ?? {},
-      };
-    },
-  });
+  return {
+    serializer: savedQueryDataSerializer,
+    idSet,
+    ...useHookForm<SavedQueryFormData>({
+      defaultValues: defaultValue
+        ? deserializer(defaultValue)
+        : {
+            id: '',
+            query: '',
+            interval: 3600,
+            ecs_mapping: {},
+            snapshot: true,
+          },
+    }),
+  };
 };

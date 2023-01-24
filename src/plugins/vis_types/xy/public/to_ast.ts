@@ -7,17 +7,19 @@
  */
 
 import moment from 'moment';
-
+import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import {
   VisToExpressionAst,
   getVisSchemas,
   DateHistogramParams,
   HistogramParams,
-} from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { BUCKET_TYPES } from '../../../data/public';
-import { Labels } from '../../../charts/public';
-
+  LegendSize,
+} from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
 import {
   Dimensions,
   Dimension,
@@ -27,91 +29,225 @@ import {
   ThresholdLine,
   ValueAxis,
   Scale,
-  TimeMarker,
+  ChartMode,
+  ScaleType,
 } from './types';
-import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
-import { XyVisType } from '../common';
-import { getEsaggsFn } from './to_ast_esaggs';
-import { TimeRangeBounds } from '../../../data/common';
+import { ChartType } from '../common';
 import { getSeriesParams } from './utils/get_series_params';
 import { getSafeId } from './utils/accessors';
+import { Bounds, getCurveType, getLineStyle, getMode, getYAxisPosition } from './utils/common';
 
-const prepareLabel = (data: Labels) => {
-  const label = buildExpressionFunction('label', {
-    ...data,
+type YDimension = Omit<Dimension, 'accessor'> & { accessor: string };
+
+const prepareLengend = (params: VisParams, legendSize?: LegendSize) => {
+  const legend = buildExpressionFunction('legendConfig', {
+    isVisible: params.addLegend,
+    maxLines: params.maxLegendLines,
+    position: params.legendPosition,
+    shouldTruncate: params.truncateLegend,
+    showSingleSeries: true,
+    legendSize,
   });
 
-  return buildExpression([label]);
+  return buildExpression([legend]);
 };
 
-const prepareScale = (data: Scale) => {
-  const scale = buildExpressionFunction('visscale', {
-    ...data,
+const getCorrectAccessor = (yAccessor: Dimension | YDimension, aggId: string) => {
+  return typeof yAccessor.accessor === 'number'
+    ? `col-${yAccessor.accessor}-${aggId}`
+    : yAccessor.accessor;
+};
+
+const prepareDecoration = (axisId: string, yAccessor: YDimension, aggId: string) => {
+  const dataDecorationConfig = buildExpressionFunction('dataDecorationConfig', {
+    forAccessor: getCorrectAccessor(yAccessor, aggId),
+    axisId,
   });
 
-  return buildExpression([scale]);
+  return buildExpression([dataDecorationConfig]);
 };
 
-const prepareThresholdLine = (data: ThresholdLine) => {
-  const thresholdLine = buildExpressionFunction('thresholdline', {
-    ...data,
+const preparePalette = (palette: PaletteOutput) => {
+  const paletteExp = buildExpressionFunction(
+    palette.name === 'custom' ? 'palette' : 'system_palette',
+    palette.name === 'custom'
+      ? { ...palette.params }
+      : {
+          name: palette.name,
+        }
+  );
+
+  return buildExpression([paletteExp]);
+};
+
+const prepareLayers = (
+  seriesParam: SeriesParam,
+  isHistogram: boolean,
+  valueAxes: ValueAxis[],
+  yAccessors: YDimension[],
+  xAccessor: Dimension | null,
+  splitAccessors?: Dimension[],
+  markSizeAccessor?: Dimension,
+  palette?: PaletteOutput,
+  xScale?: Scale
+) => {
+  // valueAxis.position !== Position.Left
+  const isHorizontal = valueAxes.some((valueAxis) => {
+    return (
+      seriesParam.valueAxis === valueAxis.id &&
+      valueAxis.position !== Position.Left &&
+      valueAxis.position !== Position.Right
+    );
+  });
+  const isBar = seriesParam.type === ChartType.Histogram;
+  const dataLayer = buildExpressionFunction('extendedDataLayer', {
+    seriesType: isBar ? 'bar' : seriesParam.type,
+    isHistogram,
+    isHorizontal,
+    isStacked: seriesParam.mode === ChartMode.Stacked,
+    lineWidth: !isBar ? seriesParam.lineWidth : undefined,
+    showPoints: !isBar ? seriesParam.showCircles : undefined,
+    pointsRadius: !isBar ? seriesParam.circlesRadius ?? 3 : undefined,
+    showLines: !isBar ? seriesParam.drawLinesBetweenPoints : undefined,
+    curveType: getCurveType(seriesParam.interpolate),
+    decorations: yAccessors.map((accessor) =>
+      prepareDecoration(seriesParam.valueAxis, accessor, seriesParam.data.id)
+    ),
+    accessors: yAccessors.map((accessor) => prepareVisDimension(accessor)),
+    xAccessor: xAccessor ? prepareVisDimension(xAccessor) : 'all',
+    xScaleType: getScaleType(
+      xScale,
+      xAccessor?.format?.id === 'number' ||
+        (xAccessor?.format?.params?.id === 'number' &&
+          xAccessor?.format?.id !== BUCKET_TYPES.RANGE &&
+          xAccessor?.format?.id !== BUCKET_TYPES.TERMS),
+      'date' in (xAccessor?.params || {}),
+      'interval' in (xAccessor?.params || {})
+    ),
+    splitAccessors: splitAccessors ? splitAccessors.map(prepareVisDimension) : undefined,
+    markSizeAccessor:
+      markSizeAccessor && !isBar ? prepareVisDimension(markSizeAccessor) : undefined,
+    palette: palette ? preparePalette(palette) : undefined,
+    columnToLabel: JSON.stringify(
+      [...yAccessors, xAccessor, ...(splitAccessors ?? [])].reduce<Record<string, string>>(
+        (acc, dimension) => {
+          if (dimension) {
+            acc[getCorrectAccessor(dimension, seriesParam.data.id)] = dimension.label;
+          }
+
+          return acc;
+        },
+        {}
+      )
+    ),
   });
 
-  return buildExpression([thresholdLine]);
+  return buildExpression([dataLayer]);
 };
 
-const prepareTimeMarker = (data: TimeMarker) => {
-  const timeMarker = buildExpressionFunction('timemarker', {
-    ...data,
+const getLabelArgs = (data: CategoryAxis, isTimeChart?: boolean) => {
+  return {
+    truncate: data.labels.truncate,
+    labelsOrientation: -(data.labels.rotate ?? (isTimeChart ? 0 : 90)),
+    showOverlappingLabels: data.labels.filter === false,
+    showDuplicates: data.labels.filter === false,
+    labelColor: data.labels.color,
+    showLabels: data.labels.show,
+  };
+};
+
+const prepareAxisExtentConfig = (scale: Scale, bounds?: Bounds) => {
+  const axisExtentConfig = buildExpressionFunction('axisExtentConfig', {
+    mode: getMode(scale, bounds),
+    lowerBound: bounds?.min || scale.min,
+    upperBound: bounds?.max || scale.max,
+    enforce: true,
   });
 
-  return buildExpression([timeMarker]);
+  return buildExpression([axisExtentConfig]);
 };
 
-const prepareCategoryAxis = (data: CategoryAxis) => {
-  const categoryAxis = buildExpressionFunction('categoryaxis', {
-    id: data.id,
-    show: data.show,
-    position: data.position,
-    type: data.type,
+function getScaleType(
+  scale?: Scale,
+  isNumber?: boolean,
+  isTime = false,
+  isHistogram = false
+): ECScaleType | undefined {
+  if (isTime) return ECScaleType.Time;
+  if (isHistogram) return ECScaleType.Linear;
+
+  if (!isNumber) {
+    return ECScaleType.Ordinal;
+  }
+
+  const type = scale?.type;
+  if (type === ScaleType.SquareRoot) {
+    return ECScaleType.Sqrt;
+  }
+
+  return type;
+}
+
+function getXAxisPosition(position: Position) {
+  if (position === Position.Left) {
+    return Position.Bottom;
+  }
+
+  if (position === Position.Right) {
+    return Position.Top;
+  }
+
+  return position;
+}
+
+const prepareXAxis = (
+  data: CategoryAxis,
+  showGridLines?: boolean,
+  bounds?: Bounds,
+  isTimeChart?: boolean
+) => {
+  const xAxisConfig = buildExpressionFunction('xAxisConfig', {
+    hide: !data.show,
+    position: getXAxisPosition(data.position),
     title: data.title.text,
-    scale: prepareScale(data.scale),
-    labels: prepareLabel(data.labels),
+    extent: prepareAxisExtentConfig(data.scale, bounds),
+    showGridLines,
+    ...getLabelArgs(data, isTimeChart),
   });
 
-  return buildExpression([categoryAxis]);
+  return buildExpression([xAxisConfig]);
 };
 
-const prepareValueAxis = (data: ValueAxis) => {
-  const categoryAxis = buildExpressionFunction('valueaxis', {
-    name: data.name,
-    axisParams: prepareCategoryAxis({
-      ...data,
-    }),
+const prepareYAxis = (data: ValueAxis, showGridLines?: boolean) => {
+  const yAxisConfig = buildExpressionFunction('yAxisConfig', {
+    id: data.id,
+    hide: !data.show,
+    position: getYAxisPosition(data.position),
+    title: data.title.text,
+    extent: prepareAxisExtentConfig(data.scale),
+    boundsMargin: data.scale.boundsMargin,
+    scaleType: getScaleType(data.scale, true),
+    mode: data.scale.mode,
+    showGridLines,
+    ...getLabelArgs(data),
   });
 
-  return buildExpression([categoryAxis]);
+  return buildExpression([yAxisConfig]);
 };
 
-const prepareSeriesParam = (data: SeriesParam) => {
-  const seriesParam = buildExpressionFunction('seriesparam', {
-    label: data.data.label,
-    id: data.data.id,
-    drawLinesBetweenPoints: data.drawLinesBetweenPoints,
-    interpolate: data.interpolate,
-    lineWidth: data.lineWidth,
-    mode: data.mode,
-    show: data.show,
-    showCircles: data.showCircles,
-    circlesRadius: data.circlesRadius,
-    type: data.type,
-    valueAxis: data.valueAxis,
+const prepareReferenceLine = (thresholdLine: ThresholdLine, axisId: string) => {
+  const referenceLine = buildExpressionFunction('referenceLine', {
+    value: thresholdLine.value,
+    color: thresholdLine.color,
+    lineWidth: thresholdLine.width,
+    lineStyle: getLineStyle(thresholdLine.style),
+    axisId,
   });
 
-  return buildExpression([seriesParam]);
+  return buildExpression([referenceLine]);
 };
 
-const prepareVisDimension = (data: Dimension) => {
+const prepareVisDimension = (data: Dimension | YDimension) => {
   const visDimension = buildExpressionFunction('visdimension', { accessor: data.accessor });
 
   if (data.format) {
@@ -122,16 +258,8 @@ const prepareVisDimension = (data: Dimension) => {
   return buildExpression([visDimension]);
 };
 
-const prepareXYDimension = (data: Dimension) => {
-  const xyDimension = buildExpressionFunction('xydimension', {
-    params: JSON.stringify(data.params),
-    aggType: data.aggType,
-    label: data.label,
-    visDimension: prepareVisDimension(data),
-  });
-
-  return buildExpression([xyDimension]);
-};
+export const isDateHistogramParams = (params: Dimension['params']): params is DateHistogramParams =>
+  (params as DateHistogramParams).date;
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
@@ -158,9 +286,12 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const finalSeriesParams = updatedSeries ?? vis.params.seriesParams;
 
+  let isHistogram = false;
+
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
+      isHistogram = true;
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
       (dimensions.x.params as DateHistogramParams).intervalESUnit = esUnit;
@@ -178,6 +309,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         };
       }
     } else if (xAgg.type.name === BUCKET_TYPES.HISTOGRAM) {
+      isHistogram = true;
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
       await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, vis.data.searchSource, {
@@ -204,40 +336,109 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     }
   });
 
-  const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
-    type: vis.type.name as XyVisType,
-    chartType: vis.params.type,
-    addTimeMarker: vis.params.addTimeMarker,
-    truncateLegend: vis.params.truncateLegend,
-    maxLegendLines: vis.params.maxLegendLines,
-    addLegend: vis.params.addLegend,
-    addTooltip: vis.params.addTooltip,
-    legendPosition: vis.params.legendPosition,
+  let legendSize = vis.params.legendSize;
+
+  if (vis.params.legendPosition === Position.Top || vis.params.legendPosition === Position.Bottom) {
+    legendSize = LegendSize.AUTO;
+  }
+
+  const yAccessors = (dimensions.y || []).reduce<Record<string, YDimension[]>>(
+    (acc, yDimension) => {
+      const yAgg = responseAggs[yDimension.accessor];
+      const aggId = getSafeId(yAgg.id);
+      const dimension: YDimension = {
+        ...yDimension,
+        accessor: getCorrectAccessor(yDimension, yAgg.id),
+      };
+      if (acc[aggId]) {
+        acc[aggId].push(dimension);
+      } else {
+        acc[aggId] = [dimension];
+      }
+      return acc;
+    },
+    {}
+  );
+
+  const xScale = vis.params.categoryAxes[0].scale;
+
+  let mapColumn;
+
+  if (!dimensions.x) {
+    mapColumn = buildExpressionFunction('mapColumn', {
+      id: 'all',
+      expression: '_all',
+      name: i18n.translate('visTypeXy.allDocsTitle', {
+        defaultMessage: 'All docs',
+      }),
+    });
+  }
+
+  const visibleSeries = finalSeriesParams.filter(
+    (param) => param.show && yAccessors[param.data.id]
+  );
+
+  const visTypeXy = buildExpressionFunction('layeredXyVis', {
+    layers: [
+      ...visibleSeries.map((seriesParams) =>
+        prepareLayers(
+          seriesParams,
+          isHistogram,
+          vis.params.valueAxes,
+          yAccessors[seriesParams.data.id],
+          dimensions.x,
+          dimensions.series,
+          dimensions.z ? dimensions.z[0] : undefined,
+          vis.params.palette,
+          xScale
+        )
+      ),
+      ...(vis.params.thresholdLine.show
+        ? [prepareReferenceLine(vis.params.thresholdLine, vis.params.valueAxes[0].id)]
+        : []),
+    ],
+    addTimeMarker: vis.params.addTimeMarker && (dimensions.x?.params as DateHistogramParams)?.date,
     orderBucketsBySum: vis.params.orderBucketsBySum,
-    categoryAxes: vis.params.categoryAxes.map(prepareCategoryAxis),
-    valueAxes: vis.params.valueAxes.map(prepareValueAxis),
-    seriesParams: finalSeriesParams.map(prepareSeriesParam),
-    labels: prepareLabel(vis.params.labels),
-    thresholdLine: prepareThresholdLine(vis.params.thresholdLine),
-    gridCategoryLines: vis.params.grid.categoryLines,
-    gridValueAxis: vis.params.grid.valueAxis,
-    radiusRatio: vis.params.radiusRatio,
-    isVislibVis: vis.params.isVislibVis,
+    fittingFunction: vis.params.fittingFunction
+      ? vis.params.fittingFunction.charAt(0).toUpperCase() + vis.params.fittingFunction.slice(1)
+      : undefined,
     detailedTooltip: vis.params.detailedTooltip,
-    fittingFunction: vis.params.fittingFunction,
-    times: vis.params.times.map(prepareTimeMarker),
-    palette: vis.params.palette.name,
     fillOpacity: vis.params.fillOpacity,
-    xDimension: dimensions.x ? prepareXYDimension(dimensions.x) : null,
-    yDimension: dimensions.y.map(prepareXYDimension),
-    zDimension: dimensions.z?.map(prepareXYDimension),
-    widthDimension: dimensions.width?.map(prepareXYDimension),
-    seriesDimension: dimensions.series?.map(prepareXYDimension),
-    splitRowDimension: dimensions.splitRow?.map(prepareXYDimension),
-    splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
+    showTooltip: vis.params.addTooltip,
+    markSizeRatio:
+      dimensions.z &&
+      visibleSeries.some((param) => param.type === ChartType.Area || param.type === ChartType.Line)
+        ? vis.params.radiusRatio * 0.6 // NOTE: downscale ratio to match current vislib implementation
+        : undefined,
+    legend: prepareLengend(vis.params, legendSize),
+    xAxisConfig: prepareXAxis(
+      vis.params.categoryAxes[0],
+      vis.params.grid.categoryLines,
+      dimensions.x?.params && isDateHistogramParams(dimensions.x?.params)
+        ? dimensions.x?.params.bounds
+        : undefined,
+      dimensions.x?.params && isDateHistogramParams(dimensions.x?.params)
+        ? dimensions.x?.params.date
+        : undefined
+    ), // as we have only one x axis
+    yAxisConfigs: vis.params.valueAxes
+      .filter((axis) => visibleSeries.some((seriesParam) => seriesParam.valueAxis === axis.id))
+      .map((valueAxis) => prepareYAxis(valueAxis, vis.params.grid.valueAxis === valueAxis.id)),
+    minTimeBarInterval:
+      dimensions.x?.params &&
+      isDateHistogramParams(dimensions.x?.params) &&
+      dimensions.x?.params.date &&
+      visibleSeries.some((param) => param.type === ChartType.Histogram)
+        ? dimensions.x?.params.intervalESValue + dimensions.x?.params.intervalESUnit
+        : undefined,
+    splitColumnAccessor: dimensions.splitColumn?.map(prepareVisDimension),
+    splitRowAccessor: dimensions.splitRow?.map(prepareVisDimension),
+    valueLabels: vis.params.labels.show ? 'show' : 'hide',
+    valuesInLegend: vis.params.labels.show,
+    singleTable: true,
   });
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+  const ast = buildExpression(mapColumn ? [mapColumn, visTypeXy] : [visTypeXy]);
 
   return ast.toAst();
 };

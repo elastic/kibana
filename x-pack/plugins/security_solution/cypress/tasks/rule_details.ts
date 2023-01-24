@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { Exception } from '../objects/exception';
+import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
-  ADD_EXCEPTIONS_BTN,
-  CLOSE_ALERTS_CHECKBOX,
-  CONFIRM_BTN,
+  ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
+  ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER,
+  EXCEPTION_ITEM_VIEWER_SEARCH,
   FIELD_INPUT,
-  LOADING_SPINNER,
-  OPERATOR_INPUT,
-  VALUES_INPUT,
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
-  BACK_TO_RULES,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -28,31 +24,28 @@ import {
   INDEX_PATTERNS_DETAILS,
   DETAILS_TITLE,
   DETAILS_DESCRIPTION,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EDIT_EXCEPTION_BTN,
+  ENDPOINT_EXCEPTIONS_TAB,
+  EDIT_RULE_SETTINGS_LINK,
+  BACK_TO_RULES_TABLE,
 } from '../screens/rule_details';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  selectBulkCloseAlerts,
+  submitNewExceptionItem,
+} from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const enablesRule = () => {
-  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then(({ response }) => {
+  cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
   });
-};
-
-export const addsException = (exception: Exception) => {
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('exist');
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
-  });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-  cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.exist');
 };
 
 export const addsFieldsToTimeline = (search: string, fields: string[]) => {
@@ -62,28 +55,45 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
   closeFieldsBrowser();
 };
 
-export const openExceptionFlyoutFromRuleSettings = () => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
+export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
 };
 
-export const addsExceptionFromRuleSettings = (exception: Exception) => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
-  exception.values.forEach((value) => {
-    cy.get(VALUES_INPUT).type(`${value}{enter}`);
+export const searchForExceptionItem = (query: string) => {
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}`).trigger('keydown', {
+    key: 'Enter',
+    keyCode: 13,
+    code: 'Enter',
+    type: 'keydown',
   });
-  cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-  cy.get(CONFIRM_BTN).click();
-  cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-  cy.get(CONFIRM_BTN).should('not.exist');
+};
+
+export const addExceptionFlyoutFromViewerHeader = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER).trigger('click');
+      return $el.find(FIELD_INPUT);
+    })
+    .should('be.visible');
+};
+
+export const addExceptionFromRuleDetails = (exception: Exception) => {
+  addExceptionFlyoutFromViewerHeader();
+  addExceptionConditions(exception);
+  submitNewExceptionItem();
+};
+
+export const addFirstExceptionFromRuleDetails = (exception: Exception, name: string) => {
+  openExceptionFlyoutFromEmptyViewerPrompt();
+  addExceptionFlyoutItemName(name);
+  addExceptionConditions(exception);
+  selectBulkCloseAlerts();
+  submitNewExceptionItem();
 };
 
 export const goToAlertsTab = () => {
@@ -91,15 +101,23 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(EXCEPTIONS_TAB).trigger('click');
-      return $el.find(ADD_EXCEPTIONS_BTN);
-    })
-    .should('be.visible');
+  cy.get(EXCEPTIONS_TAB).should('exist');
+  cy.get(EXCEPTIONS_TAB).click();
+};
+
+export const goToEndpointExceptionsTab = () => {
+  cy.get(ENDPOINT_EXCEPTIONS_TAB).should('exist');
+  cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
+};
+
+export const openEditException = (index = 0) => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
 };
 
 export const removeException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
@@ -113,15 +131,22 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const goBackToAllRulesTable = () => {
-  cy.get(BACK_TO_RULES).click();
+export const goBackToRulesTable = () => {
+  cy.get(BACK_TO_RULES_TABLE).click();
 };
 
-export const getDetails = (title: string) =>
-  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+export const getDetails = (title: string | RegExp) =>
+  cy.contains(DETAILS_TITLE, title).next(DETAILS_DESCRIPTION);
+
+export const assertDetailsNotExist = (title: string | RegExp) =>
+  cy.get(DETAILS_TITLE).contains(title).should('not.exist');
 
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
   });
+};
+
+export const goToRuleEditSettings = () => {
+  cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };

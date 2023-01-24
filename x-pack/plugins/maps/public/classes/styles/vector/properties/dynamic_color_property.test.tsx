@@ -13,7 +13,6 @@ jest.mock('../components/vector_style_editor', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Feature, Point } from 'geojson';
 
 import { DynamicColorProperty } from './dynamic_color_property';
 import {
@@ -158,7 +157,7 @@ describe('renderLegendDetailRow', () => {
   });
 
   describe('categorical', () => {
-    test('Should render categorical legend with breaks from default', async () => {
+    test('Should render categorical legend with breaks from color ramp', async () => {
       const colorStyle = makeProperty({
         type: COLOR_MAP_TYPE.CATEGORICAL,
         useCustomColorPalette: false,
@@ -208,38 +207,6 @@ describe('renderLegendDetailRow', () => {
   });
 });
 
-function makeFeatures(foobarPropValues: string[]) {
-  return foobarPropValues.map((value: string) => {
-    return {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [-10, 0],
-      } as Point,
-      properties: {
-        foobar: value,
-      },
-    } as Feature;
-  });
-}
-
-test('Should pluck the categorical style-meta', async () => {
-  const colorStyle = makeProperty({
-    type: COLOR_MAP_TYPE.CATEGORICAL,
-    colorCategory: 'palette_0',
-    fieldMetaOptions,
-  });
-
-  const features = makeFeatures(['CN', 'CN', 'US', 'CN', 'US', 'IN']);
-  const meta = colorStyle.pluckCategoricalStyleMetaFromFeatures(features);
-
-  expect(meta).toEqual([
-    { key: 'CN', count: 3 },
-    { key: 'US', count: 2 },
-    { key: 'IN', count: 1 },
-  ]);
-});
-
 test('Should pluck the categorical style-meta from fieldmeta', async () => {
   const colorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
@@ -257,6 +224,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
         { key: 'US', doc_count: 2 },
         { key: 'IN', doc_count: 1 },
       ],
+      sum_other_doc_count: 0,
     },
   });
 
@@ -601,16 +569,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
   });
 
   describe('categorical color palette', () => {
-    test('should return null when field is not provided', async () => {
+    test('should return "other category" color when field is not provided', async () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         fieldMetaOptions,
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
-      expect(colorProperty._getMbColor()).toBeNull();
+      expect(colorProperty._getMbColor()).toBe('#d3dae6');
     });
 
-    test('should return null when field name is not provided', async () => {
+    test('should return "other category" color when field name is not provided', async () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         field: {},
@@ -618,23 +586,24 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       };
       // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
-      expect(colorProperty._getMbColor()).toBeNull();
+      expect(colorProperty._getMbColor()).toBe('#d3dae6');
     });
 
     describe('pre-defined color palette', () => {
-      test('should return null when color palette is not provided', async () => {
+      test('should return "other category" color when color palette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBeNull();
+        expect(colorProperty._getMbColor()).toBe('#d3dae6');
       });
 
       test('should return mapbox expression for color palette', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           colorCategory: 'palette_0',
+          otherCategoryColor: 'grey',
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
@@ -645,23 +614,23 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           '#54B399',
           'CN',
           '#6092C0',
-          '#D36086',
+          'grey',
         ]);
       });
     });
 
     describe('custom color palette', () => {
-      test('should return null when customColorPalette is not provided', async () => {
+      test('should return "other category" color when customColorPalette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBeNull();
+        expect(colorProperty._getMbColor()).toBe('#d3dae6');
       });
 
-      test('should return null when customColorPalette is empty', async () => {
+      test('should return "other category" color when customColorPalette is empty', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
@@ -669,17 +638,15 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBeNull();
+        expect(colorProperty._getMbColor()).toBe('#d3dae6');
       });
 
       test('should return mapbox expression for custom color palette', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           useCustomColorPalette: true,
-          customColorPalette: [
-            { stop: null, color: '#f7faff' },
-            { stop: 'MX', color: '#072f6b' },
-          ],
+          customColorPalette: [{ stop: 'MX', color: '#072f6b' }],
+          otherCategoryColor: '#f7faff',
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);

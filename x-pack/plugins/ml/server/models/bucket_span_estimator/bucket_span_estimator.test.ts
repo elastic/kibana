@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { BucketSpanEstimatorData } from '../../../common/types/job_service';

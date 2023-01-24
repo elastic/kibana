@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
@@ -46,7 +46,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.category', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'event.category')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = shallow(<span>{column}</span>);
       expect(wrapper).toMatchSnapshot();
@@ -71,7 +71,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.category', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'event.category')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -87,7 +87,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('destination.ip', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'destination.ip')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -103,7 +103,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('destination.bytes', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'destination.bytes')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -119,7 +119,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.action', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'event.action')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -135,7 +135,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('@timestamp', mockDatum),
         field: defaultHeaders.find((h) => h.id === '@timestamp')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -152,7 +152,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('destination.ip', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'destination.ip')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -169,7 +169,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.severity', mockDatum),
         field: defaultHeaders.find((h) => h.id === 'event.severity')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -186,7 +186,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('message', mockMessageDatum),
         field: defaultHeaders.find((h) => h.id === 'message')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -203,7 +203,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('message', mockMessageDatum),
         field: defaultHeaders.find((h) => h.id === 'message')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -220,7 +220,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: [mockTimelineData[0]._id],
         field: defaultHeaders.find((h) => h.id === '_id')!,
-        timelineId: 'test',
+        scopeId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -228,6 +228,43 @@ describe('plain_column_renderer', () => {
         </TestProviders>
       );
 
+      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
+    });
+
+    test('should join multiple values with a comma [not draggable]', () => {
+      const data = mockTimelineData[19].data;
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'process.args',
+        eventId: _id,
+        values: getValues('process.args', data),
+        field: defaultHeaders.find((h) => h.id === 'message')!,
+        scopeId: 'test',
+        isDraggable: false,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      const values = getValues('process.args', data);
+      expect(wrapper.text()).toEqual(values?.join(', '));
+    });
+
+    test('should NOT join multiple values with a comma [draggable]', () => {
+      const data = mockTimelineData[19].data;
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'process.args',
+        eventId: _id,
+        values: getValues('process.args', data),
+        field: defaultHeaders.find((h) => h.id === 'message')!,
+        scopeId: 'test',
+        isDraggable: true,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
       expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
     });
   });

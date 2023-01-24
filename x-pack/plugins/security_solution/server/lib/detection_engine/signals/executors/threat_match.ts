@@ -5,78 +5,76 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
-import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
+import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const threatMatchExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   listClient,
-  exceptionItems,
   services,
   version,
   searchAfterSize,
-  logger,
+  ruleExecutionLogger,
   eventsTelemetry,
-  experimentalFeatures,
-  buildRuleMessage,
   bulkCreate,
   wrapHits,
+  primaryTimestamp,
+  secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
-  logger: Logger;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  experimentalFeatures: ExperimentalFeatures;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('threatMatchExecutor', async () => {
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
     return createThreatSignals({
       alertId: completeRule.alertId,
-      buildRuleMessage,
       bulkCreate,
       completeRule,
       concurrentSearches: ruleParams.concurrentSearches ?? 1,
       eventsTelemetry,
-      exceptionItems,
       filters: ruleParams.filters ?? [],
       inputIndex,
       itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
       language: ruleParams.language,
       listClient,
-      logger,
       outputIndex: ruleParams.outputIndex,
       query: ruleParams.query,
+      ruleExecutionLogger,
       savedId: ruleParams.savedId,
       searchAfterSize,
       services,
@@ -89,6 +87,11 @@ export const threatMatchExecutor = async ({
       tuple,
       type: ruleParams.type,
       wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionFilter,
+      unprocessedExceptions,
     });
   });
 };

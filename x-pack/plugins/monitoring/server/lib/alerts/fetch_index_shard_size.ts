@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 type TopHitType = ElasticsearchResponseHit & {
   _source: { index_stats?: Partial<ElasticsearchIndexStats> };
@@ -26,7 +26,7 @@ const memoizedIndexPatterns = (globPatterns: string) => {
   ) as RegExPatterns;
 };
 
-const gbMultiplier = 1000000000;
+const gbMultiplier = Math.pow(1024, 3);
 
 export async function fetchIndexShardSize(
   esClient: ElasticsearchClient,
@@ -36,11 +36,11 @@ export async function fetchIndexShardSize(
   size: number,
   filterQuery?: string
 ): Promise<IndexShardSizeStats[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'index',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -50,7 +50,7 @@ export async function fetchIndexShardSize(
       query: {
         bool: {
           filter: [
-            createDatasetFilter('index_stats', 'index', 'elasticsearch.index'),
+            createDatasetFilter('index_stats', 'index', getElasticsearchDataset('index')),
             {
               range: {
                 timestamp: {
@@ -115,9 +115,14 @@ export async function fetchIndexShardSize(
   }
 
   const response = await esClient.search(params);
-  // @ts-expect-error declare aggegations type explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
   const stats: IndexShardSizeStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
+  // @ts-expect-error declare aggegations type explicitly
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
   if (!clusterBuckets?.length) {
     return stats;
   }

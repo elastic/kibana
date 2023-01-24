@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   ExceptionListType,
-  ExceptionListTypeEnum,
   CreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION,
   ENDPOINT_BLOCKLISTS_LIST_ID,
@@ -24,3 +24,12 @@ export const BLOCKLISTS_LIST_DEFINITION: CreateExceptionListSchema = {
   list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
   type: BLOCKLISTS_LIST_TYPE,
 };
+
+export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+  `name`,
+  `description`,
+  'item_id',
+  `entries.value`,
+  `entries.entries.value`,
+  `comments.comment`,
+];

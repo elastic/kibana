@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import {
   IngestSection,
@@ -23,7 +24,6 @@ import {
   DefinedSections,
   ManagementSectionsStartPrivate,
 } from './types';
-import { createGetterSetter } from '../../kibana_utils/public';
 
 const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] =
   createGetterSetter<ManagementSectionsStartPrivate>('SectionsServiceStartPrivate');

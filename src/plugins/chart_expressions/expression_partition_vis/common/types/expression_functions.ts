@@ -7,18 +7,19 @@
  */
 
 import {
+  ExpressionFunctionDefinition,
+  Datatable,
+  ExpressionValueRender,
+  ExpressionValueBoxed,
+} from '@kbn/expressions-plugin/common';
+import {
   PARTITION_LABELS_VALUE,
   PIE_VIS_EXPRESSION_NAME,
   TREEMAP_VIS_EXPRESSION_NAME,
   MOSAIC_VIS_EXPRESSION_NAME,
   WAFFLE_VIS_EXPRESSION_NAME,
+  PARTITION_LABELS_FUNCTION,
 } from '../constants';
-import {
-  ExpressionFunctionDefinition,
-  Datatable,
-  ExpressionValueRender,
-  ExpressionValueBoxed,
-} from '../../../../expressions/common';
 import {
   RenderValue,
   PieVisConfig,
@@ -35,6 +36,7 @@ export interface PartitionLabelsArguments {
   values: boolean;
   valuesFormat: ValueFormats;
   percentDecimals: number;
+  colorOverrides?: string;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   truncate?: number | null;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
@@ -49,6 +51,7 @@ export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
     values: boolean;
     valuesFormat: ValueFormats;
     percentDecimals: number;
+    colorOverrides: Record<string, string>;
     /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
     truncate?: number | null;
     /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
@@ -91,3 +94,10 @@ export enum ChartTypes {
   MOSAIC = 'mosaic',
   WAFFLE = 'waffle',
 }
+
+export type PartitionLabelsExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof PARTITION_LABELS_FUNCTION,
+  Datatable | null,
+  PartitionLabelsArguments,
+  ExpressionValuePartitionLabels
+>;

@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart } from 'src/core/public';
 
 import type { RoleMapping } from '../../../../../common/model';
 import type { Rule } from '../../model';
@@ -39,6 +39,7 @@ interface Props {
   onValidityChange: (isValid: boolean) => void;
   validateForm: boolean;
   docLinks: DocLinksStart;
+  readOnly?: boolean;
 }
 
 interface State {
@@ -51,6 +52,10 @@ interface State {
 }
 
 export class RuleEditorPanel extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -115,9 +120,8 @@ export class RuleEditorPanel extends Component<Props, State> {
               <EuiErrorBoundary>
                 <Fragment>
                   {validationWarning}
+                  {this.conditionallyRenderEditModeToggle()}
                   {this.getEditor()}
-                  <EuiSpacer size="xl" />
-                  {this.getModeToggle()}
                   {this.getConfirmModeChangePrompt()}
                 </Fragment>
               </EuiErrorBoundary>
@@ -127,6 +131,17 @@ export class RuleEditorPanel extends Component<Props, State> {
       </EuiPanel>
     );
   }
+
+  private conditionallyRenderEditModeToggle = () => {
+    if (!this.props.readOnly) {
+      return (
+        <>
+          {this.getModeToggle()}
+          <EuiSpacer size="m" />
+        </>
+      );
+    }
+  };
 
   private initializeFromRawRules = (rawRules: Props['rawRules']) => {
     const { rules, maxDepth } = generateRulesFromRaw(rawRules);
@@ -206,18 +221,22 @@ export class RuleEditorPanel extends Component<Props, State> {
       case 'visual':
         return (
           <VisualRuleEditor
+            data-test-subj="roleMappingsVisualRuleEditor"
             rules={this.state.rules}
             maxDepth={this.state.maxDepth}
             onChange={this.onRuleChange}
             onSwitchEditorMode={() => this.trySwitchEditorMode('json')}
+            readOnly={this.props.readOnly}
           />
         );
       case 'json':
         return (
           <JSONRuleEditor
+            data-test-subj="roleMappingsJSONRuleEditor"
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}
+            readOnly={this.props.readOnly}
           />
         );
       default:

@@ -17,312 +17,246 @@ The default host and port settings configure {kib} to run on `localhost:5601`. T
 variety of other options. Finally, environment variables can be injected into
 configuration using `${MY_ENV_VAR}` syntax.
 
-[cols="2*<"]
-|===
-
-| `console.ui.enabled:`
-| Toggling this causes the server to regenerate assets on the next startup,
+`console.ui.enabled`::
+Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
-| `csp.rules:`
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
-A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
-that disables certain unnecessary and potentially insecure capabilities in
-the browser. It is strongly recommended that you keep the default CSP rules
-that ship with {kib}.
+`csp.script_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
-| `csp.script_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
+`csp.disableUnsafeEval`::
+experimental[] Set this to `true` to remove the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression from the `script-src` directive. *Default: `false`*
++
+By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library which doesn't support https://handlebarsjs.com/guide/partials.html#inline-partials[inline partials].
+Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation.
+If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, or if you rely on inline partials, please revert this setting to `false` and https://github.com/elastic/kibana/issues/new/choose[open an issue] in the Kibana GitHub repository.
 
-| `csp.worker_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
+`csp.worker_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
 
-| `csp.style_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
+`csp.style_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
 
-| `csp.connect_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src[Content Security Policy `connect-src` directive].
+`csp.connect_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src[Content Security Policy `connect-src` directive].
 
-| `csp.default_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src[Content Security Policy `default-src` directive].
+`csp.default_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src[Content Security Policy `default-src` directive].
 
-| `csp.font_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src[Content Security Policy `font-src` directive].
+`csp.font_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src[Content Security Policy `font-src` directive].
 
-| `csp.frame_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-src[Content Security Policy `frame-src` directive].
+`csp.frame_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-src[Content Security Policy `frame-src` directive].
 
-| `csp.img_src:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src[Content Security Policy `img-src` directive].
+`csp.img_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src[Content Security Policy `img-src` directive].
 
-| `csp.frame_ancestors:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors[Content Security Policy `frame-ancestors` directive].
-
-|===
-
-[NOTE]
-============
-The `frame-ancestors` directive can also be configured by using
+`csp.frame_ancestors`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors[Content Security Policy `frame-ancestors` directive].
++
+NOTE: The `frame-ancestors` directive can also be configured by using
 <<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors`
 are ignored.
-============
 
-[cols="2*<"]
-|===
+`csp.report_uri`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
 
-| `csp.report_uri:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
+`csp.report_to:`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to[Content Security Policy `report-to` directive].
 
-| `csp.report_to:`
-| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to[Content Security Policy `report-to` directive].
-
-|[[csp-strict]] `csp.strict:`
- | Blocks {kib} access to any browser that
+[[csp-strict]] `csp.strict`::
+Blocks {kib} access to any browser that
 does not enforce even rudimentary CSP rules. In practice, this disables
 support for older, less safe browsers like Internet Explorer.
 For more information, refer to <<csp-strict-mode, Content Security Policy>>.
 *Default: `true`*
 
-| `csp.warnLegacyBrowsers:`
- | Shows a warning message after loading {kib} to any browser that does not
+`csp.warnLegacyBrowsers`::
+Shows a warning message after loading {kib} to any browser that does not
 enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
-| `elasticsearch.customHeaders:`
+[[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
+The maximum number of sockets that can be used for communications with {es}.
+*Default: `Infinity`*
+
+
+[[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
+The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.
+*Default: `256`*
+
+[[elasticsearch-idleSocketTimeout]] `elasticsearch.idleSocketTimeout`::
+The timeout for idle sockets kept open between {kib} and {es}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {kib} and {es} be sure to set this value lower than or equal to the proxy's timeout.
+*Default: `60s`*
+
+`elasticsearch.customHeaders`::
  | Header names and values to send to {es}. Any custom headers cannot be
 overwritten by client-side headers, regardless of the
 <<elasticsearch-requestHeadersWhitelist, `elasticsearch.requestHeadersWhitelist`>> configuration. *Default: `{}`*
 
-|[[elasticsearch-hosts]] `elasticsearch.hosts:`
- | The URLs of the {es} instances to use for all your queries. All nodes
+[[elasticsearch-hosts]] `elasticsearch.hosts:`::
+The URLs of the {es} instances to use for all your queries. All nodes
 listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`*
-
++
 To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
 in this setting.
 
-| `elasticsearch.logQueries:`
- | deprecated:[7.12.0,"This setting is no longer used and will be removed in Kibana 8.0."]
- Instead, configure the `elasticsearch.query` logger.
- +
- This is useful for seeing the query DSL generated by applications that
- currently do not have an inspector, for example Timelion and Monitoring.
- *Default: `false`*
-
-The following example shows a valid verbose `elasticsearch.query` logger configuration:
-|===
-
-[source,text]
---
-logging:
-  appenders:
-    console_appender:
-      type: console
-      layout:
-        type: pattern
-        highlight: true
-  root:
-    appenders: [console_appender]
-    level: warn
-  loggers:
-    - name: elasticsearch.query
-      level: debug
---
-
-[cols="2*<"]
-|===
-
-|[[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout:`
- | Time in milliseconds to wait for {es} to respond to pings.
+[[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
+Time in milliseconds to wait for {es} to respond to pings.
 *Default: the value of the <<elasticsearch-requestTimeout, `elasticsearch.requestTimeout`>> setting*
 
-|[[elasticsearch-requestHeadersWhitelist]] `elasticsearch.requestHeadersWhitelist:`
- | List of {kib} client-side headers to send to {es}. To send *no* client-side
+[[elasticsearch-requestHeadersWhitelist]] `elasticsearch.requestHeadersWhitelist`::
+List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
 header from being whitelisted means that you cannot use
 <<basic-authentication, basic authentication>> in {kib}.
 *Default: `[ 'authorization' ]`*
 
-|[[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout:`
- | Time in milliseconds to wait for responses from the back end or {es}.
+[[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout`::
+Time in milliseconds to wait for responses from the back end or {es}.
 This value must be a positive integer. *Default: `30000`*
 
-| `elasticsearch.shardTimeout:`
- | Time in milliseconds for {es} to wait for responses from shards.
+`elasticsearch.shardTimeout`::
+Time in milliseconds for {es} to wait for responses from shards.
 Set to 0 to disable. *Default: `30000`*
 
-| `elasticsearch.compression:`
-| Specifies whether {kib} should use compression for communications with {es}. *Default: `false`*
+`elasticsearch.compression`::
+Specifies whether {kib} should use compression for communications with {es}. *Default: `false`*
 
-| `elasticsearch.sniffInterval:`
- | Time in milliseconds between requests to check {es} for an updated list of
+`elasticsearch.sniffInterval`::
+Time in milliseconds between requests to check {es} for an updated list of
 nodes. *Default: `false`*
 
-| `elasticsearch.sniffOnStart:`
- | Attempt to find other {es} nodes on startup. *Default: `false`*
+`elasticsearch.sniffOnStart`::
+Attempt to find other {es} nodes on startup. *Default: `false`*
 
-| `elasticsearch.sniffOnConnectionFault:`
- | Update the list of {es} nodes immediately following a connection fault.
+`elasticsearch.sniffOnConnectionFault`::
+Update the list of {es} nodes immediately following a connection fault.
 *Default: `false`*
 
-|[[elasticsearch-ssl-alwaysPresentCertificate]] `elasticsearch.ssl.alwaysPresentCertificate:`
- | Controls {kib} behavior in regard to presenting a client certificate when
+[[elasticsearch-ssl-alwaysPresentCertificate]] `elasticsearch.ssl.alwaysPresentCertificate`::
+Controls {kib} behavior in regard to presenting a client certificate when
 requested by {es}. This setting applies to all outbound SSL/TLS connections
 to {es}, including requests that are proxied for end users. *Default: `false`*
-
-|===
-
-[WARNING]
-============
-When {es} uses certificates to authenticate end users with a PKI realm
++
+WARNING: When {es} uses certificates to authenticate end users with a PKI realm
 and <<elasticsearch-ssl-alwaysPresentCertificate, `elasticsearch.ssl.alwaysPresentCertificate`>> is `true`,
 proxied requests may be executed as the identity that is tied to the {kib}
 server.
-============
 
-[cols="2*<"]
-|===
-
-|[[elasticsearch-ssl-cert-key]] `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`
- | Paths to a PEM-encoded X.509 client certificate and its corresponding
+[[elasticsearch-ssl-cert-key]] `elasticsearch.ssl.certificate` and `elasticsearch.ssl.key`::
+Paths to a PEM-encoded X.509 client certificate and its corresponding
 private key. These are used by {kib} to authenticate itself when making
 outbound SSL/TLS connections to {es}. For this setting to take effect, the
 `xpack.security.http.ssl.client_authentication` setting in {es} must be also
 be set to `"required"` or `"optional"` to request a client certificate from
 {kib}.
-
-|===
-
-[NOTE]
-============
-These settings cannot be used in conjunction with
++
+NOTE: These settings cannot be used in conjunction with
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>.
-============
 
-[cols="2*<"]
-|===
-
-|[[elasticsearch-ssl-certificateAuthorities]] `elasticsearch.ssl.certificateAuthorities:`
- | Paths to one or more PEM-encoded X.509 certificate authority (CA)
+[[elasticsearch-ssl-certificateAuthorities]] `elasticsearch.ssl.certificateAuthorities`::
+Paths to one or more PEM-encoded X.509 certificate authority (CA)
 certificates, which make up a trusted certificate chain for {es}. This chain is
 used by {kib} to establish trust when making outbound SSL/TLS connections to
 {es}.
-
++
 In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>> and/or
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
 
-| `elasticsearch.ssl.keyPassphrase:`
- | The password that decrypts the private key that is specified
+`elasticsearch.ssl.keyPassphrase`::
+The password that decrypts the private key that is specified
 via <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.key`>>. This value is optional, as the key may not be
 encrypted.
 
-|[[elasticsearch-ssl-keystore-path]] `elasticsearch.ssl.keystore.path:`
- | Path to a PKCS#12 keystore that contains an X.509 client certificate and it's
+[[elasticsearch-ssl-keystore-path]] `elasticsearch.ssl.keystore.path`::
+Path to a PKCS#12 keystore that contains an X.509 client certificate and it's
 corresponding private key. These are used by {kib} to authenticate itself when
 making outbound SSL/TLS connections to {es}. For this setting, you must also set
 the `xpack.security.http.ssl.client_authentication` setting in {es} to
 `"required"` or `"optional"` to request a client certificate from {kib}.
-
++
 If the keystore contains any additional certificates, they are used as a
 trusted certificate chain for {es}. This chain is used by {kib} to establish
 trust when making outbound SSL/TLS connections to {es}. In addition to this
 setting, trusted certificates may be specified via
 <<elasticsearch-ssl-certificateAuthorities, `elasticsearch.ssl.certificateAuthorities`>> and/or
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
-
-|===
-
-[NOTE]
-============
-This setting cannot be used in conjunction with
++
+NOTE: This setting cannot be used in conjunction with
 <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.certificate`>> or <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.key`>>.
-============
 
-[cols="2*<"]
-|===
-
-| `elasticsearch.ssl.keystore.password:`
- | The password that decrypts the keystore specified via
+`elasticsearch.ssl.keystore.password`::
+The password that decrypts the keystore specified via
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>. If the keystore has no password, leave this
 as blank. If the keystore has an empty password, set this to
 `""`.
 
-|[[elasticsearch-ssl-truststore-path]] `elasticsearch.ssl.truststore.path:`
- | Path to a PKCS#12 trust store that contains one or more X.509 certificate
+[[elasticsearch-ssl-truststore-path]] `elasticsearch.ssl.truststore.path`::
+Path to a PKCS#12 trust store that contains one or more X.509 certificate
 authority (CA) certificates, which make up a trusted certificate chain for
 {es}. This chain is used by {kib} to establish trust when making outbound
 SSL/TLS connections to {es}.
-
++
 In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-certificateAuthorities, `elasticsearch.ssl.certificateAuthorities`>> and/or
 <<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>.
 
-|`elasticsearch.ssl.truststore.password:`
- | The password that decrypts the trust store specified via
+`elasticsearch.ssl.truststore.password`::
+The password that decrypts the trust store specified via
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>. If the trust store
 has no password, leave this as blank. If the trust store has an empty password, set this to `""`.
 
-|[[elasticsearch-ssl-verificationMode]] `elasticsearch.ssl.verificationMode:`
- | Controls the verification of the server certificate that {kib} receives when
+[[elasticsearch-ssl-verificationMode]] `elasticsearch.ssl.verificationMode`::
+Controls the verification of the server certificate that {kib} receives when
 making an outbound SSL/TLS connection to {es}. Valid values are `"full"`,
 `"certificate"`, and `"none"`. Using `"full"` performs hostname verification,
 using `"certificate"` skips hostname verification, and using `"none"` skips
 verification entirely. *Default: `"full"`*
 
-|[[elasticsearch-user-passwd]] `elasticsearch.username:` and `elasticsearch.password:`
- | If your {es} is protected with basic authentication, these settings provide
+[[elasticsearch-user-passwd]] `elasticsearch.username` and `elasticsearch.password`::
+If your {es} is protected with basic authentication, these settings provide
 the username and password that the {kib} server uses to perform maintenance
 on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
-|[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken`::
+If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-| `interpreter.enableInVisualize`
-  | Enables use of interpreter in Visualize. *Default: `true`*
+`interpreter.enableInVisualize`::
+Enables use of interpreter in Visualize. *Default: `true`*
 
-| `data.autocomplete.valueSuggestions.timeout:` {ess-icon}
- | Time in milliseconds to wait for autocomplete suggestions from {es}.
+`unifiedSearch.autocomplete.valueSuggestions.timeout` {ess-icon}::
+Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
 
-| `data.autocomplete.valueSuggestions.terminateAfter:` {ess-icon}
- | Maximum number of documents loaded by each shard to generate autocomplete
+`unifiedSearch.autocomplete.valueSuggestions.terminateAfter` {ess-icon}::
+Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
-
-|===
-
-[NOTE]
-============
-To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
++
+NOTE: To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
 For more logging configuration options, see the <<logging-configuration, Configure Logging in {kib}>> guide.
-============
 
-[cols="2*<"]
-|===
+[[logging-root]] `logging.root`::
+The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
 
-|[[logging-root]] `logging.root:`
-| The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
+[[logging-root-appenders]] `logging.root.appenders`::
+A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they're re-configured explicitly. You can override the default behavior by configuring a different <<logging-appenders, appender>> to apply to `root`.
 
-|[[logging-root-appenders]] `logging.root.appenders:`
-| A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they're re-configured explicitly. You can override the default behavior by configuring a different <<logging-appenders, appender>> to apply to `root`.
-
-|[[logging-root-level]] `logging.root.level:` {ess-icon}
-| Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. *Default: `info`*.
-
-2+a|
-[TIP]
-============
-Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging <<logging-cli-migration, cli commands>> to set log level to `verbose` or silence all logs.
-============
-
+[[logging-root-level]] `logging.root.level` {ess-icon}::
+Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. *Default: `info`*.
++
+TIP: Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging <<logging-cli-migration, cli commands>> to set log level to `verbose` or silence all logs.
++
 The following example shows a valid verbose `logging.root` configuration:
-|===
-
++
 [source,text]
 --
 logging:
@@ -337,381 +271,353 @@ logging:
     level: all
 --
 
-[cols="2*<"]
-|===
+[[logging-loggers]] `logging.loggers[]`::
+Allows you to <<customize-specific-log-records,customize a specific logger instance>>.
 
-|[[logging-loggers]] `logging.loggers[]:`
- | Allows you to <<customize-specific-log-records,customize a specific logger instance>>.
+`logging.appenders[]`::
+<<logging-appenders, Appenders>> define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
 
-| `logging.appenders[]:`
-| <<logging-appenders, Appenders>> define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
-
-
-| `map.includeElasticMapsService:` {ess-icon}
- | Set to `false` to disable connections to Elastic Maps Service.
+`map.includeElasticMapsService` {ess-icon}::
+Set to `false` to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only tile layer configured by <<tilemap-url, `map.tilemap.url`>> is available in <<maps, Maps>>. *Default: `true`*
 
-| `map.emsUrl:`
- | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
+`map.emsUrl`::
+Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
-| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
- | The map attribution string. Provide attributions in markdown and use '|' to delimit attributions, for example: `"[attribution 1](https://www.attribution1)|[attribution 2](https://www.attribution2)"`.
+[[tilemap-settings]] `map.tilemap.options.attribution` {ess-icon}::
+The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
-| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
- | The maximum zoom level. *Default: `10`*
+[[tilemap-max-zoom]] `map.tilemap.options.maxZoom` {ess-icon}::
+The maximum zoom level. *Default: `10`*
 
-| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon}
- | The minimum zoom level. *Default: `1`*
+[[tilemap-min-zoom]] `map.tilemap.options.minZoom` {ess-icon}::
+The minimum zoom level. *Default: `1`*
 
-| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon}
- | An array of subdomains
+[[tilemap-subdomains]] `map.tilemap.options.subdomains` {ess-icon}::
+An array of subdomains
 used by the tile service. Specify the position of the subdomain the URL with
 the token `{s}`.
 
-| [[tilemap-url]] `map.tilemap.url:` {ess-icon}
- | The URL to the service that {kib} uses
+[[tilemap-url]] `map.tilemap.url` {ess-icon}::
+The URL to the service that {kib} uses
 as the default basemap in <<maps, maps>> and <<vega-with-a-map, vega maps>>. By default,
 {kib} sets a basemap from the <<maps-connect-to-ems, Elastic Maps Service>>, but users can
 point to their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
-| `migrations.batchSize:`
- | Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process performs at the cost of higher memory consumption. If upgrade migrations results in {kib} crashing with an out of memory exception or fails due to an Elasticsearch `circuit_breaking_exception`, use a smaller `batchSize` value to reduce the memory pressure. *Default: `1000`*
+`migrations.batchSize`::
+Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process performs at the cost of higher memory consumption. If upgrade migrations results in {kib} crashing with an out of memory exception or fails due to an Elasticsearch `circuit_breaking_exception`, use a smaller `batchSize` value to reduce the memory pressure. *Default: `1000`*
 
- | `migrations.maxBatchSizeBytes:`
- | Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster's `http.max_content_length` configuration option. *Default: `100mb`*
+`migrations.maxBatchSizeBytes`::
+Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster's `http.max_content_length` configuration option. *Default: `100mb`*
 
-| `migrations.retryAttempts:`
- | The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. *Default: `15`*
+`migrations.retryAttempts`::
+ The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. *Default: `15`*
 
-| `newsfeed.enabled:`
- | Controls whether to enable the newsfeed
+`newsfeed.enabled`::
+Controls whether to enable the newsfeed
 system for the {kib} UI notification center. Set to `false` to disable the
 newsfeed system. *Default: `true`*
 
-|[[path-data]] `path.data:`
- | The path where {kib} stores persistent data
+`node.roles`::
+experimental[] Indicates which roles to configure the {kib} process with, which will effectively
+run {kib} in different modes. Valid options are `background_tasks` and `ui`,
+or `*` to select all roles. *Default: `*`*
+
+`notifications.connectors.default.email`::
+Specifies the name of the connector that is used to send email notifications.
+In {ecloud}, the default value is `elastic-cloud-email`.
+
+[[path-data]] `path.data`::
+The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*
 
-| `pid.file:`
- | Specifies the path where {kib} creates the process ID file.
+`pid.file`::
+Specifies the path where {kib} creates the process ID file.
 
-| `ops.interval:`
- | Set the interval in milliseconds to sample
+`ops.interval`::
+Set the interval in milliseconds to sample
 system and process performance metrics. The minimum value is 100. *Default: `5000`*
 
-|[[ops-cGroupOverrides-cpuPath]] `ops.cGroupOverrides.cpuPath:`
- | Override for cgroup cpu path when mounted in a
+[[ops-cGroupOverrides-cpuPath]] `ops.cGroupOverrides.cpuPath`::
+Override for cgroup cpu path when mounted in a
 manner that is inconsistent with `/proc/self/cgroup`.
 
-|[[ops-cGroupOverrides-cpuAcctPath]] `ops.cGroupOverrides.cpuAcctPath:`
- | Override for cgroup cpuacct path when mounted
+[[ops-cGroupOverrides-cpuAcctPath]] `ops.cGroupOverrides.cpuAcctPath`::
+Override for cgroup cpuacct path when mounted
 in a manner that is inconsistent with `/proc/self/cgroup`.
 
-|[[savedObjects-maxImportExportSize]] `savedObjects.maxImportExportSize:`
- | The maximum count of saved objects that can be imported or exported.
+[[savedObjects-maxImportExportSize]] `savedObjects.maxImportExportSize`::
+The maximum count of saved objects that can be imported or exported.
 This setting exists to prevent the {kib} server from running out of memory when handling
 large numbers of saved objects. It is recommended to only raise this setting if you are
 confident your server can hold this many objects in memory.
 *Default: `10000`*
 
-|[[savedObjects-maxImportPayloadBytes]] `savedObjects.maxImportPayloadBytes:`
- | The maximum byte size of a saved objects import that the {kib} server will accept.
+[[savedObjects-maxImportPayloadBytes]] `savedObjects.maxImportPayloadBytes`::
+The maximum byte size of a saved objects import that the {kib} server will accept.
 This setting exists to prevent the {kib} server from running out of memory when handling
 a large import payload. Note that this setting overrides the more general
 <<server-maxPayload, `server.maxPayload`>> for saved object imports only.
 *Default: `26214400`*
 
-|[[server-basePath]] `server.basePath:`
- | Enables you to specify a path to mount {kib} at if you are
+[[server-basePath]] `server.basePath`::
+Enables you to specify a path to mount {kib} at if you are
 running behind a proxy. Use the <<server-rewriteBasePath, `server.rewriteBasePath`>> setting to tell {kib}
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-|[[server-publicBaseUrl]] `server.publicBaseUrl:` {ess-icon}
- | The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
- (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
- <<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).
+[[server-publicBaseUrl]] `server.publicBaseUrl`::
+The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
+(if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
+<<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).
 
-| [[server-compression]] `server.compression.enabled:`
- | Set to `false` to disable HTTP compression for all responses. *Default: `true`*
+[[server-compression]] `server.compression.enabled`::
+Set to `false` to disable HTTP compression for all responses. *Default: `true`*
 
-| `server.cors.enabled:`
- | experimental[] Set to `true` to allow cross-origin API calls. *Default:* `false`
+`server.cors.enabled`::
+experimental[] Set to `true` to allow cross-origin API calls. *Default:* `false`
 
-| `server.cors.allowCredentials:`
- | experimental[] Set to `true` to allow browser code to access response body whenever request performed with user credentials. *Default:* `false`
+`server.cors.allowCredentials`::
+experimental[] Set to `true` to allow browser code to access response body whenever request performed with user credentials. *Default:* `false`
 
-| `server.cors.allowOrigin:`
- | experimental[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. *Default:* ["*"]
+`server.cors.allowOrigin`::
+experimental[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. *Default:* ["*"]
 
-| `server.compression.referrerWhitelist:`
- | Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
+`server.compression.referrerWhitelist`::
+Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `none`*
 
-a|
-`server.securityResponseHeaders:`
-`strictTransportSecurity:`
-| [[server-securityResponseHeaders-strictTransportSecurity]] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
+`server.compression.brotli.enabled`::
+Set to `true` to enable brotli (br) compression format.
+Note: browsers not supporting brotli compression will fallback to using gzip instead. 
+This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `false`*
+
+[[server-securityResponseHeaders-strictTransportSecurity]] `server.securityResponseHeaders.strictTransportSecurity`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
 `null`. To disable, set to `null`. *Default:* `null`
 
-[[server-securityResponseHeaders-xContentTypeOptions]]
-a| `server.securityResponseHeaders:`
-`xContentTypeOptions:`
-| Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options[`X-Content-Type-Options`] header is
+[[server-securityResponseHeaders-xContentTypeOptions]] `server.securityResponseHeaders.xContentTypeOptions`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options[`X-Content-Type-Options`] header is
 used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are `nosniff` or `null`. To
 disable, set to `null`. *Default:* `"nosniff"`
 
-[[server-securityResponseHeaders-referrerPolicy]]
-a|`server.securityResponseHeaders:`
-`referrerPolicy:`
-| Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
+[[server-securityResponseHeaders-referrerPolicy]] `server.securityResponseHeaders.referrerPolicy`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
 `unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
 
-[[server-securityResponseHeaders-permissionsPolicy]]
-a|`server.securityResponseHeaders:`
-`permissionsPolicy:`
-| experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
+[[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-|[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders:`
-`disableEmbedding:`
-| Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
+[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`:: 
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
 
-| `server.customResponseHeaders:` {ess-icon}
- | Header names and values to
-send on all responses to the client from the {kib} server. *Default: `{}`*
+[[server-securityResponseHeaders-crossOriginOpenerPolicy]] `server.securityResponseHeaders.crossOriginOpenerPolicy`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy[`Cross-Origin-Opener-Policy`] header is used in all
+responses to the client from the {kib} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. *Default:* `"same-origin"`
 
-|[[server-shutdownTimeout]] `server.shutdownTimeout:`
-| Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected with a `503` response. *Default: `30s`*
+`server.customResponseHeaders` {ess-icon}::
+Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
 
-|[[server-host]] `server.host:`
- | This setting specifies the host of the
-back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. *Default: `"localhost"`*
+[[server-shutdownTimeout]] `server.shutdownTimeout`::
+Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected with a `503` response. *Default: `30s`*
 
-| `server.keepaliveTimeout:`
- | The number of milliseconds to wait for additional data before restarting
+[[server-host]] `server.host`::
+This setting specifies the host of the
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. Use `0.0.0.0` to make Kibana listen on all IPs (public and private). *Default: `"localhost"`*
+
+`server.keepaliveTimeout`::
+The number of milliseconds to wait for additional data before restarting
 the <<server-socketTimeout, `server.socketTimeout`>> counter. *Default: `"120000"`*
 
-|[[server-maxPayloadBytes]] `server.maxPayloadBytes:`
- | deprecated:[7.13.0,"In 8.0 and later, this setting will no longer be supported."]
- This setting has been renamed to <<server-maxPayload,`server.maxPayload`>>.
-
-|[[server-maxPayload]] `server.maxPayload:`
- | The maximum payload size in bytes
+[[server-maxPayload]] `server.maxPayload`::
+The maximum payload size in bytes
 for incoming server requests. *Default: `1048576`*
 
-| `server.name:`
- | A human-readable display name that
+`server.name`::
+A human-readable display name that
 identifies this {kib} instance. *Default: `"your-hostname"`*
 
-|[[server-port]] `server.port:`
- | {kib} is served by a back end server. This
+[[server-port]] `server.port`::
+{kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
 
-|[[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp:`
- | Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
+[[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
+Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
-| `server.requestId.ipAllowlist:`
- | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
+`server.requestId.ipAllowlist`::
+A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
 
-|[[server-rewriteBasePath]] `server.rewriteBasePath:`
- | Specifies whether {kib} should
+[[server-rewriteBasePath]] `server.rewriteBasePath`::
+Specifies whether {kib} should
 rewrite requests that are prefixed with <<server-basePath, `server.basePath`>> or require that they
 are rewritten by your reverse proxy. In {kib} 6.3 and earlier, the default is
 `false`. In {kib} 7.x, the setting is deprecated. In {kib} 8.0 and later, the
 default is `true`. *Default: `deprecated`*
 
-|[[server-socketTimeout]] `server.socketTimeout:`
- | The number of milliseconds to wait before closing an
+[[server-socketTimeout]] `server.socketTimeout`::
+The number of milliseconds to wait before closing an
 inactive socket. *Default: `"120000"`*
 
-|[[server-ssl-cert-key]] `server.ssl.certificate:` and `server.ssl.key:`
- | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
+[[server-ssl-cert-key]] `server.ssl.certificate` and `server.ssl.key`::
+Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
++
+NOTE: These settings cannot be used in conjunction with <<server-ssl-keystore-path, `server.ssl.keystore.path`>>.
 
-|[[server-uuid]] `server.uuid:`
- | The unique identifier for this {kib} instance.
-
-
-|===
-
-[NOTE]
-============
-These settings cannot be used in conjunction with <<server-ssl-keystore-path, `server.ssl.keystore.path`>>.
-============
-
-[cols="2*<"]
-|===
-
-|[[server-ssl-certificateAuthorities]] `server.ssl.certificateAuthorities:`
- | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a
+[[server-ssl-certificateAuthorities]] `server.ssl.certificateAuthorities`::
+Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a
 trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections from end
 users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
-
++
 In addition to this setting, trusted certificates may be specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>> and/or <<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
 
-| [[server-ssl-cipherSuites]] `server.ssl.cipherSuites:`
- | Details on the format, and the valid options, are available via the
+[[server-ssl-cipherSuites]] `server.ssl.cipherSuites`::
+Details on the format, and the valid options, are available via the
 https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
 *Default: `TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256 ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA`*.
 
-| `server.ssl.clientAuthentication:`
- | Controls the behavior in {kib} for requesting a certificate from client
+`server.ssl.clientAuthentication`::
+Controls the behavior in {kib} for requesting a certificate from client
 connections. Valid values are `"required"`, `"optional"`, and `"none"`. Using `"required"` will refuse to establish the connection unless a
 client presents a certificate, using `"optional"` will allow a client to present a certificate if it has one, and using `"none"` will
 prevent a client from presenting a certificate. *Default: `"none"`*
 
-|[[server-ssl-enabled]] `server.ssl.enabled:`
+[[server-ssl-enabled]] `server.ssl.enabled`::
  | Enables SSL/TLS for inbound connections to {kib}. When set to `true`, a certificate and its
 corresponding private key must be provided. These can be specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>> or the combination of
 <<server-ssl-cert-key, `server.ssl.certificate`>> and <<server-ssl-cert-key, `server.ssl.key`>>. *Default: `false`*
 
-| `server.ssl.keyPassphrase:`
- | The password that decrypts the private key that is specified via <<server-ssl-cert-key, `server.ssl.key`>>. This value
+`server.ssl.keyPassphrase`::
+The password that decrypts the private key that is specified via <<server-ssl-cert-key, `server.ssl.key`>>. This value
 is optional, as the key may not be encrypted.
 
-|[[server-ssl-keystore-path]] `server.ssl.keystore.path:`
- | Path to a PKCS#12 keystore that contains an X.509 server certificate and its corresponding private key. If the
+[[server-ssl-keystore-path]] `server.ssl.keystore.path`::
+Path to a PKCS#12 keystore that contains an X.509 server certificate and its corresponding private key. If the
 keystore contains any additional certificates, those will be used as a trusted certificate chain for {kib}. All of these are used by {kib}
 to establish trust when receiving inbound SSL/TLS connections from end users. The certificate chain is also used by {kib} to verify client
 certificates from end users when PKI authentication is enabled.
-
++
 In addition to this setting, trusted certificates may be specified via <<server-ssl-certificateAuthorities, `server.ssl.certificateAuthorities`>> and/or
 <<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
++
+NOTE: This setting cannot be used in conjunction with <<server-ssl-cert-key, `server.ssl.certificate`>> or <<server-ssl-cert-key, `server.ssl.key`>>
 
-|===
-
-[NOTE]
-============
-This setting cannot be used in conjunction with <<server-ssl-cert-key, `server.ssl.certificate`>> or <<server-ssl-cert-key, `server.ssl.key`>>
-============
-
-[cols="2*<"]
-|===
-
-| `server.ssl.keystore.password:`
- | The password that will be used to decrypt the keystore specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>>. If the
+`server.ssl.keystore.password`::
+The password that will be used to decrypt the keystore specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>>. If the
 keystore has no password, leave this unset. If the keystore has an empty password, set this to `""`.
 
-|[[server-ssl-truststore-path]] `server.ssl.truststore.path:`
- | Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which
+[[server-ssl-truststore-path]] `server.ssl.truststore.path`::
+Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which
 make up a trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections
 from end users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
-
++
 In addition to this setting, trusted certificates may be specified via <<server-ssl-certificateAuthorities, `server.ssl.certificateAuthorities`>> and/or
 <<server-ssl-keystore-path, `server.ssl.keystore.path`>>.
 
-| `server.ssl.truststore.password:`
- | The password that will be used to decrypt the trust store specified via <<server-ssl-truststore-path, `server.ssl.truststore.path`>>. If
+`server.ssl.truststore.password`::
+The password that will be used to decrypt the trust store specified via <<server-ssl-truststore-path, `server.ssl.truststore.path`>>. If
 the trust store has no password, leave this unset. If the trust store has an empty password, set this to `""`.
 
-| `server.ssl.redirectHttpFromPort:`
- | {kib} binds to this port and redirects
+`server.ssl.redirectHttpFromPort`::
+{kib} binds to this port and redirects
 all http requests to https over the port configured as <<server-port, `server.port`>>.
 
-| [[server-ssl-supportedProtocols]] `server.ssl.supportedProtocols:`
- | An array of supported protocols with versions.
+[[server-ssl-supportedProtocols]] `server.ssl.supportedProtocols`::
+An array of supported protocols with versions.
 Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
 
-| [[settings-xsrf-allowlist]] `server.xsrf.allowlist:`
- | It is not recommended to disable protections for
+[[server-uuid]] `server.uuid`::
+The unique identifier for this {kib} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.
+
+[[settings-xsrf-allowlist]] `server.xsrf.allowlist`::
+It is not recommended to disable protections for
 arbitrary API endpoints. Instead, supply the `kbn-xsrf` header.
 The <<settings-xsrf-allowlist, `server.xsrf.allowlist`>> setting requires the following format:
-
-|===
-
++
 [source,text]
 ----
 *Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
 ----
 
-[cols="2*<"]
-|===
+[[settings-xsrf-disableProtection]] `server.xsrf.disableProtection`::
+Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended. *Default: `false`*
 
-| [[settings-xsrf-disableProtection]] `server.xsrf.disableProtection:`
- | Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended. *Default: `false`*
-
-| `status.allowAnonymous:`
- | If authentication is enabled,
+`status.allowAnonymous`::
+If authentication is enabled,
 setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
-|[[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`
- | When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`,
-{kib} looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send
-telemetry data or not. <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> and <<settings-telemetry-optIn, `telemetry.optIn`>>
-cannot be `false` at the same time. *Default: `true`*.
+[[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
+When `true`, users are able to change the telemetry setting at a later time in
+<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+{kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
-|[[settings-telemetry-optIn]] `telemetry.optIn`
- | When `true`, telemetry data is sent to Elastic.
-When `false`, collection of telemetry data is disabled.
-To enable telemetry and prevent users from disabling it,
-set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false` and <<settings-telemetry-optIn, `telemetry.optIn`>> to `true`.
+[[settings-telemetry-optIn]] `telemetry.optIn`::
+Reporting your cluster statistics helps
+us improve your user experience. Your data is never shared with anyone.
+Set to `true` to allow telemetry data to be sent to Elastic.
+When `false`, the telemetry data is never sent to Elastic. +
++
+This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
+To prevent users from changing it,
+set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false`.
 *Default: `true`*
 
-| `telemetry.enabled`
- | Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone. Set to
-`false` to disable telemetry capabilities entirely. You can alternatively opt
-out through *Advanced Settings*. *Default: `true`*
-
-| `vis_type_vega.enableExternalUrls:` {ess-icon}
- | Set this value to true to allow Vega to use any URL to access external data
+`vis_type_vega.enableExternalUrls` {ess-icon}::
+Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
-| `xpack.ccr.ui.enabled`
+`xpack.ccr.ui.enabled`::
 Set this value to false to disable the Cross-Cluster Replication UI.
 *Default: `true`*
 
-|[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
-`exploreDataInContextMenu.enabled`
- | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
+[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`::
+Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
++
+When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
 
-|[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
-`exploreDataInChart.enabled`
- | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
+[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`::
+Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
-| `xpack.ilm.ui.enabled`
+`xpack.ilm.ui.enabled`::
 Set this value to false to disable the Index Lifecycle Policies UI.
 *Default: `true`*
 
-| `xpack.index_management.ui.enabled`
+`xpack.index_management.ui.enabled`::
 Set this value to false to disable the Index Management UI.
 *Default: `true`*
 
-| `xpack.license_management.ui.enabled`
+`xpack.license_management.ui.enabled`::
 Set this value to false to disable the License Management UI.
 *Default: `true`*
 
-| `xpack.remote_clusters.ui.enabled`
+`xpack.remote_clusters.ui.enabled`::
 Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
-| `xpack.rollup.ui.enabled:`
+`xpack.rollup.ui.enabled`::
 Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
-| `xpack.snapshot_restore.ui.enabled:`
+`xpack.snapshot_restore.ui.enabled`::
 Set this value to false to disable the Snapshot and Restore UI. *Default: true*
 
-| `xpack.upgrade_assistant.ui.enabled:`
+`xpack.upgrade_assistant.ui.enabled`::
 Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
-| `i18n.locale` {ess-icon}
- | Set this value to change the {kib} interface language.
+`i18n.locale` {ess-icon}::
+Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
-
-|===
 
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]

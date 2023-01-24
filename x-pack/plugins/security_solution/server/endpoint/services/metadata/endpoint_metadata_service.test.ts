@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  createEndpointMetadataServiceTestContextMock,
-  EndpointMetadataServiceTestContextMock,
-} from './mocks';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import type { EndpointMetadataServiceTestContextMock } from './mocks';
+import { createEndpointMetadataServiceTestContextMock } from './mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
@@ -21,15 +18,17 @@ import {
   getESQueryHostMetadataByFleetAgentIds,
   buildUnitedIndexQuery,
 } from '../../routes/metadata/query_builders';
-import { HostMetadata } from '../../../../common/endpoint/types';
-import { Agent, PackagePolicy } from '../../../../../fleet/common';
-import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
+import type { HostMetadata } from '../../../../common/endpoint/types';
+import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
   let metadataService: EndpointMetadataServiceTestContextMock['endpointMetadataService'];
   let esClient: ElasticsearchClientMock;
+  let soClient: SavedObjectsClientContract;
   let endpointDocGenerator: EndpointDocGenerator;
 
   beforeEach(() => {
@@ -37,6 +36,8 @@ describe('EndpointMetadataService', () => {
     testMockedContext = createEndpointMetadataServiceTestContextMock();
     metadataService = testMockedContext.endpointMetadataService;
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    soClient = savedObjectsClientMock.create();
+    soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
   });
 
   describe('#findHostMetadataForFleetAgents()', () => {
@@ -73,30 +74,6 @@ describe('EndpointMetadataService', () => {
     });
   });
 
-  describe('#doesUnitedIndexExist', () => {
-    it('should return true if united index found', async () => {
-      esClient.search.mockResponse(unitedMetadataSearchResponseMock());
-      const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
-
-      expect(doesIndexExist).toEqual(true);
-    });
-
-    it('should return false if united index not found', async () => {
-      esClient.search.mockRejectedValue({
-        meta: { body: { error: { type: 'index_not_found_exception' } } },
-      });
-      const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
-
-      expect(doesIndexExist).toEqual(false);
-    });
-
-    it('should throw wrapped error if es error other than index not found', async () => {
-      esClient.search.mockRejectedValue({});
-      const response = metadataService.doesUnitedIndexExist(esClient);
-      await expect(response).rejects.toThrow(EndpointError);
-    });
-  });
-
   describe('#getHostMetadataList', () => {
     let agentPolicyServiceMock: jest.Mocked<AgentPolicyServiceInterface>;
 
@@ -109,6 +86,7 @@ describe('EndpointMetadataService', () => {
       esClient.search.mockRejectedValue({});
       const metadataListResponse = metadataService.getHostMetadataList(
         esClient,
+        soClient,
         testMockedContext.fleetServices,
         {
           page: 0,
@@ -118,6 +96,28 @@ describe('EndpointMetadataService', () => {
         }
       );
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
+    });
+
+    it('should not throw if index not found', async () => {
+      esClient.search.mockRejectedValue({
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      });
+      const metadataListResponse = await metadataService.getHostMetadataList(
+        esClient,
+        soClient,
+        testMockedContext.fleetServices,
+        {
+          page: 0,
+          pageSize: 10,
+          kuery: '',
+          hostStatuses: [],
+        }
+      );
+
+      expect(metadataListResponse).toEqual({
+        data: [],
+        total: 0,
+      });
     });
 
     it('should correctly list HostMetadata', async () => {
@@ -166,10 +166,19 @@ describe('EndpointMetadataService', () => {
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
       const metadataListResponse = await metadataService.getHostMetadataList(
         esClient,
+        soClient,
         testMockedContext.fleetServices,
         queryOptions
       );
-      const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, packagePolicyIds);
+      const unitedIndexQuery = await buildUnitedIndexQuery(
+        soClient,
+        queryOptions,
+        packagePolicyIds
+      );
+
+      expect(unitedIndexQuery.body.runtime_mappings.status).toBeDefined();
+      // @ts-expect-error runtime_mappings is not typed
+      unitedIndexQuery.body.runtime_mappings.status.script.source = expect.any(String);
 
       expect(esClient.search).toBeCalledWith(unitedIndexQuery);
       expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);
@@ -177,7 +186,7 @@ describe('EndpointMetadataService', () => {
         data: [
           {
             metadata: endpointMetadataDoc,
-            host_status: 'inactive',
+            host_status: 'healthy',
             policy_info: {
               agent: {
                 applied: {

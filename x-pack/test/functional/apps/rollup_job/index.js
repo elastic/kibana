@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+export default function ({ loadTestFile, getService }) {
+  const config = getService('config');
   describe('rollup app', function () {
-    this.tags('ciGroup1');
-
     loadTestFile(require.resolve('./rollup_jobs'));
-    loadTestFile(require.resolve('./hybrid_index_pattern'));
-    loadTestFile(require.resolve('./tsvb'));
+    if (!config.get('esTestCluster.ccs')) {
+      loadTestFile(require.resolve('./hybrid_index_pattern'));
+      loadTestFile(require.resolve('./tsvb'));
+    }
   });
 }

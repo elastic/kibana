@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 
@@ -16,12 +16,12 @@ export const dataViewSavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    displayName: 'Data view',
+    displayName: 'data view',
     icon: 'indexPatternApp',
-    defaultSearchField: 'title',
+    defaultSearchField: 'name',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.title;
+      return obj.attributes.name || obj.attributes.title;
     },
     getEditUrl(obj) {
       return `/management/kibana/dataViews/dataView/${encodeURIComponent(obj.id)}`;
@@ -38,7 +38,15 @@ export const dataViewSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       type: { type: 'keyword' },
+      name: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations as any,
+  migrations: indexPatternSavedObjectTypeMigrations,
 };

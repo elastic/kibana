@@ -4,29 +4,37 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+echo '--- Setup environment vars'
+source .buildkite/scripts/common/env.sh
+source .buildkite/scripts/common/setup_node.sh
+
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
 
-echo '--- Install buildkite dependencies'
+echo '--- Install/build buildkite dependencies'
+
+# `rm -rf <ts-node node_modules dir>; npm install -g ts-node` will cause ts-node bin files to be messed up
+# but literally just calling `npm install -g ts-node` a second time fixes it
+# this is only on newer versions of npm
+npm_install_global ts-node
+if ! ts-node --version; then
+  npm_install_global ts-node
+  ts-node --version;
+fi
+
 cd '.buildkite'
-
-# If this yarn install is terminated early, e.g. if the build is cancelled in buildkite,
-# A node module could end up in a bad state that can cause all future builds to fail
-# So, let's cache clean and try again to make sure that's not what caused the error
-install_deps() {
-  yarn install --production --pure-lockfile
-  EXIT=$?
-  if [[ "$EXIT" != "0" ]]; then
-    yarn cache clean
-  fi
-  return $EXIT
-}
-
-retry 5 15 install_deps
-
+retry 5 15 npm ci
 cd ..
 
-node .buildkite/scripts/lifecycle/print_agent_links.js || true
+echo '--- Agent Debug/SSH Info'
+ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
+
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  echo ""
+  echo "To SSH into this agent, run:"
+  echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
+  echo ""
+fi
 
 echo '--- Job Environment Setup'
 
@@ -56,6 +64,15 @@ EOF
   fi
 }
 
+# If a custom manifest isn't specified, then use the default one that we resolve earlier in the build
+{
+  if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
+    ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST_DEFAULT --default '')}
+    export ES_SNAPSHOT_MANIFEST
+    echo "Using default ES Snapshot Manifest: $ES_SNAPSHOT_MANIFEST"
+  fi
+}
+
 # Setup CI Stats
 {
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
@@ -82,6 +99,9 @@ EOF
 
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
+
+KIBANA_CI_GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibana-ci-github)
+export KIBANA_CI_GITHUB_TOKEN
 
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
@@ -125,17 +145,9 @@ export SYNTHETICS_REMOTE_KIBANA_URL
   export TEST_FAILURES_ES_PASSWORD
 }
 
-KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
-export KIBANA_BUILDBUDDY_CI_API_KEY
-
-# By default, all steps should set up these things to get a full environment before running
-# It can be skipped for pipeline upload steps though, to make job start time a little faster
-if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
-  if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    source .buildkite/scripts/common/env.sh
-    source .buildkite/scripts/common/setup_node.sh
-  fi
-fi
+BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
+export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

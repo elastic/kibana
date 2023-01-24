@@ -10,169 +10,90 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: c2-16
+      queue: n2-16-spot
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
-  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Default CI Group'
-    parallelism: 27
+  - command: .buildkite/scripts/steps/build_api_docs.sh
+    label: 'Build API Docs'
     agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 150
-    key: default-cigroup
+      queue: n2-4-spot
+    key: build_api_docs
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
+    agents:
+      queue: kibana-default
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - build_api_docs
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Docker CI Group'
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
     agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    key: default-cigroup-docker
+      queue: kibana-default
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
-    label: 'OSS CI Group'
-    parallelism: 11
-    agents:
-      queue: ci-group-4d
-    depends_on: build
-    timeout_in_minutes: 120
-    key: oss-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
-    label: 'OSS Accessibility Tests'
-    agents:
-      queue: ci-group-4d
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
-    label: 'Default Accessibility Tests'
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/oss_firefox.sh
-    label: 'OSS Firefox Tests'
-    agents:
-      queue: ci-group-4d
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
-    label: 'Default Firefox Tests'
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/oss_misc.sh
-    label: 'OSS Misc Functional Tests'
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
-    label: 'Saved Object Field Metrics'
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/test/jest.sh
-    label: 'Jest Tests'
-    parallelism: 8
-    agents:
-      queue: n2-4
-    timeout_in_minutes: 90
-    key: jest
-
-  - command: .buildkite/scripts/steps/test/jest_integration.sh
-    label: 'Jest Integration Tests'
-    parallelism: 3
-    agents:
-      queue: n2-4
-    timeout_in_minutes: 120
-    key: jest-integration
-
-  - command: .buildkite/scripts/steps/test/api_integration.sh
-    label: 'API Integration Tests'
-    agents:
-      queue: n2-2
-    timeout_in_minutes: 120
-    key: api-integration
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      queue: n2-2
+      queue: n2-8-spot
     key: linting
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      queue: c2-16
+      queue: n2-16-spot
     key: linting_with_types
     timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      queue: c2-8
-    key: checks
-    timeout_in_minutes: 120
-
-  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-    label: 'Build Storybooks'
-    agents:
-      queue: c2-4
-    key: storybooks
+      queue: n2-2-spot
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
-  - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
-    label: 'Build Webpack Bundle Analyzer reports'
+  - command: .buildkite/scripts/steps/check_types.sh
+    label: 'Check Types'
     agents:
-      queue: n2-2
-    key: webpack_bundle_analyzer
+      queue: n2-16-spot
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
+import {
+  IconChartWaffle,
+  IconChartMosaic,
+  IconChartPie,
+  IconChartDonut,
+  IconChartTreemap,
+} from '@kbn/chart-icons';
 import { ChartTypes } from '../../common/types';
-import { PieIcon, DonutIcon, TreemapIcon, MosaicIcon, WaffleIcon } from '../icons';
 
 export const getIcon = (chart: ChartTypes) =>
   ({
-    [ChartTypes.PIE]: PieIcon,
-    [ChartTypes.DONUT]: DonutIcon,
-    [ChartTypes.TREEMAP]: TreemapIcon,
-    [ChartTypes.MOSAIC]: MosaicIcon,
-    [ChartTypes.WAFFLE]: WaffleIcon,
+    [ChartTypes.PIE]: IconChartPie,
+    [ChartTypes.DONUT]: IconChartDonut,
+    [ChartTypes.TREEMAP]: IconChartTreemap,
+    [ChartTypes.MOSAIC]: IconChartMosaic,
+    [ChartTypes.WAFFLE]: IconChartWaffle,
   }[chart]);

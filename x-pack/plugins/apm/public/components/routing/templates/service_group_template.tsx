@@ -9,18 +9,13 @@ import {
   EuiPageHeaderProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiLoadingContent,
+  EuiIcon,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  useKibana,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../plugin';
-import { enableServiceGroups } from '../../../../../observability/public';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
@@ -40,28 +35,26 @@ export function ServiceGroupTemplate({
   environmentFilter?: boolean;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
 } & KibanaPageTemplateProps) {
-  const {
-    services: { uiSettings },
-  } = useKibana<ApmPluginStartDeps>();
-  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
-
   const router = useApmRouter();
   const {
     query,
     query: { serviceGroup: serviceGroupId },
   } = useAnyOfApmParams('/services', '/service-map');
 
-  const { data } = useFetcher((callApmApi) => {
-    if (serviceGroupId) {
-      return callApmApi('GET /internal/apm/service-group', {
-        params: { query: { serviceGroup: serviceGroupId } },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (serviceGroupId) {
+        return callApmApi('GET /internal/apm/service-group', {
+          params: { query: { serviceGroup: serviceGroupId } },
+        });
+      }
+    },
+    [serviceGroupId]
+  );
 
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
+  const isAllServices = !serviceGroupId;
   const serviceGroupsLink = router.link('/service-groups', {
     query: { ...query, serviceGroup: '' },
   });
@@ -69,19 +62,11 @@ export function ServiceGroupTemplate({
   const serviceGroupsPageTitle = (
     <EuiFlexGroup
       direction="row"
-      gutterSize="s"
+      gutterSize="m"
       alignItems="center"
       justifyContent="flexStart"
+      responsive={false}
     >
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="layers"
-          color="text"
-          aria-label="Go to service groups"
-          iconSize="xl"
-          href={serviceGroupsLink}
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {loadingServiceGroupName ? (
           <EuiLoadingContent lines={2} style={{ width: 180, height: 40 }} />
@@ -97,39 +82,62 @@ export function ServiceGroupTemplate({
 
   const tabs = useTabs(serviceGroupContextTab);
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
-  useBreadcrumb([
-    {
-      title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
-        defaultMessage: 'Services',
-      }),
-      href: serviceGroupsLink,
-    },
-    ...(selectedTab
-      ? [
-          ...(serviceGroupName
-            ? [
-                {
-                  title: serviceGroupName,
-                  href: router.link('/services', { query }),
-                },
-              ]
-            : []),
-          {
-            title: selectedTab.label,
-            href: selectedTab.href,
-          } as { title: string; href: string },
-        ]
-      : []),
-  ]);
+  useBreadcrumb(
+    () => [
+      {
+        title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+          defaultMessage: 'Services',
+        }),
+        href: serviceGroupsLink,
+      },
+      ...(selectedTab
+        ? [
+            ...(serviceGroupName
+              ? [
+                  {
+                    title: serviceGroupName,
+                    href: router.link('/services', { query }),
+                  },
+                ]
+              : []),
+            {
+              title: selectedTab.label,
+              href: selectedTab.href,
+            } as { title: string; href: string },
+          ]
+        : []),
+    ],
+    [query, router, selectedTab, serviceGroupName, serviceGroupsLink]
+  );
   return (
     <ApmMainTemplate
-      pageTitle={isServiceGroupsEnabled ? serviceGroupsPageTitle : pageTitle}
+      pageTitle={serviceGroupsPageTitle}
       pageHeader={{
-        tabs: isServiceGroupsEnabled ? tabs : undefined,
+        tabs,
+        breadcrumbs: !isAllServices
+          ? [
+              {
+                text: (
+                  <>
+                    <EuiIcon size="s" type="arrowLeft" />{' '}
+                    {i18n.translate(
+                      'xpack.apm.serviceGroups.breadcrumb.return',
+                      { defaultMessage: 'Return to service groups' }
+                    )}
+                  </>
+                ),
+                color: 'primary',
+                'aria-current': false,
+                href: serviceGroupsLink,
+              },
+            ]
+          : undefined,
         ...pageHeader,
       }}
       environmentFilter={environmentFilter}
-      showServiceGroupSaveButton={true}
+      showServiceGroupSaveButton={!isAllServices}
+      showServiceGroupsNav={isAllServices}
+      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}
     >
       {children}

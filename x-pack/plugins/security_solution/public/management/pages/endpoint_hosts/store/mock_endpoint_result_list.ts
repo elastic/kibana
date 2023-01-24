@@ -5,36 +5,37 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+  GetAgentsResponse,
+  BulkGetPackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec';
+import type {
   GetHostPolicyResponse,
   HostInfo,
   HostPolicyResponse,
-  HostStatus,
   MetadataListResponse,
   PendingActionsResponse,
 } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
   INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
-} from '../../policy/store/services/ingest';
-import {
-  GetAgentPoliciesResponse,
-  GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
-  GetAgentsResponse,
-} from '../../../../../../fleet/common/types/rest_spec';
-import { GetPolicyListResponse } from '../../policy/types';
+} from '../../../services/policies/ingest';
+import type { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import {
   ACTION_STATUS_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import { TransformStats, TransformStatsResponse } from '../types';
+import type { TransformStats, TransformStatsResponse } from '../types';
 
 const generator = new EndpointDocGenerator('seed');
 
@@ -120,9 +121,6 @@ const endpointListApiPathHandlerMocks = ({
     // Do policies referenced in endpoint list exist
     // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
     [INGEST_API_AGENT_POLICIES]: (): GetAgentPoliciesResponse => {
-      (agentPolicy.package_policies as string[]).push(
-        ...endpointPackagePolicies.map((packagePolicy) => packagePolicy.id)
-      );
       return {
         items: [agentPolicy],
         total: 10,
@@ -143,6 +141,13 @@ const endpointListApiPathHandlerMocks = ({
         page: 1,
         perPage: 10,
         total: endpointPackagePolicies?.length,
+      };
+    },
+
+    // List of Policies (package policies) for onboarding
+    [`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`]: (): BulkGetPackagePoliciesResponse => {
+      return {
+        items: endpointPackagePolicies,
       };
     },
 
@@ -200,6 +205,17 @@ export const setEndpointListApiMockImplementation: (
 
   // Setup handling of GET requests
   mockedHttpService.get.mockImplementation(async (...args) => {
+    const [path] = args;
+    if (typeof path === 'string') {
+      if (apiHandlers[path]) {
+        return apiHandlers[path]();
+      }
+    }
+
+    throw new Error(`MOCK: api request does not have a mocked handler: ${path}`);
+  });
+
+  mockedHttpService.post.mockImplementation(async (...args) => {
     const [path] = args;
     if (typeof path === 'string') {
       if (apiHandlers[path]) {

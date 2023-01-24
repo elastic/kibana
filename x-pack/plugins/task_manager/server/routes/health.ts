@@ -11,13 +11,13 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
-import { IClusterClient } from 'src/core/server';
+} from '@kbn/core/server';
+import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
   MonitoringStats,
   summarizeMonitoringStats,
@@ -57,8 +57,10 @@ export interface HealthRouteParams {
   config: TaskManagerConfig;
   kibanaVersion: string;
   kibanaIndexName: string;
+  shouldRunTasks: boolean;
   getClusterClient: () => Promise<IClusterClient>;
   usageCounter?: UsageCounter;
+  docLinks: DocLinksServiceSetup;
 }
 
 export function healthRoute(params: HealthRouteParams): {
@@ -75,6 +77,8 @@ export function healthRoute(params: HealthRouteParams): {
     kibanaIndexName,
     getClusterClient,
     usageCounter,
+    shouldRunTasks,
+    docLinks,
   } = params;
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
@@ -83,7 +87,7 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
-    const status = calculateHealthStatus(summarizedStats, config, logger);
+    const status = calculateHealthStatus(summarizedStats, config, shouldRunTasks, logger);
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
     return { id: taskManagerId, timestamp, status, ...summarizedStats };
@@ -109,7 +113,7 @@ export function healthRoute(params: HealthRouteParams): {
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
       monitoredHealth$.next(monitoredHealth);
-      logHealthMetrics(monitoredHealth, logger, config);
+      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks, docLinks);
     });
 
   router.get(

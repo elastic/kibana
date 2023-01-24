@@ -13,27 +13,40 @@ export {
   ILLEGAL_CHARACTERS,
   validateDataView,
 } from '../common/lib';
-export { onRedirectNoIndexPattern } from './data_views';
 
 export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
-export type { DataViewSpec } from '../common';
+export type {
+  DataViewSpec,
+  FieldSpec,
+  DataViewAttributes,
+  SavedObjectsClientCommon,
+  RuntimeField,
+} from '../common';
 export {
-  IndexPatternField,
   DataViewField,
   DataViewType,
+  DataViewSavedObjectConflictError,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
 } from '../common';
 
-export type { IndexPatternsContract } from './data_views';
+export type {
+  DataViewsPublicSetupDependencies,
+  DataViewsPublicStartDependencies,
+  MatchedItem,
+  Tag,
+} from './types';
+
+export { INDEX_PATTERN_TYPE } from './types';
+
+export type {
+  DataViewsServicePublic,
+  DataViewsServicePublicDeps,
+} from './data_views_service_public';
+export { DataViewsApiClient, DataViewsService, DataView } from './data_views';
 export type { DataViewListItem } from './data_views';
-export {
-  IndexPatternsService,
-  IndexPattern,
-  DataViewsApiClient,
-  DataViewsService,
-  DataView,
-} from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
@@ -51,6 +64,8 @@ export type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
   DataViewsContract,
+  HasDataViewsResponse,
+  IndicesViaSearchResponse,
 } from './types';
 
 // Export plugin after all other imports

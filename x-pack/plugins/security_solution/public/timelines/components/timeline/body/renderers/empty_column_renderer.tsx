@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { ColumnHeaderOptions } from '../../../../../../common/types';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import {
   DraggableWrapper,
   DragEffects,
@@ -16,7 +16,7 @@ import { escapeDataProviderId } from '../../../../../common/components/drag_and_
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { EXISTS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 import { parseQueryValue } from './parse_query_value';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
@@ -30,14 +30,14 @@ export const emptyColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     isDraggable = true,
-    timelineId,
+    scopeId,
     truncate,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
     isDraggable?: boolean;
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
   }) =>
     isDraggable ? (
@@ -45,7 +45,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
         dataProvider={{
           enabled: true,
           id: escapeDataProviderId(
-            `empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`
+            `empty-column-renderer-draggable-wrapper-${scopeId}-${columnName}-${eventId}-${field.id}`
           ),
           name: `${columnName}: ${parseQueryValue(null)}`,
           queryMatch: {
@@ -59,7 +59,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           and: [],
         }}
         isDraggable={isDraggable}
-        key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
+        key={`empty-column-renderer-draggable-wrapper-${scopeId}-${columnName}-${eventId}-${field.id}`}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -70,6 +70,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           )
         }
         truncate={truncate}
+        scopeId={scopeId}
       />
     ) : (
       <span>{getEmptyValue()}</span>

@@ -9,16 +9,44 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
+import {
+  SOURCE_CATEGORIES,
+  SOURCE_NAMES,
+  SOURCE_OBJ_TYPES,
+  GITHUB_LINK_TITLE,
+} from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
+
+export const staticGenericExternalSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.CUSTOM_CONNECTOR_PACKAGE,
+  categories: ['API', 'Custom'],
+  serviceType: 'external',
+  configuration: {
+    hasOauthRedirect: false,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchCustomConnectorPackage,
+    applicationPortalUrl: '',
+  },
+  objTypes: [],
+  features: {
+    basicOrgContext: [FeatureIds.SyncFrequency, FeatureIds.GlobalAccessPermissions],
+    platinumOrgContext: [],
+    platinumPrivateContext: [],
+  },
+  accountContextOnly: false,
+  isBeta: true,
+};
 
 export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
-    iconName: SOURCE_NAMES.BOX,
     serviceType: 'box',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchBox,
@@ -40,14 +68,12 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.CONFLUENCE,
-    iconName: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceCloud,
@@ -74,16 +100,49 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
+  },
+
+  {
+    name: SOURCE_NAMES.CONFLUENCE_CONNECTOR_PACKAGE,
+    serviceType: 'external',
+    baseServiceType: 'confluence_cloud',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
+    configuration: {
+      hasOauthRedirect: true,
+      needsBaseUrl: true,
+      documentationUrl: docLinks.workplaceSearchConfluenceCloudConnectorPackage,
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
+    },
+    objTypes: [
+      SOURCE_OBJ_TYPES.PAGES,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
+      SOURCE_OBJ_TYPES.BLOG_POSTS,
+      SOURCE_OBJ_TYPES.SPACES,
+    ],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
   },
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
-    iconName: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
+    categories: [SOURCE_CATEGORIES.WIKI, SOURCE_CATEGORIES.ATLASSIAN, SOURCE_CATEGORIES.INTRANET],
     configuration: {
-      isPublicKey: true,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchConfluenceServer,
     },
     objTypes: [
@@ -106,14 +165,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.DROPBOX,
-    iconName: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchDropbox,
@@ -135,14 +196,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GITHUB,
-    iconName: SOURCE_NAMES.GITHUB,
     serviceType: 'github',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsConfiguration: true,
@@ -171,14 +234,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
-    iconName: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.VERSION_CONTROL,
+      SOURCE_CATEGORIES.CODE_REPOSITORY,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsConfiguration: true,
       needsBaseUrl: true,
@@ -213,14 +278,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GMAIL,
-    iconName: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
+    categories: [
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.EMAIL,
+      SOURCE_CATEGORIES.GOOGLE,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchGmail,
@@ -234,10 +301,15 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
-    iconName: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.GSUITE,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchGoogleDrive,
@@ -263,14 +335,17 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.JIRA,
-    iconName: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchJiraCloud,
@@ -299,16 +374,19 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.JIRA_SERVER,
-    iconName: SOURCE_NAMES.JIRA_SERVER,
     serviceType: 'jira_server',
+    categories: [
+      SOURCE_CATEGORIES.SOFTWARE,
+      SOURCE_CATEGORIES.BUG_TRACKING,
+      SOURCE_CATEGORIES.ATLASSIAN,
+      SOURCE_CATEGORIES.PROJECT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: true,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
+      needsBaseUrl: true,
       documentationUrl: docLinks.workplaceSearchJiraServer,
       applicationPortalUrl: '',
     },
@@ -334,14 +412,32 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
+  },
+  {
+    name: SOURCE_NAMES.NETWORK_DRVE,
+    categories: [SOURCE_CATEGORIES.STORAGE],
+    serviceType: 'custom',
+    baseServiceType: 'network_drive',
+    configuration: {
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchNetworkDrive,
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-network-drive-connector',
+    },
+    accountContextOnly: false,
   },
   {
     name: SOURCE_NAMES.ONEDRIVE,
-    iconName: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchOneDrive,
@@ -363,14 +459,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SALESFORCE,
-    iconName: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSalesforce,
@@ -399,15 +497,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
-
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
-    iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
+    categories: [
+      SOURCE_CATEGORIES.CRM,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.ACCOUNT_MANAGEMENT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSalesforce,
@@ -436,16 +535,15 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SERVICENOW,
-    iconName: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
+    categories: [SOURCE_CATEGORIES.WORKFLOW],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
+      needsCredentials: true,
       documentationUrl: docLinks.workplaceSearchServiceNow,
       applicationPortalUrl: 'https://www.servicenow.com/my-account/sign-in.html',
     },
@@ -469,14 +567,18 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SHAREPOINT,
-    iconName: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSharePoint,
@@ -497,24 +599,26 @@ export const staticSourceData: SourceDataItem[] = [
         FeatureIds.SyncedItems,
       ],
     },
-
     accountContextOnly: false,
-    internalConnectorAvailable: true,
-    externalConnectorAvailable: true,
   },
-  // TODO: temporary hack until backend sends us stuff
   {
-    name: SOURCE_NAMES.SHAREPOINT,
-    iconName: SOURCE_NAMES.SHAREPOINT,
+    name: SOURCE_NAMES.SHAREPOINT_CONNECTOR_PACKAGE,
     serviceType: 'external',
+    baseServiceType: 'share_point',
+    categories: [
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchSharePoint,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
-    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+    objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,
@@ -530,56 +634,38 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
-    externalConnectorAvailable: false,
-    customConnectorAvailable: false,
+    isBeta: true,
   },
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
-    iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
     categories: [
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing', {
-        defaultMessage: 'File Sharing',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
-        defaultMessage: 'Storage',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
-        defaultMessage: 'Cloud',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
-        defaultMessage: 'Microsoft',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
-        defaultMessage: 'Office 365',
-      }),
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
     ],
-    serviceType: 'share_point_server', // this doesn't exist on the BE
+    serviceType: 'custom',
+    baseServiceType: 'share_point_server',
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      // helpText: i18n.translate( // TODO updatae this
-      //   'xpack.enterpriseSearch.workplaceSearch.sources.helpText.sharepointServer',
-      //   {
-      //     defaultMessage:
-      //       "Here is some help text. It should probably give the user a heads up that they're going to have to deploy some code.",
-      //   }
-      // ),
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO update this
+      documentationUrl: docLinks.workplaceSearchSharePointServer,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
     },
     accountContextOnly: false,
-    internalConnectorAvailable: false,
-    customConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SLACK,
-    iconName: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
+    categories: [
+      SOURCE_CATEGORIES.COLLABORATION,
+      SOURCE_CATEGORIES.COMMUNICATION,
+      SOURCE_CATEGORIES.INSTANT_MESSAGING,
+      SOURCE_CATEGORIES.CHAT,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       documentationUrl: docLinks.workplaceSearchSlack,
@@ -594,15 +680,18 @@ export const staticSourceData: SourceDataItem[] = [
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
     },
     accountContextOnly: true,
-    internalConnectorAvailable: true,
   },
-
   {
     name: SOURCE_NAMES.ZENDESK,
-    iconName: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
+    categories: [
+      SOURCE_CATEGORIES.HELP,
+      SOURCE_CATEGORIES.CUSTOMER_SERVICE,
+      SOURCE_CATEGORIES.CUSTOMER_RELATIONSHIP_MANAGEMENT,
+      SOURCE_CATEGORIES.TICKETING,
+      SOURCE_CATEGORIES.HELPDESK,
+    ],
     configuration: {
-      isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsSubdomain: true,
@@ -624,26 +713,41 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
+  staticGenericExternalSourceData,
 ];
 
 export const staticCustomSourceData: SourceDataItem = {
   name: SOURCE_NAMES.CUSTOM,
-  iconName: SOURCE_NAMES.CUSTOM,
   categories: ['API', 'Custom'],
   serviceType: 'custom',
   configuration: {
-    isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
-    helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
-      defaultMessage:
-        'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
-    }),
     documentationUrl: docLinks.workplaceSearchCustomSources,
     applicationPortalUrl: '',
   },
   accountContextOnly: false,
-  customConnectorAvailable: true,
 };
+
+export const getSourceData = (
+  serviceType: string,
+  baseServiceType?: string
+): SourceDataItem | undefined => {
+  if (serviceType === 'custom' && typeof baseServiceType === 'undefined') {
+    return staticCustomSourceData;
+  }
+  return staticSourceData.find(
+    (staticSource) =>
+      staticSource.serviceType === serviceType && staticSource.baseServiceType === baseServiceType
+  );
+};
+
+export const hasExternalConnectorOption = (serviceType: string): boolean =>
+  !!getSourceData('external', serviceType);
+
+export const hasCustomConnectorOption = (serviceType: string): boolean =>
+  !!getSourceData('custom', serviceType);
+
+export const hasMultipleConnectorOptions = (serviceType: string): boolean =>
+  hasExternalConnectorOption(serviceType) || hasCustomConnectorOption(serviceType);

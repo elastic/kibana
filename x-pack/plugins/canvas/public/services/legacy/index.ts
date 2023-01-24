@@ -6,12 +6,12 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreSetup, CoreStart, AppUpdater } from '../../../../../../src/core/public';
+import { CoreSetup, CoreStart, AppUpdater } from '@kbn/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
 import { searchServiceFactory } from './search';
 
 export type { SearchService } from './search';
-export { ExpressionsService } from '../../../../../../src/plugins/expressions/common';
+export { ExpressionsService } from '@kbn/expressions-plugin/common';
 export * from './context';
 
 export type CanvasServiceFactory<Service> = (

@@ -89,7 +89,6 @@ jest.mock('../../../hooks', () => {
               },
             ],
             latestVersion: version,
-            removable: true,
             keepPoliciesUpToDate: false,
             status: 'not_installed',
           },
@@ -132,6 +131,7 @@ jest.mock('../../../../integrations/hooks', () => {
   return {
     ...jest.requireActual('../../../../integrations/hooks'),
     useGetOnePackagePolicy: jest.fn(),
+    useConfirmForceInstall: jest.fn(),
   };
 });
 
@@ -152,7 +152,6 @@ const mockPackagePolicy = {
   package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
   enabled: true,
   policy_id: 'agent-policy-1',
-  output_id: '',
   inputs: [
     {
       type: 'logfile',
@@ -264,6 +263,7 @@ describe('edit package policy page', () => {
     const { id, ...restProps } = mockPackagePolicy;
     expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('nginx-1', {
       ...restProps,
+      vars: {},
       inputs: [
         {
           ...mockPackagePolicy.inputs[0],

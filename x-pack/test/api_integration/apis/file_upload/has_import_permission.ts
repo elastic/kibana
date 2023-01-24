@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
         const resp = await supertestWithoutAuth
           .get(
             `/internal/file_upload/has_import_permission\
-?checkCreateIndexPattern=true\
+?checkCreateDataView=true\
 &checkHasManagePipeline=true\
 &indexName=${INDEX_NAME}`
           )
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    it('should return false when user can not create index pattern when checkCreateIndexPattern=true', async () => {
+    it('should return false when user can not create data view when checkCreateDataView=true', async () => {
       try {
         await security.role.create(IMPORTER_ROLE_NAME, {});
 
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
         const resp = await supertestWithoutAuth
           .get(
             `/internal/file_upload/has_import_permission\
-?checkCreateIndexPattern=true\
+?checkCreateDataView=true\
 &checkHasManagePipeline=false`
           )
           .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
         const resp = await supertestWithoutAuth
           .get(
             `/internal/file_upload/has_import_permission\
-?checkCreateIndexPattern=false\
+?checkCreateDataView=false\
 &checkHasManagePipeline=true`
           )
           .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         const resp = await supertestWithoutAuth
           .get(
             `/internal/file_upload/has_import_permission\
-?checkCreateIndexPattern=false\
+?checkCreateDataView=false\
 &checkHasManagePipeline=false\
 &indexName=${INDEX_NAME}`
           )

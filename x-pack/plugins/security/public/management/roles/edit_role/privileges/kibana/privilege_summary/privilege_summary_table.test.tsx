@@ -8,11 +8,11 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
+import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
-import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
-import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
@@ -87,6 +87,15 @@ const expectNoPrivileges = (displayedPrivileges: any, expectSubFeatures: boolean
         primaryFeaturePrivilege: 'None',
         ...maybeExpectSubFeaturePrivileges(expectSubFeatures, {
           'Cool Sub Feature': [],
+        }),
+      },
+    },
+    with_require_all_spaces_sub_features: {
+      '*': {
+        hasCustomizedSubFeaturePrivileges: false,
+        primaryFeaturePrivilege: 'None',
+        ...maybeExpectSubFeaturePrivileges(expectSubFeatures, {
+          'Require all spaces Sub Feature': [],
         }),
       },
     },
@@ -248,6 +257,15 @@ describe('PrivilegeSummaryTable', () => {
               }),
             },
           },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+          },
         });
       });
 
@@ -307,6 +325,15 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
               }),
             },
           },
@@ -370,6 +397,15 @@ describe('PrivilegeSummaryTable', () => {
               }),
             },
           },
+          with_require_all_spaces_sub_features: {
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+          },
         });
       });
 
@@ -429,6 +465,15 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': [],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'None',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': [],
               }),
             },
           },
@@ -519,6 +564,22 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'Read',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
               }),
             },
           },
@@ -614,6 +675,22 @@ describe('PrivilegeSummaryTable', () => {
               }),
             },
           },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'Read',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'Read',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+          },
         });
       });
 
@@ -703,6 +780,22 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['Cool toggle 2', 'All'],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'None',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': [],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'Read',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
               }),
             },
           },
@@ -797,6 +890,22 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'All',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'None',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': [],
+              }),
+            },
+            'default, space-1': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'None',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': [],
               }),
             },
           },
@@ -922,6 +1031,29 @@ describe('PrivilegeSummaryTable', () => {
               primaryFeaturePrivilege: 'Read',
               ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
                 'Cool Sub Feature': ['Cool toggle 2', 'Read'],
+              }),
+            },
+          },
+          with_require_all_spaces_sub_features: {
+            '*': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'Read',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+            default: {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'All',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
+              }),
+            },
+            'space-1, space-2': {
+              hasCustomizedSubFeaturePrivileges: false,
+              primaryFeaturePrivilege: 'Read',
+              ...maybeExpectSubFeaturePrivileges(allowSubFeaturePrivileges, {
+                'Require all spaces Sub Feature': ['Cool toggle 1'],
               }),
             },
           },

@@ -9,7 +9,7 @@
 import { DataViewFieldBase } from '@kbn/es-query';
 
 import {
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   EVENT_FILTERS_OPERATORS,
   OperatorOption,
   doesNotExistOperator,
@@ -34,6 +34,6 @@ export const getOperators = (field: DataViewFieldBase | undefined): OperatorOpti
   } else if (field.name === 'file.path.text') {
     return EVENT_FILTERS_OPERATORS;
   } else {
-    return EXCEPTION_OPERATORS;
+    return ALL_OPERATORS;
   }
 };

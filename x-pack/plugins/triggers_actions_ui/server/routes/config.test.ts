@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createConfigRoute } from './config';
 
 describe('createConfigRoute', () => {
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
-    createConfigRoute(logger, router, `/api/triggers_actions_ui`, {
-      minimumScheduleInterval: '1m',
-    });
+    createConfigRoute(logger, router, `/internal/triggers_actions_ui`, () => ({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    }));
 
     const [config, handler] = router.get.mock.calls[0];
-    expect(config.path).toMatchInlineSnapshot(`"/api/triggers_actions_ui/_config"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/triggers_actions_ui/_config"`);
 
     const mockResponse = httpServerMock.createResponseFactory();
     await handler({}, httpServerMock.createKibanaRequest(), mockResponse);
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
-      body: { minimumScheduleInterval: '1m' },
+      body: { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } },
     });
   });
 });

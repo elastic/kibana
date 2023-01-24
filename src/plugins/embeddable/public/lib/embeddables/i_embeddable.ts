@@ -7,20 +7,19 @@
  */
 
 import { Observable } from 'rxjs';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableError {
-  name: string;
-  message: string;
-}
-
+export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
@@ -29,12 +28,15 @@ export interface EmbeddableOutput {
   defaultTitle?: string;
   title?: string;
   editable?: boolean;
+  // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
+  editableWithExplicitInput?: boolean;
   savedObjectId?: string;
 }
 
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
-  O extends EmbeddableOutput = EmbeddableOutput
+  O extends EmbeddableOutput = EmbeddableOutput,
+  N = any
 > {
   /**
    * Is this embeddable an instance of a Container class, can it contain
@@ -87,6 +89,14 @@ export interface IEmbeddable<
   fatalError?: Error;
 
   /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): boolean;
+
+  /**
    * A functional representation of the isContainer variable, but helpful for typescript to
    * know the shape if this returns true
    */
@@ -136,6 +146,12 @@ export interface IEmbeddable<
   updateInput(changes: Partial<I>): void;
 
   /**
+   * Updates output state with the given changes.
+   * @param changes
+   */
+  updateOutput(changes: Partial<O>): void;
+
+  /**
    * Returns an observable which will be notified when input state changes.
    */
   getInput$(): Readonly<Observable<I>>;
@@ -159,8 +175,17 @@ export interface IEmbeddable<
   /**
    * Renders the embeddable at the given node.
    * @param domNode
+   * @returns A React node to mount or void in the case when rendering is done without React.
    */
-  render(domNode: HTMLElement | Element): void;
+  render(domNode: HTMLElement | Element): N | void;
+
+  /**
+   * Renders a custom embeddable error at the given node.
+   * @param error
+   * @param domNode
+   * @returns A React node or callback that will be called on error destroy.
+   */
+  catchError?(error: EmbeddableError, domNode: HTMLElement | Element): N | (() => void);
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
@@ -189,4 +214,6 @@ export interface IEmbeddable<
    * Used to diff explicit embeddable input
    */
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
+
+  refreshInputFromParent(): void;
 }

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from 'src/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '@kbn/es-types';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -13,18 +15,17 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
+} from '../../../../common/es_fields/apm';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../../metrics/by_agent/shared/memory';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 interface ServiceInstanceSystemMetricPrimaryStatistics {
   serviceNodeName: string;
@@ -47,7 +48,7 @@ export async function getServiceInstancesSystemMetricStatistics<
 >({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   serviceName,
   size,
   start,
@@ -55,8 +56,9 @@ export async function getServiceInstancesSystemMetricStatistics<
   serviceNodeIds,
   numBuckets,
   isComparisonSearch,
+  offset,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
@@ -66,10 +68,19 @@ export async function getServiceInstancesSystemMetricStatistics<
   kuery: string;
   size?: number;
   isComparisonSearch: T;
+  offset?: string;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
-  const { apmEventClient } = setup;
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+    numBuckets,
+  });
 
   const systemMemoryFilter = {
     bool: {
@@ -99,8 +110,8 @@ export async function getServiceInstancesSystemMetricStatistics<
                 fixed_interval: intervalString,
                 min_doc_count: 0,
                 extended_bounds: {
-                  min: start,
-                  max: end,
+                  min: startWithOffset,
+                  max: endWithOffset,
                 },
               },
               aggs: { avg: { avg: agg } },
@@ -132,12 +143,13 @@ export async function getServiceInstancesSystemMetricStatistics<
         events: [ProcessorEvent.metric],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...(isComparisonSearch && serviceNodeIds

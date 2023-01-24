@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TableIdLiteral } from '../../../../common/types';
+import type { DataTableModel } from '../../../common/store/data_table/model';
 
-export interface TimelinesStorage {
-  getAllTimelines: () => Record<TimelineIdLiteral, TimelineModel>;
-  getTimelineById: (id: TimelineIdLiteral) => TimelineModel | null;
-  addTimeline: (id: TimelineIdLiteral, timeline: TimelineModel) => void;
+export interface DataTablesStorage {
+  getAllDataTables: () => Record<TableIdLiteral, DataTableModel>;
+  getDataTablesById: (id: TableIdLiteral) => DataTableModel | null;
+  addDataTable: (id: TableIdLiteral, table: DataTableModel) => void;
 }

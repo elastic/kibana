@@ -70,15 +70,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should update a transform', async () => {
       // assert the original transform for comparison
-      const { body: transformOriginalBody } = await supertest
+      const { body: transformOriginalBody, status: transformOriginalStatus } = await supertest
         .get('/api/transform/transforms/transform-test-update-1')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, transformOriginalStatus, transformOriginalBody);
 
       expect(transformOriginalBody.count).to.eql(expected.transformOriginalConfig.count);
       expect(transformOriginalBody.transforms).to.have.length(
@@ -92,15 +92,20 @@ export default ({ getService }: FtrProviderContext) => {
       expect(transformOriginalConfig.settings).to.eql({});
 
       // update the transform and assert the response
-      const { body: transformUpdateResponseBody } = await supertest
-        .post('/api/transform/transforms/transform-test-update-1/_update')
-        .auth(
-          USER.TRANSFORM_POWERUSER,
-          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
-        )
-        .set(COMMON_REQUEST_HEADERS)
-        .send(getTransformUpdateConfig())
-        .expect(200);
+      const { body: transformUpdateResponseBody, status: transformUpdatedResponseStatus } =
+        await supertest
+          .post('/api/transform/transforms/transform-test-update-1/_update')
+          .auth(
+            USER.TRANSFORM_POWERUSER,
+            transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+          )
+          .set(COMMON_REQUEST_HEADERS)
+          .send(getTransformUpdateConfig());
+      transform.api.assertResponseStatusCode(
+        200,
+        transformUpdatedResponseStatus,
+        transformUpdateResponseBody
+      );
 
       const expectedUpdateConfig = getTransformUpdateConfig();
       expect(transformUpdateResponseBody.id).to.eql(expected.transformOriginalConfig.id);
@@ -112,15 +117,15 @@ export default ({ getService }: FtrProviderContext) => {
       expect(transformUpdateResponseBody.settings).to.eql({});
 
       // assert the updated transform for comparison
-      const { body: transformUpdatedBody } = await supertest
+      const { body: transformUpdatedBody, status: transformUpdatedStatus } = await supertest
         .get('/api/transform/transforms/transform-test-update-1')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, transformUpdatedStatus, transformUpdatedBody);
 
       expect(transformUpdatedBody.count).to.eql(expected.transformOriginalConfig.count);
       expect(transformUpdatedBody.transforms).to.have.length(
@@ -138,15 +143,15 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return 403 for transform view-only user', async () => {
-      await supertest
+      const { body, status } = await supertest
         .post('/api/transform/transforms/transform-test-update-1/_update')
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send(getTransformUpdateConfig())
-        .expect(403);
+        .send(getTransformUpdateConfig());
+      transform.api.assertResponseStatusCode(403, status, body);
     });
   });
 };

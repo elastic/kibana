@@ -8,10 +8,9 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import type { Filter } from '@kbn/es-query';
-import { InspectQuery, Refetch, RefetchKql } from './model';
-import { InputsModelId } from './constants';
-
-import type { SavedQuery } from '../../../../../../../src/plugins/data/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import type { InspectQuery, Refetch, RefetchKql } from './model';
+import type { InputsModelId } from './constants';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/inputs');
 
@@ -36,7 +35,10 @@ export const setRelativeRangeDatePicker = actionCreator<{
   to: string;
 }>('SET_RELATIVE_RANGE_DATE_PICKER');
 
-export const setDuration = actionCreator<{ id: InputsModelId; duration: number }>('SET_DURATION');
+export const setDuration = actionCreator<{
+  id: InputsModelId;
+  duration: number;
+}>('SET_DURATION');
 
 export const startAutoReload = actionCreator<{ id: InputsModelId }>('START_KQL_AUTO_RELOAD');
 
@@ -48,35 +50,35 @@ export const setFullScreen = actionCreator<{
 }>('SET_FULL_SCREEN');
 
 export const setQuery = actionCreator<{
-  inputId: InputsModelId;
+  inputId: InputsModelId.global | InputsModelId.timeline;
   id: string;
   loading: boolean;
   refetch: Refetch | RefetchKql;
   inspect: InspectQuery | null;
+  searchSessionId?: string;
 }>('SET_QUERY');
 
 export const deleteOneQuery = actionCreator<{
-  inputId: InputsModelId;
+  inputId: InputsModelId.global | InputsModelId.timeline;
   id: string;
 }>('DELETE_QUERY');
 
 export const setInspectionParameter = actionCreator<{
   id: string;
-  inputId: InputsModelId;
+  inputId: InputsModelId.global | InputsModelId.timeline;
   isInspected: boolean;
   selectedInspectIndex: number;
+  searchSessionId?: string;
 }>('SET_INSPECTION_PARAMETER');
 
 export const deleteAllQuery = actionCreator<{ id: InputsModelId }>('DELETE_ALL_QUERY');
 
-export const toggleTimelineLinkTo =
-  actionCreator<{ linkToId: InputsModelId }>('TOGGLE_TIMELINE_LINK_TO');
+export const toggleTimelineLinkTo = actionCreator('TOGGLE_TIMELINE_LINK_TO');
 
-export const removeTimelineLinkTo = actionCreator('REMOVE_TIMELINE_LINK_TO');
-export const addTimelineLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_TIMELINE_LINK_TO');
+export const toggleSocTrendsLinkTo = actionCreator('TOGGLE_SOC_TRENDS_LINK_TO');
 
-export const removeGlobalLinkTo = actionCreator('REMOVE_GLOBAL_LINK_TO');
-export const addGlobalLinkTo = actionCreator<{ linkToId: InputsModelId }>('ADD_GLOBAL_LINK_TO');
+export const removeLinkTo = actionCreator<InputsModelId[]>('REMOVE_LINK_TO');
+export const addLinkTo = actionCreator<InputsModelId[]>('ADD_LINK_TO');
 
 export const setFilterQuery = actionCreator<{
   id: InputsModelId;

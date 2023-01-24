@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createTGridMocks } from '../../../../../../timelines/public/mock';
+import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 
 import {
   createKibanaContextProviderMock,
@@ -17,14 +16,33 @@ import {
   createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
+import { mockApm } from '../../apm/service.mock';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { mockCasesContract } from '../../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 const mockStartServicesMock = createStartServicesMock();
-export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
+export const KibanaServices = {
+  get: jest.fn(() => {
+    const { application, http, uiSettings, notifications, data, unifiedSearch } =
+      mockStartServicesMock;
+
+    return {
+      application,
+      http,
+      uiSettings,
+      notifications,
+      data,
+      unifiedSearch,
+    };
+  }),
+  getKibanaVersion: jest.fn(() => '8.0.0'),
+  getKibanaBranch: jest.fn(() => 'main'),
+  getPrebuiltRulesPackageVersion: jest.fn(() => undefined),
+};
 export const useKibana = jest.fn().mockReturnValue({
   services: {
     ...mockStartServicesMock,
+    apm: mockApm(),
     uiSettings: {
       get: jest.fn(),
       set: jest.fn(),
@@ -52,7 +70,16 @@ export const useKibana = jest.fn().mockReturnValue({
         },
       },
     },
+    osquery: {
+      OsqueryResults: jest.fn().mockReturnValue(null),
+      fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
+    },
     timelines: createTGridMocks(),
+    savedObjectsTagging: {
+      ui: {
+        getTableColumnDefinition: jest.fn(),
+      },
+    },
   },
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());
@@ -75,3 +102,19 @@ export const useAppUrl = jest.fn().mockReturnValue({
       mockStartServicesMock.application.getUrlForApp(appId, options)
     ),
 });
+// do not delete
+export const useNavigateTo = jest.fn().mockReturnValue({
+  navigateTo: jest.fn().mockImplementation(({ appId = APP_UI_ID, url, ...options }) => {
+    if (url) {
+      mockStartServicesMock.application.navigateToUrl(url);
+    } else {
+      mockStartServicesMock.application.navigateToApp(appId, options);
+    }
+  }),
+});
+
+export const useCapabilities = jest.fn((featureId?: string) =>
+  featureId
+    ? mockStartServicesMock.application.capabilities[featureId]
+    : mockStartServicesMock.application.capabilities
+);

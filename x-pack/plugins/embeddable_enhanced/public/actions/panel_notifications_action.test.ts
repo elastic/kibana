@@ -7,7 +7,7 @@
 
 import { PanelNotificationsAction } from './panel_notifications_action';
 import { EnhancedEmbeddableContext } from '../types';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const createContext = (events: unknown[] = [], isEditMode = false): EnhancedEmbeddableContext =>
   ({

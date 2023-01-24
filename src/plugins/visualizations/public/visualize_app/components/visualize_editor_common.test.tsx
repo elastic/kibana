@@ -7,14 +7,15 @@
  */
 
 import React from 'react';
+
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeEditorVisInstance } from '../types';
-import { SplitChartWarning } from './split_chart_warning';
+import { VizChartWarning } from './viz_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
-jest.mock('../../../../kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => ({
     services: {
       spaces: {
@@ -100,6 +101,7 @@ describe('VisualizeEditorCommon', () => {
               sharingSavedObjectProps: {
                 outcome: 'aliasMatch',
                 aliasTargetId: 'alias_id',
+                aliasPurpose: 'savedObjectConversion',
               },
             },
             vis: {
@@ -111,10 +113,11 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-      '#/edit/alias_id?_g=test',
-      'TSVB visualization'
-    );
+    expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/edit/alias_id?_g=test',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'TSVB visualization',
+    });
   });
 
   it('should display a warning callout for new heatmap implementation with split aggs', async () => {
@@ -155,7 +158,7 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(wrapper.find(SplitChartWarning).length).toBe(1);
+    expect(wrapper.find(VizChartWarning).length).toBe(1);
   });
 
   it('should not display a warning callout for XY charts with split aggs', async () => {
@@ -196,6 +199,6 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(wrapper.find(SplitChartWarning).length).toBe(0);
+    expect(wrapper.find(VizChartWarning).length).toBe(0);
   });
 });

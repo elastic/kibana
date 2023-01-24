@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import type { Installation, Output } from '../../../common';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common';
+import type { Installation, Output } from '../../../common/types';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common/constants';
 
 export const migrateOutputToV800: SavedObjectMigrationFn<Output, Output> = (
   outputDoc,

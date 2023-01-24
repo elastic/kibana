@@ -9,8 +9,8 @@ import moment from 'moment';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';
 
@@ -58,51 +58,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Error groups main statistics',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded', () => {
-        const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } = config;
+  registry.when('Error groups main statistics', { config: 'basic', archives: [] }, () => {
+    describe('when data is loaded', () => {
+      const { PROD_LIST_ERROR_RATE, PROD_ID_ERROR_RATE, ERROR_NAME_1, ERROR_NAME_2 } = config;
 
+      before(async () => {
+        await generateData({ serviceName, start, end, synthtraceEsClient });
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('returns the correct data', () => {
+        let errorGroupMainStatistics: ErrorGroupsMainStatistics;
         before(async () => {
-          await generateData({ serviceName, start, end, synthtraceEsClient });
+          const response = await callApi();
+          errorGroupMainStatistics = response.body;
         });
 
-        after(() => synthtraceEsClient.clean());
+        it('returns correct number of occurrences', () => {
+          expect(errorGroupMainStatistics.errorGroups.length).to.equal(2);
+          expect(errorGroupMainStatistics.errorGroups.map((error) => error.name).sort()).to.eql([
+            ERROR_NAME_1,
+            ERROR_NAME_2,
+          ]);
+        });
 
-        describe('returns the correct data', () => {
-          let errorGroupMainStatistics: ErrorGroupsMainStatistics;
-          before(async () => {
-            const response = await callApi();
-            errorGroupMainStatistics = response.body;
-          });
+        it('returns correct occurences', () => {
+          const numberOfBuckets = 15;
+          expect(
+            errorGroupMainStatistics.errorGroups.map((error) => error.occurrences).sort()
+          ).to.eql([PROD_LIST_ERROR_RATE * numberOfBuckets, PROD_ID_ERROR_RATE * numberOfBuckets]);
+        });
 
-          it('returns correct number of occurrences', () => {
-            expect(errorGroupMainStatistics.errorGroups.length).to.equal(2);
-            expect(errorGroupMainStatistics.errorGroups.map((error) => error.name).sort()).to.eql([
-              ERROR_NAME_1,
-              ERROR_NAME_2,
-            ]);
-          });
-
-          it('returns correct occurences', () => {
-            const numberOfBuckets = 15;
-            expect(
-              errorGroupMainStatistics.errorGroups.map((error) => error.occurrences).sort()
-            ).to.eql([
-              PROD_LIST_ERROR_RATE * numberOfBuckets,
-              PROD_ID_ERROR_RATE * numberOfBuckets,
-            ]);
-          });
-
-          it('has same last seen value as end date', () => {
-            errorGroupMainStatistics.errorGroups.map((error) => {
-              expect(error.lastSeen).to.equal(moment(end).startOf('minute').valueOf());
-            });
+        it('has same last seen value as end date', () => {
+          errorGroupMainStatistics.errorGroups.map((error) => {
+            expect(error.lastSeen).to.equal(moment(end).startOf('minute').valueOf());
           });
         });
       });
-    }
-  );
+    });
+  });
 }

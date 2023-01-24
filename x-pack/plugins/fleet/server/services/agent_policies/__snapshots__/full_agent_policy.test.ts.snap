@@ -3,6 +3,9 @@
 exports[`getFullAgentPolicy should support a different data output 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -46,14 +49,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "default": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
@@ -67,6 +68,9 @@ Object {
 exports[`getFullAgentPolicy should support a different monitoring output 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -110,14 +114,12 @@ Object {
   },
   "outputs": Object {
     "default": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
@@ -131,6 +133,9 @@ Object {
 exports[`getFullAgentPolicy should support both different outputs for data and monitoring  1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "http://default-registry.co",
+    },
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -174,14 +179,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],

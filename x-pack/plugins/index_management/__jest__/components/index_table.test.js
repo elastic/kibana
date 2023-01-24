@@ -8,20 +8,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import axios from 'axios';
-import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
+import { mountWithIntl } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
+import { init as initHttpRequests } from '../client_integration/helpers/http_requests';
 
-/**
- * The below import is required to avoid a console error warn from brace package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import { mountWithIntl, stubWebWorker } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
-
-import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
+import { BASE_PATH } from '../../common/constants';
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
 import { loadIndicesSuccess } from '../../public/application/store/actions';
@@ -35,12 +26,8 @@ import { setExtensionsService } from '../../public/application/store/selectors/e
 import { ExtensionsService } from '../../public/services';
 import { kibanaVersion } from '../client_integration/helpers';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
+import { notificationServiceMock, executionContextServiceMock } from '@kbn/core/public/mocks';
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-let server = null;
 let store = null;
 const indices = [];
 
@@ -147,6 +134,8 @@ const getActionMenuButtons = (rendered) => {
     .map((span) => span.text());
 };
 describe('index table', () => {
+  const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
+
   beforeEach(() => {
     // Mock initialization of services
     const services = {
@@ -157,14 +146,20 @@ describe('index table', () => {
     setExtensionsService(services.extensionsService);
     setUiMetricService(services.uiMetricService);
 
-    // @ts-ignore
-    httpService.setup(mockHttpClient);
+    httpService.setup(httpSetup);
     breadcrumbService.setup(() => undefined);
     notificationService.setup(notificationServiceMock.createStartContract());
 
     store = indexManagementStore(services);
 
-    const appDependencies = { services, core: {}, plugins: {} };
+    const appDependencies = {
+      services,
+      core: {
+        getUrlForApp: () => {},
+        executionContext: executionContextServiceMock.createStartContract(),
+      },
+      plugins: {},
+    };
 
     component = (
       <Provider store={store}>
@@ -177,33 +172,9 @@ describe('index table', () => {
     );
 
     store.dispatch(loadIndicesSuccess({ indices }));
-    server = sinon.fakeServer.create();
 
-    server.respondWith(`${API_BASE_PATH}/indices`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(indices),
-    ]);
-
-    server.respondWith([
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify({ acknowledged: true }),
-    ]);
-
-    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(indices),
-    ]);
-
-    server.respondImmediately = true;
-  });
-  afterEach(() => {
-    if (!server) {
-      return;
-    }
-    server.restore();
+    httpRequestsMockHelpers.setLoadIndicesResponse(indices);
+    httpRequestsMockHelpers.setReloadIndicesResponse(indices);
   });
 
   test('should change pages when a pagination link is clicked on', async () => {
@@ -450,13 +421,13 @@ describe('index table', () => {
     const rowIndex = 0;
     openMenuAndClickButton(rendered, rowIndex, 'forcemergeIndexMenuButton');
     snapshot(status(rendered, rowIndex));
-    expect(rendered.find('.euiModal').length).toBe(1);
+    expect(rendered.find('div.euiModal').length).toBe(1);
 
     let count = 0;
     store.subscribe(() => {
       if (count === 1) {
         snapshot(status(rendered, rowIndex));
-        expect(rendered.find('.euiModal').length).toBe(0);
+        expect(rendered.find('div.euiModal').length).toBe(0);
       }
       count++;
     });
@@ -467,22 +438,17 @@ describe('index table', () => {
   });
 
   test('close index button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-
     const modifiedIndices = indices.map((index) => {
       return {
         ...index,
         status: index.name === 'testy0' ? 'close' : index.status,
       };
     });
+    httpRequestsMockHelpers.setReloadIndicesResponse(modifiedIndices);
 
-    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(modifiedIndices),
-    ]);
+    const rendered = mountWithIntl(component);
+    await runAllPromises();
+    rendered.update();
 
     testAction(rendered, 'closeIndexMenuButton');
   });
@@ -494,16 +460,12 @@ describe('index table', () => {
         status: index.name === 'testy1' ? 'closed' : index.status,
       };
     });
-
-    server.respondWith(`${API_BASE_PATH}/indices`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(modifiedIndices),
-    ]);
+    httpRequestsMockHelpers.setLoadIndicesResponse(modifiedIndices);
 
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
+
     testAction(rendered, 'openIndexMenuButton', 'testy1');
   });
 

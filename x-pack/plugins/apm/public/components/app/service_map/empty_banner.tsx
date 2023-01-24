@@ -8,17 +8,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CytoscapeContext } from './cytoscape';
 import { useTheme } from '../../../hooks/use_theme';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const EmptyBannerContainer = euiStyled.div`
-  margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
+  margin: ${({ theme }) => theme.eui.euiSizeS};
   /* Add some extra margin so it displays to the right of the controls. */
   left: calc(
-    ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge} +
-      ${({ theme }) => theme.eui.gutterTypes.gutterSmall}
+    ${({ theme }) => theme.eui.euiSizeXXL} +
+      ${({ theme }) => theme.eui.euiSizeS}
   );
   position: absolute;
   z-index: 1;
@@ -54,8 +54,8 @@ export function EmptyBanner() {
   // subtract the space for controls and margins.
   const width =
     cy.width() -
-    parseInt(theme.eui.gutterTypes.gutterExtraLarge, 10) -
-    parseInt(theme.eui.gutterTypes.gutterLarge, 10);
+    parseInt(theme.eui.euiSizeXXL, 10) -
+    parseInt(theme.eui.euiSizeL, 10);
 
   return (
     <EmptyBannerContainer style={{ width }}>

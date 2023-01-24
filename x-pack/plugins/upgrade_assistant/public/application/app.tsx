@@ -8,8 +8,12 @@
 import React, { useState, useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiPageContent, EuiLoadingSpinner } from '@elastic/eui';
-import { ScopedHistory } from 'src/core/public';
+import {
+  EuiEmptyPrompt,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { ClusterUpgradeState } from '../../common/types';
@@ -19,37 +23,54 @@ import {
   AuthorizationProvider,
   RedirectAppLinks,
   KibanaThemeProvider,
+  NotAuthorizedSection,
 } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import {
-  EsDeprecations,
-  EsDeprecationLogs,
-  ComingSoonPrompt,
-  KibanaDeprecations,
-  Overview,
-} from './components';
+import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
-    isReadOnlyMode,
-    services: { api },
+    services: { api, core },
   } = useAppContext();
 
-  const [clusterUpgradeState, setClusterUpradeState] =
+  const missingManageSpacesPrivilege = core.application.capabilities.spaces.manage !== true;
+
+  const [clusterUpgradeState, setClusterUpgradeState] =
     useState<ClusterUpgradeState>('isPreparingForUpgrade');
 
   useEffect(() => {
     api.onClusterUpgradeStateChange((newClusterUpgradeState: ClusterUpgradeState) => {
-      setClusterUpradeState(newClusterUpgradeState);
+      setClusterUpgradeState(newClusterUpgradeState);
     });
   }, [api]);
 
-  // Read-only mode will be enabled up until the last minor before the next major release
-  if (isReadOnlyMode) {
-    return <ComingSoonPrompt />;
+  if (missingManageSpacesPrivilege) {
+    return (
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="subdued"
+        data-test-subj="missingKibanaPrivilegesMessage"
+      >
+        <NotAuthorizedSection
+          title={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.app.deniedPrivilegeTitle"
+              defaultMessage="Kibana admin role required"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.app.deniedPrivilegeDescription"
+              defaultMessage="To use Upgrade Assistant and resolve deprecation issues, you must have access to manage all Kibana spaces."
+            />
+          }
+        />
+      </EuiPageContent>
+    );
   }
 
   if (clusterUpgradeState === 'isUpgrading') {
@@ -168,8 +189,10 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = (dependencies: AppDependencies) => {
   const {
     history,
-    core: { i18n, application, http },
+    core: { i18n, application, http, executionContext },
   } = dependencies.services;
+
+  executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>

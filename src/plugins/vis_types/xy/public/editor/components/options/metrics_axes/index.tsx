@@ -12,7 +12,8 @@ import { cloneDeep, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { BUCKET_TYPES, IAggConfig } from '../../../../../../../data/public';
+import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { getUISettings } from '../../../../services';
 
 import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
@@ -29,7 +30,6 @@ import {
   mapPositionOpposingOpposite,
 } from './utils';
 import { getSeriesParams } from '../../../../utils/get_series_params';
-import { LEGACY_TIME_AXIS } from '../../../../../../../charts/common';
 
 export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
   axesName: 'valueAxes' | 'seriesParams',
@@ -97,14 +97,14 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
 
         series.forEach((serie, seriesIndex) => {
           if ((axisNumber === 0 && !serie.valueAxis) || serie.valueAxis === axis.id) {
-            const aggByIndex = aggs.bySchemaName('metric')[seriesIndex];
+            const aggByIndex = aggs?.bySchemaName('metric')[seriesIndex];
             matchingSeries.push(aggByIndex);
           }
         });
 
         if (matchingSeries.length === 1) {
           // if several series matches to the axis, axis title is set according to the first serie.
-          newCustomLabel = matchingSeries[0].makeLabel();
+          newCustomLabel = matchingSeries[0]?.makeLabel();
         }
 
         if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
@@ -290,7 +290,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     updateAxisTitle(updatedSeries);
   }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
 
-  const isTimeViz = aggs.aggs.some(
+  const isTimeViz = aggs?.aggs.some(
     (agg) =>
       agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
   );

@@ -9,13 +9,13 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
+import type { EndpointIsolatedFormProps } from '../../../common/components/endpoint/host_isolation';
 import {
-  EndpointIsolatedFormProps,
   EndpointUnisolateForm,
   ActionCompletionReturnButton,
 } from '../../../common/components/endpoint/host_isolation';
 import { useHostUnisolation } from '../../containers/detection_engine/alerts/use_host_unisolation';
-import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
+import type { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const UnisolateHost = React.memo(
   ({

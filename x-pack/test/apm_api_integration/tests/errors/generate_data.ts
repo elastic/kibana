@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
-import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const config = {
   appleTransaction: {
@@ -31,40 +31,42 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const serviceGoProdInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+  const serviceGoProdInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
 
   const interval = '1m';
 
   const { bananaTransaction, appleTransaction } = config;
 
-  const documents = [appleTransaction, bananaTransaction].map((transaction, index) => {
-    return timerange(start, end)
-      .interval(interval)
-      .rate(transaction.successRate)
-      .spans((timestamp) =>
-        serviceGoProdInstance
-          .transaction(transaction.name)
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-          .serialize()
-      )
-      .concat(
-        timerange(start, end)
-          .interval(interval)
-          .rate(transaction.failureRate)
-          .spans((timestamp) =>
-            serviceGoProdInstance
-              .transaction(transaction.name)
-              .errors(
-                serviceGoProdInstance.error(`Error ${index}`, transaction.name).timestamp(timestamp)
-              )
-              .duration(1000)
-              .timestamp(timestamp)
-              .failure()
-              .serialize()
-          )
-      );
+  const documents = [appleTransaction, bananaTransaction].flatMap((transaction, index) => {
+    return [
+      timerange(start, end)
+        .interval(interval)
+        .rate(transaction.successRate)
+        .generator((timestamp) =>
+          serviceGoProdInstance
+            .transaction({ transactionName: transaction.name })
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+        ),
+      timerange(start, end)
+        .interval(interval)
+        .rate(transaction.failureRate)
+        .generator((timestamp) =>
+          serviceGoProdInstance
+            .transaction({ transactionName: transaction.name })
+            .errors(
+              serviceGoProdInstance
+                .error({ message: `Error ${index}`, type: transaction.name })
+                .timestamp(timestamp)
+            )
+            .duration(1000)
+            .timestamp(timestamp)
+            .failure()
+        ),
+    ];
   });
 
   await synthtraceEsClient.index(documents);

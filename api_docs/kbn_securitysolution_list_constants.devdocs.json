@@ -24,92 +24,634 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
+        "type": "string",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_ID",
+        "type": "string",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_ID",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/services/blocklists_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/services/blocklists_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/services/blocklists_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/blocklist_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_NAME",
+        "type": "string",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "ENDPOINT_BLOCKLISTS_LIST_NAME",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
-        "description": [
-          "Description of event filters agnostic list"
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
+          }
         ],
-        "signature": [
-          "\"Endpoint Security Event Filters List\""
-        ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_ID",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_ID",
-        "description": [
-          "ID of event filters agnostic list"
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/view/components/form.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/view/components/form.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/view/utils.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/view/utils.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/service/service_actions.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/service/service_actions.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/service/service_actions.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/event_filter_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          }
         ],
-        "signature": [
-          "\"endpoint_event_filters\""
-        ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_NAME",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_NAME",
-        "description": [
-          "Name of event filters agnostic list"
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
+          }
         ],
-        "signature": [
-          "\"Endpoint Security Event Filters List\""
-        ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
         "description": [],
-        "signature": [
-          "\"Endpoint Security Host isolation exceptions List\""
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
+          }
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
         "description": [],
-        "signature": [
-          "\"endpoint_host_isolation_exceptions\""
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/host_isolation_exceptions_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/endpoint_app_context_services.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/endpoint_app_context_services.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/get_exception_list_summary.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/get_exception_list_summary.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/host_isolation_exception_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/host_isolation_exception_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          }
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
         "description": [],
-        "signature": [
-          "\"Endpoint Security Host isolation exceptions List\""
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/host_isolation_exceptions/index.ts"
+          }
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -124,8 +666,9 @@
         "signature": [
           "\"Endpoint Security Exception List\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -140,8 +683,9 @@
         "signature": [
           "\"endpoint_list\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -156,8 +700,9 @@
         "signature": [
           "\"/api/endpoint_list/items\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -172,8 +717,9 @@
         "signature": [
           "\"Endpoint Security Exception List\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -188,56 +734,404 @@
         "signature": [
           "\"/api/endpoint_list\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
-        "description": [
-          "Description of trusted apps agnostic list"
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          }
         ],
-        "signature": [
-          "\"Endpoint Security Trusted Apps List\""
-        ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_ID",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_ID",
-        "description": [
-          "ID of trusted apps agnostic list"
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/lib/telemetry/receiver.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/mocks/trusted_apps_http_mocks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/mocks/trusted_apps_http_mocks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/mocks/trusted_apps_http_mocks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/mappers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/service/mappers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          }
         ],
-        "signature": [
-          "\"endpoint_trusted_apps\""
-        ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
-        "deprecated": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_NAME",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_NAME",
-        "description": [
-          "Name of trusted apps agnostic list"
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/server/services/exception_lists/create_endpoint_trusted_apps_list.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "lists",
+            "path": "x-pack/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-io-ts-list-types",
+            "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.mock.ts"
+          }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_FILTER",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_FILTER",
+        "description": [],
         "signature": [
-          "\"Endpoint Security Trusted Apps List\""
+          "\"/internal/lists/_create_filter\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -250,8 +1144,9 @@
         "signature": [
           "\"/api/exception_lists/items\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -264,8 +1159,9 @@
         "signature": [
           "\"exception-list\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -280,8 +1176,9 @@
         "signature": [
           "\"exception-list-agnostic\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -296,8 +1193,67 @@
         "signature": [
           "\"/api/exception_lists\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.FIND_LISTS_BY_SIZE",
+        "type": "string",
+        "tags": [],
+        "label": "FIND_LISTS_BY_SIZE",
+        "description": [],
+        "signature": [
+          "\"/internal/lists/_find_lists_by_size\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_EXCEPTION_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_EXCEPTION_LIST_URL",
+        "description": [
+          "\nInternal exception list routes"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.INTERNAL_LIST_URL",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_LIST_URL",
+        "description": [
+          "\nInternal value list routes"
+        ],
+        "signature": [
+          "\"/internal/lists\""
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -307,8 +1263,9 @@
         "tags": [],
         "label": "LIST_INDEX",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -318,8 +1275,9 @@
         "tags": [],
         "label": "LIST_ITEM_URL",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -329,8 +1287,9 @@
         "tags": [],
         "label": "LIST_PRIVILEGES_URL",
         "description": [],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -345,8 +1304,9 @@
         "signature": [
           "\"/api/lists\""
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -359,11 +1319,77 @@
         "signature": [
           "10000"
         ],
-        "path": "packages/kbn-securitysolution-list-constants/src/index.ts",
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE",
+        "description": [],
+        "signature": [
+          "200"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.MAXIMUM_SMALL_VALUE_LIST_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAXIMUM_SMALL_VALUE_LIST_SIZE",
+        "description": [],
+        "signature": [
+          "65536"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_ARTIFACT_LIST_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "ENDPOINT_ARTIFACT_LIST_IDS",
+        "description": [
+          "\nThe IDs of all Endpoint artifact lists"
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.ENDPOINT_ARTIFACT_LISTS",
+        "type": "Object",
+        "tags": [],
+        "label": "ENDPOINT_ARTIFACT_LISTS",
+        "description": [
+          "\nList definitions for Endpoint Artifact"
+        ],
+        "signature": [
+          "{ readonly trustedApps: Readonly<{ id: string; name: string; description: string; }>; readonly eventFilters: Readonly<{ id: string; name: string; description: string; }>; readonly hostIsolationExceptions: Readonly<{ id: string; name: string; description: string; }>; readonly blocklists: Readonly<{ id: string; name: string; description: string; }>; }"
+        ],
+        "path": "packages/kbn-securitysolution-list-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

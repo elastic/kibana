@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from 'kibana/public';
+import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit) {

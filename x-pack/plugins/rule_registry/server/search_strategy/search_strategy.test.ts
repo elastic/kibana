@@ -10,14 +10,17 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
-import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
-import { alertsMock } from '../../../alerting/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { spacesMock } from '../../../spaces/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
+import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
+
+jest.mock('../lib/get_is_kibana_request');
 
 const getBasicResponse = (overwrites = {}) => {
   return merge(
@@ -71,12 +74,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
-    ruleDataService.findIndicesByFeature.mockImplementation(() => {
-      return [
-        {
-          baseName: 'test',
-        } as IndexInfo,
-      ];
+    ruleDataService.findIndexByFeature.mockImplementation(() => {
+      return {
+        baseName: 'test',
+      } as IndexInfo;
     });
 
     data.search.getSearchStrategy.mockImplementation(() => {
@@ -89,6 +90,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       return of(response);
     });
 
+    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
+      return true;
+    });
+
     getAuthzFilterSpy = jest
       .spyOn(getAuthzFilterImport, 'getAuthzFilter')
       .mockImplementation(async () => {
@@ -97,7 +102,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   afterEach(() => {
-    ruleDataService.findIndicesByFeature.mockClear();
+    ruleDataService.findIndexByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
     (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
@@ -145,12 +150,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       };
     });
 
-    ruleDataService.findIndicesByFeature.mockImplementation(() => {
-      return [
-        {
-          baseName: 'myTestIndex',
-        } as unknown as IndexInfo,
-      ];
+    ruleDataService.findIndexByFeature.mockImplementation(() => {
+      return {
+        baseName: 'myTestIndex',
+      } as unknown as IndexInfo;
     });
 
     let searchRequest: RuleRegistrySearchRequest = {} as unknown as RuleRegistrySearchRequest;
@@ -188,8 +191,8 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    ruleDataService.findIndicesByFeature.mockImplementationOnce(() => {
-      return [];
+    ruleDataService.findIndexByFeature.mockImplementationOnce(() => {
+      return null;
     });
 
     const strategy = ruleRegistrySearchStrategyProvider(
@@ -376,5 +379,109 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(
       (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.sort
     ).toStrictEqual([{ test: { order: 'desc' } }]);
+  });
+
+  it('passes the query ids if provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+      query: {
+        ids: { values: ['test-id'] },
+      },
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      {
+        params: {
+          allow_no_indices: true,
+          body: {
+            _source: false,
+            fields: [
+              {
+                field: '*',
+                include_unmapped: true,
+              },
+            ],
+            from: 0,
+            query: {
+              ids: {
+                values: ['test-id'],
+              },
+            },
+            size: 1000,
+            sort: [],
+          },
+          ignore_unavailable: true,
+          index: ['test-testSpace*'],
+        },
+      },
+      {},
+      { request: {} }
+    );
+  });
+
+  it('passes the fields if provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+      query: {
+        ids: { values: ['test-id'] },
+      },
+      fields: [{ field: '@timestamp', include_unmapped: true }],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(searchStrategySearch).toHaveBeenCalledWith(
+      {
+        params: {
+          allow_no_indices: true,
+          body: {
+            _source: false,
+            fields: [{ field: '@timestamp', include_unmapped: true }],
+            from: 0,
+            query: {
+              ids: {
+                values: ['test-id'],
+              },
+            },
+            size: 1000,
+            sort: [],
+          },
+          ignore_unavailable: true,
+          index: ['test-testSpace*'],
+        },
+      },
+      {},
+      { request: {} }
+    );
   });
 });

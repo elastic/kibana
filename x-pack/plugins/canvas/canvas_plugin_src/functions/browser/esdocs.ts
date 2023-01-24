@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { zipObject } from 'lodash';
 import {
+  Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
-
-// @ts-expect-error untyped local
-import { buildESRequest } from '../../../common/lib/request/build_es_request';
+} from '@kbn/expressions-plugin/common';
+import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
+import {
+  SqlRequestParams,
+  SqlSearchStrategyRequest,
+  SqlSearchStrategyResponse,
+  SQL_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/common';
 
 import { searchService } from '../../../public/services';
-import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
-import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { buildBoolArray } from '../../../common/lib/request/build_bool_array';
+import { normalizeType } from '../../../common/lib/request/normalize_type';
 
 interface Arguments {
   index: string;
@@ -27,11 +33,15 @@ interface Arguments {
   count: number;
 }
 
+function sanitize(value: string) {
+  return value.replace(/[\(\)]/g, '_');
+}
+
 export function esdocs(): ExpressionFunctionDefinition<
   'esdocs',
   ExpressionValueFilter,
   Arguments,
-  any
+  Observable<Datatable>
 > {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
 
@@ -60,6 +70,7 @@ export function esdocs(): ExpressionFunctionDefinition<
       },
       index: {
         types: ['string'],
+        aliases: ['dataView'],
         default: '_all',
         help: argHelp.index,
       },
@@ -74,68 +85,97 @@ export function esdocs(): ExpressionFunctionDefinition<
         help: argHelp.sort,
       },
     },
-    fn: async (input, args, handlers) => {
-      const { count, index, fields, sort } = args;
-
-      input.and = input.and.concat([
-        {
-          type: 'filter',
-          filterType: 'luceneQueryString',
-          query: args.query,
-          and: [],
-        },
-      ]);
-
+    fn(input, args, { abortSignal }) {
       // Load ad-hoc to avoid adding to the page load bundle size
-      const squel = await import('safe-squel');
+      return from(import('safe-squel')).pipe(
+        switchMap((squel) => {
+          const { count, index, fields, sort } = args;
 
-      let query = squel.select({
-        autoQuoteTableNames: true,
-        autoQuoteFieldNames: true,
-        autoQuoteAliasNames: true,
-        nameQuoteCharacter: '"',
-      });
+          let query = squel.select({
+            autoQuoteTableNames: true,
+            autoQuoteFieldNames: true,
+            autoQuoteAliasNames: true,
+            nameQuoteCharacter: '"',
+          });
 
-      if (index) {
-        query.from(index);
-      }
+          if (index) {
+            query.from(index);
+          }
 
-      if (fields) {
-        const allFields = fields.split(',').map((field) => field.trim());
-        allFields.forEach((field) => (query = query.field(field)));
-      }
+          if (fields) {
+            const allFields = fields.split(',').map((field) => field.trim());
+            allFields.forEach((field) => (query = query.field(field)));
+          }
 
-      if (sort) {
-        const [sortField, sortOrder] = sort.split(',').map((str) => str.trim());
-        if (sortField) {
-          query.order(`"${sortField}"`, sortOrder === 'asc');
-        }
-      }
+          if (sort) {
+            const [sortField, sortOrder] = sort.split(',').map((str) => str.trim());
+            if (sortField) {
+              query.order(`"${sortField}"`, sortOrder === 'asc');
+            }
+          }
 
-      const search = searchService.getService().search;
+          const params: SqlRequestParams = {
+            query: query.toString(),
+            fetch_size: count,
+            field_multi_value_leniency: true,
+            filter: {
+              bool: {
+                must: [
+                  { match_all: {} },
+                  ...buildBoolArray([
+                    ...input.and,
+                    {
+                      type: 'filter',
+                      filterType: 'luceneQueryString',
+                      query: args.query,
+                      and: [],
+                    },
+                  ]),
+                ],
+              },
+            },
+          };
 
-      const req = {
-        count,
-        query: query.toString(),
-        filter: input.and,
-      };
+          const search = searchService.getService().search;
 
-      // We're requesting the data using the ESSQL strategy because
-      // the SQL routes return type information with the result set
-      return search
-        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
-          strategy: ESSQL_SEARCH_STRATEGY,
-        })
-        .toPromise()
-        .then((resp: EssqlSearchStrategyResponse) => {
+          return search.search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
+            { params },
+            { abortSignal, strategy: SQL_SEARCH_STRATEGY }
+          );
+        }),
+        catchError((error) => {
+          if (!error.err) {
+            error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+          } else {
+            const { type, reason } = error.err.attributes;
+            error.message =
+              type === 'parsing_exception'
+                ? `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`
+                : `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+          }
+
+          return throwError(() => error);
+        }),
+        map(({ rawResponse: body }) => {
+          const columns =
+            body.columns?.map(({ name, type }) => ({
+              id: sanitize(name),
+              name: sanitize(name),
+              meta: { type: normalizeType(type) },
+            })) ?? [];
+          const columnNames = columns.map(({ name }) => name);
+          const rows = body.rows.map((row) => zipObject(columnNames, row));
+
           return {
             type: 'datatable',
             meta: {
               type: 'essql',
             },
-            ...resp,
-          };
-        });
+            columns,
+            rows,
+          } as Datatable;
+        })
+      );
     },
   };
 }

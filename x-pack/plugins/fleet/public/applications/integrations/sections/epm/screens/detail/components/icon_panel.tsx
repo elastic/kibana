@@ -14,7 +14,7 @@ import { usePackageIconType } from '../../../../../hooks';
 import { Loading } from '../../../../../components';
 
 const Panel = styled(EuiPanel)`
-  padding: ${(props) => props.theme.eui.spacerSizes.xl};
+  padding: ${(props) => props.theme.eui.euiSizeXL};
   width: ${(props) =>
     parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
   svg,

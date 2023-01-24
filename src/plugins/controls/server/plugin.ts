@@ -6,28 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-
-import { EmbeddableSetup } from '../../embeddable/server';
-import { PluginSetup as DataSetup } from '../../data/server';
-import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
+import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
-import { optionsListPersistableStateServiceFactory } from './control_types/options_list/options_list_embeddable_factory';
+import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
+import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
+import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   data: DataSetup;
+  unifiedSearch: UnifiedSearchSetup;
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  public setup(core: CoreSetup, { embeddable, data }: SetupDeps) {
-    embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
-
+  public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)
     );
+    embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
+    embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
+    embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
 
-    setupOptionsListSuggestionsRoute(core, data.autocomplete.getAutocompleteSettings);
+    setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
     return {};
   }
 

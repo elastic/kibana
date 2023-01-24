@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Polygon, Position } from 'geojson';
+import { MultiPolygon, Polygon, Position } from 'geojson';
 import type { Filter } from '@kbn/es-query';
 import { ES_SPATIAL_RELATIONS } from '../constants';
 
@@ -25,7 +25,7 @@ export interface ESBBox {
 }
 
 export interface GeoShapeQueryBody {
-  shape?: Polygon;
+  shape?: MultiPolygon | Polygon;
   relation?: ES_SPATIAL_RELATIONS;
   indexed_shape?: PreIndexedShape;
 }
@@ -43,6 +43,12 @@ export type GeoFilter = Filter & {
   geo_distance?: {
     distance: string;
     [geoFieldName: string]: Position | { lat: number; lon: number } | string;
+  };
+  geo_grid?: {
+    [geoFieldName: string]: {
+      geohex?: string;
+      geotile?: string;
+    };
   };
   geo_shape?: GeoShapeQuery;
 };

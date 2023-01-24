@@ -1,0 +1,29 @@
+{
+  "type": "index",
+  "value": {
+    "index": "fake.index.1",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "epoch_second"
+        },
+        "locale": {
+          "type": "keyword"
+        },
+        "created_at": {
+          "type": "date",
+          "format": "epoch_second"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "1s",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from '../../../src/core/types';
-
-export interface TodoSavedObjectAttributes extends SavedObjectAttributes {
+export interface TodoSavedObjectAttributes {
   task: string;
   icon?: string;
   title?: string;

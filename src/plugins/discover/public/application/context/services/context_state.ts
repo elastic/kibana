@@ -8,17 +8,19 @@
 
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
-import { Filter, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
+import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
+import { Filter, compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
   withNotifyOnErrors,
   ReduxLikeStateContainer,
-} from '../../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 
-import { FilterManager } from '../../../../../data/public';
+import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
 export interface AppState {
@@ -46,7 +48,7 @@ export interface AppState {
   sort?: string[][];
 }
 
-interface GlobalState {
+export interface GlobalState {
   /**
    * Array of filters
    */
@@ -78,6 +80,16 @@ export interface GetStateParams {
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
+
+  /**
+   * data service
+   */
+  data: DataPublicPluginStart;
+
+  /**
+   * the current data view
+   */
+  dataView: DataView;
 }
 
 export interface GetStateReturn {
@@ -128,6 +140,8 @@ export function getState({
   history,
   toasts,
   uiSettings,
+  data,
+  dataView,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -135,14 +149,20 @@ export function getState({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
+  const globalStateFromUrl = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) as GlobalState;
+  const globalStateInitial = createInitialGlobalState(globalStateFromUrl);
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   const appStateInitial = createInitialAppState(defaultSize, appStateFromUrl, uiSettings);
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
 
-  const { start, stop } = syncStates([
+  const getAllFilters = () => [
+    ...getFilters(globalStateContainer.getState()),
+    ...getFilters(appStateContainer.getState()),
+  ];
+
+  const { start: startSyncingStates, stop: stopSyncingStates } = syncStates([
     {
       storageKey: GLOBAL_STATE_URL_KEY,
       stateContainer: {
@@ -173,11 +193,35 @@ export function getState({
     },
   ]);
 
+  let stopSyncingFilters = () => {};
+
   return {
     globalState: globalStateContainer,
     appState: appStateContainer,
-    startSync: start,
-    stopSync: stop,
+    startSync: () => {
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      data.query.filterManager.setFilters(getValidFilters(dataView, getAllFilters()));
+
+      const stopSyncingAppFilters = connectToQueryState(data.query, appStateContainer, {
+        filters: FilterStateStore.APP_STATE,
+      });
+      const stopSyncingGlobalFilters = connectToQueryState(data.query, globalStateContainer, {
+        filters: FilterStateStore.GLOBAL_STATE,
+      });
+
+      stopSyncingFilters = () => {
+        stopSyncingAppFilters();
+        stopSyncingGlobalFilters();
+      };
+
+      startSyncingStates();
+    },
+    stopSync: () => {
+      stopSyncingFilters();
+      stopSyncingFilters = () => {};
+      stopSyncingStates();
+    },
     setAppState: (newState: Partial<AppState>) => {
       const oldState = appStateContainer.getState();
       const mergedState = { ...oldState, ...newState };
@@ -186,10 +230,7 @@ export function getState({
         stateStorage.set(APP_STATE_URL_KEY, mergedState, { replace: true });
       }
     },
-    getFilters: () => [
-      ...getFilters(globalStateContainer.getState()),
-      ...getFilters(appStateContainer.getState()),
-    ],
+    getFilters: getAllFilters,
     setFilters: (filterManager: FilterManager) => {
       // global state filters
       const globalFilters = filterManager.getGlobalFilters();
@@ -281,4 +322,22 @@ function createInitialAppState(
     },
     uiSettings
   );
+}
+
+/**
+ * Helper function to return the initial global state, which is a merged object of url state and
+ * default state
+ */
+function createInitialGlobalState(urlState: GlobalState): GlobalState {
+  const defaultState: GlobalState = {
+    filters: [],
+  };
+  if (typeof urlState !== 'object') {
+    return defaultState;
+  }
+
+  return {
+    ...defaultState,
+    ...urlState,
+  };
 }

@@ -6,11 +6,11 @@
  */
 
 import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
+import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 import { fieldAliasesOutdated } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';
@@ -32,19 +32,22 @@ export const readIndexRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const siemClient = context.securitySolution?.getAppClient();
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+
+        const siemClient = securitySolution?.getAppClient();
+        const esClient = core.elasticsearch.client.asCurrentUser;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const spaceId = context.securitySolution.getSpaceId();
+        const spaceId = securitySolution.getSpaceId();
         const indexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
         const index = siemClient.getSignalsIndex();
         const indexExists = await getBootstrapIndexExists(
-          context.core.elasticsearch.client.asInternalUser,
+          core.elasticsearch.client.asInternalUser,
           index
         );
 

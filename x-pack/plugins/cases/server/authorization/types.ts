@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventType, KibanaRequest } from 'kibana/server';
+import type { EcsEventType } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { Space } from '../../../spaces/server';
-import { CasesSupportedOperations } from '../../../security/server';
+import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -18,8 +17,6 @@ export interface Verbs {
   progressive: string;
   past: string;
 }
-
-export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 /**
  * Read operations for the cases APIs.
@@ -31,6 +28,7 @@ export enum ReadOperations {
   GetCase = 'getCase',
   ResolveCase = 'resolveCase',
   FindCases = 'findCases',
+  BulkGetCases = 'bulkGetCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
@@ -39,10 +37,13 @@ export enum ReadOperations {
   GetTags = 'getTags',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
+  FindUserActions = 'findUserActions',
   GetUserActions = 'getUserActions',
+  GetConnectors = 'getConnectors',
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
   GetAttachmentMetrics = 'getAttachmentMetrics',
   GetCaseMetrics = 'getCaseMetrics',
+  GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
 }
 
@@ -79,7 +80,7 @@ export interface OperationDetails {
    */
   name: CasesSupportedOperations;
   /**
-   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_fined
+   * The ECS `event.action` field, should be in the form of <entity>_<operation> e.g comment_get, case_find
    */
   action: string;
   /**

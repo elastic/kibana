@@ -12,13 +12,14 @@ import { useValues } from 'kea';
 
 import {
   EuiPage,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '..';
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../shared/http';
 import { SetWorkplaceSearchChrome } from '../../../../shared/kibana_chrome';
@@ -27,7 +28,6 @@ import { Loading } from '../../../../shared/loading';
 
 import { PRIVATE_SOURCES_PATH, PERSONAL_SETTINGS_PATH } from '../../../routes';
 import { PERSONAL_DASHBOARD_READ_ONLY_MODE_WARNING } from '../../../views/content_sources/constants';
-import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '../index';
 
 import './personal_dashboard_layout.scss';
 

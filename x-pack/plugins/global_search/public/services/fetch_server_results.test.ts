@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { GlobalSearchResult } from '../../common/types';
 import { fetchServerResults } from './fetch_server_results';
 
@@ -55,11 +56,9 @@ describe('fetchServerResults', () => {
 
     http.post.mockResolvedValue({ results: [resultA, resultB] });
 
-    const results = await fetchServerResults(
-      http,
-      { term: 'some term' },
-      { preference: 'pref' }
-    ).toPromise();
+    const results = await lastValueFrom(
+      fetchServerResults(http, { term: 'some term' }, { preference: 'pref' })
+    );
 
     expect(http.post).toHaveBeenCalledTimes(1);
     expect(results).toHaveLength(2);

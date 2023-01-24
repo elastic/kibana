@@ -1,0 +1,2157 @@
+{
+  "id": "@kbn/core-saved-objects-utils-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.SavedObjectsErrorHelpers",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsErrorHelpers",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isSavedObjectsClientError",
+            "type": "Function",
+            "tags": [],
+            "label": "isSavedObjectsClientError",
+            "description": [],
+            "signature": [
+              "(error: any) => error is ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isSavedObjectsClientError.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateBadRequestError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateBadRequestError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateBadRequestError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateBadRequestError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createBadRequestError",
+            "type": "Function",
+            "tags": [],
+            "label": "createBadRequestError",
+            "description": [],
+            "signature": [
+              "(reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createBadRequestError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createUnsupportedTypeError",
+            "type": "Function",
+            "tags": [],
+            "label": "createUnsupportedTypeError",
+            "description": [],
+            "signature": [
+              "(type: string) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createUnsupportedTypeError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isBadRequestError",
+            "type": "Function",
+            "tags": [],
+            "label": "isBadRequestError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isBadRequestError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createInvalidVersionError",
+            "type": "Function",
+            "tags": [],
+            "label": "createInvalidVersionError",
+            "description": [],
+            "signature": [
+              "(versionInput?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createInvalidVersionError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "versionInput",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isInvalidVersionError",
+            "type": "Function",
+            "tags": [],
+            "label": "isInvalidVersionError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isInvalidVersionError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateNotAuthorizedError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateNotAuthorizedError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateNotAuthorizedError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isNotAuthorizedError",
+            "type": "Function",
+            "tags": [],
+            "label": "isNotAuthorizedError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isNotAuthorizedError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateForbiddenError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateForbiddenError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateForbiddenError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateForbiddenError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isForbiddenError",
+            "type": "Function",
+            "tags": [],
+            "label": "isForbiddenError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isForbiddenError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateRequestEntityTooLargeError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isRequestEntityTooLargeError",
+            "type": "Function",
+            "tags": [],
+            "label": "isRequestEntityTooLargeError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundError",
+            "description": [],
+            "signature": [
+              "(type?: string | null, id?: string | null) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createIndexAliasNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndexAliasNotFoundError",
+            "description": [],
+            "signature": [
+              "(alias: string) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alias",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateIndexAliasNotFoundError",
+            "description": [],
+            "signature": [
+              "(error: Error, alias: string) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "alias",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "isNotFoundError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isNotFoundError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateConflictError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateConflictError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateConflictError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "createConflictError",
+            "description": [],
+            "signature": [
+              "(type: string, id: string, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createConflictError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createConflictError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createConflictError.$3",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "isConflictError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isConflictError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateTooManyRequestsError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateTooManyRequestsError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateTooManyRequestsError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createTooManyRequestsError",
+            "type": "Function",
+            "tags": [],
+            "label": "createTooManyRequestsError",
+            "description": [],
+            "signature": [
+              "(type: string, id: string) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createTooManyRequestsError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createTooManyRequestsError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isTooManyRequestsError",
+            "type": "Function",
+            "tags": [],
+            "label": "isTooManyRequestsError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isTooManyRequestsError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateEsCannotExecuteScriptError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError",
+            "type": "Function",
+            "tags": [],
+            "label": "isEsCannotExecuteScriptError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsUnavailableError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateEsUnavailableError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "isEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.decorateGeneralError",
+            "type": "Function",
+            "tags": [],
+            "label": "decorateGeneralError",
+            "description": [],
+            "signature": [
+              "(error: Error, reason?: string | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateGeneralError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.decorateGeneralError.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.isGeneralError",
+            "type": "Function",
+            "tags": [],
+            "label": "isGeneralError",
+            "description": [],
+            "signature": [
+              "(error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.isGeneralError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-utils-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                    "section": "def-common.DecoratedError",
+                    "text": "DecoratedError"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(type?: string | null, id?: string | null) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-utils-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+                "section": "def-common.DecoratedError",
+                "text": "DecoratedError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.SavedObjectsUtils",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsUtils",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.namespaceIdToString",
+            "type": "Function",
+            "tags": [],
+            "label": "namespaceIdToString",
+            "description": [
+              "\nConverts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with\nthe exception of the `undefined` namespace ID (which has a namespace string of `'default'`).\n"
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.namespaceIdToString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace ID, which must be either a non-empty string or `undefined`."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.namespaceStringToId",
+            "type": "Function",
+            "tags": [],
+            "label": "namespaceStringToId",
+            "description": [
+              "\nConverts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with\nthe exception of the `'default'` namespace string (which has a namespace ID of `undefined`).\n"
+            ],
+            "signature": [
+              "(namespace: string) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.namespaceStringToId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace string, which must be non-empty."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.createEmptyFindResponse",
+            "type": "Function",
+            "tags": [],
+            "label": "createEmptyFindResponse",
+            "description": [
+              "\nCreates an empty response for a find operation."
+            ],
+            "signature": [
+              "<T, A>({ page, perPage, }: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<T, A>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.createEmptyFindResponse.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsFindOptions",
+                    "text": "SavedObjectsFindOptions"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.generateId",
+            "type": "Function",
+            "tags": [],
+            "label": "generateId",
+            "description": [
+              "\nGenerates a random ID for a saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.isRandomId",
+            "type": "Function",
+            "tags": [
+              "todo"
+            ],
+            "label": "isRandomId",
+            "description": [
+              "\nValidates that a saved object ID has been randomly generated.\n"
+            ],
+            "signature": [
+              "(id: string | undefined) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.isRandomId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of a saved object."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.getConvertedObjectId",
+            "type": "Function",
+            "tags": [],
+            "label": "getConvertedObjectId",
+            "description": [
+              "\nUses a single-namespace object's \"legacy ID\" to determine what its new ID will be after it is converted to a multi-namespace type.\n"
+            ],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "The type of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The ID of the saved object after it is converted."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.arrayMapsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "arrayMapsAreEqual",
+        "description": [
+          "\nDetermines if a given map of arrays is equal to another given map of arrays.\nUsed for comparing namespace maps in saved object repo/security extension tests.\n"
+        ],
+        "signature": [
+          "(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.arrayMapsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapA",
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.arrayMapsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mapB",
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.mergeSavedObjectMigrationMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSavedObjectMigrationMaps",
+        "description": [
+          "\nMerges two saved object migration maps.\n\nIf there is a migration for a given version on only one of the maps,\nthat migration function will be used:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '4.5.6': g }) -> { '1.2.3': f, '4.5.6': g }\n\nIf there is a migration for a given version on both maps, the migrations will be composed:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '1.2.3': g }) -> { '1.2.3': (doc, context) => f(g(doc, context), context) }\n"
+        ],
+        "signature": [
+          "(map1: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
+          ", map2: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrationMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "map1",
+            "description": [
+              "- The first map to merge"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrationMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "map2",
+            "description": [
+              "- The second map to merge"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The merged map {@link SavedObjectMigrationMap }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.setMapsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "setMapsAreEqual",
+        "description": [
+          "\nDetermines if a given Map of Sets is equal to another given Map of Sets.\nUsed for comparing typeMaps and enforceMaps in saved object repo/security extension tests.\n"
+        ],
+        "signature": [
+          "(mapA: Map<T, Set<T>> | undefined, mapB: Map<T, Set<T>> | undefined) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setMapsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapA",
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setMapsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mapB",
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.setsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "setsAreEqual",
+        "description": [
+          "\nDetermines if a given Set is equal to another given Set. Set types must be the same, and comparable.\n"
+        ],
+        "signature": [
+          "(setA: Set<T>, setB: Set<T>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "setA",
+            "description": [
+              "The first Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "setB",
+            "description": [
+              "The second Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if Set A is equal to Set B"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.DecoratedError",
+        "type": "Interface",
+        "tags": [],
+        "label": "DecoratedError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-utils-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+            "section": "def-common.DecoratedError",
+            "text": "DecoratedError"
+          },
+          " extends ",
+          "Boom",
+          "<any>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.DecoratedError.code",
+            "type": "string",
+            "tags": [],
+            "label": "[code]",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_error_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.ALL_NAMESPACES_STRING",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_NAMESPACES_STRING",
+        "description": [],
+        "signature": [
+          "\"*\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.DEFAULT_NAMESPACE_STRING",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_NAMESPACE_STRING",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.FIND_DEFAULT_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "FIND_DEFAULT_PAGE",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.FIND_DEFAULT_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "FIND_DEFAULT_PER_PAGE",
+        "description": [],
+        "signature": [
+          "20"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

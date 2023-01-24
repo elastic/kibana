@@ -6,25 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-import { DataPublicPluginStart } from '../../../data/public';
-import { setFormatService } from './services';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { setDataViewsStart, setFormatService } from './services';
 import { registerTableVis } from './register_vis';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
 export interface TablePluginStartDependencies {
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsPublicPluginStart;
+  usageCollection: UsageCollectionStart;
 }
 
 /** @internal */
@@ -35,7 +37,8 @@ export class TableVisPlugin
     registerTableVis(core, deps);
   }
 
-  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
-    setFormatService(data.fieldFormats);
+  public start(core: CoreStart, { fieldFormats, dataViews }: TablePluginStartDependencies) {
+    setFormatService(fieldFormats);
+    setDataViewsStart(dataViews);
   }
 }

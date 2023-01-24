@@ -17,6 +17,7 @@ export class InspectorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   private async getIsEnabled(): Promise<boolean> {
     const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
@@ -190,16 +191,21 @@ export class InspectorService extends FtrService {
   }
 
   /**
-   * Opens inspector view
+   * Opens inspector viewId for example 'Requests
    * @param viewId
    */
+
   public async openInspectorView(viewId: string): Promise<void> {
     this.log.debug(`Open Inspector view ${viewId}`);
+    const dtsViewId = 'inspectorViewChooser' + viewId;
     await this.retry.try(async () => {
       await this.testSubjects.click('inspectorViewChooser');
       // check whether popover menu opens, if not, fail and retry opening
-      await this.testSubjects.existOrFail(viewId, { timeout: 2000 });
-      await this.testSubjects.click(viewId);
+      await this.testSubjects.existOrFail(dtsViewId, { timeout: 2000 });
+      await this.testSubjects.click(dtsViewId);
+      const selection = await this.testSubjects.getVisibleText('inspectorViewChooser');
+      this.log.debug(`inspector view selection = ${selection}`);
+      expect(selection.includes(viewId)).to.be(true);
     });
   }
 
@@ -207,7 +213,29 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    await this.openInspectorView('inspectorViewChooserRequests');
+    if (!(await this.testSubjects.exists('inspectorViewChooser'))) return;
+    await this.openInspectorView('Requests');
+  }
+
+  /**
+   * Check how many tables are being shown in the inspector.
+   * @returns
+   */
+  public async getNumberOfTables(): Promise<number> {
+    const chooserDataTestId = 'inspectorTableChooser';
+    const menuDataTestId = 'inspectorTableChooserMenuPanel';
+
+    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+      return 1;
+    }
+
+    return await this.retry.try(async () => {
+      await this.testSubjects.click(chooserDataTestId);
+      const menu = await this.testSubjects.find(menuDataTestId);
+      return (
+        await menu.findAllByCssSelector(`[data-test-subj="${menuDataTestId}"] .euiContextMenuItem`)
+      ).length;
+    });
   }
 
   /**
@@ -246,6 +274,15 @@ export class InspectorService extends FtrService {
 
   public getOpenRequestDetailResponseButton() {
     return this.testSubjects.find('inspectorRequestDetailResponse');
+  }
+
+  public async getResponse(): Promise<Record<string, any>> {
+    await (await this.getOpenRequestDetailResponseButton()).click();
+
+    await this.monacoEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
+    const responseString = await this.monacoEditor.getCodeEditorValue();
+    this.log.debug('Response string from inspector:', responseString);
+    return JSON.parse(responseString);
   }
 
   /**

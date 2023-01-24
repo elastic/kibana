@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "public/**/*",
@@ -12,9 +9,17 @@
     "common/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+    "@kbn/utility-types",
+    "@kbn/core-test-helpers-test-utils",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }
 

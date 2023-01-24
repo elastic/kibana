@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FieldValueSelectionProps } from './types';
-export const ALL_VALUES_SELECTED = 'ALL_VALUES';
 const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
   const uniqueValues = Array.from(
     new Set(

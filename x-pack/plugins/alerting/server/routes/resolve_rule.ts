@@ -7,11 +7,11 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, rewriteRuleLastRun } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   ResolvedSanitizedRule,
@@ -21,7 +21,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>> = ({
   alertTypeId,
   createdBy,
   updatedBy,
@@ -34,6 +34,8 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
   executionStatus,
   actions,
   scheduledTaskId,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -52,12 +54,15 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
     group,
     id,
     params,
     connector_type_id: actionTypeId,
+    frequency,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const resolveRuleRoute = (
@@ -73,9 +78,9 @@ export const resolveRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.resolve({ id });
+        const rule = await rulesClient.resolve({ id, includeSnoozeData: true });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

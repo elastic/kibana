@@ -8,17 +8,16 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { listMock } from '../../../../../lists/server/mocks';
-import { buildRuleMessageFactory } from './rule_messages';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
-// @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
 moment.suppressDeprecationWarnings = true;
 
 import {
@@ -43,8 +42,10 @@ import {
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
-  isRACAlert,
+  isDetectionAlert,
   getField,
+  addToSearchAfterReturn,
+  getUnprocessedExceptionsWarnings,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -52,7 +53,6 @@ import {
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
-  mockLogger,
   sampleSignalHit,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
@@ -63,24 +63,21 @@ import {
   sampleAlertDocAADNoSortIdWithTimestamp,
 } from './__mocks__/es_results';
 import type { ShardError } from '../../types';
-import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
-
-const buildRuleMessage = buildRuleMessageFactory({
-  id: 'fake id',
-  ruleId: 'fake rule id',
-  index: 'fakeindex',
-  name: 'fake name',
-});
+import { ruleExecutionLogMock } from '../rule_monitoring/mocks';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
   const unix = moment(anchor).valueOf();
   let nowDate = moment('2020-01-01T00:00:00.000Z');
   let clock: sinon.SinonFakeTimers;
+  let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
 
   beforeEach(() => {
     nowDate = moment('2020-01-01T00:00:00.000Z');
     clock = sinon.useFakeTimers(unix);
+    ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   });
 
   afterEach(() => {
@@ -426,10 +423,10 @@ describe('utils', () => {
   });
 
   describe('#getListsClient', () => {
-    let alertServices: AlertServicesMock;
+    let alertServices: RuleExecutorServicesMock;
 
     beforeEach(() => {
-      alertServices = alertsMock.createAlertServices();
+      alertServices = alertsMock.createRuleExecutorServices();
     });
 
     test('it successfully returns list and exceptions list client', async () => {
@@ -449,14 +446,13 @@ describe('utils', () => {
   describe('getRuleRangeTuples', () => {
     test('should return a single tuple if no gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
         from: 'now-30s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -466,14 +462,13 @@ describe('utils', () => {
 
     test('should return a single tuple if malformed interval prevents gap calculation', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: 'invalid',
         from: 'now-30s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -483,14 +478,13 @@ describe('utils', () => {
 
     test('should return two tuples if gap and previouslyStartedAt', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(),
         startedAt: moment().toDate(),
         interval: '50s',
         from: 'now-55s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
@@ -499,14 +493,13 @@ describe('utils', () => {
 
     test('should return five tuples when give long gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
         startedAt: moment().toDate(),
         interval: '10s',
         from: 'now-13s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       expect(tuples.length).toEqual(5);
       tuples.forEach((item, index) => {
@@ -522,14 +515,13 @@ describe('utils', () => {
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
-        logger: mockLogger,
         previousStartedAt: moment().subtract(-15, 's').toDate(),
         startedAt: moment().subtract(-15, 's').toDate(),
         interval: '10s',
         from: 'now-13s',
         to: 'now',
         maxSignals: 20,
-        buildRuleMessage,
+        ruleExecutionLogger,
       });
       expect(tuples.length).toEqual(1);
       const someTuple = tuples[0];
@@ -651,10 +643,8 @@ describe('utils', () => {
           },
         },
       };
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-      mockLogger.warn.mockClear();
 
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -662,14 +652,10 @@ describe('utils', () => {
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
-      expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -702,10 +688,7 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-      mockLogger.warn.mockClear();
-
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -713,14 +696,10 @@ describe('utils', () => {
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
-      expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(foundNoIndices).toBeFalsy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -738,12 +717,11 @@ describe('utils', () => {
         },
       };
 
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'Endpoint Security',
       });
-      mockLogger.warn.mockClear();
 
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -751,14 +729,10 @@ describe('utils', () => {
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
-      expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -777,13 +751,11 @@ describe('utils', () => {
       };
 
       // SUT uses rule execution logger's context to check the rule name
-      const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
         ruleName: 'NOT Endpoint Security',
       });
 
-      mockLogger.warn.mockClear();
-
-      const res = await hasTimestampFields({
+      const { wroteWarningStatus, foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -791,14 +763,10 @@ describe('utils', () => {
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
-        logger: mockLogger,
-        buildRuleMessage,
       });
 
-      expect(res).toBeTruthy();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
-      );
+      expect(wroteWarningStatus).toBeTruthy();
+      expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
@@ -981,10 +949,11 @@ describe('utils', () => {
       const searchResult = sampleEmptyDocSearchResults();
       const newSearchResult = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1001,10 +970,11 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsWithSortId();
       const newSearchResult = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1024,7 +994,7 @@ describe('utils', () => {
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(false);
     });
@@ -1036,7 +1006,7 @@ describe('utils', () => {
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(false);
     });
@@ -1052,7 +1022,7 @@ describe('utils', () => {
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(false);
     });
@@ -1062,7 +1032,7 @@ describe('utils', () => {
       searchResult._shards.failed = 0;
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(success).toEqual(true);
     });
@@ -1078,7 +1048,7 @@ describe('utils', () => {
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: 'event.ingested',
+        primaryTimestamp: 'event.ingested',
       });
       expect(success).toEqual(true);
     });
@@ -1091,7 +1061,7 @@ describe('utils', () => {
       }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(lastLookBackDate).toEqual(null);
     });
@@ -1104,7 +1074,7 @@ describe('utils', () => {
       }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(lastLookBackDate).toEqual(null);
     });
@@ -1117,7 +1087,7 @@ describe('utils', () => {
       }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
-        timestampOverride: undefined,
+        primaryTimestamp: TIMESTAMP,
       });
       expect(lastLookBackDate).toEqual(null);
     });
@@ -1130,7 +1100,7 @@ describe('utils', () => {
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
       }
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1140,7 +1110,7 @@ describe('utils', () => {
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
       }
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1150,13 +1120,13 @@ describe('utils', () => {
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
       }
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
     test('It returns normal date time if set', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
     });
 
@@ -1172,7 +1142,7 @@ describe('utils', () => {
           '@timestamp': [timestamp],
         },
       };
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
+      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(timestamp);
     });
 
@@ -1180,7 +1150,7 @@ describe('utils', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
       searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
-      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
 
@@ -1196,7 +1166,7 @@ describe('utils', () => {
           different_timestamp: [override],
         },
       };
-      const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
+      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
   });
@@ -1208,7 +1178,7 @@ describe('utils', () => {
       if (doc.fields != null) {
         (doc.fields['@timestamp'] as unknown) = null;
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1218,7 +1188,7 @@ describe('utils', () => {
       if (doc.fields != null) {
         (doc.fields['@timestamp'] as unknown) = undefined;
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
@@ -1228,13 +1198,13 @@ describe('utils', () => {
       if (doc.fields != null) {
         (doc.fields['@timestamp'] as unknown) = ['invalid value'];
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date).toEqual(undefined);
     });
 
     test('It returns normal date time if set', () => {
       const doc = sampleDocNoSortId();
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
     });
 
@@ -1250,7 +1220,7 @@ describe('utils', () => {
           '@timestamp': [timestamp],
         },
       };
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(timestamp);
     });
 
@@ -1258,7 +1228,7 @@ describe('utils', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const doc = sampleDocNoSortId();
       doc._source.different_timestamp = new Date(override).toISOString();
-      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
 
@@ -1274,7 +1244,7 @@ describe('utils', () => {
           different_timestamp: [override],
         },
       };
-      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
 
@@ -1286,7 +1256,7 @@ describe('utils', () => {
       if (doc.fields != null) {
         doc.fields['@timestamp'] = [testDate];
       }
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(testDateString);
     });
 
@@ -1296,7 +1266,7 @@ describe('utils', () => {
       const testDate = `${new Date(testDateString).valueOf()}`;
       doc._source['@timestamp'] = testDate;
       doc.fields = undefined;
-      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: TIMESTAMP });
       expect(date?.toISOString()).toEqual(testDateString);
     });
 
@@ -1313,7 +1283,7 @@ describe('utils', () => {
           different_timestamp: [testDate],
         },
       };
-      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      const date = getValidDateFromDoc({ doc, primaryTimestamp: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
   });
@@ -1323,6 +1293,7 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType();
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1338,6 +1309,7 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override all values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
+        enrichmentTimes: [],
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
@@ -1349,6 +1321,7 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
+        enrichmentTimes: [],
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
@@ -1369,6 +1342,7 @@ describe('utils', () => {
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
@@ -1387,6 +1361,7 @@ describe('utils', () => {
       const merged = mergeReturns([createSearchAfterReturnType(), createSearchAfterReturnType()]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
+        enrichmentTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
@@ -1443,6 +1418,7 @@ describe('utils', () => {
       const merged = mergeReturns([
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
+          enrichmentTimes: [],
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
@@ -1453,6 +1429,7 @@ describe('utils', () => {
         }),
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
+          enrichmentTimes: [],
           createdSignalsCount: 2,
           createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
@@ -1465,6 +1442,7 @@ describe('utils', () => {
       ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        enrichmentTimes: [],
         createdSignalsCount: 5, // Adds the 3 and 2 together
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
@@ -1475,6 +1453,58 @@ describe('utils', () => {
         warningMessages: ['warning1', 'warning2'],
       };
       expect(merged).toEqual(expected);
+    });
+  });
+
+  describe('addToSearchAfterReturn', () => {
+    test('merges the values from bulk create response into search after return type', () => {
+      const current = createSearchAfterReturnType();
+      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+        success: false,
+        bulkCreateDuration: '100',
+        enrichmentDuration: '0',
+        createdItemsCount: 1,
+        createdItems: [],
+        errors: ['new error'],
+        alertsWereTruncated: false,
+      };
+      addToSearchAfterReturn({ current, next });
+      expect(current.success).toEqual(false);
+      expect(current.bulkCreateTimes).toEqual(['100']);
+      expect(current.createdSignalsCount).toEqual(1);
+      expect(current.errors).toEqual(['new error']);
+    });
+
+    test('does not duplicate error messages', () => {
+      const current = createSearchAfterReturnType({ errors: ['error 1'] });
+      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+        success: true,
+        bulkCreateDuration: '0',
+        enrichmentDuration: '0',
+        createdItemsCount: 0,
+        createdItems: [],
+        errors: ['error 1'],
+        alertsWereTruncated: false,
+      };
+      addToSearchAfterReturn({ current, next });
+
+      expect(current.errors).toEqual(['error 1']);
+    });
+
+    test('adds new error messages', () => {
+      const current = createSearchAfterReturnType({ errors: ['error 1'] });
+      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+        success: true,
+        bulkCreateDuration: '0',
+        enrichmentDuration: '0',
+        createdItemsCount: 0,
+        createdItems: [],
+        errors: ['error 2'],
+        alertsWereTruncated: false,
+      };
+      addToSearchAfterReturn({ current, next });
+
+      expect(current.errors).toEqual(['error 1', 'error 2']);
     });
   });
 
@@ -1538,10 +1568,10 @@ describe('utils', () => {
     });
   });
 
-  describe('isRACAlert', () => {
+  describe('isDetectionAlert', () => {
     test('alert with dotted fields returns true', () => {
       expect(
-        isRACAlert({
+        isDetectionAlert({
           [ALERT_UUID]: '123',
         })
       ).toEqual(true);
@@ -1549,7 +1579,7 @@ describe('utils', () => {
 
     test('alert with nested fields returns true', () => {
       expect(
-        isRACAlert({
+        isDetectionAlert({
           kibana: {
             alert: { uuid: '123' },
           },
@@ -1558,31 +1588,31 @@ describe('utils', () => {
     });
 
     test('undefined returns false', () => {
-      expect(isRACAlert(undefined)).toEqual(false);
+      expect(isDetectionAlert(undefined)).toEqual(false);
     });
 
     test('null returns false', () => {
-      expect(isRACAlert(null)).toEqual(false);
+      expect(isDetectionAlert(null)).toEqual(false);
     });
 
     test('number returns false', () => {
-      expect(isRACAlert(5)).toEqual(false);
+      expect(isDetectionAlert(5)).toEqual(false);
     });
 
     test('string returns false', () => {
-      expect(isRACAlert('a')).toEqual(false);
+      expect(isDetectionAlert('a')).toEqual(false);
     });
 
     test('array returns false', () => {
-      expect(isRACAlert([])).toEqual(false);
+      expect(isDetectionAlert([])).toEqual(false);
     });
 
     test('empty object returns false', () => {
-      expect(isRACAlert({})).toEqual(false);
+      expect(isDetectionAlert({})).toEqual(false);
     });
 
     test('alert with null value returns false', () => {
-      expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
+      expect(isDetectionAlert({ 'kibana.alert.uuid': null })).toEqual(false);
     });
   });
 
@@ -1645,6 +1675,22 @@ describe('utils', () => {
       const doc = sampleAlertDocAADNoSortIdWithTimestamp();
       const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
       expect(value).toEqual('Descriptive description');
+    });
+  });
+
+  describe('logUnprocessedExceptionsWarnings', () => {
+    test('does not log anything when the array is empty', () => {
+      const result = getUnprocessedExceptionsWarnings([]);
+      expect(result).toBeUndefined();
+    });
+
+    test('logs the exception names when there are unprocessed exceptions', () => {
+      const result = getUnprocessedExceptionsWarnings([getExceptionListItemSchemaMock()]);
+      expect(result).toEqual(
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`
+      );
     });
   });
 });

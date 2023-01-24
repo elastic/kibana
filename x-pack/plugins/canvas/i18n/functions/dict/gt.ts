@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { gt } from '../../../canvas_plugin_src/functions/common/gt';
+import type { gt } from '../../../canvas_plugin_src/functions/common/gt';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

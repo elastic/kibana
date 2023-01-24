@@ -13,8 +13,6 @@ The syntax enables some features that classical point series charts don't offer,
 [role="screenshot"]
 image:dashboard/images/timelion.png[Timelion]
 
-deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In 7.16 and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to <<migrate-timelion-app-worksheets,Migrate Timelion app worksheets>>."]
-
 [float]
 ==== Timelion expressions
 

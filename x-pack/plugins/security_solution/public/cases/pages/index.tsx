@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseViewRefreshPropInterface } from '../../../../cases/common';
+import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { useTourContext } from '../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../common/components/guided_onboarding_tour/tour_config';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
@@ -27,17 +32,14 @@ import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 
 const TimelineDetailsPanel = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   return (
     <DetailsPanel
       browserFields={browserFields}
-      docValueFields={docValueFields}
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}
-      timelineId={TimelineId.casePage}
+      scopeId={TimelineId.casePage}
     />
   );
 };
@@ -45,7 +47,7 @@ const TimelineDetailsPanel = () => {
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -61,7 +63,7 @@ const CaseContainerComponent: React.FC = () => {
       dispatch(
         timelineActions.toggleDetailPanel({
           panelView: 'eventDetail',
-          timelineId: TimelineId.casePage,
+          id: TimelineId.casePage,
           params: {
             eventId: alertId,
             indexName: index,
@@ -79,7 +81,7 @@ const CaseContainerComponent: React.FC = () => {
         selected_endpoint: endpointId,
       }),
     });
-
+  // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
   const onComponentInitialized = useCallback(() => {
     dispatch(
       timelineActions.createTimeline({
@@ -94,6 +96,16 @@ const CaseContainerComponent: React.FC = () => {
   }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+  const { activeStep, endTourStep, isTourShown } = useTourContext();
+
+  const isTourActive = useMemo(
+    () => activeStep === AlertsCasesTourSteps.viewCase && isTourShown(SecurityStepId.alertsCases),
+    [activeStep, isTourShown]
+  );
+
+  useEffect(() => {
+    if (isTourActive) endTourStep(SecurityStepId.alertsCases);
+  }, [endTourStep, isTourActive]);
 
   return (
     <SecuritySolutionPageWrapper noPadding>
@@ -103,6 +115,7 @@ const CaseContainerComponent: React.FC = () => {
           owner: [APP_ID],
           features: {
             metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            alerts: { isExperimental: true },
           },
           refreshRef,
           onComponentInitialized,
@@ -147,7 +160,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
-          userCanCrud: userPermissions?.crud ?? false,
+          permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

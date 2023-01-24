@@ -9,16 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
-  createCase,
-  getCaseUserActions,
-  getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
+import { deleteAllCaseItems, createCase, getAuthWithSuperUser } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -28,16 +24,30 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it(`should get user actions in space1`, async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
-      const body = await getCaseUserActions({ supertest, caseID: postedCase.id, auth: authSpace1 });
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
+      const body = await getCaseUserActions({
+        supertest: supertestWithoutAuth,
+        caseID: postedCase.id,
+        auth: authSpace1,
+      });
 
       expect(body.length).to.eql(1);
     });
 
     it(`should not get user actions in the wrong space`, async () => {
-      const postedCase = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      const postedCase = await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest(),
+        200,
+        authSpace1
+      );
       const body = await getCaseUserActions({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseID: postedCase.id,
         auth: getAuthWithSuperUser('space2'),
       });

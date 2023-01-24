@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
@@ -15,39 +16,36 @@ const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
 
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
-    before(async function () {
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-    });
-
-    after(async function () {
-      await kibanaServer.uiSettings.replace({});
-    });
-
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
       });
     });
 
-    it('inclusive filter should be addable via expanded doc table rows', async function () {
+    it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
-        await docTable.toggleRowExpanded({ isAnchorRow: true });
-        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
-        await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
+        await dataGrid.clickFieldActionInFlyout(
+          TEST_ANCHOR_FILTER_FIELD,
+          'addFilterForValueButton'
+        );
         await PageObjects.context.waitUntilContextLoadingHasFinished();
 
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true);
       });
-      await retry.waitFor(`filter matching docs in docTable`, async () => {
-        const fields = await docTable.getFields();
+
+      await dataGrid.closeFlyout();
+
+      await retry.waitFor(`filter matching docs in data grid`, async () => {
+        const fields = await dataGrid.getFields();
         return fields
           .map((row) => row[2])
           .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
@@ -55,7 +53,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('inclusive filter should be toggleable via the filter bar', async function () {
-      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await filterBar.addFilter({
+        field: TEST_ANCHOR_FILTER_FIELD,
+        operation: 'is',
+        value: TEST_ANCHOR_FILTER_VALUE,
+      });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
@@ -66,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await retry.waitFor('filters are disabled', async () => {
-        const fields = await docTable.getFields();
+        const fields = await dataGrid.getFields();
         const hasOnlyFilteredRows = fields
           .map((row) => row[2])
           .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
@@ -74,15 +76,144 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('filter for presence should be addable via expanded doc table rows', async function () {
-      await docTable.toggleRowExpanded({ isAnchorRow: true });
-
+    it('filter for presence should be addable via expanded data grid rows', async function () {
       await retry.waitFor('an exists filter in the filterbar', async () => {
-        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
-        await docTable.addExistsFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
+        await dataGrid.clickFieldActionInFlyout(TEST_ANCHOR_FILTER_FIELD, 'addExistsFilterButton');
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         return await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, 'exists', true);
       });
+    });
+
+    const addPinnedFilter = async () => {
+      await filterBar.addFilter({
+        field: TEST_ANCHOR_FILTER_FIELD,
+        operation: 'is',
+        value: TEST_ANCHOR_FILTER_VALUE,
+      });
+      await filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
+    };
+
+    const everyFieldMatches = async (matches: (field: string[]) => boolean) => {
+      const fields = await dataGrid.getFields();
+      return fields.every(matches);
+    };
+
+    it('should update the data grid when a pinned filter is modified', async function () {
+      await addPinnedFilter();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await everyFieldMatches((field) => field[2] === TEST_ANCHOR_FILTER_VALUE)).to.be(true);
+      await filterBar.toggleFilterNegated(TEST_ANCHOR_FILTER_FIELD);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await everyFieldMatches((field) => field[2] === TEST_ANCHOR_FILTER_VALUE)).to.be(
+        false
+      );
+    });
+
+    const expectFiltersToExist = async () => {
+      expect(await filterBar.getFilterCount()).to.be(2);
+      expect(
+        await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true, true)
+      ).to.be(true);
+      expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
+      expect(
+        await everyFieldMatches(
+          (field) => field[1] === 'png' && field[2] === TEST_ANCHOR_FILTER_VALUE
+        )
+      ).to.be(true);
+    };
+
+    it('should preserve filters when the page is refreshed', async function () {
+      await addPinnedFilter();
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await expectFiltersToExist();
+      await browser.refresh();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await expectFiltersToExist();
+    });
+
+    it('should update filters when navigating forward and backward in history', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
+      expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(true);
+      await browser.goBack();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(0);
+      expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(false);
+      await browser.goForward();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
+      expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(true);
+    });
+
+    it('should add or filter', async () => {
+      await filterBar.addFilter({
+        condition: 'OR',
+        filters: [
+          { field: 'extension', operation: 'is', value: 'png' },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        'extension: png OR bytes: 1,000B to 2KB'
+      );
+    });
+
+    it('should add and filter', async () => {
+      await filterBar.addFilter({
+        condition: 'AND',
+        filters: [
+          { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        'extension: is one of png, jpeg AND bytes: 1,000B to 2KB'
+      );
+    });
+
+    it('should add nested filters', async () => {
+      await filterBar.addFilter({
+        condition: 'AND',
+        filters: [
+          {
+            condition: 'OR',
+            filters: [
+              { field: 'clientip', operation: 'does not exist' },
+              { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+            ],
+          },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
+      );
     });
   });
 }

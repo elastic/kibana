@@ -6,51 +6,90 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import { pick } from 'lodash/fp';
-import { useKibana } from '../../lib/kibana';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { sourcererActions } from '../../store/sourcerer';
-import {
-  DELETED_SECURITY_SOLUTION_DATA_VIEW,
+import { omit, pick } from 'lodash/fp';
+import type {
+  BrowserField,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../../../timelines/common';
-import {
-  FieldSpec,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+} from '@kbn/timelines-plugin/common';
+import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useKibana } from '../../lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
-import { getBrowserFields, getDocValueFields } from './';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataview } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../../common/constants';
 
-const getEsFields = memoizeOne(
-  (fields: IndexField[]): FieldSpec[] =>
-    fields && fields.length > 0
-      ? fields.map((field) =>
+export type IndexFieldSearch = (param: {
+  dataViewId: string;
+  scopeId?: SourcererScopeName;
+  needToBeInit?: boolean;
+  cleanCache?: boolean;
+  skipScopeUpdate?: boolean;
+}) => Promise<void>;
+
+type DangerCastForBrowserFieldsMutation = Record<
+  string,
+  Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
+>;
+interface DataViewInfo {
+  browserFields: DangerCastForBrowserFieldsMutation;
+  indexFields: FieldSpec[];
+}
+
+/**
+ * HOT Code path where the fields can be 16087 in length or larger. This is
+ * VERY mutatious on purpose to improve the performance of the transform.
+ */
+export const getDataViewStateFromIndexFields = memoizeOne(
+  (_title: string, fields: IndexField[]): DataViewInfo => {
+    // Adds two dangerous casts to allow for mutations within this function
+    type DangerCastForMutation = Record<string, {}>;
+
+    return fields.reduce<DataViewInfo>(
+      (acc, field) => {
+        // mutate browserFields
+        if (acc.browserFields[field.category] == null) {
+          (acc.browserFields as DangerCastForMutation)[field.category] = {};
+        }
+        if (acc.browserFields[field.category].fields == null) {
+          acc.browserFields[field.category].fields = {};
+        }
+        acc.browserFields[field.category].fields[field.name] = field as unknown as BrowserField;
+
+        // mutate indexFields
+        acc.indexFields.push(
           pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-        )
-      : [],
-  (newArgs, lastArgs) => newArgs[0].length === lastArgs[0].length
+        );
+
+        return acc;
+      },
+      {
+        browserFields: {},
+        indexFields: [],
+      }
+    );
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const useDataView = (): {
-  indexFieldsSearch: (
-    selectedDataViewId: string,
-    scopeId?: SourcererScopeName,
-    needToBeInit?: boolean
-  ) => Promise<void>;
+  indexFieldsSearch: IndexFieldSearch;
 } => {
   const { data } = useKibana().services;
   const abortCtrl = useRef<Record<string, AbortController>>({});
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError, addWarning } = useAppToasts();
+  const { startTracking } = useTrackHttpRequest();
 
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
@@ -58,101 +97,115 @@ export const useDataView = (): {
     },
     [dispatch]
   );
-  const indexFieldsSearch = useCallback(
-    (
-      selectedDataViewId: string,
-      scopeId: SourcererScopeName = SourcererScopeName.default,
-      needToBeInit: boolean = false
-    ) => {
+  const indexFieldsSearch = useCallback<IndexFieldSearch>(
+    ({
+      dataViewId,
+      scopeId = SourcererScopeName.default,
+      needToBeInit = false,
+      cleanCache = false,
+      skipScopeUpdate = false,
+    }) => {
+      const unsubscribe = () => {
+        searchSubscription$.current[dataViewId]?.unsubscribe();
+        searchSubscription$.current = omit(dataViewId, searchSubscription$.current);
+        abortCtrl.current = omit(dataViewId, abortCtrl.current);
+      };
+
       const asyncSearch = async () => {
         abortCtrl.current = {
           ...abortCtrl.current,
-          [selectedDataViewId]: new AbortController(),
+          [dataViewId]: new AbortController(),
         };
-        setLoading({ id: selectedDataViewId, loading: true });
+        setLoading({ id: dataViewId, loading: true });
+
+        const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
+
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataview(
-            selectedDataViewId,
-            abortCtrl.current[selectedDataViewId].signal
-          );
-          dispatch(
-            sourcererActions.updateSourcererDataViews({
-              dataView: dataViewToUpdate,
-            })
-          );
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews);
+          dispatch(sourcererActions.setDataView(dataView));
         }
 
         return new Promise<void>((resolve) => {
           const subscription = data.search
             .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
               {
-                dataViewId: selectedDataViewId,
+                dataViewId,
                 onlyCheckIfIndicesExist: false,
               },
               {
-                abortSignal: abortCtrl.current[selectedDataViewId].signal,
+                abortSignal: abortCtrl.current[dataViewId].signal,
                 strategy: 'indexFields',
               }
             )
             .subscribe({
               next: async (response) => {
                 if (isCompleteResponse(response)) {
+                  endTracking('success');
+
                   const patternString = response.indicesExist.sort().join();
-                  if (needToBeInit && scopeId) {
+                  if (needToBeInit && scopeId && !skipScopeUpdate) {
                     dispatch(
                       sourcererActions.setSelectedDataView({
                         id: scopeId,
-                        selectedDataViewId,
+                        selectedDataViewId: dataViewId,
                         selectedPatterns: response.indicesExist,
                       })
                     );
                   }
+
+                  if (cleanCache) {
+                    getDataViewStateFromIndexFields.clear();
+                  }
+                  const dataViewInfo = getDataViewStateFromIndexFields(
+                    patternString,
+                    response.indexFields
+                  );
+
                   dispatch(
                     sourcererActions.setDataView({
-                      browserFields: getBrowserFields(patternString, response.indexFields),
-                      docValueFields: getDocValueFields(patternString, response.indexFields),
-                      id: selectedDataViewId,
-                      indexFields: getEsFields(response.indexFields),
+                      ...dataViewInfo,
+                      id: dataViewId,
                       loading: false,
                       runtimeMappings: response.runtimeMappings,
                     })
                   );
-                  searchSubscription$.current[selectedDataViewId]?.unsubscribe();
                 } else if (isErrorResponse(response)) {
-                  setLoading({ id: selectedDataViewId, loading: false });
+                  endTracking('invalid');
+                  setLoading({ id: dataViewId, loading: false });
                   addWarning(i18n.ERROR_BEAT_FIELDS);
-                  searchSubscription$.current[selectedDataViewId]?.unsubscribe();
                 }
+                unsubscribe();
                 resolve();
               },
               error: (msg) => {
+                endTracking('error');
                 if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
                   // reload app if security solution data view is deleted
                   return location.reload();
                 }
-                setLoading({ id: selectedDataViewId, loading: false });
+                setLoading({ id: dataViewId, loading: false });
                 addError(msg, {
                   title: i18n.FAIL_BEAT_FIELDS,
                 });
-                searchSubscription$.current[selectedDataViewId]?.unsubscribe();
+                unsubscribe();
                 resolve();
               },
             });
           searchSubscription$.current = {
             ...searchSubscription$.current,
-            [selectedDataViewId]: subscription,
+            [dataViewId]: subscription,
           };
         });
       };
-      if (searchSubscription$.current[selectedDataViewId]) {
-        searchSubscription$.current[selectedDataViewId].unsubscribe();
+      if (searchSubscription$.current[dataViewId]) {
+        searchSubscription$.current[dataViewId].unsubscribe();
       }
-      if (abortCtrl.current[selectedDataViewId]) {
-        abortCtrl.current[selectedDataViewId].abort();
+      if (abortCtrl.current[dataViewId]) {
+        abortCtrl.current[dataViewId].abort();
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading]
+    [addError, addWarning, data.search, dispatch, setLoading, startTracking, data.dataViews]
   );
 
   useEffect(() => {

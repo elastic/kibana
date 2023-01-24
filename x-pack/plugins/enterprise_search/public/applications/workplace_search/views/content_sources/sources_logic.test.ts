@@ -10,7 +10,11 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
-import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+import {
+  configuredSources,
+  contentSources,
+  externalConfiguredConnector,
+} from '../../__mocks__/content_sources.mock';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
@@ -19,7 +23,12 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { staticSourceData } from './source_data';
-import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
+import {
+  SourcesLogic,
+  fetchSourceStatuses,
+  POLLING_INTERVAL,
+  mergeServerAndStaticData,
+} from './sources_logic';
 
 describe('SourcesLogic', () => {
   const { http } = mockHttpValues;
@@ -33,13 +42,22 @@ describe('SourcesLogic', () => {
   const defaultValues = {
     contentSources: [],
     privateContentSources: [],
-    sourceData: staticSourceData.map((data) => ({ ...data, connected: false })),
-    availableSources: staticSourceData.map((data) => ({ ...data, connected: false })),
+    sourceData: mergeServerAndStaticData([], staticSourceData, []).map((data) => ({
+      ...data,
+      connected: false,
+    })),
+    availableSources: mergeServerAndStaticData([], staticSourceData, [])
+      .map((data) => ({
+        ...data,
+        connected: false,
+      }))
+      .filter((source) => source.serviceType !== 'external'),
     configuredSources: [],
     serviceTypes: [],
     permissionsModal: null,
     dataLoading: true,
     serverStatuses: null,
+    externalConfigured: false,
   };
 
   const serverStatuses = [
@@ -62,7 +80,7 @@ describe('SourcesLogic', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     jest.clearAllMocks();
     mount();
   });
@@ -319,6 +337,15 @@ describe('SourcesLogic', () => {
 
       expect(SourcesLogic.values.availableSources).toHaveLength(14);
       expect(SourcesLogic.values.configuredSources).toHaveLength(5);
+    });
+    it('externalConfigured is set to true if external is configured', () => {
+      const externalConfiguredResponse = {
+        contentSources,
+        privateContentSources: contentSources,
+        serviceTypes: [...configuredSources, externalConfiguredConnector],
+      };
+      SourcesLogic.actions.onInitializeSources(externalConfiguredResponse);
+      expect(SourcesLogic.values.externalConfigured).toEqual(true);
     });
   });
 

@@ -5,75 +5,66 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { SavedObjectsFindResponse } from 'kibana/server';
-import { copyAllowlistedFields, packEventFields, savedQueryEventFields } from './filters';
-import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
+import { filter, find, isEmpty, pick, isString } from 'lodash';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type {
+  PackSavedObjectAttributes,
+  SavedQuerySavedObjectAttributes,
+} from '../../common/types';
+
+/**
+ * Constructs the configs telemetry schema from a collection of config saved objects
+ */
+export const templateConfigs = (configsData: PackagePolicy[]) =>
+  configsData.map((item) => ({
+    id: item.id,
+    version: item.package?.version,
+    enabled: item.enabled,
+    config: find(item.inputs, ['type', 'osquery'])?.config?.osquery.value,
+  }));
 
 /**
  * Constructs the packs telemetry schema from a collection of packs saved objects
  */
 export const templatePacks = (
-  packsData: SavedObjectsFindResponse['saved_objects'],
-  clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined
-) =>
-  packsData.map((item) => {
-    const template: ListTemplate = {
-      '@timestamp': moment().toISOString(),
-      cluster_uuid: clusterInfo.cluster_uuid,
-      cluster_name: clusterInfo.cluster_name,
-      license_id: licenseInfo?.uid,
-    };
+  packsData: SavedObjectsFindResponse<PackSavedObjectAttributes>['saved_objects']
+) => {
+  const nonEmptyQueryPacks = filter(packsData, (pack) => !isEmpty(pack.attributes.queries));
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredPackItem = copyAllowlistedFields(
-      packEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
-    return {
-      ...template,
-      id: item.id,
-      ...filteredPackItem,
-    };
-  });
+  return nonEmptyQueryPacks.map((item) =>
+    pick(
+      {
+        name: item.attributes.name,
+        enabled: item.attributes.enabled,
+        queries: item.attributes.queries,
+        policies: (filter(item.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id')?.length,
+        prebuilt:
+          !!filter(item.references, ['type', 'osquery-pack-asset']) &&
+          item.attributes.version !== undefined,
+      },
+      ['name', 'queries', 'policies', 'prebuilt', 'enabled']
+    )
+  );
+};
 
 /**
  * Constructs the packs telemetry schema from a collection of packs saved objects
  */
 export const templateSavedQueries = (
-  savedQueriesData: SavedObjectsFindResponse['saved_objects'],
-  clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined
+  savedQueriesData: SavedObjectsFindResponse<SavedQuerySavedObjectAttributes>['saved_objects'],
+  prebuiltSavedQueryIds: string[]
 ) =>
-  savedQueriesData.map((item) => {
-    const template: ListTemplate = {
-      '@timestamp': moment().toISOString(),
-      cluster_uuid: clusterInfo.cluster_uuid,
-      cluster_name: clusterInfo.cluster_name,
-      license_id: licenseInfo?.uid,
-    };
-
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredSavedQueryItem = copyAllowlistedFields(
-      savedQueryEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
-    return {
-      ...template,
-      id: item.id,
-      ...filteredSavedQueryItem,
-    };
-  });
-
-/**
- * Convert counter label list to kebab case
- *
- * @param label_list the list of labels to create standardized UsageCounter from
- * @returns a string label for usage in the UsageCounter
- */
-export function createUsageCounterLabel(labelList: string[]): string {
-  return labelList.join('-');
-}
+  savedQueriesData.map((item) => ({
+    id: item.attributes.id,
+    query: item.attributes.query,
+    platform: item.attributes.platform,
+    interval: isString(item.attributes.interval)
+      ? parseInt(item.attributes.interval, 10)
+      : item.attributes.interval,
+    ...(!isEmpty(item.attributes.snapshot) ? { snapshot: item.attributes.snapshot } : {}),
+    ...(!isEmpty(item.attributes.removed) ? { snapshot: item.attributes.removed } : {}),
+    ...(!isEmpty(item.attributes.ecs_mapping) ? { ecs_mapping: item.attributes.ecs_mapping } : {}),
+    prebuilt: prebuiltSavedQueryIds.includes(item.id),
+  }));

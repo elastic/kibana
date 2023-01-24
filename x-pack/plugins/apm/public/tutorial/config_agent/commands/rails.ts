@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+export const railsVariables = {
+  apmServiceName: 'service_name',
+  secretToken: 'secret_token',
+  apmServerUrl: 'server_url',
+  apmEnvironment: 'environment',
+};
+
 export const rails = `# config/elastic_apm.yml:
 
 # Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
 # Defaults to the name of your Rails app
-service_name: 'my-service'
+${railsVariables.apmServiceName}: '{{{apmServiceName}}}'
 
 # Use if APM Server requires a secret token
-secret_token: '{{{secretToken}}}'
+${railsVariables.secretToken}: '{{{secretToken}}}'
 
 # Set the custom APM Server URL (default: http://localhost:8200)
-server_url: '{{{apmServerUrl}}}'
+${railsVariables.apmServerUrl}: '{{{apmServerUrl}}}'
 
 # Set the service environment
-environment: 'production'`;
+${railsVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;

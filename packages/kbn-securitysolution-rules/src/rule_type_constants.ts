@@ -21,3 +21,4 @@ export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
 export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
 export const SAVED_QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.savedQueryRule` as const;
 export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
+export const NEW_TERMS_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.newTermsRule` as const;

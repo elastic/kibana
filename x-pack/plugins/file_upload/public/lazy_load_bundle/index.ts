@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { FeatureCollection } from 'geojson';
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { IImporter, ImportFactoryOptions } from '../importer';
 import { getHttp } from '../kibana_services';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
-import { IndexNameFormProps } from '../';
+import { IndexNameFormProps } from '..';
 
 export interface FileUploadGeoResults {
   indexPatternId: string;

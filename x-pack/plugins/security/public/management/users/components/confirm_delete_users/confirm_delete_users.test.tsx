@@ -7,8 +7,8 @@
 
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import { userAPIClientMock } from '../../index.mock';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
@@ -71,7 +71,7 @@ describe('ConfirmDeleteUsers', () => {
       />
     );
 
-    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(apiClientMock.deleteUser).toBeCalledTimes(2);
     expect(apiClientMock.deleteUser).toBeCalledWith('foo');
@@ -98,7 +98,7 @@ describe('ConfirmDeleteUsers', () => {
       />
     );
 
-    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(apiClientMock.deleteUser).toBeCalledTimes(2);
     expect(apiClientMock.deleteUser).toBeCalledWith('foo');

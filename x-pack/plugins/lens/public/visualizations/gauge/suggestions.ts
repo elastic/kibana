@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GaugeShape } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
 import {
   GaugeShapes,
   GaugeTicksPositions,
   GaugeLabelMajorModes,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+} from '@kbn/expression-gauge-plugin/common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
-import { layerTypes } from '../../../common';
-import { GaugeVisualizationState } from './constants';
+import type { GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
@@ -41,7 +41,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   if (
     hasLayerMismatch(keptLayerIds, table) ||
     isNotNumericMetric(table) ||
-    (!isGauge && table.columns.length > 1) ||
+    (state && !isGauge && table.columns.length > 1) ||
     (isGauge && (numberOfAccessors !== table.columns.length || table.changeType === 'initial'))
   ) {
     return [];
@@ -57,7 +57,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       ...state,
       shape,
       layerId: table.layerId,
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
     },

@@ -7,6 +7,7 @@
 
 export * from './detections_admin';
 export * from './hunter';
+export * from './hunter_no_actions';
 export * from './platform_engineer';
 export * from './reader';
 export * from './rule_author';

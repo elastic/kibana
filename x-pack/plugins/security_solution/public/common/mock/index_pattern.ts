@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecuritySolutionDataViewBase } from '../types';
+import type { SecuritySolutionDataViewBase } from '../types';
 
 export const mockIndexPattern: SecuritySolutionDataViewBase = {
   fields: [

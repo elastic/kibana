@@ -19,6 +19,10 @@
     flex: 1 1 100%;
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
+
+    &[data-error] {
+      display: none;
+    }
   }
 
   // SASSTODO: this MIGHT be fixing IE
@@ -72,7 +76,7 @@
   }
 }
 
-.embPanel__dragger:not(.embPanel__title) {
+.embPanel--dragHandle:not(.embPanel__title) {
   flex-grow: 1;
 }
 
@@ -81,7 +85,9 @@
   right: 0;
   top: 0;
   left: 0;
-  z-index: $euiZLevel1;
+  * {
+    z-index: $euiZLevel1; // apply high z-index to all children
+  }
 }
 
 // OPTIONS MENU
@@ -100,6 +106,17 @@
   &:focus {
     background-color: $euiFocusBackgroundColor;
   }
+
+}
+
+.embPanel__optionsMenuPopover-notification::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  content: '•';
+  transform: translate(50%, -50%);
+  color: $euiColorAccent;
+  font-size: $euiSizeL;
 }
 
 .embPanel .embPanel__optionsMenuButton {
@@ -129,7 +146,7 @@
     @include euiSlightShadowHover;
   }
 
-  .embPanel__dragger {
+  .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {
@@ -152,11 +169,12 @@
 }
 
 .embPanel__error {
-  text-align: center;
-  justify-content: center;
-  flex-direction: column;
-  overflow: auto;
-  padding: $euiSizeS;
+  padding: $euiSizeL;
+
+  & > * {
+    max-height: 100%;
+    overflow: auto;
+  }
 }
 
 .embPanel__label {

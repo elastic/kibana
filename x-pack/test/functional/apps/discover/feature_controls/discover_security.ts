@@ -10,6 +10,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const esSupertest = getService('esSupertest');
+  const dataGrid = getService('dataGrid');
+  const find = getService('find');
+  const indexPatterns = getService('indexPatterns');
+  const retry = getService('retry');
+  const monacoEditor = getService('monacoEditor');
   const security = getService('security');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
@@ -20,19 +26,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'share',
     'spaceSelector',
+    'header',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const kibanaServer = getService('kibanaServer');
+  const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/106631
-  describe.skip('discover feature controls security', () => {
+  describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
@@ -51,6 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global discover all privileges', () => {
@@ -83,6 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('logstash-*');
       });
 
       after(async () => {
@@ -153,13 +162,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allow saving currently loaded query as a copy', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'ok2',
           'description',
           true,
           false
         );
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+        await testSubjects.click('showQueryBarMenu');
         await savedQueryManagementComponent.deleteSavedQuery('ok2');
       });
     });
@@ -219,6 +232,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
+        await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
@@ -431,12 +445,126 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_discover_privileges_user');
       });
 
-      it(`shows 403`, async () => {
+      it('shows 403', async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectForbidden();
+        await retry.try(async () => {
+          await PageObjects.error.expectForbidden();
+        });
+      });
+    });
+
+    describe('when has privileges to read data views but no privileges to read index', () => {
+      before(async () => {
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                add: { index: logstashIndexName, alias: 'alias-logstash-discover' },
+              },
+            ],
+          })
+          .expect(200);
+
+        await indexPatterns.create(
+          { title: 'alias-logstash-discover', timeFieldName: '@timestamp' },
+          { override: true }
+        );
+
+        await security.role.create('discover_only_data_views_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['alias-logstash-discover'], privileges: ['read', 'view_index_metadata'] },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('discover_only_data_views_user', {
+          password: 'discover_only_data_views_user-password',
+          roles: ['discover_only_data_views_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'discover_only_data_views_user',
+          'discover_only_data_views_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+
+        await PageObjects.common.navigateToApp('discover');
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.unset('defaultIndex');
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                remove: { index: logstashIndexName, alias: 'alias-logstash-discover' },
+              },
+            ],
+          })
+          .expect(200);
+
+        await security.role.delete('discover_only_data_views_role');
+        await security.user.delete('discover_only_data_views_user');
+      });
+
+      it('allows to access only via a permitted index alias', async () => {
+        await globalNav.badgeExistsOrFail('Read only');
+
+        // can't access logstash index directly
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('discoverNoResultsCheckIndices');
+
+        // but can access via a permitted alias for the logstash index
+        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await setDiscoverTimeRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('discoverNoResultsCheckIndices');
+        await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        // expand a row
+        await dataGrid.clickRowToggle();
+
+        // check the fields tab
+        await retry.waitForWithTimeout(
+          'index in flyout fields tab is matching the logstash index',
+          5000,
+          async () => {
+            return (
+              (await testSubjects.getVisibleText('tableDocViewRow-_index-value')) ===
+              logstashIndexName
+            );
+          }
+        );
+
+        // check the JSON tab
+        await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
+        await retry.waitForWithTimeout(
+          'index in flyout JSON tab is matching the logstash index',
+          5000,
+          async () => {
+            const text = await monacoEditor.getCodeEditorValue();
+            return JSON.parse(text)._index === logstashIndexName;
+          }
+        );
       });
     });
   });

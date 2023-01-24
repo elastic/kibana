@@ -7,9 +7,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "optionalPlugins": ["alerting", "cloud", "features", "home", "spaces"],
-  "requiredPlugins": ["management", "charts", "data", "kibanaReact", "kibanaUtils", "savedObjects"],
+  "optionalPlugins": ["cloud", "features", "home", "spaces"],
+  "requiredPlugins": ["management", "charts", "data", "kibanaReact", "kibanaUtils", "savedObjects", "unifiedSearch", "dataViews", "dataViewEditor", "alerting", "actions"],
   "configPath": ["xpack", "trigger_actions_ui"],
   "extraPublicDirs": ["public/common", "public/common/constants"],
-  "requiredBundles": ["home", "alerting", "esUiShared", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils", "actions"]
 }

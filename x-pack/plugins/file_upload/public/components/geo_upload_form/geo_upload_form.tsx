@@ -6,10 +6,18 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSelect,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { IndexNameForm } from './index_name_form';
 import { validateIndexName } from '../../validate_index_name';
 
@@ -28,12 +36,14 @@ interface Props {
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   indexName: string;
   indexNameError?: string;
+  smallChunks: boolean;
   onFileClear: () => void;
   onFileSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
   onGeoFieldTypeSelect: (geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE) => void;
   onIndexNameChange: (name: string, error?: string) => void;
   onIndexNameValidationStart: () => void;
   onIndexNameValidationEnd: () => void;
+  onSmallChunksChange: (smallChunks: boolean) => void;
 }
 
 interface State {
@@ -96,6 +106,10 @@ export class GeoUploadForm extends Component<Props, State> {
     );
   };
 
+  _onSmallChunksChange = (event: EuiSwitchEvent) => {
+    this.props.onSmallChunksChange(event.target.checked);
+  };
+
   _renderGeoFieldTypeSelect() {
     return this.state.hasFile && this.state.isPointsOnly ? (
       <EuiFormRow
@@ -119,13 +133,33 @@ export class GeoUploadForm extends Component<Props, State> {
         <GeoFilePicker onSelect={this._onFileSelect} onClear={this._onFileClear} />
         {this._renderGeoFieldTypeSelect()}
         {this.state.hasFile ? (
-          <IndexNameForm
-            indexName={this.props.indexName}
-            indexNameError={this.props.indexNameError}
-            onIndexNameChange={this.props.onIndexNameChange}
-            onIndexNameValidationStart={this.props.onIndexNameValidationStart}
-            onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
-          />
+          <>
+            <IndexNameForm
+              indexName={this.props.indexName}
+              indexNameError={this.props.indexNameError}
+              onIndexNameChange={this.props.onIndexNameChange}
+              onIndexNameValidationStart={this.props.onIndexNameValidationStart}
+              onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
+            />
+            <EuiSpacer size="m" />
+            <EuiFormRow display="columnCompressedSwitch">
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.fileUpload.smallChunks.tooltip', {
+                  defaultMessage: 'Use to alleviate request timeout failures.',
+                })}
+              >
+                <EuiSwitch
+                  label={i18n.translate('xpack.fileUpload.smallChunks.switchLabel', {
+                    defaultMessage: 'Upload file in smaller chunks',
+                  })}
+                  checked={this.props.smallChunks}
+                  onChange={this._onSmallChunksChange}
+                  compressed
+                />
+              </EuiToolTip>
+            </EuiFormRow>
+          </>
         ) : null}
       </EuiForm>
     );

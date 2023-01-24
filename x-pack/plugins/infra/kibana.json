@@ -3,30 +3,33 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
+    "share",
     "features",
     "usageCollection",
     "spaces",
     "embeddable",
     "data",
-    "dataEnhanced",
+    "dataViews",
     "visTypeTimeseries",
     "alerting",
     "triggersActionsUi",
     "observability",
-    "ruleRegistry"
+    "ruleRegistry",
+    "unifiedSearch"
   ],
   "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"],
   "requiredBundles": [
+    "unifiedSearch",
     "observability",
     "licenseManagement",
     "kibanaUtils",
     "kibanaReact",
-    "home",
     "ml",
-    "embeddable"
+    "embeddable",
+    "controls"  
   ],
   "owner": {
     "name": "Logs and Metrics UI",

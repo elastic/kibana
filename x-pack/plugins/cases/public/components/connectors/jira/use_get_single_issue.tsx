@@ -6,10 +6,10 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnector } from '../../../../common/api';
+import type { HttpSetup, ToastsApi } from '@kbn/core/public';
+import type { ActionConnector } from '../../../../common/api';
 import { getIssue } from './api';
-import { Issue } from './types';
+import type { Issue } from './types';
 import * as i18n from './translations';
 
 interface Props {

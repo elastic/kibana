@@ -6,16 +6,27 @@
  */
 
 import type {
+  AggregateName,
+  AggregationsMultiTermsAggregate,
+  CreateRequest,
+  IndicesCreateRequest,
+  MsearchRequestItem,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
+import type {
   BulkOperationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import semver from 'semver';
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuditLogger } from '../audit';
-import { sessionCleanupEvent } from '../audit';
+import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
+import { getDetailedErrorMessage } from '../errors';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
@@ -43,6 +54,17 @@ export type InvalidateSessionsFilter =
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
 
 /**
+ * The current version of the session index mappings.
+ */
+const SESSION_INDEX_MAPPINGS_VERSION = '8.7.0';
+
+/**
+ * Name of the session index mappings _meta field storing session index version. Named after a field used for the
+ * Elasticsearch security-specific indices with the same purpose.
+ */
+export const SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME = 'security-version';
+
+/**
  * Number of sessions to remove per batch during cleanup.
  */
 const SESSION_INDEX_CLEANUP_BATCH_SIZE = 10_000;
@@ -59,34 +81,42 @@ const SESSION_INDEX_CLEANUP_BATCH_LIMIT = 10;
 const SESSION_INDEX_CLEANUP_KEEP_ALIVE = '5m';
 
 /**
- * Returns index template that is used for the current version of the session index.
+ * Returns index settings that are used for the current version of the session index.
  */
-export function getSessionIndexTemplate(templateName: string, indexName: string) {
+export function getSessionIndexSettings({
+  indexName,
+  aliasName,
+}: {
+  indexName: string;
+  aliasName: string;
+}): IndicesCreateRequest {
   return Object.freeze({
-    name: templateName,
-    index_patterns: [indexName],
-    template: {
-      settings: {
-        index: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
-          auto_expand_replicas: '0-1',
-          priority: 1000,
-          refresh_interval: '1s',
-          hidden: true,
-        },
+    index: indexName,
+    settings: {
+      number_of_shards: 1,
+      number_of_replicas: 0,
+      auto_expand_replicas: '0-1',
+      priority: 1000,
+      refresh_interval: '1s',
+      hidden: true,
+    },
+    aliases: {
+      [aliasName]: {
+        is_write_index: true,
       },
-      mappings: {
-        dynamic: 'strict',
-        properties: {
-          usernameHash: { type: 'keyword' },
-          provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-          idleTimeoutExpiration: { type: 'date' },
-          lifespanExpiration: { type: 'date' },
-          accessAgreementAcknowledged: { type: 'boolean' },
-          content: { type: 'binary' },
-        },
-      } as const,
+    },
+    mappings: {
+      dynamic: 'strict',
+      _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: SESSION_INDEX_MAPPINGS_VERSION },
+      properties: {
+        usernameHash: { type: 'keyword' },
+        provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
+        idleTimeoutExpiration: { type: 'date' },
+        createdAt: { type: 'date' },
+        lifespanExpiration: { type: 'date' },
+        accessAgreementAcknowledged: { type: 'boolean' },
+        content: { type: 'binary' },
+      },
     },
   });
 }
@@ -124,6 +154,12 @@ export interface SessionIndexValue {
   lifespanExpiration: number | null;
 
   /**
+   * The Unix time in ms which is the time when the session was initially created. The missing value indicates that the
+   * session was created before `createdAt` was introduced.
+   */
+  createdAt?: number;
+
+  /**
    * Indicates whether user acknowledged access agreement or not.
    */
   accessAgreementAcknowledged?: boolean;
@@ -138,6 +174,11 @@ export interface SessionIndexValue {
    */
   metadata: SessionIndexValueMetadata;
 }
+
+/**
+ * Subset of the `SessionIndexValue` fields required for session cleanup.
+ */
+type SessionIndexValueDescriptor = Pick<SessionIndexValue, 'sid' | 'usernameHash' | 'provider'>;
 
 /**
  * Additional index specific information about the session value.
@@ -161,6 +202,11 @@ export class SessionIndex {
   private readonly indexName: string;
 
   /**
+   * Name of the write alias to store session information in.
+   */
+  private readonly aliasName: string;
+
+  /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
    * as Core provides support for plugin statuses (https://github.com/elastic/kibana/issues/41983).
    * With this we won't mark Security as `Green` until index is fully initialized and hence consumers
@@ -170,6 +216,7 @@ export class SessionIndex {
 
   constructor(private readonly options: Readonly<SessionIndexOptions>) {
     this.indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+    this.aliasName = `${this.options.kibanaIndexName}_security_session`;
   }
 
   /**
@@ -181,7 +228,7 @@ export class SessionIndex {
     try {
       const { body: response, statusCode } =
         await this.options.elasticsearchClient.get<SessionIndexValue>(
-          { id: sid, index: this.indexName },
+          { id: sid, index: this.aliasName },
           { ignore: [404], meta: true }
         );
 
@@ -215,21 +262,25 @@ export class SessionIndex {
       await this.indexInitialization;
     }
 
-    const { sid, ...sessionValueToStore } = sessionValue;
     try {
-      const { _primary_term: primaryTerm, _seq_no: sequenceNumber } =
-        await this.options.elasticsearchClient.create({
-          id: sid,
-          // We cannot control whether index is created automatically during this operation or not.
-          // But we can reduce probability of getting into a weird state when session is being created
-          // while session index is missing for some reason. This way we'll recreate index with a
-          // proper name and alias. But this will only work if we still have a proper index template.
-          index: this.indexName,
-          body: sessionValueToStore,
-          refresh: 'wait_for',
-        });
+      let { body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
+        ignore404: true,
+      });
 
-      return { ...sessionValue, metadata: { primaryTerm, sequenceNumber } } as SessionIndexValue;
+      if (statusCode === 404) {
+        this.options.logger.warn(
+          'Attempted to create a new session, but session index or alias was missing.'
+        );
+        await this.ensureSessionIndexExists();
+        ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
+          ignore404: false,
+        }));
+      }
+
+      return {
+        ...sessionValue,
+        metadata: { primaryTerm: body._primary_term, sequenceNumber: body._seq_no },
+      } as SessionIndexValue;
     } catch (err) {
       this.options.logger.error(`Failed to create session value: ${err.message}`);
       throw err;
@@ -241,19 +292,20 @@ export class SessionIndex {
    * @param sessionValue Session index value.
    */
   async update(sessionValue: Readonly<SessionIndexValue>) {
-    const { sid, metadata, ...sessionValueToStore } = sessionValue;
     try {
-      const { body: response, statusCode } = await this.options.elasticsearchClient.index(
-        {
-          id: sid,
-          index: this.indexName,
-          body: sessionValueToStore,
-          if_seq_no: metadata.sequenceNumber,
-          if_primary_term: metadata.primaryTerm,
-          refresh: 'wait_for',
-        },
-        { ignore: [409], meta: true }
-      );
+      let { body: response, statusCode } = await this.updateExistingSessionDocument(sessionValue, {
+        ignore404: true,
+      });
+
+      if (statusCode === 404) {
+        this.options.logger.warn(
+          'Attempted to update an existing session, but session index or alias was missing.'
+        );
+        await this.ensureSessionIndexExists();
+        ({ body: response, statusCode } = await this.updateExistingSessionDocument(sessionValue, {
+          ignore404: false,
+        }));
+      }
 
       // We don't want to override changes that were made after we fetched session value or
       // re-create it if has been deleted already. If we detect such a case we discard changes and
@@ -263,7 +315,7 @@ export class SessionIndex {
         this.options.logger.debug(
           'Cannot update session value due to conflict, session either does not exist or was already updated.'
         );
-        return await this.get(sid);
+        return await this.get(sessionValue.sid);
       }
 
       return {
@@ -286,7 +338,7 @@ export class SessionIndex {
         // We don't specify primary term and sequence number as delete should always take precedence
         // over any updates that could happen in the meantime.
         const { statusCode } = await this.options.elasticsearchClient.delete(
-          { id: filter.sid, index: this.indexName, refresh: 'wait_for' },
+          { id: filter.sid, index: this.aliasName, refresh: 'wait_for' },
           { ignore: [404], meta: true }
         );
 
@@ -321,7 +373,7 @@ export class SessionIndex {
 
     try {
       const response = await this.options.elasticsearchClient.deleteByQuery({
-        index: this.indexName,
+        index: this.aliasName,
         refresh: true,
         body: { query: deleteQuery },
       });
@@ -372,7 +424,7 @@ export class SessionIndex {
           }
         }
 
-        // Check if required index template exists.
+        // Check if index template exists.
         let indexTemplateExists = false;
         try {
           indexTemplateExists = await this.options.elasticsearchClient.indices.existsIndexTemplate({
@@ -385,50 +437,21 @@ export class SessionIndex {
           return reject(err);
         }
 
-        // Create index template if it doesn't exist.
+        // Delete index template if it does.
         if (indexTemplateExists) {
-          this.options.logger.debug('Session index template already exists.');
-        } else {
+          this.options.logger.debug('Deleting unused session index template.');
           try {
-            await this.options.elasticsearchClient.indices.putIndexTemplate(
-              getSessionIndexTemplate(sessionIndexTemplateName, this.indexName)
-            );
-            this.options.logger.debug('Successfully created session index template.');
+            await this.options.elasticsearchClient.indices.deleteIndexTemplate({
+              name: sessionIndexTemplateName,
+            });
+            this.options.logger.debug('Successfully deleted session index template.');
           } catch (err) {
-            this.options.logger.error(`Failed to create session index template: ${err.message}`);
+            this.options.logger.error(`Failed to delete session index template: ${err.message}`);
             return reject(err);
           }
         }
 
-        // Check if required index exists. We cannot be sure that automatic creation of indices is
-        // always enabled, so we create session index explicitly.
-        let indexExists = false;
-        try {
-          indexExists = await this.options.elasticsearchClient.indices.exists({
-            index: this.indexName,
-          });
-        } catch (err) {
-          this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
-          return reject(err);
-        }
-
-        // Create index if it doesn't exist.
-        if (indexExists) {
-          this.options.logger.debug('Session index already exists.');
-        } else {
-          try {
-            await this.options.elasticsearchClient.indices.create({ index: this.indexName });
-            this.options.logger.debug('Successfully created session index.');
-          } catch (err) {
-            // There can be a race condition if index is created by another Kibana instance.
-            if (err?.body?.error?.type === 'resource_already_exists_exception') {
-              this.options.logger.debug('Session index already exists.');
-            } else {
-              this.options.logger.error(`Failed to create session index: ${err.message}`);
-              return reject(err);
-            }
-          }
-        }
+        await this.ensureSessionIndexExists();
 
         // Notify any consumers that are awaiting on this promise and immediately reset it.
         resolve();
@@ -444,69 +467,288 @@ export class SessionIndex {
    * Trigger a removal of any outdated session values.
    */
   async cleanUp() {
-    const { auditLogger, elasticsearchClient, logger } = this.options;
-    logger.debug(`Running cleanup routine.`);
+    const { auditLogger, logger } = this.options;
+    logger.debug('Running cleanup routine.');
 
     let error: Error | undefined;
     let indexNeedsRefresh = false;
     try {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
-        const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
-        sessionValues.forEach(({ _id, _source }) => {
+        const operations = sessionValues.map(({ _id, _source }) => {
           const { usernameHash, provider } = _source!;
           auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
-          operations.push({ delete: { _id } });
+          return { delete: { _id } };
         });
-        if (operations.length > 0) {
-          const bulkResponse = await elasticsearchClient.bulk(
-            {
-              index: this.indexName,
-              operations,
-              refresh: false,
-            },
-            { ignore: [409, 404] }
-          );
-          if (bulkResponse.errors) {
-            const errorCount = bulkResponse.items.reduce(
-              (count, item) => (item.delete!.error ? count + 1 : count),
-              0
-            );
-            if (errorCount < bulkResponse.items.length) {
-              logger.warn(
-                `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
-              );
-              indexNeedsRefresh = true;
-            } else {
-              logger.error(
-                `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
-              );
-            }
-          } else {
-            logger.debug(`Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`);
-            indexNeedsRefresh = true;
-          }
-        }
+
+        indexNeedsRefresh = (await this.bulkDeleteSessions(operations)) || indexNeedsRefresh;
       }
     } catch (err) {
       logger.error(`Failed to clean up sessions: ${err.message}`);
       error = err;
     }
 
+    // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
+    // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
     if (indexNeedsRefresh) {
-      // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
-      // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
-      try {
-        await elasticsearchClient.indices.refresh({ index: this.indexName });
-        logger.debug(`Refreshed session index.`);
-      } catch (err) {
-        logger.error(`Failed to refresh session index: ${err.message}`);
+      await this.refreshSessionIndex();
+    }
+
+    // Once index refresh is complete we can check if there are sessions left that exceed concurrent sessions limit.
+    try {
+      indexNeedsRefresh = false;
+
+      const operations = (await this.getSessionsOutsideConcurrentSessionLimit()).map((session) => {
+        auditLogger.log(
+          sessionCleanupConcurrentLimitEvent({
+            sessionId: session.sid,
+            usernameHash: session.usernameHash,
+            provider: session.provider,
+          })
+        );
+        return { delete: { _id: session.sid } };
+      });
+
+      if (operations.length > 0) {
+        // Limit max number of documents to delete to 10_000 to avoid massively large delete request payloads (10k batch
+        // delete request payload is about 700kb).
+        const batchSize = SESSION_INDEX_CLEANUP_BATCH_SIZE;
+        for (let i = 0; i < operations.length; i += batchSize) {
+          indexNeedsRefresh =
+            (await this.bulkDeleteSessions(operations.slice(i, i + batchSize))) ||
+            indexNeedsRefresh;
+        }
       }
+    } catch (err) {
+      logger.error(
+        `Failed to clean up sessions that exceeded concurrent sessions limit: ${err.message}`
+      );
+      error = err;
+    }
+
+    if (indexNeedsRefresh) {
+      await this.refreshSessionIndex();
     }
 
     if (error) {
+      logger.error(`Cleanup routine failed: ${getDetailedErrorMessage(error)}.`);
       // If we couldn't fetch or delete sessions, throw an error so the task will be retried.
       throw error;
     }
+
+    logger.debug('Cleanup routine successfully completed.');
+  }
+
+  /**
+   * Checks whether specific session is within a concurrent sessions limit.
+   * @param sessionValue Session index value to check against concurrent sessions limit.
+   */
+  async isWithinConcurrentSessionLimit(sessionValue: Readonly<SessionIndexValue>) {
+    // Concurrent user sessions limit doesn't apply if it's not configured, or session isn't authenticated, or session
+    // belongs to the anonymous user.
+    const maxConcurrentSessions = this.options.config.session.concurrentSessions?.maxSessions;
+    if (
+      maxConcurrentSessions == null ||
+      !sessionValue.usernameHash ||
+      sessionValue.provider.type === AnonymousAuthenticationProvider.type
+    ) {
+      return true;
+    }
+
+    let sessionsOutsideLimit: Array<SearchHit<SessionIndexValue>>;
+    try {
+      const searchResponse = await this.options.elasticsearchClient.search<SessionIndexValue>({
+        index: this.aliasName,
+
+        // Find all sessions created for the same user by the same authentication provider.
+        query: {
+          bool: {
+            filter: [
+              { term: { usernameHash: sessionValue.usernameHash } },
+              { term: { 'provider.type': sessionValue.provider.type } },
+              { term: { 'provider.name': sessionValue.provider.name } },
+            ],
+          },
+        },
+
+        // Sort sessions by creation date in descending order to get the most recent session that's also outside the
+        // limit. This query relies on a default value for `missing` sort parameter which is `_last`, meaning that
+        // sessions without `createdAt` field ("legacy" sessions) are always considered older than the ones that have
+        // this field populated. For example, if the limit is 2 the resulting set might look like this:
+        // { createdAt: 3 } <-- the most recent session (within the limit, not returned because of `from`)
+        // { createdAt: 2 } <-- the second most recent session (within the limit, not returned because of `from`)
+        // { createdAt: 1 } <-- the third most recent session (outside the limit, *returned*)
+        // { createdAt: undefined } <--- the oldest "legacy" session (outside the limit, not returned because of `size`)
+        sort: [{ createdAt: { order: 'desc' } }],
+
+        // Improve performance by fetching just one field of one outside-the-limit session and not tracking total hits.
+        _source_includes: 'createdAt',
+        filter_path: 'hits.hits._source',
+        from: maxConcurrentSessions,
+        size: 1,
+        track_total_hits: false,
+      });
+      sessionsOutsideLimit = searchResponse.hits?.hits ?? [];
+    } catch (err) {
+      this.options.logger.error(
+        `Failed to fetch user sessions to check concurrent sessions limit: ${err.message}.`
+      );
+      throw err;
+    }
+
+    // If all sessions are within the limit, then the provided one should be within the limit as well.
+    if (sessionsOutsideLimit.length === 0) {
+      return true;
+    }
+
+    // If there is any session that is outside the limit and the provided session is "legacy" session (doesn't have a
+    // `createdAt` field populated), then we can safely treat it as outside-the-limit session (all "legacy" sessions are
+    // treated equally).
+    if (!sessionValue.createdAt) {
+      return false;
+    }
+
+    // If the first outside-the-limit session doesn't have `createdAt` then all other sessions with `createdAt` are
+    // within the limit, otherwise the specified session is outside the limit only if it was created before or at the
+    // same time as the first outside-the-limit session.
+    const [{ _source: sessionOutsideLimit }] = sessionsOutsideLimit;
+    return (
+      !sessionOutsideLimit?.createdAt || sessionValue.createdAt > sessionOutsideLimit.createdAt
+    );
+  }
+
+  /**
+   * Creates the session index if it doesn't already exist.
+   */
+  private async ensureSessionIndexExists() {
+    // Check if required index exists.
+    let indexExists = false;
+    try {
+      indexExists = await this.options.elasticsearchClient.indices.exists({
+        index: this.indexName,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
+      throw err;
+    }
+
+    const sessionIndexSettings = getSessionIndexSettings({
+      indexName: this.indexName,
+      aliasName: this.aliasName,
+    });
+
+    // Initialize session index:
+    // Ensure the alias is attached to the already existing index and field mappings are up-to-date,
+    // or create a new index if it doesn't exist.
+    if (!indexExists) {
+      try {
+        await this.options.elasticsearchClient.indices.create(sessionIndexSettings);
+        this.options.logger.debug('Successfully created session index.');
+      } catch (err) {
+        // There can be a race condition if index is created by another Kibana instance.
+        if (err?.body?.error?.type === 'resource_already_exists_exception') {
+          this.options.logger.debug('Session index already exists.');
+        } else {
+          this.options.logger.error(`Failed to create session index: ${err.message}`);
+          throw err;
+        }
+      }
+
+      return;
+    }
+
+    this.options.logger.debug(
+      'Session index already exists. Attaching alias to the index and ensuring up-to-date mappings...'
+    );
+
+    // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
+    // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
+    // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
+    // it to see if the alias already exists.
+    try {
+      await this.options.elasticsearchClient.indices.putAlias({
+        index: this.indexName,
+        name: this.aliasName,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
+      throw err;
+    }
+
+    let indexMappingsVersion: string | undefined;
+    try {
+      const indexMappings = await this.options.elasticsearchClient.indices.getMapping({
+        index: this.indexName,
+      });
+
+      indexMappingsVersion =
+        indexMappings[this.indexName]?.mappings?._meta?.[
+          SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME
+        ];
+    } catch (err) {
+      this.options.logger.error(`Failed to retrieve session index metadata: ${err.message}`);
+      throw err;
+    }
+
+    if (!indexMappingsVersion || semver.lt(indexMappingsVersion, SESSION_INDEX_MAPPINGS_VERSION)) {
+      this.options.logger.debug(
+        `Updating session index mappings from ${
+          indexMappingsVersion ?? 'unknown'
+        } to ${SESSION_INDEX_MAPPINGS_VERSION} version.`
+      );
+      try {
+        await this.options.elasticsearchClient.indices.putMapping({
+          index: this.indexName,
+          ...sessionIndexSettings.mappings,
+        });
+        this.options.logger.debug('Successfully updated session index mappings.');
+      } catch (err) {
+        this.options.logger.error(`Failed to update session index mappings: ${err.message}`);
+        throw err;
+      }
+    }
+  }
+
+  private async writeNewSessionDocument(
+    sessionValue: Readonly<Omit<SessionIndexValue, 'metadata'>>,
+    { ignore404 }: { ignore404: boolean }
+  ) {
+    const { sid, ...sessionValueToStore } = sessionValue;
+
+    const { body, statusCode } = await this.options.elasticsearchClient.create(
+      {
+        id: sid,
+        // We write to the alias for `create` operations so that we can prevent index auto-creation in the event it is missing.
+        index: this.aliasName,
+        body: sessionValueToStore,
+        refresh: 'wait_for',
+        require_alias: true,
+      } as CreateRequest,
+      { meta: true, ignore: ignore404 ? [404] : [] }
+    );
+
+    return { body, statusCode };
+  }
+
+  private async updateExistingSessionDocument(
+    sessionValue: Readonly<SessionIndexValue>,
+    { ignore404 }: { ignore404: boolean }
+  ) {
+    const { sid, metadata, ...sessionValueToStore } = sessionValue;
+
+    const { body, statusCode } = await this.options.elasticsearchClient.index(
+      {
+        id: sid,
+        index: this.aliasName,
+        body: sessionValueToStore,
+        if_seq_no: metadata.sequenceNumber,
+        if_primary_term: metadata.primaryTerm,
+        refresh: 'wait_for',
+        require_alias: true,
+      },
+      { ignore: ignore404 ? [404, 409] : [409], meta: true }
+    );
+
+    return { body, statusCode };
   }
 
   /**
@@ -572,10 +814,26 @@ export class SessionIndex {
       });
     }
 
-    const openPitResponse = await this.options.elasticsearchClient.openPointInTime({
-      index: this.indexName,
-      keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-    });
+    let { body: openPitResponse, statusCode } =
+      await this.options.elasticsearchClient.openPointInTime(
+        {
+          index: this.aliasName,
+          keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+        },
+        { ignore: [404], meta: true }
+      );
+
+    if (statusCode === 404) {
+      await this.ensureSessionIndexExists();
+      ({ body: openPitResponse, statusCode } =
+        await this.options.elasticsearchClient.openPointInTime(
+          {
+            index: this.aliasName,
+            keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+          },
+          { meta: true }
+        ));
+    }
 
     try {
       let searchAfter: SortResults | undefined;
@@ -602,6 +860,233 @@ export class SessionIndex {
       await this.options.elasticsearchClient.closePointInTime({
         id: openPitResponse.id,
       });
+    }
+  }
+
+  private async getSessionsOutsideConcurrentSessionLimit(): Promise<SessionIndexValueDescriptor[]> {
+    const maxConcurrentSessions = this.options.config.session.concurrentSessions?.maxSessions;
+    if (maxConcurrentSessions == null) {
+      return [];
+    }
+
+    // 1. We need to figure out what users have sessions that exceed the concurrent session limit. For that, we group
+    // existing sessions by username and authentication provider.
+    const aggResponse = await this.options.elasticsearchClient.search<
+      unknown,
+      Record<AggregateName, AggregationsMultiTermsAggregate>
+    >({
+      index: this.aliasName,
+
+      // Exclude unauthenticated sessions and sessions of the anonymous users that shouldn't be affected by the
+      // concurrent user sessions limit.
+      query: {
+        bool: {
+          filter: [
+            { exists: { field: 'usernameHash' } },
+            {
+              bool: {
+                must_not: [{ term: { 'provider.type': AnonymousAuthenticationProvider.type } }],
+              },
+            },
+          ],
+        },
+      },
+
+      aggs: {
+        sessions_grouped_by_user: {
+          multi_terms: {
+            // If we have more than 10_000 users that all exceeded the limit (highly unlikely), then the rest of the
+            // sessions will be cleaned up during the next run. It doesn't expose Kibana to any security risks since the
+            // concurrent sessions limits is enforced on fetch. The `size` is limited by `search.max_buckets` setting
+            // which is 65,536 by default, but we don't want to load Elasticsearch too much (response size for 10000
+            // buckets is around 1mb).
+            size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
+            terms: [
+              { field: 'usernameHash' },
+              { field: 'provider.type' },
+              { field: 'provider.name' },
+            ],
+            // Return only those groups that exceed the limit.
+            min_doc_count: maxConcurrentSessions + 1,
+          },
+        },
+      },
+
+      // Improve performance by not tracking total hits, not returning hits themselves (size=0), and fetching only buckets keys.
+      size: 0,
+      filter_path: [
+        'aggregations.sessions_grouped_by_user.sum_other_doc_count',
+        'aggregations.sessions_grouped_by_user.buckets.key',
+        'aggregations.sessions_grouped_by_user.buckets.doc_count',
+      ],
+      track_total_hits: false,
+    });
+
+    // The reason we check if buckets is an array is to narrow down the type of the response since ES can return buckets as
+    // either an array OR a dictionary (aggregation has keys configured for the different buckets, that's not the case here).
+    const sessionsGroupedByUser = aggResponse.aggregations?.sessions_grouped_by_user;
+    const sessionBuckets = sessionsGroupedByUser?.buckets ?? [];
+    if (sessionBuckets.length === 0 || !Array.isArray(sessionBuckets)) {
+      return [];
+    }
+
+    // Log a warning if we didn't fetch buckets for all users that exceeded the limit.
+    const ungroupedSessions = sessionsGroupedByUser?.sum_other_doc_count ?? 0;
+    if (ungroupedSessions > 0) {
+      this.options.logger.warn(
+        `Unable to check if remaining ${ungroupedSessions} sessions exceed the concurrent session limit. Sessions will be checked during the next cleanup job run.`
+      );
+    }
+
+    // 2. Once we know what users within what authentication providers exceed the concurrent sessions limit, we can
+    // fetch specific sessions documents that are outside the limit.
+    const { sessionGroups, sessionQueries, skippedSessions } = sessionBuckets.reduce(
+      (result, sessionGroup) => {
+        // The keys are arrays of values ordered the same ways as expression in the terms parameter of the aggregation.
+        const [usernameHash, providerType, providerName] = sessionGroup.key as string[];
+
+        // Record a number of session documents that won't be included in the batch during this run.
+        if (sessionGroup.doc_count > SESSION_INDEX_CLEANUP_BATCH_SIZE) {
+          result.skippedSessions += sessionGroup.doc_count - SESSION_INDEX_CLEANUP_BATCH_SIZE;
+        }
+
+        result.sessionGroups.push({
+          usernameHash,
+          provider: { type: providerType, name: providerName },
+        });
+
+        result.sessionQueries.push(
+          {},
+          {
+            query: {
+              bool: {
+                must: [
+                  { term: { usernameHash } },
+                  { term: { 'provider.type': providerType } },
+                  { term: { 'provider.name': providerName } },
+                ],
+              },
+            },
+
+            // Sort sessions by creation date in descending order to get the most recent session that's also outside the
+            // limit. Refer to comment in `isWithinConcurrentSessionLimit` for the explanation and example.
+            sort: [{ createdAt: { order: 'desc' } }],
+
+            // We only need to fetch sessions that exceed the limit.
+            from: maxConcurrentSessions,
+            size: SESSION_INDEX_CLEANUP_BATCH_SIZE - maxConcurrentSessions,
+
+            // Improve performance by not tracking total hits and not fetching _source since we already have all necessary
+            // data returned within aggregation buckets (`usernameHash` and `provider`).
+            _source: false,
+            track_total_hits: false,
+          }
+        );
+
+        return result;
+      },
+      { sessionGroups: [], sessionQueries: [], skippedSessions: 0 } as {
+        sessionGroups: Array<Pick<SessionIndexValue, 'usernameHash' | 'provider'>>;
+        sessionQueries: MsearchRequestItem[];
+        skippedSessions: number;
+      }
+    );
+
+    // Log a warning if we didn't fetch all sessions that exceeded the limit.
+    if (skippedSessions > 0) {
+      this.options.logger.warn(
+        `Unable to fetch ${skippedSessions} sessions that exceed the concurrent session limit. Sessions will be fetched and invalidated during the next cleanup job run.`
+      );
+    }
+
+    const { responses } = await this.options.elasticsearchClient.msearch({
+      index: this.aliasName,
+      searches: sessionQueries,
+      filter_path: ['responses.status', 'responses.hits.hits._id'],
+    });
+
+    const sessionValueDescriptors = responses.flatMap<SessionIndexValueDescriptor>(
+      (response, index) => {
+        if ('error' in response) {
+          this.options.logger.error(
+            `Failed to fetch sessions that exceed the concurrent session limit: ${
+              getDetailedErrorMessage(response.error) ??
+              response.error.reason ??
+              response.error.type
+            }.`
+          );
+          return [];
+        }
+
+        return response.hits?.hits?.map((hit) => ({ sid: hit._id, ...sessionGroups[index] })) ?? [];
+      }
+    );
+
+    this.options.logger.debug(
+      `Preparing to delete ${sessionValueDescriptors.length} sessions of ${sessionBuckets.length} unique users due to exceeded concurrent sessions limit.`
+    );
+
+    return sessionValueDescriptors;
+  }
+
+  /**
+   * Performs a bulk delete operation on the Kibana session index.
+   * @param deleteOperations Bulk delete operations.
+   * @returns Returns `true` if the bulk delete affected any session document.
+   */
+  private async bulkDeleteSessions(
+    deleteOperations: Array<Required<Pick<BulkOperationContainer, 'delete'>>>
+  ) {
+    if (deleteOperations.length === 0) {
+      return false;
+    }
+
+    const bulkResponse = await this.options.elasticsearchClient.bulk(
+      {
+        index: this.aliasName,
+        operations: deleteOperations,
+        refresh: false,
+        // delete operations do not respect `require_alias`, but we include it here for consistency.
+        require_alias: true,
+      },
+      { ignore: [409, 404] }
+    );
+
+    if (!bulkResponse.errors) {
+      this.options.logger.debug(
+        `Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`
+      );
+      return true;
+    }
+
+    const errorCount = bulkResponse.items.reduce(
+      (count, item) => (item.delete!.error ? count + 1 : count),
+      0
+    );
+    if (errorCount < bulkResponse.items.length) {
+      this.options.logger.warn(
+        `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
+      );
+      return true;
+    }
+
+    this.options.logger.error(
+      `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
+    );
+
+    return false;
+  }
+
+  /**
+   * Refreshes Kibana session index. This is used as a part of the session index cleanup job only and hence doesn't
+   * throw even if the operation fails.
+   */
+  private async refreshSessionIndex() {
+    try {
+      await this.options.elasticsearchClient.indices.refresh({ index: this.aliasName });
+      this.options.logger.debug(`Refreshed session index.`);
+    } catch (err) {
+      this.options.logger.error(`Failed to refresh session index: ${err.message}`);
     }
   }
 }

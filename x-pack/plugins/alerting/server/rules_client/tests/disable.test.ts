@@ -6,19 +6,22 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { InvalidatePendingApiKey } from '../../types';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { eventLoggerMock } from '../../../../event_log/server/event_logger.mock';
-import { TaskStatus } from '../../../../task_manager/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+
+jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -42,7 +45,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -57,7 +60,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   taskManager.get.mockResolvedValue({
-    id: 'task-123',
+    id: '1',
     taskType: 'alerting:123',
     scheduledAt: new Date(),
     attempts: 1,
@@ -78,7 +81,7 @@ setGlobalDate();
 
 describe('disable()', () => {
   let rulesClient: RulesClient;
-  const existingAlert = {
+  const existingRule = {
     id: '1',
     type: 'alert',
     attributes: {
@@ -86,7 +89,7 @@ describe('disable()', () => {
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       enabled: true,
-      scheduledTaskId: 'task-123',
+      scheduledTaskId: '1',
       actions: [
         {
           group: 'default',
@@ -102,11 +105,12 @@ describe('disable()', () => {
     version: '123',
     references: [],
   };
-  const existingDecryptedAlert = {
-    ...existingAlert,
+  const existingDecryptedRule = {
+    ...existingRule,
     attributes: {
-      ...existingAlert.attributes,
+      ...existingRule.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
+      apiKeyOwner: 'elastic',
     },
     version: '123',
     references: [],
@@ -114,12 +118,12 @@ describe('disable()', () => {
 
   beforeEach(() => {
     rulesClient = new RulesClient(rulesClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedRule);
   });
 
   describe('authorization', () => {
-    test('ensures user is authorised to disable this type of alert under the consumer', async () => {
+    test('ensures user is authorised to disable this type of rule under the consumer', async () => {
       await rulesClient.disable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -130,7 +134,7 @@ describe('disable()', () => {
       });
     });
 
-    test('throws when user is not authorised to disable this type of alert', async () => {
+    test('throws when user is not authorised to disable this type of rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to disable a "myType" alert for "myApp"`)
       );
@@ -187,16 +191,7 @@ describe('disable()', () => {
     });
   });
 
-  test('disables an alert', async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
+  test('disables an rule', async () => {
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -211,11 +206,11 @@ describe('disable()', () => {
         alertTypeId: 'myType',
         enabled: false,
         meta: {
-          versionApiKeyLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: null,
-        apiKey: null,
-        apiKeyOwner: null,
+        scheduledTaskId: '1',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
@@ -229,28 +224,18 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
   test('disables the rule with calling event log to "recover" the alert instances from the task state', async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
-    const scheduledTaskId = 'task-123';
+    const scheduledTaskId = '1';
     taskManager.get.mockResolvedValue({
       id: scheduledTaskId,
       taskType: 'alerting:123',
@@ -266,7 +251,6 @@ describe('disable()', () => {
             meta: {
               lastScheduledActions: {
                 group: 'default',
-                subgroup: 'newSubgroup',
                 date: new Date().toISOString(),
               },
             },
@@ -293,11 +277,11 @@ describe('disable()', () => {
         alertTypeId: 'myType',
         enabled: false,
         meta: {
-          versionApiKeyLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: null,
-        apiKey: null,
-        apiKeyOwner: null,
+        scheduledTaskId: '1',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
@@ -311,15 +295,14 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
@@ -329,9 +312,14 @@ describe('disable()', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            consumer: 'myApp',
+            rule_type_id: '123',
+          },
+        },
         alerting: {
           action_group_id: 'default',
-          action_subgroup: 'newSubgroup',
           instance_id: '1',
         },
         saved_objects: [
@@ -343,6 +331,7 @@ describe('disable()', () => {
             type_id: 'myType',
           },
         ],
+        space_ids: ['default'],
       },
       message: "instance '1' has recovered due to the rule was disabled",
       rule: {
@@ -355,15 +344,6 @@ describe('disable()', () => {
   });
 
   test('disables the rule even if unable to retrieve task manager doc to generate recovery event log events', async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     taskManager.get.mockRejectedValueOnce(new Error('Fail'));
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -379,11 +359,11 @@ describe('disable()', () => {
         alertTypeId: 'myType',
         enabled: false,
         meta: {
-          versionApiKeyLastmodified: kibanaVersion,
+          versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: null,
-        apiKey: null,
-        apiKeyOwner: null,
+        scheduledTaskId: '1',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
@@ -397,15 +377,14 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
-    expect(
-      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
-    ).toBe('123');
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
@@ -415,16 +394,6 @@ describe('disable()', () => {
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
-
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -438,12 +407,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
-        meta: {
-          versionApiKeyLastmodified: kibanaVersion,
-        },
-        scheduledTaskId: null,
-        apiKey: null,
-        apiKeyOwner: null,
+        scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
@@ -457,75 +421,41 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1']);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test(`doesn't disable already disabled alerts`, async () => {
+  test(`doesn't disable already disabled rules`, async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      ...existingDecryptedAlert,
+      ...existingDecryptedRule,
       attributes: {
-        ...existingDecryptedAlert.attributes,
+        ...existingDecryptedRule.attributes,
         actions: [],
         enabled: false,
       },
     });
 
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
-
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  test(`doesn't invalidate when no API key is used`, async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(existingAlert);
-
-    await rulesClient.disable({ id: '1' });
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
   test('swallows error when failing to load decrypted saved object', async () => {
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'api_key_pending_invalidation',
-      attributes: {
-        apiKeyId: '123',
-        createdAt: '2019-02-12T21:01:22.479Z',
-      },
-      references: [],
-    });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(taskManager.removeIfExists).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.bulkDisable).toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'disable(): Failed to load API key to invalidate on alert 1: Fail'
+      'disable(): Failed to load API key of alert 1: Fail'
     );
   });
 
@@ -535,21 +465,108 @@ describe('disable()', () => {
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
     );
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test('swallows error when invalidate API key throws', async () => {
-    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
-    await rulesClient.disable({ id: '1' });
-    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for API key [id="MTIzOmFiYw=="] for invalidation: Fail'
+  test('throws when failing to disable task', async () => {
+    taskManager.bulkDisable.mockRejectedValueOnce(new Error('Failed to disable task'));
+
+    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to disable task"`
     );
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test('throws when failing to remove task from task manager', async () => {
-    taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
+  test('removes task document if scheduled task id does not match rule id', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingRule,
+      attributes: {
+        ...existingRule.attributes,
+        scheduledTaskId: 'task-123',
+      },
+    });
+    await rulesClient.disable({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        scheduledTaskId: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        nextRun: null,
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+  });
 
+  test('throws when failing to remove existing task', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingRule,
+      attributes: {
+        ...existingRule.attributes,
+        scheduledTaskId: 'task-123',
+      },
+    });
+    taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to remove task"`
     );
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        scheduledTaskId: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        nextRun: null,
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.bulkDisable).not.toHaveBeenCalled();
   });
 });

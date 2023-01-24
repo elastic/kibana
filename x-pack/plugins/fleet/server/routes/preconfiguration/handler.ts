@@ -7,56 +7,25 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { PreconfiguredAgentPolicy } from '../../../common';
-
 import type { FleetRequestHandler } from '../../types';
-import type {
-  PutPreconfigurationSchema,
-  PostResetOnePreconfiguredAgentPoliciesSchema,
-} from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
-import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
-import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/index';
-
-export const updatePreconfigurationHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PutPreconfigurationSchema.body>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-  const spaceId = context.fleet.spaceId;
-  const { agentPolicies, packages } = request.body;
-
-  try {
-    const body = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
-      packages ?? [],
-      defaultOutput,
-      spaceId
-    );
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+import type { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
+import { defaultFleetErrorHandler } from '../../errors';
+import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/reset_agent_policies';
 
 export const resetOnePreconfigurationHandler: FleetRequestHandler<
   TypeOf<typeof PostResetOnePreconfiguredAgentPoliciesSchema.params>,
   undefined,
   undefined
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     await resetPreconfiguredAgentPolicies(soClient, esClient, request.params.agentPolicyId);
     return response.ok({});
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -65,13 +34,14 @@ export const resetPreconfigurationHandler: FleetRequestHandler<
   undefined,
   undefined
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     await resetPreconfiguredAgentPolicies(soClient, esClient);
     return response.ok({});
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

@@ -5,15 +5,29 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy } from 'lodash';
+import { isArray, isEmpty, pickBy, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiCodeBlock,
+  formatDate,
+  EuiIcon,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { useAllActions } from './use_all_actions';
+import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
+import { useAllLiveQueries } from './use_all_live_queries';
+import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useRouterNavigate, useKibana } from '../common/lib/kibana';
+import { usePacks } from '../packs/use_packs';
+
+const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
@@ -22,21 +36,40 @@ interface ActionTableResultsButtonProps {
 const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
-  return <EuiButtonIcon iconType="visTable" {...navProps} />;
+  const detailsText = i18n.translate(
+    'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
+    {
+      defaultMessage: 'Details',
+    }
+  );
+
+  return (
+    <EuiToolTip position="top" content={detailsText}>
+      <EuiButtonIcon iconType="visTable" {...navProps} aria-label={detailsText} />
+    </EuiToolTip>
+  );
 };
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
-  const { data: actionsData } = useAllActions({
+  const { data: packsData } = usePacks({});
+
+  const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
     direction: Direction.desc,
     sortField: '@timestamp',
+    filterQuery: {
+      exists: {
+        field: 'user_id',
+      },
+    },
   });
 
   const onTableChange = useCallback(({ page = {} }) => {
@@ -46,14 +79,28 @@ const ActionsTableComponent = () => {
     setPageSize(size);
   }, []);
 
-  const renderQueryColumn = useCallback(
-    (_, item) => (
+  const renderQueryColumn = useCallback((_, item) => {
+    if (item._source.pack_name) {
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="package" />
+          </EuiFlexItem>
+          <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    const query = item._source.queries[0].query;
+    const singleLine = removeMultilines(query);
+    const content = singleLine.length > 90 ? `${singleLine?.substring(0, 90)}...` : singleLine;
+
+    return (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.data.query}
+        {content}
       </EuiCodeBlock>
-    ),
-    []
-  );
+    );
+  }, []);
 
   const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
 
@@ -70,19 +117,80 @@ const ActionsTableComponent = () => {
   );
 
   const handlePlayClick = useCallback(
-    (item) =>
+    (item) => () => {
+      const packId = item._source.pack_id;
+
+      if (packId) {
+        return push('/live_queries/new', {
+          form: pickBy(
+            {
+              packId: item._source.pack_id,
+              agentSelection: {
+                agents: item._source.agent_ids,
+                allAgentsSelected: item._source.agent_all,
+                platformsSelected: item._source.agent_platforms,
+                policiesSelected: item._source.agent_policy_ids,
+              },
+            },
+            (value) => !isEmpty(value)
+          ),
+        });
+      }
+
       push('/live_queries/new', {
         form: pickBy(
           {
-            agentIds: item.fields.agents,
-            query: item._source.data.query,
-            ecs_mapping: item._source.data.ecs_mapping,
-            savedQueryId: item._source.data.saved_query_id,
+            query: item._source.queries[0].query,
+            ecs_mapping: item._source.queries[0].ecs_mapping,
+            savedQueryId: item._source.queries[0].saved_query_id,
+            agentSelection: {
+              agents: item._source.agent_ids,
+              allAgentsSelected: item._source.agent_all,
+              platformsSelected: item._source.agent_platforms,
+              policiesSelected: item._source.agent_policy_ids,
+            },
           },
           (value) => !isEmpty(value)
         ),
-      }),
+      });
+    },
     [push]
+  );
+  const renderPlayButton = useCallback(
+    (item, enabled) => {
+      const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
+        defaultMessage: 'Run query',
+      });
+
+      return (
+        <EuiToolTip position="top" content={playText}>
+          <EuiButtonIcon
+            iconType="play"
+            onClick={handlePlayClick(item)}
+            isDisabled={!enabled}
+            aria-label={playText}
+          />
+        </EuiToolTip>
+      );
+    },
+    [handlePlayClick]
+  );
+
+  const existingPackIds = useMemo(() => map(packsData?.data ?? [], 'id'), [packsData]);
+
+  const isPlayButtonAvailable = useCallback(
+    (item) => {
+      if (item.fields.pack_id?.length) {
+        return (
+          existingPackIds.includes(item.fields.pack_id[0]) &&
+          permissions.runSavedQueries &&
+          permissions.readPacks
+        );
+      }
+
+      return !!(permissions.runSavedQueries || permissions.writeLiveQueries);
+    },
+    [permissions, existingPackIds]
   );
 
   const columns = useMemo(
@@ -93,6 +201,7 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Query',
         }),
         truncateText: true,
+        width: '60%',
         render: renderQueryColumn,
       },
       {
@@ -125,9 +234,8 @@ const ActionsTableComponent = () => {
         }),
         actions: [
           {
-            type: 'icon',
-            icon: 'play',
-            onClick: handlePlayClick,
+            available: isPlayButtonAvailable,
+            render: renderPlayButton,
           },
           {
             render: renderActionsColumn,
@@ -136,10 +244,11 @@ const ActionsTableComponent = () => {
       },
     ],
     [
-      handlePlayClick,
+      isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
+      renderPlayButton,
       renderQueryColumn,
       renderTimestampColumn,
     ]
@@ -149,16 +258,15 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: actionsData?.totalCount ?? 0,
+      totalItemCount: actionsData?.data?.total ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
-    [actionsData?.totalCount, pageIndex, pageSize]
+    [actionsData, pageIndex, pageSize]
   );
 
   return (
     <EuiBasicTable
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      items={actionsData?.actions ?? []}
+      items={actionsData?.data?.items ?? EMPTY_ARRAY}
       // @ts-expect-error update types
       columns={columns}
       pagination={pagination}

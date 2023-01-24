@@ -10,15 +10,25 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
+import type {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+} from '../../../../../common/detection_engine/rule_schema';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
+import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
-import { FieldValueTimeline } from '../pick_timeline';
-import { FormSchema } from '../../../../shared_imports';
-import { ListItems } from './types';
+import type {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+} from '../../../pages/detection_engine/rules/types';
+import type { FieldValueTimeline } from '../pick_timeline';
+import type { FormSchema } from '../../../../shared_imports';
+import type { ListItems } from './types';
 import {
   buildQueryBarDescription,
   buildSeverityDescription,
@@ -31,12 +41,17 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
   buildThreatMappingDescription,
+  buildEqlOptionsDescription,
+  buildRequiredFieldsDescription,
+  buildAlertSuppressionDescription,
 } from './helpers';
-import { buildMlJobsDescription } from './ml_job_description';
+import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { THREAT_QUERY_LABEL } from './translations';
-import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
+import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import { useLicense } from '../../../../common/hooks/use_license';
+import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -62,6 +77,7 @@ export const StepRuleDescriptionComponent = <T,>({
   schema,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
+  const license = useLicense();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
   const keys = Object.keys(schema);
@@ -84,7 +100,10 @@ export const StepRuleDescriptionComponent = <T,>({
       return [...acc, buildActionsDescription(get(key, data), get([key, 'label'], schema))];
     }
 
-    return [...acc, ...buildListItems(data, pick(key, schema), filterManager, indexPatterns)];
+    return [
+      ...acc,
+      ...buildListItems(data, pick(key, schema), filterManager, license, indexPatterns),
+    ];
   }, []);
 
   if (columns === 'multi') {
@@ -125,6 +144,7 @@ export const buildListItems = <T,>(
   data: unknown,
   schema: FormSchema<T>,
   filterManager: FilterManager,
+  license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] =>
   Object.keys(schema).reduce<ListItems[]>(
@@ -135,6 +155,7 @@ export const buildListItems = <T,>(
         get([field, 'label'], schema),
         data,
         filterManager,
+        license,
         indexPatterns
       ),
     ],
@@ -151,26 +172,36 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-/* eslint complexity: ["error", 21]*/
+/* eslint complexity: ["error", 25]*/
+// eslint-disable-next-line complexity
 export const getDescriptionItem = (
   field: string,
   label: string,
   data: unknown,
   filterManager: FilterManager,
+  license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
+    const savedQueryName = get('queryBar.title', data);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
       savedId,
+      savedQueryName,
       indexPatterns,
     });
+  } else if (field === 'groupByFields') {
+    const values: string[] = get(field, data);
+    return buildAlertSuppressionDescription(label, values, license);
+  } else if (field === 'eqlOptions') {
+    const eqlOptions: EqlOptionsSelected = get(field, data);
+    return buildEqlOptionsDescription(eqlOptions);
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
@@ -183,15 +214,18 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
-    const values: string[] = get(field, data);
-    return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);
   } else if (field === 'severity') {
     const values: AboutStepSeverity = get(field, data);
     return buildSeverityDescription(values);
+  } else if (field === 'requiredFields') {
+    const requiredFields: RequiredFieldArray = get(field, data);
+    return buildRequiredFieldsDescription(label, requiredFields);
+  } else if (field === 'relatedIntegrations') {
+    const relatedIntegrations: RelatedIntegrationArray = get(field, data);
+    return buildRelatedIntegrationsDescription(label, relatedIntegrations);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
     return [
@@ -224,6 +258,15 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
+  } else if (field === 'dataViewId') {
+    return [];
+  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(label, field, values);
+  } else if (field === 'index') {
+    if (get('dataViewId', data)) {
+      return [];
+    }
   }
 
   const description: string = get(field, data);

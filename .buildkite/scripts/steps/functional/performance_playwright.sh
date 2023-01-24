@@ -4,52 +4,29 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+is_test_execution_step
+
 .buildkite/scripts/bootstrap.sh
+
+# These tests are running on static workers so we have to make sure we delete previous build of Kibana
+rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
-echo --- Run Performance Tests with Playwright config
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
+  # 'performance-data-set-extraction' uses 'n2-2-spot' agent, performance metrics don't matter
+  # and we skip warmup phase for each test
+  echo "--- Running single user journeys"
+  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --skip-warmup
+else
+  # pipeline should use bare metal static worker
+  echo "--- Running performance tests"
+  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+fi
 
-node scripts/es snapshot&
-
-esPid=$!
-
-export TEST_ES_URL=http://elastic:changeme@localhost:9200
-export TEST_ES_DISABLE_STARTUP=true
-
-sleep 120
-
-cd "$XPACK_DIR"
-
-jobId=$(npx uuid)
-export TEST_JOB_ID="$jobId"
-
-journeys=("ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
-
-for i in "${journeys[@]}"; do
-    echo "JOURNEY[${i}] is running"
-
-    export TEST_PERFORMANCE_PHASE=WARMUP
-    export ELASTIC_APM_ACTIVE=false
-    export JOURNEY_NAME="${i}"
-    
-    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
-      node scripts/functional_tests \
-      --config test/performance/config.playwright.ts \
-      --include "test/performance/tests/playwright/${i}.ts" \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
-
-    export TEST_PERFORMANCE_PHASE=TEST
-    export ELASTIC_APM_ACTIVE=true
-
-    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
-      node scripts/functional_tests \
-      --config test/performance/config.playwright.ts \
-      --include "test/performance/tests/playwright/${i}.ts" \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
-done
-
-kill "$esPid"
+echo "--- Upload journey step screenshots"
+JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
+if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
+  cd "$JOURNEY_SCREENSHOTS_DIR"
+  buildkite-agent artifact upload "**/*fullscreen*.png"
+  cd "$KIBANA_DIR"
+fi

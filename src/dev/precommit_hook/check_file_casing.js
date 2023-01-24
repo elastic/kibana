@@ -10,7 +10,7 @@ import { relative, basename } from 'path';
 
 import { dim } from 'chalk';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { matchesAnyGlob } from '../globs';
 
 import {

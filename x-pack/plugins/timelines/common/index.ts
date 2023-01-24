@@ -17,36 +17,23 @@
 export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
 export type {
-  ActionProps,
-  AlertWorkflowStatus,
   CellValueElementProps,
-  ColumnId,
-  ColumnRenderer,
-  ColumnHeaderType,
-  ColumnHeaderOptions,
-  ControlColumnProps,
   DataProvidersAnd,
   DataProvider,
-  FieldBrowserOptions,
-  GenericActionRowCellRenderProps,
-  HeaderActionProps,
-  HeaderCellRender,
   QueryOperator,
   QueryMatch,
-  RowCellRender,
   RowRenderer,
-  SetEventsDeleted,
-  SetEventsLoading,
+  TimelineType,
+  ColumnHeaderOptions,
 } from './types';
 
-export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType, TimelineId } from './types';
+export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';
 
 export type {
   BeatFields,
   BrowserField,
   BrowserFields,
   CursorType,
-  DocValueFields,
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,
@@ -81,6 +68,5 @@ export {
   EntityType,
   LastEventIndexKey,
   EMPTY_BROWSER_FIELDS,
-  EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_FIELDS,
 } from './search_strategy';

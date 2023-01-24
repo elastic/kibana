@@ -74,7 +74,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
 
   async _checkIndexPermissions() {
     return await getFileUpload().hasImportPermission({
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
       indexName: this.state.indexName,
     });

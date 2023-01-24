@@ -26,14 +26,14 @@ export function registerLicenseRoute({
       },
     },
     async (ctx, req, res) => {
-      const { client } = ctx.core.elasticsearch;
+      const { client } = (await ctx.core).elasticsearch;
       try {
         return res.ok({
           body: await putLicense({
             acknowledge: Boolean(req.query.acknowledge),
             client,
             licensing,
-            license: req.body,
+            licenses: [req.body.license as any],
           }),
         });
       } catch (error) {

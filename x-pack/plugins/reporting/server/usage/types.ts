@@ -19,12 +19,50 @@ interface DocCount {
   doc_count: number;
 }
 
-interface SizeStats {
-  sizes?: { values: SizePercentiles };
+interface SizeBuckets {
+  output_size?: { values: SizePercentiles };
 }
 
-export interface KeyCountBucket extends DocCount, SizeStats {
-  key: string;
+interface ObjectTypeBuckets {
+  objectTypes?: AggregationBuckets;
+}
+
+interface LayoutTypeBuckets {
+  layoutTypes?: AggregationBuckets;
+}
+
+interface ErrorCodeBuckets {
+  errorCodes?: AggregationBuckets;
+}
+
+interface ExecutionTimesMetrics {
+  execution_times?: ExecutionTimes;
+}
+
+interface QueueTimesMetrics {
+  queue_times?: QueueTimes;
+}
+
+/*
+ * NOTE: This list needs to be explicit in order for the telemetry schema check script to resolve the types.
+ * However, using `keyof JobTypes` is functionally the same thing
+ */
+type BaseJobTypes =
+  | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
+
+export interface KeyCountBucket
+  extends DocCount,
+    SizeBuckets,
+    ObjectTypeBuckets,
+    LayoutTypeBuckets,
+    ErrorCodeBuckets,
+    ExecutionTimesMetrics {
+  key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
 
@@ -44,14 +82,8 @@ export interface StatusByAppBucket extends DocCount {
   };
 }
 
-export interface AggregationResultBuckets extends DocCount, SizeStats {
+export interface AggregationResultBuckets extends DocCount, SizeBuckets, QueueTimesMetrics {
   jobTypes?: AggregationBuckets;
-  layoutTypes: {
-    pdf?: AggregationBuckets;
-  } & DocCount;
-  objectTypes: {
-    pdf?: AggregationBuckets;
-  } & DocCount;
   statusTypes: AggregationBuckets;
   statusByApp: {
     buckets: StatusByAppBucket[];
@@ -69,32 +101,31 @@ export interface SearchResponse {
   };
 }
 
+export interface ExecutionTimes {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+}
+
+export interface QueueTimes {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+}
+
 export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  sizes?: SizePercentiles;
-  app?: {
+  output_size: SizePercentiles;
+  execution_times?: ExecutionTimes;
+  app: {
     search?: number;
     dashboard?: number;
     visualization?: number;
     'canvas workpad'?: number;
   };
-  layout?: {
-    print?: number;
-    preserve_layout?: number;
-    canvas?: number;
-  };
 }
-
-// FIXME: find a way to get this from exportTypesHandler or common/constants
-type BaseJobTypes =
-  | 'csv_searchsource'
-  | 'csv_searchsource_immediate'
-  | 'PNG'
-  | 'PNGV2'
-  | 'printable_pdf'
-  | 'printable_pdf_v2';
 
 export interface LayoutCounts {
   canvas: number;
@@ -106,7 +137,34 @@ export type AppCounts = {
   [A in 'canvas workpad' | 'dashboard' | 'visualization' | 'search']?: number;
 };
 
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal };
+export interface JobTypes {
+  csv_searchsource: AvailableTotal & {
+    metrics: MetricsStatsCsv;
+    error_codes: ErrorCodesStatsCsv;
+  };
+  csv_searchsource_immediate: AvailableTotal & {
+    metrics: MetricsStatsCsv;
+    error_codes: ErrorCodesStatsCsv;
+  };
+  PNG: AvailableTotal & {
+    metrics: MetricsStatsPng;
+    error_codes: ErrorCodesStatsPng;
+  };
+  PNGV2: AvailableTotal & {
+    metrics: MetricsStatsPng;
+    error_codes: ErrorCodesStatsPng;
+  };
+  printable_pdf: AvailableTotal & {
+    layout: LayoutCounts;
+    metrics: MetricsStatsPdf;
+    error_codes: ErrorCodesStatsPdf;
+  };
+  printable_pdf_v2: AvailableTotal & {
+    layout: LayoutCounts;
+    metrics: MetricsStatsPdf;
+    error_codes: ErrorCodesStatsPdf;
+  };
+}
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
 
@@ -124,7 +182,62 @@ export type RangeStats = JobTypes & {
   status: StatusCounts;
   statuses?: StatusByAppCounts;
   output_size?: SizePercentiles;
+  queue_times?: QueueTimes;
 };
+
+interface MetricsStatsCsv {
+  csv_rows: MetricsPercentiles;
+}
+
+interface MetricsStatsPng {
+  png_cpu: MetricsPercentiles;
+  png_memory: MetricsPercentiles;
+}
+
+interface MetricsStatsPdf {
+  pdf_cpu: MetricsPercentiles;
+  pdf_memory: MetricsPercentiles;
+  pdf_pages: MetricsPercentiles;
+}
+
+export interface MetricsPercentiles {
+  '50.0': number | null;
+  '75.0': number | null;
+  '95.0': number | null;
+  '99.0': number | null;
+}
+
+type ErrorCodesStatsCsv = Pick<
+  ErrorCodeStats,
+  | 'authentication_expired_error'
+  | 'queue_timeout_error'
+  | 'unknown_error'
+  | 'kibana_shutting_down_error'
+>;
+type ErrorCodesStatsPng = Omit<ErrorCodeStats, 'pdf_worker_out_of_memory_error'>;
+type ErrorCodesStatsPdf = ErrorCodeStats;
+
+export interface ErrorCodeStats {
+  authentication_expired_error: number | null;
+  queue_timeout_error: number | null;
+  unknown_error: number | null;
+  invalid_layout_parameters_error: number | null;
+  pdf_worker_out_of_memory_error: number | null;
+  browser_could_not_launch_error: number | null;
+  browser_unexpectedly_closed_error: number | null;
+  browser_screenshot_error: number | null;
+  kibana_shutting_down_error: number | null;
+  visual_reporting_soft_disabled_error: number | null;
+}
+
+export interface MetricsStats {
+  csv_rows: MetricsPercentiles;
+  pdf_cpu: MetricsPercentiles;
+  pdf_memory: MetricsPercentiles;
+  pdf_pages: MetricsPercentiles;
+  png_cpu: MetricsPercentiles;
+  png_memory: MetricsPercentiles;
+}
 
 export type ReportingUsageType = RangeStats & {
   available: boolean;
@@ -133,14 +246,3 @@ export type ReportingUsageType = RangeStats & {
 };
 
 export type FeatureAvailabilityMap = Record<string, boolean>;
-
-export interface ReportingUsageSearchResponse {
-  aggregations: {
-    ranges: {
-      buckets: {
-        all: AggregationResultBuckets;
-        last7Days: AggregationResultBuckets;
-      };
-    };
-  };
-}

@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
@@ -18,32 +18,16 @@ const apmConfigSchema = schema.object({
   ),
 });
 
-const fullStoryConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-  org_id: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
-});
-
-const chatConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-  chatURL: schema.maybe(schema.string()),
-});
-
 const configSchema = schema.object({
   apm: schema.maybe(apmConfigSchema),
   base_url: schema.maybe(schema.string()),
-  chat: chatConfigSchema,
-  chatIdentitySecret: schema.maybe(schema.string()),
   cname: schema.maybe(schema.string()),
   deployment_url: schema.maybe(schema.string()),
-  full_story: fullStoryConfigSchema,
   id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
+  trial_end_date: schema.maybe(schema.string()),
+  is_elastic_staff_owned: schema.maybe(schema.boolean()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -51,13 +35,13 @@ export type CloudConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
     base_url: true,
-    chat: true,
     cname: true,
     deployment_url: true,
-    full_story: true,
     id: true,
     organization_url: true,
     profile_url: true,
+    trial_end_date: true,
+    is_elastic_staff_owned: true,
   },
   schema: configSchema,
 };

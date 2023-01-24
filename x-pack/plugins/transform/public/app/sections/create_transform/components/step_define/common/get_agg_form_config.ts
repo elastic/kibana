@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getTermsAggConfig } from './terms_agg';
+import { getPercentilesAggConfig } from './percentiles_agg';
 import {
   PivotSupportedAggs,
   PIVOT_SUPPORTED_AGGS,
@@ -12,7 +14,7 @@ import {
 
 import { PivotAggsConfigBase, PivotAggsConfigWithUiBase } from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg/config';
-import { getTopMetricsAggConfig } from './top_metrics_agg/config';
+import { getTopMetricsAggConfig } from './top_metrics_agg';
 
 /**
  * Gets form configuration for provided aggregation type.
@@ -26,6 +28,10 @@ export function getAggFormConfig(
       return getFilterAggConfig(commonConfig);
     case PIVOT_SUPPORTED_AGGS.TOP_METRICS:
       return getTopMetricsAggConfig(commonConfig);
+    case PIVOT_SUPPORTED_AGGS.PERCENTILES:
+      return getPercentilesAggConfig(commonConfig);
+    case PIVOT_SUPPORTED_AGGS.TERMS:
+      return getTermsAggConfig(commonConfig);
     default:
       return commonConfig;
   }

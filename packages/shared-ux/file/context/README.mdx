@@ -1,0 +1,22 @@
+---
+id: sharedUX/Components/FileContext
+slug: /shared-ux/components/context
+title: File component context
+description: Context for shared ux file components
+tags: ['shared-ux', 'context', 'files']
+date: 2022-11-22
+---
+
+## Description
+
+Context in which the Global Experience files components should live to access files client and more.
+
+## Example
+
+```tsx
+const client = files.filesClientFactory.asUnscoped<MyImageMetadata>()
+...
+<FilesClient client={client}>
+  <MyApp />
+</FilesClient>
+```

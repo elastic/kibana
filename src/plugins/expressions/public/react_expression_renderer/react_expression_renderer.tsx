@@ -8,8 +8,7 @@
 
 import React, { useRef } from 'react';
 import classNames from 'classnames';
-import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-theme';
+import { EuiLoadingChart, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
@@ -38,6 +37,7 @@ export function ReactExpressionRenderer({
   ...expressionRendererOptions
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
   const { error, isEmpty, isLoading } = useExpressionRenderer(nodeRef, {
     ...expressionRendererOptions,
     hasCustomErrorRenderer: !!renderError,
@@ -51,13 +51,15 @@ export function ReactExpressionRenderer({
   const expressionStyles: React.CSSProperties = {};
 
   if (padding) {
-    expressionStyles.padding = theme.paddingSizes[padding];
+    expressionStyles.padding = euiTheme.size[padding];
   }
 
   return (
     <div {...dataAttrs} className={classes}>
       {isEmpty && <EuiLoadingChart mono size="l" />}
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {isLoading && (
+        <EuiProgress size="xs" color="accent" position="absolute" style={{ zIndex: 1 }} />
+      )}
       {!isLoading && error && renderError?.(error.message, error)}
       <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef} />
     </div>

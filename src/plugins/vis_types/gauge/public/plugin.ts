@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { CoreSetup } from '../../../../core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 import { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypeGaugeSetupDependencies {
@@ -19,13 +21,14 @@ export interface VisTypeGaugeSetupDependencies {
 }
 
 /** @internal */
-export interface VisTypePiePluginStartDependencies {
+export interface VisTypeGaugePluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export class VisTypeGaugePlugin {
   public setup(
-    core: CoreSetup<VisTypePiePluginStartDependencies>,
+    core: CoreSetup<VisTypeGaugeSetupDependencies>,
     { visualizations }: VisTypeGaugeSetupDependencies
   ): VisTypeGaugePluginSetup {
     if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
@@ -37,5 +40,7 @@ export class VisTypeGaugePlugin {
     return {};
   }
 
-  public start() {}
+  public start(core: CoreStart, { dataViews }: VisTypeGaugePluginStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
 }

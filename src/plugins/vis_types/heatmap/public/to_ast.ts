@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
 import type { HeatmapVisParams } from './types';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 const DEFAULT_PERCENT_DECIMALS = 2;
 
@@ -41,6 +40,7 @@ const prepareGrid = (params: HeatmapVisParams) => {
   const gridConfig = buildExpressionFunction('heatmap_grid', {
     isCellLabelVisible: params.valueAxes?.[0].labels.show ?? false,
     isXAxisLabelVisible: true,
+    isYAxisLabelVisible: true,
     isYAxisTitleVisible: true,
     isXAxisTitleVisible: true,
   });
@@ -127,7 +127,7 @@ export const toExpressionAst: VisToExpressionAst<HeatmapVisParams> = async (vis,
   }
   visTypeHeatmap.addArgument('palette', buildExpression([palette]));
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeHeatmap]);
+  const ast = buildExpression([visTypeHeatmap]);
 
   return ast.toAst();
 };

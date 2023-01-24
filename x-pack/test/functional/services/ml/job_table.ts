@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
-
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
   URL_TYPE,
-} from '../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
+} from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
+import { MlCustomUrls } from './custom_urls';
 
 export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
 
@@ -42,10 +41,11 @@ export interface OtherUrlConfig {
 }
 
 export function MachineLearningJobTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   customUrls: MlCustomUrls
 ) {
+  const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -230,7 +230,7 @@ export function MachineLearningJobTableProvider(
     ) {
       const testSubjStr =
         tableEnvironment === 'mlAnomalyDetection'
-          ? 'mlRefreshPageButton'
+          ? 'mlDatePickerRefreshPageButton'
           : 'mlRefreshJobListButton';
 
       await this.waitForRefreshButtonLoaded(testSubjStr);
@@ -277,6 +277,15 @@ export function MachineLearningJobTableProvider(
             jobRow
           )}')`
         );
+      });
+    }
+
+    public async assertJobRowJobId(jobId: string) {
+      await retry.tryForTime(5000, async () => {
+        await this.refreshJobList();
+        const rows = await this.parseJobTable();
+        const jobRowMatch = rows.find((row) => row.id === jobId);
+        expect(jobRowMatch).to.not.eql(undefined, `Expected row with job ID ${jobId} to exist`);
       });
     }
 
@@ -358,12 +367,37 @@ export function MachineLearningJobTableProvider(
       );
     }
 
+    public async assertJobActionResetJobButtonEnabled(jobId: string, expectedValue: boolean) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonResetJob');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "reset job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
     public async assertJobActionCloneJobButtonEnabled(jobId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(jobId);
       const isEnabled = await testSubjects.isEnabled('mlActionButtonCloneJob');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "clone job" action button for AD job '${jobId}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async assertJobActionViewDatafeedCountsButtonEnabled(
+      jobId: string,
+      expectedValue: boolean
+    ) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      const isEnabled = await testSubjects.isEnabled('mlActionButtonViewDatafeedChart');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "view datafeed counts" action button for AD job '${jobId}' to be '${
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
@@ -431,6 +465,18 @@ export function MachineLearningJobTableProvider(
     public async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > mlDeleteJobConfirmModalButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickDeleteAnnotationsInDeleteJobModal(checked: boolean) {
+      await testSubjects.setEuiSwitch(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch',
+        checked ? 'check' : 'uncheck'
+      );
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch'
+      );
+
+      expect(isChecked).to.eql(checked, `Expected delete annotations switch to be ${checked}`);
     }
 
     public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
@@ -573,6 +619,7 @@ export function MachineLearningJobTableProvider(
       // click Custom URLs tab
       await testSubjects.click('mlEditJobFlyout-customUrls');
       await this.ensureEditCustomUrlTabOpen();
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async ensureEditCustomUrlTabOpen() {
@@ -602,11 +649,19 @@ export function MachineLearningJobTableProvider(
       return existingCustomUrls.length;
     }
 
-    public async saveCustomUrl(expectedLabel: string, expectedIndex: number) {
+    public async saveCustomUrl(
+      expectedLabel: string,
+      expectedIndex: number,
+      expectedValue?: string
+    ) {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('mlJobAddCustomUrl');
         await customUrls.assertCustomUrlLabel(expectedIndex, expectedLabel);
       });
+
+      if (expectedValue !== undefined) {
+        await customUrls.assertCustomUrlUrlValue(expectedIndex, expectedValue);
+      }
     }
 
     public async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
@@ -672,14 +727,16 @@ export function MachineLearningJobTableProvider(
       await this.saveEditJobFlyoutChanges();
     }
 
-    public async addDashboardCustomUrl(jobId: string, customUrl: DashboardUrlConfig) {
+    public async addDashboardCustomUrl(
+      jobId: string,
+      customUrl: DashboardUrlConfig,
+      expectedResult: { index: number; url: string }
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.closeEditJobFlyout();
         await this.openEditCustomUrlsForJobTab(jobId);
-        const existingCustomUrlCount = await this.getExistingCustomUrlCount();
-
         await this.fillInDashboardUrlForm(customUrl);
-        await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
+        await this.saveCustomUrl(customUrl.label, expectedResult.index, expectedResult.url);
       });
 
       // Save the job

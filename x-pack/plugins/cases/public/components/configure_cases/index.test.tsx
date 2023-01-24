@@ -6,18 +6,17 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { ConfigureCases } from '.';
-import { TestProviders } from '../../common/mock';
+import { noUpdateCasesPermissions, TestProviders } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
 import { useKibana } from '../../common/lib/kibana';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { useActionTypes } from '../../containers/configure/use_action_types';
 
 import {
   connectors,
@@ -27,7 +26,9 @@ import {
   useActionTypesResponse,
 } from './__mock__';
 import { ConnectorTypes } from '../../../common/api';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
@@ -35,10 +36,10 @@ jest.mock('../../containers/configure/use_configure');
 jest.mock('../../containers/configure/use_action_types');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
-const useActionTypesMock = useActionTypes as jest.Mock;
+const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 
@@ -57,14 +58,14 @@ describe('ConfigureCases', () => {
   });
 
   beforeEach(() => {
-    useActionTypesMock.mockImplementation(() => useActionTypesResponse);
+    useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
   });
 
   describe('rendering', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
-      useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
+      useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
@@ -118,7 +119,7 @@ describe('ConfigureCases', () => {
           closureType: 'close-by-user',
         },
       }));
-      useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
+      useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
@@ -164,7 +165,7 @@ describe('ConfigureCases', () => {
           closureType: 'close-by-user',
         },
       }));
-      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
@@ -188,10 +189,10 @@ describe('ConfigureCases', () => {
       expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(false);
     });
 
-    test('it disables correctly when the user cannot crud', () => {
+    test('it disables correctly when the user cannot update', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
-        wrappingComponentProps: { userCanCrud: false },
+        wrappingComponentProps: { permissions: noUpdateCasesPermissions() },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
@@ -246,9 +247,9 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      useConnectorsMock.mockImplementation(() => ({
+      useGetConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
-        loading: true,
+        isLoading: true,
       }));
 
       useGetUrlSearchMock.mockImplementation(() => searchURL);
@@ -280,12 +281,15 @@ describe('ConfigureCases', () => {
     });
 
     test('it shows isLoading when loading action types', () => {
-      useConnectorsMock.mockImplementation(() => ({
+      useGetConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
-        loading: false,
+        isLoading: false,
       }));
 
-      useActionTypesMock.mockImplementation(() => ({ ...useActionTypesResponse, loading: true }));
+      useGetActionTypesMock.mockImplementation(() => ({
+        ...useActionTypesResponse,
+        isLoading: true,
+      }));
 
       wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
@@ -309,7 +313,7 @@ describe('ConfigureCases', () => {
         persistLoading: true,
       }));
 
-      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
@@ -350,7 +354,7 @@ describe('ConfigureCases', () => {
         ...useCaseConfigureResponse,
         loading: true,
       }));
-      useConnectorsMock.mockImplementation(() => ({
+      useGetConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
       }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
@@ -395,7 +399,7 @@ describe('ConfigureCases', () => {
         },
         persistCaseConfigure,
       }));
-      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
@@ -486,7 +490,7 @@ describe('ConfigureCases', () => {
         },
         persistCaseConfigure,
       }));
-      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
@@ -533,7 +537,7 @@ describe('ConfigureCases', () => {
           closureType: 'close-by-user',
         },
       }));
-      useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+      useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useGetUrlSearchMock.mockImplementation(() => searchURL);
     });
 
@@ -550,20 +554,7 @@ describe('ConfigureCases', () => {
         expect(wrapper.find('[data-test-subj="add-connector-flyout"]').exists()).toBe(true);
         expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            actionTypes: [
-              expect.objectContaining({
-                id: '.servicenow',
-              }),
-              expect.objectContaining({
-                id: '.jira',
-              }),
-              expect.objectContaining({
-                id: '.resilient',
-              }),
-              expect.objectContaining({
-                id: '.servicenow-sir',
-              }),
-            ],
+            featureId: 'cases',
           })
         );
       });
@@ -572,9 +563,6 @@ describe('ConfigureCases', () => {
     test('it show the edit flyout when pressing the update connector button', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.resilient',
-        validateConnector: () => {
-          return Promise.resolve({});
-        },
         validateParams: () => {
           const validationResult = { errors: {} };
           return Promise.resolve(validationResult);
@@ -600,7 +588,7 @@ describe('ConfigureCases', () => {
         wrapper.update();
         expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(true);
         expect(getEditConnectorFlyoutMock).toHaveBeenCalledWith(
-          expect.objectContaining({ initialConnector: connectors[1] })
+          expect.objectContaining({ connector: connectors[1] })
         );
       });
 

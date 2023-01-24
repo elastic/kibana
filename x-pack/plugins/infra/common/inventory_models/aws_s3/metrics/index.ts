@@ -19,6 +19,18 @@ import { s3NumberOfObjects } from './snapshot/s3_number_of_objects';
 import { s3DownloadBytes } from './snapshot/s3_download_bytes';
 import { s3UploadBytes } from './snapshot/s3_upload_bytes';
 
+const awsS3SnapshotMetrics = {
+  s3BucketSize,
+  s3NumberOfObjects,
+  s3TotalRequests,
+  s3UploadBytes,
+  s3DownloadBytes,
+};
+
+export const awsS3SnapshotMetricTypes = Object.keys(awsS3SnapshotMetrics) as Array<
+  keyof typeof awsS3SnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     awsS3BucketSize,
@@ -27,13 +39,7 @@ export const metrics: InventoryMetrics = {
     awsS3DownloadBytes,
     awsS3UploadBytes,
   },
-  snapshot: {
-    s3BucketSize,
-    s3NumberOfObjects,
-    s3TotalRequests,
-    s3UploadBytes,
-    s3DownloadBytes,
-  },
+  snapshot: awsS3SnapshotMetrics,
   defaultSnapshot: 's3BucketSize',
   defaultTimeRangeInSeconds: 86400 * 7, // 7 days
 };

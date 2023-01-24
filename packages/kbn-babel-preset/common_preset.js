@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
+module.exports = (_, options = {}) => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
@@ -46,6 +46,19 @@ module.exports = {
             version: '^7.12.5',
           },
         ],
+
+        ...(options['kibana/ignoreAllPkgImports']
+          ? []
+          : [
+              [
+                require.resolve('@kbn/babel-plugin-package-imports'),
+                {
+                  ignoredPkgIds: options['kibana/ignoredPkgIds']
+                    ? new Set(options['kibana/ignoredPkgIds'])
+                    : undefined,
+                },
+              ],
+            ]),
       ],
     },
 
@@ -59,4 +72,4 @@ module.exports = {
       },
     ],
   ],
-};
+});

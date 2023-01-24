@@ -1,19 +1,24 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "target": "ES2019",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ],
   "exclude": [
-    "src/template/*"
+    "template/*",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/jest-serializers",
   ],
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '../../../common';
 
 const defaultSessionId = `${Date.now()}`;

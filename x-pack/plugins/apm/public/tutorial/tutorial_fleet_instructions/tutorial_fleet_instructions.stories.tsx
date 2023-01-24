@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React from 'react';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import TutorialFleetInstructions from '.';
 
 interface Args {

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
-import type { DatasourcePublicAPI, OperationDescriptor } from '../../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { CustomPaletteParams, layerTypes } from '../../../common';
+import type { DatasourceLayers, OperationDescriptor } from '../../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { GaugeVisualizationState } from './constants';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): GaugeVisualizationState {
   return {
     layerId: 'test-layer',
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
     labelMajorMode: 'auto',
     ticksPosition: 'auto',
     shape: 'horizontalBullet',
@@ -25,6 +26,7 @@ function exampleState(): GaugeVisualizationState {
 }
 
 const paletteService = chartPluginMock.createPaletteRegistry();
+const theme = themeServiceMock.createStartContract();
 
 describe('gauge', () => {
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -35,9 +37,9 @@ describe('gauge', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getGaugeVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
+      expect(getGaugeVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
         ticksPosition: 'auto',
@@ -46,7 +48,10 @@ describe('gauge', () => {
 
     test('returns persisted state', () => {
       expect(
-        getGaugeVisualization({ paletteService }).initialize(() => 'test-layer', exampleState())
+        getGaugeVisualization({ paletteService, theme }).initialize(
+          () => 'test-layer',
+          exampleState()
+        )
       ).toEqual(exampleState());
     });
   });
@@ -86,57 +91,77 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
-            accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
+            isMetricDimension: true,
+            accessors: [{ columnId: 'metric-accessor', triggerIconType: 'none' }],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'min-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'max-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'goal-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],
@@ -152,57 +177,77 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
+            isMetricDimension: true,
             accessors: [],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: true,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'min-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
+            isMetricDimension: true,
             accessors: [],
             filterOperations: isNumericMetric,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
+            isMetricDimension: true,
             accessors: [],
             filterOperations: isNumericMetric,
             supportsMoreColumns: true,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],
@@ -224,138 +269,77 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
-            accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
+            isMetricDimension: true,
+            accessors: [{ columnId: 'metric-accessor', triggerIconType: 'none' }],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'min-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'max-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
+            isMetricDimension: true,
             accessors: [{ columnId: 'goal-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
-            supportStaticValue: true,
-          },
-        ],
-      });
-    });
-
-    test('resolves configuration when with group error when max < minimum', () => {
-      const state: GaugeVisualizationState = {
-        ...exampleState(),
-        layerId: 'first',
-        metricAccessor: 'metric-accessor',
-        minAccessor: 'min-accessor',
-        maxAccessor: 'max-accessor',
-        goalAccessor: 'goal-accessor',
-      };
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [],
-          rows: [{ 'min-accessor': 10, 'max-accessor': 0 }],
-        },
-      };
-
-      expect(
-        getGaugeVisualization({
-          paletteService,
-        }).getConfiguration({ state, frame, layerId: 'first' })
-      ).toEqual({
-        groups: [
-          {
-            layerId: 'first',
-            groupId: GROUP_ID.METRIC,
-            groupLabel: 'Metric',
-            accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
-            filterOperations: isNumericDynamicMetric,
-            supportsMoreColumns: false,
-            required: true,
-            dataTestSubj: 'lnsGauge_metricDimensionPanel',
-            enableDimensionEditor: true,
-            supportFieldFormat: true,
-          },
-          {
-            layerId: 'first',
-            groupId: GROUP_ID.MIN,
-            groupLabel: 'Minimum value',
-            accessors: [{ columnId: 'min-accessor' }],
-            filterOperations: isNumericMetric,
-            supportsMoreColumns: false,
-            dataTestSubj: 'lnsGauge_minDimensionPanel',
-            prioritizedOperation: 'min',
-            suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
-            supportStaticValue: true,
-            invalid: true,
-            invalidMessage: 'Minimum value may not be greater than maximum value',
-          },
-          {
-            layerId: 'first',
-            groupId: GROUP_ID.MAX,
-            groupLabel: 'Maximum value',
-            accessors: [{ columnId: 'max-accessor' }],
-            filterOperations: isNumericMetric,
-            supportsMoreColumns: false,
-            dataTestSubj: 'lnsGauge_maxDimensionPanel',
-            prioritizedOperation: 'max',
-            suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
-            supportStaticValue: true,
-            invalid: true,
-            invalidMessage: 'Minimum value may not be greater than maximum value',
-          },
-          {
-            layerId: 'first',
-            groupId: GROUP_ID.GOAL,
-            groupLabel: 'Goal value',
-            accessors: [{ columnId: 'goal-accessor' }],
-            filterOperations: isNumericMetric,
-            supportsMoreColumns: false,
-            required: false,
-            dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],
@@ -373,6 +357,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).setDimension({
           prevState,
           layerId: 'first',
@@ -400,6 +385,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -415,6 +401,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -435,6 +422,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).getSupportedLayers()
       ).toHaveLength(1);
     });
@@ -448,14 +436,15 @@ describe('gauge', () => {
       };
       const instance = getGaugeVisualization({
         paletteService,
+        theme,
       });
-      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('test-layer', state)).toEqual(LayerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
   });
 
   describe('#toExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
@@ -479,6 +468,7 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
@@ -495,8 +485,6 @@ describe('gauge', () => {
               ticksPosition: ['auto'],
               labelMajorMode: ['auto'],
               labelMinor: ['Subtitle'],
-              labelMajor: [],
-              palette: [],
               shape: ['horizontalBullet'],
             },
           },
@@ -512,21 +500,13 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
+          theme,
         }).toExpression(state, datasourceLayers)
       ).toEqual(null);
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('returns undefined if no error is raised', () => {
-      const error = getGaugeVisualization({
-        paletteService,
-      }).getErrorMessages(exampleState());
-      expect(error).not.toBeDefined();
-    });
-  });
-
-  describe('#getWarningMessages', () => {
+  describe('#getUserMessages', () => {
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
@@ -545,6 +525,51 @@ describe('gauge', () => {
       maxAccessor: 'max-accessor',
       goalAccessor: 'goal-accessor',
     };
+
+    it('should report error when max < minimum', () => {
+      const localState: GaugeVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        metricAccessor: 'metric-accessor',
+        minAccessor: 'min-accessor',
+        maxAccessor: 'max-accessor',
+        goalAccessor: 'goal-accessor',
+      };
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          columns: [],
+          rows: [{ 'min-accessor': 10, 'max-accessor': 0 }],
+        },
+      };
+
+      expect(
+        getGaugeVisualization({
+          paletteService,
+          theme,
+        }).getUserMessages!(localState, { frame })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "dimensionId": "min-accessor",
+                "id": "dimensionTrigger",
+              },
+              Object {
+                "dimensionId": "max-accessor",
+                "id": "dimensionTrigger",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "",
+            "severity": "error",
+            "shortMessage": "Minimum value may not be greater than maximum value",
+          },
+        ]
+      `);
+    });
+
     it('should not warn for data in bounds', () => {
       frame.activeData = {
         first: {
@@ -564,7 +589,8 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
-        }).getWarningMessages!(state, frame)
+          theme,
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(0);
     });
     it('should warn when minimum value is greater than metric value', () => {
@@ -586,7 +612,8 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
-        }).getWarningMessages!(state, frame)
+          theme,
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
 
@@ -608,7 +635,8 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
-        }).getWarningMessages!(state, frame)
+          theme,
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
     it('should warn when goal value is greater than maximum value', () => {
@@ -630,7 +658,8 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
-        }).getWarningMessages!(state, frame)
+          theme,
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
     it('should warn when minimum value is greater than goal value', () => {
@@ -652,7 +681,8 @@ describe('gauge', () => {
       expect(
         getGaugeVisualization({
           paletteService,
-        }).getWarningMessages!(state, frame)
+          theme,
+        }).getUserMessages!(state, { frame })
       ).toHaveLength(1);
     });
   });

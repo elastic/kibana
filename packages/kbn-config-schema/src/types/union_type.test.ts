@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 test('handles string', () => {
   expect(schema.oneOf([schema.string()]).validate('test')).toBe('test');

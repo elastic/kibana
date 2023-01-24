@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { TestProviders } from '../common/mock';
+import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
 import { useApplication } from '../components/cases_context/use_application';
 
@@ -19,10 +19,13 @@ const useApplicationMock = useApplication as jest.Mock;
 describe('hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useApplicationMock.mockReturnValue({ appId: 'management', appTitle: 'Management' });
   });
 
   describe('useIsMainApplication', () => {
+    beforeEach(() => {
+      useApplicationMock.mockReturnValue({ appId: 'management', appTitle: 'Management' });
+    });
+
     it('returns true if it is the main application', () => {
       const { result } = renderHook(() => useIsMainApplication(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -33,6 +36,7 @@ describe('hooks', () => {
 
     it('returns false if it is not the main application', () => {
       useApplicationMock.mockReturnValue({ appId: 'testAppId', appTitle: 'Test app' });
+
       const { result } = renderHook(() => useIsMainApplication(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });

@@ -7,29 +7,24 @@
 
 import { memoize } from 'lodash';
 
-import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
-import { ConfigType } from './config';
-import { ruleExecutionLogForRoutesFactory } from './lib/detection_engine/rule_execution_log';
+import type { ConfigType } from './config';
+import type { IRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
-import {
+import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
 } from './plugin_contract';
-import {
+import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
-import { Immutable } from '../common/endpoint/types';
-import { EndpointAuthz } from '../common/endpoint/types/authz';
-import {
-  calculateEndpointAuthz,
-  getEndpointAuthzInitialState,
-} from '../common/endpoint/service/authz';
-import { licenseService } from './lib/license';
-import { FleetAuthz } from '../../fleet/common';
+import type { Immutable } from '../common/endpoint/types';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 
 export interface IRequestContextFactory {
   create(
@@ -43,6 +38,8 @@ interface ConstructorOptions {
   logger: Logger;
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
+  endpointAppContextService: EndpointAppContextService;
+  ruleExecutionLogService: IRuleExecutionLogService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -57,37 +54,29 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, logger, core, plugins } = options;
-    const { lists, ruleRegistry, security } = plugins;
+    const { config, core, plugins, endpointAppContextService, ruleExecutionLogService } = options;
+    const { lists, ruleRegistry, security, licensing, osquery } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    const coreContext = await context.core;
+
     appClientFactory.setup({
       getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
       config,
     });
 
+    // List of endpoint authz for the current request's user. Will be initialized the first
+    // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
-    let fleetAuthz: FleetAuthz;
-
-    // If Fleet is enabled, then get its Authz
-    if (startPlugins.fleet) {
-      fleetAuthz = context.fleet?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
-    }
 
     return {
-      core: context.core,
+      core: coreContext,
 
-      get endpointAuthz(): Immutable<EndpointAuthz> {
-        // Lazy getter of endpoint Authz. No point in defining it if it is never used.
+      getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
         if (!endpointAuthz) {
-          // If no fleet (fleet plugin is optional in the configuration), then just turn off all permissions
-          if (!startPlugins.fleet) {
-            endpointAuthz = getEndpointAuthzInitialState();
-          } else {
-            const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
-            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
-          }
+          // eslint-disable-next-line require-atomic-updates
+          endpointAuthz = await endpointAppContextService.getEndpointAuthz(request);
         }
 
         return endpointAuthz;
@@ -103,12 +92,13 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
+      getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
+
       getRuleExecutionLog: memoize(() =>
-        ruleExecutionLogForRoutesFactory(
-          context.core.savedObjects.client,
-          startPlugins.eventLog.getClient(request),
-          logger
-        )
+        ruleExecutionLogService.createClientForRoutes({
+          savedObjectsClient: coreContext.savedObjects.client,
+          eventLogClient: startPlugins.eventLog.getClient(request),
+        })
       ),
 
       getExceptionListClient: () => {
@@ -117,7 +107,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
 
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return lists.getExceptionListClient(context.core.savedObjects.client, username);
+        return lists.getExceptionListClient(coreContext.savedObjects.client, username);
+      },
+
+      getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
+
+      getQueryRuleAdditionalOptions: {
+        licensing,
+        osqueryCreateAction: osquery.osqueryCreateAction,
       },
     };
   }

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Filter, IIndexPattern } from '../../../../common';
+import { Filter, DataViewBase } from '@kbn/es-query';
 
-export function getIndexPatternFromFilter(
+export function getIndexPatternFromFilter<T extends DataViewBase = DataViewBase>(
   filter: Filter,
-  indexPatterns: IIndexPattern[]
-): IIndexPattern | undefined {
+  indexPatterns: T[]
+): T | undefined {
   return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
 }

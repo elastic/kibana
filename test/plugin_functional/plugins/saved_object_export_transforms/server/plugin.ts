@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class SavedObjectExportTransformsPlugin implements Plugin {
   public setup({ savedObjects, getStartServices }: CoreSetup, deps: {}) {
@@ -16,7 +16,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
 
     // example of a SO type that will mutates its properties
     // during the export transform
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string; enabled: boolean }>({
       name: 'test-export-transform',
       hidden: false,
       namespaceType: 'single',
@@ -46,7 +46,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
 
     // example of a SO type that will add additional objects
     // to the export during the export transform
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string }>({
       name: 'test-export-add',
       hidden: false,
       namespaceType: 'single',
@@ -74,7 +74,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
 
     // dependency of `test_export_transform_2` that will be included
     // when exporting them
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string }>({
       name: 'test-export-add-dep',
       hidden: false,
       namespaceType: 'single',
@@ -91,7 +91,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
     });
 
     // example of a SO type that will throw an object-transform-error
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string }>({
       name: 'test-export-transform-error',
       hidden: false,
       namespaceType: 'single',
@@ -111,7 +111,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
     });
 
     // example of a SO type that will throw an invalid-transform-error
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string }>({
       name: 'test-export-invalid-transform',
       hidden: false,
       namespaceType: 'single',
@@ -134,7 +134,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
     });
 
     // example of a SO type that is exportable while being hidden
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string; enabled: boolean }>({
       name: 'test-actions-export-hidden',
       hidden: true,
       namespaceType: 'single',

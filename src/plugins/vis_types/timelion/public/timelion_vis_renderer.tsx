@@ -9,18 +9,33 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { RangeFilterParams } from '@kbn/es-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
-import { VisualizationContainer } from '../../../visualizations/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaExecutionContext } from '@kbn/core/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
-import { UI_SETTINGS } from '../common/constants';
+import { getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>
   import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
 );
-const TimelionVisLegacyComponent = lazy(() => import('./legacy/timelion_vis_component'));
+
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
 
 export const getTimelionVisRenderer: (
   deps: TimelionVisDependencies
@@ -28,17 +43,13 @@ export const getTimelionVisRenderer: (
   name: 'timelion_vis',
   displayName: 'Timelion visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visParams }, handlers) => {
+  render: (domNode, { visData, visParams, syncTooltips, syncCursor }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     const seriesList = visData?.sheet[0];
     const showNoResult = !seriesList || !seriesList.list.length;
-
-    const VisComponent = deps.uiSettings.get(UI_SETTINGS.LEGACY_CHARTS_LIBRARY, false)
-      ? TimelionVisLegacyComponent
-      : LazyTimelionVisComponent;
 
     const onBrushEvent = (rangeFilterParams: RangeFilterParams) => {
       handlers.event({
@@ -58,17 +69,37 @@ export const getTimelionVisRenderer: (
       });
     };
 
+    const renderComplete = () => {
+      const usageCollection = getUsageCollection();
+      const containerType = extractContainerType(handlers.getExecutionContext());
+
+      if (usageCollection && containerType) {
+        usageCollection.reportUiCounter(
+          containerType,
+          METRIC_TYPE.COUNT,
+          `render_agg_based_timelion`
+        );
+      }
+      handlers.done();
+    };
+
     render(
-      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+      <VisualizationContainer
+        renderComplete={renderComplete}
+        handlers={handlers}
+        showNoResult={showNoResult}
+      >
         <KibanaThemeProvider theme$={deps.theme.theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             {seriesList && (
-              <VisComponent
+              <LazyTimelionVisComponent
                 interval={visParams.interval}
                 ariaLabel={visParams.ariaLabel}
                 seriesList={seriesList}
-                renderComplete={handlers.done}
+                renderComplete={renderComplete}
                 onBrushEvent={onBrushEvent}
+                syncTooltips={syncTooltips}
+                syncCursor={syncCursor}
               />
             )}
           </KibanaContextProvider>

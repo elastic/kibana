@@ -7,8 +7,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ISavedObjectsRepository } from 'kibana/server';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../../usage_collection/common/constants';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,
@@ -16,6 +16,7 @@ import {
   SAVED_OBJECTS_TOTAL_TYPE,
 } from '../saved_objects_types';
 import { serializeKey } from './utils';
+import { fetchAllSavedObjects } from '../fetch_all_saved_objects';
 
 /**
  * Moves all the daily documents into aggregated "total" documents as we don't care about any granularity after 90 days
@@ -28,16 +29,11 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
   }
 
   try {
-    const [
-      { saved_objects: rawApplicationUsageTotals },
-      { saved_objects: rawApplicationUsageDaily },
-    ] = await Promise.all([
-      savedObjectsClient.find<ApplicationUsageTotal>({
-        perPage: 10000,
+    const [rawApplicationUsageTotals, rawApplicationUsageDaily] = await Promise.all([
+      fetchAllSavedObjects<ApplicationUsageTotal>(savedObjectsClient, {
         type: SAVED_OBJECTS_TOTAL_TYPE,
       }),
-      savedObjectsClient.find<ApplicationUsageDaily>({
-        perPage: 10000,
+      fetchAllSavedObjects<ApplicationUsageDaily>(savedObjectsClient, {
         type: SAVED_OBJECTS_DAILY_TYPE,
         filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`,
       }),

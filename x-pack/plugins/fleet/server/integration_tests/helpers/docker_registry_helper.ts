@@ -5,17 +5,52 @@
  * 2.0.
  */
 
-import { spawn } from 'child_process';
 import type { ChildProcess } from 'child_process';
 
-import pRetry from 'p-retry';
-import fetch from 'node-fetch';
+import * as Rx from 'rxjs';
+import { filter, take, map, tap } from 'rxjs/operators';
+import execa from 'execa';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { observeLines } from '@kbn/stdio-dev-helpers';
+import { ToolingLog } from '@kbn/tooling-log';
+import pRetry from 'p-retry';
+
+const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
 const DOCKER_START_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const DOCKER_IMAGE = `docker.elastic.co/package-registry/distribution:lite`;
+
+function firstWithTimeout(source$: Rx.Observable<any>, errorMsg: string, ms = 30 * 1000) {
+  return Rx.race(
+    source$.pipe(take(1)),
+    Rx.timer(ms).pipe(
+      map(() => {
+        throw new Error(`[docker:${DOCKER_IMAGE}] ${errorMsg} within ${ms / 1000} seconds`);
+      })
+    )
+  );
+}
+
+function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
+  const logLine$ = new Rx.Subject<string>();
+
+  Rx.merge(
+    observeLines(childProcess.stdout!).pipe(
+      tap((line) => log.info(`[docker:${DOCKER_IMAGE}] ${line}`))
+    ), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+    observeLines(childProcess.stderr!).pipe(
+      tap((line) => log.error(`[docker:${DOCKER_IMAGE}] ${line}`))
+    ) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+  ).subscribe(logLine$);
+
+  return logLine$.asObservable();
+}
 
 export function useDockerRegistry() {
+  const logger = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
   const packageRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || '8081';
 
   if (!packageRegistryPort.match(/^[0-9]{4}/)) {
@@ -24,38 +59,42 @@ export function useDockerRegistry() {
 
   let dockerProcess: ChildProcess | undefined;
   async function startDockerRegistryServer() {
-    const dockerImage = `docker.elastic.co/package-registry/distribution@sha256:b3dfc6a11ff7dce82ba8689ea9eeb54e353c6b4bfd2d28127b20ef72fd8883e9`;
+    const args = ['run', '--rm', '-p', `${packageRegistryPort}:8080`, DOCKER_IMAGE];
 
-    const args = ['run', '--rm', '-p', `${packageRegistryPort}:8080`, dockerImage];
-
-    dockerProcess = spawn('docker', args, { stdio: 'inherit' });
+    dockerProcess = execa('docker', args, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
 
     let isExited = dockerProcess.exitCode !== null;
     dockerProcess.once('exit', () => {
       isExited = true;
     });
+    const waitForLogLine = /package manifests loaded/;
 
-    const startedAt = Date.now();
-
-    while (!isExited && Date.now() - startedAt <= DOCKER_START_TIMEOUT) {
-      try {
-        const res = await fetch(`http://localhost:${packageRegistryPort}/`);
-        if (res.status === 200) {
-          return;
-        }
-      } catch (err) {
-        // swallow errors
-      }
-
-      await delay(3000);
+    try {
+      await firstWithTimeout(
+        childProcessToLogLine(dockerProcess, logger).pipe(
+          filter((line) => {
+            process.stdout.write(line);
+            return waitForLogLine.test(line);
+          })
+        ),
+        'no package manifests loaded',
+        DOCKER_START_TIMEOUT
+      ).toPromise();
+    } catch (err) {
+      dockerProcess.kill();
+      throw err;
     }
 
     if (isExited && dockerProcess.exitCode !== 0) {
       throw new Error(`Unable to setup docker registry exit code ${dockerProcess.exitCode}`);
     }
+  }
 
-    dockerProcess.kill();
-    throw new pRetry.AbortError('Unable to setup docker registry after timeout');
+  async function pullDockerImage() {
+    logger.info(`[docker:${DOCKER_IMAGE}] pulling docker image "${DOCKER_IMAGE}"`);
+    await execa('docker', ['pull', DOCKER_IMAGE]);
   }
 
   async function cleanupDockerRegistryServer() {
@@ -65,8 +104,11 @@ export function useDockerRegistry() {
   }
 
   beforeAll(async () => {
-    const testTimeout = 5 * 60 * 1000; // 5 minutes timeout
-    jest.setTimeout(testTimeout);
+    jest.setTimeout(BEFORE_SETUP_TIMEOUT);
+    await pRetry(() => pullDockerImage(), {
+      retries: 3,
+    });
+
     await pRetry(() => startDockerRegistryServer(), {
       retries: 3,
     });

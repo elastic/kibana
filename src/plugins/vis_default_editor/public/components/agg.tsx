@@ -16,7 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, TimeRange } from 'src/plugins/data/public';
+import type { TimeRange } from '@kbn/es-query';
+import { IAggConfig } from '@kbn/data-plugin/public';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';

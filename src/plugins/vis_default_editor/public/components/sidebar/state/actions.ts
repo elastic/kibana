@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Vis, VisParams, Schema } from 'src/plugins/visualizations/public';
-import type { IAggConfig } from 'src/plugins/data/public';
+import { Vis, VisParams, Schema } from '@kbn/visualizations-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
 
 import { EditorStateActionTypes } from './constants';
 
@@ -20,7 +20,7 @@ type AggId = IAggConfig['id'];
 type AggParams = IAggConfig['params'];
 
 type AddNewAgg = ActionType<EditorStateActionTypes.ADD_NEW_AGG, { schema: Schema }>;
-type DiscardChanges = ActionType<EditorStateActionTypes.DISCARD_CHANGES, Vis>;
+type DiscardChanges = ActionType<EditorStateActionTypes.DISCARD_CHANGES, { vis: Vis }>;
 type ChangeAggType = ActionType<
   EditorStateActionTypes.CHANGE_AGG_TYPE,
   { aggId: AggId; value: IAggConfig['type'] }
@@ -90,7 +90,7 @@ const addNewAgg: EditorActions['addNewAgg'] = (schema) => ({
 
 const discardChanges: EditorActions['discardChanges'] = (vis) => ({
   type: EditorStateActionTypes.DISCARD_CHANGES,
-  payload: vis,
+  payload: { vis },
 });
 
 const changeAggType: EditorActions['changeAggType'] = (aggId, value) => ({

@@ -6,14 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
-// @ts-expect-error importing js file
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
@@ -67,18 +66,13 @@ export async function validateJob(
         const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
         const timeField = job.data_description.time_field!;
-        const timeRange = await fs.getTimeFieldRange(
+        duration = await fs.getTimeFieldRange(
           index,
           timeField,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
           job.datafeed_config.indices_options
         );
-
-        duration = {
-          start: timeRange.start.epoch,
-          end: timeRange.end.epoch,
-        };
       }
 
       validationMessages = filteredBasicValidationMessages;
@@ -91,9 +85,7 @@ export async function validateJob(
         return messages[m.id as MessageId].status === VALIDATION_STATUS.ERROR;
       });
 
-      validationMessages.push(
-        ...(await validateBucketSpan(client, job, duration, isSecurityDisabled))
-      );
+      validationMessages.push(...(await validateBucketSpan(client, job, duration)));
       validationMessages.push(...(await validateTimeRange(client, job, duration)));
 
       // only run the influencer and model memory limit checks
@@ -112,7 +104,13 @@ export async function validateJob(
       }
 
       validationMessages.push(
-        ...(await validateDatafeedPreviewWithMessages(mlClient, authHeader, job))
+        ...(await validateDatafeedPreviewWithMessages(
+          mlClient,
+          authHeader,
+          job,
+          duration?.start,
+          duration?.end
+        ))
       );
     } else {
       validationMessages = basicValidation.messages;

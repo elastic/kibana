@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 import { VerificationCode } from './verification_code';

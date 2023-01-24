@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React, { Fragment } from 'react';
 import {
   validateBaseProperties,
@@ -17,7 +17,7 @@ import {
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
-const config = { minimumScheduleInterval: '1m' };
+const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
   describe('validateBaseProperties()', () => {
     it('should validate the name', () => {
@@ -44,10 +44,25 @@ describe('rule_errors', () => {
       });
     });
 
-    it('should validate the minimumScheduleInterval', () => {
+    it('should validate the minimumScheduleInterval if enforce = false', () => {
       const rule = mockRule();
       rule.schedule.interval = '2s';
       const result = validateBaseProperties(rule, config);
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
+      });
+    });
+
+    it('should validate the minimumScheduleInterval if enforce = true', () => {
+      const rule = mockRule();
+      rule.schedule.interval = '2s';
+      const result = validateBaseProperties(rule, {
+        isUsingSecurity: true,
+        minimumScheduleInterval: { value: '1m', enforce: true },
+      });
       expect(result.errors).toStrictEqual({
         name: [],
         'schedule.interval': ['Interval must be at least 1 minute.'],
@@ -136,26 +151,25 @@ describe('rule_errors', () => {
         })),
       }));
       const result = await getRuleActionErrors(
-        mockRule({
-          actions: [
-            {
-              id: '1234',
-              actionTypeId: 'myActionType',
-              group: '',
-              params: {
-                name: 'yes',
-              },
+        [
+          {
+            id: '1234',
+            actionTypeId: 'myActionType',
+            group: '',
+            params: {
+              name: 'yes',
             },
-            {
-              id: '5678',
-              actionTypeId: 'myActionType2',
-              group: '',
-              params: {
-                name: 'yes',
-              },
+          },
+          {
+            id: '5678',
+            actionTypeId: 'myActionType2',
+            group: '',
+            params: {
+              name: 'yes',
             },
-          ],
-        }),
+          },
+        ],
+
         actionTypeRegistry
       );
       expect(result).toStrictEqual([
@@ -230,9 +244,9 @@ function mockRuleTypeModel(overloads: Partial<RuleTypeModel> = {}): RuleTypeMode
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

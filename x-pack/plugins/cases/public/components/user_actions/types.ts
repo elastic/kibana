@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
-import { SnakeToCamelCase } from '../../../common/types';
-import { ActionTypes, UserActionWithResponse } from '../../../common/api';
-import { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { AddCommentRefObject } from '../add_comment';
-import { UserActionMarkdownRefObject } from './markdown_form';
-import { CasesNavigation } from '../links';
-import { UNSUPPORTED_ACTION_TYPES } from './constants';
+import type { EuiCommentProps } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
+import type { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { AddCommentRefObject } from '../add_comment';
+import type { UserActionMarkdownRefObject } from './markdown_form';
+import type { CasesNavigation } from '../links';
+import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { CurrentUserProfile } from '../types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
   data: Case;
-  fetchUserActions: () => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
@@ -29,21 +34,23 @@ export interface UserActionTreeProps {
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
-  updateCase: (newCase: Case) => void;
   useFetchAlertData: UseFetchAlertData;
-  userCanCrud: boolean;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
 export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
 
 export interface UserActionBuilderArgs {
+  appId?: string;
   caseData: Case;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   userAction: CaseUserActions;
   caseServices: CaseServices;
   comments: Comment[];
   index: number;
-  userCanCrud: boolean;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
   >;
@@ -52,12 +59,13 @@ export interface UserActionBuilderArgs {
   loadingCommentIds: string[];
   loadingAlertData: boolean;
   alertData: Record<string, unknown>;
+  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
+  handleDeleteComment: (id: string) => void;
   handleManageQuote: (quote: string) => void;
   onShowAlertDetails: (alertId: string, index: string) => void;
-  actionsNavigation?: ActionsNavigation;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
 }

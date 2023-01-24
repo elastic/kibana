@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isMetricsTabHidden, isJVMsTabHidden } from './';
+import { isMetricsTabHidden, isInfraTabHidden } from '.';
 
 describe('APM service template', () => {
   describe('isMetricsTabHidden', () => {
@@ -14,11 +14,6 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { agentName: 'java' },
-        { agentName: 'opentelemetry/java' },
-        { agentName: 'ios/swift' },
-        { agentName: 'opentelemetry/swift' },
-        { agentName: 'ruby', runtimeName: 'jruby' },
         { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
@@ -35,6 +30,9 @@ describe('APM service template', () => {
         { agentName: 'nodejs' },
         { agentName: 'php' },
         { agentName: 'python' },
+        { agentName: 'ruby', runtimeName: 'jruby' },
+        { agentName: 'java' },
+        { agentName: 'opentelemetry/java' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeFalsy();
@@ -42,32 +40,36 @@ describe('APM service template', () => {
       });
     });
   });
-  describe('isJVMsTabHidden', () => {
-    describe('hides JVMs tab', () => {
+  describe('isInfraTabHidden', () => {
+    describe('hides infra tab', () => {
       [
         { agentName: undefined },
+        { agentName: 'js-base' },
+        { agentName: 'rum-js' },
+        { agentName: 'opentelemetry/webjs' },
+
+        { runtimeName: 'aws_lambda' },
+      ].map((input) => {
+        it(`when input ${JSON.stringify(input)}`, () => {
+          expect(isInfraTabHidden(input)).toBeTruthy();
+        });
+      });
+    });
+    describe('shows infra tab', () => {
+      [
         { agentName: 'ruby', runtimeName: 'ruby' },
+        { agentName: 'ruby', runtimeName: 'jruby' },
         { agentName: 'ruby' },
         { agentName: 'dotnet' },
         { agentName: 'go' },
         { agentName: 'nodejs' },
         { agentName: 'php' },
         { agentName: 'python' },
-        { runtimeName: 'aws_lambda' },
-      ].map((input) => {
-        it(`when input ${JSON.stringify(input)}`, () => {
-          expect(isJVMsTabHidden(input)).toBeTruthy();
-        });
-      });
-    });
-    describe('shows JVMs tab', () => {
-      [
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
-        { agentName: 'ruby', runtimeName: 'jruby' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
-          expect(isJVMsTabHidden(input)).toBeFalsy();
+          expect(isInfraTabHidden(input)).toBeFalsy();
         });
       });
     });

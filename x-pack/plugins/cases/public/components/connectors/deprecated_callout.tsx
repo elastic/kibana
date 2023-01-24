@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const DEPRECATED_CONNECTOR_WARNING_TITLE = i18n.translate(

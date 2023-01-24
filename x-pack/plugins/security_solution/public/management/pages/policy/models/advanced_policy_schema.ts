@@ -12,6 +12,7 @@ interface AdvancedPolicySchemaType {
   first_supported_version: string;
   last_supported_version?: string;
   documentation: string;
+  license?: string;
 }
 
 export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
@@ -141,6 +142,50 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A supplied value will configure logging to syslog. Allowed values are error, warning, info, debug, and trace.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_process',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_process',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record for a single process. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_event',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_event',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record in a single event. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.capture_env_vars',
+    first_supported_version: '8.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_env_vars',
+      {
+        defaultMessage:
+          'The list of environment variables to capture (up to five), separated by commas.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_event_interval_seconds',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_event_interval_seconds',
+      {
+        defaultMessage:
+          'The maximum amount of time (seconds) to batch terminal output in a single event. Default: 30',
       }
     ),
   },
@@ -870,6 +915,147 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.kernel.capture_mode',
+    first_supported_version: '8.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
+      {
+        defaultMessage:
+          'Allows users to control whether kprobes or ebpf are used to gather data. Options are kprobe, ebpf, or auto. Auto uses ebpf if possible, otherwise uses kprobe. Default: auto',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.cpu',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
+      {
+        defaultMessage:
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 100',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.cpu',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
+      {
+        defaultMessage:
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 50',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.enabled',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.enabled',
+      {
+        defaultMessage:
+          'Self-healing erases attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false',
+      }
+    ),
+    license: 'platinum',
+  },
+  {
+    key: 'linux.advanced.fanotify.ignore_unknown_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignore_unknown_filesystems',
+      {
+        defaultMessage:
+          'Whether fanotify should ignore unknown filesystems. When true, only CI tested filesystems will be marked by default; additional filesystems can be added or removed with "monitored_filesystems" and "ignored_filesystems", respectively. When false, only an internally curated list of filesystems will be ignored, all others will be marked; additional filesystems can be ignored via "ignored_filesystems". "monitored_filesystems" is ignored when "ignore_unknown_filesystems" is false. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.monitored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.monitored_filesystems',
+      {
+        defaultMessage:
+          'Additional filesystems for fanotify to monitor. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "jfs,ufs,ramfs". It is recommended to avoid network-backed filesystems. When "ignore_unknown_filesystems" is false, this option is ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option are monitored by fanotify unless overridden by entries in "ignored_filesystems" or internally known bad filesystems.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.fanotify.ignored_filesystems',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.ignored_filesystems',
+      {
+        defaultMessage:
+          'Additional filesystems for fanotify to ignore. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "ext4,tmpfs". When "ignore_unknown_filesystems" is false, parsed entries of this option supplement internally known bad filesystems to be ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option override entries in "monitored_filesystems" and internally CI tested filesystems.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.context_manipulation_detection',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.context_manipulation_detection',
+      {
+        defaultMessage:
+          'Detect injection based on thread context manipulation (e.g. `SetThreadContext`) as a part of memory protection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.image_and_process_file_timestamp',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.image_and_process_file_timestamp',
+      {
+        defaultMessage:
+          'Collect executable/dll timestamps for process and async image load events. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.host_isolation.allowed',
+    first_supported_version: '8.6.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
+      {
+        defaultMessage:
+          'A value of false disallows host isolation activity on Linux endpoints, regardless of whether host isolation is supported. Note that if a host is currently not isolated, it will refuse to isolate, and likewise, a host will refuse to release if it is currently isolated. A value of true will allow Linux endpoints to isolate if supported. Default: true',
       }
     ),
   },

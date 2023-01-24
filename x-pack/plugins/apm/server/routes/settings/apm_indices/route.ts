@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getApmIndices, getApmIndexSettings } from './get_apm_indices';
 import { saveApmIndices } from './save_apm_indices';
-import { APMConfig } from '../../../';
+import { APMConfig } from '../../..';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
@@ -25,7 +25,6 @@ const apmIndexSettingsRoute = createApmServerRoute({
         | 'span'
         | 'error'
         | 'metric'
-        | 'sourcemap'
         | 'onboarding';
       defaultValue: string;
       savedValue: string | undefined;
@@ -46,8 +45,9 @@ const apmIndicesRoute = createApmServerRoute({
     import('./../../../../../observability/common/typings').ApmIndicesConfig
   > => {
     const { context, config } = resources;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     return await getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
+      savedObjectsClient,
       config,
     });
   },
@@ -65,7 +65,6 @@ const saveApmIndicesRoute = createApmServerRoute({
   },
   params: t.type({
     body: t.partial({
-      sourcemap: t.string,
       error: t.string,
       onboarding: t.string,
       span: t.string,
@@ -76,11 +75,11 @@ const saveApmIndicesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    import('./../../../../../../../src/core/types/saved_objects').SavedObject<{}>
+    import('./../../../../../../../src/core/types').SavedObject<{}>
   > => {
     const { params, context } = resources;
     const { body } = params;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);
   },
 });

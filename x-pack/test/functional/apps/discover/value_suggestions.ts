@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'timePicker', 'settings', 'context']);
 
   async function setAutocompleteUseTimeRange(value: boolean) {
@@ -27,16 +27,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
+
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+      );
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': true,
+        'doc_table:legacy': false,
       });
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('useTimeRange enabled', () => {
@@ -68,6 +72,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.setQuery('extension.raw : ');
           await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
         });
+
+        it('also displays descriptions for operators', async () => {
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await queryBar.setQuery('extension.raw');
+          await queryBar.expectSuggestionsDescription({ count: 2 });
+        });
       });
 
       describe('context', () => {
@@ -80,13 +90,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.setDefaultAbsoluteRange();
 
           // navigate to context
-          await docTable.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-          await rowActions[0].click();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          await rowActions[1].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
           // Apply filter in context view
-          await filterBar.addFilter('geo.dest', 'is', 'US');
+          await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'US' });
         });
       });
     });

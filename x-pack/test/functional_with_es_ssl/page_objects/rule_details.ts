@@ -21,10 +21,8 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async getRuleType() {
       return await testSubjects.getVisibleText('ruleTypeLabel');
     },
-    async getActionsLabels() {
-      return {
-        connectorType: await testSubjects.getVisibleText('actionTypeLabel'),
-      };
+    async getAPIKeyOwner() {
+      return await testSubjects.getVisibleText('apiKeyOwnerLabel');
     },
     async getAlertsList() {
       const table = await find.byCssSelector(

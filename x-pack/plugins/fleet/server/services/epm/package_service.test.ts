@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-jest.mock('../../routes/security');
+jest.mock('../security');
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-} from '../../../../../../src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
 import type { InstallablePackage } from '../../types';
@@ -34,7 +31,7 @@ const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
   'fetchFindLatestPackage',
-  'getRegistryPackage',
+  'getPackage',
   'reinstallEsAssets',
 ];
 
@@ -53,6 +50,7 @@ function getTest(
     spy: jest.SpyInstance;
     spyArgs: any[];
     spyResponse: any;
+    expectedReturnValue: any;
   };
 
   switch (testKey) {
@@ -68,6 +66,7 @@ function getTest(
           },
         ],
         spyResponse: { name: 'getInstallation test' },
+        expectedReturnValue: { name: 'getInstallation test' },
       };
       break;
     case testKeys[1]:
@@ -85,6 +84,7 @@ function getTest(
           },
         ],
         spyResponse: { name: 'ensureInstalledPackage test' },
+        expectedReturnValue: { name: 'ensureInstalledPackage test' },
       };
       break;
     case testKeys[2]:
@@ -92,18 +92,23 @@ function getTest(
         method: mocks.packageClient.fetchFindLatestPackage.bind(mocks.packageClient),
         args: ['package name'],
         spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
-        spyArgs: ['package name'],
+        spyArgs: ['package name', undefined],
         spyResponse: { name: 'fetchFindLatestPackage test' },
+        expectedReturnValue: { name: 'fetchFindLatestPackage test' },
       };
       break;
     case testKeys[3]:
       test = {
-        method: mocks.packageClient.getRegistryPackage.bind(mocks.packageClient),
+        method: mocks.packageClient.getPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
-        spy: jest.spyOn(epmRegistry, 'getRegistryPackage'),
-        spyArgs: ['package name', '8.0.0'],
+        spy: jest.spyOn(epmRegistry, 'getPackage'),
+        spyArgs: ['package name', '8.0.0', undefined],
         spyResponse: {
-          packageInfo: { name: 'getRegistryPackage test' },
+          packageInfo: { name: 'getPackage test' },
+          paths: ['/some/test/path'],
+        },
+        expectedReturnValue: {
+          packageInfo: { name: 'getPackage test' },
           paths: ['/some/test/path'],
         },
       };
@@ -123,9 +128,16 @@ function getTest(
       test = {
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
-        spy: jest.spyOn(epmTransformsInstall, 'installTransform'),
+        spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
         spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
-        spyResponse: [
+        spyResponse: {
+          installedTransforms: [
+            {
+              name: 'package name',
+            },
+          ],
+        },
+        expectedReturnValue: [
           {
             name: 'package name',
           },
@@ -179,10 +191,13 @@ describe('PackageService', () => {
           soClient: mockSoClient,
           logger: mockLogger,
         };
-        const { method, args, spy, spyArgs, spyResponse } = getTest(mockClients, testKey);
+        const { method, args, spy, spyArgs, spyResponse, expectedReturnValue } = getTest(
+          mockClients,
+          testKey
+        );
         spy.mockResolvedValue(spyResponse);
 
-        await expect(method(...args)).resolves.toEqual(spyResponse);
+        await expect(method(...args)).resolves.toEqual(expectedReturnValue);
         expect(spy).toHaveBeenCalledWith(...spyArgs);
       });
     });
@@ -196,10 +211,13 @@ describe('PackageService', () => {
         soClient: mockSoClient,
         logger: mockLogger,
       };
-      const { method, args, spy, spyArgs, spyResponse } = getTest(mockClients, testKey);
+      const { method, args, spy, spyArgs, spyResponse, expectedReturnValue } = getTest(
+        mockClients,
+        testKey
+      );
       spy.mockResolvedValue(spyResponse);
 
-      await expect(method(...args)).resolves.toEqual(spyResponse);
+      await expect(method(...args)).resolves.toEqual(expectedReturnValue);
       expect(spy).toHaveBeenCalledWith(...spyArgs);
     });
   });

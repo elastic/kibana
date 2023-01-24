@@ -8,8 +8,9 @@
 // See: https://github.com/elastic/kibana/issues/117255, this creates mocks to avoid memory leaks from kibana core.
 
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects/service/lib/utils';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+
 module.exports = {
   SavedObjectsUtils,
+  SavedObjectsErrorHelpers,
 };

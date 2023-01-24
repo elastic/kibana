@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 
 type ServiceDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;
 
@@ -50,79 +50,70 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Service details when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      let body: ServiceDetails;
-      let status: number;
+  registry.when('Service details when data is generated', { config: 'basic', archives: [] }, () => {
+    let body: ServiceDetails;
+    let status: number;
 
-      before(async () => {
-        await generateData({ synthtraceEsClient, start, end });
-        const response = await callApi();
-        body = response.body;
-        status = response.status;
-      });
+    before(async () => {
+      await generateData({ synthtraceEsClient, start, end });
+      const response = await callApi();
+      body = response.body;
+      status = response.status;
+    });
 
-      after(() => synthtraceEsClient.clean());
+    after(() => synthtraceEsClient.clean());
 
-      it('returns correct HTTP status', () => {
-        expect(status).to.be(200);
-      });
+    it('returns correct HTTP status', () => {
+      expect(status).to.be(200);
+    });
 
-      it('returns correct cloud details', () => {
-        const { cloud } = dataConfig;
-        const {
-          provider,
-          availabilityZone,
-          region,
-          machineType,
-          projectName,
-          serviceName: cloudServiceName,
-        } = cloud;
+    it('returns correct cloud details', () => {
+      const { cloud } = dataConfig;
+      const {
+        provider,
+        availabilityZone,
+        region,
+        machineType,
+        projectName,
+        serviceName: cloudServiceName,
+      } = cloud;
 
-        expect(first(body?.cloud?.availabilityZones)).to.be(availabilityZone);
-        expect(first(body?.cloud?.machineTypes)).to.be(machineType);
-        expect(body?.cloud?.provider).to.be(provider);
-        expect(body?.cloud?.projectName).to.be(projectName);
-        expect(body?.cloud?.serviceName).to.be(cloudServiceName);
-        expect(first(body?.cloud?.regions)).to.be(region);
-      });
+      expect(first(body?.cloud?.availabilityZones)).to.be(availabilityZone);
+      expect(first(body?.cloud?.machineTypes)).to.be(machineType);
+      expect(body?.cloud?.provider).to.be(provider);
+      expect(body?.cloud?.projectName).to.be(projectName);
+      expect(body?.cloud?.serviceName).to.be(cloudServiceName);
+      expect(first(body?.cloud?.regions)).to.be(region);
+    });
 
-      it('returns correct container details', () => {
-        const { containerOs } = dataConfig;
+    it('returns correct container details', () => {
+      expect(body?.container?.totalNumberInstances).to.be(1);
+    });
 
-        expect(body?.container?.isContainerized).to.be(true);
-        expect(body?.container?.os).to.be(containerOs);
-        expect(body?.container?.totalNumberInstances).to.be(1);
-        expect(body?.container?.type).to.be('Kubernetes');
-      });
+    it('returns correct serverless details', () => {
+      const { cloud, serverless } = dataConfig;
+      const { serviceName: cloudServiceName } = cloud;
+      const { faasTriggerType, firstFunctionName, secondFunctionName } = serverless;
 
-      it('returns correct serverless details', () => {
-        const { cloud, serverless } = dataConfig;
-        const { serviceName: cloudServiceName } = cloud;
-        const { faasTriggerType, firstFunctionName, secondFunctionName } = serverless;
+      expect(body?.serverless?.type).to.be(cloudServiceName);
+      expect(body?.serverless?.functionNames).to.have.length(2);
+      expect(body?.serverless?.functionNames).to.contain(firstFunctionName);
+      expect(body?.serverless?.functionNames).to.contain(secondFunctionName);
+      expect(first(body?.serverless?.faasTriggerTypes)).to.be(faasTriggerType);
+    });
 
-        expect(body?.serverless?.type).to.be(cloudServiceName);
-        expect(body?.serverless?.functionNames).to.have.length(2);
-        expect(body?.serverless?.functionNames).to.contain(firstFunctionName);
-        expect(body?.serverless?.functionNames).to.contain(secondFunctionName);
-        expect(first(body?.serverless?.faasTriggerTypes)).to.be(faasTriggerType);
-      });
+    it('returns correct service details', () => {
+      const { service } = dataConfig;
+      const { version, runtime, framework, agent } = service;
+      const { name: runTimeName, version: runTimeVersion } = runtime;
+      const { name: agentName, version: agentVersion } = agent;
 
-      it('returns correct service details', () => {
-        const { service } = dataConfig;
-        const { version, runtime, framework, agent } = service;
-        const { name: runTimeName, version: runTimeVersion } = runtime;
-        const { name: agentName, version: agentVersion } = agent;
-
-        expect(body?.service?.framework).to.be(framework);
-        expect(body?.service?.agent.name).to.be(agentName);
-        expect(body?.service?.agent.version).to.be(agentVersion);
-        expect(body?.service?.runtime?.name).to.be(runTimeName);
-        expect(body?.service?.runtime?.version).to.be(runTimeVersion);
-        expect(first(body?.service?.versions)).to.be(version);
-      });
-    }
-  );
+      expect(body?.service?.framework).to.be(framework);
+      expect(body?.service?.agent.name).to.be(agentName);
+      expect(body?.service?.agent.version).to.be(agentVersion);
+      expect(body?.service?.runtime?.name).to.be(runTimeName);
+      expect(body?.service?.runtime?.version).to.be(runTimeVersion);
+      expect(first(body?.service?.versions)).to.be(version);
+    });
+  });
 }

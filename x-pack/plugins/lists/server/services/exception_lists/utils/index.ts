@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import {
   CommentsArray,
   CreateComment,
@@ -299,7 +303,7 @@ export const transformCreateCommentsToComments = ({
     comment: comment.comment,
     created_at: dateNow,
     created_by: user,
-    id: uuid.v4(),
+    id: uuidv4(),
   }));
 };
 

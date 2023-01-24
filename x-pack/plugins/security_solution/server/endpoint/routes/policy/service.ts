@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, KibanaRequest } from '../../../../../../../src/core/server';
-import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
-import { INITIAL_POLICY_ID } from './index';
-import { Agent } from '../../../../../fleet/common/types/models';
-import { EndpointAppContext } from '../../types';
-import type { ISearchRequestParams } from '../../../../../../../src/plugins/data/common';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { INITIAL_POLICY_ID } from '.';
+import type { EndpointAppContext } from '../../types';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -51,7 +51,7 @@ export async function getPolicyResponseByAgentId(
   dataClient: IScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = await dataClient.asCurrentUser.search<HostPolicyResponse>(query);
+  const response = await dataClient.asInternalUser.search<HostPolicyResponse>(query);
 
   if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
     return {
@@ -113,11 +113,9 @@ export async function agentVersionsMap(
   const result: Map<string, number> = new Map<string, number>();
   let hasMore = true;
   while (hasMore) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const queryResult = await endpointAppContext.service
-      .getAgentService()!
-      .asScoped(request)
-      .listAgents(searchOptions(page++));
+      .getInternalFleetServices()
+      .agent.listAgents(searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {

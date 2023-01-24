@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Query } from '../../../../../../src/plugins/data/public';
-import type { DataView, DataViewsContract } from '../../../../../../src/plugins/data_views/public';
+import type { Query } from '@kbn/es-query';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearchSavedObject } from '../../../common/types/kibana';
 import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
 
@@ -49,11 +49,11 @@ export async function getDataViewIdFromName(name: string): Promise<string | null
     throw new Error('Data views are not initialized!');
   }
   const dataViews = await dataViewsContract.find(name);
-  const dataView = dataViews.find(({ title }) => title === name);
+  const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
     return null;
   }
-  return dataView.id ?? dataView.title;
+  return dataView.id ?? dataView.getIndexPattern();
 }
 
 export function getDataViewById(id: string): Promise<DataView> {
@@ -116,8 +116,8 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
       const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
         title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view {dataViewName} is not based on a time series',
-          values: { dataViewName: dataView.title },
+          defaultMessage: 'The data view {dataViewIndexPattern} is not based on a time series',
+          values: { dataViewIndexPattern: dataView.getIndexPattern() },
         }),
         text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices',
@@ -131,9 +131,9 @@ export function timeBasedIndexCheck(dataView: DataView, showNotification = false
 }
 
 /**
- * Returns true if the data view name contains a :
+ * Returns true if the data view index pattern contains a :
  * which means it is cross-cluster
  */
-export function isCcsIndexPattern(dataViewName: string) {
-  return dataViewName.includes(':');
+export function isCcsIndexPattern(dataViewIndexPattern: string) {
+  return dataViewIndexPattern.includes(':');
 }

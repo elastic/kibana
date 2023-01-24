@@ -23,11 +23,14 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install_remove_kbn_assets_in_space'));
     loadTestFile(require.resolve('./install_remove_multiple'));
     loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./bulk_upgrade'));
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));
     loadTestFile(require.resolve('./package_install_complete'));
+    loadTestFile(require.resolve('./remove_legacy_templates'));
     loadTestFile(require.resolve('./install_error_rollback'));
     loadTestFile(require.resolve('./final_pipeline'));
+    loadTestFile(require.resolve('./custom_ingest_pipeline'));
   });
 }

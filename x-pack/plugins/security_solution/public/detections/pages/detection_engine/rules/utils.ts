@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import {
-  getRulesUrl,
+  getRuleDetailsTabUrl,
   getRuleDetailsUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18nRules from './translations';
-import { RouteSpyState } from '../../../../common/utils/route/types';
-import { GetUrlForApp } from '../../../../common/components/navigation/types';
+import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_UI_ID, RULES_PATH } from '../../../../../common/constants';
-import { RuleStep, RuleStepsOrder } from './types';
+import { DEFAULT_THREAT_MATCH_QUERY, RULES_PATH } from '../../../../../common/constants';
+import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
+import { DataSourceType, RuleStep } from './types';
+import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import {
+  RuleDetailTabs,
+  RULE_DETAILS_TAB_NAME,
+} from '../../../../detection_engine/rule_details_ui/pages/rule_details';
+import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.defineRule,
@@ -26,18 +33,8 @@ export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.ruleActions,
 ];
 
-const getRulesBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
-  const tabPath = pathname.split('/')[1];
-
-  if (tabPath === 'rules') {
-    return {
-      text: i18nRules.PAGE_TITLE,
-      href: getUrlForApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
-      }),
-    };
-  }
+const getRuleDetailsTabName = (tabName: string): string => {
+  return RULE_DETAILS_TAB_NAME[tabName] ?? RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts];
 };
 
 const isRuleCreatePage = (pathname: string) =>
@@ -46,27 +43,33 @@ const isRuleCreatePage = (pathname: string) =>
 const isRuleEditPage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/edit');
 
-export const getBreadcrumbs = (
+export const getTrailingBreadcrumbs = (
   params: RouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
   let breadcrumb: ChromeBreadcrumb[] = [];
-
-  const rulesBreadcrumb = getRulesBreadcrumb(params.pathName, search, getUrlForApp);
-
-  if (rulesBreadcrumb) {
-    breadcrumb = [...breadcrumb, rulesBreadcrumb];
-  }
 
   if (params.detailName && params.state?.ruleName) {
     breadcrumb = [
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: getUrlForApp(APP_UI_ID, {
+        href: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+          path: getRuleDetailsUrl(params.detailName, ''),
+        }),
+      },
+    ];
+  }
+
+  if (params.detailName && params.state?.ruleName && params.tabName) {
+    breadcrumb = [
+      ...breadcrumb,
+      {
+        text: getRuleDetailsTabName(params.tabName),
+        href: getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsTabUrl(params.detailName, params.tabName, ''),
         }),
       },
     ];
@@ -93,4 +96,100 @@ export const getBreadcrumbs = (
   }
 
   return breadcrumb;
+};
+
+export const threatDefault = [
+  {
+    framework: 'MITRE ATT&CK',
+    tactic: { id: 'none', name: 'none', reference: 'none' },
+    technique: [],
+  },
+];
+
+export const stepDefineDefaultValue: DefineStepRule = {
+  anomalyThreshold: 50,
+  index: [],
+  indexPattern: { fields: [], title: '' },
+  machineLearningJobId: [],
+  ruleType: 'query',
+  threatIndex: [],
+  queryBar: {
+    query: { query: '', language: 'kuery' },
+    filters: [],
+    saved_id: null,
+  },
+  threatQueryBar: {
+    query: { query: DEFAULT_THREAT_MATCH_QUERY, language: 'kuery' },
+    filters: [],
+    saved_id: null,
+  },
+  requiredFields: [],
+  relatedIntegrations: [],
+  threatMapping: [],
+  threshold: {
+    field: [],
+    value: '200',
+    cardinality: {
+      field: [],
+      value: '',
+    },
+  },
+  timeline: {
+    id: null,
+    title: DEFAULT_TIMELINE_TITLE,
+  },
+  eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
+  newTermsFields: [],
+  historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
+  groupByFields: [],
+};
+
+export const stepAboutDefaultValue: AboutStepRule = {
+  author: [],
+  name: '',
+  description: '',
+  isAssociatedToEndpointList: false,
+  isBuildingBlock: false,
+  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+  riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  references: [''],
+  falsePositives: [''],
+  license: '',
+  ruleNameOverride: '',
+  tags: [],
+  timestampOverride: '',
+  threat: threatDefault,
+  note: '',
+  threatIndicatorPath: undefined,
+  timestampOverrideFallbackDisabled: undefined,
+};
+
+const DEFAULT_INTERVAL = '5m';
+const DEFAULT_FROM = '1m';
+const THREAT_MATCH_INTERVAL = '1h';
+const THREAT_MATCH_FROM = '5m';
+
+export const getStepScheduleDefaultValue = (ruleType: Type | undefined): ScheduleStepRule => {
+  return {
+    interval: isThreatMatchRule(ruleType) ? THREAT_MATCH_INTERVAL : DEFAULT_INTERVAL,
+    from: isThreatMatchRule(ruleType) ? THREAT_MATCH_FROM : DEFAULT_FROM,
+  };
+};
+
+/**
+ * This default query will be used for threat query/indicator matches
+ * as the default when the user swaps to using it by changing their
+ * rule type from any rule type to the "threatMatchRule" type. Only
+ * difference is that "*:*" is used instead of '' for its query.
+ */
+const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
+  ...stepDefineDefaultValue.queryBar,
+  query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
+};
+
+export const defaultCustomQuery = {
+  forNormalRules: stepDefineDefaultValue.queryBar,
+  forThreatMatchRules: threatQueryBarDefaultValue,
 };

@@ -1,13 +1,13 @@
-[chapter]
-[role="xpack"]
 [[osquery]]
 = Osquery
 
+[partintro]
+--
 https://osquery.io[Osquery] is an open source tool that lets you query operating systems like a database, providing you with visibility into your infrastructure and operating systems.
-Using basic SQL commands, you can ask questions about devices, such as servers, 
+Using basic SQL commands, you can ask questions about devices, such as servers,
 Docker containers, and computers running Linux, macOS, or Windows.
 The https://osquery.io/schema[extensive schema] helps with a variety of use cases,
-including vulnerability detection, compliance monitoring, incident investigations, and more.  
+including vulnerability detection, compliance monitoring, incident investigations, and more.
 
 With Osquery in {kib}, you can:
 
@@ -16,7 +16,7 @@ With Osquery in {kib}, you can:
  * View a history of past queries and their results
  * Save queries and build a library of queries for specific use cases
 
-Osquery is powered by the *Osquery Manager* integration.
+Osquery in {kib} is powered by the *Osquery Manager* integration.
 For information on how to set up *Osquery Manager*, refer to <<manage-osquery-integration>>.
 
 [float]
@@ -37,75 +37,83 @@ To inspect hosts, run a query against one or more agents or policies,
 then view the results.
 
 . Open the main menu, and then click *Osquery*.
-
 . In the *Live queries* view, click **New live query**.
-
+. Choose to run a single query or a query pack.
 . Select one or more agents or groups to query. Start typing in the search field,
 and you'll get suggestions for agents by name, ID, platform, and policy.
-
-. Enter a query or select a query from your saved queries.
+. Specify the query or pack to run:
+** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query. Mapping ECS fields is optional.
+** *Pack*: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.
++
+TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
 [role="screenshot"]
 image::images/enter-query.png[Select saved query dropdown name showing query name and description]
 
-. (Optional) Expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query.
+. Click **Submit**. Queries will timeout after 5 minutes if there are no responses.
++
+TIP: To save a single query for future use, click *Save for later* and define the ID, description, and other <<osquery-manage-query,details>>.
 
-. Click **Submit**.
+. Review the results and do any of the following:
 
-. Review the results in a table, or navigate to *Discover* to dive deeper into the response,
-or to the drag-and-drop *Lens* editor to create visualizations.
+** Click *View in Discover* (image:images/discover-button-osquery.png[View in Discover icon,20,20]) to explore the results in *Discover*.
+** Click *View in Lens* (image:images/lens-button-osquery.png[View in Lens icon,20,20]) to navigate to *Lens*, where you can use the drag-and-drop *Lens* editor to create visualizations.
+** Click *Add to Case* (image:images/case-button-osquery.png[Add to Case icon,20,20]) to add the query results to a new or existing case. 
+** Click the view details icon (image:images/view-osquery-details.png[View details icon,20,20]) to examine the query ID and statement.  
+
 . To view more information about the request, such as failures, open the *Status* tab.
-. To save the query for future use, click *Save for later* and define the ID,
-description, and other <<osquery-manage-query,details>>. 
 
 [float]
 [[osquery-view-history]]
-===  View or rerun previous live queries
+== View or rerun previous live queries
 
-From the *Live queries history* section on the *Live queries* tab:
+The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days. From the Live queries table, you can:
 
-* Click image:images/play-icon.png[Right-pointing triangle] to replay a query.
+* Click the run icon (image:images/play-icon.png[Right-pointing triangle]) to rerun a single query or a query pack.
 
-* Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
+* Click the table icon (image:images/table-icon.png[Table icon]) to examine the <<osquery-results,results>> for a single query or a query pack. From the results table, you can also find the query <<osquery-status,status>>.
 +
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]
-
 
 [float]
 [[osquery-schedule-query]]
 == Schedule queries with packs
 
-Create packs to organize sets of queries. For example, you might create one pack that checks
-for IT compliance-type issues, and another pack that monitors for evidence of malware. 
-You can schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies. Scheduling packs is optional. 
+A pack is a set of grouped queries that perform similar functions or address common use cases. <<osquery-prebuilt-packs, Prebuilt Elastic packs>> are available to download and can help you get started using the Osquery integration.
 
-. Open the **Packs** tab.
+You can also create a custom pack with one or more queries. For example, when creating custom packs, you might create one pack that checks for IT compliance-type issues, and another pack that monitors for evidence of malware.
 
+You can run packs as live queries or schedule packs to run for one or more agent policies. When scheduled, queries in the pack are run at the set intervals for all agents in those policies.
+
+. Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
+. Provide a name for the pack. The short description is optional. 
+. Schedule the pack to be deployed on specified agent policies (*Policy*) or on all agent policies (*Global*).
++
+TIP: Pack deployment details are stored within the <<osquery-custom-config,Osquery configuration>>. The `shard` field value is the percentage of agents in the policy using the pack.  
++
+If you choose the *Policy* option, configure these fields: 
++
+NOTE: When defining pack deployment details, you cannot configure the same policy multiple times. In other words, after specifying a policy, you can either choose to deploy the pack to all of the policy's agents or only a subset. You cannot choose both.
 
-. Provide the following fields:
+** *Scheduled {agent} policies (optional)*: Allows you to deploy the pack to specific agent policies. By default, the pack is deployed to all {agents} that are registered to the policies you define.  
+** *Partial deployment (shards)*: Allows you to deploy the pack to a portion of the agents on each specified agent policy. After defining a policy, use the *Shard* slider to set the amount of agents to which the pack is deployed. For example, after specifying a policy, you can choose to deploy the pack to half of the policy's agents by selecting 50% on the slider.
 
-* The name of the pack.
+. If you're creating a new pack, add queries to schedule:
 
-* A short description of the pack.
-
-* The agent policies where this pack should run. If no agent policies are set, then the pack is not scheduled.
-
-. Add queries to schedule:
-
-* To add a query to the pack, click *Add query*, and then either add a saved query or enter a new query.
-Each query must include a unique query ID and the interval at which it should run. 
+ ** Click *Add query* and then add a saved query or enter a new query.
+Each query must include a unique query ID and the interval at which it should run.
 Optionally, set the minimum Osquery version and platform,
 or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
 
-* To upload queries from a `.conf` query pack, drag the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
+** Upload queries from a `.conf` query pack by dragging the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
 
 . Click *Save pack*. The queries run when the policy receives the update.
 
 [float]
 [[osquery-schedule-status]]
-=== View status of scheduled packs
+== View status of scheduled packs
 
 . Open the **Packs** tab.
 
@@ -126,22 +134,20 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 You can save queries in two ways:
 
 * After running a live query, click the *Save for later* link.
-* From the *Saved queries* tab, click the **Add saved query** button.
+* From the *Saved queries* tab, click **Add saved query**.
 
-Once you save a query, you can only edit it from the *Saved queries* tab.
-
-To add or edit saved queries from the *Saved queries* tab:
+Once you save a query, you can only edit it from the *Saved queries* tab:
 
 . Go to *Saved queries*, and then click **Add saved query** or the edit icon.
 . Provide the following fields:
 
-* The unique identifier.
+* The unique identifier (required).
 
 * A brief description.
 
-* The SQL query.
+* The SQL query (required). Osquery supports multi-line queries.
 
-* The <<osquery-map-fields,ECS fields>> to populate when the query is run. These fields are also copied in when you add this query to a pack.
+* The <<osquery-map-fields,ECS fields>> to populate when the query is run (optional). These fields are also copied in when you add this query to a pack.
 
 * The defaults to set when you add the query to a pack.
 
@@ -151,11 +157,77 @@ To add or edit saved queries from the *Saved queries* tab:
 
 ** The operating system required to run the query. For information about supported platforms per table, refer to the https://osquery.io/schema[Osquery schema].
 
-. Click *Test configuration* to test the query and any mapped fields: 
+. Click *Test configuration* to test the query and any mapped fields:
 
 * From the *Test query* panel, select agents or groups to test the query, then click *Submit* to run a live query. Result columns with the image:images/mapped-icon.png[mapping] icon are mapped. Hover over the icon to see the mapped ECS field.
 
-. Click *Save* or *Update*. 
+. Click *Save* or *Update*.
+
+[float]
+[[osquery-prebuilt-packs-queries]]
+== Prebuilt Elastic packs and queries
+The prebuilt Osquery packs are included with the integration. Once you add a pack, you can activate and schedule it.
+
+[float]
+[[osquery-prebuilt-packs]]
+=== Prebuilt packs
+The prebuilt Osquery packs are included with the integration and can be optionally loaded.
+Once added, you can then activate and schedule the packs.
+
+You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
+
+For information about the prebuilt packs that are available, refer to <<prebuilt-packs>>.
+
+[float]
+[[load-prebuilt-packs]]
+==== Load and activate prebuilt Elastic packs
+
+Follow these steps to load and turn on new or updated prebuilt packs:
+
+. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
+. For each pack that you want to activate and schedule:
+
+* Turn on the *Active* toggle to ensure the pack runs continuously.
++
+NOTE: You must manually run inactive packs.
+
+* Click the pack name, then *Edit*.
+
+* Update the *Scheduled agent policies* to specify the policies where this pack should run.
+
+. Click *Update pack*.
+
+[float]
+[[copy-prebuilt-packs]]
+==== Copy prebuilt Elastic packs
+
+To modify queries in prebuilt packs, you must first make a copy of the pack.
+
+. Go to *Stack Management* -> *Saved Objects*.
+
+. Search for the Osquery packs you want to modify by name.
+
+. Select the checkboxes of the packs to export.
+
+. Click *Export x objects*.
+
+. Click *Import*.
+
+. Select the import option *Create new objects with random IDs*, then click *Import* to import the pack. This creates a copy of the pack that you can edit.
+
+[float]
+[[osquery-prebuilt-queries]]
+=== Prebuilt queries
+A set of saved queries are included with the integration and available to run as a live query.
+Note the following about the prebuilt queries:
+
+* The queries are not editable.
+
+* Several of the queries include default ECS mappings to standardize the results.
+
+* The prebuilt Elastic queries all follow the same naming convention and identify
+what type of information is being queried, what operating system it supports if it's limited to one or more,
+and that these are Elastic queries. For example, `firewall_rules_windows_elastic`.
 
 [float]
 [[osquery-map-fields]]
@@ -166,7 +238,7 @@ the {ecs-ref}/ecs-reference.html[Elastic Common Schema] (ECS).
 This standardizes your Osquery data for use across detections, machine learning,
 and any other areas that rely on ECS-compliant data.
 When the query is run, the results include the original `osquery.<fields>`
-and the mapped ECS fields. For example, if you update a query to map `osquery.name` to `user.name`, the query results include both fields. 
+and the mapped ECS fields. For example, if you update a query to map `osquery.name` to `user.name`, the query results include both fields.
 
 . Edit saved queries or queries in a pack to map fields:
 
@@ -174,13 +246,13 @@ and the mapped ECS fields. For example, if you update a query to map `osquery.na
 
 * For *packs*: Open the *Packs* tab, edit a pack, and then click the edit icon for the query that you want to map.
 
-. In the **ECS mapping** section, select an **ECS field** to map. 
+. In the **ECS mapping** section, select an **ECS field** to map.
 
-. In the **Value** column, use the dropdown on the left to choose what type of value to map to the ECS field: 
+. In the **Value** column, use the dropdown on the left to choose what type of value to map to the ECS field:
 
 ** **Osquery value**: Select an Osquery field. The fields available are based on the SQL query entered, and only include fields that the query returns. When the query runs, the ECS field is set dynamically to the value of the Osquery field selected.
 
-** **Static value**: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply `tags` or your preferred `event.category` to the query results. 
+** **Static value**: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply `tags` or your preferred `event.category` to the query results.
 
 . Map more fields, as needed. To remove any mapped rows, click the delete icon.
 
@@ -191,10 +263,10 @@ and the mapped ECS fields. For example, if you update a query to map `osquery.na
 
 * Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
 
-* Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields. 
+* Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields.
 
-* Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you might need to use SQL operators in the query to get an {es}-compatible 
-{ref}/date.html[date] type. 
+* Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you might need to use SQL operators in the query to get an {es}-compatible
+{ref}/date.html[date] type.
 =========================
 
 
@@ -211,7 +283,7 @@ In addition to the Osquery schema, the Elastic-provided version of Osquery also 
 
 When querying these tables, the expectation is that the `/etc/passwd`, `/etc/group`, and `/proc` are available in the container under `/hostfs` as:
 `/hostfs/etc/passwd`, `/hostfs/etc/group`, and `/hostfs/proc`. For information about the fields available in these tables, see the
-https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields] reference. 
+https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields] reference.
 
 [float]
 [[osquery-status]]
@@ -228,15 +300,14 @@ A query can have the following status:
 |===
 
 NOTE: If an agent is offline, the request status remains **pending** as {kib} retries the request.
-By default, a query request times out after five minutes. The time out applies to the time it takes
-to deliver the action request to an agent to run a query. If the action completes after the timeout period,
-the results are still returned.
+By default, a query request times out after one minute. An action timeout error is returned when
+the query does not complete within that interval.
 
 
 [float]
 [[osquery-results]]
 == Osquery results
-When you run live or scheduled queries, the results are automatically 
+When you run live or scheduled queries, the results are automatically
 stored in an {es} index, so that you can search, analyze, and visualize this data in {kib}.
 For a list of the Osquery fields that can be returned in query results,
 refer to https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields].
@@ -253,120 +324,18 @@ Osquery responses include the following information:
 * For scheduled queries in a pack, the `action_id` has the format `pack_<pack-name>_<query-ID>`. You can use this information to look up the query that was run.
 
 * By default, all query results are https://osquery.readthedocs.io/en/stable/deployment/logging/#snapshot-logs[snapshot logs]
-that represent a point in time with a set of results, with no 
+that represent a point in time with a set of results, with no
 https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[differentials].
 
-* Osquery data is stored in the `logs-osquery_manager.result-<namespace>` datastream, and the result row data is under the `osquery` property in the document. 
+* Osquery data is stored in the `logs-osquery_manager.result-<namespace>` datastream, and the result row data is under the `osquery` property in the document.
 
-[float]
-[[manage-osquery-integration]]
-== Manage the integration
 
-[float]
-=== System requirements
+--
 
-* {fleet-guide}/fleet-overview.html[Fleet] is enabled on your cluster, and
-one or more {fleet-guide}/elastic-agent-installation.html[Elastic Agents] is enrolled.
-* The https://docs.elastic.co/en/integrations/osquery_manager[*Osquery Manager*] integration
-has been added and configured
-for an agent policy through Fleet.
-This integration supports x64 architecture on Windows, MacOS, and Linux platforms, 
-and ARM64 architecture on Linux.
+include::manage-integration.asciidoc[]
 
-[NOTE]
-=========================
+include::exported-fields-reference.asciidoc[]
 
-* The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
-and the https://docs.elastic.co/en/integrations/osquery[Osquery]
-integration collect logs from self-managed Osquery deployments.
-The *Osquery Manager* integration manages Osquery deployments
-and supports running and scheduling queries from {kib}.
+include::prebuilt-packs.asciidoc[]
 
-* *Osquery Manager* cannot be integrated with an Elastic Agent in standalone mode.
-=========================
-
-[float]
-=== Customize Osquery sub-feature privileges
-
-Depending on your https://www.elastic.co/subscriptions[subscription level],
-you can further customize the sub-feature privileges
-for *Osquery Manager*. These include options to grant specific access for running live queries,
-running saved queries, saving queries, and scheduling packs. For example,
-you can create roles for users who can only run live or saved queries, but who cannot save or schedule queries.
-This is useful for teams who need in-depth and detailed control.
-
-[float]
-=== Customize Osquery configuration
-experimental[] By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
-you want to adjust. The custom configuration is then applied to all agents in the policy. 
-This powerful feature allows you to configure
-https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring[File Integrity Monitoring], https://osquery.readthedocs.io/en/stable/deployment/process-auditing[Process auditing], 
-and https://osquery.readthedocs.io/en/stable/deployment/configuration/#configuration-specification[others].
-
-[IMPORTANT]
-=========================
-
-* Take caution when editing this configuration. The changes you make are distributed to all agents in the policy.
-
-* Take caution when editing `packs` using the Advanced *Osquery config* field. 
-Any changes you make to `packs` from this field are not reflected in the UI on the Osquery *Packs* page in {kib}, however, these changes are deployed to agents in the policy. 
-While this allows you to use advanced Osquery functionality like pack discovery queries, you do lose the ability to manage packs defined this way from the Osquery *Packs* page.
-=========================
-
-. From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
-
-. Click the name of the agent policy where you want to adjust the Osquery configuration. The configuration changes you make only apply to the policy you select.
-
-. Click the name of the *Osquery Manager* integration, or add the integration first if the agent policy does not yet have it.
-
-. From the *Edit Osquery Manager integration* page, expand the *Advanced* section.
-
-. Edit the *Osquery config* JSON field to apply your preferred Osquery configuration. Note the following:
-
-* The field may already have content if you have scheduled packs for this agent policy. To keep these packs scheduled, do not remove the `packs` section.
-
-* Refer to the https://osquery.readthedocs.io/en/stable/[Osquery documentation] for configuration options. 
-
-* Some fields are protected and cannot be set. A warning is displayed with details about which fields should be removed.
-
-* (Optional) To load a full configuration file, drag and drop an Osquery `.conf` file into the area at the bottom of the page.
-
-. Click *Save integration* to apply the custom configuration to all agents in the policy.
-+
-As an example, the following configuration disables two tables.
-+
-```ts
-{
-   "options":{
-      "disable_tables":"curl,process_envs"
-   }
-}
-```
-
-[float]
-=== Upgrade Osquery versions
-
-The https://github.com/osquery/osquery/releases[Osquery version] available on an Elastic Agent
-is associated to the version of Osquery Beat on the Agent.
-To get the latest version of Osquery Beat,
-https://www.elastic.co/guide/en/fleet/master/upgrade-elastic-agent.html[upgrade your Elastic Agent].
-
-[float]
-=== Debug issues
-If you encounter issues with *Osquery Manager*, find the relevant logs for {elastic-agent}
-and Osquerybeat in the agent directory. Refer to the {fleet-guide}/installation-layout.html[Fleet Installation layout] to find the log file location for your OS.
-
-```ts
-../data/elastic-agent-*/logs/elastic-agent-json.log-*
-../data/elastic-agent-*/logs/default/osquerybeat-json.log
-```
-
-To get more details in the logs, change the agent logging level to debug:
-
-. Open the main menu, and then select **Fleet**.
-
-. Select the agent that you want to debug.
-
-. On the **Logs** tab, change the **Agent logging level** to **debug**, and then click **Apply changes**.
-+
-`agent.logging.level` is updated in `fleet.yml`, and the logging level is changed to `debug`.
+include::osquery-faq.asciidoc[]

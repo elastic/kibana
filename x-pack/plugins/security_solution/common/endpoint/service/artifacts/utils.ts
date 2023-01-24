@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';
 
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;
@@ -43,7 +43,7 @@ export const createExceptionListItemForCreate = (listId: string): CreateExceptio
     item_id: undefined,
     list_id: listId,
     meta: {
-      temporaryUuid: uuid.v4(),
+      temporaryUuid: uuidv4(),
     },
     name: '',
     namespace_type: 'agnostic',

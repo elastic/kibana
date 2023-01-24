@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Influencer } from '../../../../../ml/public';
-import { FlowTarget } from '../../../../common/search_strategy';
+import type { Influencer } from '@kbn/ml-plugin/public';
+import type { FlowTarget } from '../../../../common/search_strategy';
 
-import { HostsType } from '../../../hosts/store/model';
-import { NetworkType } from '../../../network/store/model';
-import { UsersType } from '../../../users/store/model';
+import type { HostsType } from '../../../explore/hosts/store/model';
+import type { NetworkType } from '../../../explore/network/store/model';
+import type { UsersType } from '../../../explore/users/store/model';
 
 export interface Source {
   job_id: string;
@@ -65,6 +65,7 @@ export type NarrowDateRange = (score: Anomaly, interval: string) => void;
 
 export interface AnomaliesBy {
   anomaly: Anomaly;
+  jobName: string | undefined;
 }
 
 export interface AnomaliesByHost extends AnomaliesBy {

@@ -8,8 +8,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
@@ -19,7 +19,7 @@ const Container = styled.div`
 
 // when displaying chart in modal the tooltip is render under the modal
 const LensChartTooltipFix = createGlobalStyle`
-  div.euiOverlayMask.euiOverlayMask--aboveHeader ~ [id^='echTooltipPortal'] {
+  div.euiOverlayMask[data-relative-to-header=above] ~ [id^='echTooltipPortal'] {
     z-index: ${({ theme }) => theme.eui.euiZLevel7} !important;
   }
 `;
@@ -50,6 +50,9 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
         attributes={attributes}
         renderMode="view"
         disableTriggers
+        executionContext={{
+          type: 'cases',
+        }}
       />
       <LensChartTooltipFix />
     </Container>

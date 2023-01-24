@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// setup ts/pkg support in this webpack process
+require('@kbn/babel-register').install();
+
 const Path = require('path');
 
 const webpack = require('webpack');
@@ -26,7 +29,7 @@ module.exports = {
   externals: {
     module: 'module',
   },
-  mode: 'production',
+  mode: process.env.NODE_ENV || 'development',
   entry: {
     'kbn-ui-shared-deps-src': './src/entry.js',
   },
@@ -57,6 +60,10 @@ module.exports = {
         ],
       },
       {
+        test: /\.peggy$/,
+        use: [require.resolve('@kbn/peggy-loader')],
+      },
+      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
@@ -67,11 +74,21 @@ module.exports = {
           limit: 8192,
         },
       },
+      {
+        test: /\.(js|tsx?)$/,
+        exclude: /[\/\\]node_modules[\/\\](?!@kbn)([^\/\\]+)[\/\\]/,
+        loader: 'babel-loader',
+        options: {
+          babelrc: false,
+          envName: process.env.NODE_ENV || 'development',
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        },
+      },
     ],
   },
 
   resolve: {
-    extensions: ['.js', '.ts'],
+    extensions: ['.js', '.ts', '.tsx'],
     symlinks: false,
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
@@ -102,7 +119,7 @@ module.exports = {
 
     new webpack.DllReferencePlugin({
       context: REPO_ROOT,
-      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line
+      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
   ],
 };

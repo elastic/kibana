@@ -10,14 +10,14 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { useCallback, useMemo, useState, useEffect, useContext } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SimpleSavedObject, SavedObjectAttributes } from 'kibana/public';
+import { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import { useUrlState } from '../../utils/use_url_state';
 import { useFindSavedObject } from '../../hooks/use_find_saved_object';
 import { useCreateSavedObject } from '../../hooks/use_create_saved_object';
 import { useDeleteSavedObject } from '../../hooks/use_delete_saved_object';
-import { Source } from '../metrics_source';
+import { useSourceContext } from '../metrics_source';
 import { metricsExplorerViewSavedObjectName } from '../../../common/saved_objects/metrics_explorer_view';
 import { inventoryViewSavedObjectName } from '../../../common/saved_objects/inventory_view';
 import { useSourceConfigurationFormState } from '../../pages/metrics/settings/source_configuration_form_state';
@@ -59,7 +59,7 @@ export const useSavedView = (props: Props) => {
     sourceExists,
     createSourceConfiguration,
     updateSourceConfiguration,
-  } = useContext(Source.Context);
+  } = useSourceContext();
   const { viewType, defaultViewState } = props;
   type ViewState = typeof defaultViewState;
   const {

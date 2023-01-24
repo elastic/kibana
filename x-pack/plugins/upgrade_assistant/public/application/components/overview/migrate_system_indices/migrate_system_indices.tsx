@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
@@ -54,7 +54,7 @@ const i18nTexts = {
     return (
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.systemIndices.body"
-        defaultMessage="Prepare the system indices that store internal information for the upgrade. Any {hiddenIndicesLink} that need to be reindexed are shown in the next step."
+        defaultMessage="Prepare the system indices that store internal information for the upgrade. This is only required during major version upgrades. Any {hiddenIndicesLink} that need to be reindexed are shown in the next step."
         values={{
           hiddenIndicesLink: (
             <EuiLink external target="_blank" href={docLink}>
@@ -83,7 +83,7 @@ const i18nTexts = {
   noMigrationNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.noMigrationNeeded',
     {
-      defaultMessage: 'Migration complete',
+      defaultMessage: 'System indices migration not needed.',
     }
   ),
   viewSystemIndicesStatus: i18n.translate(
@@ -237,6 +237,7 @@ interface CustomProps {
 
 export const getMigrateSystemIndicesStep = ({
   isComplete,
+
   setIsComplete,
   docLinks,
 }: OverviewStepProps & CustomProps): EuiStepProps => {

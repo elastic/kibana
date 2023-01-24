@@ -32,16 +32,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UiSettingsType, DocLinksStart, ToastsStart } from '@kbn/core/public';
 import { FieldCodeEditor } from './field_code_editor';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
-import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;
   handleChange: (name: string, value: FieldState) => void;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   clearChange?: (name: string) => void;
   unsavedChanges?: FieldState;
@@ -100,7 +100,7 @@ export class Field extends PureComponent<FieldProps> {
     if (type === 'image') {
       this.cancelChangeImage();
       return this.handleChange({
-        value: getEditableValue(type, defVal),
+        value: getEditableValue(type, defVal, defVal),
         changeImage: true,
       });
     }
@@ -156,7 +156,7 @@ export class Field extends PureComponent<FieldProps> {
     this.onFieldChange(e.target.value);
 
   onFieldChange = (targetValue: any) => {
-    const { type, value, defVal } = this.props.setting;
+    const { type, value, defVal, options } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
@@ -169,6 +169,13 @@ export class Field extends PureComponent<FieldProps> {
         break;
       case 'number':
         newUnsavedValue = Number(targetValue);
+        break;
+      case 'select':
+        if (typeof options?.[0] === 'number') {
+          newUnsavedValue = Number(targetValue);
+        } else {
+          newUnsavedValue = targetValue;
+        }
         break;
       default:
         newUnsavedValue = targetValue;
@@ -459,7 +466,7 @@ export class Field extends PureComponent<FieldProps> {
     let deprecation;
 
     if (setting.deprecation) {
-      const links = this.props.dockLinks;
+      const links = this.props.docLinks;
 
       deprecation = (
         <>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 /**
  * Returns forced **Partial** IndexPattern for use in tests

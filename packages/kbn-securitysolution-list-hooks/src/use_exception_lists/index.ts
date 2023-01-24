@@ -11,6 +11,7 @@ import type {
   ExceptionListSchema,
   UseExceptionListsProps,
   Pagination,
+  Sort,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionLists } from '@kbn/securitysolution-list-api';
 
@@ -22,13 +23,20 @@ export type ReturnExceptionLists = [
   exceptionLists: ExceptionListSchema[],
   pagination: Pagination,
   setPagination: React.Dispatch<React.SetStateAction<Pagination>>,
-  fetchLists: Func | null
+  fetchLists: Func | null,
+  sort: Sort,
+  setSort: React.Dispatch<React.SetStateAction<Sort>>
 ];
 
 const DEFAULT_PAGINATION = {
   page: 1,
   perPage: 20,
   total: 0,
+};
+
+const DEFAULT_SORT = {
+  field: 'created_at',
+  order: 'desc',
 };
 
 /**
@@ -39,9 +47,7 @@ const DEFAULT_PAGINATION = {
  * @param filterOptions filter by certain fields
  * @param namespaceTypes spaces to be searched
  * @param notifications kibana service for displaying toasters
- * @param showTrustedApps boolean - include/exclude trusted app lists
- * @param showEventFilters boolean - include/exclude event filters lists
- * @param showHostIsolationExceptions boolean - include/exclude host isolation exceptions lists
+ * @param hideLists a list of listIds we don't want to query
  * @param initialPagination
  *
  */
@@ -52,12 +58,12 @@ export const useExceptionLists = ({
   filterOptions = {},
   namespaceTypes,
   notifications,
-  showTrustedApps = false,
-  showEventFilters = false,
-  showHostIsolationExceptions = false,
+  hideLists = [],
+  initialSort = DEFAULT_SORT,
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
+  const [sort, setSort] = useState<Sort>(initialSort);
   const [loading, setLoading] = useState(true);
   const abortCtrlRef = useRef<AbortController>();
 
@@ -67,11 +73,9 @@ export const useExceptionLists = ({
       getFilters({
         filters: filterOptions,
         namespaceTypes,
-        showTrustedApps,
-        showEventFilters,
-        showHostIsolationExceptions,
+        hideLists,
       }),
-    [namespaceTypes, filterOptions, showTrustedApps, showEventFilters, showHostIsolationExceptions]
+    [namespaceTypes, filterOptions, hideLists]
   );
 
   const fetchData = useCallback(async (): Promise<void> => {
@@ -93,6 +97,7 @@ export const useExceptionLists = ({
           page: pagination.page,
           perPage: pagination.perPage,
         },
+        sort,
         signal: abortCtrlRef.current.signal,
       });
 
@@ -121,6 +126,7 @@ export const useExceptionLists = ({
     notifications.toasts,
     pagination.page,
     pagination.perPage,
+    sort,
   ]);
 
   useEffect(() => {
@@ -131,5 +137,5 @@ export const useExceptionLists = ({
     };
   }, [fetchData]);
 
-  return [loading, exceptionLists, pagination, setPagination, fetchData];
+  return [loading, exceptionLists, pagination, setPagination, fetchData, sort, setSort];
 };

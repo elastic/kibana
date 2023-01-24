@@ -7,11 +7,11 @@
 
 import {
   loadIndexPatterns,
-  setSavedObjectsClient,
+  setDataViewsService,
   getMatchingIndices,
   getESIndexFields,
 } from './data_apis';
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 const mockFind = jest.fn();
 const perPage = 1000;
@@ -19,10 +19,8 @@ const http = httpServiceMock.createStartContract();
 const pattern = 'test-pattern';
 const indexes = ['test-index'];
 
-const generateIndexPattern = (title: string) => ({
-  attributes: {
-    title,
-  },
+const generateDataView = (title: string) => ({
+  title,
 });
 
 const mockIndices = { indices: ['indices1', 'indices2'] };
@@ -40,7 +38,7 @@ describe('Data API', () => {
       http.post.mockResolvedValueOnce(mockFields);
       const fields = await getESIndexFields({ indexes, http });
 
-      expect(http.post).toHaveBeenCalledWith('/api/triggers_actions_ui/data/_fields', {
+      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_fields', {
         body: `{"indexPatterns":${JSON.stringify(indexes)}}`,
       });
       expect(fields).toEqual(mockFields.fields);
@@ -52,7 +50,7 @@ describe('Data API', () => {
       http.post.mockResolvedValueOnce(mockIndices);
       const indices = await getMatchingIndices({ pattern, http });
 
-      expect(http.post).toHaveBeenCalledWith('/api/triggers_actions_ui/data/_indices', {
+      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_indices', {
         body: `{"pattern":"*${mockPattern}*"}`,
       });
       expect(indices).toEqual(mockIndices.indices);
@@ -67,7 +65,7 @@ describe('Data API', () => {
 
   describe('index patterns', () => {
     beforeEach(() => {
-      setSavedObjectsClient({
+      setDataViewsService({
         find: mockFind,
       });
     });
@@ -76,68 +74,15 @@ describe('Data API', () => {
     });
 
     test('fetches the index patterns', async () => {
-      mockFind.mockResolvedValueOnce({
-        savedObjects: [generateIndexPattern('index-1'), generateIndexPattern('index-2')],
-        total: 2,
-      });
+      mockFind.mockResolvedValueOnce([generateDataView('index-1'), generateDataView('index-2')]);
       const results = await loadIndexPatterns(mockPattern);
 
       expect(mockFind).toBeCalledTimes(1);
-      expect(mockFind).toBeCalledWith({
-        fields: ['title'],
-        page: 1,
-        perPage,
-        search: '*test-pattern*',
-        type: 'index-pattern',
-      });
+      expect(mockFind).toBeCalledWith('*test-pattern*', perPage);
       expect(results).toEqual(['index-1', 'index-2']);
     });
 
-    test(`fetches the index patterns as chunks and merges them, if the total number of index patterns more than ${perPage}`, async () => {
-      mockFind.mockResolvedValueOnce({
-        savedObjects: [generateIndexPattern('index-1'), generateIndexPattern('index-2')],
-        total: 2010,
-      });
-      mockFind.mockResolvedValueOnce({
-        savedObjects: [generateIndexPattern('index-3'), generateIndexPattern('index-4')],
-        total: 2010,
-      });
-      mockFind.mockResolvedValueOnce({
-        savedObjects: [generateIndexPattern('index-5'), generateIndexPattern('index-6')],
-        total: 2010,
-      });
-      const results = await loadIndexPatterns(mockPattern);
-
-      expect(mockFind).toBeCalledTimes(3);
-      expect(mockFind).toHaveBeenNthCalledWith(1, {
-        fields: ['title'],
-        page: 1,
-        perPage,
-        search: '*test-pattern*',
-        type: 'index-pattern',
-      });
-      expect(mockFind).toHaveBeenNthCalledWith(2, {
-        fields: ['title'],
-        page: 2,
-        perPage,
-        search: '*test-pattern*',
-        type: 'index-pattern',
-      });
-      expect(mockFind).toHaveBeenNthCalledWith(3, {
-        fields: ['title'],
-        page: 3,
-        perPage,
-        search: '*test-pattern*',
-        type: 'index-pattern',
-      });
-      expect(results).toEqual(['index-1', 'index-2', 'index-3', 'index-4', 'index-5', 'index-6']);
-    });
-
-    test('returns an empty array if one of the requests fails', async () => {
-      mockFind.mockResolvedValueOnce({
-        savedObjects: [generateIndexPattern('index-1'), generateIndexPattern('index-2')],
-        total: 1010,
-      });
+    test('returns an empty array if find requests fails', async () => {
       mockFind.mockRejectedValueOnce(500);
 
       const results = await loadIndexPatterns(mockPattern);

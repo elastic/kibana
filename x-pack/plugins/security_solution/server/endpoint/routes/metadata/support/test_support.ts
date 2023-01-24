@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Agent } from '../../../../../../fleet/common';
+import type { Agent } from '@kbn/fleet-plugin/common';
 import { METADATA_UNITED_INDEX } from '../../../../../common/endpoint/constants';
-import { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
+import type { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
 
 export function legacyMetadataSearchResponseMock(
   hostMetadata?: HostMetadata
@@ -47,7 +47,8 @@ export function legacyMetadataSearchResponseMock(
 
 export function unitedMetadataSearchResponseMock(
   hostMetadata: HostMetadata = {} as HostMetadata,
-  agent: Agent = {} as Agent
+  agent: Agent = {} as Agent,
+  agentStatus: Agent['status'] = 'online'
 ): estypes.SearchResponse<UnitedAgentMetadata> {
   return {
     took: 15,
@@ -82,6 +83,9 @@ export function unitedMetadataSearchResponseMock(
                     ...hostMetadata,
                   },
                 },
+              },
+              fields: {
+                status: [agentStatus],
               },
               sort: [1588337587997],
             },

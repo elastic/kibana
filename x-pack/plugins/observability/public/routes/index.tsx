@@ -7,15 +7,22 @@
 
 import * as t from 'io-ts';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
-import { HomePage } from '../pages/home';
-import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
+import { AlertingPages } from '../config';
+import { AlertDetails } from '../pages/alert_details';
+import { DatePickerContextProvider } from '../context/date_picker_context';
+import { SlosPage } from '../pages/slos';
+import { SloDetailsPage } from '../pages/slo_details';
+import { SloEditPage } from '../pages/slo_edit';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -28,46 +35,58 @@ export interface Params {
   path?: t.HasProps;
 }
 
+// Note: React Router DOM <Redirect> component was not working here
+// so I've recreated this simple version for this purpose.
+function SimpleRedirect({ to }: { to: string }) {
+  const history = useHistory();
+  history.replace(to);
+  return null;
+}
+
 export const routes = {
   '/': {
     handler: () => {
-      return <HomePage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
     exact: true,
   },
   '/landing': {
     handler: () => {
-      return <LandingPage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
     exact: true,
   },
   '/overview': {
     handler: ({ query }: any) => {
-      return <OverviewPage routeParams={{ query }} />;
+      return (
+        <DatePickerContextProvider>
+          <OverviewPage />
+        </DatePickerContextProvider>
+      );
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-        alpha: jsonRt.pipe(t.boolean),
-      }),
-    },
+    params: {},
     exact: true,
   },
   [casesPath]: {
     handler: () => {
-      return <CasesPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.cases}>
+          <CasesPage />
+        </TrackApplicationView>
+      );
     },
     params: {},
     exact: false,
   },
   '/alerts': {
     handler: () => {
-      return <AlertsPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.alerts}>
+          <AlertsPage />
+        </TrackApplicationView>
+      );
     },
     params: {
       // Technically gets a '_a' param by using Kibana URL state sync helpers
@@ -88,9 +107,55 @@ export const routes = {
     },
     exact: true,
   },
-  '/rules': {
+  '/alerts/rules': {
     handler: () => {
-      return <RulesPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.rules}>
+          <RulesPage />
+        </TrackApplicationView>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/:alertId': {
+    handler: () => {
+      return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos': {
+    handler: () => {
+      return <SlosPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/create': {
+    handler: () => {
+      return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/edit/:sloId': {
+    handler: () => {
+      return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/:sloId': {
+    handler: () => {
+      return <SloDetailsPage />;
     },
     params: {},
     exact: true,

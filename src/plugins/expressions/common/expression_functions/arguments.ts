@@ -54,6 +54,10 @@ type UnresolvedArrayTypeToArgumentString<T> =
 interface BaseArgumentType<T> {
   /** Alternate names for the Function valid for use in the Expression Editor */
   aliases?: string[];
+  /**
+   * The flag to mark the function parameter as deprecated.
+   */
+  deprecated?: boolean;
   /** Help text for the Argument to be displayed in the Expression Editor */
   help: string;
   /** Default options for the Argument */
@@ -69,6 +73,13 @@ interface BaseArgumentType<T> {
    * @default true
    */
   resolve?: boolean;
+  /**
+   * Turns on strict options checking.
+   * @default false
+   * @deprecated This option is added for backward compatibility and will be removed
+   * as soon as all the functions list all the available options.
+   */
+  strict?: boolean;
   /** Names of types that are valid values of the Argument. */
   types?: string[];
   /** The optional default value of the Argument. */

@@ -7,18 +7,21 @@
 
 import React, { useMemo } from 'react';
 
-import { Ecs } from '../../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
-import { OnRowSelected } from '../../events';
-import { EventsTrData, EventsTdGroupActions } from '../../styles';
-import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
-import { inputsModel } from '../../../../../common/store';
-import {
-  ColumnHeaderOptions,
-  CellValueElementProps,
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type {
   ControlColumnProps,
   RowCellRender,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { OnRowSelected } from '../../events';
+import { EventsTrData, EventsTdGroupActions } from '../../styles';
+import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
+import type { inputsModel } from '../../../../../common/store';
+import type {
+  ColumnHeaderOptions,
+  CellValueElementProps,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 

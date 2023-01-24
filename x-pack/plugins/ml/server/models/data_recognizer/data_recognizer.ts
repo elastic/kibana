@@ -12,11 +12,13 @@ import type {
   KibanaRequest,
   IScopedClusterClient,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import moment from 'moment';
 import { merge } from 'lodash';
-import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
@@ -52,9 +54,7 @@ import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import type { JobSavedObjectService } from '../../saved_objects';
-import { isDefined } from '../../../common/types/guards';
-import { isPopulatedObject } from '../../../common/util/object_utils';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -111,7 +111,7 @@ export class DataRecognizer {
   private _client: IScopedClusterClient;
   private _mlClient: MlClient;
   private _savedObjectsClient: SavedObjectsClientContract;
-  private _jobSavedObjectService: JobSavedObjectService;
+  private _mlSavedObjectService: MLSavedObjectService;
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
@@ -145,14 +145,14 @@ export class DataRecognizer {
     mlClient: MlClient,
     savedObjectsClient: SavedObjectsClientContract,
     dataViewsService: DataViewsService,
-    jobSavedObjectService: JobSavedObjectService,
+    mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
     this._savedObjectsClient = savedObjectsClient;
     this._dataViewsService = dataViewsService;
-    this._jobSavedObjectService = jobSavedObjectService;
+    this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
     this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
@@ -304,11 +304,14 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const body = await this._client.asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._client.asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;
@@ -782,11 +785,12 @@ export class DataRecognizer {
       })
     );
     if (applyToAllSpaces === true) {
-      const canCreateGlobalJobs = await this._jobSavedObjectService.canCreateGlobalJobs(
+      const canCreateGlobalJobs = await this._mlSavedObjectService.canCreateGlobalMlSavedObjects(
+        'anomaly-detector',
         this._request
       );
       if (canCreateGlobalJobs === true) {
-        await this._jobSavedObjectService.updateJobsSpaces(
+        await this._mlSavedObjectService.updateJobsSpaces(
           'anomaly-detector',
           jobs.map((j) => j.id),
           ['*'], // spacesToAdd
@@ -798,7 +802,6 @@ export class DataRecognizer {
   }
 
   private async _saveJob(job: ModuleJob) {
-    // @ts-expect-error type mismatch on MlPutJobRequest.body
     return this._mlClient.putJob({ job_id: job.id, body: job.config });
   }
 
@@ -1105,8 +1108,8 @@ export class DataRecognizer {
     );
 
     return {
-      start: timeFieldRange.end.epoch - moment.duration(3, 'months').asMilliseconds(),
-      end: timeFieldRange.end.epoch,
+      start: timeFieldRange.end - moment.duration(3, 'months').asMilliseconds(),
+      end: timeFieldRange.end,
     };
   }
 
@@ -1398,7 +1401,7 @@ export function dataRecognizerFactory(
   mlClient: MlClient,
   savedObjectsClient: SavedObjectsClientContract,
   dataViewsService: DataViewsService,
-  jobSavedObjectService: JobSavedObjectService,
+  mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest
 ) {
   return new DataRecognizer(
@@ -1406,7 +1409,7 @@ export function dataRecognizerFactory(
     mlClient,
     savedObjectsClient,
     dataViewsService,
-    jobSavedObjectService,
+    mlSavedObjectService,
     request
   );
 }

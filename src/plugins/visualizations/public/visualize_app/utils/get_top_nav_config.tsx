@@ -8,43 +8,38 @@
 
 import React from 'react';
 import moment from 'moment';
+import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
-import { Capabilities } from 'src/core/public';
-import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { saveVisualization } from '../../utils/saved_visualize_utils';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeInput,
-  getFullPath,
-  NavigateToLensContext,
-} from '../../../../visualizations/public';
+import { Capabilities } from '@kbn/core/public';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
   OnSaveProps,
-} from '../../../../saved_objects/public';
+} from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
-} from '../../../../presentation_util/public';
-import { unhashUrl } from '../../../../kibana_utils/public';
+} from '@kbn/presentation-util-plugin/public';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { saveVisualization } from '../../utils/saved_visualize_utils';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
 
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VISUALIZE_APP_NAME, VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
@@ -70,11 +65,11 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
-  editInLensConfig?: NavigateToLensContext | null;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
   showBadge: boolean;
+  eventEmitter?: EventEmitter;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -101,11 +96,11 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
     showBadge,
+    eventEmitter,
   }: TopNavConfigParams,
   {
     data,
@@ -121,23 +116,13 @@ export const getTopNavConfig = (
     i18n: { Context: I18nContext },
     savedObjectsTagging,
     presentationUtil,
-    usageCollection,
     getKibanaVersion,
     savedObjects,
+    theme,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
-
-  const doTelemetryForSaveEvent = (visType: string) => {
-    if (usageCollection) {
-      usageCollection.reportUiCounter(
-        originatingApp ?? VISUALIZE_APP_NAME,
-        METRIC_TYPE.CLICK,
-        `${visType}:save`
-      );
-    }
-  };
 
   /**
    * Called when the user clicks "Save" button.
@@ -150,9 +135,12 @@ export const getTopNavConfig = (
     stateContainer.transitions.setVis({
       title: savedVis.title,
     });
+
+    savedVis.savedSearchId = vis.data.savedSearchId;
     savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = vis.uiState.toString();
+
     setHasUnsavedChanges(false);
 
     try {
@@ -230,7 +218,7 @@ export const getTopNavConfig = (
 
       return { id };
     } catch (error) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.error(error);
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -301,7 +289,6 @@ export const getTopNavConfig = (
               defaultMessage: 'Go to Lens with your current configuration',
             }),
             className: 'visNavItem__goToLens',
-            disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
             ...(showBadge && {
               badge: {
@@ -312,17 +299,30 @@ export const getTopNavConfig = (
               },
             }),
             run: async () => {
+              // lens doesn't support saved searches, should unlink before transition
+              if (eventEmitter && visInstance.vis.data.savedSearchId) {
+                eventEmitter.emit('unlinkFromSavedSearch', false);
+              }
+              const navigateToLensConfig = await visInstance.vis.type.navigateToLens?.(
+                vis,
+                data.query.timefilter.timefilter
+              );
               const updatedWithMeta = {
-                ...editInLensConfig,
-                savedObjectId: visInstance.vis.id,
+                ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
               };
-              if (editInLensConfig) {
+              if (navigateToLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
-                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
+                getUiActions()
+                  .getTrigger(
+                    visInstance.vis.type.group === 'aggbased'
+                      ? AGG_BASED_VISUALIZATION_TRIGGER
+                      : VISUALIZE_EDITOR_TRIGGER
+                  )
+                  .exec(updatedWithMeta);
               }
             },
           },
@@ -520,8 +520,6 @@ export const getTopNavConfig = (
                   return { id: true };
                 }
 
-                doTelemetryForSaveEvent(vis.type.name);
-
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
                 const response = await doSave(saveOptions);
@@ -599,11 +597,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              showSaveModal(
-                saveModal,
-                I18nContext,
-                !originatingApp ? presentationUtil.ContextProvider : React.Fragment
-              );
+              showSaveModal(saveModal, presentationUtil.ContextProvider);
             },
           },
         ]
@@ -627,7 +621,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
+            disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(
@@ -639,8 +633,6 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              doTelemetryForSaveEvent(vis.type.name);
-
               if (!savedVis?.id) {
                 return createVisReference();
               }

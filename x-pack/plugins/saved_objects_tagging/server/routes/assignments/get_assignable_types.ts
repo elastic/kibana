@@ -15,7 +15,7 @@ export const registerGetAssignableTypesRoute = (router: TagsPluginRouter) => {
       validate: {},
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const { assignmentService } = ctx.tags!;
+      const { assignmentService } = await ctx.tags;
       const types = await assignmentService.getAssignableTypes();
 
       return res.ok({

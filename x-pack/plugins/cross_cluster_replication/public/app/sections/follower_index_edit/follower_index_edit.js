@@ -13,13 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,

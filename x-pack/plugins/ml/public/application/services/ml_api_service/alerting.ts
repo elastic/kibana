@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
-import { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../../../common/types/alerts';
-
-export type AlertingApiService = ReturnType<typeof alertingApiProvider>;
+import type {
+  MlAnomalyDetectionAlertParams,
+  PreviewResponse,
+} from '../../../../common/types/alerts';
 
 export const alertingApiProvider = (httpService: HttpService) => {
   return {
@@ -27,3 +30,17 @@ export const alertingApiProvider = (httpService: HttpService) => {
     },
   };
 };
+
+export type AlertingApiService = ReturnType<typeof alertingApiProvider>;
+
+/**
+ * Hooks for accessing {@link AlertingApiService} in React components.
+ */
+export function useAlertingApiService(): AlertingApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => alertingApiProvider(httpService), [httpService]);
+}

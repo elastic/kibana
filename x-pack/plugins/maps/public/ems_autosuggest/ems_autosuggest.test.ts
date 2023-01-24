@@ -20,6 +20,10 @@ class MockFileLayer {
     return this._id;
   }
 
+  getDisplayName() {
+    return `display name: ${this._id}`;
+  }
+
   getFields() {
     return this._fields;
   }
@@ -62,6 +66,7 @@ describe('suggestEMSTermJoinConfig', () => {
         sampleValuesColumnName: 'country_iso_code',
       });
       expect(termJoinConfig).toEqual({
+        displayName: 'display name: world_countries',
         layerId: 'world_countries',
         field: 'iso2',
       });
@@ -88,6 +93,7 @@ describe('suggestEMSTermJoinConfig', () => {
         sampleValuesColumnName: 'Country_name',
       });
       expect(termJoinConfig).toEqual({
+        displayName: 'display name: world_countries',
         layerId: 'world_countries',
         field: 'iso2',
       });
@@ -107,6 +113,7 @@ describe('suggestEMSTermJoinConfig', () => {
         sampleValues: ['40205', 40204],
       });
       expect(termJoinConfig).toEqual({
+        displayName: 'display name: usa_zip_codes',
         layerId: 'usa_zip_codes',
         field: 'zip',
       });

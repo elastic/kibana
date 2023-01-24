@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   ListId,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { HttpStart } from 'kibana/public';
+
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
+} from '@kbn/securitysolution-list-constants';
+import type { HttpStart } from '@kbn/core/public';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 /**
@@ -31,13 +37,19 @@ export class ExceptionsListApiClient {
   constructor(
     private readonly http: HttpStart,
     public readonly listId: ListId,
-    private readonly listDefinition: CreateExceptionListSchema
+    private readonly listDefinition: CreateExceptionListSchema,
+    private readonly readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
+    private readonly writeTransform?: <
+      T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
+    >(
+      item: T
+    ) => T
   ) {
     this.ensureListExists = this.createExceptionList();
   }
 
   /**
-   * PrivateStatic method that creates the list and don't throw if list already exists.
+   * PrivateStatic method that creates the list.
    * This method is being used when initializing an instance only once.
    */
   private async createExceptionList(): Promise<void> {
@@ -49,19 +61,14 @@ export class ExceptionsListApiClient {
       new Promise<void>((resolve, reject) => {
         const asyncFunction = async () => {
           try {
-            await this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+            await this.http.post<ExceptionListSchema>(INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL, {
               body: JSON.stringify({ ...this.listDefinition, list_id: this.listId }),
             });
 
             resolve();
           } catch (err) {
-            // Ignore 409 errors. List already created
-            if (err.response?.status !== 409) {
-              ExceptionsListApiClient.wasListCreated.delete(this.listId);
-              reject(err);
-            }
-
-            resolve();
+            ExceptionsListApiClient.wasListCreated.delete(this.listId);
+            reject(err);
           }
         };
         asyncFunction();
@@ -87,6 +94,10 @@ export class ExceptionsListApiClient {
     return this.http === coreHttp;
   }
 
+  protected getHttp(): HttpStart {
+    return this.http;
+  }
+
   /**
    * Static method to get a fresh or existing instance.
    * It will ensure we only check and create the list once.
@@ -94,7 +105,11 @@ export class ExceptionsListApiClient {
   public static getInstance(
     http: HttpStart,
     listId: string,
-    listDefinition: CreateExceptionListSchema
+    listDefinition: CreateExceptionListSchema,
+    readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
+    writeTransform?: <T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
+      item: T
+    ) => T
   ): ExceptionsListApiClient {
     if (
       !ExceptionsListApiClient.instance.has(listId) ||
@@ -102,14 +117,20 @@ export class ExceptionsListApiClient {
     ) {
       ExceptionsListApiClient.instance.set(
         listId,
-        new ExceptionsListApiClient(http, listId, listDefinition)
+        new ExceptionsListApiClient(http, listId, listDefinition, readTransform, writeTransform)
       );
     }
     const currentInstance = ExceptionsListApiClient.instance.get(listId);
     if (currentInstance) {
       return currentInstance;
     } else {
-      return new ExceptionsListApiClient(http, listId, listDefinition);
+      return new ExceptionsListApiClient(
+        http,
+        listId,
+        listDefinition,
+        readTransform,
+        writeTransform
+      );
     }
   }
 
@@ -159,17 +180,26 @@ export class ExceptionsListApiClient {
     filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
     await this.ensureListExists;
-    return this.http.get<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
-      query: {
-        page,
-        per_page: perPage,
-        sort_field: sortField,
-        sort_order: sortOrder,
-        list_id: [this.listId],
-        namespace_type: ['agnostic'],
-        filter,
-      },
-    });
+    const result = await this.http.get<FoundExceptionListItemSchema>(
+      `${EXCEPTION_LIST_ITEM_URL}/_find`,
+      {
+        query: {
+          page,
+          per_page: perPage,
+          sort_field: sortField,
+          sort_order: sortOrder,
+          list_id: [this.listId],
+          namespace_type: ['agnostic'],
+          filter,
+        },
+      }
+    );
+
+    if (this.readTransform) {
+      result.data = result.data.map(this.readTransform);
+    }
+
+    return result;
   }
 
   /**
@@ -182,13 +212,19 @@ export class ExceptionsListApiClient {
     }
 
     await this.ensureListExists;
-    return this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    let result = await this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         id,
         item_id: itemId,
         namespace_type: 'agnostic',
       },
     });
+
+    if (this.readTransform) {
+      result = this.readTransform(result);
+    }
+
+    return result;
   }
 
   /**
@@ -199,8 +235,14 @@ export class ExceptionsListApiClient {
     await this.ensureListExists;
     this.checkIfIsUsingTheRightInstance(exception.list_id);
     delete exception.meta;
+
+    let transformedException = exception;
+    if (this.writeTransform) {
+      transformedException = this.writeTransform(exception);
+    }
+
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(exception),
+      body: JSON.stringify(transformedException),
     });
   }
 
@@ -210,8 +252,16 @@ export class ExceptionsListApiClient {
    */
   async update(exception: UpdateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
+
+    let transformedException = exception;
+    if (this.writeTransform) {
+      transformedException = this.writeTransform(exception);
+    }
+
     return this.http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exception)),
+      body: JSON.stringify(
+        ExceptionsListApiClient.cleanExceptionsBeforeUpdate(transformedException)
+      ),
     });
   }
 

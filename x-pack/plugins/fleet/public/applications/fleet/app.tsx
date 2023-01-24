@@ -7,8 +7,8 @@
 
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
-import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
+import type { AppMountParameters } from '@kbn/core/public';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,20 +16,18 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz } from './hooks';
+import { useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -40,8 +38,15 @@ import {
   useBreadcrumbs,
   useStartServices,
   UIExtensionsContext,
+  FlyoutContextProvider,
 } from './hooks';
-import { Error, Loading, FleetSetupLoading } from './components';
+import {
+  Error,
+  Loading,
+  FleetSetupLoading,
+  AgentEnrollmentFlyout,
+  FleetServerFlyout,
+} from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -53,6 +58,7 @@ import { MissingESRequirementsPage } from './sections/agents/agent_requirements_
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -140,6 +146,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
     (async () => {
@@ -186,6 +193,10 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
+  }
+  // Debug page moved outside of initialization to allow debugging when setup failed
+  if (isDebugPath) {
+    return <DebugPage setupError={initializationError} isInitialized={isInitialized} />;
   }
 
   if (!isInitialized || initializationError) {
@@ -253,7 +264,7 @@ export const FleetAppContext: React.FC<{
                               notifications={startServices.notifications}
                               theme$={theme$}
                             >
-                              {children}
+                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
                             </PackageInstallProvider>
                           </Router>
                         </FleetStatusProvider>
@@ -279,7 +290,7 @@ const FleetTopNav = memo(
     const topNavConfig: TopNavMenuData[] = [
       {
         label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-          defaultMessage: 'Send Feedback',
+          defaultMessage: 'Send feedback',
         }),
         iconType: 'popout',
         run: () => window.open(FEEDBACK_URL),
@@ -297,6 +308,9 @@ const FleetTopNav = memo(
 
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
+    const flyoutContext = useFlyoutContext();
+    const fleetStatus = useFleetStatus();
+
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
@@ -345,6 +359,26 @@ export const AppRoutes = memo(
             }}
           />
         </Switch>
+
+        {flyoutContext.isEnrollmentFlyoutOpen && (
+          <EuiPortal>
+            <AgentEnrollmentFlyout
+              defaultMode={
+                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                  ? 'managed'
+                  : 'standalone'
+              }
+              isIntegrationFlow={true}
+              onClose={() => flyoutContext.closeEnrollmentFlyout()}
+            />
+          </EuiPortal>
+        )}
+
+        {flyoutContext.isFleetServerFlyoutOpen && (
+          <EuiPortal>
+            <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+          </EuiPortal>
+        )}
       </>
     );
   }

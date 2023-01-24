@@ -7,30 +7,31 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Adapters } from 'src/plugins/inspector/public';
-import {
-  getMapsCapabilities,
-  getIsAllowByValueEmbeddables,
-  getInspector,
-  getCoreI18n,
-  getSavedObjectsClient,
-  getCoreOverlays,
-  getSavedObjectsTagging,
-  getPresentationUtilContext,
-} from '../../kibana_services';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import {
   checkForDuplicateTitle,
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   showSaveModal,
-} from '../../../../../../src/plugins/saved_objects/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { SavedMap } from './saved_map';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
+} from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
+import {
+  getNavigateToApp,
+  getMapsCapabilities,
+  getIsAllowByValueEmbeddables,
+  getInspector,
+  getSavedObjectsClient,
+  getCoreOverlays,
+  getSavedObjectsTagging,
+  getPresentationUtilContext,
+} from '../../kibana_services';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { SavedMap } from './saved_map';
+import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -41,6 +42,7 @@ export function getTopNavConfig({
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
+  history,
 }: {
   savedMap: SavedMap;
   isOpenSettingsDisabled: boolean;
@@ -48,6 +50,7 @@ export function getTopNavConfig({
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
+  history: ScopedHistory;
 }) {
   const topNavConfigs = [];
 
@@ -95,6 +98,23 @@ export function getTopNavConfig({
       },
     }
   );
+
+  if (savedMap.hasOriginatingApp()) {
+    topNavConfigs.push({
+      label: i18n.translate('xpack.maps.topNav.cancel', {
+        defaultMessage: 'Cancel',
+      }),
+      run: () => {
+        getNavigateToApp()(savedMap.getOriginatingApp()!, {
+          path: savedMap.getOriginatingPath(),
+        });
+      },
+      testId: 'mapsCancelButton',
+      description: i18n.translate('xpack.maps.topNav.cancelButtonAriaLabel', {
+        defaultMessage: 'Return to the last app without saving changes',
+      }),
+    });
+  }
 
   if (getMapsCapabilities().save) {
     const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
@@ -179,6 +199,7 @@ export function getTopNavConfig({
               ...props,
               newTags: selectedTags,
               saveByReference: props.addToLibrary,
+              history,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -197,7 +218,7 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -227,7 +248,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
+        showSaveModal(saveModal, PresentationUtilContext);
       },
     });
 
@@ -248,6 +269,7 @@ export function getTopNavConfig({
             returnToOrigin: true,
             onTitleDuplicate: () => {},
             saveByReference: !savedMap.isByValue(),
+            history,
           });
         },
         testId: 'mapSaveAndReturnButton',

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { PresentationUtilPluginStart } from '../../presentation_util/public';
-
 import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
@@ -17,8 +15,8 @@ export interface CustomIntegrationsSetup {
 
 export interface CustomIntegrationsStart {
   ContextProvider: React.FC;
+  languageClientsUiComponents: Record<string, React.FC>;
 }
 
-export interface CustomIntegrationsStartDependencies {
-  presentationUtil: PresentationUtilPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CustomIntegrationsStartDependencies {}

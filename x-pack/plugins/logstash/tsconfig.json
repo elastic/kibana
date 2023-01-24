@@ -2,24 +2,29 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json"},
-    { "path": "../../../src/plugins/management/tsconfig.json"},
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/management-plugin",
 
-    { "path": "../features/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json"},
-    { "path": "../monitoring/tsconfig.json"},
-    { "path": "../security/tsconfig.json"},
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

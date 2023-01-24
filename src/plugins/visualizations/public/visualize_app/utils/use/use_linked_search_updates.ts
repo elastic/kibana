@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
-import { Filter } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
@@ -29,27 +29,31 @@ export const useLinkedSearchUpdates = (
       // SearchSource is a promise-based stream of search results that can inherit from other search sources.
       const { searchSource } = visInstance.vis.data;
 
-      const unlinkFromSavedSearch = () => {
+      const unlinkFromSavedSearch = (showToast: boolean = true) => {
         const searchSourceParent = savedSearch.searchSource;
         const searchSourceGrandparent = searchSourceParent?.getParent();
         const currentIndex = searchSourceParent?.getField('index');
+        visInstance.savedSearch = undefined;
+        visInstance.vis.data.savedSearchId = undefined;
 
         searchSource.setField('index', currentIndex);
         searchSource.setParent(searchSourceGrandparent);
 
         appState.transitions.unlinkSavedSearch({
-          query: searchSourceParent?.getField('query'),
+          query: searchSourceParent?.getField('query') as Query,
           parentFilters: (searchSourceParent?.getOwnField('filter') as Filter[]) || [],
         });
 
-        services.toastNotifications.addSuccess(
-          i18n.translate('visualizations.linkedToSearch.unlinkSuccessNotificationText', {
-            defaultMessage: `Unlinked from saved search '{searchTitle}'`,
-            values: {
-              searchTitle: savedSearch.title,
-            },
-          })
-        );
+        if (showToast) {
+          services.toastNotifications.addSuccess(
+            i18n.translate('visualizations.linkedToSearch.unlinkSuccessNotificationText', {
+              defaultMessage: `Unlinked from saved search '{searchTitle}'`,
+              values: {
+                searchTitle: savedSearch.title,
+              },
+            })
+          );
+        }
       };
 
       eventEmitter.on('unlinkFromSavedSearch', unlinkFromSavedSearch);

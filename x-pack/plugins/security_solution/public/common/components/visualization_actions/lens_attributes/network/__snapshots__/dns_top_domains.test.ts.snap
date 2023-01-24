@@ -1,0 +1,254 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dnsTopDomainsLensAttributes should render 1`] = `
+Object {
+  "description": "Security Solution Network DNS",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "filter-index-pattern-0",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "b1c3efc6-c886-4fba-978f-3b6bb5e7948a": Object {
+            "columnOrder": Array [
+              "e8842815-2a45-4c74-86de-c19a391e2424",
+              "d1452b87-0e9e-4fc0-a725-3727a18e0b37",
+              "2a4d5e20-f570-48e4-b9ab-ff3068919377",
+            ],
+            "columns": Object {
+              "2a4d5e20-f570-48e4-b9ab-ff3068919377": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Unique count of dns.question.registered_domain",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "dns.question.registered_domain",
+              },
+              "d1452b87-0e9e-4fc0-a725-3727a18e0b37": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "e8842815-2a45-4c74-86de-c19a391e2424": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of dns.question.name",
+                "operationType": "terms",
+                "params": Object {
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "2a4d5e20-f570-48e4-b9ab-ff3068919377",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "size": 6,
+                },
+                "scale": "ordinal",
+                "sourceField": "dns.question.name",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "indexRefName": "filter-index-pattern-0",
+          "key": "dns.question.type",
+          "negate": true,
+          "params": Object {
+            "query": "PTR",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "dns.question.type": "PTR",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "source.ip",
+          "negate": false,
+          "params": Object {
+            "query": "192.168.1.1",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"source.ip\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"destination.ip\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "fittingFunction": "None",
+      "gridlinesVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "2a4d5e20-f570-48e4-b9ab-ff3068919377",
+          ],
+          "layerId": "b1c3efc6-c886-4fba-978f-3b6bb5e7948a",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar",
+          "showGridlines": false,
+          "splitAccessor": "e8842815-2a45-4c74-86de-c19a391e2424",
+          "xAccessor": "d1452b87-0e9e-4fc0-a725-3727a18e0b37",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "preferredSeriesType": "bar",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "Top domains by dns.question.registered_domain",
+  "visualizationType": "lnsXY",
+}
+`;

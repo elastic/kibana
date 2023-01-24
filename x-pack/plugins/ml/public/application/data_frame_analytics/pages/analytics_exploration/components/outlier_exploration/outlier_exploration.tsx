@@ -19,7 +19,12 @@ import {
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
+import {
+  defaultSearchQuery,
+  isOutlierAnalysis,
+  useResultsViewConfig,
+  getDestinationIndex,
+} from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
 import {
@@ -33,6 +38,7 @@ import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 export type TableItem = Record<string, any>;
 
@@ -66,16 +72,14 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   const { columnsWithCharts, tableItems } = outlierData;
 
-  const featureCount = getFeatureCount(jobConfig?.dest?.results_field || '', tableItems);
+  const resultsField = jobConfig?.dest.results_field ?? '';
+  const featureCount = getFeatureCount(resultsField, tableItems);
   const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
 
-  // Show the color range only if feature influence is enabled and there's more than 0 features.
+  // Show the color range only if feature influence is enabled.
   const showColorRange =
-    featureCount > 0 &&
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
-
-  const resultsField = jobConfig?.dest.results_field ?? '';
 
   // Identify if the results index has a legacy feature influence format.
   // If feature influence was enabled for the legacy job we'll show a callout
@@ -92,6 +96,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
+  const destIndex = getDestinationIndex(jobConfig);
 
   if (indexPatternErrorMessage !== undefined) {
     return (
@@ -103,7 +108,12 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           color="danger"
           iconType="cross"
         >
-          <p>{indexPatternErrorMessage}</p>
+          <p>
+            {indexPatternErrorMessage}
+            {needsDestIndexPattern ? (
+              <IndexPatternPrompt destIndex={destIndex} color="text" />
+            ) : null}
+          </p>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -111,7 +121,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   return (
     <>
-      {typeof jobConfig?.description !== 'undefined' && (
+      {typeof jobConfig?.description !== 'undefined' && jobConfig?.description !== '' && (
         <>
           <EuiText>{jobConfig?.description}</EuiText>
           <EuiSpacer size="m" />

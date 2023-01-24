@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
+import type { AllowlistFields } from './filterlists/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -133,6 +134,7 @@ export interface EndpointMetricsAggregation {
     endpoint_agents: {
       buckets: Array<{ key: string; doc_count: number; latest_metrics: EndpointMetricHits }>;
     };
+    endpoint_count: { value: number };
   };
 }
 
@@ -208,6 +210,10 @@ export interface EndpointMetrics {
     registry_events: DocumentsVolumeMetrics;
     network_events: DocumentsVolumeMetrics;
     overall: DocumentsVolumeMetrics;
+    alerts: DocumentsVolumeMetrics;
+    diagnostic_alerts: DocumentsVolumeMetrics;
+    dns_events: DocumentsVolumeMetrics;
+    security_events: DocumentsVolumeMetrics;
   };
   malicious_behavior_rules: Array<{ id: string; endpoint_uptime_percent: number }>;
   system_impact: Array<{
@@ -229,6 +235,10 @@ export interface EndpointMetrics {
     library_load_events?: SystemImpactEventsMetrics;
   }>;
   threads: Array<{ name: string; cpu: { mean: number } }>;
+  event_filter: {
+    active_global_count: number;
+    active_user_count: number;
+  };
 }
 
 interface EndpointMetricOS {
@@ -280,18 +290,6 @@ export interface EndpointMetadataDocument {
     };
   };
 }
-
-// List HTTP Types
-
-export const GetTrustedAppsRequestSchema = {
-  query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-    per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
-    kuery: schema.maybe(schema.string()),
-  }),
-};
-
-export type GetEndpointListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
 
 export interface GetEndpointListResponse {
   per_page: number;
@@ -348,4 +346,93 @@ export interface RuleSearchResult {
     updatedAt: string;
     params: DetectionRuleParms;
   };
+}
+
+// EP Timeline telemetry
+
+export type EnhancedAlertEvent = AlertEvent & { 'event.id': string; 'kibana.alert.uuid': string };
+
+export type TimelineTelemetryEvent = ResolverNode & { event: SafeResolverEvent | undefined };
+
+export interface TimelineTelemetryTemplate {
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  version: string | undefined;
+  license_uuid: string | undefined;
+  alert_id: string | undefined;
+  event_id: string;
+  timeline: TimelineTelemetryEvent[];
+}
+
+export interface ValueListMetaData {
+  total_list_count: number;
+  types: Array<{
+    type: string;
+    count: number;
+  }>;
+  lists: Array<{
+    id: string;
+    count: number;
+  }>;
+  included_in_exception_lists_count: number;
+  used_in_indicator_match_rule_count: number;
+}
+
+export interface ValueListResponseAggregation {
+  aggregations: {
+    total_value_list_count: number;
+    type_breakdown: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ValueListItemsResponseAggregation {
+  aggregations: {
+    value_list_item_count: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ValueListExceptionListResponseAggregation {
+  aggregations: {
+    vl_included_in_exception_lists_count: { value: number };
+  };
+}
+
+export interface ValueListIndicatorMatchResponseAggregation {
+  aggregations: {
+    vl_used_in_indicator_match_rule_count: { value: number };
+  };
+}
+
+export interface TaskMetric {
+  name: string;
+  passed: boolean;
+  time_executed_in_ms: number;
+  start_time: number;
+  end_time: number;
+  error_message?: string;
+}
+
+export interface TelemetryConfiguration {
+  telemetry_max_buffer_size: number;
+  max_security_list_telemetry_batch: number;
+  max_endpoint_telemetry_batch: number;
+  max_detection_rule_telemetry_batch: number;
+  max_detection_alerts_batch: number;
+}
+
+export interface TelemetryFilterListArtifact {
+  endpoint_alerts: AllowlistFields;
+  exception_lists: AllowlistFields;
+  prebuilt_rules_alerts: AllowlistFields;
 }

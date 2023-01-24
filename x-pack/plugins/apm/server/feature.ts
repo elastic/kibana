@@ -6,13 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LicenseType } from '../../licensing/common/types';
-import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
-} from '../../licensing/server';
+} from '@kbn/licensing-plugin/server';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+} from '../common/rules/apm_rule_types';
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -26,7 +29,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: Object.values(AlertType),
+  alerting: Object.values(ApmRuleType),
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -39,10 +42,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          all: Object.values(AlertType),
+          all: Object.values(ApmRuleType),
         },
         rule: {
-          all: Object.values(AlertType),
+          all: Object.values(ApmRuleType),
         },
       },
       management: {
@@ -60,10 +63,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          read: Object.values(AlertType),
+          read: Object.values(ApmRuleType),
         },
         rule: {
-          read: Object.values(AlertType),
+          read: Object.values(ApmRuleType),
         },
       },
       management: {

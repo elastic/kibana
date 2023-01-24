@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
-import { CommentRequestAlertType, CommentType } from '../../../../common/api';
+} from '@kbn/core/server';
+import type { CommentRequestAlertType } from '../../../../common/api';
+import { CommentType } from '../../../../common/api';
 import { GENERATED_ALERT } from '../constants';
 import { logError } from '../utils';
-import { UserActionVersion800 } from './types';
+import type { UserActionVersion800 } from './types';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import type { LicenseCheck } from '../../../../../licensing/server';
 import type { RawKibanaPrivileges } from '../../../../common/model';
 import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
@@ -66,15 +66,18 @@ describe('GET privileges', () => {
         query: includeActions ? { includeActions: 'true' } : undefined,
         headers,
       });
-      const mockContext = {
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown as SecurityRequestHandlerContext;
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      };
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        licensing: mockLicensingContext,
+      }) as unknown as SecurityRequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 

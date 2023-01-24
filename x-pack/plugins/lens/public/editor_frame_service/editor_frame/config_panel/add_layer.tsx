@@ -6,10 +6,19 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiToolTip, EuiButton, EuiPopover, EuiIcon, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiPopover,
+  EuiIcon,
+  EuiContextMenu,
+  EuiBadge,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { LayerType, layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LayerType } from '../../../../common';
 import type { FramePublicAPI, Visualization } from '../../../types';
 
 interface AddLayerButtonProps {
@@ -20,7 +29,7 @@ interface AddLayerButtonProps {
 }
 
 export function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
-  return visualization.getLayerType(layerId, state) || layerTypes.DATA;
+  return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
 }
 
 export function AddLayerButton({
@@ -35,10 +44,12 @@ export function AddLayerButton({
     if (!visualization.appendLayer || !visualizationState) {
       return null;
     }
-    return visualization.getSupportedLayers?.(visualizationState, layersMeta);
+    return visualization
+      .getSupportedLayers?.(visualizationState, layersMeta)
+      ?.filter(({ canAddViaMenu: hideFromMenu }) => !hideFromMenu);
   }, [visualization, visualizationState, layersMeta]);
 
-  if (supportedLayers == null) {
+  if (supportedLayers == null || !supportedLayers.length) {
     return null;
   }
   if (supportedLayers.length === 1) {
@@ -55,7 +66,6 @@ export function AddLayerButton({
         position="bottom"
       >
         <EuiButton
-          className="lnsConfigPanel__addLayerBtn"
           fullWidth
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -79,7 +89,6 @@ export function AddLayerButton({
       data-test-subj="lnsConfigPanel__addLayerPopover"
       button={
         <EuiButton
-          className="lnsConfigPanel__addLayerBtn"
           fullWidth
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -107,11 +116,34 @@ export function AddLayerButton({
             title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
               defaultMessage: 'Select layer type',
             }),
+            width: 300,
             items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
               return {
                 toolTipContent,
                 disabled,
-                name: label,
+                name:
+                  type === LayerTypes.ANNOTATIONS ? (
+                    <EuiFlexGroup gutterSize="m">
+                      <EuiFlexItem>
+                        <span className="lnsLayerAddButton__label">{label}</span>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          className="lnsLayerAddButton__techBadge"
+                          color="hollow"
+                          isDisabled={disabled}
+                        >
+                          {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
+                            defaultMessage: 'Technical preview',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <span className="lnsLayerAddButtonLabel">{label}</span>
+                  ),
+                className: 'lnsLayerAddButton',
                 icon: icon && <EuiIcon size="m" type={icon} />,
                 ['data-test-subj']: `lnsLayerAddButton-${type}`,
                 onClick: () => {

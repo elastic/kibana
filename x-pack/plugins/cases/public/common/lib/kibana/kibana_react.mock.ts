@@ -8,19 +8,29 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-
-import { PublicAppInfo } from 'kibana/public';
-import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { securityMock } from '../../../../../security/public/mocks';
-import { spacesPluginMock } from '../../../../../spaces/public/mocks';
-import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 
-export const createStartServicesMock = (): StartServices => {
+import type { PublicAppInfo } from '@kbn/core/public';
+import type { RecursivePartial } from '@elastic/eui/src/components/common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { StartServices } from '../../../types';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
+import { connectorsMock } from '../../mock/connectors';
+
+interface StartServiceArgs {
+  license?: ILicense | null;
+}
+
+export const createStartServicesMock = ({ license }: StartServiceArgs = {}): StartServices => {
+  const licensingPluginMock = licensingMock.createStart();
+
   const services = {
     ...coreMock.createStart(),
     storage: { ...coreMock.createStorage(), get: jest.fn(), set: jest.fn(), remove: jest.fn() },
@@ -31,12 +41,40 @@ export const createStartServicesMock = (): StartServices => {
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
+    licensing:
+      license != null
+        ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
+        : licensingPluginMock,
   } as unknown as StartServices;
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
   services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(
     new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
   );
+
+  services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+    actionTypeTitle: '.servicenow',
+    iconClass: 'logoSecurity',
+  });
+
+  registerConnectorsToMockActionRegistry(
+    services.triggersActionsUi.actionTypeRegistry,
+    connectorsMock
+  );
+
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: { save: true, show: true },
+    generalCases: {
+      create_cases: true,
+      read_cases: true,
+      update_cases: true,
+      delete_cases: true,
+      push_cases: true,
+    },
+    visualize: { save: true, show: true },
+    dashboard: { show: true, createNew: true },
+  };
 
   return services;
 };

@@ -1,0 +1,61 @@
+title: Create case request properties for a ServiceNow SecOps connector
+required:
+  - fields
+  - id
+  - name
+  - type
+description: Defines properties for connectors when type is `.servicenow-sir`.
+type: object
+properties:
+  fields:
+    description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+    type: object
+    required:
+      - category
+      - destIp
+      - malwareHash
+      - malwareUrl
+      - priority
+      - sourceIp
+      - subcategory
+    properties:
+      category:
+        description: The category of the incident. 
+        type: string
+        nullable: true
+      destIp:
+        description: Indicates whether cases will send a comma-separated list of destination IPs.
+        type: boolean
+        nullable: true
+      malwareHash:
+        description: Indicates whether cases will send a comma-separated list of malware hashes. 
+        type: boolean
+        nullable: true
+      malwareUrl:
+        description: Indicates whether cases will send a comma-separated list of malware URLs. 
+        type: boolean
+        nullable: true
+      priority:
+        description: The priority of the issue.
+        type: string
+        nullable: true
+      sourceIp:
+        description: Indicates whether cases will send a comma-separated list of source IPs.
+        type: boolean
+        nullable: true
+      subcategory:
+        description: The subcategory of the incident.
+        type: string
+        nullable: true
+  id:
+    description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+    type: string
+  name:
+    description: The name of the connector.
+    type: string
+  type:
+    description: The type of connector.
+    type: string
+    example: .servicenow-sir
+    enum:
+      - .servicenow-sir

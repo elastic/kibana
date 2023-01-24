@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AppDataType, ReportViewType, SeriesConfig } from '../types';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
 
 interface Props {
@@ -14,18 +14,20 @@ interface Props {
   dataView: DataView;
   dataType: AppDataType;
   reportConfigMap: ReportConfigMap;
+  spaceId?: string;
 }
 
 export const getDefaultConfigs = ({
   reportType,
   dataType,
+  spaceId,
   dataView,
   reportConfigMap,
 }: Props): SeriesConfig => {
   let configResult: SeriesConfig | undefined;
 
   reportConfigMap[dataType]?.some((fn) => {
-    const config = fn({ dataView });
+    const config = fn({ dataView, spaceId });
     if (config.reportType === reportType) {
       configResult = config;
     }

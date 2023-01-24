@@ -8,7 +8,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { Rule } from '../../../triggers_actions_ui/public';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { JobId } from '../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
@@ -79,6 +79,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
       },
     });
     // deps on id to avoid re-rendering on auto-refresh
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggersActionsUi, initialAlert?.id, jobIds]);
 
   return <>{AlertFlyout}</>;
@@ -114,6 +115,7 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
     return () => {
       unsetShowFunction();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isVisible && jobIds ? (

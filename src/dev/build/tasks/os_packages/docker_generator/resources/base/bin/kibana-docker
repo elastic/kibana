@@ -27,6 +27,7 @@ kibana_vars=(
     console.proxyFilter
     csp.strict
     csp.warnLegacyBrowsers
+    csp.disableUnsafeEval
     csp.script_src
     csp.worker_src
     csp.style_src
@@ -40,6 +41,22 @@ kibana_vars=(
     csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
+    data.search.asyncSearch.waitForCompletion
+    data.search.asyncSearch.keepAlive
+    data.search.asyncSearch.batchedReduceSize
+    data.search.asyncSearch.pollInterval
+    data.search.sessions.defaultExpiration
+    data.search.sessions.enabled
+    data.search.sessions.maxUpdateRetries
+    data.search.sessions.notTouchedInProgressTimeout
+    data.search.sessions.notTouchedTimeout
+    data.search.sessions.pageSize
+    data.search.sessions.trackingInterval
+    unifiedSearch.autocomplete.valueSuggestions.terminateAfter
+    unifiedSearch.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.querySuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.tiers
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries
@@ -113,6 +130,7 @@ kibana_vars=(
     monitoring.ui.max_bucket_size
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
+    node.roles
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
     ops.interval
@@ -147,6 +165,7 @@ kibana_vars=(
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.crossOriginOpenerPolicy
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -170,6 +189,7 @@ kibana_vars=(
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.hidePrivacyStatement
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
@@ -182,6 +202,7 @@ kibana_vars=(
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
+    xpack.actions.email.domain_allowlist
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -199,7 +220,14 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.rules.run.timeout
+    xpack.alerting.rules.run.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
+    xpack.alerting.rules.minimumScheduleInterval.value
+    xpack.alerting.rules.minimumScheduleInterval.enforce
+    xpack.alerting.rules.run.actions.max
+    xpack.alerting.rules.run.alerts.max
+    xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -271,8 +299,11 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
-    xpack.observability.unsafe.alertingExperience.enabled
-    xpack.observability.unsafe.cases.enabled
+    xpack.observability.unsafe.slo.enabled
+    xpack.observability.unsafe.alertDetails.apm.enabled
+    xpack.observability.unsafe.alertDetails.metrics.enabled
+    xpack.observability.unsafe.alertDetails.logs.enabled
+    xpack.observability.unsafe.alertDetails.uptime.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -319,6 +350,7 @@ kibana_vars=(
     xpack.reporting.roles.allow
     xpack.reporting.roles.enabled
     xpack.ruleRegistry.write.enabled
+    xpack.security.accessAgreement.message
     xpack.security.audit.appender.fileName
     xpack.security.audit.appender.layout.highlight
     xpack.security.audit.appender.layout.pattern
@@ -349,6 +381,7 @@ kibana_vars=(
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.session.cleanupInterval
+    xpack.security.session.concurrentSessions.maxSessions
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
@@ -361,8 +394,7 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.prebuiltRulesFromFileSystem
-    xpack.securitySolution.prebuiltRulesFromSavedObjects
+    xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
@@ -376,6 +408,8 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.event_loop_delay.monitor
+    xpack.task_manager.event_loop_delay.warn_threshold
     xpack.uptime.index
 )
 

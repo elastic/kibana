@@ -13,7 +13,7 @@ import {
 } from '../../../../common/lib';
 import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   name: schema.string(),
@@ -24,7 +24,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
   router.get(
     { path: addBasePath('/component_templates'), validate: false },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const { component_templates: componentTemplates } =
@@ -58,7 +58,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params;
 
       try {

@@ -11,6 +11,7 @@ import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
 
 import del from 'del';
+import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface Test {
@@ -48,9 +49,7 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
   }
 
   async function onFailure(_: any, test: Test) {
-    // Replace characters in test names which can't be used in filenames, like *
-    const name = test.fullTitle().replace(/([^ a-zA-Z0-9-]+)/g, '_');
-
+    const name = FtrScreenshotFilename.create(test.fullTitle(), { ext: false });
     await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
   }
 

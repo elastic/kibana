@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IntegrationCategory } from '../../../../../../../../../../src/plugins/custom_integrations/common';
-import { INTEGRATION_CATEGORY_DISPLAY } from '../../../../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import { INTEGRATION_CATEGORY_DISPLAY } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationCardItem } from '../../../../../../../common/types/models';
 

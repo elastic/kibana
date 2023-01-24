@@ -5,53 +5,47 @@
  * 2.0.
  */
 
-import { Setup } from '../../lib/helpers/setup_request';
-import {
-  HOST_NAME,
-  CONTAINER_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { HOST_NAME, CONTAINER_ID } from '../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import {
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceNodeMetadata({
   kuery,
   serviceName,
   serviceNodeName,
-  setup,
+  apmEventClient,
   start,
   end,
+  environment,
 }: {
   kuery: string;
   serviceName: string;
   serviceNodeName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
+  environment: string;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
-            ...environmentQuery(ENVIRONMENT_ALL.value),
+            ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...serviceNodeNameQuery(serviceNodeName),
           ],

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getTheme } from '../services';
 
 let activeSession: ContextMenuSession | null = null;

@@ -6,11 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient } from 'kibana/server';
-import type {
-  DataViewsService,
-  DataView,
-} from '../../../../../../../src/plugins/data_views/common';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import type { RollupFields } from '../../../../common/types/fields';
 
 export interface RollupJob {
@@ -36,9 +33,12 @@ export async function rollupServiceProvider(
       rollupIndexPatternObject.typeMeta?.params !== undefined
     ) {
       const rollUpIndex: string = rollupIndexPatternObject.typeMeta.params.rollup_index;
-      const rollupCaps = await asCurrentUser.rollup.getRollupIndexCaps({
-        index: rollUpIndex,
-      });
+      const rollupCaps = await asCurrentUser.rollup.getRollupIndexCaps(
+        {
+          index: rollUpIndex,
+        },
+        { maxRetries: 0 }
+      );
 
       const indexRollupCaps = rollupCaps[rollUpIndex];
       if (indexRollupCaps && indexRollupCaps.rollup_jobs) {

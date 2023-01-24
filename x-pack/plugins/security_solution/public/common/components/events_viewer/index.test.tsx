@@ -9,33 +9,58 @@ import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
-import { waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
-import { EntityType } from '../../../../../timelines/common';
-import { TimelineId } from '../../../../common/types/timeline';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
+import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { TableId } from '../../../../common/types';
+import { mount } from 'enzyme';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('../../components/url_state/normalize_time_range.ts');
+jest.mock('../../utils/normalize_time_range');
 
-const mockUseCreateFieldButton = jest.fn().mockReturnValue(<></>);
-jest.mock('../../../timelines/components/fields_browser/create_field_button', () => ({
-  useCreateFieldButton: (...params: unknown[]) => mockUseCreateFieldButton(...params),
+const mockUseFieldBrowserOptions = jest.fn();
+jest.mock('../../../timelines/components/fields_browser', () => ({
+  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+}));
+
+jest.mock('./helpers', () => ({
+  getDefaultViewSelection: () => 'gridView',
+  resolverIsShowing: () => false,
+  getCombinedFilterQuery: () => undefined,
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -52,62 +77,54 @@ const testProps = {
   end: to,
   entityType: EntityType.ALERTS,
   indexNames: [],
-  id: TimelineId.test,
+  tableId: TableId.test,
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
-  scopeId: SourcererScopeName.default,
+  sourcererScope: SourcererScopeName.default,
   start: from,
+  bulkActions: false,
+  hasCrudPermissions: true,
 };
 describe('StatefulEventsViewer', () => {
-  const mount = useMountAppended();
-
   (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
 
-  test('it renders the events viewer', async () => {
+  test('it renders the events viewer', () => {
     const wrapper = mount(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.text()).toMatchInlineSnapshot(`"hello grid"`);
-    });
+    expect(wrapper.find(`[data-test-subj="events-viewer-panel"]`).exists()).toBeTruthy();
   });
 
   // InspectButtonContainer controls displaying InspectButton components
-  test('it renders InspectButtonContainer', async () => {
+  test('it renders InspectButtonContainer', () => {
     const wrapper = mount(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
-    });
+    expect(wrapper.find(`[data-test-subj="hoverVisibilityContainer"]`).exists()).toBeTruthy();
   });
 
-  test('it closes field editor when unmounted', async () => {
+  test('it closes field editor when unmounted', () => {
     const mockCloseEditor = jest.fn();
-    mockUseCreateFieldButton.mockImplementation((_, __, fieldEditorActionsRef) => {
-      fieldEditorActionsRef.current = { closeEditor: mockCloseEditor };
-      return <></>;
+    mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+      editorActionsRef.current = { closeEditor: mockCloseEditor };
+      return {};
     });
 
-    const wrapper = mount(
+    const { unmount } = render(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
     expect(mockCloseEditor).not.toHaveBeenCalled();
 
-    wrapper.unmount();
+    unmount();
     expect(mockCloseEditor).toHaveBeenCalled();
   });
 });

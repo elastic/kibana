@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-ui-settings-common"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

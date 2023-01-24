@@ -12,11 +12,11 @@ import { get } from 'lodash';
 import { Query } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
-import type { SpacesApi, SpacesContextProps } from '../../../../../x-pack/plugins/spaces/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { DataViewsContract } from '../../../data_views/public';
-import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
+import type { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -83,7 +83,6 @@ const SavedObjectsTablePage = ({
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
-        savedObjectsClient={coreStart.savedObjects.client}
         dataViews={dataViewsApi}
         search={dataStart.search}
         http={coreStart.http}
@@ -103,6 +102,7 @@ const SavedObjectsTablePage = ({
           if (!inAppUrl.uiCapabilitiesPath) return true;
           return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
         }}
+        customBranding={coreStart.customBranding}
       />
     </ContextWrapper>
   );

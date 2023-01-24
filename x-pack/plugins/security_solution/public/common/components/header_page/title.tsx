@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { DraggableArguments, BadgeOptions, TitleProp } from './types';
+import type { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { DefaultDraggable } from '../draggables';
 import { TruncatableText } from '../truncatable_text';
 
@@ -59,6 +59,7 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
               label={badgeOptions.text}
               tooltipContent={badgeOptions.tooltip}
               tooltipPosition="bottom"
+              size={badgeOptions.size}
             />
           ) : (
             <EuiBadge color={badgeOptions.color || 'hollow'} title="">

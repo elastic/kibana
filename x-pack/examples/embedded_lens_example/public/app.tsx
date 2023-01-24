@@ -12,16 +12,15 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
 
-import type { DataView } from 'src/plugins/data_views/public';
-import type { CoreStart } from 'kibana/public';
-import type { StartDependencies } from './plugin';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -29,10 +28,11 @@ import type {
   LensEmbeddableInput,
   FormulaPublicApi,
   DateHistogramIndexPatternColumn,
-} from '../../../plugins/lens/public';
+} from '@kbn/lens-plugin/public';
 
-import { ViewMode } from '../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { StartDependencies } from './plugin';
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
@@ -100,7 +100,7 @@ function getLensAttributes(
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer!,
           },
@@ -126,6 +126,9 @@ export const App = (props: {
     from: 'now-5d',
     to: 'now',
   });
+  const [searchSession, setSearchSession] = useState(() =>
+    props.plugins.data.search.session.start()
+  );
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
@@ -239,6 +242,18 @@ export const App = (props: {
                   Change time range
                 </EuiButton>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Refresh"
+                  data-test-subj="lns-example-refresh"
+                  isDisabled={!attributes}
+                  onClick={() => {
+                    setSearchSession(props.plugins.data.search.session.start());
+                  }}
+                >
+                  Refresh
+                </EuiButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <LensComponent
               id=""
@@ -246,6 +261,7 @@ export const App = (props: {
               style={{ height: 500 }}
               timeRange={time}
               attributes={attributes}
+              searchSessionId={searchSession}
               onLoad={(val) => {
                 setIsLoading(val);
               }}

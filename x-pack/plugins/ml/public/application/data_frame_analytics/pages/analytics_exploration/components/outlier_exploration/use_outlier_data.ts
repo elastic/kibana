@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
@@ -55,13 +55,14 @@ export const useOutlierData = (
       const resultsField = jobConfig.dest.results_field;
       const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
       newColumns.push(
-        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
           sortExplorationResultsFields(a.id, b.id, jobConfig)
         )
       );
     }
 
     return newColumns;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig, indexPattern]);
 
   const dataGrid = useExplorationDataGrid(
@@ -77,6 +78,7 @@ export const useOutlierData = (
     if (jobConfig !== undefined) {
       dataGrid.setSortingColumns([{ id: getOutlierScoreFieldName(jobConfig), direction: 'desc' }]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id]);
 
   // The pattern using `didCancel` allows us to abort out of date remote request.
@@ -89,6 +91,7 @@ export const useOutlierData = (
       options.didCancel = true;
     };
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
@@ -123,19 +126,23 @@ export const useOutlierData = (
       fetchColumnChartsData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
     // Only trigger when search or the visible columns changes.
     // We're only interested in the visible columns but not their order, that's
     // why we sort for comparison (and copying it via spread to avoid sort in place).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([searchQuery, [...dataGrid.visibleColumns].sort()]),
   ]);
 
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, dataGrid.tableItems) : 1
+    jobConfig !== undefined
+      ? getFeatureCount(jobConfig.dest.results_field!, dataGrid.tableItems)
+      : 1
   );
 
   const renderCellValue = useRenderCellValue(

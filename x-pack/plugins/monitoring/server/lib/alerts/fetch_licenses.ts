@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 export async function fetchLicenses(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   filterQuery?: string
 ): Promise<AlertLicense[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -50,7 +50,11 @@ export async function fetchLicenses(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter(
+              'cluster_stats',
+              'cluster_stats',
+              getElasticsearchDataset('cluster_stats')
+            ),
             {
               range: {
                 timestamp: {

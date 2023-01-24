@@ -6,47 +6,33 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-/** Types matching number values **/
-export type AllowedSchemaNumberTypes =
-  | 'long'
-  | 'integer'
-  | 'short'
-  | 'byte'
-  | 'double'
-  | 'float'
-  | 'date';
-/** Types matching string values **/
-export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
-/** Types matching boolean values **/
-export type AllowedSchemaBooleanTypes = 'boolean';
+import type { PossibleSchemaTypes, SchemaMetaOptional } from '@kbn/analytics-client';
 
-/**
- * Possible type values in the schema
- */
-export type AllowedSchemaTypes =
-  | AllowedSchemaNumberTypes
-  | AllowedSchemaStringTypes
-  | AllowedSchemaBooleanTypes;
-
-/**
- * Helper to ensure the declared types match the schema types
- */
-export type PossibleSchemaTypes<U> = U extends string
-  ? AllowedSchemaStringTypes
-  : U extends number
-  ? AllowedSchemaNumberTypes
-  : U extends boolean
-  ? AllowedSchemaBooleanTypes
-  : // allow any schema type from the union if typescript is unable to resolve the exact U type
-    AllowedSchemaTypes;
+export type {
+  AllowedSchemaTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  PossibleSchemaTypes,
+} from '@kbn/analytics-client';
 
 /**
  * Helper to find out whether to keep recursively looking or if we are on an end value
  */
 export type RecursiveMakeSchemaFrom<U> = U extends object
-  ? MakeSchemaFrom<U>
+  ? Record<string, unknown> extends U
+    ?
+        | {
+            // pass_through should only be allowed for Record<string, unknown> for now
+            type: 'pass_through';
+            _meta: {
+              description: string; // Intentionally enforcing the descriptions here
+            } & SchemaMetaOptional<U>;
+          }
+        | MakeSchemaFrom<U> // But still allow being explicit in the definition if they want to.
+    : MakeSchemaFrom<U>
   : { type: PossibleSchemaTypes<U>; _meta?: { description: string } };
 
 /**
@@ -84,7 +70,7 @@ export interface CollectorFetchContext {
 /**
  * The fetch method has the context of the Collector itself
  * (this has access to all the properties of the collector like the logger)
- * and the the first parameter is {@link CollectorFetchContext}.
+ * and the first parameter is {@link CollectorFetchContext}.
  */
 export type CollectorFetchMethod<TReturn, ExtraOptions extends object = {}> = (
   this: ICollector<TReturn> & ExtraOptions, // Specify the context of `this` for this.log and others to become available

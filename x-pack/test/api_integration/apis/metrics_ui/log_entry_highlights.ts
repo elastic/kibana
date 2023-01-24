@@ -11,13 +11,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
 
-import { createPlainError, throwErrors } from '../../../../plugins/infra/common/runtime_types';
+import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
 
 import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
-} from '../../../../plugins/infra/common/http_api';
+} from '@kbn/infra-plugin/common/http_api';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -37,6 +37,7 @@ const COMMON_HEADERS = {
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('log highlight apis', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs'));
@@ -44,8 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('/log_entries/highlights', () => {
       describe('with the default source', () => {
-        before(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
-        after(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
+        before(() => kibanaServer.savedObjects.cleanStandardList());
+        after(() => kibanaServer.savedObjects.cleanStandardList());
 
         it('Handles empty responses', async () => {
           const { body } = await supertest

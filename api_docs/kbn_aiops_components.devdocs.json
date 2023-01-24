@@ -1,0 +1,127 @@
+{
+  "id": "@kbn/aiops-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/aiops-components",
+        "id": "def-common.DualBrush",
+        "type": "Function",
+        "tags": [],
+        "label": "DualBrush",
+        "description": [],
+        "signature": [
+          "({\n  windowParameters,\n  min,\n  max,\n  onChange,\n  marginLeft,\n  snapTimestamps,\n  width,\n}: DualBrushProps) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DualBrush.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  windowParameters,\n  min,\n  max,\n  onChange,\n  marginLeft,\n  snapTimestamps,\n  width,\n}",
+            "description": [],
+            "signature": [
+              "DualBrushProps"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-components",
+        "id": "def-common.DualBrushAnnotation",
+        "type": "Function",
+        "tags": [],
+        "label": "DualBrushAnnotation",
+        "description": [],
+        "signature": [
+          "({ id, min, max }: React.PropsWithChildren<BrushAnnotationProps>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DualBrushAnnotation.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ id, min, max }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<BrushAnnotationProps>"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-components",
+        "id": "def-common.ProgressControls",
+        "type": "Function",
+        "tags": [],
+        "label": "ProgressControls",
+        "description": [],
+        "signature": [
+          "({\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  isRunning,\n  shouldRerunAnalysis,\n}: ProgressControlProps) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.ProgressControls.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  isRunning,\n  shouldRerunAnalysis,\n}",
+            "description": [],
+            "signature": [
+              "ProgressControlProps"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

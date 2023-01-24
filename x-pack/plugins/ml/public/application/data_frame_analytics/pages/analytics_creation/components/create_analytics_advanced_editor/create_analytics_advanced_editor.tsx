@@ -11,7 +11,7 @@ import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elast
 
 import { i18n } from '@kbn/i18n';
 
-import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { useNotifications } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
@@ -52,6 +52,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
           );
         }
       }, 400),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobId]
   );
 
@@ -75,6 +76,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     return () => {
       debouncedJobIdCheck.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   return (

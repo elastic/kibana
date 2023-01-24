@@ -20,7 +20,7 @@ export default function (this: webpack.loader.LoaderContext) {
   this.cacheable(true);
 
   const options = getOptions(this);
-  const bundleId: string = options.bundleId!;
+  const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
 
   const cases = ALL_THEMES.map((tag) => {

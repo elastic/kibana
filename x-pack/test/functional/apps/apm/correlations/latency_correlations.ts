@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('latency correlations', () => {
-    describe('space with no features disabled', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/127431
+    describe.skip('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
         await spacesService.create({
@@ -69,7 +70,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await retry.try(async () => {
           const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
           const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
-
           expect(apmMainContainerTextItems).to.not.contain('No services found');
 
           expect(apmMainContainerTextItems).to.contain('opbeans-go');

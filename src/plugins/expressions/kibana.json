@@ -4,8 +4,8 @@
   "server": true,
   "ui": true,
   "owner": {
-    "name": "App Services",
-    "githubTeam": "kibana-app-services"
+    "name": "Visualizations",
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Adds expression runtime to Kibana",
   "extraPublicDirs": ["common", "common/fonts"],

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { FormatFactory } from '../../types';
 import type { ColumnConfigArg } from './datatable_column';
 import type { DatatableExpressionFunction } from './types';
@@ -29,6 +29,8 @@ export interface DatatableArgs {
   sortingDirection: SortingState['direction'];
   fitRowToContent?: boolean;
   rowHeightLines?: number;
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
 }
 
@@ -37,7 +39,7 @@ export const getDatatable = (
 ): DatatableExpressionFunction => ({
   name: 'lens_datatable',
   type: 'render',
-  inputTypes: ['lens_multitable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
     defaultMessage: 'Datatable renderer',
   }),
@@ -70,6 +72,14 @@ export const getDatatable = (
       help: '',
     },
     rowHeightLines: {
+      types: ['number'],
+      help: '',
+    },
+    headerRowHeight: {
+      types: ['string'],
+      help: '',
+    },
+    headerRowHeightLines: {
       types: ['number'],
       help: '',
     },

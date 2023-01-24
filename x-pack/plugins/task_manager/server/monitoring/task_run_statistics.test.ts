@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
@@ -362,18 +362,40 @@ describe('Task Run Statistics', () => {
               // Success, Success, Success, Failed
               { Success: 75, RetryScheduled: 0, Failed: 25, status: 'OK' },
               // Success, Success, Success, Failed, Failed
-              { Success: 60, RetryScheduled: 0, Failed: 40, status: 'warn' },
+              { Success: 60, RetryScheduled: 0, Failed: 40, status: 'OK' },
               // Success, Success, Failed, Failed, Failed
-              { Success: 40, RetryScheduled: 0, Failed: 60, status: 'error' },
+              { Success: 40, RetryScheduled: 0, Failed: 60, status: 'OK' },
               // Success, Failed, Failed, Failed, RetryScheduled
-              { Success: 20, RetryScheduled: 20, Failed: 60, status: 'error' },
+              { Success: 20, RetryScheduled: 20, Failed: 60, status: 'OK' },
               // Failed, Failed, Failed, RetryScheduled, RetryScheduled
-              { Success: 0, RetryScheduled: 40, Failed: 60, status: 'error' },
+              { Success: 0, RetryScheduled: 40, Failed: 60, status: 'OK' },
               // Failed, Failed, RetryScheduled, RetryScheduled, Success
-              { Success: 20, RetryScheduled: 40, Failed: 40, status: 'warn' },
+              { Success: 20, RetryScheduled: 40, Failed: 40, status: 'OK' },
               // Failed, RetryScheduled, RetryScheduled, Success, Success
               { Success: 40, RetryScheduled: 40, Failed: 20, status: 'OK' },
             ]);
+
+            expect(logger.debug).toHaveBeenCalledTimes(5);
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              1,
+              'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              2,
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              3,
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              4,
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              5,
+              'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
+            );
             resolve();
           } catch (e) {
             reject(e);
@@ -894,7 +916,7 @@ const mockTaskPollingEvent = (overrides: Partial<ConcreteTaskInstance> = {}) => 
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
-  id: uuid.v4(),
+  id: uuidv4(),
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',

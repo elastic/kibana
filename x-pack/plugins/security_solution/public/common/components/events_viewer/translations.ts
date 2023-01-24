@@ -11,13 +11,6 @@ export const SHOWING = i18n.translate('xpack.securitySolution.eventsViewer.showi
   defaultMessage: 'Showing',
 });
 
-export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
-  'xpack.securitySolution.eventsViewer.errorFetchingEventsData',
-  {
-    defaultMessage: 'Failed to query events data',
-  }
-);
-
 export const EVENTS = i18n.translate('xpack.securitySolution.eventsViewer.eventsLabel', {
   defaultMessage: 'Events',
 });
@@ -31,3 +24,10 @@ export const UNIT = (totalCount: number) =>
 export const ACTIONS = i18n.translate('xpack.securitySolution.eventsViewer.actionsColumnLabel', {
   defaultMessage: 'Actions',
 });
+
+export const ERROR_TIMELINE_EVENTS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.timelineEvents.errorSearchDescription',
+  {
+    defaultMessage: `An error has occurred on timeline events search`,
+  }
+);

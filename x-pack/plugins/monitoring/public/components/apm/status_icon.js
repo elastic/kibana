@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StatusIcon, STATUS_ICON_TYPES } from '../../components/status_icon';
+import { StatusIcon, STATUS_ICON_TYPES } from '../status_icon';
 import { i18n } from '@kbn/i18n';
 
 export function ApmStatusIcon({ status, availability = true }) {

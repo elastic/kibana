@@ -1,0 +1,467 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OsCondition should render one OS_LABELS 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        data-test-subj="OsConditionMacOs"
+      >
+        <strong>
+          <span
+            class="euiExpression emotion-euiExpression-success"
+            data-test-subj="osLabel"
+          >
+            <span
+              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+            />
+             
+            <span
+              class="euiExpression__value emotion-euiExpression__value"
+            >
+              OS
+            </span>
+          </span>
+          <span
+            class="euiExpression emotion-euiExpression-success"
+            data-test-subj="osValue"
+          >
+            <span
+              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+            >
+              IS
+            </span>
+             
+            <span
+              class="euiExpression__value emotion-euiExpression__value"
+            >
+              Mac
+            </span>
+          </span>
+        </strong>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      data-test-subj="OsConditionMacOs"
+    >
+      <strong>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="osLabel"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          />
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            OS
+          </span>
+        </span>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="osValue"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            IS
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            Mac
+          </span>
+        </span>
+      </strong>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`OsCondition should render two OS_LABELS 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        data-test-subj="OsConditionMacOs"
+      >
+        <strong>
+          <span
+            class="euiExpression emotion-euiExpression-success"
+            data-test-subj="osLabel"
+          >
+            <span
+              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+            />
+             
+            <span
+              class="euiExpression__value emotion-euiExpression__value"
+            >
+              OS
+            </span>
+          </span>
+          <span
+            class="euiExpression emotion-euiExpression-success"
+            data-test-subj="osValue"
+          >
+            <span
+              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+            >
+              IS
+            </span>
+             
+            <span
+              class="euiExpression__value emotion-euiExpression__value"
+            >
+              Mac, Windows
+            </span>
+          </span>
+        </strong>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      data-test-subj="OsConditionMacOs"
+    >
+      <strong>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="osLabel"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          />
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            OS
+          </span>
+        </span>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="osValue"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            IS
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            Mac, Windows
+          </span>
+        </span>
+      </strong>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`OsCondition should return any os sent 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        data-test-subj="OsConditionMacOs"
+      >
+        <strong>
+          <span
+            class="euiExpression emotion-euiExpression-success"
+            data-test-subj="osLabel"
+          >
+            <span
+              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+            />
+             
+            <span
+              class="euiExpression__value emotion-euiExpression__value"
+            >
+              OS
+            </span>
+          </span>
+          <span
+            class="euiExpression emotion-euiExpression-success"
+            data-test-subj="osValue"
+          >
+            <span
+              class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+            >
+              IS
+            </span>
+             
+            <span
+              class="euiExpression__value emotion-euiExpression__value"
+            >
+              MacPro
+            </span>
+          </span>
+        </strong>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      data-test-subj="OsConditionMacOs"
+    >
+      <strong>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="osLabel"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          />
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            OS
+          </span>
+        </span>
+        <span
+          class="euiExpression emotion-euiExpression-success"
+          data-test-subj="osValue"
+        >
+          <span
+            class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+          >
+            IS
+          </span>
+           
+          <span
+            class="euiExpression__value emotion-euiExpression__value"
+          >
+            MacPro
+          </span>
+        </span>
+      </strong>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`OsCondition should return empty body 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div />
+  </body>,
+  "container": <div />,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

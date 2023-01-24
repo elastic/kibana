@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
-import { ExpressionRenderError } from '../../../../../src/plugins/expressions/public';
-import { isEsError } from '../../../../../src/plugins/data/public';
-import type { IEsError, Reason } from '../../../../../src/plugins/data/public';
+import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
+import { isEsError } from '@kbn/data-plugin/public';
+import type { IEsError, Reason } from '@kbn/data-plugin/public';
 
 type ErrorCause = Required<IEsError>['attributes'];
 
@@ -47,7 +47,7 @@ const isEsAggError = (e: Error | EsAggError): e is EsAggError => {
 
 function getNestedErrorClauseWithContext({
   type,
-  reason,
+  reason = '',
   caused_by: causedBy,
   lang,
   script,
@@ -73,7 +73,7 @@ function getNestedErrorClauseWithContext({
 }
 
 function getNestedErrorClause(e: ErrorCause | Reason): ReasonDescription[] {
-  const { type, reason, caused_by: causedBy } = e;
+  const { type, reason = '', caused_by: causedBy } = e;
   // Painless scripts errors are nested within the failed_shards property
   if ('failed_shards' in e) {
     if (e.failed_shards) {
@@ -143,39 +143,12 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
         }
       }
     }
+  } else if (error?.message) {
+    errorMessages.push(error?.message);
   }
   return errorMessages;
 }
 
-export function getMissingVisualizationTypeError() {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
-    defaultMessage: 'Visualization type not found.',
-  });
-}
-
-export function getMissingCurrentDatasource() {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingDatasource', {
-    defaultMessage: 'Could not find datasource for the visualization',
-  });
-}
-
-export function getMissingIndexPatterns(indexPatternIds: string[]) {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingDataView', {
-    defaultMessage: 'Could not find the {count, plural, one {data view} other {data views}}: {ids}',
-    values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
-  });
-}
-
-export function getUnknownVisualizationTypeError(visType: string) {
-  return {
-    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
-      defaultMessage: `Unknown visualization type`,
-    }),
-    longMessage: i18n.translate('xpack.lens.unknownVisType.longMessage', {
-      defaultMessage: `The visualization type {visType} could not be resolved.`,
-      values: {
-        visType,
-      },
-    }),
-  };
-}
+// NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
+// or the getUserMessages method of a particular datasource or visualization class! Alternatively, use the
+// addUserMessage function passed down by the application component.

@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { pluginServices } from './services';
-import { registry } from './services/kibana';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { pluginServices, registry } from './services/plugin_services';
 import {
   PresentationUtilPluginSetupDeps,
   PresentationUtilPluginStartDeps,

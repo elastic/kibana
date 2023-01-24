@@ -12,7 +12,7 @@ import {
   getPinTooltip,
   stringifyEvent,
 } from './helpers';
-import { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {
@@ -196,36 +196,112 @@ describe('helpers', () => {
   describe('getPinTooltip', () => {
     test('it indicates the event may NOT be unpinned when `isPinned` is `true` and the event has notes', () => {
       expect(
-        getPinTooltip({ isPinned: true, eventHasNotes: true, timelineType: TimelineType.default })
+        getPinTooltip({
+          isAlert: false,
+          isPinned: true,
+          eventHasNotes: true,
+          timelineType: TimelineType.default,
+        })
       ).toEqual('This event cannot be unpinned because it has notes');
+    });
+
+    test('it indicates the alert may NOT be unpinned when `isPinned` is `true` and the alert has notes', () => {
+      expect(
+        getPinTooltip({
+          isAlert: true,
+          isPinned: true,
+          eventHasNotes: true,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('This alert cannot be unpinned because it has notes');
     });
 
     test('it indicates the event is pinned when `isPinned` is `true` and the event does NOT have notes', () => {
       expect(
-        getPinTooltip({ isPinned: true, eventHasNotes: false, timelineType: TimelineType.default })
-      ).toEqual('Pinned event');
+        getPinTooltip({
+          isAlert: false,
+          isPinned: true,
+          eventHasNotes: false,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('Unpin event');
+    });
+
+    test('it indicates the alert is pinned when `isPinned` is `true` and the alert does NOT have notes', () => {
+      expect(
+        getPinTooltip({
+          isAlert: true,
+          isPinned: true,
+          eventHasNotes: false,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('Unpin alert');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event has notes', () => {
       expect(
-        getPinTooltip({ isPinned: false, eventHasNotes: true, timelineType: TimelineType.default })
-      ).toEqual('Unpinned event');
+        getPinTooltip({
+          isAlert: false,
+          isPinned: false,
+          eventHasNotes: true,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('Pin event');
+    });
+
+    test('it indicates the alert is NOT pinned when `isPinned` is `false` and the alert has notes', () => {
+      expect(
+        getPinTooltip({
+          isAlert: true,
+          isPinned: false,
+          eventHasNotes: true,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('Pin alert');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event does NOT have notes', () => {
       expect(
-        getPinTooltip({ isPinned: false, eventHasNotes: false, timelineType: TimelineType.default })
-      ).toEqual('Unpinned event');
+        getPinTooltip({
+          isAlert: false,
+          isPinned: false,
+          eventHasNotes: false,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('Pin event');
+    });
+
+    test('it indicates the alert is NOT pinned when `isPinned` is `false` and the alert does NOT have notes', () => {
+      expect(
+        getPinTooltip({
+          isAlert: true,
+          isPinned: false,
+          eventHasNotes: false,
+          timelineType: TimelineType.default,
+        })
+      ).toEqual('Pin alert');
     });
 
     test('it indicates the event is disabled if timelineType is template', () => {
       expect(
         getPinTooltip({
+          isAlert: false,
           isPinned: false,
           eventHasNotes: false,
           timelineType: TimelineType.template,
         })
       ).toEqual('This event may not be pinned while editing a template timeline');
+    });
+
+    test('it indicates the alert is disabled if timelineType is template', () => {
+      expect(
+        getPinTooltip({
+          isAlert: true,
+          isPinned: false,
+          eventHasNotes: false,
+          timelineType: TimelineType.template,
+        })
+      ).toEqual('This alert may not be pinned while editing a template timeline');
     });
   });
 

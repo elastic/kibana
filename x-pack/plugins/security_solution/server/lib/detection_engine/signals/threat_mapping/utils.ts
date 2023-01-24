@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
+import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
-import { ThreatMatchNamedQuery } from './types';
+import type { ThreatMatchNamedQuery, ThreatListItem } from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -70,6 +70,7 @@ export const combineResults = (
 ): SearchAfterAndBulkCreateReturnType => ({
   success: currentResult.success === false ? false : newResult.success,
   warning: currentResult.warning || newResult.warning,
+  enrichmentTimes: calculateAdditiveMax(currentResult.enrichmentTimes, newResult.enrichmentTimes),
   bulkCreateTimes: calculateAdditiveMax(currentResult.bulkCreateTimes, newResult.bulkCreateTimes),
   searchAfterTimes: calculateAdditiveMax(
     currentResult.searchAfterTimes,
@@ -94,6 +95,7 @@ export const combineConcurrentResults = (
   const maxedNewResult = newResult.reduce(
     (accum, item) => {
       const maxSearchAfterTime = calculateMax(accum.searchAfterTimes, item.searchAfterTimes);
+      const maxEnrichmentTimes = calculateMax(accum.enrichmentTimes, item.enrichmentTimes);
       const maxBulkCreateTimes = calculateMax(accum.bulkCreateTimes, item.bulkCreateTimes);
       const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
@@ -101,6 +103,7 @@ export const combineConcurrentResults = (
         warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
+        enrichmentTimes: [maxEnrichmentTimes],
         lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
@@ -113,6 +116,7 @@ export const combineConcurrentResults = (
       warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
+      enrichmentTimes: [],
       lastLookBackDate: undefined,
       createdSignalsCount: 0,
       createdSignals: [],
@@ -147,7 +151,9 @@ export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQu
   return query;
 };
 
-export const extractNamedQueries = (hit: SignalSourceHit): ThreatMatchNamedQuery[] =>
+export const extractNamedQueries = (
+  hit: SignalSourceHit | ThreatListItem
+): ThreatMatchNamedQuery[] =>
   hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
 
 export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {

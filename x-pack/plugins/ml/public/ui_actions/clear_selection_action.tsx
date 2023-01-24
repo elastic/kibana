@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 
 export const CLEAR_SELECTION_ACTION = 'clearSelectionAction';
@@ -15,8 +15,10 @@ export interface ClearSelectionContext {
   updateCallback: () => void;
 }
 
-export function createClearSelectionAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<ClearSelectionContext>({
+export function createClearSelectionAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<ClearSelectionContext> {
+  return {
     id: 'clear-selection-action',
     type: CLEAR_SELECTION_ACTION,
     getIconType(context): string {
@@ -33,5 +35,5 @@ export function createClearSelectionAction(getStartServices: MlCoreSetup['getSta
     async isCompatible({ updateCallback }) {
       return typeof updateCallback === 'function';
     },
-  });
+  };
 }

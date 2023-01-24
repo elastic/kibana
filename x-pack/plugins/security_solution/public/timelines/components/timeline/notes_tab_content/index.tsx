@@ -34,11 +34,12 @@ import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
 import { PARTICIPANTS } from '../translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
-import { TimelineResultNote } from '../../open_timeline/types';
+import type { TimelineResultNote } from '../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../side_panel';
 import { getScrollToTopSelector } from '../tabs_content/selectors';
 import { useScrollToTop } from '../../../../common/components/scroll_to_top';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -131,6 +132,7 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
@@ -145,9 +147,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
 
   const getNotesAsCommentsList = useMemo(
     () => appSelectors.selectNotesAsCommentsListSelector(),
@@ -179,7 +179,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   );
 
   const handleOnPanelClosed = useCallback(() => {
-    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, timelineId }));
+    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, id: timelineId }));
   }, [dispatch, timelineId]);
 
   const DetailsPanelContent = useMemo(
@@ -187,21 +187,13 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
       expandedDetail[TimelineTabs.notes]?.panelView ? (
         <DetailsPanel
           browserFields={browserFields}
-          docValueFields={docValueFields}
           handleOnPanelClosed={handleOnPanelClosed}
           runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
-          timelineId={timelineId}
+          scopeId={timelineId}
         />
       ) : null,
-    [
-      browserFields,
-      docValueFields,
-      expandedDetail,
-      handleOnPanelClosed,
-      runtimeMappings,
-      timelineId,
-    ]
+    [browserFields, expandedDetail, handleOnPanelClosed, runtimeMappings, timelineId]
   );
 
   const SidebarContent = useMemo(
@@ -239,7 +231,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             showTimelineDescription
           />
           <EuiSpacer size="s" />
-          {!isImmutable && (
+          {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
             <AddNote
               associateNote={associateNote}
               newNote={newNote}

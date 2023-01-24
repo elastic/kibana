@@ -1,426 +1,72 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`InspectorPanel should render as expected 1`] = `
-<InspectorPanel
-  adapters={
-    Object {
-      "bardapter": Object {},
-      "foodapter": Object {
-        "foo": [Function],
-      },
-    }
-  }
-  dependencies={
-    Object {
-      "application": Object {
-        "applications$": BehaviorSubject {
-          "_isScalar": false,
-          "_value": Map {},
-          "closed": false,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
-        "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "_isScalar": false,
-          "source": Subject {
-            "_isScalar": false,
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-        },
-        "getUrlForApp": [MockFunction],
-        "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
-      },
-      "http": Object {},
-      "share": Object {},
-      "uiSettings": Object {},
-    }
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  title="Inspector"
-  views={
-    Array [
-      Object {
-        "component": [Function],
-        "order": 200,
-        "title": "View 1",
-      },
-      Object {
-        "component": [Function],
-        "order": 100,
-        "shouldShow": [Function],
-        "title": "Foo View",
-      },
-      Object {
-        "component": [Function],
-        "order": 200,
-        "shouldShow": [Function],
-        "title": "Never",
-      },
-    ]
-  }
->
-  <Provider
-    services={
-      Object {
-        "application": Object {
-          "applications$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": Map {},
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "capabilities": Object {
-            "catalogue": Object {},
-            "management": Object {},
-            "navLinks": Object {},
-          },
-          "currentAppId$": Observable {
-            "_isScalar": false,
-            "source": Subject {
-              "_isScalar": false,
-              "closed": false,
-              "hasError": false,
-              "isStopped": false,
-              "observers": Array [],
-              "thrownError": null,
-            },
-          },
-          "getUrlForApp": [MockFunction],
-          "navigateToApp": [MockFunction],
-          "navigateToUrl": [MockFunction],
-        },
-        "http": Object {},
-        "share": Object {},
-        "uiSettings": Object {},
-      }
-    }
+Array [
+  <div
+    class="euiFlyoutHeader emotion-euiFlyoutHeader-hasBorder"
   >
-    <EuiFlyoutHeader
-      hasBorder={true}
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
     >
       <div
-        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
+        <h1
+          class="euiTitle emotion-euiTitle-s"
         >
-          <div
-            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-          >
-            <EuiFlexItem
-              grow={true}
-            >
-              <div
-                className="euiFlexItem"
-              >
-                <EuiTitle
-                  size="s"
-                >
-                  <h1
-                    className="euiTitle euiTitle--small"
-                  >
-                    Inspector
-                  </h1>
-                </EuiTitle>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <InspectorViewChooser
-                  onViewSelected={[Function]}
-                  selectedView={
-                    Object {
-                      "component": [Function],
-                      "order": 200,
-                      "title": "View 1",
-                    }
-                  }
-                  views={
-                    Array [
-                      Object {
-                        "component": [Function],
-                        "order": 200,
-                        "title": "View 1",
-                      },
-                      Object {
-                        "component": [Function],
-                        "order": 100,
-                        "shouldShow": [Function],
-                        "title": "Foo View",
-                      },
-                      Object {
-                        "component": [Function],
-                        "order": 200,
-                        "shouldShow": [Function],
-                        "title": "Never",
-                      },
-                    ]
-                  }
-                >
-                  <EuiPopover
-                    anchorPosition="downRight"
-                    button={
-                      <EuiButtonEmpty
-                        data-test-subj="inspectorViewChooser"
-                        iconSide="right"
-                        iconType="arrowDown"
-                        onClick={[Function]}
-                        size="s"
-                      >
-                        <FormattedMessage
-                          defaultMessage="View: {viewName}"
-                          id="inspector.view"
-                          values={
-                            Object {
-                              "viewName": "View 1",
-                            }
-                          }
-                        />
-                      </EuiButtonEmpty>
-                    }
-                    closePopover={[Function]}
-                    display="inlineBlock"
-                    hasArrow={true}
-                    id="inspectorViewChooser"
-                    isOpen={false}
-                    ownFocus={true}
-                    panelPaddingSize="none"
-                    repositionOnScroll={true}
-                  >
-                    <div
-                      className="euiPopover euiPopover--anchorDownRight"
-                      id="inspectorViewChooser"
-                    >
-                      <div
-                        className="euiPopover__anchor"
-                      >
-                        <EuiButtonEmpty
-                          data-test-subj="inspectorViewChooser"
-                          iconSide="right"
-                          iconType="arrowDown"
-                          onClick={[Function]}
-                          size="s"
-                        >
-                          <button
-                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
-                            data-test-subj="inspectorViewChooser"
-                            disabled={false}
-                            onClick={[Function]}
-                            type="button"
-                          >
-                            <EuiButtonContent
-                              className="euiButtonEmpty__content"
-                              iconSide="right"
-                              iconSize="m"
-                              iconType="arrowDown"
-                              textProps={
-                                Object {
-                                  "className": "euiButtonEmpty__text",
-                                }
-                              }
-                            >
-                              <span
-                                className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                              >
-                                <EuiIcon
-                                  className="euiButtonContent__icon"
-                                  color="inherit"
-                                  size="m"
-                                  type="arrowDown"
-                                >
-                                  <span
-                                    className="euiButtonContent__icon"
-                                    color="inherit"
-                                    data-euiicon-type="arrowDown"
-                                    size="m"
-                                  />
-                                </EuiIcon>
-                                <span
-                                  className="euiButtonEmpty__text"
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="View: {viewName}"
-                                    id="inspector.view"
-                                    values={
-                                      Object {
-                                        "viewName": "View 1",
-                                      }
-                                    }
-                                  >
-                                    View: View 1
-                                  </FormattedMessage>
-                                </span>
-                              </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonEmpty>
-                      </div>
-                    </div>
-                  </EuiPopover>
-                </InspectorViewChooser>
-              </div>
-            </EuiFlexItem>
-          </div>
-        </EuiFlexGroup>
+          Inspector
+        </h1>
       </div>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody
-      className="insInspectorPanel__flyoutBody"
-    >
       <div
-        className="euiFlyoutBody insInspectorPanel__flyoutBody"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          className="euiFlyoutBody__overflow"
-          tabIndex={0}
+          class="euiPopover emotion-euiPopover"
+          id="inspectorViewChooser"
         >
           <div
-            className="euiFlyoutBody__overflowContent"
+            class="euiPopover__anchor css-16vtueo-render"
           >
-            <Suspense
-              fallback={<EuiLoadingSpinner />}
+            <button
+              class="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
+              data-test-subj="inspectorViewChooser"
+              type="button"
             >
-              <component
-                adapters={
-                  Object {
-                    "bardapter": Object {},
-                    "foodapter": Object {
-                      "foo": [Function],
-                    },
-                  }
-                }
-                title="Inspector"
+              <span
+                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
               >
-                <h1>
-                  View 1
-                </h1>
-              </component>
-            </Suspense>
+                <span
+                  class="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  View: View 1
+                </span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
-    </EuiFlyoutBody>
-  </Provider>
-</InspectorPanel>
+    </div>
+  </div>,
+  <div
+    class="euiFlyoutBody insInspectorPanel__flyoutBody emotion-euiFlyoutBody"
+  >
+    <div
+      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
+      tabindex="0"
+    >
+      <div
+        class="euiFlyoutBody__overflowContent"
+      >
+        <h1>
+          View 1
+        </h1>
+      </div>
+    </div>
+  </div>,
+]
 `;

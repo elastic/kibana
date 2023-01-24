@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingCore } from '../../..';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';
 import { Report } from '../../../lib/store';
@@ -152,6 +152,20 @@ describe('POST /api/reporting/generate', () => {
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot('"Invalid export-type of TonyHawksProSkater2"')
+      );
+  });
+
+  it('returns 400 on invalid browser timezone', async () => {
+    registerJobGenerationRoutes(mockReportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/reporting/generate/printablePdf')
+      .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
       );
   });
 

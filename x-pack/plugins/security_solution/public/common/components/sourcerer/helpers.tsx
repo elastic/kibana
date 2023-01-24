@@ -6,17 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiSuperSelectOption,
-  EuiIcon,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiFormRowProps,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption, EuiFormRowProps } from '@elastic/eui';
+import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { sourcererModel } from '../../store/sourcerer';
+import type { sourcererModel } from '../../store/sourcerer';
 
 import * as i18n from './translations';
 

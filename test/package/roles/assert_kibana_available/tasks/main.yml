@@ -4,6 +4,6 @@
     status_code: [200, 401]
     timeout: 120
   register: result
-  until: result.status != 503
+  until: result.status not in [503, -1]
   retries: 3
   delay: 30

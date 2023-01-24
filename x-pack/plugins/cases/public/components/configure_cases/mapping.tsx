@@ -9,19 +9,26 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { TextColor } from '@elastic/eui/src/components/text/text_color';
+import type { TextColor } from '@elastic/eui/src/components/text/text_color';
+import { ConnectorTypes } from '../../../common/api';
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
-import { CaseConnectorMapping } from '../../containers/configure/types';
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 
 export interface MappingProps {
   actionTypeName: string;
+  connectorType: ConnectorTypes;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
 }
 
-const MappingComponent: React.FC<MappingProps> = ({ actionTypeName, isLoading, mappings }) => {
+const MappingComponent: React.FC<MappingProps> = ({
+  actionTypeName,
+  connectorType,
+  isLoading,
+  mappings,
+}) => {
   const fieldMappingDesc: { desc: string; color: TextColor } = useMemo(
     () =>
       mappings.length > 0 || isLoading
@@ -29,12 +36,18 @@ const MappingComponent: React.FC<MappingProps> = ({ actionTypeName, isLoading, m
             desc: i18n.FIELD_MAPPING_DESC(actionTypeName),
             color: 'subdued',
           }
+        : connectorType === ConnectorTypes.casesWebhook
+        ? {
+            desc: i18n.CASES_WEBHOOK_MAPPINGS,
+            color: 'subdued',
+          }
         : {
             desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
             color: 'danger',
           },
-    [isLoading, mappings.length, actionTypeName]
+    [mappings.length, isLoading, actionTypeName, connectorType]
   );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>

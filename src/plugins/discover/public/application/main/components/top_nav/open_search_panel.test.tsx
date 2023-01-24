@@ -15,11 +15,12 @@ describe('OpenSearchPanel', () => {
   });
 
   test('render', async () => {
-    jest.doMock('../../../../utils/use_discover_services', () => ({
+    jest.doMock('../../../../hooks/use_discover_services', () => ({
       useDiscoverServices: jest.fn().mockImplementation(() => ({
-        core: { uiSettings: {}, savedObjects: {} },
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: true } },
+        savedObjectsFinder: { Finder: jest.fn() },
+        core: {},
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');
@@ -31,11 +32,12 @@ describe('OpenSearchPanel', () => {
   });
 
   test('should not render manage searches button without permissions', async () => {
-    jest.doMock('../../../../utils/use_discover_services', () => ({
+    jest.doMock('../../../../hooks/use_discover_services', () => ({
       useDiscoverServices: jest.fn().mockImplementation(() => ({
-        core: { uiSettings: {}, savedObjects: {} },
         addBasePath: (path: string) => path,
         capabilities: { savedObjectsManagement: { edit: false, delete: false } },
+        savedObjectsFinder: { Finder: jest.fn() },
+        core: {},
       })),
     }));
     const { OpenSearchPanel } = await import('./open_search_panel');

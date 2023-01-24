@@ -9,18 +9,18 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { MachineLearningRuleParams } from '../../rule_schema';
+import { machineLearningRuleParams } from '../../rule_schema';
 import { mlExecutor } from '../../signals/executors/ml';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { logger, ml, experimentalFeatures } = createOptions;
+  const { ml } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -51,29 +51,30 @@ export const createMlAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
           bulkCreate,
-          exceptionItems,
-          listClient,
           completeRule,
+          listClient,
+          ruleExecutionLogger,
           tuple,
           wrapHits,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
 
       const result = await mlExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        listClient,
-        logger,
-        ml,
         completeRule,
-        services,
         tuple,
+        ml,
+        listClient,
+        services,
+        ruleExecutionLogger,
+        bulkCreate,
         wrapHits,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

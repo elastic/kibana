@@ -8,12 +8,8 @@
 
 import Path from 'path';
 
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createStripAnsiSerializer,
-  createRecursiveSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createStripAnsiSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { exec } from './exec';
 

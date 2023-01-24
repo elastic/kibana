@@ -6,19 +6,20 @@
  */
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { finished, Writable } from 'stream';
-import { promisify } from 'util';
-import { getContentStream } from '../';
-import type { ReportingCore } from '../../';
+import { Writable } from 'stream';
+import { finished } from 'stream/promises';
+import { setTimeout } from 'timers/promises';
 import type {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+import { getContentStream } from '..';
+import type { ReportingCore } from '../..';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
@@ -35,7 +36,7 @@ import {
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
   TaskRunResult,
-} from './';
+} from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
@@ -57,6 +58,22 @@ function isOutput(output: CompletedReportOutput | Error): output is CompletedRep
 
 function reportFromTask(task: ReportTaskParams) {
   return new Report({ ...task, _id: task.id, _index: task.index });
+}
+
+async function finishedWithNoPendingCallbacks(stream: Writable) {
+  await finished(stream, { readable: false });
+
+  // Race condition workaround:
+  // `finished(...)` will resolve while there's still pending callbacks in the writable part of the `stream`.
+  // This introduces a race condition where the code continues before the writable part has completely finished.
+  // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
+  // For more information, see: https://github.com/nodejs/node/issues/46170
+  await (async function pendingCallbacks(delay = 1) {
+    if ((stream as any)._writableState.pendingcb > 0) {
+      await setTimeout(delay);
+      await pendingCallbacks(delay < 32 ? delay * 2 : delay);
+    }
+  })();
 }
 
 export class ExecuteReportTask implements ReportingTask {
@@ -232,7 +249,7 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.error_code = output.error_code;
     } else {
       const defaultOutput = null;
-      docOutput.content = output.toString() || defaultOutput;
+      docOutput.content = output.humanFriendlyMessage?.() || output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
       docOutput.warnings = [output.toString()];
       docOutput.error_code = output.code;
@@ -259,9 +276,11 @@ export class ExecuteReportTask implements ReportingTask {
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream))
-      .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
-      .toPromise();
+    return Rx.lastValueFrom(
+      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+        timeout(queueTimeout)
+      ) // throw an error if a value is not emitted before timeout
+    );
   }
 
   public async _completeJob(
@@ -375,7 +394,7 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
-            await promisify(finished)(stream, { readable: false });
+            await finishedWithNoPendingCallbacks(stream);
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;

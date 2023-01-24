@@ -40,9 +40,11 @@ As you edit the specs, work in small steps, and frequently save your work. Small
 
 Before starting, add the eCommerce sample data that you'll use in your spec, then create the dashboard.
 
-. From the {kib} *Home* page, click *Try our sample data*.
+. On the home page, click *Try sample data*.
 
-. From *eCommerce sample data*, click *Add data*.
+. Click *Other sample data sets*. 
+
+. On the *Sample eCommerce orders* card, click *Add data*.
 
 . Open the main menu, then click *Dashboard*.
 
@@ -53,7 +55,7 @@ Before starting, add the eCommerce sample data that you'll use in your spec, the
 
 Open *Vega-Lite* and change the time range.
 
-. On the dashboard, click *All types*, then select *Custom visualization*.
+. On the dashboard, click *Select type*, then select *Custom visualization*.
 +
 A pre-populated line chart displays the total number of documents. 
 

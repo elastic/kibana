@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
-import { advancedSettingsMock } from 'src/plugins/advanced_settings/public/mocks';
-import { homePluginMock } from 'src/plugins/home/public/mocks';
+import { advancedSettingsMock } from '@kbn/advanced-settings-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import {
   createManagementSectionMock,
   managementPluginMock,
-} from 'src/plugins/management/public/mocks';
+} from '@kbn/management-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
 

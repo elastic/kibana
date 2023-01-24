@@ -10,6 +10,7 @@ export enum METRIC_TYPES {
   AVG = 'avg',
   FILTERED_METRIC = 'filtered_metric',
   CARDINALITY = 'cardinality',
+  VALUE_COUNT = 'value_count',
   AVG_BUCKET = 'avg_bucket',
   MAX_BUCKET = 'max_bucket',
   MIN_BUCKET = 'min_bucket',
@@ -21,6 +22,7 @@ export enum METRIC_TYPES {
   GEO_CENTROID = 'geo_centroid',
   MEDIAN = 'median',
   SINGLE_PERCENTILE = 'single_percentile',
+  SINGLE_PERCENTILE_RANK = 'single_percentile_rank',
   MIN = 'min',
   MAX = 'max',
   MOVING_FN = 'moving_avg',
@@ -30,5 +32,6 @@ export enum METRIC_TYPES {
   TOP_METRICS = 'top_metrics',
   PERCENTILES = 'percentiles',
   PERCENTILE_RANKS = 'percentile_ranks',
+  RATE = 'rate',
   STD_DEV = 'std_dev',
 }

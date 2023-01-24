@@ -5,71 +5,70 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { ActionType } from '../../../../types';
 
 interface ActionTypeFilterProps {
   actionTypes: ActionType[];
-  onChange?: (selectedActionTypeIds: string[]) => void;
+  onChange: (selectedActionTypeIds: string[]) => void;
+  filters: string[];
 }
 
 export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = ({
   actionTypes,
-  onChange,
+  onChange: onFilterChange,
+  filters,
 }: ActionTypeFilterProps) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (onChange) {
-      onChange(selectedValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedValues]);
+  const onClick = useCallback(
+    (item: ActionType) => {
+      return () => {
+        const isPreviouslyChecked = filters.includes(item.id);
+        if (isPreviouslyChecked) {
+          onFilterChange(filters.filter((val) => val !== item.id));
+        } else {
+          onFilterChange(filters.concat(item.id));
+        }
+      };
+    },
+    [filters, onFilterChange]
+  );
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            hasActiveFilters={selectedValues.length > 0}
-            numActiveFilters={selectedValues.length}
-            numFilters={selectedValues.length}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="actionTypeFilterButton"
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      button={
+        <EuiFilterButton
+          iconType="arrowDown"
+          hasActiveFilters={filters.length > 0}
+          numActiveFilters={filters.length}
+          numFilters={filters.length}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj="actionTypeFilterButton"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.actionTypeFilterLabel"
+            defaultMessage="Action type"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <div className="euiFilterSelect__items">
+        {actionTypes.map((item) => (
+          <EuiFilterSelectItem
+            key={item.id}
+            onClick={onClick(item)}
+            checked={filters.includes(item.id) ? 'on' : undefined}
+            data-test-subj={`actionType${item.id}FilterOption`}
           >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.actionTypeFilterLabel"
-              defaultMessage="Action type"
-            />
-          </EuiFilterButton>
-        }
-      >
-        <div className="euiFilterSelect__items">
-          {actionTypes.map((item) => (
-            <EuiFilterSelectItem
-              key={item.id}
-              onClick={() => {
-                const isPreviouslyChecked = selectedValues.includes(item.id);
-                if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter((val) => val !== item.id));
-                } else {
-                  setSelectedValues(selectedValues.concat(item.id));
-                }
-              }}
-              checked={selectedValues.includes(item.id) ? 'on' : undefined}
-              data-test-subj={`actionType${item.id}FilterOption`}
-            >
-              {item.name}
-            </EuiFilterSelectItem>
-          ))}
-        </div>
-      </EuiPopover>
-    </EuiFilterGroup>
+            {item.name}
+          </EuiFilterSelectItem>
+        ))}
+      </div>
+    </EuiPopover>
   );
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { EndpointDocGenerator, Event, TreeOptions } from '../generate_data';
+import type { Client } from '@elastic/elasticsearch';
+import type { EndpointDocGenerator, Event, TreeOptions } from '../generate_data';
 import { firstNonNullValue } from '../models/ecs_safety_helpers';
 
 function delay(ms: number) {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/public';
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 import { MapsXPackConfig } from '../config';
 
@@ -18,6 +18,7 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
 };
 
 export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+export { MAPS_APP_LOCATOR } from './locators';
 export type { PreIndexedShape } from '../common/elasticsearch_util';
 
 export { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids';
@@ -33,7 +34,14 @@ export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './e
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 
-export type { IVectorSource, GeoJsonWithMeta } from './classes/sources/vector_source/vector_source';
+export type { ITMSSource } from './classes/sources/tms_source';
+export type { IRasterSource } from './classes/sources/raster_source';
+
+export type {
+  GetFeatureActionsArgs,
+  IVectorSource,
+  GeoJsonWithMeta,
+} from './classes/sources/vector_source/vector_source';
 export type { ImmutableSourceProperty, SourceEditorArgs } from './classes/sources/source';
 export type { Attribution } from '../common/descriptor_types';
 export type {

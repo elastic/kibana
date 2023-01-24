@@ -6,13 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import rison from 'rison-node';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
+import rison from '@kbn/rison';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import type { BaseParams } from '../../types';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { RequestHandler } from '../lib/request_handler';
+import { authorizedUserPreRouting, getCounters, RequestHandler } from '../lib';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -27,73 +26,86 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
 
-  router.post(
-    {
-      path: `${BASE_GENERATE}/{exportType}`,
-      validate: {
-        params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
-        body: schema.nullable(schema.object({ jobParams: schema.maybe(schema.string()) })),
-        query: schema.nullable(schema.object({ jobParams: schema.string({ defaultValue: '' }) })),
+  const registerPostGenerationEndpoint = () => {
+    const path = `${BASE_GENERATE}/{exportType}`;
+    router.post(
+      {
+        path,
+        validate: {
+          params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
+          body: schema.nullable(schema.object({ jobParams: schema.maybe(schema.string()) })),
+          query: schema.nullable(schema.object({ jobParams: schema.string({ defaultValue: '' }) })),
+        },
+        options: { tags: kibanaAccessControlTags },
       },
-      options: { tags: kibanaAccessControlTags },
-    },
-    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-      let jobParamsRison: null | string = null;
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        const counters = getCounters(
+          req.route.method,
+          path.replace(/{exportType}/, req.params.exportType),
+          reporting.getUsageCounter()
+        );
 
-      if (req.body) {
-        const { jobParams: jobParamsPayload } = req.body;
-        jobParamsRison = jobParamsPayload ? jobParamsPayload : null;
-      } else if (req.query?.jobParams) {
-        const { jobParams: queryJobParams } = req.query;
-        if (queryJobParams) {
-          jobParamsRison = queryJobParams;
-        } else {
-          jobParamsRison = null;
+        let jobParamsRison: null | string = null;
+
+        if (req.body) {
+          const { jobParams: jobParamsPayload } = req.body;
+          jobParamsRison = jobParamsPayload ? jobParamsPayload : null;
+        } else if (req.query?.jobParams) {
+          const { jobParams: queryJobParams } = req.query;
+          if (queryJobParams) {
+            jobParamsRison = queryJobParams;
+          } else {
+            jobParamsRison = null;
+          }
         }
-      }
 
-      if (!jobParamsRison) {
-        return res.customError({
-          statusCode: 400,
-          body: 'A jobParams RISON string is required in the querystring or POST body',
-        });
-      }
-
-      let jobParams;
-
-      try {
-        jobParams = rison.decode(jobParamsRison) as BaseParams | null;
-        if (!jobParams) {
+        if (!jobParamsRison) {
           return res.customError({
             statusCode: 400,
-            body: 'Missing jobParams!',
+            body: 'A jobParams RISON string is required in the querystring or POST body',
           });
         }
-      } catch (err) {
-        return res.customError({
-          statusCode: 400,
-          body: `invalid rison: ${jobParamsRison}`,
-        });
+
+        let jobParams;
+
+        try {
+          jobParams = rison.decode(jobParamsRison) as BaseParams | null;
+          if (!jobParams) {
+            return res.customError({
+              statusCode: 400,
+              body: 'Missing jobParams!',
+            });
+          }
+        } catch (err) {
+          return res.customError({
+            statusCode: 400,
+            body: `invalid rison: ${jobParamsRison}`,
+          });
+        }
+
+        const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+        return await requestHandler.handleGenerateRequest(
+          req.params.exportType,
+          jobParams,
+          counters
+        );
+      })
+    );
+  };
+
+  const registerGetGenerationEndpoint = () => {
+    // Get route to generation endpoint: show error about GET method to user
+    router.get(
+      {
+        path: `${BASE_GENERATE}/{p*}`,
+        validate: false,
+      },
+      (_context, _req, res) => {
+        return res.customError({ statusCode: 405, body: 'GET is not allowed' });
       }
+    );
+  };
 
-      const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
-
-      try {
-        return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
-      } catch (err) {
-        return requestHandler.handleError(err);
-      }
-    })
-  );
-
-  // Get route to generation endpoint: show error about GET method to user
-  router.get(
-    {
-      path: `${BASE_GENERATE}/{p*}`,
-      validate: false,
-    },
-    (_context, _req, res) => {
-      return res.customError({ statusCode: 405, body: 'GET is not allowed' });
-    }
-  );
+  registerPostGenerationEndpoint();
+  registerGetGenerationEndpoint();
 }

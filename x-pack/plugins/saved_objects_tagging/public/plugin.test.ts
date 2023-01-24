@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock } from '../../../../src/core/public/mocks';
-import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
-import { savedObjectTaggingOssPluginMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { SavedObjectsTaggingClientConfigRawType } from './config';
 import { TagsCache } from './services';

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { AdvancedSettingsPlugin } from './plugin';
 export type { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
 export { ComponentRegistry } from './component_registry';
@@ -20,6 +20,10 @@ export { ComponentRegistry } from './component_registry';
 const LazyField = React.lazy(() => import('./management_app/components/field'));
 export { LazyField };
 
+export { toEditableConfig } from './management_app/lib/to_editable_config';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedSettingsPlugin();
 }
+
+export type { FieldState } from './management_app/types';

@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 
-import { UserDetailsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/details';
+import type { UserDetailsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/details';
 
 export const mockOptions: UserDetailsRequestOptions = {
   defaultIndex: ['test_indices*'],
-  docValueFields: [
-    {
-      field: '@timestamp',
-      format: 'date_time',
-    },
-  ],
   factoryQueryType: UsersQueries.details,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"user.name":{"query":"test_user"}}}],"should":[],"must_not":[]}}',

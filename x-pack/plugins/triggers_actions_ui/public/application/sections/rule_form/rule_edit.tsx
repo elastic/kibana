@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect } from 'react';
+import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -21,8 +22,9 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Rule,
@@ -31,6 +33,7 @@ import {
   IErrorObject,
   RuleType,
   TriggersActionsUiConfig,
+  RuleNotifyWhenType,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -44,6 +47,29 @@ import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
+const cloneAndMigrateRule = (initialRule: Rule) => {
+  const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
+
+  const hasRuleLevelNotifyWhen = Boolean(initialRule.notifyWhen);
+  const hasRuleLevelThrottle = Boolean(initialRule.throttle);
+
+  if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
+    const frequency = hasRuleLevelNotifyWhen
+      ? {
+          summary: false,
+          notifyWhen: initialRule.notifyWhen as RuleNotifyWhenType,
+          throttle:
+            initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
+        }
+      : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
+    clonedRule.actions = clonedRule.actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+  return clonedRule;
+};
+
 export const RuleEdit = ({
   initialRule,
   onClose,
@@ -51,12 +77,12 @@ export const RuleEdit = ({
   onSave,
   ruleTypeRegistry,
   actionTypeRegistry,
-  metadata,
+  metadata: initialMetadata,
   ...props
 }: RuleEditProps) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
-    rule: cloneDeep(initialRule),
+    rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
@@ -68,12 +94,16 @@ export const RuleEdit = ({
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
     props.ruleType
   );
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
+
+  const [metadata, setMetadata] = useState(initialMetadata);
+  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
 
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -89,11 +119,11 @@ export const RuleEdit = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getRuleActionErrors(rule as Rule, actionTypeRegistry);
+      const res = await getRuleActionErrors(rule.actions, actionTypeRegistry);
       setRuleActionsErrors([...res]);
       setIsLoading(false);
     })();
-  }, [rule, actionTypeRegistry]);
+  }, [rule.actions, actionTypeRegistry]);
 
   useEffect(() => {
     if (!props.ruleType && !serverRuleType) {
@@ -118,11 +148,12 @@ export const RuleEdit = ({
     if (hasRuleChanged(rule, initialRule, true)) {
       setIsConfirmRuleCloseModalOpen(true);
     } else {
-      onClose(RuleFlyoutCloseReason.CANCELED);
+      onClose(RuleFlyoutCloseReason.CANCELED, metadata);
     }
   };
 
-  async function onSaveRule(): Promise<Rule | undefined> {
+  async function onSaveRule(): Promise<void> {
+    setIsSaving(true);
     try {
       if (
         !isLoading &&
@@ -138,7 +169,10 @@ export const RuleEdit = ({
             },
           })
         );
-        return newRule;
+        onClose(RuleFlyoutCloseReason.SAVED, metadata);
+        if (onSaveHandler) {
+          onSaveHandler(metadata);
+        }
       } else {
         setRule(
           getRuleWithInvalidatedFields(rule, ruleParamsErrors, ruleBaseErrors, ruleActionsErrors)
@@ -152,6 +186,7 @@ export const RuleEdit = ({
           })
       );
     }
+    setIsSaving(false);
   }
 
   return (
@@ -201,10 +236,14 @@ export const RuleEdit = ({
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
                 setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-                operation="i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.operationName', {
-                  defaultMessage: 'edit',
-                })"
+                operation={i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleEdit.operationName',
+                  {
+                    defaultMessage: 'edit',
+                  }
+                )}
                 metadata={metadata}
+                onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>
             <EuiFlyoutFooter>
@@ -228,30 +267,40 @@ export const RuleEdit = ({
                   <></>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="success"
-                    data-test-subj="saveEditedRuleButton"
-                    type="submit"
-                    iconType="check"
-                    isLoading={isSaving}
-                    onClick={async () => {
-                      setIsSaving(true);
-                      const savedRule = await onSaveRule();
-                      setIsSaving(false);
-                      if (savedRule) {
-                        onClose(RuleFlyoutCloseReason.SAVED);
-                        if (onSaveHandler) {
-                          onSaveHandler();
-                        }
-                      }
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  </EuiButton>
+                  <EuiFlexGroup alignItems="center">
+                    {config.isUsingSecurity && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="alert"
+                          position="top"
+                          data-test-subj="changeInPrivilegesTip"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
+                            {
+                              defaultMessage:
+                                'Saving this rule will change its privileges and might change its behavior.',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        color="success"
+                        data-test-subj="saveEditedRuleButton"
+                        type="submit"
+                        iconType="check"
+                        isLoading={isSaving}
+                        onClick={async () => await onSaveRule()}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
+                          defaultMessage="Save"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutFooter>
@@ -261,7 +310,7 @@ export const RuleEdit = ({
           <ConfirmRuleClose
             onConfirm={() => {
               setIsConfirmRuleCloseModalOpen(false);
-              onClose(RuleFlyoutCloseReason.CANCELED);
+              onClose(RuleFlyoutCloseReason.CANCELED, metadata);
             }}
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);

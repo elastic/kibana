@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Anomalies, AnomaliesByUser, Anomaly } from '../types';
+import type { Anomalies, AnomaliesByUser, Anomaly } from '../types';
 import { getUserNameFromInfluencers } from '../influencers/get_user_name_from_influencers';
 
 export const convertAnomaliesToUsers = (
   anomalies: Anomalies | null,
+  jobNameById: Record<string, string | undefined>,
   userName?: string
 ): AnomaliesByUser[] => {
   if (anomalies == null) {
@@ -17,11 +18,25 @@ export const convertAnomaliesToUsers = (
   } else {
     return anomalies.anomalies.reduce<AnomaliesByUser[]>((accum, item) => {
       if (getUserNameFromEntity(item, userName)) {
-        return [...accum, { userName: item.entityValue, anomaly: item }];
+        return [
+          ...accum,
+          {
+            userName: item.entityValue,
+            jobName: jobNameById[item.jobId] ?? item.jobId,
+            anomaly: item,
+          },
+        ];
       } else {
         const userNameFromInfluencers = getUserNameFromInfluencers(item.influencers, userName);
         if (userNameFromInfluencers != null) {
-          return [...accum, { userName: userNameFromInfluencers, anomaly: item }];
+          return [
+            ...accum,
+            {
+              userName: userNameFromInfluencers,
+              jobName: jobNameById[item.jobId] ?? item.jobId,
+              anomaly: item,
+            },
+          ];
         } else {
           return accum;
         }

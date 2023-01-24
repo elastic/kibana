@@ -18,16 +18,19 @@ import {
   setFirstPreviewLayerToSelectedLayer,
   setEditLayerToSelectedLayer,
   updateFlyout,
+  setAutoOpenLayerWizardId,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common/constants';
+import { getAutoOpenLayerWizardId } from '../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     hasPreviewLayers: hasPreviewLayers(state),
     isLoadingPreviewLayers: isLoadingPreviewLayers(state),
+    autoOpenLayerWizardId: getAutoOpenLayerWizardId(state),
   };
 }
 
@@ -48,6 +51,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     enableEditMode: () => {
       dispatch(setEditLayerToSelectedLayer());
       dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
+    },
+    clearAutoOpenLayerWizardId: () => {
+      dispatch(setAutoOpenLayerWizardId(''));
     },
   };
 }

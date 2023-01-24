@@ -7,8 +7,8 @@
  */
 
 import { accessSync, constants } from 'fs';
-import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from './';
-import { REPO_ROOT } from '../repo_root';
+import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from '.';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 expect.addSnapshotSerializer(
   ((rootPath: string = REPO_ROOT, replacement = '<absolute path>') => {

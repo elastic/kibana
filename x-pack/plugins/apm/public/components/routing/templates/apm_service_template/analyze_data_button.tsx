@@ -8,24 +8,24 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
-import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { ALL_VALUES_SELECTED } from '@kbn/observability-plugin/public';
 import {
-  isIosAgentName,
+  isMobileAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
 function getEnvironmentDefinition(environment: string) {
   switch (environment) {
@@ -43,13 +43,16 @@ export function AnalyzeDataButton() {
 
   const {
     query: { rangeFrom, rangeTo, environment },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;
 
   if (
-    (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
+    (isRumAgentName(agentName) || isMobileAgentName(agentName)) &&
     rangeFrom &&
     canShowDashboard &&
     rangeTo

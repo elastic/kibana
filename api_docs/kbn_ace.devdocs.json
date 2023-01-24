@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.addToRules",
+        "id": "def-common.addToRules",
         "type": "Function",
         "tags": [],
         "label": "addToRules",
@@ -23,10 +31,11 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.addToRules.$1",
+            "id": "def-common.addToRules.$1",
             "type": "Any",
             "tags": [],
             "label": "otherRules",
@@ -36,11 +45,12 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.addToRules.$2",
+            "id": "def-common.addToRules.$2",
             "type": "Any",
             "tags": [],
             "label": "embedUnder",
@@ -50,6 +60,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -58,7 +69,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.ElasticsearchSqlHighlightRules",
+        "id": "def-common.ElasticsearchSqlHighlightRules",
         "type": "Function",
         "tags": [],
         "label": "ElasticsearchSqlHighlightRules",
@@ -68,13 +79,14 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/elasticsearch_sql_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.installXJsonMode",
+        "id": "def-common.installXJsonMode",
         "type": "Function",
         "tags": [],
         "label": "installXJsonMode",
@@ -86,10 +98,11 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.installXJsonMode.$1",
+            "id": "def-common.installXJsonMode.$1",
             "type": "Object",
             "tags": [],
             "label": "editor",
@@ -99,6 +112,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -107,7 +121,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.ScriptHighlightRules",
+        "id": "def-common.ScriptHighlightRules",
         "type": "Function",
         "tags": [],
         "label": "ScriptHighlightRules",
@@ -117,10 +131,11 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.ScriptHighlightRules.$1",
+            "id": "def-common.ScriptHighlightRules.$1",
             "type": "Any",
             "tags": [],
             "label": "this",
@@ -130,6 +145,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -138,7 +154,7 @@
       },
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.XJsonHighlightRules",
+        "id": "def-common.XJsonHighlightRules",
         "type": "Function",
         "tags": [],
         "label": "XJsonHighlightRules",
@@ -148,10 +164,11 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
-            "id": "def-server.XJsonHighlightRules.$1",
+            "id": "def-common.XJsonHighlightRules.$1",
             "type": "Any",
             "tags": [],
             "label": "this",
@@ -161,6 +178,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -173,7 +191,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ace",
-        "id": "def-server.XJsonMode",
+        "id": "def-common.XJsonMode",
         "type": "Any",
         "tags": [],
         "label": "XJsonMode",
@@ -183,17 +201,10 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -8,17 +8,16 @@
 import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
-import { AlertInfo } from '../../common/types';
-import { UpdateAlertRequest } from '../../client/alerts/types';
-import {
-  ALERT_WORKFLOW_STATUS,
-  STATUS_VALUES,
-} from '../../../../rule_registry/common/technical_rule_data_field_names';
-import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { AlertInfo } from '../../common/types';
+import type { UpdateAlertRequest } from '../../client/alerts/types';
+import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {
   constructor(
@@ -30,7 +29,7 @@ export class AlertService {
     aggregationBuilders,
     alerts,
   }: {
-    aggregationBuilders: AggregationBuilder[];
+    aggregationBuilders: Array<AggregationBuilder<unknown>>;
     alerts: AlertIdIndex[];
   }): Promise<AggregationResponse> {
     try {
@@ -180,7 +179,7 @@ export class AlertService {
     );
   }
 
-  public async getAlerts(alertsInfo: AlertInfo[]): Promise<AlertsResponse | undefined> {
+  public async getAlerts(alertsInfo: AlertInfo[]): Promise<MgetResponse<Alert> | undefined> {
     try {
       const docs = alertsInfo
         .filter((alert) => !AlertService.isEmptyAlert(alert))
@@ -193,8 +192,7 @@ export class AlertService {
 
       const results = await this.scopedClusterClient.mget<Alert>({ body: { docs } });
 
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return results.body;
+      return results;
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
@@ -230,14 +228,10 @@ function updateIndexEntryWithStatus(
   }
 }
 
-interface Alert {
+export interface Alert {
   _id: string;
   _index: string;
   _source: Record<string, unknown>;
-}
-
-interface AlertsResponse {
-  docs: Alert[];
 }
 
 interface AlertIdIndex {

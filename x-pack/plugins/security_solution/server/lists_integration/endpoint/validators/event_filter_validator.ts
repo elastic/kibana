@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import {
+import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
+} from '@kbn/lists-plugin/server';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 
-import { ExceptionItemLikeOptions } from '../types';
+import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
@@ -48,8 +48,16 @@ export class EventFilterValidator extends BaseValidator {
     return item.listId === ENDPOINT_EVENT_FILTERS_LIST_ID;
   }
 
+  protected async validateHasWritePrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canWriteEventFilters');
+  }
+
+  protected async validateHasReadPrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canReadEventFilters');
+  }
+
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
     await this.validateEventFilterData(item);
 
     // user can always create a global entry so additional checks not needed
@@ -67,7 +75,7 @@ export class EventFilterValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
     await this.validateEventFilterData(updatedItem);
 
     try {
@@ -96,27 +104,27 @@ export class EventFilterValidator extends BaseValidator {
   }
 
   async validatePreGetOneItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSummary(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreMultiListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreImport(): Promise<void> {

@@ -4,17 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCodeBlock, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import {
-  isPrereleaseVersion,
-  SUPPORTED_APM_PACKAGE_VERSION,
-} from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
-import { getCommands } from './commands/get_commands';
+import { AgentConfigInstructions } from './agent_config_instructions';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
 
@@ -72,9 +68,7 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: isPrereleaseVersion(kibanaVersion)
-          ? `${basePath}/app/integrations#/detail/apm/overview`
-          : `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
+        href: `${basePath}/app/integrations#/detail/apm/overview`,
       };
 }
 
@@ -127,16 +121,7 @@ function TutorialConfigAgent({
     );
   }
 
-  const commands = getCommands({
-    variantId,
-    policyDetails: {
-      apmServerUrl: selectedOption?.apmServerUrl,
-      secretToken: selectedOption?.secretToken,
-    },
-  });
-
   const hasFleetAgents = !!data.fleetAgents.length;
-
   return (
     <>
       <PolicySelector
@@ -150,11 +135,11 @@ function TutorialConfigAgent({
           kibanaVersion,
         })}
       />
-
-      <EuiSpacer />
-      <EuiCodeBlock isCopyable language="bash" data-test-subj="commands">
-        {commands}
-      </EuiCodeBlock>
+      <AgentConfigInstructions
+        variantId={variantId}
+        apmServerUrl={selectedOption?.apmServerUrl}
+        secretToken={selectedOption?.secretToken}
+      />
     </>
   );
 }

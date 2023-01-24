@@ -27,6 +27,7 @@
         "description": [],
         "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics",
@@ -40,6 +41,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -59,6 +61,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -76,6 +79,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -89,6 +93,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -106,6 +111,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -119,6 +125,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -136,6 +143,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -151,6 +159,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -166,6 +175,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -179,6 +189,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -196,6 +207,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -209,6 +221,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -226,6 +239,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -241,6 +255,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -256,6 +271,7 @@
             ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -269,6 +285,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -286,6 +303,7 @@
         "description": [],
         "path": "packages/kbn-analytics/src/reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics",
@@ -295,7 +313,8 @@
             "label": "checkInterval",
             "description": [],
             "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -309,6 +328,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -328,6 +348,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -345,6 +366,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -360,6 +382,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -373,6 +396,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -387,6 +411,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -401,6 +426,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -415,6 +441,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -432,6 +459,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -445,6 +473,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -464,6 +493,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -477,6 +507,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -494,6 +525,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -509,6 +541,7 @@
         "description": [],
         "path": "packages/kbn-analytics/src/report.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics",
@@ -518,7 +551,8 @@
             "label": "REPORT_VERSION",
             "description": [],
             "path": "packages/kbn-analytics/src/report.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -537,7 +571,8 @@
               }
             ],
             "path": "packages/kbn-analytics/src/report.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -551,6 +586,7 @@
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -571,6 +607,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/report.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -595,6 +632,7 @@
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -610,6 +648,7 @@
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -625,6 +664,7 @@
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -652,6 +692,7 @@
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -668,6 +709,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/report.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -687,6 +729,7 @@
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -700,6 +743,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/report.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -720,6 +764,7 @@
         "description": [],
         "path": "packages/kbn-analytics/src/report.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics",
@@ -732,7 +777,8 @@
               "3"
             ],
             "path": "packages/kbn-analytics/src/report.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -745,7 +791,8 @@
               "Record<string, { key: string; appName: string; eventName: string; type: string; total: number; }> | undefined"
             ],
             "path": "packages/kbn-analytics/src/report.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -766,7 +813,8 @@
               ".USER_AGENT; appName: string; }> | undefined"
             ],
             "path": "packages/kbn-analytics/src/report.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -779,7 +827,8 @@
               "Record<string, { appId: string; viewId: string; minutesOnScreen: number; numberOfClicks: number; }> | undefined"
             ],
             "path": "packages/kbn-analytics/src/report.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -793,6 +842,7 @@
         "description": [],
         "path": "packages/kbn-analytics/src/reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics",
@@ -814,6 +864,7 @@
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -833,7 +884,8 @@
                   }
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -863,7 +915,8 @@
               ", void> | undefined"
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -876,7 +929,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -889,7 +943,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics",
@@ -902,7 +957,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -926,6 +982,7 @@
         ],
         "path": "packages/kbn-analytics/src/storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics",
@@ -939,6 +996,7 @@
             ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -952,6 +1010,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -969,6 +1028,7 @@
             ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -982,6 +1042,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -996,6 +1057,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1013,6 +1075,7 @@
             ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics",
@@ -1026,6 +1089,7 @@
                 ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1043,8 +1107,66 @@
             ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/analytics",
+        "id": "def-common.UserAgentMetric",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserAgentMetric",
+        "description": [],
+        "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics",
+            "id": "def-common.UserAgentMetric.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/analytics",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsPluginApi",
+                "section": "def-common.METRIC_TYPE",
+                "text": "METRIC_TYPE"
+              },
+              ".USER_AGENT"
+            ],
+            "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics",
+            "id": "def-common.UserAgentMetric.appName",
+            "type": "string",
+            "tags": [],
+            "label": "appName",
+            "description": [],
+            "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics",
+            "id": "def-common.UserAgentMetric.userAgent",
+            "type": "string",
+            "tags": [],
+            "label": "userAgent",
+            "description": [],
+            "path": "packages/kbn-analytics/src/metrics/user_agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1060,6 +1182,7 @@
         "description": [],
         "path": "packages/kbn-analytics/src/metrics/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1084,6 +1207,7 @@
         ],
         "path": "packages/kbn-analytics/src/reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1103,7 +1227,8 @@
               }
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1120,6 +1245,7 @@
         ],
         "path": "packages/kbn-analytics/src/metrics/ui_counter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

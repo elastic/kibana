@@ -7,8 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
-import { LegendDisplay } from '../types/expression_renderers';
 
 export const strings = {
   getPieVisFunctionName: () =>
@@ -18,6 +16,10 @@ export const strings = {
   getMetricArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.metricHelpText', {
       defaultMessage: 'Metric dimensions config',
+    }),
+  getMetricToLabelHelp: () =>
+    i18n.translate('expressionPartitionVis.metricToLabel.help', {
+      defaultMessage: 'JSON key-value pairs of column ID to label',
     }),
   getBucketsArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.bucketsHelpText', {
@@ -49,7 +51,7 @@ export const strings = {
     }),
   getLegendSizeArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.legendSizeHelpText', {
-      defaultMessage: 'Specifies the legend size in pixels',
+      defaultMessage: 'Specifies the legend size',
     }),
   getNestedLegendArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.nestedLegendHelpText', {
@@ -125,22 +127,13 @@ export const strings = {
 export const errors = {
   moreThanNBucketsAreNotSupportedError: (maxLength: number) =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.moreThenNumberBuckets', {
-      defaultMessage: 'More than {maxLength} buckets are not supported',
+      defaultMessage: 'More than {maxLength} buckets are not supported.',
       values: { maxLength },
     }),
+
   splitRowAndSplitColumnAreSpecifiedError: () =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
       defaultMessage:
         'A split row and column are specified. Expression is supporting only one of them at once.',
-    }),
-  invalidLegendDisplayError: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendDisplayError', {
-      defaultMessage: `Invalid legend display mode is specified. Supported ticks legend display modes: {legendDisplayModes}`,
-      values: { legendDisplayModes: Object.values(LegendDisplay).join(', ') },
-    }),
-  invalidLegendPositionError: () =>
-    i18n.translate('expressionPartitionVis.reusable.function.errors.invalidLegendPositionError', {
-      defaultMessage: `Invalid legend position is specified. Supported ticks legend positions: {positions}`,
-      values: { positions: Object.values(Position).join(', ') },
     }),
 };

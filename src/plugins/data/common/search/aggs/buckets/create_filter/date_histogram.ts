@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { buildRangeFilter } from '@kbn/es-query';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
 
@@ -14,7 +14,7 @@ export const createFilterDateHistogram = (
   agg: IBucketDateHistogramAggConfig,
   key: string | number
 ) => {
-  const start = moment(key);
+  const start = moment.tz(key, agg.aggConfigs.timeZone);
   const interval = agg.buckets.getInterval();
 
   return buildRangeFilter(

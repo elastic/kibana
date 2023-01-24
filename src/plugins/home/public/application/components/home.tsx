@@ -10,17 +10,21 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
-import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services';
-import { FeatureCatalogueCategory } from '../../services';
+import type {
+  FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
+  FeatureCatalogueCategory,
+} from '../../services';
 import { getServices } from '../kibana_services';
 import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
 
-const KEY_ENABLE_WELCOME = 'home:welcome:show';
+export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
 export interface HomeProps {
   addBasePath: (url: string) => string;
@@ -29,6 +33,7 @@ export interface HomeProps {
   localStorage: Storage;
   urlBasePath: string;
   hasUserDataView: () => Promise<boolean>;
+  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -122,11 +127,11 @@ export class Home extends Component<HomeProps, State> {
   }
 
   private renderNormal() {
-    const { addBasePath, solutions } = this.props;
+    const { addBasePath, solutions, isCloudEnabled } = this.props;
     const { application, trackUiMetric } = getServices();
     const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
     const devTools = this.findDirectoryById('console');
-    const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
+    const manageDataFeatures = this.getFeaturesByCategory('admin');
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {
@@ -140,11 +145,16 @@ export class Home extends Component<HomeProps, State> {
           bottomBorder: false,
           pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
         }}
-        template="empty"
+        panelled={false}
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
-        <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
+        <AddData
+          addBasePath={addBasePath}
+          application={application}
+          isDarkMode={isDarkMode}
+          isCloudEnabled={isCloudEnabled}
+        />
 
         <ManageData
           addBasePath={addBasePath}
@@ -178,12 +188,18 @@ export class Home extends Component<HomeProps, State> {
 
   public render() {
     const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
+    const { isCloudEnabled } = this.props;
+    const { application } = getServices();
 
     if (isWelcomeEnabled) {
       if (isLoading) {
         return this.renderLoading();
       }
       if (isNewKibanaInstance) {
+        if (isCloudEnabled) {
+          application.navigateToUrl('./home#/getting_started');
+          return null;
+        }
         return this.renderWelcome();
       }
     }

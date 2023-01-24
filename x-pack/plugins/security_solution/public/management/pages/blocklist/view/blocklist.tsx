@@ -7,46 +7,32 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { DocLinks } from '@kbn/doc-links';
+import { EuiLink } from '@elastic/eui';
+
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { BlocklistsApiClient } from '../services';
-
-// FIXME:PT delete this when real component is implemented
-const TempDevFormComponent: ArtifactListPageProps['ArtifactFormComponent'] = (props) => {
-  // For Dev. Delete once we implement this component
-  // @ts-ignore
-  if (!window._dev_artifact_form_props) {
-    // @ts-ignore
-    window._dev_artifact_form_props = [];
-    // @ts-ignore
-    window.console.log(window._dev_artifact_form_props);
-  }
-  // @ts-ignore
-  window._dev_artifact_form_props.push(props);
-
-  return (
-    <div>
-      <div style={{ margin: '3em 0' }}>
-        {props.error ? props.error?.body?.message || props.error : ''}
-      </div>
-      {`TODO: ${props.mode} Form here`}
-    </div>
-  );
-};
+import { BlockListForm } from './components/blocklist_form';
 
 const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.blocklist.pageTitle', {
     defaultMessage: 'Blocklist',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.blocklist.pageAboutInfo', {
-    defaultMessage: 'Add a blocklist to block applications or files from running on the endpoint.',
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
   }),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
-      defaultMessage: 'Showing {total} {total, plural, one {blocklist} other {blocklists}}',
+      defaultMessage:
+        'Showing {total} {total, plural, one {blocklist entry} other {blocklist entries}}',
       values: { total },
     }),
   cardActionEditLabel: i18n.translate('xpack.securitySolution.blocklist.cardActionEditLabel', {
@@ -67,7 +53,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>
     i18n.translate('xpack.securitySolution.blocklist.flyoutCreateSubmitSuccess', {
-      defaultMessage: '"{name}" has been added to your blocklist.', // FIXME: match this to design (needs count of items)
+      defaultMessage: '"{name}" has been added to your blocklist.',
       values: { name },
     }),
   flyoutEditSubmitSuccess: ({ name }) =>
@@ -75,57 +61,66 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{name}" has been updated.',
       values: { name },
     }),
-  flyoutDowngradedLicenseDocsInfo: () => {
-    return 'tbd...';
-    // FIXME: define docs link for license downgrade message. sample code below
-
-    // const { docLinks } = useKibana().services;
-    // return (
-    //   <FormattedMessage
-    //     id="some-id-1"
-    //     defaultMessage="For more information, see our {link}."
-    //     value={{
-    //       link: (
-    //         <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
-    //           {' '}
-    //           <FormattedMessage
-    //             id="dome-id-2"
-    //             defaultMessage="Event filters documentation"
-    //           />{' '}
-    //         </EuiLink>
-    //       ),
-    //     }}
-    //   />
-    // );
+  flyoutDowngradedLicenseDocsInfo: (
+    securitySolutionDocsLinks: DocLinks['securitySolution']
+  ): React.ReactNode => {
+    return (
+      <>
+        <FormattedMessage
+          id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsInfo"
+          defaultMessage="For more information, see our "
+        />
+        <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
+          <FormattedMessage
+            id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
+            defaultMessage="blocklist documentation."
+          />
+        </EuiLink>
+      </>
+    );
   },
   deleteActionSuccess: (itemName) =>
     i18n.translate('xpack.securitySolution.blocklist.deleteSuccess', {
       defaultMessage: '"{itemName}" has been removed from blocklist.',
       values: { itemName },
     }),
-  emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
-    defaultMessage: 'Add your first blocklist',
-  }),
-  emptyStateInfo: i18n.translate(
-    'xpack.securitySolution.blocklist.emptyStateInfo',
-    { defaultMessage: 'Add a blocklist to prevent execution on the endpoint' } // FIXME: need wording here form PM
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no blocklist entries to display.',
+    }
   ),
+  emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
+    defaultMessage: 'Add your first blocklist entry',
+  }),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.blocklist.emptyStateInfo', {
+    defaultMessage:
+      'The blocklist prevents specified applications from running on your hosts, extending the list of processes that Endpoint Security considers malicious.',
+  }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
-    { defaultMessage: 'Add blocklist' }
+    { defaultMessage: 'Add blocklist entry' }
   ),
+  searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }),
 };
 
 export const Blocklist = memo(() => {
+  const { canWriteBlocklist } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const blocklistsApiClient = BlocklistsApiClient.getInstance(http);
 
   return (
     <ArtifactListPage
       apiClient={blocklistsApiClient}
-      ArtifactFormComponent={TempDevFormComponent} // FIXME: Implement create/edit form
+      ArtifactFormComponent={BlockListForm}
       labels={BLOCKLIST_PAGE_LABELS}
       data-test-subj="blocklistPage"
+      flyoutSize="l"
+      allowCardCreateAction={canWriteBlocklist}
+      allowCardEditAction={canWriteBlocklist}
+      allowCardDeleteAction={canWriteBlocklist}
     />
   );
 });

@@ -5,34 +5,36 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
-import {
-  CaseMetricsResponse,
-  CaseStatuses,
-  CaseUserActionResponse,
+import type { SavedObject } from '@kbn/core/server';
+import type {
+  CaseUserActionInjectedAttributesWithoutActionId,
+  SingleCaseMetricsResponse,
   StatusInfo,
   StatusUserAction,
-  StatusUserActionRt,
   UserActionWithResponse,
 } from '../../../common/api';
+import { CaseStatuses, StatusUserActionRt } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { BaseHandler } from './base_handler';
-import { BaseHandlerCommonOptions } from './types';
+import { SingleCaseBaseHandler } from './single_case_base_handler';
+import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
-export class Lifespan extends BaseHandler {
-  constructor(options: BaseHandlerCommonOptions) {
+export class Lifespan extends SingleCaseBaseHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(options, ['lifespan']);
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
-      this.options.clientArgs;
+  public async compute(): Promise<SingleCaseMetricsResponse> {
+    const {
+      authorization,
+      services: { userActionService },
+      logger,
+    } = this.options.clientArgs;
 
-    const { caseId, casesClient } = this.options;
+    const { casesClient } = this.options;
 
     try {
-      const caseInfo = await casesClient.cases.get({ id: caseId });
+      const caseInfo = await casesClient.cases.get({ id: this.caseId });
 
       const caseOpenTimestamp = new Date(caseInfo.created_at);
       if (!isDateValid(caseOpenTimestamp)) {
@@ -45,9 +47,8 @@ export class Lifespan extends BaseHandler {
         Operations.getUserActionMetrics
       );
 
-      const statusUserActions = await userActionService.findStatusChanges({
-        unsecuredSavedObjectsClient,
-        caseId,
+      const statusUserActions = await userActionService.finder.findStatusChanges({
+        caseId: this.caseId,
         filter: authorizationFilter,
       });
 
@@ -62,7 +63,7 @@ export class Lifespan extends BaseHandler {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve lifespan metrics for case id: ${caseId}: ${error}`,
+        message: `Failed to retrieve lifespan metrics for case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });
@@ -82,7 +83,7 @@ interface StatusCalculations {
 }
 
 export function getStatusInfo(
-  statusUserActions: Array<SavedObject<CaseUserActionResponse>>,
+  statusUserActions: Array<SavedObject<CaseUserActionInjectedAttributesWithoutActionId>>,
   caseOpenTimestamp: Date
 ): StatusInfo {
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
@@ -137,7 +138,7 @@ export function getStatusInfo(
 }
 
 function isValidStatusChangeUserAction(
-  attributes: CaseUserActionResponse,
+  attributes: CaseUserActionInjectedAttributesWithoutActionId,
   newStatusChangeTimestamp: Date
 ): attributes is UserActionWithResponse<StatusUserAction> {
   return StatusUserActionRt.is(attributes) && isDateValid(newStatusChangeTimestamp);

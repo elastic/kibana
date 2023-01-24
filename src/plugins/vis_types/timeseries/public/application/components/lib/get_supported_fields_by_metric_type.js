@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../../../data/common';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 
 export function getSupportedFieldsByMetricType(type) {
   switch (type) {
     case METRIC_TYPES.CARDINALITY:
       return Object.values(KBN_FIELD_TYPES).filter((t) => t !== KBN_FIELD_TYPES.HISTOGRAM);
-    case TSVB_METRIC_TYPES.VALUE_COUNT:
+    case METRIC_TYPES.VALUE_COUNT:
       return Object.values(KBN_FIELD_TYPES);
     case METRIC_TYPES.AVG:
     case METRIC_TYPES.SUM:

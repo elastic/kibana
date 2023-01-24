@@ -1,0 +1,119 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { transformError } from '@kbn/securitysolution-es-utils';
+
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { validateCreateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
+import { RuleCreateProps } from '../../../../../../../common/detection_engine/rule_schema';
+
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import type { SetupPlugins } from '../../../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildMlAuthz } from '../../../../../machine_learning/authz';
+import { throwAuthzError } from '../../../../../machine_learning/validation';
+import { readRules } from '../../../logic/crud/read_rules';
+import { buildSiemResponse } from '../../../../routes/utils';
+
+import { createRules } from '../../../logic/crud/create_rules';
+import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
+import { transformValidate } from '../../../utils/validate';
+
+export const createRuleRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml']
+): void => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
+      validate: {
+        body: buildRouteValidation(RuleCreateProps),
+      },
+      options: {
+        tags: ['access:securitySolution'],
+      },
+    },
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const validationErrors = validateCreateRuleProps(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
+
+      try {
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'licensing',
+          'alerting',
+          'lists',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+
+        if (request.body.rule_id != null) {
+          const rule = await readRules({
+            rulesClient,
+            ruleId: request.body.rule_id,
+            id: undefined,
+          });
+          if (rule != null) {
+            return siemResponse.error({
+              statusCode: 409,
+              body: `rule_id: "${request.body.rule_id}" already exists`,
+            });
+          }
+        }
+
+        const mlAuthz = buildMlAuthz({
+          license: ctx.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
+        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+
+        // This will create the endpoint list if it does not exist yet
+        await exceptionsClient?.createEndpointList();
+        checkDefaultRuleExceptionListReferences({
+          exceptionLists: request.body.exceptions_list,
+        });
+
+        await validateRuleDefaultExceptionList({
+          exceptionsList: request.body.exceptions_list,
+          rulesClient,
+          ruleRuleId: undefined,
+          ruleId: undefined,
+        });
+
+        const createdRule = await createRules({
+          rulesClient,
+          params: request.body,
+        });
+
+        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
+
+        const [validated, errors] = transformValidate(createdRule, ruleExecutionSummary);
+        if (errors != null) {
+          return siemResponse.error({ statusCode: 500, body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
+      } catch (err) {
+        const error = transformError(err as Error);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
+};

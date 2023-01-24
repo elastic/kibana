@@ -6,15 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { OptionsListEmbeddableFactory } from '../control_types/options_list';
-import { ControlsService } from '../services/controls';
+import { OptionsListEmbeddableFactory } from '../options_list';
+import { RangeSliderEmbeddableFactory } from '../range_slider';
+import { TimeSliderEmbeddableFactory } from '../time_slider';
+import { ControlsServiceType } from '../services/controls/types';
 import { ControlFactory } from '..';
 
-export const populateStorybookControlFactories = (controlsServiceStub: ControlsService) => {
+export const populateStorybookControlFactories = (controlsServiceStub: ControlsServiceType) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory();
 
   // cast to unknown because the stub cannot use the embeddable start contract to transform the EmbeddableFactoryDefinition into an EmbeddableFactory
   const optionsListControlFactory = optionsListFactoryStub as unknown as ControlFactory;
   optionsListControlFactory.getDefaultInput = () => ({});
   controlsServiceStub.registerControlType(optionsListControlFactory);
+
+  const rangeSliderFactoryStub = new RangeSliderEmbeddableFactory();
+
+  // cast to unknown because the stub cannot use the embeddable start contract to transform the EmbeddableFactoryDefinition into an EmbeddableFactory
+  const rangeSliderControlFactory = rangeSliderFactoryStub as unknown as ControlFactory;
+  rangeSliderControlFactory.getDefaultInput = () => ({});
+  controlsServiceStub.registerControlType(rangeSliderControlFactory);
+
+  const timesliderFactoryStub = new TimeSliderEmbeddableFactory();
+  const timeSliderControlFactory = timesliderFactoryStub as unknown as ControlFactory;
+  timeSliderControlFactory.getDefaultInput = () => ({});
+  controlsServiceStub.registerControlType(timeSliderControlFactory);
 };

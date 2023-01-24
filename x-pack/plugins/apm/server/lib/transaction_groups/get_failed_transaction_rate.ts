@@ -6,17 +6,17 @@
  */
 
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -24,12 +24,13 @@ import {
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 
 export async function getFailedTransactionRate({
   environment,
@@ -37,27 +38,33 @@ export async function getFailedTransactionRate({
   serviceName,
   transactionTypes,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
   numBuckets,
+  offset,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionTypes: string[];
   transactionName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
   numBuckets?: number;
+  offset?: string;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
 }> {
-  const { apmEventClient } = setup;
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -69,7 +76,7 @@ export async function getFailedTransactionRate({
     { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
@@ -81,6 +88,7 @@ export async function getFailedTransactionRate({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: { bool: { filter } },
       aggs: {
@@ -89,13 +97,13 @@ export async function getFailedTransactionRate({
           date_histogram: {
             field: '@timestamp',
             fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
+              start: startWithOffset,
+              end: endWithOffset,
               searchAggregatedTransactions,
               numBuckets,
             }).intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             outcomes,

@@ -9,9 +9,9 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
@@ -125,6 +125,7 @@ export const useIndexData = (
     }
 
     fetchDataGridSampleDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // To be used for data grid column selection
@@ -162,6 +163,7 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   useEffect(() => {
@@ -215,14 +217,17 @@ export const useIndexData = (
       fetchIndexData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     indexPattern.title,
     indexPatternFields,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
   const dataLoader = useMemo(
     () => new DataLoader(indexPattern, toastNotifications),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [indexPattern]
   );
 
@@ -250,9 +255,11 @@ export const useIndexData = (
       fetchColumnChartsData(query);
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 

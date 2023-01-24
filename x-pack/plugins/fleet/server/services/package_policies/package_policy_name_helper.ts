@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../common';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { getMaxPackageName } from '../../../common/services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import { packagePolicyService } from '../package_policy';
@@ -38,20 +39,23 @@ export async function incrementPackagePolicyCopyName(
   // find all pacakge policies starting with the same name and increment the name
   const packagePolicyData = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${packageName}*`,
+    // split package name on first space as KQL do not support wildcard and space
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${packageName.split(' ')[0]}*`,
   });
 
   const maxVersion =
     packagePolicyData.items.length > 0
       ? Math.max(
-          ...packagePolicyData.items.map((item) => {
-            const matches = item.name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
-            if (matches) {
-              return parseInt(matches[2], 10) || 1;
-            }
+          ...packagePolicyData.items
+            .filter((item) => item.name.startsWith(packageName))
+            .map((item) => {
+              const matches = item.name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
+              if (matches) {
+                return parseInt(matches[2], 10) || 1;
+              }
 
-            return 0;
-          })
+              return 0;
+            })
         )
       : 0;
 

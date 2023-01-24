@@ -26,7 +26,8 @@ describe('Executor mocked execution tests', () => {
         executor.createExecution('foo bar="baz"');
 
         expect(Execution).toHaveBeenCalledWith(
-          expect.objectContaining({ expression: 'foo bar="baz"' })
+          expect.objectContaining({ expression: 'foo bar="baz"' }),
+          undefined
         );
       });
     });
@@ -38,7 +39,8 @@ describe('Executor mocked execution tests', () => {
         executor.createExecution(ast);
 
         expect(Execution).toHaveBeenCalledWith(
-          expect.not.objectContaining({ expression: expect.anything() })
+          expect.not.objectContaining({ expression: expect.anything() }),
+          undefined
         );
       });
     });

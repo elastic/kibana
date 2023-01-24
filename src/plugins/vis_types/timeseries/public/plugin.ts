@@ -6,9 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
 import { createMetricsFn } from './metrics_fn';
@@ -19,10 +31,11 @@ import {
   setFieldFormats,
   setCoreStart,
   setDataStart,
+  setDataViewsStart,
   setCharts,
+  setUsageCollectionStart,
+  setUnifiedSearchStart,
 } from './services';
-import { DataPublicPluginStart } from '../../../data/public';
-import { ChartsPluginStart } from '../../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 
 /** @internal */
@@ -34,7 +47,26 @@ export interface MetricsPluginSetupDependencies {
 /** @internal */
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
+  usageCollection: UsageCollectionStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+}
+
+/** @internal */
+export interface TimeseriesVisDependencies extends Partial<CoreStart> {
+  uiSettings: IUiSettingsClient;
+  http: HttpSetup;
+  timefilter: TimefilterContract;
+  theme: ThemeServiceStart;
+  appName: string;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  notifications: CoreStart['notifications'];
+  storage: IStorageWrapper;
+  data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
+  docLinks: DocLinksStart;
 }
 
 /** @internal */
@@ -58,11 +90,24 @@ export class MetricsPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart, { data, charts }: MetricsPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    {
+      data,
+      charts,
+      dataViews,
+      usageCollection,
+      fieldFormats,
+      unifiedSearch,
+    }: MetricsPluginStartDependencies
+  ) {
     setCharts(charts);
     setI18n(core.i18n);
-    setFieldFormats(data.fieldFormats);
+    setFieldFormats(fieldFormats);
     setDataStart(data);
+    setUnifiedSearchStart(unifiedSearch);
+    setDataViewsStart(dataViews);
     setCoreStart(core);
+    setUsageCollectionStart(usageCollection);
   }
 }

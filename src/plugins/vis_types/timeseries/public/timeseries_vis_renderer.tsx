@@ -9,19 +9,21 @@
 import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
-
+import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
-import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
+import { IUiSettingsClient, KibanaExecutionContext, ThemeServiceStart } from '@kbn/core/public';
 
-import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
+import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { getUsageCollectionStart } from './services';
+import { TIME_RANGE_DATA_MODES } from '../common/enums';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
 
 import type { TimeseriesVisParams } from './types';
-import type { ExpressionRenderDefinition } from '../../../expressions/common';
 import type { TimeseriesRenderValue } from './metrics_fn';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -36,6 +38,20 @@ const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVis
   return false;
 };
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 export const getTimeseriesVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
   theme: ThemeServiceStart;
@@ -43,16 +59,41 @@ export const getTimeseriesVisRenderer: (deps: {
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
-    // Build optimization. Move app styles from main bundle
-    // @ts-expect-error TS error, cannot find type declaration for scss
-    import('./application/index.scss');
-
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-    const { visParams: model, visData, syncColors } = config;
-
+    const {
+      visParams: model,
+      visData,
+      syncColors,
+      syncTooltips,
+      syncCursor,
+      canNavigateToLens,
+    } = config;
     const showNoResult = !checkIfDataExists(visData, model);
+
+    const renderComplete = () => {
+      const usageCollection = getUsageCollectionStart();
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'tsvb';
+
+      if (usageCollection && containerType) {
+        const counterEvents = [
+          `render_${visualizationType}_${model.type}`,
+          model.use_kibana_indexes === false
+            ? `render_${visualizationType}_index_pattern_string`
+            : undefined,
+          model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+            ? `render_${visualizationType}_last_value`
+            : undefined,
+          canNavigateToLens ? `render_${visualizationType}_convertable` : undefined,
+        ].filter(Boolean) as string[];
+
+        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
+      }
+
+      handlers.done();
+    };
 
     render(
       <I18nProvider>
@@ -60,6 +101,7 @@ export const getTimeseriesVisRenderer: (deps: {
           <VisualizationContainer
             data-test-subj="timeseriesVis"
             handlers={handlers}
+            renderComplete={renderComplete}
             showNoResult={showNoResult}
             error={get(visData, [model.id, 'error'])}
           >
@@ -70,15 +112,15 @@ export const getTimeseriesVisRenderer: (deps: {
               model={model}
               visData={visData as TimeseriesVisData}
               syncColors={syncColors}
+              syncTooltips={syncTooltips}
+              syncCursor={syncCursor}
               uiState={handlers.uiState! as PersistedState}
+              initialRender={renderComplete}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

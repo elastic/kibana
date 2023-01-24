@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
   ESUpgradeStatus,
@@ -240,9 +240,33 @@ export class ApiService {
     });
   }
 
+  public async updateClusterSettings(settings: string[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/cluster_settings`,
+      method: 'post',
+      body: {
+        settings: JSON.stringify(settings),
+      },
+    });
+  }
+
   public useLoadRemoteClusters() {
     return this.useRequest<string[]>({
       path: `${API_BASE_PATH}/remote_clusters`,
+      method: 'get',
+    });
+  }
+
+  public useLoadNodeDiskSpace() {
+    return this.useRequest<
+      Array<{
+        nodeId: string;
+        nodeName: string;
+        available: string;
+        lowDiskWatermarkSetting: string;
+      }>
+    >({
+      path: `${API_BASE_PATH}/node_disk_space`,
       method: 'get',
     });
   }

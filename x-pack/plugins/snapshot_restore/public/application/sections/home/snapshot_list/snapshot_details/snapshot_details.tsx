@@ -23,6 +23,7 @@ import {
 import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
 import { SectionError, Error } from '../../../../../shared_imports';
 import { SectionLoading, SnapshotDeleteProvider } from '../../../../components';
@@ -35,8 +36,6 @@ import {
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { TabSummary, TabFailures } from './tabs';
-
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   repositoryName: string;

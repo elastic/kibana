@@ -23,9 +23,9 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { DataView, Query } from 'src/plugins/data/common';
+import type { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../common/constants';
-import { getIndexPatternService, getData } from '../../../kibana_services';
+import { getIndexPatternService, getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import { ILayer } from '../../../classes/layers/layer';
@@ -35,6 +35,7 @@ export interface Props {
   layer: ILayer;
   setLayerQuery: (id: string, query: Query) => void;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
+  isFeatureEditorOpenForLayer: boolean;
 }
 
 interface State {
@@ -122,7 +123,7 @@ export class FilterEditor extends Component<Props, State> {
 
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
-    const { SearchBar } = getData().ui;
+    const SearchBar = getSearchBar();
 
     return (
       <EuiPopover
@@ -157,6 +158,15 @@ export class FilterEditor extends Component<Props, State> {
   }
 
   _renderQuery() {
+    if (this.props.isFeatureEditorOpenForLayer) {
+      return (
+        <FormattedMessage
+          id="xpack.maps.layerPanel.filterEditor.isLayerFilterNotApplied"
+          defaultMessage="Layer filter is not applied while editing features"
+        />
+      );
+    }
+
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
@@ -199,6 +209,7 @@ export class FilterEditor extends Component<Props, State> {
         onClick={this._toggle}
         data-test-subj="mapLayerPanelOpenFilterEditorButton"
         iconType={openButtonIcon}
+        disabled={this.props.isFeatureEditorOpenForLayer}
       >
         {openButtonLabel}
       </EuiButtonEmpty>
@@ -213,6 +224,7 @@ export class FilterEditor extends Component<Props, State> {
         })}
         applyGlobalTime={this.props.layer.getSource().getApplyGlobalTime()}
         setApplyGlobalTime={this._onApplyGlobalTimeChange}
+        isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
       />
     ) : null;
 
@@ -244,6 +256,7 @@ export class FilterEditor extends Component<Props, State> {
           })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+          isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
         />
 
         {globalTimeCheckbox}

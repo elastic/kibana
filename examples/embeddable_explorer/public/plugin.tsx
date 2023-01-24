@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
-import { UiActionsService } from '../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import img from './embeddables.png';
 
 interface StartDeps {

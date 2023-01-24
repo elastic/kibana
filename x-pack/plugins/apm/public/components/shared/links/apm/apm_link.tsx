@@ -6,7 +6,7 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { pick } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -33,6 +33,7 @@ export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
   'refreshInterval',
   'environment',
   'serviceGroup',
+  'comparisonEnabled',
 ];
 
 /**
@@ -85,7 +86,12 @@ export function getLegacyApmHref({
   });
 }
 
-export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
+export function LegacyAPMLink({
+  path = '',
+  query,
+  mergeQuery,
+  ...rest
+}: Props) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
   const { basePath } = core.http;

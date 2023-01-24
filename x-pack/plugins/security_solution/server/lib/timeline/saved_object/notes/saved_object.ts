@@ -7,39 +7,29 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { getOr } from 'lodash/fp';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import type { SavedObjectsFindOptions } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import {
+import type {
   SavedNote,
-  NoteSavedObjectRuntimeType,
   NoteSavedObject,
-  PageInfoNote,
-  SortNote,
   NoteResult,
-  ResponseNotes,
   ResponseNote,
   NoteWithoutExternalRefs,
 } from '../../../../../common/types/timeline/note';
-import { FrameworkRequest } from '../../../framework';
+import { NoteSavedObjectRuntimeType } from '../../../../../common/types/timeline/note';
+import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { createTimeline } from '../timelines';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
-
-export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
-
-  await Promise.all(
-    noteIds.map((noteId) => savedObjectsClient.delete(noteSavedObjectType, noteId))
-  );
-};
 
 export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -47,7 +37,7 @@ export const deleteNoteByTimelineId = async (request: FrameworkRequest, timeline
     hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const notesToBeDeleted = await getAllSavedNote(request, options);
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   await Promise.all(
     notesToBeDeleted.notes.map((note) =>
@@ -63,19 +53,6 @@ export const getNote = async (
   return getSavedNote(request, noteId);
 };
 
-export const getNotesByEventId = async (
-  request: FrameworkRequest,
-  eventId: string
-): Promise<NoteSavedObject[]> => {
-  const options: SavedObjectsFindOptions = {
-    type: noteSavedObjectType,
-    search: eventId,
-    searchFields: ['eventId'],
-  };
-  const notesByEventId = await getAllSavedNote(request, options);
-  return notesByEventId.notes;
-};
-
 export const getNotesByTimelineId = async (
   request: FrameworkRequest,
   timelineId: string
@@ -86,24 +63,6 @@ export const getNotesByTimelineId = async (
   };
   const notesByTimelineId = await getAllSavedNote(request, options);
   return notesByTimelineId.notes;
-};
-
-export const getAllNotes = async (
-  request: FrameworkRequest,
-  pageInfo: PageInfoNote | null,
-  search: string | null,
-  sort: SortNote | null
-): Promise<ResponseNotes> => {
-  const options: SavedObjectsFindOptions = {
-    type: noteSavedObjectType,
-    perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-    page: pageInfo != null ? pageInfo.pageIndex : undefined,
-    search: search != null ? search : undefined,
-    searchFields: ['note'],
-    sortField: sort != null ? sort.sortField : undefined,
-    sortOrder: sort != null ? sort.sortOrder : undefined,
-  };
-  return getAllSavedNote(request, options);
 };
 
 export const persistNote = async ({
@@ -133,7 +92,7 @@ export const persistNote = async ({
     if (getOr(null, 'output.statusCode', err) === 403) {
       const noteToReturn: NoteResult = {
         ...note,
-        noteId: uuid.v1(),
+        noteId: uuidv1(),
         version: '',
         timelineId: '',
         timelineVersion: '',
@@ -159,7 +118,7 @@ const createNote = async ({
   note: SavedNote;
   overrideOwner?: boolean;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
   const shallowCopyOfNote = { ...note };
@@ -217,7 +176,7 @@ const updateNote = async ({
   note: SavedNote;
   overrideOwner?: boolean;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
   const existingNote = await savedObjectsClient.get<NoteWithoutExternalRefs>(
@@ -258,7 +217,7 @@ const updateNote = async ({
 };
 
 const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObject = await savedObjectsClient.get<NoteWithoutExternalRefs>(
     noteSavedObjectType,
     NoteId
@@ -270,7 +229,7 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
 };
 
 const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<NoteWithoutExternalRefs>(options);
 
   return {
@@ -300,25 +259,17 @@ export const convertSavedObjectToSavedNote = (
     }, identity)
   );
 
-// we have to use any here because the SavedObjectAttributes interface is like below
-// export interface SavedObjectAttributes {
-//   [key: string]: SavedObjectAttributes | string | number | boolean | null;
-// }
-// then this interface does not allow types without index signature
-// this is limiting us with our type for now so the easy way was to use any
-
-const pickSavedNote = (
+export const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
   userInfo: AuthenticatedUser | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+) => {
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
-    savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedNote.createdBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   }
 
   savedNote.updated = new Date().valueOf();
-  savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+  savedNote.updatedBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   return savedNote;
 };

@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/server';
+import type {
+  ActionDetails,
   ActionDetailsStrategyResponse,
   ActionDetailsRequestOptions,
   OsqueryQueries,
 } from '../../../../../../common/search_strategy/osquery';
 
 import { inspectStringifyObject } from '../../../../../../common/utils/build_query';
-import { OsqueryFactory } from '../../types';
+import type { OsqueryFactory } from '../../types';
 import { buildActionDetailsQuery } from './query.action_details.dsl';
 
 export const actionDetails: OsqueryFactory<OsqueryQueries.actionDetails> = {
   buildDsl: (options: ActionDetailsRequestOptions) => buildActionDetailsQuery(options),
   parse: async (
     options: ActionDetailsRequestOptions,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<ActionDetails>
   ): Promise<ActionDetailsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionDetailsQuery(options))],

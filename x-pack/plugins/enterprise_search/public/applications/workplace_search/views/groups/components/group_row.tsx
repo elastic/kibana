@@ -28,12 +28,6 @@ export const NO_SOURCES_MESSAGE = i18n.translate(
     defaultMessage: 'No organizational content sources',
   }
 );
-export const NO_USERS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.noUsersMessage',
-  {
-    defaultMessage: 'No users',
-  }
-);
 
 const dateDisplay = (date: string) =>
   moment(date).isAfter(moment().subtract(DAYS_CUTOFF, 'days'))

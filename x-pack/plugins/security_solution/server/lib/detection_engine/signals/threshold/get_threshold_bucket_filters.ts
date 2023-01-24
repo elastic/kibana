@@ -6,8 +6,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
-import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
+import type { ESFilter } from '@kbn/es-types';
+import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
 /*
  * Returns a filter to exclude events that have already been included in a
@@ -15,10 +15,10 @@ import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
  */
 export const getThresholdBucketFilters = async ({
   signalHistory,
-  timestampOverride,
+  aggregatableTimestampField,
 }: {
   signalHistory: ThresholdSignalHistory;
-  timestampOverride: string | undefined;
+  aggregatableTimestampField: string;
 }): Promise<Filter[]> => {
   const filters = Object.values(signalHistory).reduce(
     (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
@@ -27,7 +27,7 @@ export const getThresholdBucketFilters = async ({
           filter: [
             {
               range: {
-                [timestampOverride ?? '@timestamp']: {
+                [aggregatableTimestampField]: {
                   // Timestamp of last event signaled on for this set of terms.
                   lte: new Date(bucket.lastSignalTimestamp).toISOString(),
                 },
@@ -37,7 +37,7 @@ export const getThresholdBucketFilters = async ({
         },
       } as ESFilter;
 
-      // Terms to filter events older than `lastSignalTimestamp`.
+      // Terms to filter out events older than `lastSignalTimestamp`.
       bucket.terms.forEach((term) => {
         if (term.field != null) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

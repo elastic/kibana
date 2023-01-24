@@ -7,8 +7,10 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
 import { getApmSettings } from './settings_definition/apm_settings';
+import { getDebugSettings } from './settings_definition/debug_settings';
 import {
   getRUMSettings,
   isRUMFormValid,
@@ -29,31 +31,30 @@ import { PackagePolicyVars } from './typings';
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
-  isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({
-  vars = {},
-  isCloudPolicy,
-  updateAPMPolicy,
-}: Props) {
+export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
+  const tailSamplingPoliciesDocsLink =
+    useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
   const {
     apmSettings,
     rumSettings,
     tlsSettings,
     agentAuthorizationSettings,
     tailSamplingSettings,
+    debugSettings,
   } = useMemo(() => {
     return {
-      apmSettings: getApmSettings({ isCloudPolicy }),
+      apmSettings: getApmSettings(),
       rumSettings: getRUMSettings(),
       tlsSettings: getTLSSettings(),
-      agentAuthorizationSettings: getAgentAuthorizationSettings({
-        isCloudPolicy,
-      }),
-      tailSamplingSettings: getTailSamplingSettings(),
+      debugSettings: getDebugSettings(),
+      agentAuthorizationSettings: getAgentAuthorizationSettings(),
+      tailSamplingSettings: getTailSamplingSettings(
+        tailSamplingPoliciesDocsLink
+      ),
     };
-  }, [isCloudPolicy]);
+  }, [tailSamplingPoliciesDocsLink]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields
@@ -65,7 +66,8 @@ export function APMPolicyForm({
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
       isSettingsFormValid(agentAuthorizationSettings, newVars) &&
-      isTailBasedSamplingValid(newVars, tailSamplingSettings);
+      isTailBasedSamplingValid(newVars, tailSamplingSettings) &&
+      isSettingsFormValid(debugSettings, newVars);
 
     updateAPMPolicy(newVars, isFormValid);
   }
@@ -131,11 +133,22 @@ export function APMPolicyForm({
               }
             ),
             settings: tailSamplingSettings,
-            isBeta: false,
             isPlatinumLicence: true,
           },
         ]
       : []),
+    {
+      id: 'debug',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.debug.settings.title',
+        { defaultMessage: 'Debug settings' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.debug.settings.subtitle',
+        { defaultMessage: 'Settings for the APM server debug flags' }
+      ),
+      settings: debugSettings,
+    },
   ];
 
   return (

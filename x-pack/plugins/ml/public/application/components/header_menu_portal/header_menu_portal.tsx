@@ -6,11 +6,8 @@
  */
 
 import React, { FC, ReactNode, useContext, useEffect, useMemo } from 'react';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import {
-  KibanaContextProvider,
-  toMountPoint,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageControlsContext } from '../ml_page';
 
@@ -23,7 +20,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
 
   const { setHeaderActionMenu } = useContext(MlPageControlsContext);
 
-  const portalNode = useMemo(() => createPortalNode(), []);
+  const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     if (!setHeaderActionMenu) {
@@ -44,6 +41,7 @@ export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portalNode, setHeaderActionMenu, services.theme.theme$]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;

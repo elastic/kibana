@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
-import { ExecutionContext } from 'src/plugins/expressions';
-import { Adapters } from 'src/plugins/inspector';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
 describe('dropdownControl', () => {

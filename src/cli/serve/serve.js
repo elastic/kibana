@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { set as lodashSet } from '@elastic/safer-lodash-set';
+import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
+import { getConfigPath } from '@kbn/utils';
+import { fromRoot, isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -38,7 +39,7 @@ const getBootstrapScript = (isDev) => {
     const { bootstrapDevMode } = require(DEV_MODE_PATH);
     return bootstrapDevMode;
   } else {
-    const { bootstrap } = require('../../core/server');
+    const { bootstrap } = require('@kbn/core/server');
     return bootstrap;
   }
 };

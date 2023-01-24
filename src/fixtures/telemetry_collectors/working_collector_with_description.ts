@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createUsageCollectionSetupMock } from '../../plugins/usage_collection/server/mocks';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const { makeUsageCollector } = createUsageCollectionSetupMock();
 
@@ -24,6 +24,7 @@ interface Usage {
   my_index_signature_prop?: {
     [key: string]: number;
   };
+  my_pass_through?: Record<string, unknown>;
 }
 
 const SOME_NUMBER: number = 123;
@@ -52,6 +53,9 @@ export const myCollector = makeUsageCollector<Usage>({
           },
         ],
         my_str_array: ['hello', 'world'],
+        my_pass_through: {
+          some: 'key',
+        },
       };
     } catch (err) {
       return {
@@ -93,6 +97,10 @@ export const myCollector = makeUsageCollector<Usage>({
       avg: { type: 'float' },
       max: { type: 'long' },
       min: { type: 'long' },
+    },
+    my_pass_through: {
+      type: 'pass_through',
+      _meta: { description: "Don't know what goes here. Simply passing it through." },
     },
   },
 });

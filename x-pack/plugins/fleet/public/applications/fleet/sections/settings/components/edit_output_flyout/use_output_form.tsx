@@ -5,95 +5,70 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { safeLoad } from 'js-yaml';
 
 import {
   sendPostOutput,
   useComboInput,
   useInput,
+  useNumberInput,
+  useSelectInput,
   useSwitchInput,
   useStartServices,
   sendPutOutput,
+  useFleetStatus,
 } from '../../../../hooks';
 import type { Output, PostOutputRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { getAgentAndPolicyCountForOutput } from '../../services/agent_and_policies_count';
 
 import {
   validateName,
-  validateHosts,
+  validateESHosts,
+  validateLogstashHosts,
   validateYamlConfig,
   validateCATrustedFingerPrint,
+  validateSSLCertificate,
+  validateSSLKey,
 } from './output_form_validators';
+import { confirmUpdate } from './confirm_update';
 
-const ConfirmTitle = () => (
-  <FormattedMessage
-    id="xpack.fleet.settings.updateOutput.confirmModalTitle"
-    defaultMessage="Save and deploy changes?"
-  />
-);
+const DEFAULT_QUEUE_MAX_SIZE = 4096;
 
-interface ConfirmDescriptionProps {
-  output: Output;
-  agentCount: number;
-  agentPolicyCount: number;
-}
-
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  output,
-  agentCount,
-  agentPolicyCount,
-}) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.updateOutput.confirmModalText"
-    defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      outputName: <strong>{output.name}</strong>,
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
-);
-
-async function confirmUpdate(
-  output: Output,
-  confirm: ReturnType<typeof useConfirmModal>['confirm']
-) {
-  const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
-  return confirm(
-    <ConfirmTitle />,
-    <ConfirmDescription
-      agentCount={agentCount}
-      agentPolicyCount={agentPolicyCount}
-      output={output}
-    />
-  );
+export interface OutputFormInputsType {
+  nameInput: ReturnType<typeof useInput>;
+  typeInput: ReturnType<typeof useInput>;
+  elasticsearchUrlInput: ReturnType<typeof useComboInput>;
+  diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
+  diskQueuePathInput: ReturnType<typeof useInput>;
+  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
+  diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
+  diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
+  compressionLevelInput: ReturnType<typeof useSelectInput>;
+  logstashHostsInput: ReturnType<typeof useComboInput>;
+  additionalYamlConfigInput: ReturnType<typeof useInput>;
+  defaultOutputInput: ReturnType<typeof useSwitchInput>;
+  defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
+  caTrustedFingerprintInput: ReturnType<typeof useInput>;
+  sslCertificateInput: ReturnType<typeof useInput>;
+  sslKeyInput: ReturnType<typeof useInput>;
+  sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  proxyIdInput: ReturnType<typeof useInput>;
+  loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
+  memQueueEvents: ReturnType<typeof useNumberInput>;
+  queueFlushTimeout: ReturnType<typeof useNumberInput>;
+  maxBatchBytes: ReturnType<typeof useNumberInput>;
 }
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
+  const fleetStatus = useFleetStatus();
+
+  const hasEncryptedSavedObjectConfigured = !fleetStatus.missingOptionalFeatures?.includes(
+    'encrypted_saved_object_encryption_key_required'
+  );
+
   const [isLoading, setIsloading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
@@ -102,23 +77,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const isPreconfigured = output?.is_preconfigured ?? false;
 
   // Define inputs
+  // Shared inputs
   const nameInput = useInput(output?.name ?? '', validateName, isPreconfigured);
-  const typeInput = useInput(output?.type ?? '', undefined, isPreconfigured);
-  const elasticsearchUrlInput = useComboInput(
-    'esHostsComboxBox',
-    output?.hosts ?? [],
-    validateHosts,
-    isPreconfigured
-  );
+  const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isPreconfigured);
   const additionalYamlConfigInput = useInput(
     output?.config_yaml ?? '',
     validateYamlConfig,
-    isPreconfigured
-  );
-
-  const caTrustedFingerprintInput = useInput(
-    output?.ca_trusted_fingerprint ?? '',
-    validateCATrustedFingerPrint,
     isPreconfigured
   );
 
@@ -131,14 +95,123 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isPreconfigured || output?.is_default_monitoring
   );
 
-  const inputs = {
+  // ES inputs
+  const caTrustedFingerprintInput = useInput(
+    output?.ca_trusted_fingerprint ?? '',
+    validateCATrustedFingerPrint,
+    isPreconfigured
+  );
+  const elasticsearchUrlInput = useComboInput(
+    'esHostsComboxBox',
+    output?.hosts ?? [],
+    validateESHosts,
+    isPreconfigured
+  );
+  /*
+  Shipper feature flag - currently depends on the content of the yaml
+  # Enables the shipper:
+  shipper: {}
+
+  # Also enables the shipper:
+  shipper:
+    enabled: true
+
+  # Yet another way of enabling it:
+  shipper:
+    queue:
+      ...
+
+  # Disables the shipper
+  shipper:
+    enabled: false
+  */
+  const configJs = output?.config_yaml ? safeLoad(output?.config_yaml) : {};
+  const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+
+  const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
+  const diskQueuePathInput = useInput(
+    output?.shipper?.disk_queue_path ?? '',
+    undefined,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const diskQueueMaxSizeInput = useNumberInput(
+    output?.shipper?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
+    undefined,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const diskQueueEncryptionEnabled = useSwitchInput(
+    output?.shipper?.disk_queue_encryption_enabled ?? false,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const loadBalanceEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
+  const diskQueueCompressionEnabled = useSwitchInput(
+    output?.shipper?.disk_queue_compression_enabled ?? false
+  );
+
+  const options = Array.from(Array(10).keys())
+    .slice(1)
+    .map((val) => {
+      return { value: `${val}`, text: `Level ${val}` };
+    });
+  const compressionLevelInput = useSelectInput(
+    options,
+    `${output?.shipper?.compression_level}` ?? options[0].value,
+    !diskQueueCompressionEnabled.value ?? false
+  );
+
+  // These parameters are yet tbd - https://github.com/elastic/kibana/issues/147613
+  const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events || undefined);
+  const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout || undefined);
+  const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes || undefined);
+
+  // Logstash inputs
+  const logstashHostsInput = useComboInput(
+    'logstashHostsComboxBox',
+    output?.hosts ?? [],
+    validateLogstashHosts,
+    isPreconfigured
+  );
+  const sslCertificateAuthoritiesInput = useComboInput(
+    'sslCertificateAuthoritiesComboxBox',
+    output?.ssl?.certificate_authorities ?? [],
+    undefined,
+    isPreconfigured
+  );
+  const sslCertificateInput = useInput(
+    output?.ssl?.certificate ?? '',
+    validateSSLCertificate,
+    isPreconfigured
+  );
+
+  const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isPreconfigured);
+
+  const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isPreconfigured);
+
+  const isLogstash = typeInput.value === 'logstash';
+
+  const inputs: OutputFormInputsType = {
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    diskQueueEnabledInput,
+    diskQueuePathInput,
+    diskQueueEncryptionEnabled,
+    diskQueueMaxSizeInput,
+    diskQueueCompressionEnabled,
+    compressionLevelInput,
+    logstashHostsInput,
     additionalYamlConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
+    sslCertificateInput,
+    sslKeyInput,
+    sslCertificateAuthoritiesInput,
+    proxyIdInput,
+    loadBalanceEnabledInput,
+    memQueueEvents,
+    queueFlushTimeout,
+    maxBatchBytes,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -146,20 +219,43 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
+    const sslCertificateValid = sslCertificateInput.validate();
+    const sslKeyValid = sslKeyInput.validate();
+    const diskQueuePathValid = diskQueuePathInput.validate();
 
-    if (
-      !elasticsearchUrlsValid ||
-      !additionalYamlConfigValid ||
-      !nameInputValid ||
-      !caTrustedFingerprintValid
-    ) {
-      return false;
+    if (isLogstash) {
+      // validate logstash
+      return (
+        logstashHostsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        sslCertificateValid &&
+        sslKeyValid
+      );
+    } else {
+      // validate ES
+      return (
+        elasticsearchUrlsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        caTrustedFingerprintValid &&
+        diskQueuePathValid
+      );
     }
-
-    return true;
-  }, [nameInput, elasticsearchUrlInput, additionalYamlConfigInput, caTrustedFingerprintInput]);
+  }, [
+    nameInput,
+    elasticsearchUrlInput,
+    logstashHostsInput,
+    additionalYamlConfigInput,
+    caTrustedFingerprintInput,
+    sslCertificateInput,
+    sslKeyInput,
+    diskQueuePathInput,
+    isLogstash,
+  ]);
 
   const submit = useCallback(async () => {
     try {
@@ -168,15 +264,63 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       }
       setIsloading(true);
 
-      const data: PostOutputRequest['body'] = {
-        name: nameInput.value,
-        type: 'elasticsearch',
-        hosts: elasticsearchUrlInput.value,
-        is_default: defaultOutputInput.value,
-        is_default_monitoring: defaultMonitoringOutputInput.value,
-        config_yaml: additionalYamlConfigInput.value,
-        ca_trusted_fingerprint: caTrustedFingerprintInput.value,
-      };
+      let shipperParams = {};
+      if (!isShipperDisabled) {
+        shipperParams = {
+          shipper: {
+            disk_queue_enabled: diskQueueEnabledInput.value,
+            disk_queue_path:
+              diskQueueEnabledInput.value && diskQueuePathInput.value
+                ? diskQueuePathInput.value
+                : '',
+            disk_queue_max_size:
+              diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
+                ? diskQueueMaxSizeInput.value
+                : null,
+            disk_queue_encryption_enabled:
+              diskQueueEnabledInput.value && diskQueueEncryptionEnabled.value,
+            disk_queue_compression_enabled: diskQueueCompressionEnabled.value,
+            compression_level: diskQueueCompressionEnabled.value
+              ? Number(compressionLevelInput.value)
+              : null,
+            loadbalance: loadBalanceEnabledInput.value,
+            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : null,
+            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : null,
+            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : null,
+          },
+        };
+      }
+
+      const proxyIdValue = proxyIdInput.value !== '' ? proxyIdInput.value : null;
+      const data: PostOutputRequest['body'] = isLogstash
+        ? {
+            name: nameInput.value,
+            type: typeInput.value as 'elasticsearch' | 'logstash',
+            hosts: logstashHostsInput.value,
+            is_default: defaultOutputInput.value,
+            is_default_monitoring: defaultMonitoringOutputInput.value,
+            config_yaml: additionalYamlConfigInput.value,
+            ssl: {
+              certificate: sslCertificateInput.value,
+              key: sslKeyInput.value,
+              certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                (val) => val !== ''
+              ),
+            },
+            proxy_id: proxyIdValue,
+            ...shipperParams,
+          }
+        : {
+            name: nameInput.value,
+            type: typeInput.value as 'elasticsearch' | 'logstash',
+            hosts: elasticsearchUrlInput.value,
+            is_default: defaultOutputInput.value,
+            is_default_monitoring: defaultMonitoringOutputInput.value,
+            config_yaml: additionalYamlConfigInput.value,
+            ca_trusted_fingerprint: caTrustedFingerprintInput.value,
+            proxy_id: proxyIdValue,
+            ...shipperParams,
+          };
 
       if (output) {
         // Update
@@ -209,22 +353,46 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     }
   }, [
     validate,
-    confirm,
-    additionalYamlConfigInput.value,
-    defaultMonitoringOutputInput.value,
+    isLogstash,
+    isShipperDisabled,
+    nameInput.value,
+    typeInput.value,
+    logstashHostsInput.value,
     defaultOutputInput.value,
+    defaultMonitoringOutputInput.value,
+    additionalYamlConfigInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
+    sslCertificateAuthoritiesInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
-    nameInput.value,
+    proxyIdInput.value,
     notifications.toasts,
     onSucess,
     output,
+    diskQueueEnabledInput.value,
+    diskQueuePathInput.value,
+    diskQueueMaxSizeInput.value,
+    diskQueueEncryptionEnabled.value,
+    diskQueueCompressionEnabled.value,
+    compressionLevelInput.value,
+    loadBalanceEnabledInput.value,
+    memQueueEvents.value,
+    queueFlushTimeout.value,
+    maxBatchBytes.value,
+    confirm,
   ]);
 
   return {
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || isPreconfigured || (output && !hasChanged),
+    hasEncryptedSavedObjectConfigured,
+    isShipperEnabled: !isShipperDisabled,
+    isDisabled:
+      isLoading ||
+      isPreconfigured ||
+      (output && !hasChanged) ||
+      (isLogstash && !hasEncryptedSavedObjectConfigured),
   };
 }

@@ -10,7 +10,7 @@ import { EuiPopover, EuiText } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { GeoJsonProperties, Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { FeaturesTooltip } from './features_tooltip';
 import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';

@@ -5,19 +5,25 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import { HttpFetchError } from 'kibana/public';
-import {
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type {
   UpdateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useBulkUpdateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema[], HttpFetchError> = DEFAULT_OPTIONS,
+  customOptions: UseMutationOptions<
+    ExceptionListItemSchema[],
+    IHttpFetchError,
+    UpdateExceptionListItemSchema[],
+    () => void
+  > = DEFAULT_OPTIONS,
   options: {
     concurrency: number;
   } = {
@@ -25,13 +31,13 @@ export function useBulkUpdateArtifact(
   }
 ): UseMutationResult<
   ExceptionListItemSchema[],
-  HttpFetchError,
+  IHttpFetchError,
   UpdateExceptionListItemSchema[],
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema[],
-    HttpFetchError,
+    IHttpFetchError,
     UpdateExceptionListItemSchema[],
     () => void
   >((exceptions: UpdateExceptionListItemSchema[]) => {

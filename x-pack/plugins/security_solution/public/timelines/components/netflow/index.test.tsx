@@ -7,9 +7,8 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -19,12 +18,15 @@ import {
 } from '../certificate_fingerprint';
 import { EVENT_DURATION_FIELD_NAME } from '../duration';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
-import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
+import {
+  DESTINATION_IP_FIELD_NAME,
+  SOURCE_IP_FIELD_NAME,
+} from '../../../explore/network/components/ip';
 import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
-} from '../../../network/components/port/helpers';
+} from '../../../explore/network/components/port/helpers';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -36,13 +38,13 @@ import {
   SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME,
   SOURCE_GEO_COUNTRY_NAME_FIELD_NAME,
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
-} from '../../../network/components/source_destination/geo_fields';
+} from '../../../explore/network/components/source_destination/geo_fields';
 import {
   DESTINATION_BYTES_FIELD_NAME,
   DESTINATION_PACKETS_FIELD_NAME,
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
-} from '../../../network/components/source_destination/source_destination_arrows';
+} from '../../../explore/network/components/source_destination/source_destination_arrows';
 import * as i18n from '../timeline/body/renderers/translations';
 
 import { Netflow } from '.';
@@ -58,8 +60,7 @@ import {
   NETWORK_PACKETS_FIELD_NAME,
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../network/components/source_destination/field_names';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
+} from '../../../explore/network/components/source_destination/field_names';
 import { getMockNetflowData } from '../../../common/mock/netflow';
 
 jest.mock('../../../common/lib/kibana');
@@ -136,300 +137,244 @@ const getNetflowInstance = () => (
 jest.mock('../../../common/components/link_to');
 
 describe('Netflow', () => {
-  const mount = useMountAppended();
-
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(getNetflowInstance());
-    expect(wrapper).toMatchSnapshot();
+    const { asFragment } = render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    expect(asFragment()).toMatchSnapshot();
   });
 
   test('it renders a destination label', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
-      i18n.DESTINATION
-    );
+    expect(screen.getByText(i18n.DESTINATION)).toBeInTheDocument();
   });
 
   test('it renders destination.bytes', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-bytes"]').first().text()).toEqual('40B');
+    expect(screen.getByText('40B')).toBeInTheDocument();
   });
 
   test('it renders destination.geo.continent_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(
-      wrapper.find('[data-test-subj="destination.geo.continent_name"]').first().text()
-    ).toEqual('North America');
+    expect(screen.getByTestId('draggable-content-destination.geo.continent_name').textContent).toBe(
+      'North America'
+    );
   });
 
   test('it renders destination.geo.country_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination.geo.country_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-destination.geo.country_name').textContent).toBe(
       'United States'
     );
   });
 
   test('it renders destination.geo.country_iso_code', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
-      wrapper.find('[data-test-subj="destination.geo.country_iso_code"]').first().text()
-    ).toEqual('US');
+      screen.getByTestId('draggable-content-destination.geo.country_iso_code').textContent
+    ).toBe('US');
   });
 
   test('it renders destination.geo.region_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination.geo.region_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-destination.geo.region_name').textContent).toBe(
       'New York'
     );
   });
 
   test('it renders destination.geo.city_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination.geo.city_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-destination.geo.city_name').textContent).toBe(
       'New York'
     );
   });
 
   test('it renders the destination ip and port, separated with a colon', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(
-      removeExternalLinkText(
-        wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
-      )
-    ).toEqual('10.1.2.3:80');
+    expect(screen.getByTestId('destination-ip-badge').textContent).toContain('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="destination-packets"]').first().text()).toEqual('1 pkts');
+    expect(screen.getByText('1 pkts')).toBeInTheDocument();
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
-      wrapper
-        .find('[data-test-subj="destination-ip-and-port"]')
-        .find('[data-test-subj="port-or-service-name-link"]')
-        .first()
-        .props().href
-    ).toEqual(
+      within(screen.getByTestId('destination-ip-group')).getByTestId('port-or-service-name-link')
+    ).toHaveAttribute(
+      'href',
       'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80'
     );
   });
 
   test('it renders event.duration', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="event-duration"]').first().text()).toEqual('1ms');
+    expect(screen.getByText('1ms')).toBeInTheDocument();
   });
 
   test('it renders event.end', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="event-end"]').first().text().length).toBeGreaterThan(0); // the format of this date will depend on the user's locale and settings
-  });
-
-  test('it renders event.start', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
-
-    expect(wrapper.find('[data-test-subj="event-start"]').first().text().length).toBeGreaterThan(0); // the format of this date will depend on the user's locale and settings
-  });
-
-  test('it renders network.bytes', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
-
-    expect(wrapper.find('[data-test-subj="network-bytes"]').first().text()).toEqual('100B');
-  });
-
-  test('it renders network.community_id', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
-
-    expect(wrapper.find('[data-test-subj="network-community-id"]').first().text()).toEqual(
-      'we.live.in.a'
+    expect(screen.getByTestId('draggable-content-event.end').textContent).toBe(
+      'Nov 12, 2018 @ 19:03:25.936'
     );
   });
 
-  test('it renders network.direction', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+  test('it renders event.start', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-direction"]').first().text()).toEqual('outgoing');
+    expect(screen.getByTestId('draggable-content-event.start').textContent).toBe(
+      'Nov 12, 2018 @ 19:03:25.836'
+    );
+  });
+
+  test('it renders network.bytes', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(screen.getByText('100B')).toBeInTheDocument();
+  });
+
+  test('it renders network.community_id', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(screen.getByText('we.live.in.a')).toBeInTheDocument();
+  });
+
+  test('it renders network.direction', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(screen.getByText('outgoing')).toBeInTheDocument();
   });
 
   test('it renders network.packets', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-packets"]').first().text()).toEqual('3 pkts');
+    expect(screen.getByText('3 pkts')).toBeInTheDocument();
   });
 
   test('it renders network.protocol', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-protocol"]').first().text()).toEqual('http');
+    expect(screen.getByText('http')).toBeInTheDocument();
   });
 
   test('it renders process.name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="process-name"]').first().text()).toEqual('rat');
+    expect(screen.getByText('rat')).toBeInTheDocument();
   });
 
   test('it renders a source label', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
+    expect(screen.getByText(i18n.SOURCE)).toBeInTheDocument();
   });
 
   test('it renders source.bytes', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-bytes"]').first().text()).toEqual('60B');
+    expect(screen.getByText('60B')).toBeInTheDocument();
   });
 
   test('it renders source.geo.continent_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.continent_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.continent_name').textContent).toBe(
       'North America'
     );
   });
 
   test('it renders source.geo.country_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.country_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.country_name').textContent).toBe(
       'United States'
     );
   });
 
   test('it renders source.geo.country_iso_code', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.country_iso_code"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.country_iso_code').textContent).toBe(
       'US'
     );
   });
 
   test('it renders source.geo.region_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.region_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.region_name').textContent).toBe(
       'Georgia'
     );
   });
 
   test('it renders source.geo.city_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source.geo.city_name"]').first().text()).toEqual(
+    expect(screen.getByTestId('draggable-content-source.geo.city_name').textContent).toBe(
       'Atlanta'
     );
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(
-      removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
-    ).toEqual('192.168.1.2:9987');
+    expect(screen.getByTestId('source-ip-badge').textContent).toContain('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="source-packets"]').first().text()).toEqual('2 pkts');
+    expect(screen.getByText('2 pkts')).toBeInTheDocument();
   });
 
   test('it hyperlinks tls.client_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="client-certificate-fingerprint"]')
-        .find('[data-test-subj="certificate-fingerprint-link"]')
-        .first()
-        .props().href
-    ).toEqual(
+    expect(screen.getByText('tls.client_certificate.fingerprint.sha1-value')).toHaveAttribute(
+      'href',
       'https://sslbl.abuse.ch/ssl-certificates/sha1/tls.client_certificate.fingerprint.sha1-value'
     );
   });
 
-  test('renders tls.client_certificate.fingerprint.sha1 text', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
-
-    expect(
-      removeExternalLinkText(
-        wrapper
-          .find('[data-test-subj="client-certificate-fingerprint"]')
-          .find('[data-test-subj="certificate-fingerprint-link"]')
-          .first()
-          .text()
-      )
-    ).toEqual('tls.client_certificate.fingerprint.sha1-value');
-  });
-
   test('it hyperlinks tls.fingerprints.ja3.hash site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().props().href).toEqual(
+    expect(screen.getByText('tls.fingerprints.ja3.hash-value')).toHaveAttribute(
+      'href',
       'https://sslbl.abuse.ch/ja3-fingerprints/tls.fingerprints.ja3.hash-value'
     );
   });
 
-  test('renders tls.fingerprints.ja3.hash text', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
-
-    expect(
-      removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
-    ).toEqual('tls.fingerprints.ja3.hash-value');
-  });
-
   test('it hyperlinks tls.server_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="server-certificate-fingerprint"]')
-        .find('[data-test-subj="certificate-fingerprint-link"]')
-        .first()
-        .props().href
-    ).toEqual(
+    expect(screen.getByText('tls.server_certificate.fingerprint.sha1-value')).toHaveAttribute(
+      'href',
       'https://sslbl.abuse.ch/ssl-certificates/sha1/tls.server_certificate.fingerprint.sha1-value'
     );
   });
 
-  test('renders tls.server_certificate.fingerprint.sha1 text', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
-
-    expect(
-      removeExternalLinkText(
-        wrapper
-          .find('[data-test-subj="server-certificate-fingerprint"]')
-          .find('[data-test-subj="certificate-fingerprint-link"]')
-          .first()
-          .text()
-      )
-    ).toEqual('tls.server_certificate.fingerprint.sha1-value');
-  });
-
   test('it renders network.transport', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="network-transport"]').first().text()).toEqual('tcp');
+    expect(screen.getByText('tcp')).toBeInTheDocument();
   });
 
   test('it renders user.name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(wrapper.find('[data-test-subj="user-name"]').first().text()).toEqual('first.last');
+    expect(screen.getByText('first.last')).toBeInTheDocument();
   });
 });

@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 import sinon from 'sinon';
 import moment from 'moment';
+import { TimeRange } from '@kbn/es-query';
 import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
-import { TimeRange, RefreshInterval } from '../../../common';
+import { RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
@@ -135,6 +136,17 @@ describe('setRefreshInterval', () => {
     refreshSub.unsubscribe();
     fetchSub.unsubscribe();
     autoRefreshSub.unsubscribe();
+  });
+
+  test('isRefreshIntervalTouched is initially set to false', () => {
+    expect(timefilter.isRefreshIntervalTouched()).toBe(false);
+  });
+
+  test('should register changes to the initial interval', () => {
+    timefilter.setRefreshInterval(timefilterConfig.refreshIntervalDefaults);
+    expect(timefilter.isRefreshIntervalTouched()).toBe(false);
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(timefilter.isRefreshIntervalTouched()).toBe(true);
   });
 
   test('should update refresh interval', () => {

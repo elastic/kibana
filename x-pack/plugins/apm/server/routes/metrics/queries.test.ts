@@ -22,9 +22,10 @@ describe('metrics queries', () => {
 
   const createTests = (serviceNodeName?: string) => {
     it('fetches cpu chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
         getCPUChartData({
-          setup,
+          config: mockConfig,
+          apmEventClient: mockApmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -38,9 +39,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches memory chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
         getMemoryChartData({
-          setup,
+          config: mockConfig,
+          apmEventClient: mockApmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -54,9 +56,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches heap memory chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
         getHeapMemoryChart({
-          setup,
+          config: mockConfig,
+          apmEventClient: mockApmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -70,9 +73,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches non heap memory chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
         getNonHeapMemoryChart({
-          setup,
+          config: mockConfig,
+          apmEventClient: mockApmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,
@@ -86,9 +90,10 @@ describe('metrics queries', () => {
     });
 
     it('fetches thread count chart data', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
         getThreadCountChart({
-          setup,
+          config: mockConfig,
+          apmEventClient: mockApmEventClient,
           serviceName: 'foo',
           serviceNodeName,
           environment: ENVIRONMENT_ALL.value,

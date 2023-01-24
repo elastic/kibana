@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';
@@ -21,7 +21,7 @@ export class DataViewEditorPlugin
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    const { application, uiSettings, docLinks, http, notifications } = core;
+    const { application, uiSettings, docLinks, http, notifications, overlays } = core;
     const { data, dataViews } = plugins;
 
     return {
@@ -48,6 +48,7 @@ export class DataViewEditorPlugin
             http,
             notifications,
             application,
+            overlays,
             dataViews,
             searchClient: data.search.search,
           }}

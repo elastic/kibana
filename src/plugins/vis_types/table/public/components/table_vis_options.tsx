@@ -12,13 +12,13 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { search } from '../../../../data/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { search } from '@kbn/data-plugin/public';
 import {
   SwitchOption,
   SelectOption,
   NumberInputOption,
-} from '../../../../vis_default_editor/public';
+} from '@kbn/vis-default-editor-plugin/public';
 import { TableVisParams } from '../../common';
 import { totalAggregations } from './utils';
 
@@ -133,6 +133,7 @@ function TableOptions({
         paramName="showTotal"
         value={stateParams.showTotal}
         setValue={setValue}
+        data-test-subj="showTotal"
       />
 
       <SelectOption
@@ -144,6 +145,7 @@ function TableOptions({
         paramName="totalFunc"
         value={stateParams.totalFunc}
         setValue={setValue}
+        data-test-subj="totalFunction"
       />
 
       <SelectOption

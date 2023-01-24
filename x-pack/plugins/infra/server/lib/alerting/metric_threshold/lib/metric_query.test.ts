@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { Comparator, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
@@ -15,6 +15,8 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     aggType: 'avg',
     timeUnit: 'm',
     timeSize: 1,
+    threshold: [1],
+    comparator: Comparator.GT,
   } as MetricExpressionParams;
 
   const groupBy = 'host.doggoname';
@@ -24,7 +26,14 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   describe('when passed no filterQuery', () => {
-    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, 100, groupBy);
+    const searchBody = getElasticsearchMetricQuery(
+      expressionParams,
+      timeframe,
+      100,
+      true,
+      void 0,
+      groupBy
+    );
     test('includes a range filter', () => {
       expect(
         searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
@@ -48,6 +57,8 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       expressionParams,
       timeframe,
       100,
+      true,
+      void 0,
       groupBy,
       filterQuery
     );

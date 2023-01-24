@@ -5,58 +5,19 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
-export const mockEndgameDnsRequest: Ecs = {
-  _id: 'S8jPcG0BOpWiDweSou3g',
-  user: {
-    id: ['S-1-5-18'],
-    domain: ['NT AUTHORITY'],
-    name: ['SYSTEM'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['6.1'],
-    },
-    ip: ['10.178.85.222'],
-    name: ['HD-obe-8bf77f54'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['request_event'],
-    category: ['network'],
-    kind: ['event'],
-  },
-  message: [
-    'DNS query is completed for the name %1, type %2, query options %3 with status %4 Results %5 ',
-  ],
-  timestamp: '1569555712000',
-  dns: {
-    question: {
-      name: ['update.googleapis.com'],
-      type: ['A'],
-    },
-    resolved_ip: ['10.100.197.67'],
-  },
-  network: {
-    protocol: ['dns'],
-  },
-  process: {
-    pid: [443192],
-    name: ['GoogleUpdate.exe'],
-    executable: ['C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe'],
-  },
-  winlog: {
-    event_id: [3008],
-  },
-  endgame: {
-    process_name: ['GoogleUpdate.exe'],
-    pid: [443192],
-  },
-};
+// these "mocks" are used by browser bundles so they were moved out of the mocks and are
+// re-exported here for convenience and internal bwc
+export { demoEndgameCreationEvent as mockEndgameCreationEvent } from '../demo_data/endgame_ecs/creation';
+export { demoEndgameDnsRequest as mockEndgameDnsRequest } from '../demo_data/endgame_ecs/dns';
+export {
+  demoEndgameFileCreateEvent as mockEndgameFileCreateEvent,
+  demoEndgameFileDeleteEvent as mockEndgameFileDeleteEvent,
+} from '../demo_data/endgame_ecs/file_events';
+export { demoEndgameIpv4ConnectionAcceptEvent as mockEndgameIpv4ConnectionAcceptEvent } from '../demo_data/endgame_ecs/ipv4';
+export { demoEndgameTerminationEvent as mockEndgameTerminationEvent } from '../demo_data/endgame_ecs/termination';
+export { demoEndgameUserLogon as mockEndgameUserLogon } from '../demo_data/endgame_ecs/user_logon';
 
 export const mockEndpointNetworkLookupRequestedEvent: Ecs = {
   host: {
@@ -173,39 +134,6 @@ export const mockEndpointNetworkLookupResultEvent: Ecs = {
   _id: 'skNzOncBPmkOXwyN9VbT',
 };
 
-export const mockEndgameFileCreateEvent: Ecs = {
-  _id: '98jPcG0BOpWiDweSouzg',
-  user: {
-    id: ['S-1-5-21-3573271228-3407584681-1597858646-1002'],
-    domain: ['Anvi-Acer'],
-    name: ['Arun'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['6.1'],
-    },
-    ip: ['10.178.85.222'],
-    name: ['HD-obe-8bf77f54'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['file_create_event'],
-    category: ['file'],
-    kind: ['event'],
-  },
-  timestamp: '1569555712000',
-  endgame: {
-    process_name: ['chrome.exe'],
-    pid: [11620],
-    file_path: [
-      'C:\\Users\\Arun\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\63d78c21-e593-4484-b7a9-db33cd522ddc.tmp',
-    ],
-  },
-};
-
 export const mockEndpointFileCreationEvent: Ecs = {
   file: {
     path: ['C:\\Windows\\TEMP\\E38FD162-B6E6-4799-B52D-F590BACBAE94\\WimProvider.dll'],
@@ -257,38 +185,6 @@ export const mockEndpointFileCreationEvent: Ecs = {
   message: ['Endpoint file event'],
   timestamp: '2021-01-25T16:21:56.832Z',
   _id: 'eSdbOncBLJMagDUQ3YFs',
-};
-
-export const mockEndgameFileDeleteEvent: Ecs = {
-  _id: 'OMjPcG0BOpWiDweSeuW9',
-  user: {
-    id: ['S-1-5-18'],
-    domain: ['NT AUTHORITY'],
-    name: ['SYSTEM'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['10.0'],
-    },
-    ip: ['10.134.159.150'],
-    name: ['HD-v1s-d2118419'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['file_delete_event'],
-    category: ['file'],
-    kind: ['event'],
-  },
-  timestamp: '1569555704000',
-  endgame: {
-    pid: [1084],
-    file_name: ['tmp000002f6'],
-    file_path: ['C:\\Windows\\TEMP\\tmp00000404\\tmp000002f6'],
-    process_name: ['AmSvc.exe'],
-  },
 };
 
 export const mockEndpointFileDeletionEvent: Ecs = {
@@ -1222,52 +1118,6 @@ export const mockEndpointProcessForkEvent: Ecs = {
   _id: 'KXomX3cBGrBB52F2S9XY',
 };
 
-export const mockEndgameIpv4ConnectionAcceptEvent: Ecs = {
-  _id: 'LsjPcG0BOpWiDweSCNfu',
-  user: {
-    id: ['S-1-5-18'],
-    domain: ['NT AUTHORITY'],
-    name: ['SYSTEM'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['10.0'],
-    },
-    ip: ['10.43.255.177'],
-    name: ['HD-gqf-0af7b4fe'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['ipv4_connection_accept_event'],
-    category: ['network'],
-    kind: ['event'],
-  },
-  timestamp: '1569555676000',
-  network: {
-    community_id: ['1:network-community_id'],
-    transport: ['tcp'],
-  },
-  process: {
-    pid: [1084],
-    name: ['AmSvc.exe'],
-    executable: ['C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe'],
-  },
-  source: {
-    ip: ['127.0.0.1'],
-    port: [49306],
-  },
-  destination: {
-    port: [49305],
-    ip: ['127.0.0.1'],
-  },
-  endgame: {
-    pid: [1084],
-  },
-};
-
 export const mockEndgameIpv6ConnectionAcceptEvent: Ecs = {
   _id: '-8SucG0BOpWiDweS0wrq',
   user: {
@@ -1545,54 +1395,6 @@ export const mockEndpointDisconnectReceivedEvent: Ecs = {
   _id: 'uUN0OncBPmkOXwyNOGPV',
 };
 
-export const mockEndgameUserLogon: Ecs = {
-  _id: 'QsjPcG0BOpWiDweSeuRE',
-  user: {
-    id: ['S-1-5-18'],
-    domain: ['NT AUTHORITY'],
-    name: ['SYSTEM'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['10.0'],
-    },
-    ip: ['10.134.159.150'],
-    name: ['HD-v1s-d2118419'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['user_logon'],
-    category: ['authentication'],
-    type: ['authentication_success'],
-    kind: ['event'],
-  },
-  message: [
-    'An account was successfully logged on.\r\n\r\nSubject:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tWIN-Q3DOP1UKA81$\r\n\tAccount Domain:\t\tWORKGROUP\r\n\tLogon ID:\t\t0x3e7\r\n\r\nLogon Type:\t\t\t5\r\n\r\nNew Logon:\r\n\tSecurity ID:\t\tS-1-5-18\r\n\tAccount Name:\t\tSYSTEM\r\n\tAccount Domain:\t\tNT AUTHORITY\r\n\tLogon ID:\t\t0x3e7\r\n\tLogon GUID:\t\t{00000000-0000-0000-0000-000000000000}\r\n\r\nProcess Information:\r\n\tProcess ID:\t\t0x1b0\r\n\tProcess Name:\t\tC:\\Windows\\System32\\services.exe\r\n\r\nNetwork Information:\r\n\tWorkstation Name:\t\r\n\tSource Network Address:\t-\r\n\tSource Port:\t\t-\r\n\r\nDetailed Authentication Information:\r\n\tLogon Process:\t\tAdvapi  \r\n\tAuthentication Package:\tNegotiate\r\n\tTransited Services:\t-\r\n\tPackage Name (NTLM only):\t-\r\n\tKey Length:\t\t0\r\n\r\nThis event is generated when a logon session is created. It is generated on the computer that was accessed.\r\n\r\nThe subject fields indicate the account on the local system which requested the logon. This is most commonly a service such as the Server service, or a local process such as Winlogon.exe or Services.exe.\r\n\r\nThe logon type field indicates the kind of logon that occurred. The most common types are 2 (interactive) and 3 (network).\r\n\r\nThe New Logon fields indicate the account for whom the new logon was created, i.e. the account that was logged on.\r\n\r\nThe network fields indicate where a remote logon request originated. Workstation name is not always available and may be left blank in some cases.\r\n\r\nThe authentication information fields provide detailed information about this specific logon request.\r\n\t- Logon GUID is a unique identifier that can be used to correlate this event with a KDC event.\r\n\t- Transited services indicate which intermediate services have participated in this logon request.\r\n\t- Package name indicates which sub-protocol was used among the NTLM protocols.\r\n\t- Key length indicates the length of the generated session key. This will be 0 if no session key was requested.',
-  ],
-  timestamp: '1569555704000',
-  process: {
-    pid: [432],
-    name: ['C:\\Windows\\System32\\services.exe'],
-    executable: ['C:\\Windows\\System32\\services.exe'],
-  },
-  winlog: {
-    event_id: [4624],
-  },
-  endgame: {
-    target_logon_id: ['0x3e7'],
-    pid: [432],
-    process_name: ['C:\\Windows\\System32\\services.exe'],
-    logon_type: [5],
-    subject_user_name: ['WIN-Q3DOP1UKA81$'],
-    subject_logon_id: ['0x3e7'],
-    target_user_name: ['SYSTEM'],
-    target_domain_name: ['NT AUTHORITY'],
-  },
-};
-
 export const mockEndpointSecurityLogOnSuccessEvent: Ecs = {
   host: {
     os: {
@@ -1853,55 +1655,6 @@ export const mockEndpointSecurityLogOffEvent: Ecs = {
   _id: 'ZesLQXcBPmkOXwyNdT1a',
 };
 
-export const mockEndgameCreationEvent: Ecs = {
-  _id: 'BcjPcG0BOpWiDweSou3g',
-  user: {
-    id: ['S-1-5-21-3573271228-3407584681-1597858646-1002'],
-    domain: ['Anvi-Acer'],
-    name: ['Arun'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['6.1'],
-    },
-    ip: ['10.178.85.222'],
-    name: ['HD-obe-8bf77f54'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['creation_event'],
-    category: ['process'],
-    type: ['process_start'],
-    kind: ['event'],
-  },
-  timestamp: '1569555712000',
-  process: {
-    hash: {
-      md5: ['62d06d7235b37895b68de56687895743'],
-      sha1: ['12563599116157778a22600d2a163d8112aed845'],
-      sha256: ['d4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee'],
-    },
-    pid: [441684],
-    ppid: [8],
-    name: ['Microsoft.Photos.exe'],
-    executable: [
-      'C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2018.18091.17210.0_x64__8wekyb3d8bbwe\\Microsoft.Photos.exe',
-    ],
-    args: [
-      'C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2018.18091.17210.0_x64__8wekyb3d8bbwe\\Microsoft.Photos.exe',
-      '-ServerName:App.AppXzst44mncqdg84v7sv6p7yznqwssy6f7f.mca',
-    ],
-  },
-  endgame: {
-    process_name: ['Microsoft.Photos.exe'],
-    pid: [441684],
-    parent_process_name: ['svchost.exe'],
-  },
-};
-
 export const mockEndpointProcessStartEvent: Ecs = {
   process: {
     hash: {
@@ -1952,48 +1705,6 @@ export const mockEndpointProcessStartEvent: Ecs = {
   message: ['Endpoint process event'],
   timestamp: '2021-01-25T21:59:58.107Z',
   _id: 't5KSO3cB8l64wN2iQ8V9',
-};
-
-export const mockEndgameTerminationEvent: Ecs = {
-  _id: '2MjPcG0BOpWiDweSoutC',
-  user: {
-    id: ['S-1-5-21-3573271228-3407584681-1597858646-1002'],
-    domain: ['Anvi-Acer'],
-    name: ['Arun'],
-  },
-  host: {
-    os: {
-      platform: ['windows'],
-      name: ['Windows'],
-      version: ['6.1'],
-    },
-    ip: ['10.178.85.222'],
-    name: ['HD-obe-8bf77f54'],
-  },
-  event: {
-    module: ['endgame'],
-    dataset: ['esensor'],
-    action: ['termination_event'],
-    category: ['process'],
-    kind: ['event'],
-  },
-  timestamp: '1569555712000',
-  process: {
-    hash: {
-      md5: ['bd4401441a21bf1abce6404f4231db4d'],
-      sha1: ['797255e72d5ed5c058d4785950eba7abaa057653'],
-      sha256: ['87976f3430cc99bc939e0694247c0759961a49832b87218f4313d6fc0bc3a776'],
-    },
-    pid: [442384],
-    ppid: [8],
-    name: ['RuntimeBroker.exe'],
-    executable: ['C:\\Windows\\System32\\RuntimeBroker.exe'],
-  },
-  endgame: {
-    pid: [442384],
-    process_name: ['RuntimeBroker.exe'],
-    exit_code: [0],
-  },
 };
 
 export const mockEndpointProcessEndEvent: Ecs = {

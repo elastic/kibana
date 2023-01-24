@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview during loading 1`] = `
+exports[`Overview renders correctly 1`] = `
 <Overview
   features={
     Array [
@@ -211,34 +211,27 @@ exports[`Overview during loading 1`] = `
     ]
   }
 >
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="center"
+  <KibanaPageTemplate
+    pageHeader={
+      Object {
+        "bottomBorder": true,
+        "iconType": "logoKibana",
+        "pageTitle": <FormattedMessage
+          defaultMessage="Analytics"
+          id="kibanaOverview.header.title"
+          values={Object {}}
+        />,
+        "rightSideItems": Array [],
+      }
+    }
+    panelled={false}
   >
-    <div
-      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiLoadingSpinner
-            size="xl"
-          >
-            <span
-              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-            />
-          </EuiLoadingSpinner>
-        </div>
-      </EuiFlexItem>
-    </div>
-  </EuiFlexGroup>
+    <MockedKibanaPageTemplate />
+  </KibanaPageTemplate>
 </Overview>
 `;
 
-exports[`Overview render 1`] = `
+exports[`Overview renders correctly when there is no user data view 1`] = `
 <Overview
   features={
     Array [
@@ -449,266 +442,296 @@ exports[`Overview render 1`] = `
     ]
   }
 >
-  <mockConstructor
-    pageHeader={
+  <AnalyticsNoDataPageKibanaProvider
+    coreStart={
       Object {
-        "iconType": "logoKibana",
-        "pageTitle": <FormattedMessage
-          defaultMessage="Analytics"
-          id="kibanaOverview.header.title"
-          values={Object {}}
-        />,
-        "rightSideItems": Array [],
+        "application": Object {
+          "capabilities": Object {
+            "navLinks": Object {
+              "integrations": Object {
+                "canAccessFleet": false,
+              },
+            },
+          },
+          "currentAppId$": Observable {},
+          "navigateToUrl": [MockFunction],
+        },
+        "chrome": undefined,
+        "docLinks": Object {
+          "links": Object {
+            "kibana": Object {
+              "guide": "kibana_docs_url",
+            },
+          },
+        },
+        "http": Object {
+          "basePath": Object {
+            "prepend": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "kibana_landing_page",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                ],
+                Array [
+                  "path-to-solution-two",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                ],
+                Array [
+                  "path-to-solution-three",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                ],
+                Array [
+                  "path-to-solution-four",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "kibana_landing_page",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                ],
+                Array [
+                  "path-to-solution-two",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                ],
+                Array [
+                  "path-to-solution-three",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                ],
+                Array [
+                  "path-to-solution-four",
+                ],
+                Array [
+                  "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+                Array [
+                  "/app/integrations/browse",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "kibana_landing_page",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-two",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-three",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-four",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "kibana_landing_page",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_kibana.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-two",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_2.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-three",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_3.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "path-to-solution-four",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/plugins/kibanaReact/assets/solutions_solution_4.svg",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+                Object {
+                  "type": "return",
+                  "value": "/app/integrations/browse",
+                },
+              ],
+            },
+          },
+        },
       }
     }
-    template="empty"
-  />
+    dataViewEditor={
+      Object {
+        "IndexPatternEditorComponent": [MockFunction],
+        "openEditor": [MockFunction],
+        "userPermissions": Object {
+          "editDataView": [MockFunction],
+        },
+      }
+    }
+    dataViews={
+      Object {
+        "hasData": Object {
+          "hasESData": [Function],
+          "hasUserDataView": [Function],
+        },
+        "hasUserDataView": [MockFunction],
+      }
+    }
+  >
+    <MockedAnalyticsNoDataPage />
+  </AnalyticsNoDataPageKibanaProvider>
 </Overview>
 `;
 
-exports[`Overview when there is no user data view 1`] = `
-<Overview
-  features={
-    Array [
-      Object {
-        "category": "data",
-        "description": "Description of dashboard",
-        "icon": "dashboardApp",
-        "id": "dashboard",
-        "path": "dashboard_landing_page",
-        "showOnHomePage": false,
-        "title": "Dashboard",
-      },
-      Object {
-        "category": "data",
-        "description": "Description of discover",
-        "icon": "discoverApp",
-        "id": "discover",
-        "path": "discover_landing_page",
-        "showOnHomePage": false,
-        "title": "Discover",
-      },
-      Object {
-        "category": "data",
-        "description": "Description of canvas",
-        "icon": "canvasApp",
-        "id": "canvas",
-        "path": "canvas_landing_page",
-        "showOnHomePage": false,
-        "title": "Canvas",
-      },
-    ]
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  newsFetchResult={
-    Object {
-      "error": null,
-      "feedItems": Array [
-        Object {
-          "badge": null,
-          "description": "The official Go client now includes features like request retries and node discovery. Learn more about its architecture and package and repository layout.",
-          "expireOn": "2050-12-31T11:59:59.000Z",
-          "hash": "8e18fcedbc",
-          "linkText": "Read more on the blog",
-          "linkUrl": "https://www.elastic.co/blog/the-go-client-for-elasticsearch-introduction?blade=kibanafeed",
-          "publishOn": "2020-08-31T10:23:47.000Z",
-          "title": "The Go client for Elasticsearch: Introduction",
-        },
-        Object {
-          "badge": null,
-          "description": "Learn how to use Elastic Uptime to configure alerting and anomaly detection for sites, services, and APIs.",
-          "expireOn": "2050-12-31T11:59:59.000Z",
-          "hash": "fb3e3d42ef",
-          "linkText": "Read more on the blog",
-          "linkUrl": "https://www.elastic.co/blog/alerting-and-anomaly-detection-for-uptime-and-reliability?blade=kibanafeed",
-          "publishOn": "2020-08-14T10:23:47.000Z",
-          "title": "Alerting and anomaly detection for uptime and reliability",
-        },
-        Object {
-          "badge": null,
-          "description": "Managing data using hot-warm architecture and ILM is a cost-effective way of retaining data — and a great way to easily keep your cloud costs down.",
-          "expireOn": "2050-12-31T11:59:59.000Z",
-          "hash": "b2fc7d47d5",
-          "linkText": "Learn more on the blog",
-          "linkUrl": "https://www.elastic.co/blog/optimizing-costs-elastic-cloud-hot-warm-index-lifecycle-management?blade=kibanafeed",
-          "publishOn": "2020-08-01T10:23:47.000Z",
-          "title": "Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management",
-        },
-      ],
-      "hasNew": true,
-      "kibanaVersion": "8.0.0",
-    }
-  }
-  solutions={
-    Array [
-      Object {
-        "description": "Description of Kibana",
-        "icon": "logoKibana",
-        "id": "kibana",
-        "order": 1,
-        "path": "kibana_landing_page",
-        "title": "Analytics",
-      },
-      Object {
-        "description": "Description of solution two",
-        "icon": "empty",
-        "id": "solution-2",
-        "order": 2,
-        "path": "path-to-solution-two",
-        "title": "Solution two",
-      },
-      Object {
-        "description": "Description of solution three",
-        "icon": "empty",
-        "id": "solution-3",
-        "order": 3,
-        "path": "path-to-solution-three",
-        "title": "Solution three",
-      },
-      Object {
-        "description": "Description of solution four",
-        "icon": "empty",
-        "id": "solution-4",
-        "order": 4,
-        "path": "path-to-solution-four",
-        "title": "Solution four",
-      },
-    ]
-  }
->
-  <mockConstructor
-    noDataConfig={
-      Object {
-        "actions": Object {
-          "elasticAgent": Object {
-            "description": "Use Elastic Agent or Beats to collect data and build out Analytics solutions.",
-            "title": "Add integrations",
-          },
-        },
-        "docsLink": "kibana_docs_url",
-        "logo": "logoKibana",
-        "pageTitle": "Welcome to Analytics!",
-        "solution": "Analytics",
-      }
-    }
-    pageHeader={
-      Object {
-        "iconType": "logoKibana",
-        "pageTitle": <FormattedMessage
-          defaultMessage="Analytics"
-          id="kibanaOverview.header.title"
-          values={Object {}}
-        />,
-        "rightSideItems": Array [],
-      }
-    }
-    template="empty"
-  />
-</Overview>
-`;
-
-exports[`Overview without features 1`] = `
+exports[`Overview renders correctly without features 1`] = `
 <Overview
   features={Array []}
   intl={
@@ -889,9 +912,10 @@ exports[`Overview without features 1`] = `
     ]
   }
 >
-  <mockConstructor
+  <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -901,12 +925,14 @@ exports[`Overview without features 1`] = `
         "rightSideItems": Array [],
       }
     }
-    template="empty"
-  />
+    panelled={false}
+  >
+    <MockedKibanaPageTemplate />
+  </KibanaPageTemplate>
 </Overview>
 `;
 
-exports[`Overview without solutions 1`] = `
+exports[`Overview renders correctly without solutions 1`] = `
 <Overview
   features={
     Array [
@@ -1082,9 +1108,10 @@ exports[`Overview without solutions 1`] = `
   }
   solutions={Array []}
 >
-  <mockConstructor
+  <KibanaPageTemplate
     pageHeader={
       Object {
+        "bottomBorder": true,
         "iconType": "logoKibana",
         "pageTitle": <FormattedMessage
           defaultMessage="Analytics"
@@ -1094,7 +1121,25 @@ exports[`Overview without solutions 1`] = `
         "rightSideItems": Array [],
       }
     }
-    template="empty"
-  />
+    panelled={false}
+  >
+    <MockedKibanaPageTemplate />
+  </KibanaPageTemplate>
 </Overview>
+`;
+
+exports[`Overview show loading spinner during loading 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <span
+      aria-label="Loading"
+      class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+      role="progressbar"
+    />
+  </div>
+</div>
 `;

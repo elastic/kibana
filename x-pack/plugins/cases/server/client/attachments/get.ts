@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from 'kibana/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import {
+import type {
   AlertResponse,
   AllCommentsResponse,
-  AllCommentsResponseRt,
   AttributesTypeAlerts,
   CommentResponse,
-  CommentResponseRt,
   CommentsResponse,
-  CommentsResponseRt,
   FindQueryParams,
 } from '../../../common/api';
+import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -26,11 +24,11 @@ import {
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import { CasesClient } from '../client';
+import type { CasesClient } from '../client';
 
 /**
  * Parameters for finding attachments of a case
@@ -102,7 +100,12 @@ export const getAllAlertsAttachToCase = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
-  const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    authorization,
+    services: { attachmentService },
+    logger,
+  } = clientArgs;
 
   try {
     // This will perform an authorization check to ensure the user has access to the parent case
@@ -146,7 +149,12 @@ export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -218,7 +226,12 @@ export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentResponse> {
-  const { attachmentService, unsecuredSavedObjectsClient, logger, authorization } = clientArgs;
+  const {
+    services: { attachmentService },
+    unsecuredSavedObjectsClient,
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const comment = await attachmentService.get({
@@ -250,7 +263,11 @@ export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(

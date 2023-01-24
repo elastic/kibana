@@ -1,0 +1,55 @@
+{
+  "description": "Security: Windows - Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms.",
+  "groups": [
+    "endpoint",
+    "event-log",
+    "process",
+    "windows",
+    "winlogbeat",
+    "powershell",
+    "security"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects high information content in powershell.file.script_block_text values.",
+        "function": "high_info_content",
+        "field_name": "powershell.file.script_block_text"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "user.name",
+      "file.path"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "job_tags": {
+      "euid": "8006",
+      "maturity": "release",
+      "author": "@randomuserid/Elastic",
+      "version": "3",
+      "updated_date": "5/16/2022"
+    },
+    "created_by": "ml-module-security-windows-v3",
+    "custom_urls": [
+      {
+        "url_name": "Host Details by user name",
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.details,type:details)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by user name",
+        "url_value": "siem#/ml-hosts?_g=()&kqlQuery=(filterQuery:(expression:'user.name%20:%20%22$user.name$%22',kind:kuery),queryLocation:hosts.page,type:page)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ],
+    "security_app_display_name": "Suspicious Powershell Script"
+  }
+}

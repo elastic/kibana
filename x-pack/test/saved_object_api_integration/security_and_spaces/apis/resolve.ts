@@ -16,7 +16,7 @@ import {
 } from '../../common/suites/resolve';
 
 const {
-  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail400, fail404 } = testCaseFailures;
 
@@ -25,10 +25,12 @@ const createTestCases = (spaceId: string) => {
   // to receive an error; otherwise, we expect to receive a success result
   const normalTypes = [
     CASES.EXACT_MATCH,
-    { ...CASES.ALIAS_MATCH, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.ALIAS_MATCH, ...fail404(spaceId === SPACE_2_ID) }, // the alias exists in the default space and space_1, but not space_2
     {
       ...CASES.CONFLICT,
-      ...(spaceId !== SPACE_1_ID && { expectedOutcome: 'exactMatch' as const }),
+      // the default expectedOutcome for this case is 'conflict'; the alias exists in the default space and space_1, but not space_2
+      // if we are testing in space_2, the expectedOutcome should be 'exactMatch' instead
+      ...(spaceId === SPACE_2_ID && { expectedOutcome: 'exactMatch' as const }),
     },
     { ...CASES.DISABLED, ...fail404() },
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
@@ -47,19 +49,18 @@ export default function ({ getService }: FtrProviderContext) {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
     return {
-      unauthorized: createTestDefinitions(allTypes, true),
-      authorized: [
-        createTestDefinitions(normalTypes, false),
-        createTestDefinitions(hiddenType, true),
+      unauthorized: [
+        createTestDefinitions(normalTypes, true),
+        createTestDefinitions(hiddenType, false), // validation for hidden type returns 400 Bad Request before authZ check
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false),
+      authorized: createTestDefinitions(allTypes, false),
     };
   };
 
   describe('_resolve', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorized, superuser } = createTests(spaceId);
+      const { unauthorized, authorized } = createTests(spaceId);
       const _addTests = (user: TestUser, tests: ResolveTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -74,10 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
         users.readGlobally,
         users.allAtSpace,
         users.readAtSpace,
+        users.superuser,
       ].forEach((user) => {
         _addTests(user, authorized);
       });
-      _addTests(users.superuser, superuser);
     });
   });
 }

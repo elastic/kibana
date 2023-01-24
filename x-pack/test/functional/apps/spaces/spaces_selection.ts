@@ -11,7 +11,6 @@ export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'common',
@@ -21,51 +20,82 @@ export default function spaceSelectorFunctionalTests({
     'security',
     'spaceSelector',
   ]);
+  const spacesService = getService('spaces');
 
+  // Failing: See https://github.com/elastic/kibana/issues/142155
   describe('Spaces', function () {
+    const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.create({ id: testSpaceId, name: `${testSpaceId} name` });
+      }
     });
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
-    );
+    after(async () => {
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.delete(testSpaceId);
+      }
+    });
 
     this.tags('includeFirefox');
-    // FLAKY: https://github.com/elastic/kibana/issues/99581
-    describe.skip('Space Selector', () => {
+    describe('Login Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
       });
 
-      afterEach(async () => {
+      after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 
-      it('allows user to navigate to different spaces', async () => {
+      it('allows user to select initial space', async () => {
         const spaceId = 'another-space';
 
         await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
 
+        // select space with card after login
         await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
         await PageObjects.spaceSelector.expectHomePage(spaceId);
-
-        await PageObjects.spaceSelector.openSpacesNav();
-
-        // change spaces
-
-        await PageObjects.spaceSelector.clickSpaceAvatar('default');
-
-        await PageObjects.spaceSelector.expectHomePage('default');
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/118356
-    // FLAKY: https://github.com/elastic/kibana/issues/118474
-    describe.skip('Search spaces in popover', () => {
+    describe('Space Navigation Menu', () => {
+      before(async () => {
+        await PageObjects.security.forceLogout();
+        await PageObjects.security.login(undefined, undefined, {
+          expectSpaceSelector: true,
+        });
+      });
+
+      after(async () => {
+        await PageObjects.security.forceLogout();
+      });
+
+      it('allows user to navigate to different spaces', async () => {
+        const anotherSpaceId = 'another-space';
+        const defaultSpaceId = 'default';
+        const space5Id = 'space-5';
+
+        await PageObjects.spaceSelector.clickSpaceCard(defaultSpaceId);
+        await PageObjects.spaceSelector.expectHomePage(defaultSpaceId);
+
+        // change spaces with nav menu
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.goToSpecificSpace(space5Id);
+        await PageObjects.spaceSelector.expectHomePage(space5Id);
+
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.goToSpecificSpace(anotherSpaceId);
+        await PageObjects.spaceSelector.expectHomePage(anotherSpaceId);
+
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.goToSpecificSpace(defaultSpaceId);
+        await PageObjects.spaceSelector.expectHomePage(defaultSpaceId);
+      });
+    });
+
+    describe('Search spaces in popover', () => {
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -85,8 +115,8 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.spaceSelector.expectSearchBoxInSpacesSelector();
       });
 
-      it('search for "ce 1" and find one space', async () => {
-        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce 1');
+      it('search for "ce-1 name" and find one space', async () => {
+        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce-1 name');
         await PageObjects.spaceSelector.expectToFindThatManySpace(1);
       });
 

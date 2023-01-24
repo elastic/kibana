@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import apmInstanceFixture from './fixtures/instance';
+import apmInstanceFixture from './fixtures/instance.json';
 
 export default function ({ getService }) {
   // Skipping for now since failure is unclear

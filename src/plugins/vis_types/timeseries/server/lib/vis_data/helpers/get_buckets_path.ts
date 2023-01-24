@@ -7,14 +7,14 @@
  */
 
 import { startsWith } from 'lodash';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../../../data/common';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 
 const percentileTest = /\[[0-9\.]+\]$/;
 
-export const getBucketsPath = (id: string, metrics: Metric[]) => {
+export const getBucketsPath = (id: string | undefined, metrics: Metric[]) => {
   const metric = metrics.find((m) => startsWith(id, m.id));
   let bucketsPath = String(id);
 

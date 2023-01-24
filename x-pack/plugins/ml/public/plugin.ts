@@ -12,48 +12,49 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
-import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SecurityPluginSetup } from '../../security/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { isFullLicense, isMlEnabled } from '../common/license';
-
-import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_feature';
-import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi, MapsSetupApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
-import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import { registerManagementSection } from './application/management';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import type {
-  FieldFormatsSetup,
-  FieldFormatsStart,
-} from '../../../../src/plugins/field_formats/public';
-import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
-import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { MlLocatorDefinition, MlLocator } from './locator';
+import { setDependencyCache } from './application/util/dependency_cache';
+import { registerFeature } from './register_feature';
+import { isFullLicense, isMlEnabled } from '../common/license';
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
@@ -64,10 +65,12 @@ export interface MlStartDependencies {
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
+  lens?: LensPublicStart;
+  cases?: CasesUiStart;
+  security: SecurityPluginStart;
 }
 
 export interface MlSetupDependencies {
-  security?: SecurityPluginSetup;
   maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
@@ -82,6 +85,7 @@ export interface MlSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
   dashboard: DashboardSetup;
+  cases?: CasesUiSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -113,10 +117,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             charts: pluginsStart.charts,
             data: pluginsStart.data,
+            unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            security: pluginsSetup.security,
-            licensing: pluginsSetup.licensing,
+            security: pluginsStart.security,
+            licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
@@ -128,6 +133,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
+            cases: pluginsStart.cases,
           },
           params
         );
@@ -146,10 +153,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
-      const [coreStart] = await core.getStartServices();
+      const mlEnabled = isMlEnabled(license);
+      const fullLicense = isFullLicense(license);
+      const [coreStart, pluginStart] = await core.getStartServices();
       const { capabilities } = coreStart.application;
 
-      if (isMlEnabled(license)) {
+      if (mlEnabled) {
         // add ML to home page
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
@@ -169,10 +178,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks,
         registerMlAlerts,
         registerMapExtension,
+        registerCasesAttachments,
       } = await import('./register_helper');
-
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
 
       if (pluginsSetup.maps) {
         // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
@@ -187,6 +194,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (fullLicense) {
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          if (pluginsSetup.cases) {
+            registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+          }
 
           const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
           if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
@@ -207,6 +218,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
+      lens: deps.lens,
     });
 
     return {

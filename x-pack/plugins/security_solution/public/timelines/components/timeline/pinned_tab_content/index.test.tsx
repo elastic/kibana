@@ -14,25 +14,28 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../body/renderers';
-import { Sort } from '../body/sort';
+import type { Sort } from '../body/sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../containers/index';
-import { useTimelineEventsDetails } from '../../../containers/details/index';
+import { useTimelineEvents } from '../../../containers';
+import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
+import type { Props as PinnedTabContentComponentProps } from '.';
+import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../common/search_strategy';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
-jest.mock('../../../containers/index', () => ({
+jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details/index', () => ({
+jest.mock('../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('../body/events/index', () => ({
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
+jest.mock('../body/events', () => ({
   Events: () => <></>,
 }));
 
@@ -41,6 +44,15 @@ jest.mock('../../../../common/containers/sourcerer');
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
+
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -66,8 +78,9 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
+          getUseAddToTimeline: () => useAddToTimeline,
         },
+        triggersActionsUi: { getFieldBrowser: jest.fn() },
       },
     }),
     useGetUserSavedObjectPermissions: jest.fn(),
@@ -79,7 +92,8 @@ describe('PinnedTabContent', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];

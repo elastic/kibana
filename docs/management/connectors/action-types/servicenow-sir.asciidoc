@@ -1,22 +1,28 @@
-[role="xpack"]
 [[servicenow-sir-action-type]]
-=== ServiceNow SecOps connector and action
+== {sn-sir} connector and action
 ++++
-<titleabbrev>ServiceNow SecOps</titleabbrev>
+<titleabbrev>{sn-sir}</titleabbrev>
 ++++
 
-The {sn} SecOps connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create {sn} security incidents.
+The {sn-sir} connector uses the
+https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[import set API]
+to create {sn} security incidents. You can use the connector for rule actions and cases.
 
 [float]
 [[servicenow-sir-connector-prerequisites]]
-==== Prerequisites
-After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
+=== Prerequisites
+After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn-sir} connector or <<servicenow-sir-connector-update, updating an existing one>>:
 
-* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
-* Create a {sn} integration user and assign it the appropriate roles.
-* Create a Cross-Origin Resource Sharing (CORS) rule.
+. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
+. <<servicenow-sir-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles>>.
+. <<servicenow-sir-connector-prerequisites-cors-rule,Create a Cross-Origin Resource Sharing (CORS) rule>>.
+. If you use open authorization (OAuth), you must also:
+.. <<servicenow-sir-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
+.. <<servicenow-sir-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
 
-*Create a {sn} integration user*
+[float]
+[[servicenow-sir-connector-prerequisites-integration-user]]
+==== Create a {sn} integration user
 
 To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles. 
 
@@ -32,7 +38,9 @@ To ensure authenticated communication between Elastic and {sn}, create a {sn} in
 * `x_elas2_sir_int.integration_user`
 . Click *Save*.
 
-*Create a CORS rule*
+[float]
+[[servicenow-sir-connector-prerequisites-cors-rule]]
+==== Create a CORS rule
 
 A CORS rule is required for communication between Elastic and {sn}. To create a CORS rule:
 
@@ -46,10 +54,26 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 . Click *Submit* to create the rule.
 
 [float]
-[[servicenow-sir-connector-update]]
-==== Update a deprecated {sn} SecOps connector
+[[servicenow-sir-connector-prerequisites-rsa-key]]
+==== Create an RSA keypair and add an X.509 Certificate
 
-{sn} SecOps connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+This step is required to use OAuth for authentication between Elastic and {sn}.
+
+include::servicenow.asciidoc[tag=servicenow-rsa-key]
+
+include::servicenow.asciidoc[tag=servicenow-certificate]
+
+[float]
+[[servicenow-sir-connector-prerequisites-endpoint]]
+==== Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map
+
+include::servicenow.asciidoc[tag=servicenow-endpoint]
+
+[float]
+[[servicenow-sir-connector-update]]
+=== Update a deprecated {sn-sir} connector
+
+{sn-sir} connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
@@ -58,7 +82,7 @@ IMPORTANT: Deprecated connectors will continue to function with the rules they w
 
 To update a deprecated connector:
 
-. Open the main menu and go to *Stack Management -> Rules and connectors -> Connectors*.
+. Open the main menu and go to *{stack-manage-app} > {connectors-ui}*.
 . Select the deprecated connector to open the *Edit connector* flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the *Edit connector* flyout.
@@ -69,25 +93,33 @@ To update a deprecated connector:
 
 [float]
 [[servicenow-sir-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
-{sn} SecOps connectors have the following configuration properties.
+{sn-sir} connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector.
+Is OAuth::  The type of authentication to use.
 URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
+User Identifier:: Identifier to use for OAuth type authentication. This identifier should be the *User field* you selected during setup. For example, if the selected *User field* is *Email*, the user identifier should be the user's email address.
+Client ID:: The client ID assigned to your OAuth application.
+Client Secret:: The client secret assigned to your OAuth application.
+JWT Key ID:: The key ID assigned to the JWT verifier map of your OAuth application.
+Private Key:: The RSA private key generated during setup.
+Private Key Password:: The password for the RSA private key generated during setup, if set.
 
 [float]
 [[servicenow-sir-connector-networking-configuration]]
-==== Connector networking configuration
+=== Connector networking configuration
 
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-servicenow-sir-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
+Connector using Basic Authentication
 [source,text]
 --
  my-servicenow-sir:
@@ -101,6 +133,24 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
      password: passwordkeystorevalue
 --
 
+Connector using OAuth
+[source,text]
+--
+ my-servicenow:
+   name: preconfigured-oauth-servicenow-connector-type
+   actionTypeId: .servicenow-sir
+   config:
+     apiUrl: https://example.service-now.com/
+     usesTableApi: false
+     isOAuth: true
+     userIdentifierValue: testuser@email.com
+     clientId: abcdefghijklmnopqrstuvwxyzabcdef
+     jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba
+   secrets:
+     clientSecret: secretsecret
+     privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY-----
+--
+
 Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
@@ -108,30 +158,41 @@ Config defines information for the connector type.
 
 NOTE: If `usesTableApi` is set to false, the Elastic application should be installed in {sn}.
 
+`isOAuth`:: A boolean that corresponds to *Is OAuth* and indicates if the connector uses Basic Authentication or OAuth.
+`userIdentifierValue`:: A string that corresponds to *User Identifier*. Required if `isOAuth` is set to `true`.
+`clientId`:: A string that corresponds to *Client ID*, used for OAuth authentication. Required if `isOAuth` is set to `true`.
+`jwtKeyId`:: A string that corresponds to *JWT Key ID*, used for OAuth authentication. Required if `isOAuth` is set to `true`.
+
 Secrets defines sensitive information for the connector type.
 
-`username`:: A string that corresponds to *Username*.
-`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+`username`:: A string that corresponds to *Username*. Required if `isOAuth` is set to `false`.
+`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `isOAuth` is set to `false`.
+`clientSecret`:: A string that corresponds to *Client Secret*. Required if `isOAuth` is set to `true`.
+`privateKey`:: A string that corresponds to *Private Key*. Required if `isOAuth` is set to `true`.
+`privateKeyPassword`:: A string that corresponds to *Private Key Password*.
 
 [float]
 [[define-servicenow-sir-ui]]
-==== Define connector in Stack Management
+=== Define connector in {stack-manage-app}
 
-Define {sn} SecOps connector properties.
-
-[role="screenshot"]
-image::management/connectors/images/servicenow-sir-connector.png[ServiceNow SecOps connector]
-
-Test {sn} SecOps action parameters.
+Define {sn} SecOps connector properties. Choose whether to use OAuth for authentication.
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow SecOps params test]
+image::management/connectors/images/servicenow-sir-connector-basic.png[{sn-sir} connector using basic auth]
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-sir-connector-oauth.png[{sn-sir} connector using OAuth]
+
+Test {sn-sir} action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-sir-params-test.png[{sn-sir} params test]
 
 [float]
 [[servicenow-sir-action-configuration]]
-==== Action configuration
+=== Action configuration
 
-ServiceNow SecOps actions have the following configuration properties.
+{sn-sir} actions have the following configuration properties.
 
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
 Priority::             The priority of the incident.
@@ -147,6 +208,6 @@ Additional comments::  Additional information for the client, such as how to tro
 
 [float]
 [[configuring-servicenow-sir]]
-==== Configure {sn} SecOps
+=== Configure {sn-sir}
 
 {sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

@@ -24,30 +24,34 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           color="primary"
           iconType="spacesApp"
           title={
-            <p>
-              <FormattedMessage
-                defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-                id="telemetry.callout.appliesSettingTitle"
-                values={
-                  Object {
-                    "allOfKibanaText": <strong>
-                      <FormattedMessage
-                        defaultMessage="all of Kibana"
-                        id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                        values={Object {}}
-                      />
-                    </strong>,
-                  }
+            <FormattedMessage
+              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+              id="telemetry.callout.appliesSettingTitle"
+              values={
+                Object {
+                  "allOfKibanaText": <strong>
+                    <FormattedMessage
+                      defaultMessage="all of Kibana"
+                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                      values={Object {}}
+                    />
+                  </strong>,
                 }
-              />
-            </p>
+              }
+            />
           }
         />
         <EuiSpacer
           size="s"
         />
         <lazy
-          dockLinks={Object {}}
+          docLinks={
+            Object {
+              "legal": Object {
+                "privacyStatement": "https://some-host/some-url",
+              },
+            }
+          }
           enableSaving={true}
           handleChange={[Function]}
           loading={false}
@@ -64,7 +68,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     values={
                       Object {
                         "privacyStatementLink": <EuiLink
-                          href="https://www.elastic.co/legal/privacy-statement"
+                          href="https://some-host/some-url"
                           target="_blank"
                         >
                           <FormattedMessage
@@ -139,7 +143,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 
 exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
 <TelemetryManagementSection
-  docLinks={Object {}}
+  docLinks={
+    Object {
+      "legal": Object {
+        "privacyStatement": "https://some-host/some-url",
+      },
+    }
+  }
   enableSaving={true}
   intl={
     Object {
@@ -252,7 +262,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
         "banner": true,
-        "enabled": true,
+        "labels": Object {},
         "optIn": true,
         "sendUsageFrom": "browser",
         "sendUsageTo": "staging",

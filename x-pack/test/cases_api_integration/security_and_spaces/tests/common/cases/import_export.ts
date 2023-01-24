@@ -7,24 +7,14 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import supertest from 'supertest';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
-import {
-  deleteAllCaseItems,
-  createCase,
-  createComment,
-  findCases,
-  getCaseUserActions,
-} from '../../../../common/lib/utils';
-import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   CASES_URL,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
-} from '../../../../../../plugins/cases/common/constants';
+} from '@kbn/cases-plugin/common/constants';
 import {
   AttributesTypeUser,
   CommentsResponse,
@@ -37,7 +27,19 @@ import {
   CommentUserAction,
   CreateCaseUserAction,
   CaseStatuses,
-} from '../../../../../../plugins/cases/common/api';
+  CaseSeverity,
+} from '@kbn/cases-plugin/common/api';
+import { ESCaseSeverity, ESCaseStatus } from '@kbn/cases-plugin/server/services/cases/types';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  deleteAllCaseItems,
+  createCase,
+  createComment,
+  findCases,
+} from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -204,6 +206,10 @@ const expectExportToHaveCaseSavedObject = (
   expect(createdCaseSO.attributes.connector.name).to.eql(caseRequest.connector.name);
   expect(createdCaseSO.attributes.connector.fields).to.eql([]);
   expect(createdCaseSO.attributes.settings).to.eql(caseRequest.settings);
+  expect(createdCaseSO.attributes.status).to.eql(ESCaseStatus.OPEN);
+  expect(createdCaseSO.attributes.severity).to.eql(ESCaseSeverity.LOW);
+  expect(createdCaseSO.attributes.duration).to.eql(null);
+  expect(createdCaseSO.attributes.tags).to.eql(caseRequest.tags);
 };
 
 const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: CasePostRequest) => {
@@ -239,6 +245,8 @@ const expectCaseCreateUserAction = (
   expect(restParsedCreateCase).to.eql({
     ...restCreateCase,
     status: CaseStatuses.open,
+    severity: CaseSeverity.LOW,
+    assignees: [],
   });
   expect(restParsedConnector).to.eql(restConnector);
 };

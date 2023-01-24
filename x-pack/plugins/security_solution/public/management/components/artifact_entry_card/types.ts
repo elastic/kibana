@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EffectScope, TrustedApp } from '../../../../common/endpoint/types';
-import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_router';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { EffectScope, TrustedApp } from '../../../../common/endpoint/types';
+import type { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_router';
 
 export type AnyArtifact = ExceptionListItemSchema | TrustedApp;
 export interface ArtifactInfoEntry {

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { HttpServiceSetup } from 'src/core/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
 
-import type { IntegrationCategory } from '../../../../src/plugins/custom_integrations/common';
-import type { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 interface WorkplaceSearchIntegration {
   id: string;
@@ -163,6 +163,21 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['productivity'],
   },
   {
+    id: 'network_drive',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveName', {
+      defaultMessage: 'Network Drive',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveDescription',
+      {
+        defaultMessage:
+          'Search over your files and folders stored on network drives with Workplace Search.',
+      }
+    ),
+    categories: ['file_storage'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
+  },
+  {
     id: 'onedrive',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.onedriveName', {
       defaultMessage: 'OneDrive',
@@ -232,7 +247,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on SharePoint Online with Workplace Search.',
       }
     ),
-    categories: ['file_storage'],
+    categories: ['file_storage', 'microsoft_365'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point',
   },
   {
@@ -250,8 +265,8 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
+    categories: ['file_storage', 'microsoft_365'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
     id: 'slack',
@@ -279,24 +294,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     ),
     categories: ['communications'],
   },
-  {
-    id: 'custom_api_source',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName',
-      {
-        defaultMessage: 'Custom API Source',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription',
-      {
-        defaultMessage:
-          'Search over anything by building your own integration with Workplace Search.',
-      }
-    ),
-    categories: ['custom'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/custom',
-  },
 ];
 
 export const registerEnterpriseSearchIntegrations = (
@@ -321,29 +318,6 @@ export const registerEnterpriseSearchIntegrations = (
   });
 
   customIntegrations.registerCustomIntegration({
-    id: 'app_search_web_crawler',
-    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.webCrawlerName', {
-      defaultMessage: 'Web site crawler',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.integrations.webCrawlerDescription',
-      {
-        defaultMessage: 'Add search to your website with the App Search web crawler.',
-      }
-    ),
-    categories: ['website_search'],
-    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=crawler',
-    icons: [
-      {
-        type: 'eui',
-        src: 'logoAppSearch',
-      },
-    ],
-    shipper: 'enterprise_search',
-    isBeta: false,
-  });
-
-  customIntegrations.registerCustomIntegration({
     id: 'app_search_json',
     title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.jsonName', {
       defaultMessage: 'JSON',
@@ -364,19 +338,134 @@ export const registerEnterpriseSearchIntegrations = (
   });
 
   customIntegrations.registerCustomIntegration({
-    id: 'app_search_api',
-    title: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiName', {
-      defaultMessage: 'API',
+    id: 'web_crawler',
+    title: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerName', {
+      defaultMessage: 'Web crawler',
     }),
-    description: i18n.translate('xpack.enterpriseSearch.appSearch.integrations.apiDescription', {
-      defaultMessage: "Add search to your application with App Search's robust APIs.",
+    description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
+      defaultMessage: 'Add search to your website with the Enterprise Search web crawler.',
     }),
-    categories: ['custom'],
-    uiInternalPath: '/app/enterprise_search/app_search/engines/new?method=api',
+    categories: ['enterprise_search', 'website_search', 'web', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=crawler',
     icons: [
       {
         type: 'eui',
-        src: 'logoAppSearch',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'api',
+    title: i18n.translate('xpack.enterpriseSearch.integrations.apiName', {
+      defaultMessage: 'API',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.integrations.apiDescription', {
+      defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
+    }),
+    categories: ['enterprise_search', 'custom', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=api',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'build_a_connector',
+    title: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorName', {
+      defaultMessage: 'Build a connector',
+    }),
+    description: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorDescription', {
+      defaultMessage: 'Search over data stored on custom data sources with Enterprise Search.',
+    }),
+    categories: ['enterprise_search', 'custom', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'native_connector',
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.nativeConnectorName',
+      {
+        defaultMessage: 'Use a connector',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.nativeConnectorDescription',
+      {
+        defaultMessage: 'Search over your data sources with a native Enterprise Search connector.',
+      }
+    ),
+    categories: ['elastic_stack', 'enterprise_search'],
+    uiInternalPath:
+      '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+    icons: [
+      {
+        type: 'eui',
+        src: 'logoEnterpriseSearch',
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'mongodb',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBName', {
+      defaultMessage: 'MongoDB',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBDescription',
+      {
+        defaultMessage: 'Search over your MongoDB content with Enterprise Search.',
+      }
+    ),
+    categories: ['datastore', 'enterprise_search'],
+    uiInternalPath:
+      '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/mongodb.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'mysql',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.mysqlName', {
+      defaultMessage: 'MySQL',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.mysqlDescription',
+      {
+        defaultMessage: 'Search over your MySQL content with Enterprise Search.',
+      }
+    ),
+    categories: ['datastore', 'enterprise_search'],
+    uiInternalPath:
+      '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/mysql.svg'),
       },
     ],
     shipper: 'enterprise_search',

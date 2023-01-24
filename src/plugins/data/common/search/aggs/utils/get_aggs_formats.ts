@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import {
   FieldFormat,
   FieldFormatInstanceType,
-  FieldFormatParams,
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
-} from '../../../../../field_formats/common';
+} from '@kbn/field-formats-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
@@ -36,22 +36,36 @@ type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
  * @internal
  */
 export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInstanceType[] {
+  class FieldFormatWithCache extends FieldFormat {
+    protected formatCache: Map<SerializedFieldFormat, FieldFormat> = new Map();
+
+    protected getCachedFormat(fieldParams: SerializedFieldFormat<{}, SerializableRecord>) {
+      const isCached = this.formatCache.has(fieldParams);
+      const cachedFormat = this.formatCache.get(fieldParams) || getFieldFormat(fieldParams);
+      if (!isCached) {
+        this.formatCache.set(fieldParams, cachedFormat);
+      }
+      return cachedFormat;
+    }
+  }
+
   return [
-    class AggsRangeFieldFormat extends FieldFormat {
+    class AggsRangeFieldFormat extends FieldFormatWithCache {
       static id = 'range';
       static hidden = true;
 
       textConvert = (range: any) => {
         const params = this._params;
 
+        if (range == null) {
+          return '';
+        }
+
         if (range.label) {
           return range.label;
         }
         const nestedFormatter = params as SerializedFieldFormat;
-        const format = getFieldFormat({
-          id: nestedFormatter.id,
-          params: nestedFormatter.params,
-        });
+        const format = this.getCachedFormat(nestedFormatter);
 
         const gte = '\u2265';
         const lt = '\u003c';
@@ -85,75 +99,70 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         });
       };
     },
-    class AggsDateRangeFieldFormat extends FieldFormat {
+    class AggsDateRangeFieldFormat extends FieldFormatWithCache {
       static id = 'date_range';
       static hidden = true;
 
       textConvert = (range: DateRange) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
-        const format = getFieldFormat({
-          id: nestedFormatter.id,
-          params: nestedFormatter.params,
-        });
+        const format = this.getCachedFormat(nestedFormatter);
         return convertDateRangeToString(range, format.convert.bind(format));
       };
     },
-    class AggsIpRangeFieldFormat extends FieldFormat {
+    class AggsIpRangeFieldFormat extends FieldFormatWithCache {
       static id = 'ip_range';
       static hidden = true;
 
       textConvert = (range: IpRangeKey) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
-        const format = getFieldFormat({
-          id: nestedFormatter.id,
-          params: nestedFormatter.params,
-        });
+        const format = this.getCachedFormat(nestedFormatter);
         return convertIPRangeToString(range, format.convert.bind(format));
       };
     },
-    class AggsTermsFieldFormat extends FieldFormat {
+    class AggsTermsFieldFormat extends FieldFormatWithCache {
       static id = 'terms';
       static hidden = true;
 
       convert = (val: string, type: FieldFormatsContentType) => {
         const params = this._params;
-        const format = getFieldFormat({ id: params.id, params });
+        const format = this.getCachedFormat(
+          params as SerializedFieldFormat<{}, SerializableRecord>
+        );
 
         if (val === '__other__') {
-          return params.otherBucketLabel;
+          return `${params.otherBucketLabel}`;
         }
         if (val === '__missing__') {
-          return params.missingBucketLabel;
+          return `${params.missingBucketLabel}`;
         }
 
         return format.convert(val, type);
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },
-    class AggsMultiTermsFieldFormat extends FieldFormat {
+    class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
       static id = 'multi_terms';
       static hidden = true;
-
-      private formatCache: Map<SerializedFieldFormat<FieldFormatParams>, FieldFormat> = new Map();
 
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
         const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
-          const isCached = this.formatCache.has(fieldParams);
-          const cachedFormat =
-            this.formatCache.get(fieldParams) ||
-            getFieldFormat({ id: fieldParams.id, params: fieldParams });
-          if (!isCached) {
-            this.formatCache.set(fieldParams, cachedFormat);
-          }
-          return cachedFormat;
+          return this.getCachedFormat(fieldParams);
         });
 
         if (String(val) === '__other__') {
-          return params.otherBucketLabel;
+          return `${params.otherBucketLabel}`;
         }
 
-        const joinTemplate = params.separator ?? ' › ';
+        const joinTemplate = `${params.separator ?? ' › '}`;
 
         return (val as MultiFieldKey).keys
           .map((valPart, i) => formats[i].convert(valPart, type))

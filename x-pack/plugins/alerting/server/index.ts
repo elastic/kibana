@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
 import { configSchema } from './config';
 import { AlertsConfigType } from './types';
@@ -18,24 +18,34 @@ export type {
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
-  AlertExecutorOptions,
-  AlertActionParams,
-  AlertServices,
-  AlertTypeState,
-  AlertTypeParams,
-  PartialAlert,
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleActionParams,
+  RuleTypeState,
+  RuleTypeParams,
+  PartialRule,
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
+  GetSummarizedAlertsFnOpts,
+  ExecutorType,
 } from './types';
+export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type { FindResult } from './rules_client';
+export type {
+  FindResult,
+  BulkEditOperation,
+  BulkOperationError,
+  BulkEditOptions,
+  BulkEditOptionsFilter,
+  BulkEditOptionsIds,
+} from './rules_client';
 export type { PublicAlert as Alert } from './alert';
-export { parseDuration } from './lib';
+export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
-export type { PublicAlertingConfig } from './config';
+export type { AlertingRulesConfig } from './config';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,
@@ -60,5 +70,8 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerting.invalidateApiKeysTask.removalDelay',
       { level: 'warning' }
     ),
+    renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
+      level: 'warning',
+    }),
   ],
 };

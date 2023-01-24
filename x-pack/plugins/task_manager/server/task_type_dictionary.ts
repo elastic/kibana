@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
-import { Logger } from '../../../../src/core/server';
 
 /**
  * Types that are no longer registered and will be marked as unregistered
@@ -17,6 +17,10 @@ export const REMOVED_TYPES: string[] = [
 
   // deprecated in https://github.com/elastic/kibana/pull/121442
   'alerting:siem.signals',
+
+  'search_sessions_monitor',
+  'search_sessions_cleanup',
+  'search_sessions_expire',
 ];
 
 /**

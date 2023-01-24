@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Immutable } from '../../../../../../../common/endpoint/types';
-import { PolicyDetailsState } from '../../../types';
+import type { Immutable } from '../../../../../../../common/endpoint/types';
+import type { PolicyDetailsState } from '../../../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -28,8 +28,8 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
   },
   artifacts: {
     location: {
-      page_index: MANAGEMENT_DEFAULT_PAGE,
-      page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
+      page: MANAGEMENT_DEFAULT_PAGE,
+      pageSize: MANAGEMENT_DEFAULT_PAGE_SIZE,
       show: undefined,
       filter: '',
     },

@@ -7,23 +7,24 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef, useState, useEffect } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import {
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './badge/sync_badge';
+import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
-import { useApmParams } from '../../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -43,7 +44,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-top: ${({ theme }) => theme.eui.euiSizeS};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
@@ -82,6 +83,31 @@ const ItemText = euiStyled.span`
   }
 `;
 
+const CriticalPathItemBar = euiStyled.div`
+  box-sizing: border-box;
+  position: relative;
+  height: ${({ theme }) => theme.eui.euiSizeS};
+  top : ${({ theme }) => theme.eui.euiSizeS};
+  min-width: 2px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+`;
+
+const CriticalPathItemSegment = euiStyled.div<{
+  left: number;
+  width: number;
+  color: string;
+}>`
+  box-sizing: border-box;
+  position: absolute;
+  height: ${({ theme }) => theme.eui.euiSizeS};
+  left: ${(props) => props.left * 100}%;
+  width: ${(props) => props.width * 100}%;
+  min-width: 2px;
+  background-color: ${(props) => props.color};
+`;
+
 interface IWaterfallItemProps {
   timelineMargins: Margins;
   totalDuration?: number;
@@ -90,7 +116,13 @@ interface IWaterfallItemProps {
   color: string;
   isSelected: boolean;
   errorCount: number;
-  onClick: () => unknown;
+  marginLeftLevel: number;
+  segments?: Array<{
+    left: number;
+    width: number;
+    color: string;
+  }>;
+  onClick: (flyoutDetailTab: string) => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -190,36 +222,69 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
+  marginLeftLevel,
   onClick,
+  segments,
 }: IWaterfallItemProps) {
+  const [widthFactor, setWidthFactor] = useState(1);
+  const waterfallItemRef: React.RefObject<any> = useRef(null);
+  useEffect(() => {
+    if (waterfallItemRef?.current && marginLeftLevel) {
+      setWidthFactor(
+        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth
+      );
+    }
+  }, [marginLeftLevel]);
+
   if (!totalDuration) {
     return null;
   }
 
-  const width = (item.duration / totalDuration) * 100;
-  const left = ((item.offset + item.skew) / totalDuration) * 100;
+  const width = (item.duration / totalDuration) * widthFactor * 100;
+  const left =
+    (((item.offset + item.skew) / totalDuration) * widthFactor -
+      widthFactor +
+      1) *
+    100;
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
+
   const itemBarStyle = getItemBarStyle(item, color, width, left);
+
   const isServerlessColdstart =
     item.docType === 'transaction' && item.doc.faas?.coldstart;
 
+  const waterfallItemFlyoutTab = 'metadata';
+
   return (
     <Container
+      ref={waterfallItemRef}
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
-        onClick();
+        onClick(waterfallItemFlyoutTab);
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={itemBarStyle}
         color={isCompositeSpan ? 'transparent' : color}
         type={item.docType}
-      />
+      >
+        {segments?.length ? (
+          <CriticalPathItemBar>
+            {segments?.map((segment) => (
+              <CriticalPathItemSegment
+                color={segment.color}
+                left={segment.left}
+                width={segment.width}
+              />
+            ))}
+          </CriticalPathItemBar>
+        ) : null}
+      </ItemBar>
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
         style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
@@ -237,6 +302,12 @@ export function WaterfallItem({
             agentName={item.doc.agent.name}
           />
         )}
+        <SpanLinksBadge
+          linkedParents={item.spanLinksCount.linkedParents}
+          linkedChildren={item.spanLinksCount.linkedChildren}
+          id={item.id}
+          onClick={onClick}
+        />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
     </Container>
@@ -252,13 +323,24 @@ function RelatedErrors({
 }) {
   const apmRouter = useApmRouter();
   const theme = useTheme();
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer',
+    '/dependencies/operation'
+  );
+
+  let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
+  if (item.doc.transaction?.id) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  }
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,
-      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+      serviceGroup: '',
+      kuery,
     },
   });
 

@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import {
+import type {
   CaseConnector,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  ConnectorTypes,
 } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import {
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsCreateOptions,
   SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CaseConfigureService } from '.';
-import { ESCasesConfigureAttributes } from './types';
+import type { ESCasesConfigureAttributes } from './types';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import { createESJiraConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
+import type { ESCaseConnectorWithId } from '../test_utils';
+import { createESJiraConnector, createJiraConnector } from '../test_utils';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,
@@ -364,6 +365,7 @@ describe('CaseConfigureService', () => {
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
           Object {
             "references": undefined,
+            "refresh": undefined,
           }
         `);
       });
@@ -469,6 +471,7 @@ describe('CaseConfigureService', () => {
                 "type": "action",
               },
             ],
+            "refresh": undefined,
           }
         `);
       });

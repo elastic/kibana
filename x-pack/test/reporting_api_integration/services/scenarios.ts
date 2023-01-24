@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
-} from '../../../plugins/reporting/common/constants';
-import { JobParamsCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource/types';
-import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNGDeprecated } from '../../../plugins/reporting/server/export_types/png/types';
-import { JobParamsPDFDeprecated } from '../../../plugins/reporting/server/export_types/printable_pdf/types';
+} from '@kbn/reporting-plugin/common/constants';
+import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
+import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
+import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/server/export_types/png/types';
+import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -143,7 +143,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send(job);
   };
   const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
-    const jobParams = rison.encode(job as object as RisonValue);
+    const jobParams = rison.encode(job);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/printablePdf`)
       .auth(username, password)
@@ -151,7 +151,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
   const generatePng = async (username: string, password: string, job: JobParamsPNGDeprecated) => {
-    const jobParams = rison.encode(job as object as RisonValue);
+    const jobParams = rison.encode(job);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/png`)
       .auth(username, password)
@@ -163,7 +163,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme'
   ) => {
-    const jobParams = rison.encode(job as object as RisonValue);
+    const jobParams = rison.encode(job);
 
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)

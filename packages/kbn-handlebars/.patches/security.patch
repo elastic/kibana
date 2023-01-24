@@ -1,0 +1,443 @@
+1,6c1,6
+< describe('security issues', function() {
+<   describe('GH-1495: Prevent Remote Code Execution via constructor', function() {
+<     it('should not allow constructors to be accessed', function() {
+<       expectTemplate('{{lookup (lookup this "constructor") "name"}}')
+<         .withInput({})
+<         .toCompileTo('');
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+8,10c8,15
+<       expectTemplate('{{constructor.name}}')
+<         .withInput({})
+<         .toCompileTo('');
+---
+> import Handlebars from '../..';
+> import { expectTemplate } from '../__jest__/test_bench';
+> 
+> describe('security issues', () => {
+>   describe('GH-1495: Prevent Remote Code Execution via constructor', () => {
+>     it('should not allow constructors to be accessed', () => {
+>       expectTemplate('{{lookup (lookup this "constructor") "name"}}').withInput({}).toCompileTo('');
+>       expectTemplate('{{constructor.name}}').withInput({}).toCompileTo('');
+13c18
+<     it('GH-1603: should not allow constructors to be accessed (lookup via toString)', function() {
+---
+>     it('GH-1603: should not allow constructors to be accessed (lookup via toString)', () => {
+16c21
+<         .withHelper('list', function(element) {
+---
+>         .withHelper('list', function (element) {
+22c27
+<     it('should allow the "constructor" property to be accessed if it is an "ownProperty"', function() {
+---
+>     it('should allow the "constructor" property to be accessed if it is an "ownProperty"', () => {
+32c37
+<     it('should allow the "constructor" property to be accessed if it is an "own property"', function() {
+---
+>     it('should allow the "constructor" property to be accessed if it is an "own property"', () => {
+39,45c44,46
+<   describe('GH-1558: Prevent explicit call of helperMissing-helpers', function() {
+<     if (!Handlebars.compile) {
+<       return;
+<     }
+< 
+<     describe('without the option "allowExplicitCallOfHelperMissing"', function() {
+<       it('should throw an exception when calling  "{{helperMissing}}" ', function() {
+---
+>   describe('GH-1558: Prevent explicit call of helperMissing-helpers', () => {
+>     describe('without the option "allowExplicitCallOfHelperMissing"', () => {
+>       it('should throw an exception when calling  "{{helperMissing}}" ', () => {
+49c50
+<       it('should throw an exception when calling  "{{#helperMissing}}{{/helperMissing}}" ', function() {
+---
+>       it('should throw an exception when calling  "{{#helperMissing}}{{/helperMissing}}" ', () => {
+53,56c54,57
+<       it('should throw an exception when calling  "{{blockHelperMissing "abc" .}}" ', function() {
+<         var functionCalls = [];
+<         expect(function() {
+<           var template = Handlebars.compile('{{blockHelperMissing "abc" .}}');
+---
+>       it('should throw an exception when calling  "{{blockHelperMissing "abc" .}}" ', () => {
+>         const functionCalls = [];
+>         expect(() => {
+>           const template = Handlebars.compile('{{blockHelperMissing "abc" .}}');
+58c59
+<             fn: function() {
+---
+>             fn() {
+60c61
+<             }
+---
+>             },
+62,63c63,64
+<         }).to.throw(Error);
+<         expect(functionCalls.length).to.equal(0);
+---
+>         }).toThrow(Error);
+>         expect(functionCalls.length).toEqual(0);
+66c67
+<       it('should throw an exception when calling  "{{#blockHelperMissing .}}{{/blockHelperMissing}}"', function() {
+---
+>       it('should throw an exception when calling  "{{#blockHelperMissing .}}{{/blockHelperMissing}}"', () => {
+69c70
+<             fn: function() {
+---
+>             fn() {
+71c72
+<             }
+---
+>             },
+76,110d76
+< 
+<     describe('with the option "allowCallsToHelperMissing" set to true', function() {
+<       it('should not throw an exception when calling  "{{helperMissing}}" ', function() {
+<         var template = Handlebars.compile('{{helperMissing}}');
+<         template({}, { allowCallsToHelperMissing: true });
+<       });
+< 
+<       it('should not throw an exception when calling  "{{#helperMissing}}{{/helperMissing}}" ', function() {
+<         var template = Handlebars.compile(
+<           '{{#helperMissing}}{{/helperMissing}}'
+<         );
+<         template({}, { allowCallsToHelperMissing: true });
+<       });
+< 
+<       it('should not throw an exception when calling  "{{blockHelperMissing "abc" .}}" ', function() {
+<         var functionCalls = [];
+<         var template = Handlebars.compile('{{blockHelperMissing "abc" .}}');
+<         template(
+<           {
+<             fn: function() {
+<               functionCalls.push('called');
+<             }
+<           },
+<           { allowCallsToHelperMissing: true }
+<         );
+<         equals(functionCalls.length, 1);
+<       });
+< 
+<       it('should not throw an exception when calling  "{{#blockHelperMissing .}}{{/blockHelperMissing}}"', function() {
+<         var template = Handlebars.compile(
+<           '{{#blockHelperMissing true}}sdads{{/blockHelperMissing}}'
+<         );
+<         template({}, { allowCallsToHelperMissing: true });
+<       });
+<     });
+113,114c79,81
+<   describe('GH-1563', function() {
+<     it('should not allow to access constructor after overriding via __defineGetter__', function() {
+---
+>   describe('GH-1563', () => {
+>     it('should not allow to access constructor after overriding via __defineGetter__', () => {
+>       // @ts-expect-error
+116c83
+<         return this.skip(); // Browser does not support this exploit anyway
+---
+>         return; // Browser does not support this exploit anyway
+130,131c97,98
+<   describe('GH-1595: dangerous properties', function() {
+<     var templates = [
+---
+>   describe('GH-1595: dangerous properties', () => {
+>     const templates = [
+141c108
+<       '{{lookup this "__proto__"}}'
+---
+>       '{{lookup this "__proto__"}}',
+144,382c111,114
+<     templates.forEach(function(template) {
+<       describe('access should be denied to ' + template, function() {
+<         it('by default', function() {
+<           expectTemplate(template)
+<             .withInput({})
+<             .toCompileTo('');
+<         });
+<         it(' with proto-access enabled', function() {
+<           expectTemplate(template)
+<             .withInput({})
+<             .withRuntimeOptions({
+<               allowProtoPropertiesByDefault: true,
+<               allowProtoMethodsByDefault: true
+<             })
+<             .toCompileTo('');
+<         });
+<       });
+<     });
+<   });
+<   describe('GH-1631: disallow access to prototype functions', function() {
+<     function TestClass() {}
+< 
+<     TestClass.prototype.aProperty = 'propertyValue';
+<     TestClass.prototype.aMethod = function() {
+<       return 'returnValue';
+<     };
+< 
+<     beforeEach(function() {
+<       handlebarsEnv.resetLoggedPropertyAccesses();
+<     });
+< 
+<     afterEach(function() {
+<       sinon.restore();
+<     });
+< 
+<     describe('control access to prototype methods via "allowedProtoMethods"', function() {
+<       checkProtoMethodAccess({});
+< 
+<       describe('in compat mode', function() {
+<         checkProtoMethodAccess({ compat: true });
+<       });
+< 
+<       function checkProtoMethodAccess(compileOptions) {
+<         it('should be prohibited by default and log a warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .toCompileTo('');
+< 
+<           expect(spy.calledOnce).to.be.true();
+<           expect(spy.args[0][0]).to.match(/Handlebars: Access has been denied/);
+<         });
+< 
+<         it('should only log the warning once', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .toCompileTo('');
+< 
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .toCompileTo('');
+< 
+<           expect(spy.calledOnce).to.be.true();
+<           expect(spy.args[0][0]).to.match(/Handlebars: Access has been denied/);
+<         });
+< 
+<         it('can be allowed, which disables the warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowedProtoMethods: {
+<                 aMethod: true
+<               }
+<             })
+<             .toCompileTo('returnValue');
+< 
+<           expect(spy.callCount).to.equal(0);
+<         });
+< 
+<         it('can be turned on by default, which disables the warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowProtoMethodsByDefault: true
+<             })
+<             .toCompileTo('returnValue');
+< 
+<           expect(spy.callCount).to.equal(0);
+<         });
+< 
+<         it('can be turned off by default, which disables the warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowProtoMethodsByDefault: false
+<             })
+<             .toCompileTo('');
+< 
+<           expect(spy.callCount).to.equal(0);
+<         });
+< 
+<         it('can be turned off, if turned on by default', function() {
+<           expectTemplate('{{aMethod}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowProtoMethodsByDefault: true,
+<               allowedProtoMethods: {
+<                 aMethod: false
+<               }
+<             })
+<             .toCompileTo('');
+<         });
+<       }
+< 
+<       it('should cause the recursive lookup by default (in "compat" mode)', function() {
+<         expectTemplate('{{#aString}}{{trim}}{{/aString}}')
+<           .withInput({ aString: '  abc  ', trim: 'trim' })
+<           .withCompileOptions({ compat: true })
+<           .toCompileTo('trim');
+<       });
+< 
+<       it('should not cause the recursive lookup if allowed through options(in "compat" mode)', function() {
+<         expectTemplate('{{#aString}}{{trim}}{{/aString}}')
+<           .withInput({ aString: '  abc  ', trim: 'trim' })
+<           .withCompileOptions({ compat: true })
+<           .withRuntimeOptions({
+<             allowedProtoMethods: {
+<               trim: true
+<             }
+<           })
+<           .toCompileTo('abc');
+<       });
+<     });
+< 
+<     describe('control access to prototype non-methods via "allowedProtoProperties" and "allowProtoPropertiesByDefault', function() {
+<       checkProtoPropertyAccess({});
+< 
+<       describe('in compat-mode', function() {
+<         checkProtoPropertyAccess({ compat: true });
+<       });
+< 
+<       describe('in strict-mode', function() {
+<         checkProtoPropertyAccess({ strict: true });
+<       });
+< 
+<       function checkProtoPropertyAccess(compileOptions) {
+<         it('should be prohibited by default and log a warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aProperty}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .toCompileTo('');
+< 
+<           expect(spy.calledOnce).to.be.true();
+<           expect(spy.args[0][0]).to.match(/Handlebars: Access has been denied/);
+<         });
+< 
+<         it('can be explicitly prohibited by default, which disables the warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aProperty}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowProtoPropertiesByDefault: false
+<             })
+<             .toCompileTo('');
+< 
+<           expect(spy.callCount).to.equal(0);
+<         });
+< 
+<         it('can be turned on, which disables the warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aProperty}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowedProtoProperties: {
+<                 aProperty: true
+<               }
+<             })
+<             .toCompileTo('propertyValue');
+< 
+<           expect(spy.callCount).to.equal(0);
+<         });
+< 
+<         it('can be turned on by default, which disables the warning', function() {
+<           var spy = sinon.spy(console, 'error');
+< 
+<           expectTemplate('{{aProperty}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowProtoPropertiesByDefault: true
+<             })
+<             .toCompileTo('propertyValue');
+< 
+<           expect(spy.callCount).to.equal(0);
+<         });
+< 
+<         it('can be turned off, if turned on by default', function() {
+<           expectTemplate('{{aProperty}}')
+<             .withInput(new TestClass())
+<             .withCompileOptions(compileOptions)
+<             .withRuntimeOptions({
+<               allowProtoPropertiesByDefault: true,
+<               allowedProtoProperties: {
+<                 aProperty: false
+<               }
+<             })
+<             .toCompileTo('');
+<         });
+<       }
+<     });
+< 
+<     describe('compatibility with old runtimes, that do not provide the function "container.lookupProperty"', function() {
+<       beforeEach(function simulateRuntimeWithoutLookupProperty() {
+<         var oldTemplateMethod = handlebarsEnv.template;
+<         sinon.replace(handlebarsEnv, 'template', function(templateSpec) {
+<           templateSpec.main = wrapToAdjustContainer(templateSpec.main);
+<           return oldTemplateMethod.call(this, templateSpec);
+---
+>     templates.forEach((template) => {
+>       describe('access should be denied to ' + template, () => {
+>         it('by default', () => {
+>           expectTemplate(template).withInput({}).toCompileTo('');
+385,400d116
+< 
+<       afterEach(function() {
+<         sinon.restore();
+<       });
+< 
+<       it('should work with simple properties', function() {
+<         expectTemplate('{{aProperty}}')
+<           .withInput({ aProperty: 'propertyValue' })
+<           .toCompileTo('propertyValue');
+<       });
+< 
+<       it('should work with Array.prototype.length', function() {
+<         expectTemplate('{{anArray.length}}')
+<           .withInput({ anArray: ['a', 'b', 'c'] })
+<           .toCompileTo('3');
+<       });
+404,409c120,122
+<   describe('escapes template variables', function() {
+<     it('in compat mode', function() {
+<       expectTemplate("{{'a\\b'}}")
+<         .withCompileOptions({ compat: true })
+<         .withInput({ 'a\\b': 'c' })
+<         .toCompileTo('c');
+---
+>   describe('escapes template variables', () => {
+>     it('in default mode', () => {
+>       expectTemplate("{{'a\\b'}}").withCompileOptions().withInput({ 'a\\b': 'c' }).toCompileTo('c');
+412,418c125
+<     it('in default mode', function() {
+<       expectTemplate("{{'a\\b'}}")
+<         .withCompileOptions()
+<         .withInput({ 'a\\b': 'c' })
+<         .toCompileTo('c');
+<     });
+<     it('in default mode', function() {
+---
+>     it('in strict mode', () => {
+426,432d132
+< 
+< function wrapToAdjustContainer(precompiledTemplateFunction) {
+<   return function templateFunctionWrapper(container /*, more args */) {
+<     delete container.lookupProperty;
+<     return precompiledTemplateFunction.apply(this, arguments);
+<   };
+< }

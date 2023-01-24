@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { TELEMETRY_CHANNEL_SAVED_QUERIES } from '../constants';
+import type { Logger } from '@kbn/core/server';
+import { TELEMETRY_EBT_SAVED_QUERY_EVENT } from '../constants';
 import { templateSavedQueries } from '../helpers';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
-import type { ESClusterInfo, ESLicense } from '../types';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
 
 export function createTelemetrySavedQueriesTaskConfig() {
   return {
@@ -18,43 +17,30 @@ export function createTelemetrySavedQueriesTaskConfig() {
     title: 'Osquery Saved Queries Telemetry',
     interval: '24h',
     timeout: '10m',
-    version: '1.0.0',
+    version: '1.1.0',
     runTask: async (
       taskId: string,
       logger: Logger,
       receiver: TelemetryReceiver,
       sender: TelemetryEventsSender
     ) => {
-      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-        receiver.fetchClusterInfo(),
-        receiver.fetchLicenseInfo(),
-      ]);
-
-      const clusterInfo =
-        clusterInfoPromise.status === 'fulfilled'
-          ? clusterInfoPromise.value
-          : ({} as ESClusterInfo);
-      const licenseInfo =
-        licenseInfoPromise.status === 'fulfilled'
-          ? licenseInfoPromise.value
-          : ({} as ESLicense | undefined);
-
       const savedQueriesResponse = await receiver.fetchSavedQueries();
 
       if (!savedQueriesResponse?.total) {
         logger.debug('no saved queries found');
-        return 0;
+
+        return;
       }
 
+      const prebuiltSavedQueryIds = await receiver.fetchPrebuiltSavedQueryIds();
       const savedQueriesJson = templateSavedQueries(
         savedQueriesResponse?.saved_objects,
-        clusterInfo,
-        licenseInfo
+        prebuiltSavedQueryIds
       );
 
-      sender.sendOnDemand(TELEMETRY_CHANNEL_SAVED_QUERIES, savedQueriesJson);
-
-      return savedQueriesResponse.total;
+      savedQueriesJson.forEach((savedQuery) => {
+        sender.reportEvent(TELEMETRY_EBT_SAVED_QUERY_EVENT, savedQuery);
+      });
     },
   };
 }

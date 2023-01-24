@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { HostMetadata } from '../../../../common/endpoint/types';
-import { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type { HostMetadata } from '../../../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { getESQueryHostMetadataByIDs } from '../../routes/metadata/query_builders';
 import { queryResponseToHostListResult } from '../../routes/metadata/support/query_strategies';
 
@@ -18,7 +18,7 @@ export async function getMetadataForEndpoints(
   requestHandlerContext: SecuritySolutionRequestHandlerContext
 ): Promise<HostMetadata[]> {
   const query = getESQueryHostMetadataByIDs(endpointIDs);
-  const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
+  const esClient = (await requestHandlerContext.core).elasticsearch.client.asInternalUser;
   const { body } = await esClient.search<HostMetadata>(query as estypes.SearchRequest, {
     meta: true,
   });

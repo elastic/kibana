@@ -11,21 +11,30 @@ import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
   Logger,
-} from 'src/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
+} from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
+
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type { AssetType, AssetReference, AssetParts } from '../../../../types';
+import type { AssetType, AssetReference, AssetParts, Installation } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
+import { saveKibanaAssetsRefs } from '../../packages/install';
+import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 
-type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+import { withPackageSpan } from '../../packages/utils';
+
+import { tagKibanaAssets } from './tag_assets';
+
+type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
@@ -43,7 +52,7 @@ export type ArchiveAsset = Pick<
 
 // KibanaSavedObjectTypes are used to ensure saved objects being created for a given
 // KibanaAssetType have the correct type
-const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
+export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
   [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
   [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
   [KibanaAssetType.map]: KibanaSavedObjectType.map,
@@ -52,7 +61,11 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
+  [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
+    KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
+  [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
+  [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -118,6 +131,60 @@ export async function installKibanaAssets(options: {
 
   return installedAssets;
 }
+
+export async function installKibanaAssetsAndReferences({
+  savedObjectsClient,
+  savedObjectsImporter,
+  savedObjectTagAssignmentService,
+  savedObjectTagClient,
+  logger,
+  pkgName,
+  pkgTitle,
+  paths,
+  installedPkg,
+  spaceId,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
+  logger: Logger;
+  pkgName: string;
+  pkgTitle: string;
+  paths: string[];
+  installedPkg?: SavedObject<Installation>;
+  spaceId: string;
+}) {
+  const kibanaAssets = await getKibanaAssets(paths);
+  if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
+  // save new kibana refs before installing the assets
+  const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+    savedObjectsClient,
+    pkgName,
+    kibanaAssets
+  );
+
+  const importedAssets = await installKibanaAssets({
+    logger,
+    savedObjectsImporter,
+    pkgName,
+    kibanaAssets,
+  });
+  await withPackageSpan('Create and assign package tags', () =>
+    tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle,
+      pkgName,
+      spaceId,
+      importedAssets,
+    })
+  );
+
+  return installedKibanaAssetsRefs;
+}
+
 export const deleteKibanaInstalledRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
@@ -213,25 +280,33 @@ export async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
-  let allSuccessResults = [];
+  let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
-    const { successResults: importSuccessResults = [], errors: importErrors = [] } =
-      await retryImportOnConflictError(() =>
-        savedObjectsImporter.import({
-          overwrite: true,
-          readStream: createListStream(toBeSavedObjects),
-          createNewCopies: false,
-        })
-      );
+    const {
+      successResults: importSuccessResults = [],
+      errors: importErrors = [],
+      success,
+    } = await retryImportOnConflictError(() =>
+      savedObjectsImporter.import({
+        overwrite: true,
+        readStream: createListStream(toBeSavedObjects),
+        createNewCopies: false,
+        refresh: false,
+      })
+    );
 
-    allSuccessResults = importSuccessResults;
+    if (success) {
+      allSuccessResults = importSuccessResults;
+    }
+
     const [referenceErrors, otherErrors] = partition(
       importErrors,
       (e) => e?.error?.type === 'missing_references'
     );
+
     if (otherErrors?.length) {
       throw new Error(
         `Encountered ${
@@ -239,10 +314,11 @@ export async function installKibanaSavedObjects({
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
       );
     }
+
     /*
     A reference error here means that a saved object reference in the references
     array cannot be found. This is an error in the package its-self but not a fatal
-    one. For example a dashboard may still refer to the legacy `metricbeat-*` index 
+    one. For example a dashboard may still refer to the legacy `metricbeat-*` index
     pattern. We ignore reference errors here so that legacy version of a package
     can still be installed, but if a warning is logged it should be reported to
     the integrations team. */
@@ -253,20 +329,22 @@ export async function installKibanaSavedObjects({
         } reference errors creating saved objects: ${formatImportErrorsForLog(referenceErrors)}`
       );
 
-      const idsToResolve = new Set(referenceErrors.map(({ id }) => id));
-
-      const resolveSavedObjects = toBeSavedObjects.filter(({ id }) => idsToResolve.has(id));
-      const retries = referenceErrors.map(({ id, type }) => ({
-        id,
-        type,
-        ignoreMissingReferences: true,
-        replaceReferences: [],
-        overwrite: true,
-      }));
+      const retries = toBeSavedObjects.map(({ id, type }) => {
+        if (referenceErrors.find(({ id: idToSearch }) => idToSearch === id)) {
+          return {
+            id,
+            type,
+            ignoreMissingReferences: true,
+            replaceReferences: [],
+            overwrite: true,
+          };
+        }
+        return { id, type, overwrite: true, replaceReferences: [] };
+      });
 
       const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =
         await savedObjectsImporter.resolveImportErrors({
-          readStream: createListStream(resolveSavedObjects),
+          readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
           retries,
         });
@@ -279,7 +357,7 @@ export async function installKibanaSavedObjects({
         );
       }
 
-      allSuccessResults = [...allSuccessResults, ...resolveSuccessResults];
+      allSuccessResults = allSuccessResults.concat(resolveSuccessResults);
     }
 
     return allSuccessResults;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   Plugin,
   CoreSetup,
@@ -14,13 +14,13 @@ import {
   Logger,
   SavedObjectsClient,
   SavedObjectsServiceStart,
-} from '../../../../src/core/server';
-import { SecurityPluginStart } from '../../security/server';
-import { InfraPluginSetup } from '../../infra/server';
+} from '@kbn/core/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
@@ -35,8 +35,9 @@ import {
   mlSavedObjectType,
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
-
 import { RouteDependencies } from './types';
+import type { UpgradeAssistantConfig } from './config';
+import type { FeatureSet } from '../common/types';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -54,6 +55,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
+  private readonly initialFeatureSet: FeatureSet;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -63,10 +65,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
 
-  constructor({ logger, env }: PluginInitializerContext) {
+  constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
+
+    const { featureSet } = config.get();
+    this.initialFeatureSet = featureSet;
   }
 
   private getWorker() {
@@ -101,7 +106,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra?.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+    infra?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
@@ -132,6 +137,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         handleEsError,
       },
       config: {
+        featureSet: this.initialFeatureSet,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
     };

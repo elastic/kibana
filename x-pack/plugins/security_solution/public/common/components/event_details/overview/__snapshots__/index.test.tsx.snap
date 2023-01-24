@@ -83,50 +83,51 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
 
 <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+      class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText emotion-euiText-s"
           >
             Status
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
             <div
               class="c2"
             >
               <div
-                class="euiPopover euiPopover--anchorDownCenter"
+                class="euiPopover emotion-euiPopover"
+                data-test-subj="alertStatus"
               >
                 <div
-                  class="euiPopover__anchor"
+                  class="euiPopover__anchor css-16vtueo-render"
                 >
                   <button
                     aria-label="Click to change alert status"
-                    class="euiBadge euiBadge-isClickable euiBadge--iconRight c3"
+                    class="euiBadge c3 emotion-euiBadge-clickable"
                     style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
                     title="open"
                   >
                     <span
-                      class="euiBadge__content"
+                      class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
-                        class="euiBadge__text"
+                        class="euiBadge__text emotion-euiBadge__text-clickable"
                       >
                         open
                       </span>
                       <span
-                        class="euiBadge__icon"
+                        class="euiBadge__icon emotion-euiBadge__icon-right"
                         color="inherit"
                         data-euiicon-type="arrowDown"
                       />
@@ -145,19 +146,27 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   class="c6"
                 >
                   <p
-                    class="euiScreenReaderOnly"
+                    class="emotion-euiScreenReaderOnly"
                   >
                     You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.workflow_status"
@@ -174,24 +183,25 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         </div>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText emotion-euiText-s"
           >
             Risk Score
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
             <div
               class="c2"
+              data-test-subj="riskScore"
             >
               47
             </div>
@@ -205,19 +215,27 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   class="c6"
                 >
                   <p
-                    class="euiScreenReaderOnly"
+                    class="emotion-euiScreenReaderOnly"
                   >
                     You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.risk_score"
@@ -235,33 +253,34 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
       </div>
     </div>
     <div
-      class="euiSpacer euiSpacer--s"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive c0"
+      class="euiFlexGroup c0 emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 emotion-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText emotion-euiText-s"
           >
             Rule
           </div>
           <div
-            class="euiSpacer euiSpacer--s"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
             <div
               class="c2"
             >
               <button
-                class="euiLink euiLink--primary"
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="ruleName"
                 type="button"
               >
                 More than one event with user name
@@ -277,19 +296,27 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   class="c6"
                 >
                   <p
-                    class="euiScreenReaderOnly"
+                    class="emotion-euiScreenReaderOnly"
                   >
                     You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
                   >
-                    Filter button
+                    <span
+                      data-test-subj="test-filter-for"
+                    >
+                      Filter button
+                    </span>
                   </div>
                   <div
                     data-test-subj="hover-actions-filter-out"
                   >
-                    Filter out button
+                    <span
+                      data-test-subj="test-filter-out"
+                    >
+                      Filter out button
+                    </span>
                   </div>
                   <div
                     data-test-subj="more-actions-kibana.alert.rule.name"

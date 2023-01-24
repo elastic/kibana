@@ -41,8 +41,10 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
           targetId: 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31-new-id',
           targetNamespace: 'custom_space',
           sourceId: 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31-old-id',
+          purpose: 'savedObjectConversion',
         },
         references: [],
+        migrationVersion: { 'legacy-url-alias': '8.2.0' },
       });
 
       // Create conflict match
@@ -55,8 +57,10 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
           targetId: 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-new',
           targetNamespace: 'custom_space',
           sourceId: 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old',
+          purpose: 'savedObjectConversion',
         },
         references: [],
+        migrationVersion: { 'legacy-url-alias': '8.2.0' },
       });
     });
 

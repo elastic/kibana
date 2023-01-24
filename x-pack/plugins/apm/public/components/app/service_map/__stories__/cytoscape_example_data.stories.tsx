@@ -17,17 +17,14 @@ import {
 } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import {
-  CodeEditor,
-  createKibanaReactContext,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
 import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseTodo from './example_response_todo.json';
 import { generateServiceMapElements } from './generate_service_map_elements';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 const STORYBOOK_PATH = 'app/ServiceMap/Example data';
 
@@ -48,16 +45,10 @@ const stories: Meta<{}> = {
   component: Cytoscape,
   decorators: [
     (StoryComponent, { globals }) => {
-      const KibanaReactContext = createKibanaReactContext({
-        uiSettings: {
-          get: () => globals.euiTheme && globals.euiTheme.includes('dark'),
-        },
-      } as unknown as Partial<CoreStart>);
-
       return (
-        <KibanaReactContext.Provider>
+        <MockApmPluginStorybook>
           <StoryComponent />
-        </KibanaReactContext.Provider>
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -129,18 +120,30 @@ export const MapFromJSON: Story<{}> = () => {
   const [error, setError] = useState<string | undefined>();
 
   const [elements, setElements] = useState<any[]>([]);
-  useEffect(() => {
+
+  const [uniqueKeyCounter, setUniqueKeyCounter] = useState<number>(0);
+  const updateRenderedElements = () => {
     try {
       setElements(JSON.parse(json).elements);
+      setUniqueKeyCounter((key) => key + 1);
+      setError(undefined);
     } catch (e) {
       setError(e.message);
     }
+  };
+
+  useEffect(() => {
+    updateRenderedElements();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div>
-      <Cytoscape elements={elements} height={getHeight()}>
+      <Cytoscape
+        key={uniqueKeyCounter}
+        elements={elements}
+        height={getHeight()}
+      >
         <Centerer />
       </Cytoscape>
       <EuiForm isInvalid={error !== undefined} error={error}>
@@ -150,6 +153,10 @@ export const MapFromJSON: Story<{}> = () => {
               languageId="json"
               value={json}
               options={{ fontFamily: 'monospace' }}
+              onChange={(value) => {
+                setJson(value);
+                setSessionJson(value);
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -177,13 +184,7 @@ export const MapFromJSON: Story<{}> = () => {
               <EuiSpacer />
               <EuiButton
                 onClick={() => {
-                  try {
-                    setElements(JSON.parse(json).elements);
-                    setSessionJson(json);
-                    setError(undefined);
-                  } catch (e) {
-                    setError(e.message);
-                  }
+                  updateRenderedElements();
                 }}
               >
                 Render JSON

@@ -7,23 +7,16 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
-import type { Style, Labels, PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Style, Labels } from '@kbn/charts-plugin/public';
 import type {
   SchemaConfig,
-  ExpressionValueXYDimension,
   FakeParams,
   HistogramParams,
   DateHistogramParams,
-} from '../../../../visualizations/public';
-import type { ChartType, XyVisType } from '../../common';
-import type {
-  ExpressionValueCategoryAxis,
-  ExpressionValueSeriesParam,
-  ExpressionValueValueAxis,
-  ExpressionValueLabel,
-  ExpressionValueThresholdLine,
-  ExpressionValueTimeMarker,
-} from '../expression_functions';
+  LegendSize,
+} from '@kbn/visualizations-plugin/public';
+import type { ChartType } from '../../common';
 
 import type {
   ChartMode,
@@ -123,6 +116,7 @@ export interface VisParams {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: LegendSize;
   categoryAxes: CategoryAxis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
@@ -145,46 +139,5 @@ export interface VisParams {
   palette: PaletteOutput;
   fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
-  ariaLabel?: string;
-}
-
-export interface XYVisConfig {
-  type: XyVisType;
-  chartType: ChartType;
-  gridCategoryLines: boolean;
-  gridValueAxis?: string;
-  categoryAxes: ExpressionValueCategoryAxis[];
-  valueAxes: ExpressionValueValueAxis[];
-  seriesParams: ExpressionValueSeriesParam[];
-  palette: string;
-  addLegend: boolean;
-  addTooltip: boolean;
-  legendPosition: Position;
-  addTimeMarker: boolean;
-  truncateLegend: boolean;
-  maxLegendLines: number;
-  orderBucketsBySum?: boolean;
-  labels: ExpressionValueLabel;
-  thresholdLine: ExpressionValueThresholdLine;
-  radiusRatio: number;
-  times: ExpressionValueTimeMarker[]; // For compatibility with vislib
-  /**
-   * flag to indicate old vislib visualizations
-   * used for backwards compatibility including colors
-   */
-  isVislibVis?: boolean;
-  /**
-   * Add for detailed tooltip option
-   */
-  detailedTooltip?: boolean;
-  fittingFunction?: Exclude<Fit, 'explicit'>;
-  fillOpacity?: number;
-  xDimension: ExpressionValueXYDimension | null;
-  yDimension: ExpressionValueXYDimension[];
-  zDimension?: ExpressionValueXYDimension[];
-  widthDimension?: ExpressionValueXYDimension[];
-  seriesDimension?: ExpressionValueXYDimension[];
-  splitRowDimension?: ExpressionValueXYDimension[];
-  splitColumnDimension?: ExpressionValueXYDimension[];
   ariaLabel?: string;
 }

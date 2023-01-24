@@ -265,7 +265,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async applyChanges() {
-    await this.testSubjects.clickWhenNotDisabled('applyBtn');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('applyBtn');
   }
 
   /**
@@ -374,11 +374,13 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getTopNLabel() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const topNLabel = await this.find.byCssSelector('.tvbVisTopN__label');
     return await topNLabel.getVisibleText();
   }
 
   public async getTopNCount() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
   }
@@ -401,6 +403,27 @@ export class VisualBuilderPageObject extends FtrService {
     await this.retry.waitFor('new agg is added', async () => {
       const currentAggs = await this.testSubjects.findAll('aggSelector');
       return currentAggs.length > prevAggs.length;
+    });
+  }
+
+  public async createNewAggSeries(nth = 0) {
+    const prevAggs = await this.testSubjects.findAll('draggable');
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new agg series is added', async () => {
+      const currentAggs = await this.testSubjects.findAll('draggable');
+      return currentAggs.length > prevAggs.length;
+    });
+  }
+
+  public async createColorRule(nth = 0) {
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new color rule is added', async () => {
+      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
+      return currentAddButtons.length > elements.length;
     });
   }
 
@@ -617,6 +640,11 @@ export class VisualBuilderPageObject extends FtrService {
     await input.type(labelName);
   }
 
+  public async setStaticValue(value: number, nth: number = 0): Promise<void> {
+    const input = (await this.testSubjects.findAll('staticValue'))[nth];
+    await input.type(value.toString());
+  }
+
   /**
    * set field for type of aggregation
    *
@@ -629,6 +657,28 @@ export class VisualBuilderPageObject extends FtrService {
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
     await this.comboBox.setElement(fieldEl, field);
+  }
+
+  public async setFieldForAggregateBy(field: string): Promise<void> {
+    const aggregateBy = await this.testSubjects.find('tsvbAggregateBySelect');
+
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(aggregateBy, field);
+      if (!(await this.comboBox.isOptionSelected(aggregateBy, field))) {
+        throw new Error(`aggregate by field - ${field} is not selected`);
+      }
+    });
+  }
+
+  public async setFunctionForAggregateFunction(func: string): Promise<void> {
+    const aggregateFunction = await this.testSubjects.find('tsvbAggregateFunctionCombobox');
+
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(aggregateFunction, func);
+      if (!(await this.comboBox.isOptionSelected(aggregateFunction, func))) {
+        throw new Error(`aggregate function - ${func} is not selected`);
+      }
+    });
   }
 
   public async checkFieldForAggregationValidity(aggNth: number = 0): Promise<boolean> {
@@ -645,7 +695,9 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clickColorPicker(nth: number = 0): Promise<void> {
-    const picker = (await this.find.allByCssSelector('.tvbColorPicker button'))[nth];
+    const picker = (await this.find.allByCssSelector('[data-test-subj="tvbColorPicker"] button'))[
+      nth
+    ];
     await picker.clickMouseButton();
   }
 
@@ -678,16 +730,16 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setColorRuleOperator(condition: string): Promise<void> {
     await this.retry.try(async () => {
-      await this.comboBox.clearInputField('colorRuleOperator');
-      await this.comboBox.set('colorRuleOperator', condition);
+      await this.comboBox.clearLastInputField('colorRuleOperator');
+      await this.comboBox.setForLastInput('colorRuleOperator', condition);
     });
   }
 
-  public async setColorRuleValue(value: number): Promise<void> {
+  public async setColorRuleValue(value: number, nth: number = 0): Promise<void> {
     await this.retry.try(async () => {
-      const colorRuleValueInput = await this.find.byCssSelector(
-        '[data-test-subj="colorRuleValue"]'
-      );
+      const colorRuleValueInput = (
+        await this.find.allByCssSelector('[data-test-subj="colorRuleValue"]')
+      )[nth];
       await colorRuleValueInput.type(value.toString());
     });
   }
@@ -772,7 +824,8 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setMetricsGroupBy(option: string) {
     const groupBy = await this.testSubjects.find('groupBySelect');
-    await this.comboBox.setElement(groupBy, option, { clickWithMouse: true });
+    await this.comboBox.setElement(groupBy, option);
+    return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setMetricsGroupByTerms(
@@ -782,9 +835,22 @@ export class VisualBuilderPageObject extends FtrService {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(byField, field);
+    });
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setAnotherGroupByTermsField(field: string) {
+    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
+    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    await this.common.sleep(2000);
+    const byFields = await this.testSubjects.findAll('fieldSelectItem');
+    const selectedByField = byFields[byFields.length - 1];
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(selectedByField, field);
+    });
   }
 
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
@@ -821,9 +887,14 @@ export class VisualBuilderPageObject extends FtrService {
     await filterLabelInput[nth].type(label);
   }
 
-  public async setChartType(type: string, nth: number = 0) {
+  public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
     const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
     return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setStackedType(stackedType: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
   }
 
   public async setSeriesFilter(query: string) {
@@ -873,6 +944,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getChartDebugState(chartData?: DebugState) {
+    await this.header.waitUntilLoadingHasFinished();
     return chartData ?? (await this.elasticChart.getChartDebugData())!;
   }
 
@@ -890,7 +962,6 @@ export class VisualBuilderPageObject extends FtrService {
     chartData?: DebugState,
     itemType: 'areas' | 'bars' | 'annotations' = 'areas'
   ) {
-    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
@@ -914,7 +985,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getVisualizeError() {
     const visError = await this.testSubjects.find(`visualization-error`);
-    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    const errorSpans = await visError.findAllByTestSubject('visualization-error-text');
     return await errorSpans[0].getVisibleText();
   }
 

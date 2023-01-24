@@ -7,14 +7,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
-import { timelineSelectors } from '../../timelines/store/timeline/';
+import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
 import { useKibana } from '../lib/kibana';
-import { TimelineUrl } from '../../timelines/store/timeline/model';
-import { CONSTANTS } from '../components/url_state/constants';
+import type { TimelineUrl } from '../../timelines/store/timeline/model';
+import { URL_PARAM_KEY } from './use_url_state';
 
 /**
  * This hooks is specifically for use with the resolve api that was introduced as part of 7.16
@@ -33,7 +33,7 @@ export const useResolveRedirect = () => {
 
   const redirect = useCallback(() => {
     const searchQuery = new URLSearchParams(search);
-    const timelineRison = searchQuery.get(CONSTANTS.timeline) ?? undefined;
+    const timelineRison = searchQuery.get(URL_PARAM_KEY.timeline) ?? undefined;
 
     // Try to get state on URL, but default to what's in Redux in case of decodeRisonFailure
     const currentTimelineState = {
@@ -42,12 +42,8 @@ export const useResolveRedirect = () => {
       activeTab,
       graphEventId,
     };
-    let timelineSearch: TimelineUrl = currentTimelineState;
-    try {
-      timelineSearch = decodeRisonUrlState(timelineRison) ?? currentTimelineState;
-    } catch (error) {
-      // do nothing as it's already defaulted on line 77
-    }
+    const timelineSearch =
+      (safeDecode(timelineRison ?? '') as TimelineUrl | null) ?? currentTimelineState;
 
     if (
       hasRedirected ||
@@ -59,15 +55,19 @@ export const useResolveRedirect = () => {
     }
 
     // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-    const newObjectId = resolveTimelineConfig?.alias_target_id ?? ''; // This is always defined if outcome === 'aliasMatch'
+    const newObjectId = resolveTimelineConfig.alias_target_id ?? ''; // This is always defined if outcome === 'aliasMatch'
     const newTimelineSearch = {
       ...timelineSearch,
       id: newObjectId,
     };
-    const newTimelineRison = encodeRisonUrlState(newTimelineSearch);
-    searchQuery.set(CONSTANTS.timeline, newTimelineRison);
+    const newTimelineRison = encode(newTimelineSearch);
+    searchQuery.set(URL_PARAM_KEY.timeline, newTimelineRison);
     const newPath = `${pathname}?${searchQuery.toString()}`;
-    spaces.ui.redirectLegacyUrl(newPath, CONSTANTS.timeline);
+    spaces.ui.redirectLegacyUrl({
+      path: newPath,
+      aliasPurpose: resolveTimelineConfig.alias_purpose,
+      objectNoun: URL_PARAM_KEY.timeline,
+    });
     // Prevent the effect from being called again as the url change takes place in location rather than a true redirect
     updateHasRedirected(true);
   }, [
@@ -75,8 +75,7 @@ export const useResolveRedirect = () => {
     graphEventId,
     hasRedirected,
     pathname,
-    resolveTimelineConfig?.outcome,
-    resolveTimelineConfig?.alias_target_id,
+    resolveTimelineConfig,
     savedObjectId,
     search,
     show,

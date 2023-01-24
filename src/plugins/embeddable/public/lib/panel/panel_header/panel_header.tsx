@@ -18,11 +18,10 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { uiToReactComponent } from '../../../../../kibana_react/public';
 import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
@@ -30,7 +29,10 @@ export interface PanelHeaderProps {
   index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
@@ -62,7 +64,7 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem), {
+      React.createElement(notification.MenuItem, {
         key: notification.id,
         context: {
           embeddable,
@@ -154,7 +156,7 @@ export function PanelHeader({
 
   if (!showPanelBar) {
     return (
-      <div data-test-subj="dashboardPanelTitle__wrapper" className={classes}>
+      <div className={classes}>
         <PanelOptionsMenu
           getActionContextMenuPanel={getActionContextMenuPanel}
           isViewMode={isViewMode}
@@ -213,26 +215,26 @@ export function PanelHeader({
     );
   };
 
+  const titleClasses = classNames('embPanel__title', { 'embPanel--dragHandle': !isViewMode });
+
   return (
-    <span data-test-subj="dashboardPanelTitle__wrapper">
-      <figcaption
-        className={classes}
-        data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
-      >
-        <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-          {renderTitle()}
-          {renderBadges(badges, embeddable)}
-        </h2>
-        {renderNotifications(notifications, embeddable)}
-        <PanelOptionsMenu
-          isViewMode={isViewMode}
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          closeContextMenu={closeContextMenu}
-          title={title}
-          index={index}
-        />
-      </figcaption>
-    </span>
+    <figcaption
+      className={classes}
+      data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
+    >
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
+        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+        {renderTitle()}
+        {renderBadges(badges, embeddable)}
+      </h2>
+      {renderNotifications(notifications, embeddable)}
+      <PanelOptionsMenu
+        isViewMode={isViewMode}
+        getActionContextMenuPanel={getActionContextMenuPanel}
+        closeContextMenu={closeContextMenu}
+        title={title}
+        index={index}
+      />
+    </figcaption>
   );
 }

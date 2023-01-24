@@ -9,9 +9,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Table } from '../table';
+import { Table } from '.';
 import { ScriptedFieldItem } from '../../types';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 

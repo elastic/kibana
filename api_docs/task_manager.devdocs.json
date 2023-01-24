@@ -27,10 +27,10 @@
           },
           " implements ",
           {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -53,6 +53,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -66,6 +67,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "taskManager",
@@ -76,16 +78,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "pluginId": "@kbn/core-plugins-server",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -101,10 +104,10 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: { usageCollection?: ",
@@ -126,6 +129,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "taskManager",
@@ -136,16 +140,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -157,6 +162,7 @@
                 "description": [],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "taskManager",
@@ -176,7 +182,8 @@
                       " | undefined"
                     ],
                     "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -191,12 +198,12 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ") => ",
@@ -210,25 +217,27 @@
             ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "taskManager",
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n  }",
+                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -241,6 +250,45 @@
     "functions": [
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.aggregateTaskOverduePercentilesForType",
+        "type": "Function",
+        "tags": [],
+        "label": "aggregateTaskOverduePercentilesForType",
+        "description": [],
+        "signature": [
+          "(type: string) => { aggs: Record<string, ",
+          "AggregationsAggregationContainer",
+          ">; query: ",
+          "QueryDslQueryContainer",
+          "; runtime_mappings: ",
+          "MappingRuntimeFields",
+          "; }"
+        ],
+        "path": "x-pack/plugins/task_manager/server/queries/aggregate_task_overdue_percentiles_for_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.aggregateTaskOverduePercentilesForType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/task_manager/server/queries/aggregate_task_overdue_percentiles_for_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.asInterval",
         "type": "Function",
         "tags": [],
@@ -251,6 +299,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -264,6 +313,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -284,6 +334,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -298,6 +349,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -318,6 +370,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -332,6 +385,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -350,6 +404,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -363,6 +418,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -371,6 +427,69 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.BulkUpdateTaskResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateTaskResult",
+        "description": [
+          "\nreturn type of TaskScheduling.bulkUpdateSchedules method"
+        ],
+        "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.BulkUpdateTaskResult.tasks",
+            "type": "Array",
+            "tags": [],
+            "label": "tasks",
+            "description": [
+              "\nlist of successfully updated tasks"
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.ConcreteTaskInstance",
+                "text": "ConcreteTaskInstance"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.BulkUpdateTaskResult.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [
+              "\nlist of failed tasks and errors caused failure"
+            ],
+            "signature": [
+              "{ task: ",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.ConcreteTaskInstance",
+                "text": "ConcreteTaskInstance"
+              },
+              "; error: Error; }[]"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "taskManager",
         "id": "def-server.ConcreteTaskInstance",
@@ -399,6 +518,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -410,7 +530,8 @@
               "\nThe id of the Elastic document that stores this instance's data. This can\nbe passed by the caller when scheduling the task."
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -426,6 +547,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": []
           },
           {
@@ -441,7 +563,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -456,7 +579,8 @@
               "Date"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -468,7 +592,8 @@
               "\nThe number of unsuccessful attempts since the last successful run. This\nwill be zeroed out after a successful run."
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -489,7 +614,8 @@
               }
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -504,7 +630,8 @@
               "Date"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -519,7 +646,8 @@
               "Date | null"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -534,7 +662,8 @@
               "Date | null"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -549,7 +678,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -564,7 +694,8 @@
               "string | null"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -580,6 +711,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -600,7 +732,8 @@
               }
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -614,6 +747,7 @@
         "description": [],
         "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -623,7 +757,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -636,7 +771,8 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -650,6 +786,7 @@
         "description": [],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -664,7 +801,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -676,7 +814,8 @@
               "\nThe task definition type whose run function will execute this instance."
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -691,7 +830,8 @@
               "Date | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -706,7 +846,8 @@
               "Date | null | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -721,7 +862,8 @@
               "Date | null | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -736,7 +878,8 @@
               "Date | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -752,7 +895,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -767,7 +911,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -782,7 +927,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -797,7 +943,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -812,7 +959,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -827,7 +975,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -842,7 +991,24 @@
               "string | null | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIndicates whether the task is currently enabled. Disabled tasks will not be claimed."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -858,6 +1024,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "taskManager",
@@ -872,7 +1039,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -887,7 +1055,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -902,7 +1071,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -918,6 +1088,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "taskManager",
@@ -931,6 +1102,7 @@
                 ],
                 "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -945,6 +1117,7 @@
                 ],
                 "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -973,6 +1146,7 @@
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -992,7 +1166,8 @@
                   }
                 ],
                 "path": "x-pack/plugins/task_manager/server/task.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1009,7 +1184,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "taskManager",
@@ -1024,7 +1200,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1040,6 +1217,7 @@
         "description": [],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1054,10 +1232,11 @@
           "\nA task instance that has an id and is ready for storage."
         ],
         "signature": [
-          "{ params: Record<string, any>; scope?: string[] | undefined; state: Record<string, any>; taskType: string; }"
+          "{ scope?: string[] | undefined; params: Record<string, any>; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1082,6 +1261,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1105,6 +1285,7 @@
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1124,13 +1305,97 @@
               }
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.IdleTaskWithExpiredRunAt",
+        "type": "Object",
+        "tags": [],
+        "label": "IdleTaskWithExpiredRunAt",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.IdleTaskWithExpiredRunAt.bool",
+            "type": "Object",
+            "tags": [],
+            "label": "bool",
+            "description": [],
+            "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.IdleTaskWithExpiredRunAt.bool.must",
+                "type": "Array",
+                "tags": [],
+                "label": "must",
+                "description": [],
+                "signature": [
+                  "({ term: { 'task.status': string; }; } | { range: { 'task.runAt': { lte: string; }; }; })[]"
+                ],
+                "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.RunningOrClaimingTaskWithExpiredRetryAt",
+        "type": "Object",
+        "tags": [],
+        "label": "RunningOrClaimingTaskWithExpiredRetryAt",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunningOrClaimingTaskWithExpiredRetryAt.bool",
+            "type": "Object",
+            "tags": [],
+            "label": "bool",
+            "description": [],
+            "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.RunningOrClaimingTaskWithExpiredRetryAt.bool.must",
+                "type": "Array",
+                "tags": [],
+                "label": "must",
+                "description": [],
+                "signature": [
+                  "({ bool: { should: { term: { 'task.status': string; }; }[]; }; } | { range: { 'task.retryAt': { lte: string; }; }; })[]"
+                ],
+                "path": "x-pack/plugins/task_manager/server/queries/mark_available_tasks_as_claimed.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "taskManager",
       "id": "def-server.TaskManagerSetupContract",
@@ -1140,6 +1405,7 @@
       "description": [],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "taskManager",
@@ -1152,6 +1418,7 @@
           "description": [],
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
           "deprecated": true,
+          "trackAdoption": false,
           "references": [
             {
               "plugin": "actions",
@@ -1181,6 +1448,7 @@
           ],
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "taskManager",
@@ -1194,6 +1462,7 @@
               ],
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -1221,6 +1490,7 @@
           ],
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "taskManager",
@@ -1242,6 +1512,7 @@
               ],
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -1261,12 +1532,21 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkEnable\" | \"bulkDisable\" | \"bulkSchedule\"> & Pick<",
         "TaskStore",
-        ", \"remove\" | \"fetch\" | \"get\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { bulkRemoveIfExist: (ids: string[]) => Promise<",
+        {
+          "pluginId": "@kbn/core-saved-objects-api-server",
+          "scope": "common",
+          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+          "section": "def-common.SavedObjectsBulkDeleteResponse",
+          "text": "SavedObjectsBulkDeleteResponse"
+        },
+        " | undefined>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }

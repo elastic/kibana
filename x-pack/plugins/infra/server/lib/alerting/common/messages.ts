@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
-} from '../../../../../observability/common/utils/formatters/duration';
+} from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
@@ -162,10 +162,25 @@ export const groupActionVariableDescription = i18n.translate(
   }
 );
 
+export const groupByKeysActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
+  {
+    defaultMessage: 'The object containing groups that are reporting data',
+  }
+);
+
 export const alertStateActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.alertStateActionVariableDescription',
   {
     defaultMessage: 'Current state of the alert',
+  }
+);
+
+export const alertDetailUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.alertDetailUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view within Elastic that shows further details and context surrounding this alert',
   }
 );
 
@@ -204,5 +219,55 @@ export const thresholdActionVariableDescription = i18n.translate(
   {
     defaultMessage:
       'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can assist with further investigation',
+  }
+);
+
+export const cloudActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.cloudActionVariableDescription',
+  {
+    defaultMessage: 'The cloud object defined by ECS if available in the source.',
+  }
+);
+
+export const hostActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.hostActionVariableDescription',
+  {
+    defaultMessage: 'The host object defined by ECS if available in the source.',
+  }
+);
+
+export const containerActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.containerActionVariableDescription',
+  {
+    defaultMessage: 'The container object defined by ECS if available in the source.',
+  }
+);
+
+export const orchestratorActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.orchestratorActionVariableDescription',
+  {
+    defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
+  }
+);
+
+export const labelsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.labelsActionVariableDescription',
+  {
+    defaultMessage: 'List of labels associated with the entity where this alert triggered.',
+  }
+);
+
+export const tagsActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.tagsActionVariableDescription',
+  {
+    defaultMessage: 'List of tags associated with the entity where this alert triggered.',
   }
 );

@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { initSortDefault, TimelineArgs, useTimelineEvents, UseTimelineEventsProps } from '.';
+import type { TimelineArgs, UseTimelineEventsProps } from '.';
+import { initSortDefault, useTimelineEvents } from '.';
 import { SecurityPageName } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -27,6 +28,7 @@ const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
 
 const mockSearch = jest.fn();
 
+jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
@@ -35,6 +37,7 @@ jest.mock('../../common/lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
   useKibana: jest.fn().mockReturnValue({
     services: {
@@ -106,7 +109,6 @@ describe('useTimelineEvents', () => {
   const endDate: string = '3000-01-01T00:00:00.000Z';
   const props: UseTimelineEventsProps = {
     dataViewId: 'data-view-id',
-    docValueFields: [],
     endDate: '',
     id: TimelineId.active,
     indexNames: ['filebeat-*'],

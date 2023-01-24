@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 
 /**
  * A bit stricter typing since the default fields type is an "any"

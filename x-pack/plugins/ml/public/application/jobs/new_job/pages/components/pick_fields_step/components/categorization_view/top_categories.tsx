@@ -12,9 +12,12 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/categorization_job';
+import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
 export const TopCategories: FC = () => {
+  const { displayErrorToast } = useToastNotificationService();
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 
@@ -26,14 +29,22 @@ export const TopCategories: FC = () => {
   }
 
   async function loadTopCats() {
-    const results = await ml.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
-    setTableRow(
-      results.categories.map((c) => ({
-        count: c.count,
-        example: c.category.examples?.length ? c.category.examples[0] : '',
-      }))
-    );
-    setTotalCategories(results.total);
+    try {
+      const results = await ml.jobs.topCategories(jobCreator.jobId, NUMBER_OF_CATEGORY_EXAMPLES);
+      setTableRow(
+        results.categories.map((c) => ({
+          count: c.count,
+          example: c.category.examples?.length ? c.category.examples[0] : '',
+        }))
+      );
+      setTotalCategories(results.total);
+    } catch (e) {
+      const error = extractErrorProperties(e);
+      // might get 404 because job has not been created yet
+      if (error.statusCode !== 404) {
+        displayErrorToast(e);
+      }
+    }
   }
 
   useEffect(() => {
@@ -42,6 +53,7 @@ export const TopCategories: FC = () => {
     return () => {
       resultsSubscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const columns = [

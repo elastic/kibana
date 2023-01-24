@@ -41,6 +41,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
@@ -54,7 +55,143 @@
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_array/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.defaultCsvArray",
+        "type": "Function",
+        "tags": [],
+        "label": "defaultCsvArray",
+        "description": [
+          "\nCreates a schema of an array that works in the following way:\n  - If input is a CSV string, it will be parsed to an array which will be validated.\n  - If input is an array, each item is validated to match `itemSchema`.\n  - If input is a single string, it is validated to match `itemSchema`.\n  - If input is not specified, the result will be set to [] (empty array):\n    - null, undefined, empty string, empty array\n\nIn all cases when an input is valid, the resulting decoded value will be an array,\neither an empty one or containing valid items.\n"
+        ],
+        "signature": [
+          "<TItem>(itemSchema: ",
+          "Type",
+          "<TItem, TItem, unknown>, name?: string | undefined) => ",
+          "Type",
+          "<TItem[], TItem[], unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/default_csv_array/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.defaultCsvArray.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "itemSchema",
+            "description": [
+              "Schema of the array's items."
+            ],
+            "signature": [
+              "Type",
+              "<TItem, TItem, unknown>"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/default_csv_array/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.defaultCsvArray.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "(Optional) Name of the resulting schema."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/default_csv_array/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.defaultValue",
+        "type": "Function",
+        "tags": [],
+        "label": "defaultValue",
+        "description": [
+          "\nCreates a schema that sets a default value if the input value is not specified.\n"
+        ],
+        "signature": [
+          "<TValue>(valueSchema: ",
+          "Type",
+          "<TValue, TValue, unknown>, value: TValue, name?: string | undefined) => ",
+          "Type",
+          "<TValue, TValue, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.defaultValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "valueSchema",
+            "description": [
+              "Base schema of a value."
+            ],
+            "signature": [
+              "Type",
+              "<TValue, TValue, unknown>"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.defaultValue.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "Default value to set."
+            ],
+            "signature": [
+              "TValue"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.defaultValue.$3",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "(Optional) Name of the resulting schema."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -76,6 +213,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/enumeration/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
@@ -91,6 +229,7 @@
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/enumeration/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -107,12 +246,108 @@
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/enumeration/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
           "Codec"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.LimitedSizeArray",
+        "type": "Function",
+        "tags": [],
+        "label": "LimitedSizeArray",
+        "description": [],
+        "signature": [
+          "<C extends ",
+          "Mixed",
+          ">({ codec, minSize, maxSize, name, }: { codec: C; minSize?: number | undefined; maxSize?: number | undefined; name?: string | undefined; }) => ",
+          "Type",
+          "<",
+          "TypeOf",
+          "<C>[], ",
+          "TypeOf",
+          "<C>[], unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.LimitedSizeArray.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  codec,\n  minSize,\n  maxSize,\n  name = `LimitedSizeArray<${codec.name}>`,\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.codec",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "codec",
+                "description": [],
+                "signature": [
+                  "C"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.minSize",
+                "type": "number",
+                "tags": [],
+                "label": "minSize",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.maxSize",
+                "type": "number",
+                "tags": [],
+                "label": "maxSize",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-io-ts-types",
+                "id": "def-common.LimitedSizeArray.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -135,6 +370,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
@@ -148,6 +384,7 @@
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_array/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -162,6 +399,42 @@
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_array/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "TimeDuration",
+        "description": [],
+        "signature": [
+          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.TimeDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ allowedUnits, allowedDurations }",
+            "description": [],
+            "signature": [
+              "TimeDurationType"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -185,6 +458,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_string_boolean_false/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -199,6 +473,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_version_number/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -213,6 +488,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -227,6 +503,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -237,10 +514,11 @@
         "label": "ImportQuerySchema",
         "description": [],
         "signature": [
-          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }"
+          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -251,10 +529,11 @@
         "label": "ImportQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\"> & { overwrite: boolean; overwrite_exceptions: boolean; }"
+          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\" | \"as_new_list\"> & { overwrite: boolean; overwrite_exceptions: boolean; as_new_list: boolean; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -270,6 +549,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/iso_date_string/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -284,6 +564,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_or_nullable_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -298,6 +579,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_or_nullable_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -312,6 +594,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -326,6 +609,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -341,6 +625,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -355,6 +640,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -366,6 +652,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -381,6 +668,41 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.TimeDurationC",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeDurationC",
+        "description": [],
+        "signature": [
+          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-io-ts-types",
+            "id": "def-common.TimeDurationC.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits"
+            ],
+            "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -396,6 +718,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/uuid/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -410,6 +733,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -424,6 +748,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -443,6 +768,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_boolean_false/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -460,6 +786,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_boolean_true/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -477,6 +804,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_empty_string/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -494,6 +822,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -511,6 +840,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_string_boolean_false/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -520,7 +850,7 @@
         "tags": [],
         "label": "DefaultUuid",
         "description": [
-          "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuid.v4() will be\n    created otherwise it will be checked just against an empty string"
+          "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuidv4() will be\n    created otherwise it will be checked just against an empty string"
         ],
         "signature": [
           "Type",
@@ -528,6 +858,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_uuid/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -545,6 +876,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_version_number/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -562,6 +894,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -579,10 +912,13 @@
           "Type",
           "<boolean, string | boolean | undefined, unknown>; overwrite_exceptions: ",
           "Type",
+          "<boolean, string | boolean | undefined, unknown>; as_new_list: ",
+          "Type",
           "<boolean, string | boolean | undefined, unknown>; }>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -600,6 +936,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/iso_date_string/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -617,6 +954,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_or_nullable_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -634,6 +972,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -651,6 +990,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -668,6 +1008,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/only_false_allowed/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -683,6 +1024,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -698,6 +1040,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -715,6 +1058,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/positive_integer/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -732,6 +1076,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/positive_integer_greater_than_zero/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -749,6 +1094,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -766,6 +1112,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/uuid/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -783,6 +1130,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -802,6 +1150,7 @@
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

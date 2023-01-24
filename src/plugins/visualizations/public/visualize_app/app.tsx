@@ -7,12 +7,18 @@
  */
 
 import './app.scss';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
-
-import { AppMountParameters } from 'kibana/public';
-import { syncQueryStateWithUrl } from '../../../data/public';
-import { useKibana } from '../../../kibana_react/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  AnalyticsNoDataPageKibanaProvider,
+  AnalyticsNoDataPage,
+} from '@kbn/shared-ux-page-analytics-no-data';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -26,24 +32,101 @@ export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
 }
 
+interface NoDataComponentProps {
+  core: CoreStart;
+  dataViews: DataViewsContract;
+  dataViewEditor: DataViewEditorStart;
+  onDataViewCreated: (dataView: unknown) => void;
+}
+
+const NoDataComponent = ({
+  core,
+  dataViews,
+  dataViewEditor,
+  onDataViewCreated,
+}: NoDataComponentProps) => {
+  const analyticsServices = {
+    coreStart: core,
+    dataViews,
+    dataViewEditor,
+  };
+  return (
+    <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+    </AnalyticsNoDataPageKibanaProvider>
+  );
+};
+
 export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   const {
     services: {
-      data: { query },
+      data: { query, dataViews },
+      core,
       kbnUrlStateStorage,
+      dataViewEditor,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const onDataViewCreated = useCallback((dataView: unknown) => {
+    if (dataView) {
+      setShowNoDataPage(false);
+    }
+  }, []);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
-    const { stop } = syncQueryStateWithUrl(query, kbnUrlStateStorage);
+    const { stop } = syncGlobalQueryStateWithUrl(query, kbnUrlStateStorage);
 
     return () => stop();
 
     // this effect should re-run when pathname is changed to preserve querystring part,
     // so the global state is always preserved
   }, [query, kbnUrlStateStorage, pathname]);
+
+  useEffect(() => {
+    const checkESOrDataViewExist = async () => {
+      // check if there is any data view or data source
+      const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
+      if (hasUserDataView) {
+        // Adding this check as TSVB asks for the default dataview on initialization
+        const defaultDataView = await dataViews.getDefaultDataView();
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      setShowNoDataPage(true);
+      setIsLoading(false);
+    };
+
+    // call the function
+    checkESOrDataViewExist();
+  }, [dataViews]);
+
+  if (isLoading) {
+    return (
+      <div className="visAppLoadingWrapper">
+        <EuiLoadingSpinner size="xl" />
+      </div>
+    );
+  }
+
+  // Visualize app should return the noData component if there is no data view or data source
+  if (showNoDataPage) {
+    return (
+      <NoDataComponent
+        core={core}
+        dataViewEditor={dataViewEditor}
+        dataViews={dataViews}
+        onDataViewCreated={onDataViewCreated}
+      />
+    );
+  }
 
   return (
     <Switch>

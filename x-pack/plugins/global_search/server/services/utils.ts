@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IBasePath, KibanaRequest } from 'src/core/server';
+import type { IBasePath, KibanaRequest } from '@kbn/core/server';
 import type { IBasePath as BasePathAccessor } from '../../common/utils';
 
 export const getRequestBasePath = (

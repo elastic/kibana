@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializerContext } from '../../../../src/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { CspPlugin } from './plugin';
 
 export type { CspServerPluginSetup, CspServerPluginStart } from './types';

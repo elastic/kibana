@@ -24,7 +24,7 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
 
 export type AsApiContract<
   T,
-  ComplexPropertyKeys = `actions` | `executionStatus`,
+  ComplexPropertyKeys = `actions` | `executionStatus` | 'lastRun',
   OpaquePropertyKeys = `params`
 > = T extends Array<infer I>
   ? Array<AsApiContract<I>>
@@ -71,7 +71,7 @@ export type RewriteResponseCase<T> = (
  *
  * For more details see this PR comment: https://github.com/microsoft/TypeScript/pull/40336#issuecomment-686723087
  */
-type CamelToSnake<T extends string> = string extends T
+export type CamelToSnake<T extends string> = string extends T
   ? string
   : T extends `${infer C0}${infer C1}${infer R}`
   ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${C1 extends Uppercase<C1>

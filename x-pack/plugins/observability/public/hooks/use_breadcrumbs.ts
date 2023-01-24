@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
 import { useKibana } from '../utils/kibana_react';
 import { useQueryParams } from './use_query_params';

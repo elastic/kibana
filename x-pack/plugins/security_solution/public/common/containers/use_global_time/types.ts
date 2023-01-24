@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { inputsActions } from '../../store/actions';
+import type { inputsActions } from '../../store/actions';
 
 export type SetQuery = Pick<
   Parameters<typeof inputsActions.setQuery>[0],
-  'id' | 'inspect' | 'loading' | 'refetch'
+  'id' | 'inspect' | 'loading' | 'refetch' | 'searchSessionId'
 >;
 
 export type DeleteQuery = Pick<Parameters<typeof inputsActions.deleteOneQuery>[0], 'id'>;

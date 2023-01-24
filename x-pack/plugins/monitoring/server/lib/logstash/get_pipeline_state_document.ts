@@ -9,7 +9,7 @@ import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export async function getPipelineStateDocument({
@@ -26,7 +26,7 @@ export async function getPipelineStateDocument({
   const dataset = 'node';
   const type = 'logstash_state';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -45,7 +45,7 @@ export async function getPipelineStateDocument({
     // that could result in us being unable to render the graph
     // Use the logstash_stats documents to determine whether the instance is up/down
     type,
-    dsDataset: `${moduleType}.${dataset}`,
+    dsDataset: getLogstashDataset(dataset),
     metricset: dataset,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,

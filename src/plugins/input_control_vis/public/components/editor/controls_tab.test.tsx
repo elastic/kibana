@@ -11,7 +11,7 @@ import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import ControlsTab, { ControlsTabProps } from './controls_tab';
-import { Vis } from '../../../../visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 const indexPatternsMock = {
   get: getIndexPatternMock,

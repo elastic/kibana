@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
-import {
+import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'src/core/server';
-import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { ILicense } from '../../../../../licensing/common/types';
+} from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAccordingToLicenseLevel,
 } from '../../../../common/license/policy_config';
-import { LicenseService } from '../../../../common/license/license';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { LicenseService } from '../../../../common/license/license';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 
 export class PolicyWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
-  private policyService: PackagePolicyServiceInterface;
+  private policyService: PackagePolicyClient;
   private subscription: Subscription | undefined;
   private soStart: SavedObjectsServiceStart;
   constructor(
-    policyService: PackagePolicyServiceInterface,
+    policyService: PackagePolicyClient,
     soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
     logger: Logger
@@ -60,7 +62,7 @@ export class PolicyWatcher {
       url: { href: {} },
       raw: { req: { url: '/' } },
     } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedWrappers: ['security'] });
+    return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
   }
 
   public start(licenseService: LicenseService) {

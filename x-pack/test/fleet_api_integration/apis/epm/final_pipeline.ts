@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
       const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?experimental=true`
+        `/api/fleet/epm/packages?prerelease=true`
       );
       const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
       if (!logPackage) {
@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(2);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(3);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
@@ -109,8 +109,9 @@ export default function (providerContext: FtrProviderContext) {
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain('.fleet_globals-1');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
-        '.fleet_component_template-1'
+        '.fleet_agent_id_verification-1'
       );
     });
 

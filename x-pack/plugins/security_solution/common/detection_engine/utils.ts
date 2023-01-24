@@ -13,10 +13,10 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import { Threshold, ThresholdNormalized } from './schemas/common';
+import type { Threshold, ThresholdNormalized } from './rule_schema';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -37,12 +37,15 @@ export const hasEqlSequenceQuery = (ruleQuery: string | undefined): boolean => {
   return false;
 };
 
+// these functions should be typeguards and accept an entire rule.
 export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
 export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+export const isMlRule = (ruleType: Type | undefined): boolean => ruleType === 'machine_learning';
+export const isNewTermsRule = (ruleType: Type | undefined): boolean => ruleType === 'new_terms';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined

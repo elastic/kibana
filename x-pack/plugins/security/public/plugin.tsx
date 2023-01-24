@@ -5,25 +5,33 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  HttpSetup,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { FeaturesPluginStart } from '../../features/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
-import { accountManagementApp } from './account_management';
+import { SecurityLicenseService } from '../common/licensing';
+import { accountManagementApp, UserProfileAPIClient } from './account_management';
+import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
+import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
-import { ManagementService } from './management';
+import { ManagementService, UserAPIClient } from './management';
 import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
@@ -36,14 +44,16 @@ export interface PluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   share?: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
-  data: DataPublicPluginStart;
   features: FeaturesPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
+  cloud?: CloudStart;
 }
 
 export class SecurityPlugin
@@ -56,14 +66,16 @@ export class SecurityPlugin
     >
 {
   private readonly config: ConfigType;
-  private sessionTimeout!: SessionTimeout;
+  private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
+  private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
+  private securityApiClients!: SecurityApiClients;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -72,18 +84,8 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, share }: PluginSetupDependencies
+    { cloud, home, licensing, management, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
-    const { http, notifications } = core;
-    const { anonymousPaths } = http;
-
-    const logoutUrl = `${core.http.basePath.serverBasePath}/logout`;
-    const tenant = core.http.basePath.serverBasePath;
-
-    const sessionExpired = new SessionExpired(logoutUrl, tenant);
-    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
-
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
     this.securityCheckupService.setup({ http: core.http });
@@ -96,16 +98,30 @@ export class SecurityPlugin
       http: core.http,
     });
 
+    this.securityApiClients = {
+      userProfiles: new UserProfileAPIClient(core.http),
+      users: new UserAPIClient(core.http),
+    };
+
     this.navControlService.setup({
       securityLicense: license,
+      logoutUrl: getLogoutUrl(core.http),
+      securityApiClients: this.securityApiClients,
+    });
+
+    this.analyticsService.setup({
+      analytics: core.analytics,
       authc: this.authc,
-      logoutUrl,
+      cloudId: cloud?.cloudId,
+      http: core.http,
+      securityLicense: license,
     });
 
     accountManagementApp.create({
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
+      securityApiClients: this.securityApiClients,
     });
 
     if (management) {
@@ -130,7 +146,7 @@ export class SecurityPlugin
         icon: 'securityApp',
         path: '/app/management/security/roles',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         order: 600,
       });
     }
@@ -149,34 +165,58 @@ export class SecurityPlugin
     core: CoreStart,
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
+    const { application, http, notifications, docLinks } = core;
+    const { anonymousPaths } = http;
+
+    const logoutUrl = getLogoutUrl(http);
+    const tenant = http.basePath.serverBasePath;
+
+    const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
+    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
+    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
+
     this.sessionTimeout.start();
-    this.securityCheckupService.start({
-      http: core.http,
-      notifications: core.notifications,
-      docLinks: core.docLinks,
-    });
+    this.securityCheckupService.start({ http, notifications, docLinks });
 
     if (management) {
-      this.managementService.start({ capabilities: core.application.capabilities });
+      this.managementService.start({ capabilities: application.capabilities });
     }
 
     if (share) {
-      this.anonymousAccessService.start({ http: core.http });
+      this.anonymousAccessService.start({ http });
     }
+
+    this.analyticsService.start({ http: core.http });
 
     return {
       uiApi: getUiApi({ core }),
-      navControlService: this.navControlService.start({ core }),
+      navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
+      userProfiles: {
+        getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
+          this.securityApiClients.userProfiles
+        ),
+        bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
+          this.securityApiClients.userProfiles
+        ),
+        suggest: this.securityApiClients.userProfiles.suggest.bind(
+          this.securityApiClients.userProfiles
+        ),
+      },
     };
   }
 
   public stop() {
-    this.sessionTimeout.stop();
+    this.sessionTimeout?.stop();
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();
+    this.analyticsService.stop();
   }
+}
+
+function getLogoutUrl(http: HttpSetup) {
+  return `${http.basePath.serverBasePath}/logout`;
 }
 
 export interface SecurityPluginSetup {
@@ -200,7 +240,13 @@ export interface SecurityPluginStart {
    */
   authc: AuthenticationServiceStart;
   /**
+   * A set of methods to work with Kibana user profiles.
+   */
+  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
+
+  /**
    * Exposes UI components that will be loaded asynchronously.
+   * @deprecated
    */
   uiApi: UiApi;
 }

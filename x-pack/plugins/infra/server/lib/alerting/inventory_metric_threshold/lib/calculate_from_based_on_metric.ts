@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import moment from 'moment';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { findInventoryModel } from '../../../../../common/inventory_models';
@@ -15,8 +15,8 @@ import {
 } from '../../../../../common/inventory_models/types';
 import { isRate } from './is_rate';
 
-export const calcualteFromBasedOnMetric = (
-  to: Moment,
+export const calculateFromBasedOnMetric = (
+  to: Date,
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
@@ -25,11 +25,10 @@ export const calcualteFromBasedOnMetric = (
   const inventoryModel = findInventoryModel(nodeType);
   const metricAgg = inventoryModel.metrics.snapshot[metric];
   if (isRate(metricAgg, customMetric)) {
-    return to
-      .clone()
+    return moment(to)
       .subtract(condition.timeSize * 2, condition.timeUnit)
       .valueOf();
   } else {
-    return to.clone().subtract(condition.timeSize, condition.timeUnit).valueOf();
+    return moment(to).subtract(condition.timeSize, condition.timeUnit).valueOf();
   }
 };

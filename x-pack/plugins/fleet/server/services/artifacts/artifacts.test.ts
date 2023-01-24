@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
@@ -23,6 +23,7 @@ import {
   setEsClientMethodResponseToError,
 } from './mocks';
 import {
+  bulkCreateArtifacts,
   createArtifact,
   deleteArtifact,
   encodeArtifactContent,
@@ -111,6 +112,68 @@ describe('When using the artifacts services', () => {
       await expect(createArtifact(esClientMock, newArtifact)).rejects.toBeInstanceOf(
         ArtifactsElasticsearchError
       );
+    });
+  });
+
+  describe('and calling `bulkCreateArtifacts()`', () => {
+    let newArtifact: NewArtifact;
+
+    beforeEach(() => {
+      const { id, created, ...artifact } = generateArtifactMock();
+      newArtifact = artifact;
+    });
+
+    it('should create and return artifacts', async () => {
+      const { artifacts } = await bulkCreateArtifacts(esClientMock, [newArtifact]);
+      const artifact = artifacts![0];
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        index: FLEET_SERVER_ARTIFACTS_INDEX,
+        refresh: false,
+        body: [
+          {
+            create: {
+              _id: `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`,
+            },
+          },
+          {
+            ...newArtifactToElasticsearchProperties(newArtifact),
+            created: expect.any(String),
+          },
+        ],
+      });
+
+      expect(artifact).toEqual({
+        ...newArtifact,
+        id: expect.any(String),
+        created: expect.any(String),
+      });
+    });
+
+    it('should ignore 409 errors from elasticsearch', async () => {
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { status: 409 } as any }],
+      } as any);
+      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
+        newArtifact,
+      ]);
+
+      expect(responseErrors).toBeUndefined();
+      expect(artifacts?.length).toEqual(1);
+    });
+
+    it('should return error if one is encountered', async () => {
+      esClientMock.bulk.mockResolvedValue({
+        errors: true,
+        items: [{ create: { status: 400, error: { reason: 'error' } } as any }],
+      } as any);
+      const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
+        newArtifact,
+      ]);
+
+      expect(responseErrors).toEqual([new Error('error')]);
+      expect(artifacts).toBeUndefined();
     });
   });
 

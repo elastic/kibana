@@ -6,14 +6,17 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { FormatFactory, LensMultiTable } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import type {
+  Datatable,
+  DatatableColumnMeta,
+  ExecutionContext,
+} from '@kbn/expressions-plugin/common';
+import { FormatFactory } from '../../types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import { getSortingCriteria } from './sorting';
-import type {
-  DatatableColumnMeta,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions';
 import type { DatatableExpressionFunction } from './types';
 
 function isRange(meta: { params?: { id?: string } } | undefined) {
@@ -24,29 +27,49 @@ export const datatableFn =
   (
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
-  async (data, args, context) => {
-    let untransposedData: LensMultiTable | undefined;
+  async (table, args, context) => {
+    if (context?.inspectorAdapters?.tables) {
+      context.inspectorAdapters.tables.reset();
+      context.inspectorAdapters.tables.allowCsvExport = true;
+
+      const logTable = prepareLogTable(
+        table,
+        [
+          [
+            args.columns.map((column) => column.columnId),
+            i18n.translate('xpack.lens.datatable.column.help', {
+              defaultMessage: 'Datatable column',
+            }),
+          ],
+        ],
+        true
+      );
+
+      context.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
+
+    let untransposedData: Datatable | undefined;
     // do the sorting at this level to propagate it also at CSV download
-    const [firstTable] = Object.values(data.tables);
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
+
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
 
-    firstTable.columns.forEach((column) => {
+    table.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
 
     const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
     if (hasTransposedColumns) {
       // store original shape of data separately
-      untransposedData = cloneDeep(data);
+      untransposedData = cloneDeep(table);
       // transposes table and args inplace
-      transposeTable(args, firstTable, formatters);
+      transposeTable(args, table, formatters);
     }
 
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
-    const columnsReverseLookup = firstTable.columns.reduce<
+    const columnsReverseLookup = table.columns.reduce<
       Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
     >((memo, { id, name, meta }, i) => {
       memo[id] = { name, index: i, meta };
@@ -57,7 +80,7 @@ export const datatableFn =
     for (const column of columnsWithSummary) {
       column.summaryRowValue = computeSummaryRowForColumn(
         column,
-        firstTable,
+        table,
         formatters,
         formatFactory({ id: 'number' })
       );
@@ -76,22 +99,26 @@ export const datatableFn =
         sortDirection
       );
       // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (firstTable.rows || [])
+      context.inspectorAdapters.tables[layerId].rows = (table.rows || [])
         .slice()
         .sort(sortingCriteria);
       // replace also the local copy
-      firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
+      table.rows = context.inspectorAdapters.tables[layerId].rows;
     } else {
       args.sortingColumnId = undefined;
       args.sortingDirection = 'none';
     }
+
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        data,
+        data: table,
         untransposedData,
-        args,
+        args: {
+          ...args,
+          title: (context.variables.embeddableTitle as string) ?? args.title,
+        },
       },
     };
   };

@@ -7,9 +7,10 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   HostAggEsItem,
   HostsStrategyResponse,
   HostsQueries,
@@ -17,20 +18,19 @@ import {
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
+import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
+  RiskScoreEntity,
   getHostRiskIndex,
   buildHostNamesFilter,
-  HostsRiskScore,
 } from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
-import { IScopedClusterClient } from '../../../../../../../../../src/core/server';
 
-import { buildHostsQueryEntities } from './query.all_hosts_entities.dsl';
-import { EndpointAppContext } from '../../../../../endpoint/types';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
@@ -66,10 +66,9 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
 
     const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
-    const enhancedEdges =
-      deps?.spaceId && deps?.endpointContext.experimentalFeatures.riskyHostsEnabled
-        ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
-        : edges;
+    const enhancedEdges = deps?.spaceId
+      ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
+      : edges;
 
     return {
       ...response,
@@ -92,11 +91,10 @@ async function enhanceEdges(
   esClient: IScopedClusterClient
 ): Promise<HostsEdges[]> {
   const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames);
-
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
-      [hit._source?.host.name ?? '']: hit._source?.risk,
+      [hit._source?.host.name ?? '']: hit._source?.host?.risk?.calculated_level,
     }),
     {}
   );
@@ -118,10 +116,11 @@ async function getHostRiskData(
   hostNames: string[]
 ) {
   try {
-    const hostRiskResponse = await esClient.asCurrentUser.search<HostsRiskScore>(
+    const hostRiskResponse = await esClient.asCurrentUser.search<HostRiskScore>(
       buildRiskScoreQuery({
         defaultIndex: [getHostRiskIndex(spaceId)],
         filterQuery: buildHostNamesFilter(hostNames),
+        riskScoreEntity: RiskScoreEntity.host,
       })
     );
     return hostRiskResponse;
@@ -132,43 +131,3 @@ async function getHostRiskData(
     return undefined;
   }
 }
-
-export const allHostsEntities: SecuritySolutionFactory<HostsQueries.hosts> = {
-  buildDsl: (options: HostsRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-    return buildHostsQueryEntities(options);
-  },
-  parse: async (
-    options: HostsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<HostsStrategyResponse> => {
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.host_count.value', response.rawResponse);
-    const buckets: HostAggEsItem[] = getOr(
-      [],
-      'aggregations.host_data.buckets',
-      response.rawResponse
-    );
-    const hostsEdges = buckets.map((bucket) => formatHostEdgesData(HOSTS_FIELDS, bucket));
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(buildHostsQueryEntities(options))],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
-
-    return {
-      ...response,
-      inspect,
-      edges,
-      totalCount,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-    };
-  },
-};

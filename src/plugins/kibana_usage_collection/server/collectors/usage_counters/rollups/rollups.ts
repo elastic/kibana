@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsRepository, Logger } from 'kibana/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import moment from 'moment';
-
-import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 
 import {
   UsageCountersSavedObject,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-} from '../../../../../usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
+import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 
 export function isSavedObjectOlderThan({
   numberOfDays,

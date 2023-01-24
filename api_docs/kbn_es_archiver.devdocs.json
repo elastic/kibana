@@ -9,20 +9,29 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/es-archiver",
-        "id": "def-server.EsArchiver",
+        "id": "def-common.EsArchiver",
         "type": "Class",
         "tags": [],
         "label": "EsArchiver",
         "description": [],
         "path": "packages/kbn-es-archiver/src/es_archiver.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.Unnamed",
+            "id": "def-common.EsArchiver.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -32,10 +41,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.Unnamed.$1",
+                "id": "def-common.EsArchiver.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -45,6 +55,7 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -52,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.save",
+            "id": "def-common.EsArchiver.save",
             "type": "Function",
             "tags": [
               "property",
@@ -69,10 +80,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.save.$1",
+                "id": "def-common.EsArchiver.save.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -84,11 +96,12 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.save.$2",
+                "id": "def-common.EsArchiver.save.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "indices",
@@ -100,21 +113,23 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.save.$3",
+                "id": "def-common.EsArchiver.save.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n      raw = false,\n      keepIndexNames = false,\n      query,\n    }",
                 "description": [],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/es-archiver",
-                    "id": "def-server.EsArchiver.save.$3.raw",
+                    "id": "def-common.EsArchiver.save.$3.raw",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "raw",
@@ -123,11 +138,12 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/es-archiver",
-                    "id": "def-server.EsArchiver.save.$3.keepIndexNames",
+                    "id": "def-common.EsArchiver.save.$3.keepIndexNames",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "keepIndexNames",
@@ -136,11 +152,12 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/es-archiver",
-                    "id": "def-server.EsArchiver.save.$3.query",
+                    "id": "def-common.EsArchiver.save.$3.query",
                     "type": "Object",
                     "tags": [],
                     "label": "query",
@@ -149,7 +166,8 @@
                       "Record<string, any> | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -158,7 +176,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.load",
+            "id": "def-common.EsArchiver.load",
             "type": "Function",
             "tags": [
               "property",
@@ -176,10 +194,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.load.$1",
+                "id": "def-common.EsArchiver.load.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -191,21 +210,23 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.load.$2",
+                "id": "def-common.EsArchiver.load.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n      skipExisting = false,\n      useCreate = false,\n      docsOnly = false,\n    }",
                 "description": [],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/es-archiver",
-                    "id": "def-server.EsArchiver.load.$2.skipExisting",
+                    "id": "def-common.EsArchiver.load.$2.skipExisting",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "skipExisting",
@@ -214,11 +235,12 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/es-archiver",
-                    "id": "def-server.EsArchiver.load.$2.useCreate",
+                    "id": "def-common.EsArchiver.load.$2.useCreate",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "useCreate",
@@ -227,11 +249,12 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/es-archiver",
-                    "id": "def-server.EsArchiver.load.$2.docsOnly",
+                    "id": "def-common.EsArchiver.load.$2.docsOnly",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "docsOnly",
@@ -240,7 +263,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -249,7 +273,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.unload",
+            "id": "def-common.EsArchiver.unload",
             "type": "Function",
             "tags": [],
             "label": "unload",
@@ -263,10 +287,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.unload.$1",
+                "id": "def-common.EsArchiver.unload.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -278,6 +303,7 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -285,7 +311,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.rebuildAll",
+            "id": "def-common.EsArchiver.rebuildAll",
             "type": "Function",
             "tags": [],
             "label": "rebuildAll",
@@ -297,10 +323,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.rebuildAll.$1",
+                "id": "def-common.EsArchiver.rebuildAll.$1",
                 "type": "string",
                 "tags": [],
                 "label": "dir",
@@ -312,6 +339,7 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -319,7 +347,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.edit",
+            "id": "def-common.EsArchiver.edit",
             "type": "Function",
             "tags": [],
             "label": "edit",
@@ -331,10 +359,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.edit.$1",
+                "id": "def-common.EsArchiver.edit.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -346,11 +375,12 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.edit.$2",
+                "id": "def-common.EsArchiver.edit.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -360,6 +390,7 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -367,7 +398,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.loadIfNeeded",
+            "id": "def-common.EsArchiver.loadIfNeeded",
             "type": "Function",
             "tags": [],
             "label": "loadIfNeeded",
@@ -381,10 +412,11 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/es-archiver",
-                "id": "def-server.EsArchiver.loadIfNeeded.$1",
+                "id": "def-common.EsArchiver.loadIfNeeded.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -394,6 +426,7 @@
                 ],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -401,7 +434,7 @@
           },
           {
             "parentPluginId": "@kbn/es-archiver",
-            "id": "def-server.EsArchiver.emptyKibanaIndex",
+            "id": "def-common.EsArchiver.emptyKibanaIndex",
             "type": "Function",
             "tags": [],
             "label": "emptyKibanaIndex",
@@ -415,6 +448,7 @@
             ],
             "path": "packages/kbn-es-archiver/src/es_archiver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -425,7 +459,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/es-archiver",
-        "id": "def-server.runCli",
+        "id": "def-common.runCli",
         "type": "Function",
         "tags": [],
         "label": "runCli",
@@ -435,19 +469,12 @@
         ],
         "path": "packages/kbn-es-archiver/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

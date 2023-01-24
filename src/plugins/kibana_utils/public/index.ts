@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaUtilsPublicPlugin } from './plugin';
 
-export type { Get, Set, UiComponent, UiComponentInstance } from '../common';
+export type { Get, Set } from '../common';
 export {
   AbortError,
   abortSignalToPromise,
@@ -71,12 +71,7 @@ export {
 export type { IStorageWrapper, IStorage } from './storage';
 export { Storage } from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
-export {
-  createStateHash,
-  persistState,
-  retrieveState,
-  isStateHash,
-} from './state_management/state_hash';
+export { persistState, retrieveState } from './state_management/state_hash';
 export {
   hashQuery,
   hashUrl,
@@ -89,10 +84,9 @@ export {
   getStatesFromKbnUrl,
   setStateToKbnUrl,
   withNotifyOnErrors,
-  replaceUrlQuery,
-  replaceUrlHashQuery,
 } from './state_management/url';
 export type {
+  IStateStorage,
   IStateSyncConfig,
   ISyncStateRef,
   IKbnUrlStateStorage,

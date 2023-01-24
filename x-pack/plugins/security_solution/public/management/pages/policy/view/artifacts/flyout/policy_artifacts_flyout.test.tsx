@@ -8,26 +8,24 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import uuid from 'uuid';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import { v4 as uuidv4 } from 'uuid';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import { PolicyData } from '../../../../../../../common/endpoint/types';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE } from '../../../../../common/constants';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { MAX_ALLOWED_RESULTS, PolicyArtifactsFlyout } from './policy_artifacts_flyout';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import {
+import type {
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -38,8 +36,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     namespace_type: ['agnostic'],
     page: MANAGEMENT_DEFAULT_PAGE + 1,
     per_page: MAX_ALLOWED_RESULTS,
-    sort_field: undefined,
-    sort_order: undefined,
+    sort_field: 'created_at',
+    sort_order: 'desc',
   },
 });
 const getEmptyList = () => ({
@@ -180,8 +178,8 @@ describe('Policy details artifacts flyout', () => {
   });
 
   describe('when submitting the form', () => {
-    const FIRST_ONE_NAME = uuid.v4();
-    const SECOND_ONE_NAME = uuid.v4();
+    const FIRST_ONE_NAME = uuidv4();
+    const SECOND_ONE_NAME = uuidv4();
     const testTags = ['policy:1234', 'non-policy-tag', 'policy:4321'];
     let exceptions: FoundExceptionListItemSchema;
 
@@ -192,12 +190,12 @@ describe('Policy details artifacts flyout', () => {
         data: [
           getExceptionListItemSchemaMock({
             name: FIRST_ONE_NAME,
-            id: uuid.v4(),
+            id: uuidv4(),
             tags: testTags,
           }),
           getExceptionListItemSchemaMock({
             name: SECOND_ONE_NAME,
-            id: uuid.v4(),
+            id: uuidv4(),
             tags: testTags,
           }),
         ],

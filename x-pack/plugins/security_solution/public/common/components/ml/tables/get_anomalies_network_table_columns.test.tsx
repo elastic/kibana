@@ -7,10 +7,10 @@
 
 import '../../../mock/match_media';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
-import { NetworkType } from '../../../../network/store/model';
+import { NetworkType } from '../../../../explore/network/store/model';
 import * as i18n from './translations';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana');
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();

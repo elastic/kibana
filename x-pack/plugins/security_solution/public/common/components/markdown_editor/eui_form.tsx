@@ -7,10 +7,13 @@
 
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
-import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import type { FieldHook } from '../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../shared_imports';
 
-import { MarkdownEditor, MarkdownEditorRef } from './editor';
+import type { MarkdownEditorRef } from './editor';
+import { MarkdownEditor } from './editor';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -23,7 +26,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
-    padding: ${theme.eui.ruleMargins.marginSmall} 0;
+    padding: ${theme.eui.euiSizeM} 0;
   `}
 `;
 

@@ -6,34 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { PluginServices } from '../../../presentation_util/public';
-import { ControlsDataViewsService } from './data_views';
-import { ControlsOverlaysService } from './overlays';
-import { registry as stubRegistry } from './stub';
-import { ControlsPluginStart } from '../types';
-import { ControlsDataService } from './data';
-import { ControlsService } from './controls';
-import { ControlsHTTPService } from './http';
-import { ControlsOptionsListService } from './options_list';
-
-export interface ControlsServices {
-  // dependency services
-  dataViews: ControlsDataViewsService;
-  overlays: ControlsOverlaysService;
-  data: ControlsDataService;
-  http: ControlsHTTPService;
-
-  // controls plugin's own services
-  controls: ControlsService;
-  optionsList: ControlsOptionsListService;
-}
-
-export const pluginServices = new PluginServices<ControlsServices>();
-
-export const getStubPluginServices = (): ControlsPluginStart => {
-  pluginServices.setRegistry(stubRegistry.start({}));
-  return {
-    getControlFactory: pluginServices.getServices().controls.getControlFactory,
-    getControlTypes: pluginServices.getServices().controls.getControlTypes,
-  };
-};
+export { pluginServices } from './plugin_services';

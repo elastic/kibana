@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { getBreakpoint } from '@elastic/eui';
+import { useCurrentEuiBreakpoint } from '@elastic/eui';
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -58,6 +58,8 @@ export const NodesOverview = ({
   topMargin,
   showLoading,
 }: Props) => {
+  const currentBreakpoint = useCurrentEuiBreakpoint();
+
   const handleDrilldown = useCallback(
     (filter: string) => {
       onDrilldown({
@@ -102,7 +104,7 @@ export const NodesOverview = ({
   }
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
-  const isStatic = ['xs', 's'].includes(getBreakpoint(window.innerWidth)!);
+  const isStatic = ['xs', 's'].includes(currentBreakpoint!);
 
   if (view === 'table') {
     return (
@@ -143,7 +145,7 @@ export const NodesOverview = ({
 };
 
 const TableContainer = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.l};
+  padding: ${(props) => props.theme.eui.euiSizeL};
 `;
 
 const MapContainer = euiStyled.div<{ top: number; positionStatic: boolean }>`

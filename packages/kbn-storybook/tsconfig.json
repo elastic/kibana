@@ -1,16 +1,23 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "incremental": false,
-    "outDir": "target_types",
-    "rootDir": "src",
-    "skipLibCheck": true,
-    "target": "es2015",
-    "types": ["node"]
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "@kbn/ambient-storybook-types"
+    ]
   },
   "include": [
-    "src/**/*.ts", "src/**/*.tsx"
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

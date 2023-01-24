@@ -9,7 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
-    experimental: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    experimental: schema.maybe(schema.boolean()), // deprecated
     include_policy_templates: schema.maybe(schema.boolean()),
   }),
 };
@@ -17,7 +18,15 @@ export const GetCategoriesRequestSchema = {
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
-    experimental: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    experimental: schema.maybe(schema.boolean()), // deprecated
+    excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
+  }),
+};
+
+export const GetLimitedPackagesRequestSchema = {
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -34,11 +43,21 @@ export const GetInfoRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    full: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const GetInfoRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
+    full: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -72,6 +91,9 @@ export const InstallPackageFromRegistryRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.boolean({ defaultValue: false }),
@@ -84,6 +106,9 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.boolean(),
@@ -91,9 +116,13 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   ),
 };
 
-export const BulkUpgradePackagesFromRegistryRequestSchema = {
+export const BulkInstallPackagesFromRegistryRequestSchema = {
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.object({
     packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 

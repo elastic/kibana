@@ -4,12 +4,18 @@
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
-  "description": "Expression MetricVis plugin adds a `metric` renderer and function to the expression plugin. The renderer will display the `metric` chart.",
+  "description": "Adds a `metric` renderer and function to the expression plugin. The renderer will display the `metric` chart.",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["expressions", "fieldFormats", "charts", "visualizations", "presentationUtil"],
+  "requiredPlugins": [
+    "expressions",
+    "fieldFormats",
+    "charts",
+    "visualizations",
+    "presentationUtil"
+  ],
   "requiredBundles": ["kibanaUtils", "kibanaReact"],
-  "optionalPlugins": []
+  "optionalPlugins": ["usageCollection"]
 }

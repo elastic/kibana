@@ -6,158 +6,141 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
-import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useGetReporters } from '../../containers/use_get_reporters';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, noCreateCasesPermissions } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { useKibana } from '../../common/lib/kibana';
-import { CaseStatuses } from '../../../common/api';
-import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
+import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCases } from '../../containers/use_get_cases';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 
-jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_action_license', () => {
+  return {
+    useGetActionLicense: jest.fn(),
+  };
+});
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
-jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/use_get_cases_status');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../api');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
-const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 describe('AllCases', () => {
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
-  const dispatchUpdateCaseProperty = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
   const setSelectedCases = jest.fn();
-  const fetchCasesStatus = jest.fn();
 
   const defaultGetCases = {
     ...useGetCasesMockState,
-    dispatchUpdateCaseProperty,
     refetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,
   };
 
-  const defaultCasesStatus = {
-    ...casesStatus,
-    fetchCasesStatus,
-    isError: false,
-    isLoading: false,
-  };
-
   const defaultActionLicense = {
-    actionLicense: null,
+    data: null,
     isLoading: false,
     isError: false,
   };
 
   beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
-    (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
-    (useGetReporters as jest.Mock).mockReturnValue({
-      reporters: ['casetester'],
-      respReporters: [{ username: 'casetester' }],
-      isLoading: true,
-      isError: false,
-      fetchReporters: jest.fn(),
-    });
-    (useGetActionLicense as jest.Mock).mockReturnValue({
-      actionLicense: null,
-      isLoading: false,
-    });
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
+
+    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
   });
+
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
+
+  describe('empty table', () => {
+    beforeEach(() => {
+      useGetCasesMock.mockReturnValue({
+        ...defaultGetCases,
+        data: {
+          ...defaultGetCases.data,
+          cases: [],
+          total: 0,
+        },
+      });
+    });
+
+    it('should render the create new case link when the user has create privileges', async () => {
+      const result = appMockRender.render(<AllCases />);
+      await waitFor(() => {
+        expect(result.getByTestId('cases-table-add-case')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render the create new case link when the user does not have create privileges', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noCreateCasesPermissions() });
+      const result = appMockRender.render(<AllCases />);
+      await waitFor(() => {
+        expect(result.queryByTestId('cases-table-add-case')).not.toBeInTheDocument();
+      });
+    });
   });
 
   it('should render the stats', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="openStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="openStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('20');
+      expect(result.getByTestId('openStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('20')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find('[data-test-subj="inProgressStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="inProgressStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('40');
+    await waitFor(() => {
+      expect(result.getByTestId('inProgressStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('40')).toBeInTheDocument();
+    });
 
-      expect(wrapper.find('[data-test-subj="closedStatsHeader"]').exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="closedStatsHeader"] .euiDescriptionList__description')
-          .first()
-          .text()
-      ).toBe('130');
+    await waitFor(() => {
+      expect(result.getByTestId('closedStatsHeader')).toBeInTheDocument();
+      expect(result.getByText('130')).toBeInTheDocument();
     });
   });
 
   it('should render the loading spinner when loading stats', async () => {
-    useGetCasesStatusMock.mockReturnValue({ ...defaultCasesStatus, isLoading: true });
-
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="openStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="inProgressStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="closedStatsHeader-loading-spinner"]').exists()
-      ).toBeTruthy();
+      expect(result.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(result.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
+      expect(result.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
     });
   });
 
   it('should not allow the user to enter configuration page with basic license', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
-      actionLicense: {
+      data: {
         id: '.jira',
         name: 'Jira',
         minimumLicenseRequired: 'gold',
@@ -167,23 +150,17 @@ describe('AllCases', () => {
       },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
-      ).toBeTruthy();
+      expect(result.getByTestId('configure-case-button')).toBeDisabled();
     });
   });
 
   it('should allow the user to enter configuration page with gold license and above', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
-      actionLicense: {
+      data: {
         id: '.jira',
         name: 'Jira',
         minimumLicenseRequired: 'gold',
@@ -193,16 +170,17 @@ describe('AllCases', () => {
       },
     });
 
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<AllCases />);
 
     await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
-      ).toBeFalsy();
+      expect(result.getByTestId('configure-case-button')).not.toBeDisabled();
+    });
+  });
+
+  it('should render the case callouts', async () => {
+    const result = appMockRender.render(<AllCases />);
+    await waitFor(() => {
+      expect(result.getByTestId('case-callouts')).toBeInTheDocument();
     });
   });
 });

@@ -13,28 +13,13 @@ import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
-import { RowRendererId, ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { BrowserFields } from '../../../../../../common/search_strategy';
+import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { TableId, RowRendererId } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../../../../timelines/public/mock';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';
+import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { cloneDeep } from 'lodash';
 jest.mock('./plain_column_renderer');
-
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: () => ({
-      services: {
-        timelines: {
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
-        },
-      },
-    }),
-  };
-});
 
 jest.mock('../../../../../common/components/link_to', () => {
   const original = jest.requireActual('../../../../../common/components/link_to');
@@ -61,13 +46,12 @@ const rowRenderers: RowRenderer[] = [
     renderRow: () => <span data-test-subj="test-row-render" />,
   },
 ];
-const browserFields: BrowserFields = {};
 
 const defaultProps = {
   columnName: REASON_FIELD_NAME,
   eventId: 'test-event-id',
   field,
-  timelineId: 'test-timeline-id',
+  scopeId: 'test-timeline-id',
   values: ['test-value'],
 };
 
@@ -83,19 +67,18 @@ describe('reasonColumnRenderer', () => {
   });
 
   describe('renderColumn', () => {
-    it('calls `plainColumnRenderer.renderColumn` when ecsData, rowRenderers or browserFields is empty', () => {
+    it('calls `plainColumnRenderer.renderColumn` when ecsData, or rowRenderers is empty', () => {
       reasonColumnRenderer.renderColumn(defaultProps);
 
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
     });
 
-    it("doesn't call `plainColumnRenderer.renderColumn` in expanded value when ecsData, rowRenderers or browserFields fields are not empty", () => {
+    it("doesn't call `plainColumnRenderer.renderColumn` in expanded value when ecsData, or rowRenderers fields are not empty", () => {
       reasonColumnRenderer.renderColumn({
         ...defaultProps,
         isDetails: true,
         ecsData: invalidEcs,
         rowRenderers,
-        browserFields,
       });
 
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(0);
@@ -107,7 +90,6 @@ describe('reasonColumnRenderer', () => {
         isDetails: false,
         ecsData: invalidEcs,
         rowRenderers,
-        browserFields,
       });
 
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
@@ -119,7 +101,6 @@ describe('reasonColumnRenderer', () => {
         isDetails: true,
         ecsData: invalidEcs,
         rowRenderers,
-        browserFields,
       });
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
@@ -133,12 +114,25 @@ describe('reasonColumnRenderer', () => {
         isDetails: true,
         ecsData: validEcs,
         rowRenderers,
-        browserFields,
       });
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
 
       expect(wrapper.queryByTestId('reason-cell-renderer')).toBeInTheDocument();
+    });
+
+    it("doesn't render reason renderers when timeline id is for the rule preview page", () => {
+      const renderedColumn = reasonColumnRenderer.renderColumn({
+        ...defaultProps,
+        isDetails: true,
+        ecsData: validEcs,
+        rowRenderers,
+        scopeId: TableId.rulePreview,
+      });
+
+      const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
+
+      expect(wrapper.queryByTestId('reason-cell-renderer')).not.toBeInTheDocument();
     });
   });
 });

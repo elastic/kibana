@@ -22,6 +22,21 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/fleet_cypress`
 
+## Test Artifacts
+
+When Cypress tests are run headless on the command line, artifacts
+are generated under the `target` directory in the root of Kibana as follows:
+
+- HTML Reports
+  - location: `target/kibana-fleet/cypress/results/output.html`
+- `junit` Reports
+  - location: `target/kibana-fleet/cypress/results`
+- Screenshots (of failed tests)
+  - location: `target/kibana-fleet/cypress/screenshots`
+- Videos
+  - disabled by default, can be enabled by setting env var `CYPRESS_video=true`
+  - location: `target/kibana-fleet/cypress/videos`
+
 ### Test Execution: Examples
 
 #### FTR + Headless (Chrome)
@@ -81,6 +96,8 @@ Cypress convention. Fixtures are used as external pieces of static data when we 
 
 Cypress convention. As a convenience, by default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs.
 
+We use the plugins file to register [tasks](https://docs.cypress.io/api/commands/task#Syntax) which are helper functions which run in the parent node process instead of the browser. Tasks can be used to make elastic commands for example.
+
 ### screens/
 
 Contains the elements we want to interact with in our tests.
@@ -111,13 +128,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/fleet`
 
 ```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/fleet_cypress/es_archives --config ../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/fleet_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/fleet_cypress/es_archives --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/fleet_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.
@@ -142,6 +159,12 @@ taken into consideration until another solution is implemented:
 - All tests in a spec file must be order-independent.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
+
+### Accessibility
+
+The `checkA11y({ skipFailures: false });` call uses [axe-core](https://github.com/dequelabs/axe-core) to perform a full page check for accessibility violations.
+
+See [axe-core](https://github.com/dequelabs/axe-core)'s documentation for details on what is checked for. 
 
 ## Linting
 

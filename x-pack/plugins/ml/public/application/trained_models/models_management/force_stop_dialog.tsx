@@ -8,9 +8,10 @@
 import React, { FC } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { OverlayStart, ThemeServiceStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ModelItem } from './models_list';
-import { toMountPoint, wrapWithTheme } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface ForceStopModelConfirmDialogProps {
   model: ModelItem;
@@ -25,27 +26,20 @@ export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> =
 }) => {
   return (
     <EuiConfirmModal
-      title={
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.forceStopDialog.title"
-          defaultMessage="Stop model {modelId}?"
-          values={{ modelId: model.model_id }}
-        />
-      }
+      title={i18n.translate('xpack.ml.trainedModels.modelsList.forceStopDialog.title', {
+        defaultMessage: 'Stop model {modelId}?',
+        values: { modelId: model.model_id },
+      })}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText"
-          defaultMessage="Cancel"
-        />
-      }
-      confirmButtonText={
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText"
-          defaultMessage="Stop"
-        />
-      }
+      cancelButtonText={i18n.translate(
+        'xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText',
+        { defaultMessage: 'Cancel' }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText',
+        { defaultMessage: 'Stop' }
+      )}
       buttonColor="danger"
     >
       <FormattedMessage

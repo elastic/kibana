@@ -7,14 +7,12 @@
 
 import Boom from '@hapi/boom';
 
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
-import { CommentableCase } from '../../common/models';
+import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { Actions, ActionTypes, CaseResponse, CommentPatchRequest } from '../../../common/api';
+import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
+import type { CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { AttachmentService, CasesService } from '../../services';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 
@@ -32,37 +30,6 @@ export interface UpdateArgs {
   updateRequest: CommentPatchRequest;
 }
 
-interface CombinedCaseParams {
-  attachmentService: AttachmentService;
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  caseID: string;
-  logger: Logger;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
-}
-
-async function createCommentableCase({
-  attachmentService,
-  caseService,
-  unsecuredSavedObjectsClient,
-  caseID,
-  logger,
-  lensEmbeddableFactory,
-}: CombinedCaseParams) {
-  const caseInfo = await caseService.getCase({
-    id: caseID,
-  });
-
-  return new CommentableCase({
-    attachmentService,
-    caseService,
-    caseInfo,
-    unsecuredSavedObjectsClient,
-    logger,
-    lensEmbeddableFactory,
-  });
-}
-
 /**
  * Update an attachment.
  *
@@ -73,13 +40,9 @@ export async function update(
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> {
   const {
-    attachmentService,
-    caseService,
+    services: { attachmentService },
     unsecuredSavedObjectsClient,
     logger,
-    lensEmbeddableFactory,
-    user,
-    userActionService,
     authorization,
   } = clientArgs;
 
@@ -91,15 +54,6 @@ export async function update(
     } = queryParams;
 
     decodeCommentRequest(queryRestAttributes);
-
-    const commentableCase = await createCommentableCase({
-      attachmentService,
-      caseService,
-      unsecuredSavedObjectsClient,
-      caseID,
-      logger,
-      lensEmbeddableFactory,
-    });
 
     const myComment = await attachmentService.get({
       unsecuredSavedObjectsClient,
@@ -115,6 +69,8 @@ export async function update(
       operation: Operations.updateComment,
     });
 
+    const model = await CaseCommentModel.create(caseID, clientArgs);
+
     if (myComment.attributes.type !== queryRestAttributes.type) {
       throw Boom.badRequest(`You cannot change the type of the comment.`);
     }
@@ -123,10 +79,19 @@ export async function update(
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 
+    if (
+      isCommentRequestTypeExternalReference(myComment.attributes) &&
+      isCommentRequestTypeExternalReference(queryRestAttributes) &&
+      myComment.attributes.externalReferenceStorage.type !==
+        queryRestAttributes.externalReferenceStorage.type
+    ) {
+      throw Boom.badRequest(`You cannot change the storage type of an external reference comment.`);
+    }
+
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
-    if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
+    if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
       throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in ${commentableCase.id}).`
+        `This comment ${queryCommentId} does not exist in ${model.savedObject.id}).`
       );
     }
 
@@ -137,25 +102,14 @@ export async function update(
     }
 
     const updatedDate = new Date().toISOString();
-    const { comment: updatedComment, commentableCase: updatedCase } =
-      await commentableCase.updateComment({
-        updateRequest: queryParams,
-        updatedAt: updatedDate,
-        user,
-      });
 
-    await userActionService.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.update,
-      unsecuredSavedObjectsClient,
-      caseId: caseID,
-      attachmentId: updatedComment.id,
-      payload: { attachment: queryRestAttributes },
-      user,
+    const updatedModel = await model.updateComment({
+      updateRequest: queryParams,
+      updatedAt: updatedDate,
       owner: myComment.attributes.owner,
     });
 
-    return await updatedCase.encode();
+    return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
       message: `Failed to patch comment case id: ${caseID}: ${error}`,

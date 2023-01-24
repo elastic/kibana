@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 
 const MAX_PARTIAL_ERROR_LENGTH = 1000; // 1000 of beginning, 1000 of end
 const ERROR_PARTIAL_SEPARATOR = '...';

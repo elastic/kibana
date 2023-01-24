@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect, useCallback, useState } from 'react';
 
-import { FLEET_SERVER_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import {
+  FLEET_SERVER_PACKAGE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../constants';
 import { sendGetAgentStatus, sendGetPackagePolicies, useStartServices } from '../../../hooks';
 
 export function useFleetServerUnhealthy() {
@@ -19,7 +23,7 @@ export function useFleetServerUnhealthy() {
     try {
       const packagePoliciesRes = await sendGetPackagePolicies({
         page: 1,
-        perPage: 10000,
+        perPage: SO_SEARCH_LIMIT,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
       });
 

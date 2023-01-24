@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'src/core/public';
 
 import type { SecurityLicense } from '../../../../../../common/licensing';
 import type { BuiltinESPrivileges, Role } from '../../../../../../common/model';
@@ -66,16 +66,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       builtinESPrivileges,
     } = this.props;
 
-    const indexProps = {
-      role,
-      indicesAPIClient,
-      validator,
-      indexPatterns,
-      license,
-      onChange,
-      availableIndexPrivileges: builtinESPrivileges.index,
-    };
-
     return (
       <Fragment>
         <EuiDescribedFormGroup
@@ -102,6 +92,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               role={this.props.role}
               onChange={this.onClusterPrivilegesChange}
               builtinClusterPrivileges={builtinESPrivileges.cluster}
+              editable={editable}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -171,17 +162,27 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           </p>
         </EuiText>
 
-        <IndexPrivileges {...indexProps} />
+        <IndexPrivileges
+          role={role}
+          indicesAPIClient={indicesAPIClient}
+          validator={validator}
+          indexPatterns={indexPatterns}
+          license={license}
+          onChange={onChange}
+          availableIndexPrivileges={builtinESPrivileges.index}
+          editable={editable}
+        />
 
-        <EuiHorizontalRule />
-
-        {this.props.editable && (
-          <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
-            <FormattedMessage
-              id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-              defaultMessage="Add index privilege"
-            />
-          </EuiButton>
+        {editable && (
+          <>
+            <EuiHorizontalRule />
+            <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
+              <FormattedMessage
+                id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+                defaultMessage="Add index privilege"
+              />
+            </EuiButton>
+          </>
         )}
       </Fragment>
     );

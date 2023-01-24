@@ -6,16 +6,16 @@
  */
 
 import { keyBy } from 'lodash';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -28,33 +28,36 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../lib/helpers/setup_request';
 import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
   kuery,
   serviceName,
   transactionNames,
-  setup,
+  apmEventClient,
   numBuckets,
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionNames: string[];
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
+  offset?: string;
 }): Promise<
   Array<{
     transactionName: string;
@@ -64,10 +67,15 @@ export async function getServiceTransactionGroupDetailedStatistics({
     impact: number;
   }>
 > {
-  const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start: startWithOffset,
+    end: endWithOffset,
     numBuckets,
     searchAggregatedTransactions,
   });
@@ -83,6 +91,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
         ],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -92,7 +101,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
@@ -116,8 +125,8 @@ export async function getServiceTransactionGroupDetailedStatistics({
                   fixed_interval: intervalString,
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: start,
-                    max: end,
+                    min: startWithOffset,
+                    max: endWithOffset,
                   },
                 },
                 aggs: {
@@ -174,34 +183,32 @@ export async function getServiceTransactionGroupDetailedStatistics({
 export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   serviceName,
   transactionNames,
-  setup,
+  apmEventClient,
   numBuckets,
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
-  comparisonStart,
-  comparisonEnd,
   environment,
   kuery,
   start,
   end,
+  offset,
 }: {
   serviceName: string;
   transactionNames: string[];
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   environment: string;
   kuery: string;
   start: number;
   end: number;
+  offset?: string;
 }) {
   const commonProps = {
-    setup,
+    apmEventClient,
     serviceName,
     transactionNames,
     searchAggregatedTransactions,
@@ -218,14 +225,14 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     end,
   });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getServiceTransactionGroupDetailedStatistics({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : [];
+  const previousPeriodPromise = offset
+    ? getServiceTransactionGroupDetailedStatistics({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : [];
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

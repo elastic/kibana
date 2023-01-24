@@ -10,9 +10,9 @@ import React from 'react';
 
 import { EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<number>) {
@@ -31,9 +31,7 @@ function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<numb
         min={1}
         max={services.uiSettings.get('visualization:tileMap:maxPrecision')}
         value={value || ''}
-        onChange={(ev: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
-          setValue(Number(ev.currentTarget.value))
-        }
+        onChange={(ev) => setValue(Number(ev.currentTarget.value))}
         data-test-subj={`visEditorMapPrecision${agg.id}`}
         showValue
         compressed

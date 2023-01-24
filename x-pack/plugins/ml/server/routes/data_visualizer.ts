@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { FieldsForHistograms } from '@kbn/ml-agg-utils';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
-import { HistogramField } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldHistogramsSchema,
   indexPatternSchema,
@@ -20,7 +20,7 @@ function getHistogramsForFields(
   client: IScopedClusterClient,
   indexPattern: string,
   query: any,
-  fields: HistogramField[],
+  fields: FieldsForHistograms,
   samplerShardSize: number,
   runtimeMappings: RuntimeMappings
 ) {
@@ -52,7 +52,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
         body: dataVisualizerFieldHistogramsSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {

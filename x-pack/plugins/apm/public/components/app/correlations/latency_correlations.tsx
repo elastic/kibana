@@ -17,22 +17,26 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../observability/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
-import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
+import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
@@ -41,13 +45,24 @@ import { getOverallHistogram } from './utils/get_overall_histogram';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { CorrelationsContextPopover } from './context_popover';
-import { OnAddFilter } from './context_popover/top_values';
+import { OnAddFilter } from './context_popover/field_stats_popover';
 import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
+import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+
+export function FallbackCorrelationBadge() {
+  return (
+    <EuiBadge>
+      <FormattedMessage
+        id="xpack.apm.correlations.latencyCorrelations.fallbackCorrelationBadgeMessage"
+        defaultMessage="Very low"
+      />
+    </EuiBadge>
+  );
+}
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -62,13 +77,6 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     response,
     progress.isRunning
   );
-
-  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
-    return response.fieldStats?.reduce((obj, field) => {
-      obj[field.fieldName] = field;
-      return obj;
-    }, {} as Record<string, FieldStats>);
-  }, [response?.fieldStats]);
 
   useEffect(() => {
     if (progress.error) {
@@ -152,6 +160,31 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           sortable: true,
         },
         {
+          width: '116px',
+          field: 'pValue',
+          name: (
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
+                {
+                  defaultMessage: 'Impact',
+                }
+              )}
+            </>
+          ),
+          render: (_, { correlation, isFallbackResult }) => {
+            const label = getLatencyCorrelationImpactLabel(
+              correlation,
+              isFallbackResult
+            );
+            return label ? (
+              <EuiBadge color={label.color}>{label.impact}</EuiBadge>
+            ) : null;
+          },
+          sortable: true,
+        },
+
+        {
           field: 'fieldName',
           name: i18n.translate(
             'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
@@ -160,10 +193,9 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           render: (_, { fieldName, fieldValue }) => (
             <>
               {fieldName}
-              <CorrelationsContextPopover
+              <FieldStatsPopover
                 fieldName={fieldName}
                 fieldValue={fieldValue}
-                topValueStats={fieldStats ? fieldStats[fieldName] : undefined}
                 onAddFilter={onAddFilter}
               />
             </>
@@ -225,7 +257,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           ),
         },
       ],
-      [fieldStats, onAddFilter]
+      [onAddFilter]
     );
 
   const [sortField, setSortField] =
@@ -297,8 +329,15 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           </EuiTitle>
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ChartTitleToolTip />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <TotalDocCountLabel
+            eventType={ProcessorEvent.transaction}
+            totalDocCount={response.totalDocCount}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -308,11 +347,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <EuiSpacer size="s" />
 
-      <TransactionDistributionChart
+      <DurationDistributionChart
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
+        eventType={ProcessorEvent.transaction}
       />
 
       <EuiSpacer size="s" />

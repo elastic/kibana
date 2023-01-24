@@ -7,15 +7,15 @@
  */
 
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
+import { EuiResizeObserver, EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
 import { throttle } from 'lodash';
 
-import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { createVegaVisualization } from '../vega_visualization';
 import { VegaVisualizationDependencies } from '../plugin';
 import { VegaParser } from '../data_model/vega_parser';
 
-import './vega_vis.scss';
+import { GlobalVegaVisStyles, wrapperStyles } from './vega_vis.styles';
 
 interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
@@ -84,13 +84,18 @@ export const VegaVisComponent = ({
     [resizeChart]
   );
 
+  const euiTheme = useEuiTheme();
+
   return (
-    <EuiResizeObserver onResize={onContainerResize}>
-      {(resizeRef) => (
-        <div className="vgaVis__wrapper" ref={resizeRef}>
-          <div ref={chartDiv} />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <>
+      <GlobalVegaVisStyles />
+      <EuiResizeObserver onResize={onContainerResize}>
+        {(resizeRef) => (
+          <div className="vgaVis__wrapper" css={wrapperStyles(euiTheme)} ref={resizeRef}>
+            <div ref={chartDiv} />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };

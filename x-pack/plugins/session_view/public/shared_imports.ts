@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SectionLoading } from '../../../../src/plugins/es_ui_shared/public';
+export { SectionLoading } from '@kbn/es-ui-shared-plugin/public';

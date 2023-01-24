@@ -6,13 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { ActionTypes, CaseUserActionsResponse, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
-  CASES_URL,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../../../plugins/cases/common/constants';
-import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/utils';
-import { CaseUserActionsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
+import { deleteAllCaseItems } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -80,6 +78,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 fields: null,
                 id: 'none',
               },
+              severity: 'low',
+              assignees: [],
               owner: 'securitySolution',
               settings: { syncAlerts: true },
             },
@@ -192,6 +192,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
+              severity: 'low',
+              assignees: [],
               owner: 'securitySolution',
             },
             type: 'create_case',
@@ -298,6 +300,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
+              severity: 'low',
+              assignees: [],
               owner: 'securitySolution',
             },
             type: 'create_case',
@@ -326,6 +330,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
+              severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
             action_id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
@@ -370,6 +376,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 syncAlerts: true,
               },
               owner: 'securitySolution',
+              severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
             action_id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
@@ -741,6 +749,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               tags: ['user', 'actions'],
               title: 'User actions',
               owner: 'securitySolution',
+              severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
           },
@@ -1047,6 +1057,164 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             type: 'comment',
           },
         ]);
+      });
+    });
+
+    describe('8.3.0', () => {
+      const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
+      const CREATE_UA_ID = '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('add severity', () => {
+        it('adds the severity field to the create case user action', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const createUserAction = userActions.find(
+            (userAction) => userAction.action_id === CREATE_UA_ID
+          );
+
+          expect(createUserAction).to.eql({
+            action: 'create',
+            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
+            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            comment_id: null,
+            created_at: '2021-12-16T14:34:48.709Z',
+            created_by: {
+              email: '',
+              full_name: '',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              description: 'migrating user actions',
+              settings: {
+                syncAlerts: true,
+              },
+              status: 'open',
+              tags: ['user', 'actions'],
+              title: 'User actions',
+              owner: 'securitySolution',
+              severity: 'low',
+              assignees: [],
+            },
+            type: 'create_case',
+          });
+        });
+
+        it('does NOT add the severity field to the other user actions', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const userActionsWithoutCreateAction = userActions.filter(
+            (userAction) => userAction.type !== ActionTypes.create_case
+          );
+
+          for (const userAction of userActionsWithoutCreateAction) {
+            expect(userAction.payload).not.to.have.property('severity');
+          }
+        });
+      });
+    });
+
+    describe('8.5.0', () => {
+      const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
+      const CREATE_UA_ID = '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('assignees', () => {
+        it('adds the assignees field to the create case user action', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const createUserAction = userActions.find(
+            (userAction) => userAction.action_id === CREATE_UA_ID
+          );
+
+          expect(createUserAction).to.eql({
+            action: 'create',
+            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
+            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            comment_id: null,
+            created_at: '2021-12-16T14:34:48.709Z',
+            created_by: {
+              email: '',
+              full_name: '',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              description: 'migrating user actions',
+              settings: {
+                syncAlerts: true,
+              },
+              status: 'open',
+              tags: ['user', 'actions'],
+              title: 'User actions',
+              owner: 'securitySolution',
+              severity: 'low',
+              assignees: [],
+            },
+            type: 'create_case',
+          });
+        });
+
+        it('does NOT add the assignees field to the other user actions', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const userActionsWithoutCreateAction = userActions.filter(
+            (userAction) => userAction.type !== ActionTypes.create_case
+          );
+
+          for (const userAction of userActionsWithoutCreateAction) {
+            expect(userAction.payload).not.to.have.property('assignees');
+          }
+        });
       });
     });
   });

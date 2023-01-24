@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import type { RuleParams } from '../../rule_schema';
 import { getSavedObjectReferenceForExceptionsList, logMissingSavedObjectError } from './utils';
 
 /**
@@ -46,7 +46,11 @@ export const injectExceptionsReferences = ({
       };
       return reference;
     } else {
-      logMissingSavedObjectError({ logger, exceptionItem });
+      logMissingSavedObjectError({
+        logger,
+        missingFieldValue: exceptionItem,
+        missingField: 'exception list',
+      });
       return exceptionItem;
     }
   });

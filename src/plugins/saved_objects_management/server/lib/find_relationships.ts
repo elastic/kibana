@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
 import { ISavedObjectsManagement } from '../services';
 import {

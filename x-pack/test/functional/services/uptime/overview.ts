@@ -13,24 +13,24 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
 
   return {
     async expandMonitorDetail(id: string): Promise<void> {
-      return testSubjects.click(`xpack.uptime.monitorList.${id}.expandMonitorDetail`);
+      return testSubjects.click(`xpack.synthetics.monitorList.${id}.expandMonitorDetail`);
     },
     async openIntegrationsPopoverForMonitor(id: string): Promise<void> {
-      return testSubjects.click(`xpack.uptime.monitorList.actionsPopover.${id}`);
+      return testSubjects.click(`xpack.synthetics.monitorList.actionsPopover.${id}`);
     },
     async openAlertsPopover(): Promise<void> {
-      return testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
+      return testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');
     },
     /**
      * If the popover is already open, click the nested button.
      * Otherwise, open the popover, then click the nested button.
      */
     async navigateToNestedPopover(): Promise<void> {
-      if (await testSubjects.exists('xpack.uptime.openAlertContextPanel')) {
-        return testSubjects.click('xpack.uptime.openAlertContextPanel');
+      if (await testSubjects.exists('xpack.synthetics.openAlertContextPanel')) {
+        return testSubjects.click('xpack.synthetics.openAlertContextPanel');
       }
-      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
-      return testSubjects.click('xpack.uptime.openAlertContextPanel');
+      await testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');
+      return testSubjects.click('xpack.synthetics.openAlertContextPanel');
     },
 
     async clickDefineSettings() {

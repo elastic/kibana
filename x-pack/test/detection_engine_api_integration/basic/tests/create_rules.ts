@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule without an input index', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: RuleCreateProps = {
           name: 'Simple Rule Query',
           description: 'Simple Rule Query',
           enabled: true,
@@ -82,13 +82,16 @@ export default ({ getService }: FtrProviderContext) => {
           interval: '5m',
           rule_id: 'rule-1',
           language: 'kuery',
-          output_index: '.siem-signals-default',
+          output_index: '',
           max_signals: 100,
           risk_score: 1,
           risk_score_mapping: [],
           name: 'Simple Rule Query',
           query: 'user.name: root or user.name: admin',
           references: [],
+          related_integrations: [],
+          required_fields: [],
+          setup: '',
           severity: 'high',
           severity_mapping: [],
           updated_by: 'elastic',

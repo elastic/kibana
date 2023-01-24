@@ -17,11 +17,13 @@ import { shallow } from 'enzyme';
 
 import { Feature } from 'geojson';
 import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
+import { IVectorSource } from '../../../sources/vector_source';
+import { InnerJoin } from '../../../joins/inner_join';
 import {
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { SOURCE_TYPES } from '../../../../../common/constants';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import { MvtVectorLayer } from './mvt_vector_layer';
 
 const defaultConfig = {
@@ -58,8 +60,13 @@ function createLayer(
     sourceDescriptor,
   };
   const layerDescriptor = MvtVectorLayer.createDescriptor(defaultLayerOptions);
-  return new MvtVectorLayer({ layerDescriptor, source: mvtSource });
+  return new MvtVectorLayer({ layerDescriptor, source: mvtSource, customIcons: [] });
 }
+
+test('should have type MVT_VECTOR_LAYER', () => {
+  const layer: MvtVectorLayer = createLayer({}, {});
+  expect(layer.getType()).toEqual(LAYER_TYPE.MVT_VECTOR);
+});
 
 describe('visiblity', () => {
   it('should get minzoom from source', async () => {
@@ -91,5 +98,144 @@ describe('getFeatureById', () => {
     const layer: MvtVectorLayer = createLayer({}, {});
     const feature = layer.getFeatureById('foobar') as Feature;
     expect(feature).toEqual(null);
+  });
+});
+
+describe('isInitialDataLoadComplete', () => {
+  const sourceDataRequestDescriptor = {
+    data: {},
+    dataId: 'source',
+    dataRequestMeta: {},
+    dataRequestMetaAtStart: undefined,
+    dataRequestToken: undefined,
+  };
+  test('should return false when tile loading has not started', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      layerDescriptor: {
+        __dataRequests: [sourceDataRequestDescriptor],
+      } as unknown as VectorLayerDescriptor,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(false);
+  });
+
+  test('should return false when tiles are loading', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      layerDescriptor: {
+        __areTilesLoaded: false,
+        __dataRequests: [sourceDataRequestDescriptor],
+      } as unknown as VectorLayerDescriptor,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(false);
+  });
+
+  test('should return true when tiles are loaded', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      layerDescriptor: {
+        __areTilesLoaded: true,
+        __dataRequests: [sourceDataRequestDescriptor],
+      } as unknown as VectorLayerDescriptor,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(true);
+  });
+
+  test('should return false when tiles are loaded but join is loading', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      joins: [
+        {
+          hasCompleteConfig: () => {
+            return true;
+          },
+          getSourceDataRequestId: () => {
+            return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
+          },
+        } as unknown as InnerJoin,
+      ],
+      layerDescriptor: {
+        __areTilesLoaded: true,
+        __dataRequests: [
+          sourceDataRequestDescriptor,
+          {
+            dataId: 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2',
+            dataRequestMetaAtStart: {},
+            dataRequestToken: Symbol('join request'),
+          },
+        ],
+      } as unknown as VectorLayerDescriptor,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(false);
+  });
+
+  test('should return true when tiles are loaded and joins are loaded', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      joins: [
+        {
+          hasCompleteConfig: () => {
+            return true;
+          },
+          getSourceDataRequestId: () => {
+            return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
+          },
+        } as unknown as InnerJoin,
+      ],
+      layerDescriptor: {
+        __areTilesLoaded: true,
+        __dataRequests: [
+          sourceDataRequestDescriptor,
+          {
+            data: {},
+            dataId: 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2',
+            dataRequestMeta: {},
+            dataRequestMetaAtStart: undefined,
+            dataRequestToken: undefined,
+          },
+        ],
+      } as unknown as VectorLayerDescriptor,
+      source: {
+        getMaxZoom: () => {
+          return 24;
+        },
+        getMinZoom: () => {
+          return 0;
+        },
+      } as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(true);
   });
 });

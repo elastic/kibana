@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThresholdSignalHistory } from '../types';
+import type { ThresholdSignalHistory } from '../types';
 import { getThresholdTermsHash } from '../utils';
 
 export const sampleThresholdSignalHistory = (): ThresholdSignalHistory => {

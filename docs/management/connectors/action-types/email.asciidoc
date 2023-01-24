@@ -5,9 +5,22 @@
 <titleabbrev>Email</titleabbrev>
 ++++
 
-The email connector uses the SMTP protocol to send mail messages, using an integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails, https://docs.microsoft.com/en-us/graph/api/user-sendmail[Send mail]. Email message text is sent as both plain text and html text.
+The email connector uses the SMTP protocol to send mail messages, using an 
+integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft 
+Exchange, which uses HTTP protocol for sending emails, 
+https://docs.microsoft.com/en-us/graph/api/user-sendmail[Send mail]. Email 
+message text is sent as both plain text and html text.
 
-NOTE: For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+[NOTE]
+====
+* For emails to have a footer with a link back to {kib}, set the 
+<<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
+* When the 
+<<action-config-email-domain-allowlist,`xpack.actions.email.domain_allowlist`>> 
+configuration setting is used, the email addresses used for all of the Sender 
+(from), To, CC, and BCC properties must have email domains specified in the 
+configuration setting.
+====
 
 [float]
 [[email-connector-configuration]]
@@ -15,24 +28,73 @@ NOTE: For emails to have a footer with a link back to {kib}, set the <<server-pu
 
 Email connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Sender::    The from address for all emails sent with this connector. This must be specified in `user@host-name` format. See the https://nodemailer.com/message/addresses/[Nodemailer address documentation] for more information.
-Service::   The name of the email service. If `service` is one of Nodemailer's https://nodemailer.com/smtp/well-known/[well-known email service providers], the `host`, `port`, and `secure` properties are defined with the default values and disabled for modification. If `service` is `MS Exchange Server`, the `host`, `port`, and `secure` properties are ignored and `tenantId`, `clientId`, `clientSecret` are required instead. If `service` is `other`, the `host` and `port` properties must be defined.
-Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this hostname is added to the allowed hosts.
-Port::      The port to connect to on the service provider.
-Secure::    If true, the connection will use TLS when connecting to the service provider. Refer to the https://nodemailer.com/smtp/#tls-options[Nodemailer TLS documentation] for more information.  If not true, the connection will initially connect over TCP, then attempt to switch to TLS via the SMTP STARTTLS command.
-Tenant ID:: The directory tenant that the application plans to operate against, in GUID format.
-Client ID:: The application ID that is assigned to your app, in GUID format. You can find this information in the portal where you registered your app.
-Client Secret:: The client secret that you generated for your app in the app registration portal. The client secret must be URL-encoded before being sent. The Basic auth pattern of providing credentials in the Authorization header, per https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1[RFC 6749], is also supported.
-Require authentication:: If true, a username and password for login type authentication must be provided.
-Username::  Username for login type authentication.
-Password::  Password for login type authentication.
+Name::
+The name of the connector. The name is used to identify a  connector in the 
+management UI connector listing, or in the connector list when configuring an 
+action.
+
+Sender::
+The from address for all emails sent with this connector. This must be specified 
+in `user@host-name` format. See the 
+https://nodemailer.com/message/addresses/[Nodemailer address documentation] for 
+more information.
+
+Service::
+The name of the email service. If `service` is one of Nodemailer's 
+https://nodemailer.com/smtp/well-known/[well-known email service providers], the 
+`host`, `port`, and `secure` properties are defined with the default values and 
+disabled for modification. If `service` is `MS Exchange Server`, the `host`, 
+`port`, and `secure` properties are ignored and `tenantId`, `clientId`, 
+`clientSecret` are required instead. If `service` is `other`, the `host` and 
+`port` properties must be defined.
+
+Host::
+Host name of the service provider. If you are using the 
+<<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this 
+hostname is added to the allowed hosts.
+
+Port::
+The port to connect to on the service provider.
+
+Secure::
+If true, the connection will use TLS when connecting to the service provider. 
+Refer to the 
+https://nodemailer.com/smtp/#tls-options[Nodemailer TLS documentation] for more 
+information. If not true, the connection will initially connect over TCP, then 
+attempt to switch to TLS via the SMTP STARTTLS command.
+
+Tenant ID::
+The directory tenant that the application plans to operate against, in GUID 
+format.
+
+Client ID::
+The application ID that is assigned to your app, in GUID format. You can find 
+this information in the portal where you registered your app.
+
+Client Secret::
+The client secret that you generated for your app in the app registration 
+portal. The client secret must be URL-encoded before being sent. The Basic auth 
+pattern of providing credentials in the Authorization header, per 
+https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1[RFC 6749], is also 
+supported.
+
+Require authentication::
+If true, a username and password for login type authentication must be provided.
+
+Username::
+Username for login type authentication.
+
+Password::
+Password for login type authentication.
 
 [float]
 [[email-connector-networking-configuration]]
 ==== Connector networking configuration
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+Use the <<action-settings, Action configuration settings>> to customize 
+connector networking configurations, such as proxies, certificates, or TLS 
+settings. You can set configurations that apply to all your connectors or use 
+`xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[preconfigured-email-configuration]]
@@ -56,24 +118,59 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 
 Config defines information for the connector type.
 
-`service`:: The name of the email service. If `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's https://nodemailer.com/smtp/well-known/[well-known email service providers], the `host`, `port`, and `secure` properties are ignored. If `service` is `other`,  the `host` and `port` properties must be defined. For more information on the `gmail` service value, refer to https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation]. If `service` is `exchange_server`, the `tenantId`, `clientId`, `clientSecret` properties are required instead of `host` and `port`.
-`from`:: An email address that corresponds to *Sender*.
-`host`:: A string that corresponds to *Host*.
-`port`:: A number that corresponds to *Port*.
-`secure`:: A boolean that corresponds to *Secure*.
-`hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
-`tenantId`:: A GUID format value that corresponds to *Tenant ID*, which is a part of OAuth 2.0 Client Credentials Authentication. 
-`clientId`:: A GUID format value that corresponds to *Client ID*, which is a part of OAuth 2.0 Client Credentials Authentication.
+`service`::
+The name of the email service. If `service` is `elastic_cloud` (for Elastic 
+Cloud notifications) or one of Nodemailer's 
+https://nodemailer.com/smtp/well-known/[well-known email service providers], the 
+`host`, `port`, and `secure` properties are ignored. If `service` is `other`,  
+the `host` and `port` properties must be defined. For more information on the 
+`gmail` service value, refer to 
+https://nodemailer.com/usage/using-gmail/[Nodemailer Gmail documentation]. If 
+`service` is `exchange_server`, the `tenantId`, `clientId`, `clientSecret` 
+properties are required instead of `host` and `port`.
+
+`from`::
+An email address that corresponds to *Sender*.
+
+`host`::
+A string that corresponds to *Host*.
+
+`port`::
+A number that corresponds to *Port*.
+
+`secure`::
+A boolean that corresponds to *Secure*.
+
+`hasAuth`::
+A boolean that corresponds to *Requires authentication*. If `true`, this 
+connector will require values for `user` and `password` inside the secrets 
+configuration. Defaults to `true`.
+
+`tenantId`::
+A GUID format value that corresponds to *Tenant ID*, which is a part of OAuth 
+2.0 Client Credentials Authentication.
+
+`clientId`::
+A GUID format value that corresponds to *Client ID*, which is a part of OAuth 
+2.0 Client Credentials Authentication.
 
 Secrets defines sensitive information for the connector type.
 
-`user`:: A string that corresponds to *Username*. Required if `hasAuth` is set to `true`.
-`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
-`clientSecret`:: A string that corresponds to *Client Secret*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `service` is set to `exchange_server`, which uses OAuth 2.0 Client Credentials Authentication.
+`user`::
+A string that corresponds to *Username*. Required if `hasAuth` is set to `true`.
+
+`password`::
+A string that corresponds to *Password*. Should be stored in the 
+<<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+
+`clientSecret`::
+A string that corresponds to *Client Secret*. Should be stored in the 
+<<creating-keystore, {kib} keystore>>. Required if `service` is set to 
+`exchange_server`, which uses OAuth 2.0 Client Credentials Authentication.
 
 [float]
 [[define-email-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define email connector properties.
 
@@ -91,17 +188,26 @@ image::management/connectors/images/email-params-test.png[Email params test]
 
 Email actions have the following configuration properties.
 
-To, CC, BCC::    Each item is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
-Subject::       The subject line of the email.
-Message::       The message text of the email. Markdown format is supported.
+To, CC, BCC::
+Each item is a list of addresses. Addresses can be specified in `user@host-name` 
+format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain 
+an entry.
+
+Subject::
+The subject line of the email.
+
+Message::
+The message text of the email. Markdown format is supported.
 
 [float]
 [[configuring-email]]
 ==== Configuring email accounts for well-known services
 
-The email connector can send email using many popular SMTP email services and the Microsoft Exchange Graph API.
+The email connector can send email using many popular SMTP email services and 
+the Microsoft Exchange Graph API.
 
-For more information about configuring the email connector to work with different email systems, refer to:
+For more information about configuring the email connector to work with 
+different email systems, refer to:
 
 * <<elasticcloud>>
 * <<gmail>>
@@ -109,33 +215,25 @@ For more information about configuring the email connector to work with differen
 * <<amazon-ses>>
 * <<exchange>>
 
-For other email servers, you can check the list of well-known services that Nodemailer supports in the JSON file https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json].  The properties of the objects in those files &mdash; `host`, `port`, and `secure` &mdash; correspond to the same email connector configuration properties.  A missing `secure` property in the "well-known/services.json" file is considered `false`.  Typically, `port: 465` uses `secure: true`, and `port: 25` and `port: 587` use `secure: false`.
+For other email servers, you can check the list of well-known services that 
+Nodemailer supports in the JSON file 
+https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json]. 
+The properties of the objects in those files &mdash; `host`, `port`, and 
+`secure` &mdash; correspond to the same email connector configuration 
+properties. A missing `secure` property in the "well-known/services.json" file 
+is considered `false`.  Typically, `port: 465` uses `secure: true`, and 
+`port: 25` and `port: 587` use `secure: false`.
 
 [float]
 [[elasticcloud]]
 ==== Sending email from Elastic Cloud
 
-IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-whitelist[allowlist] the email addresses that notifications get sent.
-
-Use the following connector settings to send email from Elastic Cloud: 
-
-Sender::
-`noreply@watcheralert.found.io`
-
-Service::
-`elastic_cloud`
-
-Host::
-`dockerhost`
-
-Port::
-`10025`
-
-Secure::
-Toggle off
-
-Authentication::
-Toggle off
+IMPORTANT: To receive notifications, the email addresses must be added to an
+    link:{cloud}/ec-watcher.html#ec-watcher-allowlist[allowlist] in the 
+    Elasticsearch Service Console.
+    
+Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from 
+Elastic Cloud.
 
 [float]
 [[gmail]]
@@ -158,9 +256,9 @@ https://mail.google.com[Gmail] SMTP service:
 --------------------------------------------------
 
 If you get an authentication error that indicates that you need to continue the
-sign-in process from a web browser when the action attempts to send email, you need
-to configure Gmail to https://support.google.com/accounts/answer/6010255?hl=en[allow
-less secure apps to access your account].
+sign-in process from a web browser when the action attempts to send email, you 
+need to configure Gmail to 
+https://support.google.com/accounts/answer/6010255?hl=en[allow less secure apps to access your account].
 
 If two-step verification is enabled for your account, you must generate and use
 a unique App Password to send email from {kib}. See
@@ -190,9 +288,10 @@ secrets:
 When sending emails, you must provide a `from` address, either as the default 
 in your connector configuration or as part of the email action in the rule.
 
-NOTE:   You must use a unique App Password if two-step verification is enabled.
-        See http://windows.microsoft.com/en-us/windows/app-passwords-two-step-verification[App
-        passwords and two-step verification] for more information.
+NOTE: You must use a unique App Password if two-step verification is enabled. 
+See 
+http://windows.microsoft.com/en-us/windows/app-passwords-two-step-verification[App passwords and two-step verification] 
+for more information.
 
 [float]
 [[amazon-ses]]
@@ -215,13 +314,15 @@ secrets:
 --------------------------------------------------
 <1> `config.host` varies depending on the region
 
-NOTE:   You must use your Amazon SES SMTP credentials to send email through
-        Amazon SES. For more information, see
-        http://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html[Obtaining
-        Your Amazon SES SMTP Credentials]. You might also need to verify
-        https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses.html[your email address]
-        or https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-domains.html[your whole domain]
-        at AWS.
+NOTE: You must use your Amazon SES SMTP credentials to send email through Amazon 
+SES. For more information, see
+http://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-credentials.html[Obtaining Your Amazon SES SMTP Credentials]. 
+You might also need to verify
+https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses.html[your email address]
+or 
+https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-domains.html[your whole domain]
+at AWS.
+
 
 [float]
 [[exchange-basic-auth]]
@@ -247,52 +348,72 @@ secrets:
     Check with your system administrator if you receive
     authentication-related failures.
 
-To prepare for the removal of Basic Auth, you must update all existing Microsoft Exchange connectors with the new configuration based on the https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow[OAuth 2.0 Client Credentials Authentication].
+To prepare for the removal of Basic Auth, you must update all existing Microsoft 
+Exchange connectors with the new configuration based on the 
+https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow[OAuth 2.0 Client Credentials Authentication].
 
 [float]
 [[exchange]]
 ==== Sending email from Microsoft Exchange with OAuth 2.0
 
-Before you create an email connector for Microsoft Exchange, you must create and register the client integration application on the https://go.microsoft.com/fwlink/?linkid=2083908[Azure portal]:
+Before you create an email connector for Microsoft Exchange, you must create and 
+register the client integration application on the 
+https://go.microsoft.com/fwlink/?linkid=2083908[Azure portal]:
 
 [role="screenshot"]
 image::management/connectors/images/exchange-register-app.png[Register client application for MS Exchange]
 
-Next, open *Manage > API permissions*, and then define the permissions for the registered application to send emails. Refer to the https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions[documentation] for the Microsoft Graph API.
+Next, open *Manage > API permissions*, and then define the permissions for the 
+registered application to send emails. Refer to the 
+https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions[documentation] 
+for the Microsoft Graph API.
+
 [role="screenshot"]
 image::management/connectors/images/exchange-api-permissions.png[MS Exchange API permissions]
 
-Add the "Mail.Send" permission for Microsoft Graph.  The permission appears in the list with the status "Not granted for <your Azure active directory>":
+Add the "Mail.Send" permission for Microsoft Graph. The permission appears in 
+the list with the status "Not granted for <your Azure active directory>":
+
 [role="screenshot"]
 image::management/connectors/images/exchange-not-granted.png[MS Exchange "Mail.Send" not granted]
 
 Click *Grant admin consent for <your Azure active directory>*.
+
 [role="screenshot"]
 image::management/connectors/images/exchange-grant-confirm.png[MS Exchange grant confirmation]
 
 Confirm that the status for the "Mail.Send" permission is now granted.
+
 [role="screenshot"]
 image::management/connectors/images/exchange-granted.png[MS Exchange grant confirmation]
 
 [float]
 [[exchange-client-secret]]
 ===== Configure Microsoft Exchange Client secret
+
 To configure the Client secret , open *Manage > Certificates & secrets*.
+
 [role="screenshot"]
 image::management/connectors/images/exchange-secrets.png[MS Exchange secrets configuration]
 
-Add a new client secret, then copy the value and put it to the proper field in the Microsoft Exchange email connector.
+Add a new client secret, then copy the value and put it to the proper field in 
+the Microsoft Exchange email connector.
 
 [float]
 [[exchange-client-tenant-id]]
 ===== Configure Microsoft Exchange Client ID and Tenant ID
-To find the application Client ID,  open the *Overview* page.
+
+To find the application Client ID, open the *Overview* page.
+
 [role="screenshot"]
 image::management/connectors/images/exchange-client-tenant.png[MS Exchange Client ID and Tenant ID configuration]
 
-Copy and paste this values to the proper fields in the Microsoft Exchange email connector.
+Copy and paste this values to the proper fields in the Microsoft Exchange email 
+connector.
 
-Use the following email connector configuration to send email from Microsoft Exchange:
+Use the following email connector configuration to send email from Microsoft 
+Exchange:
+
 [source,text]
 --------------------------------------------------
 config:

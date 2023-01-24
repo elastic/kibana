@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { createStore, Store } from 'redux';
+import type { Store } from 'redux';
+import { createStore } from 'redux';
 import { RelatedEventCategory } from '../../../../common/endpoint/generate_data';
 import { dataReducer } from './reducer';
 import * as selectors from './selectors';
-import { DataState, GeneratedTreeMetadata } from '../../types';
-import { DataAction } from './action';
+import type { DataState, GeneratedTreeMetadata, TimeFilters } from '../../types';
+import type { DataAction } from './action';
 import { generateTreeWithDAL } from '../../data_access_layer/mocks/generator_tree';
-import { endpointSourceSchema, winlogSourceSchema } from './../../mocks/tree_schema';
-import { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
+import { endpointSourceSchema, winlogSourceSchema } from '../../mocks/tree_schema';
+import type { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
 import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
 
 type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
@@ -23,11 +24,19 @@ type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: strin
  */
 describe('Resolver Data Middleware', () => {
   let store: Store<DataState, DataAction>;
-  let dispatchTree: (tree: NewResolverTree, sourceAndSchema: SourceAndSchemaFunction) => void;
+  let dispatchTree: (
+    tree: NewResolverTree,
+    sourceAndSchema: SourceAndSchemaFunction,
+    detectedBounds?: TimeFilters
+  ) => void;
 
   beforeEach(() => {
     store = createStore(dataReducer, undefined);
-    dispatchTree = (tree: NewResolverTree, sourceAndSchema: SourceAndSchemaFunction) => {
+    dispatchTree = (
+      tree: NewResolverTree,
+      sourceAndSchema: SourceAndSchemaFunction,
+      detectedBounds?: TimeFilters
+    ) => {
       const { schema, dataSource } = sourceAndSchema();
       const action: DataAction = {
         type: 'serverReturnedResolverData',
@@ -40,6 +49,7 @@ describe('Resolver Data Middleware', () => {
             indices: [],
             filters: {},
           },
+          detectedBounds,
         },
       };
       store.dispatch(action);
@@ -73,6 +83,25 @@ describe('Resolver Data Middleware', () => {
 
       it('should indicate that there were no more generations to retrieve', () => {
         expect(selectors.hasMoreGenerations(store.getState())).toBeFalsy();
+      });
+    });
+    describe('when a tree with detected bounds is loaded', () => {
+      it('should set the detected bounds when in the payload', () => {
+        dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema, {
+          from: 'Sep 19, 2022 @ 20:49:13.452',
+          to: 'Sep 19, 2022 @ 20:49:13.452',
+        });
+        expect(selectors.detectedBounds(store.getState())).toBeTruthy();
+      });
+
+      it('should clear the previous detected bounds when a new response without detected bounds is recevied', () => {
+        dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema, {
+          from: 'Sep 19, 2022 @ 20:49:13.452',
+          to: 'Sep 19, 2022 @ 20:49:13.452',
+        });
+        expect(selectors.detectedBounds(store.getState())).toBeTruthy();
+        dispatchTree(generatedTreeMetadata.formattedTree, endpointSourceSchema);
+        expect(selectors.detectedBounds(store.getState())).toBeFalsy();
       });
     });
   });

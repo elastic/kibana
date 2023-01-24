@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { UpdateListOptions } from '../lists';
 import {
   DATE_NOW,
   DESCRIPTION,
@@ -19,6 +17,8 @@ import {
   USER,
   VERSION,
 } from '../../../common/constants.mock';
+
+import { UpdateListOptions } from '.';
 
 export const getUpdateListOptionsMock = (): UpdateListOptions => ({
   _version: undefined,

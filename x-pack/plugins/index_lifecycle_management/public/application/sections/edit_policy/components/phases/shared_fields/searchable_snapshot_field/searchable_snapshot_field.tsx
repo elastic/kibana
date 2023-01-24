@@ -14,7 +14,7 @@ import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfiguration, UseField, globalFields } from '../../../../form';
-import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
+import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
 
@@ -265,7 +265,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink and read only actions are not allowed when converting data to a fully-mounted index in this phase.',
+                'Force merge, shrink, downsample and read only actions are not allowed when converting data to a fully-mounted index in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"

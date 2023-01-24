@@ -12,46 +12,47 @@ import type {
   Plugin,
   PluginInitializerContext,
   CoreStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import type {
   CustomIntegrationsStart,
   CustomIntegrationsSetup,
-} from 'src/plugins/custom_integrations/public';
+} from '@kbn/custom-integrations-plugin/public';
 
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { once } from 'lodash';
 
-import type { SpacesPluginStart } from '../../spaces/public';
-
-import type { CloudStart } from '../../cloud/public';
-
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
-
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginStart } from '../../licensing/public';
-import type { CloudSetup } from '../../cloud/public';
-import type { GlobalSearchPluginSetup } from '../../global_search/public';
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  setupRouteService,
-  appRoutesService,
-  calculateAuthz,
-} from '../common';
-import type { CheckPermissionsResponse, PostFleetSetupResponse, FleetAuthz } from '../common';
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
+
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -61,12 +62,13 @@ import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
+import { ExperimentalFeaturesService } from './services/experimental_features';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export type { FleetConfigType } from '../common/types';
 
-import { setCustomIntegrations } from './services/custom_integrations';
+import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 
 // We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
@@ -95,28 +97,36 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
   cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup & CloudStart;
+  discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
   private config: FleetConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
+  private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
@@ -238,7 +248,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         icon: 'indexManagementApp',
         showOnHomePage: true,
         path: INTEGRATIONS_BASE_PATH,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         order: 510,
       });
     }
@@ -251,6 +261,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   }
 
   public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
+    ExperimentalFeaturesService.init(this.experimentalFeatures);
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
@@ -266,19 +277,25 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     });
     const { capabilities } = core.application;
 
+    // Set the custom integrations language clients
+    setCustomIntegrationsStart(deps.customIntegrations);
+
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
-      authz: calculateAuthz({
-        fleet: {
-          all: capabilities.fleetv2.all as boolean,
-          setup: false,
-        },
-        integrations: {
-          all: capabilities.fleet.all as boolean,
-          read: capabilities.fleet.read as boolean,
-        },
-        isSuperuser: false,
-      }),
+      authz: {
+        ...calculateAuthz({
+          fleet: {
+            all: capabilities.fleetv2.all as boolean,
+            setup: false,
+          },
+          integrations: {
+            all: capabilities.fleet.all as boolean,
+            read: capabilities.fleet.read as boolean,
+          },
+          isSuperuser: false,
+        }),
+        packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
+      },
 
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();

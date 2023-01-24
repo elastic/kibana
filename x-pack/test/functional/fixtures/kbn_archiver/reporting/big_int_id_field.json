@@ -1,0 +1,96 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "test_elastic*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "timestamp",
+    "title": "test_elastic*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-25T20:55:46.970Z",
+  "id": "c424ce04-f440-4f48-aa0c-534da84d06f6",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-10-25T20:55:46.970Z",
+  "version": "WzIxOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "columns": [],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "isTextBasedQuery": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "timestamp",
+        "desc"
+      ]
+    ],
+    "timeRestore": false,
+    "title": "testsearch"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-25T20:57:39.872Z",
+  "id": "a984aeb0-54a7-11ed-b3f3-41d5096a3cfd",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "c424ce04-f440-4f48-aa0c-534da84d06f6",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-10-25T20:57:39.872Z",
+  "version": "WzI2MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.6.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":18,\"i\":\"7307be50-603d-4091-b4b9-e76a96c6a33a\"},\"panelIndex\":\"7307be50-603d-4091-b4b9-e76a96c6a33a\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_7307be50-603d-4091-b4b9-e76a96c6a33a\"}]",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "timeFrom": "now-15y",
+    "timeRestore": true,
+    "timeTo": "2022-10-30T00:00:00.000Z",
+    "title": "rbbaf",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-25T21:01:17.780Z",
+  "id": "b78b1350-54a7-11ed-b3f3-41d5096a3cfd",
+  "migrationVersion": {
+    "dashboard": "8.6.0"
+  },
+  "references": [
+    {
+      "id": "a984aeb0-54a7-11ed-b3f3-41d5096a3cfd",
+      "name": "7307be50-603d-4091-b4b9-e76a96c6a33a:panel_7307be50-603d-4091-b4b9-e76a96c6a33a",
+      "type": "search"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2022-10-25T21:01:17.780Z",
+  "version": "WzMzNiwxXQ=="
+}

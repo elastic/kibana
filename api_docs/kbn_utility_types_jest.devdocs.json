@@ -1,0 +1,66 @@
+{
+  "id": "@kbn/utility-types-jest",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/utility-types-jest",
+        "id": "def-common.DeeplyMockedKeys",
+        "type": "Type",
+        "tags": [],
+        "label": "DeeplyMockedKeys",
+        "description": [],
+        "signature": [
+          "{ [P in keyof T]: T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : ",
+          {
+            "pluginId": "@kbn/utility-types-jest",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesJestPluginApi",
+            "section": "def-common.DeeplyMockedKeys",
+            "text": "DeeplyMockedKeys"
+          },
+          "<T[P]>; } & T"
+        ],
+        "path": "packages/kbn-utility-types-jest/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types-jest",
+        "id": "def-common.MockedKeys",
+        "type": "Type",
+        "tags": [],
+        "label": "MockedKeys",
+        "description": [],
+        "signature": [
+          "{ [P in keyof T]: jest.Mocked<T[P]>; }"
+        ],
+        "path": "packages/kbn-utility-types-jest/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

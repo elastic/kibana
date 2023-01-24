@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
+jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   instance: {
     setInputEditor: () => {},
     getInputEditor: () => ({
@@ -15,11 +19,7 @@ jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
     }),
   },
 }));
-jest.mock('../../../../components/editor_example.tsx', () => {});
-jest.mock('../../../../../lib/mappings/mappings', () => ({
-  retrieveAutoCompleteInfo: () => {},
-  clearSubscriptions: () => {},
-}));
+jest.mock('../../../../components/editor_example', () => {});
 jest.mock('../../../../models/sense_editor', () => {
   return {
     create: () => ({
@@ -30,6 +30,8 @@ jest.mock('../../../../models/sense_editor', () => {
           focus: () => {},
         }),
         on: jest.fn(),
+        addFoldsAtRanges: jest.fn(),
+        getAllFoldRanges: jest.fn(),
       }),
       update: jest.fn(),
       commands: {
@@ -39,8 +41,8 @@ jest.mock('../../../../models/sense_editor', () => {
   };
 });
 
-jest.mock('../../../../hooks/use_send_current_request_to_es/send_request_to_es', () => ({
-  sendRequestToES: jest.fn(),
+jest.mock('../../../../hooks/use_send_current_request/send_request', () => ({
+  sendRequest: jest.fn(),
 }));
 jest.mock('../../../../../lib/autocomplete/get_endpoint_from_position', () => ({
   getEndpointFromPosition: jest.fn(),

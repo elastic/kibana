@@ -31,6 +31,7 @@ Object {
     "barTarget": undefined,
     "maxBars": undefined,
   },
+  "timeRange": undefined,
   "timefilter": Object {
     "calculateBounds": [MockFunction],
     "createFilter": [MockFunction],
@@ -52,6 +53,7 @@ Object {
     "getTimeDefaults": [MockFunction],
     "getTimeUpdate$": [MockFunction],
     "isAutoRefreshSelectorEnabled": [MockFunction],
+    "isRefreshIntervalTouched": [MockFunction],
     "isTimeRangeSelectorEnabled": [MockFunction],
     "isTimeTouched": [MockFunction],
     "setRefreshInterval": [MockFunction],

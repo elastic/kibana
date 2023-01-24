@@ -7,9 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
-import { MlAnomalyRecordDoc as Anomaly } from '../../../../ml/server';
+import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-plugin/server';
+import type { Filter } from '@kbn/es-query';
 
 export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;
@@ -23,8 +22,8 @@ export interface AnomaliesSearchParams {
   threshold: number;
   earliestMs: number;
   latestMs: number;
-  exceptionItems: ExceptionListItemSchema[];
   maxRecords?: number;
+  exceptionFilter: Filter | undefined;
 }
 
 export const getAnomalies = async (
@@ -32,11 +31,10 @@ export const getAnomalies = async (
   mlAnomalySearch: MlAnomalySearch
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
-
   return mlAnomalySearch(
     {
-      size: params.maxRecords || 100,
       body: {
+        size: params.maxRecords || 100,
         query: {
           bool: {
             filter: [
@@ -53,11 +51,7 @@ export const getAnomalies = async (
                 },
               },
             ],
-            must_not: buildExceptionFilter({
-              lists: params.exceptionItems,
-              excludeExceptions: true,
-              chunkSize: 1024,
-            })?.query,
+            must_not: params.exceptionFilter?.query,
           },
         },
         fields: [

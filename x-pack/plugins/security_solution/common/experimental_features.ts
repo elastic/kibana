@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  metricsEntitiesEnabled: false,
-  ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  usersEnabled: false,
+  kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
-  riskyHostsEnabled: false,
-  securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
-  policyListEnabled: false,
+  policyListEnabled: true,
+  policyResponseInFleetEnabled: true,
+  chartEmbeddablesEnabled: false,
 
   /**
-   * This is used for enabling the end to end tests for the security_solution telemetry.
+   * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
@@ -33,6 +31,70 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
+
+  /**
+   * Enables the Endpoint response actions console in various areas of the app
+   */
+  responseActionsConsoleEnabled: true,
+
+  /**
+   * Enables the insights module for related alerts by process ancestry
+   */
+  insightsRelatedAlertsByProcessAncestry: true,
+
+  /**
+   * Enables extended rule execution logging to Event Log. When this setting is enabled:
+   * - Rules write their console error, info, debug, and trace messages to Event Log,
+   *   in addition to other events they log there (status changes and execution metrics).
+   * - We add a Kibana Advanced Setting that controls this behavior (on/off and log level).
+   * - We show a table with plain execution logs on the Rule Details page.
+   */
+  extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the SOC trends timerange and stats on D&R page
+   */
+  socTrendsEnabled: false,
+
+  /**
+   * Enables the detection response actions in rule + alerts
+   */
+  responseActionsEnabled: true,
+
+  /**
+   * Enables endpoint package level rbac
+   */
+  endpointRbacEnabled: true,
+
+  /**
+   * Enables endpoint package level rbac for response actions only.
+   * if endpointRbacEnabled is enabled, it will take precedence.
+   */
+  endpointRbacV1Enabled: true,
+  /**
+   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
+   */
+  alertDetailsPageEnabled: false,
+
+  /**
+   * Enables the `get-file` endpoint response action
+   */
+  responseActionGetFileEnabled: false,
+
+  /**
+   * Enables top charts on Alerts Page
+   */
+  alertsPageChartsEnabled: false,
+
+  /**
+   * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
+   * https://www.elastic.co/guide/en/security/current/user-risk-score.html
+   * https://www.elastic.co/guide/en/security/current/host-risk-score.html
+   *
+   * Issue: https://github.com/elastic/kibana/issues/146777
+   */
+  riskyHostsEnabled: false, // DEPRECATED
+  riskyUsersEnabled: false, // DEPRECATED
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -65,7 +127,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string): boolean => {
+export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 

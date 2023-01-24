@@ -6,30 +6,37 @@
  */
 
 import { pick, reduce } from 'lodash';
+import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
-// @ts-expect-error update types
-export const convertPackQueriesToSO = (queries) =>
+export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFormData, 'id'>>) =>
   reduce(
     queries,
     (acc, value, key) => {
       acc.push({
-        // @ts-expect-error update types
         id: key,
-        ...pick(value, ['query', 'interval', 'platform', 'version', 'ecs_mapping']),
+        ...pick(value, [
+          'query',
+          'interval',
+          'snapshot',
+          'removed',
+          'platform',
+          'version',
+          'ecs_mapping',
+        ]),
       });
+
       return acc;
     },
-    []
+    [] as PackQueryFormData[]
   );
 
-// @ts-expect-error update types
-export const convertSOQueriesToPack = (queries) =>
+export const convertSOQueriesToPack = (queries: PackQueryFormData[]) =>
   reduce(
     queries,
     (acc, { id: queryId, ...query }) => {
       acc[queryId] = query;
+
       return acc;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    {} as Record<string, any>
+    {} as Record<string, Omit<PackQueryFormData, 'id'>>
   );

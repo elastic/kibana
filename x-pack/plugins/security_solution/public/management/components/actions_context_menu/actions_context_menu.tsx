@@ -6,21 +6,13 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiContextMenuPanelProps,
-  EuiIconProps,
-} from '@elastic/eui';
+import type { EuiPopoverProps, EuiContextMenuPanelProps, EuiIconProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
-import {
-  ContextMenuItemNavByRouter,
-  ContextMenuItemNavByRouterProps,
-} from '../context_menu_with_router_support';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { v4 as uuidv4 } from 'uuid';
+import type { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support';
+import { ContextMenuItemNavByRouter } from '../context_menu_with_router_support';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ActionsContextMenuProps {
   items: ContextMenuItemNavByRouterProps[];
@@ -49,7 +41,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
-            key={uuid.v4()}
+            key={uuidv4()}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {

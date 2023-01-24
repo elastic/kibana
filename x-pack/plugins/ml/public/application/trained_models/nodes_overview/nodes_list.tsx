@@ -16,9 +16,10 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
-import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
@@ -27,10 +28,14 @@ import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.TRAINED_MODELS_NODES;
+  pageUrlState: ListingPageUrlState;
+}
 
 export const getDefaultNodesListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -55,7 +60,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [pageState, updatePageState] = usePageUrlState(
+  const [pageState, updatePageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.TRAINED_MODELS_NODES,
     getDefaultNodesListState()
   );
@@ -84,6 +89,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       );
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
@@ -113,7 +119,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlNodesTableRowDetailsToggle',
@@ -123,6 +129,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeNameHeader', {
         defaultMessage: 'Name',
       }),
+      width: '200px',
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlNodesTableColumnName',
@@ -163,7 +170,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     };
   }, [items]);
 
-  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
+  let tableSettings: object = useTableSettings<NodeItem>(items.length, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
@@ -183,6 +190,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     function updateOnTimerRefresh() {
       fetchNodesData();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
   );
 

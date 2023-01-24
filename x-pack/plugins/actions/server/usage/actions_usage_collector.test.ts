@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import { registerActionsUsageCollector } from './actions_usage_collector';
 import { configSchema, ActionsConfig } from '../config';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 
@@ -42,5 +44,51 @@ describe('registerActionsUsageCollector', () => {
     );
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('actions');
+  });
+
+  it('should return an error message if fetching data fails', async () => {
+    mockTaskManagerStart.get.mockRejectedValueOnce(new Error('error message'));
+    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
+      resolve(mockTaskManagerStart);
+    });
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      config,
+      taskManagerPromise
+    );
+    // @ts-ignore
+    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
+      expect.objectContaining({
+        has_errors: true,
+        error_messages: ['error message'],
+      })
+    );
+  });
+
+  it('should return the task state including error messages', async () => {
+    const mockStats = {
+      has_errors: true,
+      error_messages: ['an error message'],
+      count_active_total: 1,
+      count_disabled_total: 10,
+    };
+    mockTaskManagerStart.get.mockResolvedValue({
+      id: '1',
+      state: mockStats,
+    } as unknown as ConcreteTaskInstance);
+
+    const taskManagerPromise = new Promise<TaskManagerStartContract>((resolve) => {
+      resolve(mockTaskManagerStart);
+    });
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      config,
+      taskManagerPromise
+    );
+    // @ts-ignore
+    expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual({
+      alert_history_connector_enabled: false,
+      ...mockStats,
+    });
   });
 });

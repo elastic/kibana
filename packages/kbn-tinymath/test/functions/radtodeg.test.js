@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { radtodeg } = require('../../src/functions/radtodeg.js');
+const { radtodeg } = require('../../src/functions/radtodeg');
 
 describe('Radians to Degrees', () => {
   it('numbers', () => {

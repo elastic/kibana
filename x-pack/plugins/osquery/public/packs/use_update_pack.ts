@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from 'react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
@@ -13,12 +14,15 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
-import { IQueryPayload } from './types';
+import type { PackSavedObject } from './types';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options?: any;
+  options?: UseMutationOptions<
+    { data: PackSavedObject },
+    { body: { message: string; error: string } },
+    Partial<PackSavedObject['attributes']> & { id: string }
+  >;
 }
 
 export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => {
@@ -30,27 +34,30 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(
-    // @ts-expect-error update types
+  return useMutation<
+    { data: PackSavedObject },
+    { body: { message: string; error: string } },
+    Partial<PackSavedObject['attributes']> & { id: string }
+  >(
     ({ id, ...payload }) =>
-      http.put<IQueryPayload>(`/internal/osquery/packs/${id}`, {
+      http.put(`/api/osquery/packs/${id}`, {
         body: JSON.stringify(payload),
       }),
     {
       onError: (error) => {
-        // @ts-expect-error update types
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error, { title: error?.body?.error, toastMessage: error?.body?.message });
       },
-      onSuccess: (payload) => {
-        queryClient.invalidateQueries(PACKS_ID);
+      onSuccess: (response) => {
+        queryClient.invalidateQueries([PACKS_ID]);
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
             defaultMessage: 'Successfully updated "{packName}" pack',
             values: {
-              packName: payload.attributes?.name ?? '',
+              packName: response?.data?.attributes?.name ?? '',
             },
           })
         );

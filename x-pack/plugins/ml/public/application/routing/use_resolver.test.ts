@@ -7,11 +7,11 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { useNotifications } from '../contexts/kibana';
-import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { useResolver } from './use_resolver';
 
@@ -38,7 +38,7 @@ const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
 
 describe('useResolver', () => {
   afterEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.advanceTimersByTime(0);

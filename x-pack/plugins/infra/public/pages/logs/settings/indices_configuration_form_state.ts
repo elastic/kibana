@@ -6,22 +6,23 @@
  */
 
 import { useMemo } from 'react';
-import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/common';
-import { useUiTracker } from '../../../../../observability/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import {
+  LogDataViewReference,
   LogIndexNameReference,
   logIndexNameReferenceRT,
-  LogIndexPatternReference,
-} from '../../../../common/log_sources';
+} from '../../../../common/log_views';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useFormElement } from './form_elements';
 import {
   FormValidationError,
   validateIndexPattern,
   validateStringNotEmpty,
+  validateStringNoSpaces,
 } from './validation_errors';
 
-export type LogIndicesFormState = LogIndexNameReference | LogIndexPatternReference | undefined;
+export type LogIndicesFormState = LogIndexNameReference | LogDataViewReference | undefined;
 
 export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
   const indexPatternService = useKibanaIndexPatternService();
@@ -35,25 +36,25 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
         if (logIndices == null) {
           return validateStringNotEmpty('log data view', '');
         } else if (logIndexNameReferenceRT.is(logIndices)) {
-          return validateStringNotEmpty('log indices', logIndices.indexName);
+          return [
+            ...validateStringNotEmpty('log indices', logIndices.indexName),
+            ...validateStringNoSpaces('log indices', logIndices.indexName),
+          ];
         } else {
-          const emptyStringErrors = validateStringNotEmpty(
-            'log data view',
-            logIndices.indexPatternId
-          );
+          const emptyStringErrors = validateStringNotEmpty('log data view', logIndices.dataViewId);
 
           if (emptyStringErrors.length > 0) {
             return emptyStringErrors;
           }
 
           const indexPatternErrors = await indexPatternService
-            .get(logIndices.indexPatternId)
+            .get(logIndices.dataViewId)
             .then(validateIndexPattern, (error): FormValidationError[] => {
               if (error instanceof SavedObjectNotFound) {
                 return [
                   {
                     type: 'missing_index_pattern' as const,
-                    indexPatternId: logIndices.indexPatternId,
+                    indexPatternId: logIndices.dataViewId,
                   },
                 ];
               } else {

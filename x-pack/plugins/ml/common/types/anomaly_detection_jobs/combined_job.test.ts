@@ -6,7 +6,7 @@
  */
 
 // @ts-ignore importing JSON file
-import jobConfigFarequote from '../__mocks__/job_config_farequote';
+import jobConfigFarequote from '../__mocks__/job_config_farequote.json';
 import { isCombinedJobWithStats } from './combined_job';
 
 describe('Types: Jobs', () => {

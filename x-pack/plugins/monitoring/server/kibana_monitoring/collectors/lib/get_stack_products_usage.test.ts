@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { getStackProductsUsage } from './get_stack_products_usage';
 
 describe('getStackProductsUsage', () => {

@@ -1,0 +1,31 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-saved-objects-utils-server",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

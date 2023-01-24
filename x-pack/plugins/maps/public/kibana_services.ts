@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
+import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
-import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
-import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
-import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
@@ -23,27 +23,35 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
   emsSettings = mapsEms.createEMSSettings();
 }
 
+let isCloudEnabled = false;
+export function setIsCloudEnabled(enabled: boolean) {
+  isCloudEnabled = enabled;
+}
+export const getIsCloud = () => isCloudEnabled;
+
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
-export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
-export const getAutocompleteService = () => pluginsStart.data.autocomplete;
+export const getIndexPatternService = () => pluginsStart.data.dataViews;
+export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
-export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
+export const getIndexPatternSelectComponent = () =>
+  pluginsStart.unifiedSearch.ui.IndexPatternSelect;
+export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
 export const getHttp = () => coreStart.http;
 export const getExecutionContext = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
+export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
 export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
-export const getSavedObjects = () => pluginsStart.savedObjects;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
@@ -51,12 +59,18 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getUrlForApp = () => coreStart.application.getUrlForApp;
+export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
+export const getApplication = () => coreStart.application;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const isScreenshotMode = () => {
+  return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
+};
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

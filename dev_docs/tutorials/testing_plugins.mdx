@@ -2,7 +2,7 @@
 id: kibDevTutorialTestingPlugins
 slug: /kibana-dev-docs/tutorials/testing-plugins
 title: Testing Kibana Plugins
-summary: Learn how to test different aspects of Kibana plugins
+description: Learn how to test different aspects of Kibana plugins
 date: 2021-07-05
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'testing']
 ---
@@ -590,7 +590,7 @@ Objects client:
 ```typescript
 // src/plugins/myplugin/server/lib/short_url_lookup.ts
 import crypto from 'crypto';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 export const shortUrlLookup = {
   generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
@@ -688,11 +688,10 @@ reflected in the mock.
 // src/plugins/myplugin/public/saved_query_service.ts
 import {
   SavedObjectsClientContract,
-  SavedObjectAttributes,
   SimpleSavedObject,
 } from 'src/core/public';
 
-export type SavedQueryAttributes = SavedObjectAttributes & {
+export type SavedQueryAttributes = {
   title: string;
   description: 'bar';
   query: {
@@ -1025,7 +1024,7 @@ data.
 ```typescript
 // src/plugins/myplugin/public/plugin.ts
 import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { SuggestionsService } from './suggestions';

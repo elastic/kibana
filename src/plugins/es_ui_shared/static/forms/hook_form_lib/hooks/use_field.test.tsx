@@ -16,32 +16,31 @@ import { emptyField } from '../../helpers/field_validators';
 import { FieldHook, FieldValidateResponse, VALIDATION_TYPES, FieldConfig } from '..';
 
 describe('useField() hook', () => {
-  let fieldHook: FieldHook;
-
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  const TestField = ({ field }: { field: FieldHook }) => {
-    fieldHook = field;
-    return null;
-  };
-
-  const getTestForm = (config?: FieldConfig) => () => {
-    const { form } = useForm();
-
-    return (
-      <Form form={form}>
-        <UseField path="test-path" component={TestField} config={config} />
-      </Form>
-    );
-  };
-
   describe('field.validate()', () => {
+    let fieldHook: FieldHook;
+    const TestField = ({ field }: { field: FieldHook }) => {
+      fieldHook = field;
+      return null;
+    };
+
+    const getTestForm = (config?: FieldConfig) => () => {
+      const { form } = useForm();
+
+      return (
+        <Form form={form}>
+          <UseField path="test-path" component={TestField} config={config} />
+        </Form>
+      );
+    };
+
     const EMPTY_VALUE = '   ';
 
     test('it should not invalidate a field with arrayItem validation when isBlocking is false', async () => {
@@ -147,6 +146,47 @@ describe('useField() hook', () => {
       });
 
       expect(validatorFn).toBeCalledTimes(0);
+    });
+  });
+
+  describe('fieldsToValidateOnChange', () => {
+    const getTestForm =
+      (configField1?: FieldConfig, configField2?: FieldConfig) =>
+      ({ showField1, showField2 }: { showField1: boolean; showField2: boolean }) => {
+        const { form } = useForm();
+
+        return (
+          <Form form={form}>
+            {showField1 && <UseField path="field1" component={() => null} config={configField1} />}
+            {showField2 && <UseField path="field2" component={() => null} config={configField2} />}
+          </Form>
+        );
+      };
+
+    test('validates dependent fields on unmount', async () => {
+      const field2ValidatorFn = jest.fn();
+      const TestForm = getTestForm(
+        {
+          fieldsToValidateOnChange: ['field1', 'field2'],
+        },
+        {
+          validations: [
+            {
+              validator: field2ValidatorFn,
+            },
+          ],
+        }
+      );
+
+      const wrapper = registerTestBed(TestForm, {
+        memoryRouter: { wrapComponent: false },
+      })({ showField1: true, showField2: true });
+      expect(field2ValidatorFn).toBeCalledTimes(0);
+
+      await act(async () => {
+        wrapper.setProps({ showField1: false });
+      });
+      expect(field2ValidatorFn).toBeCalledTimes(1);
     });
   });
 });

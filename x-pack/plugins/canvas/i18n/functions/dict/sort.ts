@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { sort } from '../../../canvas_plugin_src/functions/common/sort';
+import type { sort } from '../../../canvas_plugin_src/functions/common/sort';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE } from '../../constants';

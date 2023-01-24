@@ -9,26 +9,28 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { IUiSettingsClient } from 'src/core/public';
-
-import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
-import { sortFilters } from './lib/sort_filters';
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
-  FilterStateStore,
+  isFilterPinned,
+  onlyDisabledFiltersChanged,
+  Filter,
   uniqFilters,
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  UI_SETTINGS,
-} from '../../../common';
-import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
+} from '@kbn/es-query';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { sortFilters } from './lib/sort_filters';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+
+import { UI_SETTINGS } from '../../../common';
 import {
   getAllMigrations,
   inject,
   extract,
   telemetry,
-} from '../../../common/query/persistable_state';
+} from '../../../common/query/filters/persistable_state';
 
 interface PartitionedFilters {
   globalFilters: Filter[];

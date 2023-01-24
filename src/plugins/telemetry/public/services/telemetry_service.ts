@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { TelemetryPluginConfig } from '../plugin';
-import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config/get_telemetry_channel_endpoint';
 import type { UnencryptedTelemetryPayload, EncryptedTelemetryPayload } from '../../common/types';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
@@ -113,7 +113,9 @@ export class TelemetryService {
    */
   public getUserShouldSeeOptInNotice(): boolean {
     return (
-      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      (!this.config.hidePrivacyStatement &&
+        this.config.telemetryNotifyUserAboutOptInDefault &&
+        this.config.userCanChangeSettings) ??
       false
     );
   }

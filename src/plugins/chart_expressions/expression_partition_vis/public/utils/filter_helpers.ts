@@ -7,11 +7,12 @@
  */
 
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
-import { Datatable, DatatableColumn } from '../../../../expressions/public';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { ValueClickContext } from '../../../../embeddable/public';
-import type { FieldFormat } from '../../../../field_formats/common';
-import { BucketColumns } from '../../common/types';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import { BucketColumns, PartitionVisParams } from '../../common/types';
 import { FilterEvent } from '../types';
 
 export const canFilter = async (
@@ -28,16 +29,20 @@ export const canFilter = async (
 export const getFilterClickData = (
   clickedLayers: LayerValue[],
   bucketColumns: Array<Partial<BucketColumns>>,
+  metricColId: string,
   visData: Datatable,
+  originalVisData: Datatable, // before multiple metrics are consolidated with collapseMetricColumns
+  numOriginalMetrics: number,
   splitChartDimension?: DatatableColumn,
   splitChartFormatter?: FieldFormat
 ): ValueClickContext['data']['data'] => {
   const data: ValueClickContext['data']['data'] = [];
-  const matchingIndex = visData.rows.findIndex((row) =>
+  const rowIndex = visData.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
-      if (!columnId) return;
-      const isCurrentLayer = row[columnId] === layer.groupByRollup;
+      if (!columnId && !splitChartDimension) return;
+      // if there is no column id it means there is no actual bucket column, just the metric column and potentially a split chart column
+      const isCurrentLayer = !columnId || row[columnId] === layer.groupByRollup;
       if (!splitChartDimension) {
         return isCurrentLayer;
       }
@@ -47,20 +52,53 @@ export const getFilterClickData = (
     })
   );
 
+  const originalRowIndex = Math.floor(rowIndex / numOriginalMetrics);
+
   data.push(
-    ...clickedLayers.map((clickedLayer, index) => ({
-      column: visData.columns.findIndex((col) => col.id === bucketColumns[index].id),
-      row: matchingIndex,
-      value: clickedLayer.groupByRollup,
-      table: visData,
-    }))
+    ...(clickedLayers
+      .map((clickedLayer, index) => {
+        const currentColumnIndex = visData.columns.findIndex(
+          (col) => col.id === bucketColumns[index].id
+        );
+
+        if (currentColumnIndex === -1) {
+          return undefined;
+        }
+
+        const currentColumn = visData.columns[currentColumnIndex];
+
+        // this logic maps the indices of the elements in the
+        // visualization's table to the indices in the table before
+        // any multiple metrics were collapsed into one metric column
+        const originalColumnIndex = currentColumn.meta?.sourceParams?.consolidatedMetricsColumn
+          ? currentColumnIndex + (rowIndex % numOriginalMetrics)
+          : currentColumnIndex;
+
+        return {
+          column: originalColumnIndex,
+          row: originalRowIndex,
+          value: clickedLayer.groupByRollup,
+          table: originalVisData,
+        };
+      })
+      .filter(Boolean) as ValueClickContext['data']['data'])
   );
 
   // Allows filtering with the small multiples value
   if (splitChartDimension) {
+    if (!bucketColumns[0].id) {
+      // this is a split chart without any real bucket columns, so filter by the metric column
+      data.push({
+        column: visData.columns.findIndex((col) => col.id === metricColId),
+        row: rowIndex,
+        table: visData,
+        value: visData.columns.find((col) => col.id === metricColId)?.name,
+      });
+    }
+
     data.push({
       column: visData.columns.findIndex((col) => col.id === splitChartDimension.id),
-      row: matchingIndex,
+      row: rowIndex,
       table: visData,
       value: clickedLayers[0].smAccessorValue,
     });
@@ -87,4 +125,25 @@ export const getFilterEventData = (
 
     return acc;
   }, []);
+};
+
+export const getSeriesValueColumnIndex = (value: string, visData: Datatable): number => {
+  return visData.columns.findIndex(({ id }) => !!visData.rows.find((r) => r[id] === value));
+};
+
+export const getFilterPopoverTitle = (
+  visParams: PartitionVisParams,
+  visData: Datatable,
+  columnIndex: number,
+  formatter: FormatFactory,
+  seriesKey: string
+) => {
+  let formattedTitle = '';
+  if (visParams.dimensions.buckets) {
+    const accessor = visParams.dimensions.buckets[columnIndex];
+    formattedTitle = accessor
+      ? formatter(getFormatByAccessor(accessor, visData.columns)).convert(seriesKey)
+      : '';
+  }
+  return formattedTitle || seriesKey;
 };

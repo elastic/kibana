@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_COLDSTART,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -20,13 +21,13 @@ import {
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../helpers/setup_request';
 import {
   calculateTransactionColdstartRate,
   getColdstartAggregation,
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
-import { termQuery } from '../../../../observability/server';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 
 export async function getColdstartRate({
   environment,
@@ -34,25 +35,31 @@ export async function getColdstartRate({
   serviceName,
   transactionType,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
+  offset?: string;
 }): Promise<{
   transactionColdstartRate: Coordinate[];
   average: number | null;
 }> {
-  const { apmEventClient } = setup;
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     ...termQuery(SERVICE_NAME, serviceName),
@@ -60,7 +67,7 @@ export async function getColdstartRate({
     ...(transactionName ? termQuery(TRANSACTION_NAME, transactionName) : []),
     ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
@@ -72,6 +79,7 @@ export async function getColdstartRate({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: { bool: { filter } },
       aggs: {
@@ -80,12 +88,12 @@ export async function getColdstartRate({
           date_histogram: {
             field: '@timestamp',
             fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
+              start: startWithOffset,
+              end: endWithOffset,
               searchAggregatedTransactions,
             }).intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             coldstartStates,
@@ -121,24 +129,22 @@ export async function getColdstartRatePeriods({
   serviceName,
   transactionType,
   transactionName = '',
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
-  comparisonStart,
-  comparisonEnd,
   start,
   end,
+  offset,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   start: number;
   end: number;
+  offset?: string;
 }) {
   const commonProps = {
     environment,
@@ -146,20 +152,20 @@ export async function getColdstartRatePeriods({
     serviceName,
     transactionType,
     transactionName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
   };
 
   const currentPeriodPromise = getColdstartRate({ ...commonProps, start, end });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getColdstartRate({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : { transactionColdstartRate: [], average: null };
+  const previousPeriodPromise = offset
+    ? getColdstartRate({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : { transactionColdstartRate: [], average: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

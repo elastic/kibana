@@ -12,9 +12,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
-import { ControlGroupInput } from '../types';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
+import { ControlGroupReduxState } from '../types';
+import { ControlGroupStrings } from '../control_group_strings';
 
 interface DragInfo {
   isOver?: boolean;
@@ -40,13 +41,16 @@ export const SortableControl = (frameProps: SortableControlProps) => {
       disabled: !isEditable,
     });
 
-  frameProps.dragInfo = { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging };
+  const sortableFrameProps = {
+    ...frameProps,
+    dragInfo: { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging },
+  };
 
   return (
     <SortableControlInner
       key={embeddableId}
       ref={setNodeRef}
-      {...frameProps}
+      {...sortableFrameProps}
       {...attributes}
       {...listeners}
       style={{
@@ -60,44 +64,57 @@ export const SortableControl = (frameProps: SortableControlProps) => {
 const SortableControlInner = forwardRef<
   HTMLButtonElement,
   SortableControlProps & { style: HTMLAttributes<HTMLButtonElement>['style'] }
->(({ embeddableId, dragInfo, style, isEditable, ...dragHandleProps }, dragHandleRef) => {
-  const { isOver, isDragging, draggingIndex, index } = dragInfo;
-  const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
-  const { panels } = useEmbeddableSelector((state) => state);
+>(
+  (
+    { embeddableId, embeddableType, dragInfo, style, isEditable, ...dragHandleProps },
+    dragHandleRef
+  ) => {
+    const { isOver, isDragging, draggingIndex, index } = dragInfo;
+    const { useEmbeddableSelector } = useReduxEmbeddableContext<ControlGroupReduxState>();
+    const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
 
-  const width = panels[embeddableId].width;
+    const grow = panels[embeddableId].grow;
+    const width = panels[embeddableId].width;
+    const title = panels[embeddableId].explicitInput.title;
 
-  const dragHandle = (
-    <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
-      <EuiIcon type="grabHorizontal" />
-    </button>
-  );
+    const dragHandle = (
+      <button
+        ref={dragHandleRef}
+        {...dragHandleProps}
+        aria-label={`${ControlGroupStrings.ariaActions.getMoveControlButtonAction(title)}`}
+        className="controlFrame__dragHandle"
+      >
+        <EuiIcon type="grabHorizontal" />
+      </button>
+    );
 
-  return (
-    <EuiFlexItem
-      grow={width === 'auto'}
-      data-control-id={embeddableId}
-      data-test-subj={`control-frame`}
-      data-render-complete="true"
-      className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper-isDragging': isDragging,
-        'controlFrameWrapper-isEditable': isEditable,
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--large': width === 'large',
-        'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
-      })}
-      style={style}
-    >
-      <ControlFrame
-        enableActions={isEditable && draggingIndex === -1}
-        embeddableId={embeddableId}
-        customPrepend={isEditable ? dragHandle : undefined}
-      />
-    </EuiFlexItem>
-  );
-});
+    return (
+      <EuiFlexItem
+        grow={grow}
+        data-control-id={embeddableId}
+        data-test-subj={`control-frame`}
+        data-render-complete="true"
+        className={classNames('controlFrameWrapper', {
+          'controlFrameWrapper-isDragging': isDragging,
+          'controlFrameWrapper-isEditable': isEditable,
+          'controlFrameWrapper--small': width === 'small',
+          'controlFrameWrapper--medium': width === 'medium',
+          'controlFrameWrapper--large': width === 'large',
+          'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+          'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+        })}
+        style={style}
+      >
+        <ControlFrame
+          enableActions={isEditable && draggingIndex === -1}
+          embeddableId={embeddableId}
+          embeddableType={embeddableType}
+          customPrepend={isEditable ? dragHandle : undefined}
+        />
+      </EuiFlexItem>
+    );
+  }
+);
 
 /**
  * A simplified clone version of the control which is dragged. This version only shows
@@ -105,8 +122,9 @@ const SortableControlInner = forwardRef<
  * can be quite cumbersome.
  */
 export const ControlClone = ({ draggingId }: { draggingId: string }) => {
-  const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
-  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
+  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<ControlGroupReduxState>();
+  const panels = select((state) => state.explicitInput.panels);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   const width = panels[draggingId].width;
   const title = panels[draggingId].explicitInput.title;

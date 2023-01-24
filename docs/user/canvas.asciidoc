@@ -51,7 +51,7 @@ To open *Canvas*, open the main menu, then click *Canvas*.
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
-. On the *Canvas workpads* page, click *Create workpad*.
+. On the *Canvas* page, click *Create workpad*.
 
 . Specify the *Workpad settings*.
 
@@ -67,7 +67,7 @@ To use the background colors, images, and data of your choice, start with a blan
 
 If you're unsure about where to start, you can use one of the preconfigured templates that come with *Canvas*.
 
-. On the *Canvas workpads* page, select *Templates*.
+. On the *Canvas* page, select *Templates*.
 
 . Click the preconfigured template that you want to use.
 
@@ -79,7 +79,7 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 
 When you want to use a workpad that someone else has already started, import the JSON file.
 
-To begin, drag the file to the *Import workpad JSON file* field on the *Canvas workpads* page. 
+On the *Canvas* page, drag the file to the *Import workpad JSON file* field. 
 
 [float]
 [[use-sample-data-workpads]]
@@ -87,9 +87,9 @@ To begin, drag the file to the *Import workpad JSON file* field on the *Canvas w
 
 Each of the {kib} sample data sets comes with a workpad that you can use for your own workpad inspiration.
 
-. Add a {kibana-ref}/add-sample-data.html[sample data set].
+. Add a <<gs-get-data-into-kibana,sample data set>>.
 
-. On the *Add Data* page, click *View data*, then select *Canvas*.
+. On a sample data card, click *View data*, then select *Canvas*.
 
 [float]
 [[add-canvas-elements]]
@@ -106,16 +106,16 @@ By default, most of the elements you create use the demo data until you change t
 
 . Click *Add element*, then select the element you want to use.
 
-. To connect the element to your data, select *Data*, then select one of the following data sources:
+. To connect the element to your data, select *Data > Demo data*, then select one of the following data sources:
 
 * *{es} SQL* &mdash; Access your data in {es} using {ref}/sql-spec.html[SQL syntax].
 
-* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. 
-Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
+* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select a {data-source} and fields. 
+Use *{es} documents* when you have low-volume datasets, and you want to view raw documents or to plot exact, non-aggregated values on a chart.
 
 * *Timelion* &mdash; Access your time series data using <<timelion,*Timelion*>> queries. To use *Timelion* queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 +
-Each element can display a different data source, and pages and workpads often contain multiple data sources.
+Each element can display a different {data-source}, and pages and workpads often contain multiple {data-sources}.
 
 . To save, use the following options:
 

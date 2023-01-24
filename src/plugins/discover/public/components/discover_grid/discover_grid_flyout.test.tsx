@@ -11,26 +11,38 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
 import { esHits } from '../../__mocks__/es_hits';
-import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { DiscoverServices } from '../../build_services';
 import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../kibana_services';
-import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { IndexPattern } from '../../../../data/common';
-import { ElasticSearchHit } from '../../types';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord, EsHitRecord } from '../../types';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
+
+const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+const waitNextUpdate = async (component: ReactWrapper) => {
+  await act(async () => {
+    await waitNextTick();
+  });
+  component.update();
+};
 
 describe('Discover flyout', function () {
   setDocViewsRegistry(new DocViewsRegistry());
 
-  const mountComponent = ({
-    indexPattern,
+  const mountComponent = async ({
+    dataView,
     hits,
     hitIndex,
   }: {
-    indexPattern?: IndexPattern;
-    hits?: ElasticSearchHit[];
+    dataView?: DataView;
+    hits?: DataTableRecord[];
     hitIndex?: number;
   }) => {
     const onClose = jest.fn();
@@ -38,13 +50,27 @@ describe('Discover flyout', function () {
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
       history: () => ({ location: {} }),
+      locator: {
+        useUrl: jest.fn(() => ''),
+        navigate: jest.fn(),
+        getUrl: jest.fn(() => Promise.resolve('mock-referrer')),
+      },
+      contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
+      singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
     } as unknown as DiscoverServices;
+
+    const hit = buildDataTableRecord(
+      hitIndex ? esHits[hitIndex] : (esHits[0] as EsHitRecord),
+      dataViewMock
+    );
 
     const props = {
       columns: ['date'],
-      indexPattern: indexPattern || indexPatternMock,
-      hit: hitIndex ? esHits[hitIndex] : esHits[0],
-      hits: hits || esHits,
+      dataView: dataView || dataViewMock,
+      hit,
+      hits:
+        hits ||
+        esHits.map((entry: EsHitRecord) => buildDataTableRecord(entry, dataView || dataViewMock)),
       onAddColumn: jest.fn(),
       onClose,
       onFilter: jest.fn(),
@@ -59,42 +85,39 @@ describe('Discover flyout', function () {
     );
 
     const component = mountWithIntl(<Proxy {...props} />);
+    await waitNextUpdate(component);
 
     return { component, props };
   };
 
-  it('should be rendered correctly using an index pattern without timefield', async () => {
-    const { component, props } = mountComponent({});
+  it('should be rendered correctly using an data view without timefield', async () => {
+    const { component, props } = await mountComponent({});
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-index-pattern-id/i?id=1"`);
+    expect(url).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });
 
-  it('should be rendered correctly using an index pattern with timefield', async () => {
-    const { component, props } = mountComponent({ indexPattern: indexPatternWithTimefieldMock });
+  it('should be rendered correctly using an data view with timefield', async () => {
+    const { component, props } = await mountComponent({ dataView: dataViewWithTimefieldMock });
 
     const actions = findTestSubject(component, 'docTableRowAction');
     expect(actions.length).toBe(2);
-    expect(actions.first().prop('href')).toMatchInlineSnapshot(
-      `"/base/app/discover#/doc/index-pattern-with-timefield-id/i?id=1"`
-    );
-    expect(actions.last().prop('href')).toMatchInlineSnapshot(
-      `"/base/app/discover#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
-    );
+    expect(actions.first().prop('href')).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
+    expect(actions.last().prop('href')).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });
 
   it('displays document navigation when there is more than 1 doc available', async () => {
-    const { component } = mountComponent({ indexPattern: indexPatternWithTimefieldMock });
+    const { component } = await mountComponent({ dataView: dataViewWithTimefieldMock });
     const docNav = findTestSubject(component, 'dscDocNavigation');
     expect(docNav.length).toBeTruthy();
   });
 
   it('displays no document navigation when there are 0 docs available', async () => {
-    const { component } = mountComponent({ hits: [] });
+    const { component } = await mountComponent({ hits: [] });
     const docNav = findTestSubject(component, 'dscDocNavigation');
     expect(docNav.length).toBeFalsy();
   });
@@ -116,53 +139,53 @@ describe('Discover flyout', function () {
         _type: '_doc',
         _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
       },
-    ];
-    const { component } = mountComponent({ hits });
+    ].map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const { component } = await mountComponent({ hits });
     const docNav = findTestSubject(component, 'dscDocNavigation');
     expect(docNav.length).toBeFalsy();
   });
 
   it('allows you to navigate to the next doc, if expanded doc is the first', async () => {
     // scenario: you've expanded a doc, and in the next request different docs where fetched
-    const { component, props } = mountComponent({});
+    const { component, props } = await mountComponent({});
     findTestSubject(component, 'pagination-button-next').simulate('click');
     // we selected 1, so we'd expect 2
-    expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('2');
+    expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('2');
   });
 
   it('doesnt allow you to navigate to the previous doc, if expanded doc is the first', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = mountComponent({});
+    const { component, props } = await mountComponent({});
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(0);
   });
 
   it('doesnt allow you to navigate to the next doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = mountComponent({ hitIndex: esHits.length - 1 });
+    const { component, props } = await mountComponent({ hitIndex: esHits.length - 1 });
     findTestSubject(component, 'pagination-button-next').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(0);
   });
 
   it('allows you to navigate to the previous doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = mountComponent({ hitIndex: esHits.length - 1 });
+    const { component, props } = await mountComponent({ hitIndex: esHits.length - 1 });
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
-    expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('4');
+    expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('4');
   });
 
-  it('allows navigating with arrow keys through documents', () => {
-    const { component, props } = mountComponent({});
+  it('allows navigating with arrow keys through documents', async () => {
+    const { component, props } = await mountComponent({});
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
-    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '2' }));
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
     component.setProps({ ...props, hit: props.hits[1] });
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
-    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ _id: '1' }));
+    expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
-  it('should not navigate with keypresses when already at the border of documents', () => {
-    const { component, props } = mountComponent({});
+  it('should not navigate with keypresses when already at the border of documents', async () => {
+    const { component, props } = await mountComponent({});
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
     component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });

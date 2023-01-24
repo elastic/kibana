@@ -1,174 +1,5 @@
 {
   "properties": {
-    "dashboard": {
-      "properties": {
-        "panels": {
-          "type": "long"
-        },
-        "panelsByValue": {
-          "type": "long"
-        },
-        "lensByValue": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for Lens visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "visualizationByValue": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "embeddable": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
-              }
-            }
-          }
-        }
-      }
-    },
-    "index-patterns": {
-      "properties": {
-        "indexPatternsCount": {
-          "type": "long"
-        },
-        "indexPatternsWithScriptedFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithRuntimeFieldCount": {
-          "type": "long"
-        },
-        "scriptedFieldCount": {
-          "type": "long"
-        },
-        "runtimeFieldCount": {
-          "type": "long"
-        },
-        "perIndexPattern": {
-          "properties": {
-            "scriptedFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "scriptedFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "kql": {
-      "properties": {
-        "optInCount": {
-          "type": "long"
-        },
-        "optOutCount": {
-          "type": "long"
-        },
-        "defaultQueryLanguage": {
-          "type": "keyword"
-        }
-      }
-    },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        }
-      }
-    },
     "application_usage": {
       "properties": {
         "dashboards": {
@@ -2136,6 +1967,399 @@
             }
           }
         },
+        "enterpriseSearchContent": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "enterpriseSearchAnalytics": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "elasticsearch": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "appSearch": {
           "properties": {
             "appId": {
@@ -2268,6 +2492,137 @@
           }
         },
         "workplaceSearch": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "searchExperiences": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -4101,6 +4456,137 @@
             }
           }
         },
+        "profiling": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "security_account": {
           "properties": {
             "appId": {
@@ -5673,6 +6159,137 @@
             }
           }
         },
+        "synthetics": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "ux": {
           "properties": {
             "appId": {
@@ -6140,6 +6757,12 @@
                       "type": "boolean",
                       "_meta": {
                         "description": "Indicates if security headers to disable embedding have been configured."
+                      }
+                    },
+                    "crossOriginOpenerPolicy": {
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The crossOriginOpenerPolicy response header, \"NULL\" if disabled."
                       }
                     }
                   }
@@ -6736,6 +7359,48 @@
             "description": "How many times this API has been called by a non-Kibana client in a custom space."
           }
         },
+        "apiCalls.savedObjectsBulkDelete.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called."
+          }
+        },
+        "apiCalls.savedObjectsBulkDelete.namespace.default.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in the Default space."
+          }
+        },
+        "apiCalls.savedObjectsBulkDelete.namespace.custom.total": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called in a custom space."
+          }
+        },
+        "apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by the Kibana client in a custom space."
+          }
+        },
+        "apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "How many times this API has been called by a non-Kibana client in a custom space."
+          }
+        },
         "apiCalls.savedObjectsImport.total": {
           "type": "long",
           "_meta": {
@@ -7048,6 +7713,120 @@
         }
       }
     },
+    "dashboard": {
+      "properties": {
+        "panels": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "by_reference": {
+              "type": "long"
+            },
+            "by_value": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_reference": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_value": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by value\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "controls": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of this type of control in all Control Groups"
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Will be used for details which are specific to the current control type"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ignore_settings": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which have this ignore setting turned on"
+                  }
+                }
+              }
+            },
+            "chaining_system": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which are using this chaining system"
+                  }
+                }
+              }
+            },
+            "label_position": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics that count the number of control groups which have their labels in this position"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "event_loop_delays": {
       "properties": {
         "daily": {
@@ -7141,6 +7920,231 @@
         }
       }
     },
+    "files": {
+      "properties": {
+        "countByExtension": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "extension": {
+                "type": "keyword"
+              },
+              "count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "countByStatus": {
+          "properties": {
+            "AWAITING_UPLOAD": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files awaiting upload"
+              }
+            },
+            "DELETED": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are marked as deleted"
+              }
+            },
+            "READY": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are ready for download"
+              }
+            },
+            "UPLOADING": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that are currently uploading"
+              }
+            },
+            "UPLOAD_ERROR": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of files that failed to upload"
+              }
+            }
+          }
+        },
+        "storage": {
+          "properties": {
+            "esFixedSizeIndex": {
+              "properties": {
+                "capacity": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Capacity of the fixed size index"
+                  }
+                },
+                "available": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Available storage in bytes"
+                  }
+                },
+                "used": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Used storage in bytes"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "kibana": {
+      "properties": {
+        "index": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The index storing the saved objects"
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of dashboard saved objects"
+              }
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of visualization saved objects"
+              }
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of search saved objects"
+              }
+            }
+          }
+        },
+        "index_pattern": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of index_pattern saved objects"
+              }
+            }
+          }
+        },
+        "graph_workspace": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of graph_workspace saved objects"
+              }
+            }
+          }
+        }
+      }
+    },
+    "kql": {
+      "properties": {
+        "optInCount": {
+          "type": "long"
+        },
+        "optOutCount": {
+          "type": "long"
+        },
+        "defaultQueryLanguage": {
+          "type": "keyword"
+        }
+      }
+    },
     "localization": {
       "properties": {
         "locale": {
@@ -7167,14 +8171,106 @@
         }
       }
     },
-    "stack_management": {
+    "sample-data": {
       "properties": {
-        "timelion:quandl.key": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting was changed."
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        }
+      }
+    },
+    "saved_objects_counts": {
+      "properties": {
+        "total": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects in the cluster"
+          }
+        },
+        "by_type": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "type": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The SavedObjects type"
+                }
+              },
+              "count": {
+                "type": "long",
+                "_meta": {
+                  "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
+                }
+              }
+            }
+          }
+        },
+        "others": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of SO objects outside the breakdown. If it is not 0, there may be an unexpected state of the deployment 0 and future migrations might fail."
+          }
+        },
+        "non_registered_types": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
+            }
+          }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
+    "stack_management": {
+      "properties": {
         "securitySolution:defaultIndex": {
           "type": "keyword",
           "_meta": {
@@ -7203,12 +8299,6 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
-          }
-        },
-        "timelion:graphite.url": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting changed."
           }
         },
         "xpackDashboardMode:roles": {
@@ -7273,12 +8363,6 @@
         },
         "visualization:tileMap:WMSdefaults": {
           "type": "text",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "timelion:legacyChartsLibrary": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -7421,7 +8505,19 @@
             "description": "Non-default value of setting."
           }
         },
+        "discover:showLegacyFieldTopValues": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "discover:sampleSize": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "discover:sampleRowsPerPage": {
           "type": "long",
           "_meta": {
             "description": "Non-default value of setting."
@@ -7754,12 +8850,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:visualize:legacyPieChartsLibrary": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:visualize:legacyHeatmapChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -7796,6 +8886,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:enableNewSyntheticsView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:maxSuggestions": {
           "type": "integer",
           "_meta": {
@@ -7808,13 +8904,37 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInfrastructureView": {
+        "observability:enableServiceGroups": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableServiceGroups": {
+        "observability:apmEnableServiceMetrics": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmAgentExplorerView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmAWSLambdaPriceFactor": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmAWSLambdaRequestCostPerMillion": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:profilingElasticsearchPlugin": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -7891,89 +9011,248 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
-        }
-      }
-    },
-    "kibana": {
-      "properties": {
-        "index": {
+        },
+        "discover:enableSql": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "discover:rowHeightOption": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "hideAnnouncements": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "isDefaultIndexMigrated": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "lens:useFieldExistenceSampling": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "metrics:allowCheckingForFailedShards": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmDefaultServiceEnvironment": {
           "type": "keyword",
           "_meta": {
-            "description": "The index storing the saved objects"
+            "description": "Default value of the setting was changed."
           }
         },
-        "dashboard": {
+        "observability:apmLabsButton": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableAwsLambdaMetrics": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmProgressiveLoading": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmServiceGroupMaxNumberOfServices": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmServiceInventoryOptimizedSorting": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmTraceExplorerTab": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmEnableCriticalPath": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableInfrastructureHostsView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:enableGroupedNav": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:showRelatedIntegrations": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "visualization:visualize:legacyGaugeChartsLibrary": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "enterpriseSearch:enableEnginesSection": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        }
+      }
+    },
+    "static_telemetry": {
+      "properties": {
+        "ece": {
           "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of dashboard saved objects"
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
+                }
               }
             }
           }
         },
-        "visualization": {
+        "ess": {
           "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of visualization saved objects"
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
+                }
               }
             }
           }
         },
-        "search": {
+        "eck": {
           "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of search saved objects"
-              }
-            }
-          }
-        },
-        "index_pattern": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of index_pattern saved objects"
-              }
-            }
-          }
-        },
-        "graph_workspace": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of graph_workspace saved objects"
+            "operator_uuid": {
+              "type": "keyword"
+            },
+            "operator_roles": {
+              "type": "keyword"
+            },
+            "custom_operator_namespace": {
+              "type": "boolean"
+            },
+            "distribution": {
+              "type": "text"
+            },
+            "build": {
+              "properties": {
+                "hash": {
+                  "type": "text"
+                },
+                "date": {
+                  "type": "date"
+                },
+                "version": {
+                  "type": "keyword"
+                }
               }
             }
           }
         }
       }
     },
-    "saved_objects_counts": {
+    "telemetry": {
       "properties": {
-        "by_type": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "type": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The SavedObjects type"
-                }
-              },
-              "count": {
-                "type": "long",
-                "_meta": {
-                  "description": "How many SavedObjects of that type are stored in the cluster across all Spaces"
-                }
-              }
-            }
-          }
+        "opt_in_status": {
+          "type": "boolean"
+        },
+        "usage_fetcher": {
+          "type": "keyword"
+        },
+        "last_reported": {
+          "type": "long"
         }
       }
     },
@@ -9092,6 +10371,142 @@
         }
       }
     },
+    "usage_collector_stats": {
+      "properties": {
+        "total_duration": {
+          "type": "long",
+          "_meta": {
+            "description": "The total execution duration to grab usage stats for all collectors in milliseconds"
+          }
+        },
+        "total_is_ready_duration": {
+          "type": "long",
+          "_meta": {
+            "description": "The total execution duration of the isReady function for all collectors in milliseconds"
+          }
+        },
+        "total_fetch_duration": {
+          "type": "long",
+          "_meta": {
+            "description": "The total execution duration of the fetch function for all ready collectors in milliseconds"
+          }
+        },
+        "is_ready_duration_breakdown": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the collector"
+                }
+              },
+              "duration": {
+                "type": "long",
+                "_meta": {
+                  "description": "The execution duration of the isReady function for the collector in milliseconds"
+                }
+              }
+            }
+          }
+        },
+        "fetch_duration_breakdown": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the collector"
+                }
+              },
+              "duration": {
+                "type": "long",
+                "_meta": {
+                  "description": "The execution duration of the fetch function for the collector in milliseconds"
+                }
+              }
+            }
+          }
+        },
+        "not_ready": {
+          "properties": {
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that returned false from the isReady function"
+              }
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the of collectors that returned false from the isReady function"
+                }
+              }
+            }
+          }
+        },
+        "not_ready_timeout": {
+          "properties": {
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that timedout during the isReady function"
+              }
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of collectors that timedout during the isReady function"
+                }
+              }
+            }
+          }
+        },
+        "succeeded": {
+          "properties": {
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that returned true from the fetch function"
+              }
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the of collectors that returned true from the fetch function"
+                }
+              }
+            }
+          }
+        },
+        "failed": {
+          "properties": {
+            "count": {
+              "type": "short",
+              "_meta": {
+                "description": "The number of collectors that threw an error from the fetch function"
+              }
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The name of the of collectors that threw an error from the fetch function"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "usage_counters": {
       "properties": {
         "dailyEvents": {
@@ -9134,250 +10549,6 @@
                   "description": "The total number of times the event happened."
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "telemetry": {
-      "properties": {
-        "opt_in_status": {
-          "type": "boolean"
-        },
-        "usage_fetcher": {
-          "type": "keyword"
-        },
-        "last_reported": {
-          "type": "long"
-        }
-      }
-    },
-    "static_telemetry": {
-      "properties": {
-        "ece": {
-          "properties": {
-            "kb_uuid": {
-              "type": "keyword"
-            },
-            "es_uuid": {
-              "type": "keyword"
-            },
-            "account_id": {
-              "type": "keyword"
-            },
-            "license": {
-              "properties": {
-                "uuid": {
-                  "type": "keyword"
-                },
-                "type": {
-                  "type": "keyword"
-                },
-                "issued_to": {
-                  "type": "text"
-                },
-                "issuer": {
-                  "type": "text"
-                },
-                "issue_date_in_millis": {
-                  "type": "long"
-                },
-                "start_date_in_millis": {
-                  "type": "long"
-                },
-                "expiry_date_in_millis": {
-                  "type": "long"
-                },
-                "max_resource_units": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "ess": {
-          "properties": {
-            "kb_uuid": {
-              "type": "keyword"
-            },
-            "es_uuid": {
-              "type": "keyword"
-            },
-            "account_id": {
-              "type": "keyword"
-            },
-            "license": {
-              "properties": {
-                "uuid": {
-                  "type": "keyword"
-                },
-                "type": {
-                  "type": "keyword"
-                },
-                "issued_to": {
-                  "type": "text"
-                },
-                "issuer": {
-                  "type": "text"
-                },
-                "issue_date_in_millis": {
-                  "type": "long"
-                },
-                "start_date_in_millis": {
-                  "type": "long"
-                },
-                "expiry_date_in_millis": {
-                  "type": "long"
-                },
-                "max_resource_units": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "eck": {
-          "properties": {
-            "operator_uuid": {
-              "type": "keyword"
-            },
-            "operator_roles": {
-              "type": "keyword"
-            },
-            "custom_operator_namespace": {
-              "type": "boolean"
-            },
-            "distribution": {
-              "type": "text"
-            },
-            "build": {
-              "properties": {
-                "hash": {
-                  "type": "text"
-                },
-                "date": {
-                  "type": "date"
-                },
-                "version": {
-                  "type": "keyword"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "vis_type_table": {
-      "properties": {
-        "total": {
-          "type": "long"
-        },
-        "total_split": {
-          "type": "long"
-        },
-        "split_columns": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "enabled": {
-              "type": "long"
-            }
-          }
-        },
-        "split_rows": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "enabled": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "vis_type_timeseries": {
-      "properties": {
-        "timeseries_use_last_value_mode_total": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of TSVB visualizations using \"last value\" as a time range"
-          }
-        },
-        "timeseries_use_es_indices_total": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of TSVB visualizations using elasticsearch indices"
-          }
-        },
-        "timeseries_table_use_aggregate_function": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of TSVB table visualizations using aggregate function"
-          }
-        },
-        "timeseries_types": {
-          "properties": {
-            "table": {
-              "type": "long"
-            },
-            "gauge": {
-              "type": "long"
-            },
-            "markdown": {
-              "type": "long"
-            },
-            "top_n": {
-              "type": "long"
-            },
-            "timeseries": {
-              "type": "long"
-            },
-            "metric": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "vis_type_vega": {
-      "properties": {
-        "vega_lib_specs_total": {
-          "type": "long"
-        },
-        "vega_lite_lib_specs_total": {
-          "type": "long"
-        },
-        "vega_use_map_total": {
-          "type": "long"
-        }
-      }
-    },
-    "visualization_types": {
-      "properties": {
-        "DYNAMIC_KEY": {
-          "properties": {
-            "total": {
-              "type": "long"
-            },
-            "spaces_min": {
-              "type": "long"
-            },
-            "spaces_max": {
-              "type": "long"
-            },
-            "spaces_avg": {
-              "type": "long"
-            },
-            "saved_7_days_total": {
-              "type": "long"
-            },
-            "saved_30_days_total": {
-              "type": "long"
-            },
-            "saved_90_days_total": {
-              "type": "long"
             }
           }
         }

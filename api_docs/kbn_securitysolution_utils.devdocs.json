@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.addIdToItem",
+        "id": "def-common.addIdToItem",
         "type": "Function",
         "tags": [],
         "label": "addIdToItem",
@@ -23,10 +31,11 @@
         ],
         "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.addIdToItem.$1",
+            "id": "def-common.addIdToItem.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "item",
@@ -36,6 +45,7 @@
             ],
             "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -44,7 +54,228 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.removeIdFromItem",
+        "id": "def-common.hasSimpleExecutableName",
+        "type": "Function",
+        "tags": [],
+        "label": "hasSimpleExecutableName",
+        "description": [],
+        "signature": [
+          "({ os, type, value, }: { os: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.OperatingSystem",
+            "text": "OperatingSystem"
+          },
+          "; type: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.EntryTypes",
+            "text": "EntryTypes"
+          },
+          "; value: string; }) => boolean | undefined"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.hasSimpleExecutableName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  os,\n  type,\n  value,\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.hasSimpleExecutableName.$1.os",
+                "type": "Enum",
+                "tags": [],
+                "label": "os",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-utils",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                    "section": "def-common.OperatingSystem",
+                    "text": "OperatingSystem"
+                  }
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.hasSimpleExecutableName.$1.type",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"match\" | \"wildcard\" | \"match_any\""
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.hasSimpleExecutableName.$1.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.isPathValid",
+        "type": "Function",
+        "tags": [],
+        "label": "isPathValid",
+        "description": [],
+        "signature": [
+          "({ os, field, type, value, }: { os: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.OperatingSystem",
+            "text": "OperatingSystem"
+          },
+          "; field: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.AllConditionEntryFields",
+            "text": "AllConditionEntryFields"
+          },
+          "; type: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.EntryTypes",
+            "text": "EntryTypes"
+          },
+          "; value: string; }) => boolean"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.isPathValid.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  os,\n  field,\n  type,\n  value,\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.isPathValid.$1.os",
+                "type": "Enum",
+                "tags": [],
+                "label": "os",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-utils",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                    "section": "def-common.OperatingSystem",
+                    "text": "OperatingSystem"
+                  }
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.isPathValid.$1.field",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-utils",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                    "section": "def-common.TrustedAppConditionEntryField",
+                    "text": "TrustedAppConditionEntryField"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/securitysolution-utils",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                    "section": "def-common.BlocklistConditionEntryField",
+                    "text": "BlocklistConditionEntryField"
+                  },
+                  " | \"file.path.text\""
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.isPathValid.$1.type",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"match\" | \"wildcard\" | \"match_any\""
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.isPathValid.$1.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.removeIdFromItem",
         "type": "Function",
         "tags": [],
         "label": "removeIdFromItem",
@@ -56,10 +287,11 @@
         ],
         "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.removeIdFromItem.$1",
+            "id": "def-common.removeIdFromItem.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "item",
@@ -71,6 +303,7 @@
             ],
             "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -79,7 +312,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.transformDataToNdjson",
+        "id": "def-common.transformDataToNdjson",
         "type": "Function",
         "tags": [],
         "label": "transformDataToNdjson",
@@ -89,10 +322,11 @@
         ],
         "path": "packages/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.transformDataToNdjson.$1",
+            "id": "def-common.transformDataToNdjson.$1",
             "type": "Array",
             "tags": [],
             "label": "data",
@@ -102,7 +336,81 @@
             ],
             "path": "packages/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.validateFilePathInput",
+        "type": "Function",
+        "tags": [],
+        "label": "validateFilePathInput",
+        "description": [],
+        "signature": [
+          "({ os, value, }: { os: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.OperatingSystem",
+            "text": "OperatingSystem"
+          },
+          "; value?: string | undefined; }) => string | undefined"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.validateFilePathInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  os,\n  value = '',\n}",
+            "description": [],
+            "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.validateFilePathInput.$1.os",
+                "type": "Enum",
+                "tags": [],
+                "label": "os",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/securitysolution-utils",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                    "section": "def-common.OperatingSystem",
+                    "text": "OperatingSystem"
+                  }
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-utils",
+                "id": "def-common.validateFilePathInput.$1.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -110,16 +418,166 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.ConditionEntryField",
+        "type": "Enum",
+        "tags": [],
+        "label": "ConditionEntryField",
+        "description": [],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.EntryFieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EntryFieldType",
+        "description": [],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.OperatingSystem",
+        "type": "Enum",
+        "tags": [],
+        "label": "OperatingSystem",
+        "description": [],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.AllConditionEntryFields",
+        "type": "Type",
+        "tags": [],
+        "label": "AllConditionEntryFields",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedAppConditionEntryField",
+            "text": "TrustedAppConditionEntryField"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.BlocklistConditionEntryField",
+            "text": "BlocklistConditionEntryField"
+          },
+          " | \"file.path.text\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.BlocklistConditionEntryField",
+        "type": "Type",
+        "tags": [],
+        "label": "BlocklistConditionEntryField",
+        "description": [],
+        "signature": [
+          "\"file.path\" | \"file.hash.*\" | \"file.Ext.code_signature\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.EntryTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "EntryTypes",
+        "description": [],
+        "signature": [
+          "\"match\" | \"wildcard\" | \"match_any\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.FILENAME_WILDCARD_WARNING",
+        "type": "Any",
+        "tags": [],
+        "label": "FILENAME_WILDCARD_WARNING",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.FILEPATH_WARNING",
+        "type": "Any",
+        "tags": [],
+        "label": "FILEPATH_WARNING",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.TrustedAppConditionEntryField",
+        "type": "Type",
+        "tags": [],
+        "label": "TrustedAppConditionEntryField",
+        "description": [],
+        "signature": [
+          "\"process.hash.*\" | \"process.executable.caseless\" | \"process.Ext.code_signature\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.TrustedAppEntryTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "TrustedAppEntryTypes",
+        "description": [],
+        "signature": [
+          "\"match\" | \"wildcard\""
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

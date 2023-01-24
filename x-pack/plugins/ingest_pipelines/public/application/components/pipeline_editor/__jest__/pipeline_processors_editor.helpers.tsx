@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { Props } from '../';
+import { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
 jest.mock('@elastic/eui', () => {
@@ -31,8 +31,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -85,16 +85,19 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorsSelector}.addProcessorButton`).simulate('click');
       await act(async () => {
         find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
       await act(async () => {
         find('processorOptionsEditor').simulate('change', {
           jsonContent: JSON.stringify(options),
         });
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -134,15 +137,18 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorSelector}.moreMenu.addOnFailureButton`).simulate('click');
       await act(async () => {
         find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
       await act(async () => {
         find('processorOptionsEditor').simulate('change', {
           jsonContent: JSON.stringify(options),
         });
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
     },
 
@@ -172,13 +178,14 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     submitProcessorForm: async () => {
       await act(async () => {
         find('editProcessorForm.submitButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
     },
   };
 };
 
 export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+  const testBed = testBedSetup(props);
   return {
     ...testBed,
     actions: createActions(testBed),

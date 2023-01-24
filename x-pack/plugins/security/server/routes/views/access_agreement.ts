@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import type { ConfigType } from '../../config';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -46,13 +46,24 @@ export function defineAccessAgreementRoutes({
       // It's not guaranteed that we'll have session for the authenticated user (e.g. when user is
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
-      const sessionValue = await getSession().get(request);
-      const accessAgreement =
-        (sessionValue &&
+      const { value: sessionValue } = await getSession().get(request);
+
+      let accessAgreement = '';
+
+      if (sessionValue) {
+        const providerSpecificAccessAgreement =
           config.authc.providers[
             sessionValue.provider.type as keyof ConfigType['authc']['providers']
-          ]?.[sessionValue.provider.name]?.accessAgreement?.message) ||
-        '';
+          ]?.[sessionValue.provider.name]?.accessAgreement?.message;
+
+        const globalAccessAgreement = config.accessAgreement?.message;
+
+        if (providerSpecificAccessAgreement) {
+          accessAgreement = providerSpecificAccessAgreement;
+        } else if (globalAccessAgreement) {
+          accessAgreement = globalAccessAgreement;
+        }
+      }
 
       return response.ok({ body: { accessAgreement } });
     })

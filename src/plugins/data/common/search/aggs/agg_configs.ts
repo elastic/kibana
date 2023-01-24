@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
-import { isRangeFilter } from '@kbn/es-query';
+import type { Assign } from '@kbn/utility-types';
+import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import {
-  IEsSearchResponse,
-  ISearchOptions,
-  ISearchSource,
-  RangeFilter,
-} from 'src/plugins/data/public';
+import type { IEsSearchResponse, ISearchOptions, ISearchSource } from '../../../public';
+import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
-import { IAggType } from './agg_type';
-import { AggTypesRegistryStart } from './agg_types_registry';
+import type { IAggType } from './agg_type';
+import type { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../..';
-import { TimeRange, getTime, calculateBounds } from '../../../common';
-import { IBucketAggConfig } from './buckets';
+import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
+import { getTime, calculateBounds } from '../..';
+import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
+import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -54,6 +54,10 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
   hierarchical?: boolean;
+  aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
+  partialRows?: boolean;
+  probability?: number;
+  samplerSeed?: number;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -77,30 +81,44 @@ export type GenericBucket = estypes.AggregationsBuckets<any> & {
 export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
-  public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
   public timeFields?: string[];
   public forceNow?: Date;
-  public hierarchical?: boolean = false;
-
-  private readonly typesRegistry: AggTypesRegistryStart;
-
-  aggs: IAggConfig[];
+  public aggs: IAggConfig[] = [];
+  public readonly timeZone: string;
 
   constructor(
-    indexPattern: IndexPattern,
+    public indexPattern: DataView,
     configStates: CreateAggConfigParams[] = [],
-    opts: AggConfigsOptions
+    private opts: AggConfigsOptions,
+    private getConfig: GetConfigFn
   ) {
-    this.typesRegistry = opts.typesRegistry;
+    this.timeZone = getUserTimeZone(
+      this.getConfig,
+      opts?.aggExecutionContext?.shouldDetectTimeZone
+    );
 
     configStates = AggConfig.ensureIds(configStates);
-
-    this.aggs = [];
-    this.indexPattern = indexPattern;
-    this.hierarchical = opts.hierarchical;
-
     configStates.forEach((params: any) => this.createAggConfig(params));
+  }
+
+  public get hierarchical() {
+    return this.opts.hierarchical ?? false;
+  }
+
+  public get partialRows() {
+    return this.opts.partialRows ?? false;
+  }
+
+  public get samplerConfig() {
+    return { probability: this.opts.probability ?? 1, seed: this.opts.samplerSeed };
+  }
+
+  isSamplingEnabled() {
+    return (
+      isSamplingEnabled(this.opts.probability) &&
+      this.getRequestAggs().filter((agg) => !agg.type.hasNoDsl).length > 0
+    );
   }
 
   setTimeFields(timeFields: string[] | undefined) {
@@ -142,17 +160,27 @@ export class AggConfigs {
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)
-  clone({ enabledOnly = true } = {}) {
+  clone({
+    enabledOnly = true,
+    opts,
+  }: {
+    enabledOnly?: boolean;
+    opts?: Partial<AggConfigsOptions>;
+  } = {}) {
     const filterAggs = (agg: AggConfig) => {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
 
-    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
-      typesRegistry: this.typesRegistry,
-    });
-
-    return aggConfigs;
+    return new AggConfigs(
+      this.indexPattern,
+      this.aggs.filter(filterAggs),
+      {
+        ...this.opts,
+        ...opts,
+      },
+      this.getConfig
+    );
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
@@ -161,7 +189,7 @@ export class AggConfigs {
   ) => {
     const { type } = params;
     const getType = (t: string) => {
-      const typeFromRegistry = this.typesRegistry.get(t);
+      const typeFromRegistry = this.opts.typesRegistry.get(t);
 
       if (!typeFromRegistry) {
         throw new Error(
@@ -211,7 +239,7 @@ export class AggConfigs {
   }
 
   toDsl(): Record<string, any> {
-    const dslTopLvl = {};
+    const dslTopLvl: Record<string, any> = {};
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
@@ -240,10 +268,21 @@ export class AggConfigs {
       (config) => 'splitForTimeShift' in config.type && config.type.splitForTimeShift(config, this)
     );
 
+    if (this.isSamplingEnabled()) {
+      dslTopLvl.sampling = createSamplerAgg({
+        probability: this.opts.probability ?? 1,
+        seed: this.opts.samplerSeed,
+      });
+    }
+
     requestAggs.forEach((config: AggConfig, i: number, list) => {
       if (!dslLvlCursor) {
         // start at the top level
         dslLvlCursor = dslTopLvl;
+        // when sampling jump directly to the aggs
+        if (this.isSamplingEnabled()) {
+          dslLvlCursor = dslLvlCursor.sampling.aggs;
+        }
       } else {
         const prevConfig: AggConfig = list[i - 1];
         const prevDsl = dslLvlCursor[prevConfig.id];
@@ -255,7 +294,7 @@ export class AggConfigs {
       }
 
       if (hasMultipleTimeShifts) {
-        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor);
+        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor, this.timeZone);
       }
 
       if (config.type.hasNoDsl) {
@@ -407,8 +446,14 @@ export class AggConfigs {
                       range: {
                         [field]: {
                           format: 'strict_date_optional_time',
-                          gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
-                          lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
+                          gte: moment
+                            .tz(filter?.query.range[field].gte, this.timeZone)
+                            .subtract(shift)
+                            .toISOString(),
+                          lte: moment
+                            .tz(filter?.query.range[field].lte, this.timeZone)
+                            .subtract(shift)
+                            .toISOString(),
                         },
                       },
                     })),
@@ -422,7 +467,7 @@ export class AggConfigs {
     ];
   }
 
-  postFlightTransform(response: IEsSearchResponse<any>) {
+  postFlightTransform(response: IEsSearchResponse) {
     if (!this.hasTimeShifts()) {
       return response;
     }
@@ -432,7 +477,12 @@ export class AggConfigs {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };
     }
-    const aggCursor = transformedRawResponse.aggregations!;
+    const aggCursor = this.isSamplingEnabled()
+      ? (transformedRawResponse.aggregations!.sampling! as Record<
+          string,
+          estypes.AggregationsAggregate
+        >)
+      : transformedRawResponse.aggregations!;
 
     mergeTimeShifts(this, aggCursor);
     return {
@@ -491,5 +541,29 @@ export class AggConfigs {
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))
     );
+  }
+
+  /**
+   * Generates an expression abstract syntax tree using the `esaggs` expression function.
+   * @returns The expression AST.
+   */
+  toExpressionAst() {
+    return buildExpression([
+      buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+        index: buildExpression([
+          buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+            'indexPatternLoad',
+            {
+              id: this.indexPattern.id!,
+            }
+          ),
+        ]),
+        metricsAtAllLevels: this.hierarchical,
+        partialRows: this.partialRows,
+        aggs: this.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
+        probability: this.opts.probability,
+        samplerSeed: this.opts.samplerSeed,
+      }),
+    ]).toAst();
   }
 }

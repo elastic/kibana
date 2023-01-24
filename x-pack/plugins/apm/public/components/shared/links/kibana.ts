@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IBasePath } from '../../../../../../../src/core/public';
+import rison from '@kbn/rison';
+import { IBasePath } from '@kbn/core/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function getUpgradeAssistantHref(basePath: IBasePath) {
@@ -29,5 +30,16 @@ export function useUpgradeApmPackagePolicyHref(packagePolicyId = '') {
   } = useApmPluginContext();
   return basePath.prepend(
     `/app/fleet/policies/policy-elastic-agent-on-cloud/upgrade-package-policy/${packagePolicyId}?from=integrations-policy-list`
+  );
+}
+
+export function useObservabilityActiveAlertsHref(kuery: string) {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useApmPluginContext();
+  return basePath.prepend(
+    `/app/observability/alerts?_a=${rison.encode({ kuery, status: 'active' })}`
   );
 }

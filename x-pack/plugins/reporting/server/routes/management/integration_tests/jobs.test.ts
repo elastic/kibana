@@ -8,13 +8,13 @@
 jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
-import type { ElasticsearchClientMock } from '../../../../../../../src/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { setupServer } from 'src/core/server/test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingCore } from '../../..';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import {
@@ -161,7 +161,7 @@ describe('GET /api/reporting/jobs/download', () => {
     await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(404);
   });
 
-  it('returns a 401 if not a valid job type', async () => {
+  it('returns a 403 if not a valid job type', async () => {
     mockEsClient.search.mockResponseOnce(
       getHits({
         jobtype: 'invalidJobType',
@@ -172,7 +172,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(401);
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(403);
   });
 
   it(`returns job's info`, async () => {
@@ -268,7 +268,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('content-disposition', 'inline; filename="report.csv"');
+        .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
     it('succeeds when security is not there or disabled', async () => {
@@ -285,7 +285,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dope')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('content-disposition', 'inline; filename="report.csv"');
+        .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
     it('forwards job content stream', async () => {
@@ -358,7 +358,10 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dope')
         .expect(403)
         .then(({ body }) =>
-          expect(body.message).toMatchInlineSnapshot(`"Sorry, you don't have access to Reporting"`)
+          expect(body.message).toMatchInlineSnapshot(`
+            "Ask your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\\"font-weight: 600;\\"
+                                target=\\"_blank\\" rel=\\"noopener\\">Learn more</a>."
+          `)
         );
     });
   });

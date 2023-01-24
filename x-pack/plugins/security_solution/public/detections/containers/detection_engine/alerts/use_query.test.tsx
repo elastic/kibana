@@ -6,23 +6,33 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useQueryAlerts, ReturnQueryAlerts } from './use_query';
+import type { ReturnQueryAlerts } from './use_query';
+import { useQueryAlerts } from './use_query';
+import { ALERTS_QUERY_NAMES } from './constants';
 import * as api from './api';
 import { mockAlertsQuery, alertsMock } from './mock';
 
 jest.mock('./api');
+jest.mock('../../../../common/lib/apm/use_track_http_request');
+
+const indexName = 'mock-index-name';
+const defaultProps = {
+  query: mockAlertsQuery,
+  indexName,
+  queryName: ALERTS_QUERY_NAMES.COUNT,
+};
 
 describe('useQueryAlerts', () => {
-  const indexName = 'mock-index-name';
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
+
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName }));
+      >(() => useQueryAlerts<unknown, unknown>(defaultProps));
       await waitForNextUpdate();
       expect(result.current).toEqual({
         loading: false,
@@ -40,7 +50,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName }));
+      >(() => useQueryAlerts<unknown, unknown>(defaultProps));
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -60,7 +70,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName }));
+      >(() => useQueryAlerts<unknown, unknown>(defaultProps));
       await waitForNextUpdate();
       await waitForNextUpdate();
       if (result.current.refetch) {
@@ -77,7 +87,7 @@ describe('useQueryAlerts', () => {
       const { rerender, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >((args) => useQueryAlerts({ query: args[0], indexName: args[1] }), {
+      >((args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }), {
         initialProps: [mockAlertsQuery, indexName],
       });
       await waitForNextUpdate();
@@ -94,7 +104,7 @@ describe('useQueryAlerts', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQueryAlerts<unknown, unknown>
-      >((args) => useQueryAlerts({ query: args[0], indexName: args[1] }), {
+      >((args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }), {
         initialProps: [mockAlertsQuery, indexName],
       });
       await waitForNextUpdate();
@@ -114,8 +124,7 @@ describe('useQueryAlerts', () => {
     });
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnQueryAlerts<unknown, unknown>>(
-        () =>
-          useQueryAlerts<unknown, unknown>({ query: mockAlertsQuery, indexName: 'mock-index-name' })
+        () => useQueryAlerts<unknown, unknown>(defaultProps)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -127,6 +136,24 @@ describe('useQueryAlerts', () => {
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,
       });
+    });
+  });
+
+  test('skip', async () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+    await act(async () => {
+      const localProps = { ...defaultProps, skip: false };
+      const { rerender, waitForNextUpdate } = renderHook<
+        [object, string],
+        ReturnQueryAlerts<unknown, unknown>
+      >(() => useQueryAlerts<unknown, unknown>(localProps));
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      localProps.skip = true;
+      act(() => rerender());
+      act(() => rerender());
+      expect(abortSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

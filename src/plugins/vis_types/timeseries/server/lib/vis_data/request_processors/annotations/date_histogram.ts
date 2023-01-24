@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { search, UI_SETTINGS } from '@kbn/data-plugin/server';
 import { overwrite } from '../../helpers';
 import { getBucketSize, getTimerange } from '../../helpers';
 import { validateField } from '../../../../../common/fields_utils';
-
-import { search, UI_SETTINGS } from '../../../../../../../../plugins/data/server';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';
 
@@ -49,7 +48,7 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
       barTargetUiSettings
     );
     const { from, to } = getTimerange(req);
-    const { timezone } = capabilities;
+    const { timezone, forceFixedInterval } = capabilities;
 
     overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,
@@ -57,9 +56,12 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
       time_zone: timezone,
       extended_bounds: {
         min: from.valueOf(),
-        max: to.valueOf() - bucketSize * 1000,
+        max: to.valueOf(),
       },
-      ...dateHistogramInterval(autoBucketSize < bucketSize ? autoIntervalString : intervalString),
+      ...dateHistogramInterval(
+        autoBucketSize < bucketSize ? autoIntervalString : intervalString,
+        forceFixedInterval
+      ),
     });
     return next(doc);
   };

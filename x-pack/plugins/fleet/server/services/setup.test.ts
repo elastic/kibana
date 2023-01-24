@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
-import type { ElasticsearchClientMock } from 'src/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
@@ -18,11 +18,14 @@ import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { setupFleet } from './setup';
 
 jest.mock('./preconfiguration');
-jest.mock('./preconfiguration/index');
+jest.mock('./preconfiguration/outputs');
+jest.mock('./preconfiguration/fleet_proxies');
 jest.mock('./settings');
 jest.mock('./output');
+jest.mock('./download_source');
 jest.mock('./epm/packages');
 jest.mock('./managed_package_policies');
+jest.mock('./setup/upgrade_package_install_version');
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
@@ -56,6 +59,9 @@ describe('setupFleet', () => {
     });
 
     (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
+
+    soClient.find.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
   });
 
   afterEach(async () => {

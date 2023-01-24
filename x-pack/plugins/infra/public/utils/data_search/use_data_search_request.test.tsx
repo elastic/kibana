@@ -7,16 +7,15 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { Observable, of, Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   ISearchGeneric,
   ISearchStart,
-} from '../../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { PluginKibanaContextValue } from '../../hooks/use_kibana';
 import { normalizeDataSearchResponses } from './normalize_data_search_responses';
 import { useDataSearch } from './use_data_search_request';
@@ -92,7 +91,7 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
 
     // execute requests$ observable
-    const firstRequestPromise = result.current.requests$.pipe(take(1)).toPromise();
+    const firstRequestPromise = firstValueFrom(result.current.requests$);
 
     act(() => {
       result.current.search('first', 'second');
@@ -161,7 +160,7 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
 
     // execute requests$ observable
-    const firstRequestPromise = result.current.requests$.pipe(take(1)).toPromise();
+    const firstRequestPromise = firstValueFrom(result.current.requests$);
 
     act(() => {
       result.current.search('first', 'second');

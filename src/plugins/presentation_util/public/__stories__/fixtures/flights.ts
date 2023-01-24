@@ -7,8 +7,13 @@
  */
 
 import { map, uniq } from 'lodash';
+import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
+import {
+  FieldFormatsGetConfigFn,
+  NumberFormat,
+  StringFormat,
+} from '@kbn/field-formats-plugin/common';
 import { flights } from './flights_data';
-import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../data_views/public';
 
 export type Flight = typeof flights[number];
 export type FlightField = keyof Flight;
@@ -43,12 +48,24 @@ export const flightFieldNames: FlightField[] = [
   'timestamp',
 ];
 
+const numberFields = [
+  'AvgTicketPrice',
+  'dayOfWeek',
+  'DistanceKilometers',
+  'DistanceMiles',
+  'FlightDelayMin',
+  'FlightTimeHour',
+  'FlightTimeMin',
+];
+
+const getConfig = (() => {}) as FieldFormatsGetConfigFn;
+
 export const flightFieldByName: { [key: string]: DataViewField } = {};
 flightFieldNames.forEach(
   (flightFieldName) =>
     (flightFieldByName[flightFieldName] = {
       name: flightFieldName,
-      type: 'string',
+      type: numberFields.includes(flightFieldName) ? 'number' : 'string',
       aggregatable: true,
     } as unknown as DataViewField)
 );
@@ -62,6 +79,10 @@ export const storybookFlightsDataView: DataView = {
   title: 'demo data flights',
   fields: flightFields as unknown as IIndexPatternFieldList,
   getFieldByName: (name: string) => flightFieldByName[name],
+  getFormatterForField: (field: DataViewField) => {
+    if (numberFields.includes(field.name)) return new NumberFormat({}, getConfig);
+    return new StringFormat({}, getConfig);
+  },
 } as unknown as DataView;
 
 export const getFlightOptions = (field: string) => uniq(map(flights, field)).sort();

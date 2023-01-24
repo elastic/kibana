@@ -1,0 +1,356 @@
+{
+  "id": "@kbn/some-dev-log",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/some-dev-log",
+        "id": "def-common.SomeDevLog",
+        "type": "Interface",
+        "tags": [],
+        "label": "SomeDevLog",
+        "description": [
+          "\nGeneric interface that is implemented by the ToolingLog and the logger\nused by kbn_pm, which is responsible for running before the repo is\nbootstrapped and therefore can't use the ToolingLog."
+        ],
+        "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/some-dev-log",
+            "id": "def-common.SomeDevLog.info",
+            "type": "Function",
+            "tags": [],
+            "label": "info",
+            "description": [
+              "\nLog an info message"
+            ],
+            "signature": [
+              "(msg: string, ...rest: any[]) => void"
+            ],
+            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.info.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.info.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rest",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/some-dev-log",
+            "id": "def-common.SomeDevLog.warning",
+            "type": "Function",
+            "tags": [],
+            "label": "warning",
+            "description": [
+              "\nLog a warning message"
+            ],
+            "signature": [
+              "(msg: string, ...rest: any[]) => void"
+            ],
+            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.warning.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.warning.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rest",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/some-dev-log",
+            "id": "def-common.SomeDevLog.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nLog an error message"
+            ],
+            "signature": [
+              "(msg: string, ...rest: any[]) => void"
+            ],
+            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.error.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.error.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rest",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/some-dev-log",
+            "id": "def-common.SomeDevLog.success",
+            "type": "Function",
+            "tags": [],
+            "label": "success",
+            "description": [
+              "\nLog a success message"
+            ],
+            "signature": [
+              "(msg: string, ...rest: any[]) => void"
+            ],
+            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.success.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.success.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rest",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/some-dev-log",
+            "id": "def-common.SomeDevLog.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [
+              "\nLog a debug message. Only printed to the terminal when --debug or --verbose are passed"
+            ],
+            "signature": [
+              "(msg: string, ...rest: any[]) => void"
+            ],
+            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.debug.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.debug.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rest",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/some-dev-log",
+            "id": "def-common.SomeDevLog.verbose",
+            "type": "Function",
+            "tags": [],
+            "label": "verbose",
+            "description": [
+              "\nLog a verbose message. Only printed to the terminal when --verbose is passed"
+            ],
+            "signature": [
+              "(msg: string, ...rest: any[]) => void"
+            ],
+            "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.verbose.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/some-dev-log",
+                "id": "def-common.SomeDevLog.verbose.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "rest",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/some-dev-log",
+        "id": "def-common.SomeLogLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "SomeLogLevel",
+        "description": [
+          "\nBasic set of log-level flags, the common levels implemented between\nthe ToolingLog and the kbn_pm logger"
+        ],
+        "signature": [
+          "\"info\" | \"debug\" | \"verbose\" | \"quiet\""
+        ],
+        "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

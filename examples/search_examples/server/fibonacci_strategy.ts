@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
-import { ISearchStrategy } from '../../../src/plugins/data/server';
+import { v4 as uuidv4 } from 'uuid';
+import { ISearchStrategy } from '@kbn/data-plugin/server';
 import { FibonacciRequest, FibonacciResponse } from '../common/types';
 
 export const fibonacciStrategyProvider = (): ISearchStrategy<
@@ -17,7 +17,7 @@ export const fibonacciStrategyProvider = (): ISearchStrategy<
   const responseMap = new Map<string, [number[], number, number]>();
   return {
     search: (request: FibonacciRequest) => {
-      const id = request.id ?? uuid();
+      const id = request.id ?? uuidv4();
       const [sequence, total, started] = responseMap.get(id) ?? [
         [],
         request.params?.n ?? 0,

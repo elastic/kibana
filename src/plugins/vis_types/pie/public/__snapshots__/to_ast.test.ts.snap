@@ -5,35 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "id": Array [
-                    "123",
-                  ],
-                },
-                "function": "indexPatternLoad",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "metricsAtAllLevels": Array [
-          true,
-        ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "addTooltip": Array [
           true,
         ],
@@ -93,7 +64,10 @@ Object {
         "legendPosition": Array [
           "right",
         ],
-        "metric": Array [
+        "legendSize": Array [
+          "large",
+        ],
+        "metrics": Array [
           Object {
             "chain": Array [
               Object {

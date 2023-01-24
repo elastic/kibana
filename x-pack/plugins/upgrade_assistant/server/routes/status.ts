@@ -16,72 +16,100 @@ import { RouteDependencies } from '../types';
 /**
  * Note that this route is primarily intended for consumption by Cloud.
  */
-export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerUpgradeStatusRoute({
+  config: { featureSet },
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client: esClient },
-            deprecations: { client: deprecationsClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          // Fetch ES upgrade status
-          const { totalCriticalDeprecations: esTotalCriticalDeps } = await getESUpgradeStatus(
-            esClient
-          );
-          // Fetch system indices migration status
-          const { migration_status: systemIndicesMigrationStatus, features } =
-            await getESSystemIndicesMigrationStatus(esClient.asCurrentUser);
-          const notMigratedSystemIndices = features.filter(
-            (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
-          ).length;
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client: esClient },
+          deprecations: { client: deprecationsClient },
+        } = await core;
+        // Fetch ES upgrade status
+        const { totalCriticalDeprecations: esTotalCriticalDeps } = await getESUpgradeStatus(
+          esClient,
+          featureSet
+        );
+        // Fetch system indices migration status
+        const { migration_status: systemIndicesMigrationStatus, features } =
+          await getESSystemIndicesMigrationStatus(esClient.asCurrentUser);
+        const notMigratedSystemIndices = features.filter(
+          (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
+        ).length;
 
-          // Fetch Kibana upgrade status
-          const { totalCriticalDeprecations: kibanaTotalCriticalDeps } =
-            await getKibanaUpgradeStatus(deprecationsClient);
-          const readyForUpgrade =
-            esTotalCriticalDeps === 0 &&
-            kibanaTotalCriticalDeps === 0 &&
-            systemIndicesMigrationStatus === 'NO_MIGRATION_NEEDED';
+        // Fetch Kibana upgrade status
+        const { totalCriticalDeprecations: kibanaTotalCriticalDeps } = await getKibanaUpgradeStatus(
+          deprecationsClient
+        );
+        const readyForUpgrade =
+          esTotalCriticalDeps === 0 &&
+          kibanaTotalCriticalDeps === 0 &&
+          systemIndicesMigrationStatus === 'NO_MIGRATION_NEEDED';
 
-          const getStatusMessage = () => {
-            if (readyForUpgrade) {
-              return i18n.translate(
-                'xpack.upgradeAssistant.status.allDeprecationsResolvedMessage',
-                {
-                  defaultMessage: 'All deprecation warnings have been resolved.',
-                }
-              );
-            }
-
-            return i18n.translate('xpack.upgradeAssistant.status.deprecationsUnresolvedMessage', {
-              defaultMessage:
-                'You have {notMigratedSystemIndices} system {notMigratedSystemIndices, plural, one {index} other {indices}} that must be migrated ' +
-                'and {esTotalCriticalDeps} Elasticsearch deprecation {esTotalCriticalDeps, plural, one {issue} other {issues}} ' +
-                'and {kibanaTotalCriticalDeps} Kibana deprecation {kibanaTotalCriticalDeps, plural, one {issue} other {issues}} that must be resolved before upgrading.',
-              values: { esTotalCriticalDeps, kibanaTotalCriticalDeps, notMigratedSystemIndices },
+        const getStatusMessage = () => {
+          if (readyForUpgrade) {
+            return i18n.translate('xpack.upgradeAssistant.status.allDeprecationsResolvedMessage', {
+              defaultMessage: 'All deprecation warnings have been resolved.',
             });
-          };
+          }
 
-          return response.ok({
-            body: {
-              readyForUpgrade,
-              details: getStatusMessage(),
+          const upgradeIssues: string[] = [];
+
+          if (notMigratedSystemIndices) {
+            upgradeIssues.push(
+              i18n.translate('xpack.upgradeAssistant.status.systemIndicesMessage', {
+                defaultMessage:
+                  '{notMigratedSystemIndices} unmigrated system {notMigratedSystemIndices, plural, one {index} other {indices}}',
+                values: { notMigratedSystemIndices },
+              })
+            );
+          }
+
+          if (esTotalCriticalDeps) {
+            upgradeIssues.push(
+              i18n.translate('xpack.upgradeAssistant.status.esTotalCriticalDepsMessage', {
+                defaultMessage:
+                  '{esTotalCriticalDeps} Elasticsearch deprecation {esTotalCriticalDeps, plural, one {issue} other {issues}}',
+                values: { esTotalCriticalDeps },
+              })
+            );
+          }
+
+          if (kibanaTotalCriticalDeps) {
+            upgradeIssues.push(
+              i18n.translate('xpack.upgradeAssistant.status.kibanaTotalCriticalDepsMessage', {
+                defaultMessage:
+                  '{kibanaTotalCriticalDeps} Kibana deprecation {kibanaTotalCriticalDeps, plural, one {issue} other {issues}}',
+                values: { kibanaTotalCriticalDeps },
+              })
+            );
+          }
+
+          return i18n.translate('xpack.upgradeAssistant.status.deprecationsUnresolvedMessage', {
+            defaultMessage:
+              'The following issues must be resolved before upgrading: {upgradeIssues}.',
+            values: {
+              upgradeIssues: upgradeIssues.join(', '),
             },
           });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        };
+
+        return response.ok({
+          body: {
+            readyForUpgrade,
+            details: getStatusMessage(),
+          },
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

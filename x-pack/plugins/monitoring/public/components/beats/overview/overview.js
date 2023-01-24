@@ -9,7 +9,7 @@ import React from 'react';
 import { LatestActive } from './latest_active';
 import { LatestVersions } from './latest_versions';
 import { LatestTypes } from './latest_types';
-import { Stats } from '../';
+import { Stats } from '..';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import {
   EuiCallOut,
@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

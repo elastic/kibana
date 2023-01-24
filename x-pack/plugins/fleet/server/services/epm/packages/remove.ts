@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '../../../../../../../src/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import { updateIndexSettings } from '../elasticsearch/index/update_settings';
+
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
@@ -23,7 +32,7 @@ import type {
   KibanaAssetReference,
   Installation,
 } from '../../../types';
-import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
@@ -31,9 +40,8 @@ import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
-import { SavedObjectsUtils } from '../../../../../../../src/core/server';
 
-import { getInstallation, kibanaSavedObjectTypes } from './index';
+import { getInstallation, kibanaSavedObjectTypes } from '.';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -42,22 +50,34 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient, force } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false && !force)
-    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
-  const { total } = await packagePolicyService.list(savedObjectsClient, {
+  const { total, items } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-    page: 0,
-    perPage: 0,
+    page: 1,
+    perPage: options.force ? SO_SEARCH_LIMIT : 0,
   });
 
-  if (total > 0)
-    throw Boom.badRequest(
-      `unable to remove package with existing package policy(s) in use by agent(s)`
-    );
+  if (total > 0) {
+    if (options.force) {
+      // delete package policies
+      const ids = items.map((item) => item.id);
+      appContextService
+        .getLogger()
+        .info(
+          `deleting package policies of ${pkgName} package because force flag was enabled: ${ids}`
+        );
+      await packagePolicyService.delete(savedObjectsClient, esClient, ids, {
+        force: options.force,
+      });
+    } else {
+      throw Boom.badRequest(
+        `unable to remove package with existing package policy(s) in use by agent(s)`
+      );
+    }
+  }
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
@@ -105,11 +125,8 @@ async function deleteKibanaAssets(
   // in the case of a partial install, it is expected that some assets will be not found
   // we filter these out before calling delete
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
-  const promises = assetsToDelete.map(async ({ id, type }) => {
-    return savedObjectsClient.delete(type, id, { namespace });
-  });
 
-  return Promise.all(promises);
+  return savedObjectsClient.bulkDelete(assetsToDelete, { namespace });
 }
 
 function deleteESAssets(
@@ -125,8 +142,10 @@ function deleteESAssets(
     } else if (assetType === ElasticsearchAssetType.componentTemplate) {
       return deleteComponentTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
-      return deleteTransforms(esClient, [id]);
+      return deleteTransforms(esClient, [id], true);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
+      return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
       return deleteIlms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.mlModel) {
       return deleteMlModel(esClient, [id]);
@@ -144,27 +163,35 @@ async function deleteAssets(
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
+  // must unset default_pipelines settings in indices first, or pipelines associated with an index cannot not be deleted
   // must delete index templates first, or component templates which reference them cannot be deleted
   // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
   // separate the assets into Index Templates and other assets.
-  type Tuple = [EsAssetReference[], EsAssetReference[]];
-  const [indexTemplatesAndPipelines, otherAssets] = installedEs.reduce<Tuple>(
-    ([indexAssetTypes, otherAssetTypes], asset) => {
+  type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[]];
+  const [indexTemplatesAndPipelines, indexAssets, otherAssets] = installedEs.reduce<Tuple>(
+    ([indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes], asset) => {
       if (
         asset.type === ElasticsearchAssetType.indexTemplate ||
         asset.type === ElasticsearchAssetType.ingestPipeline
       ) {
+        indexTemplateAndPipelineTypes.push(asset);
+      } else if (asset.type === ElasticsearchAssetType.index) {
         indexAssetTypes.push(asset);
       } else {
         otherAssetTypes.push(asset);
       }
 
-      return [indexAssetTypes, otherAssetTypes];
+      return [indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes];
     },
-    [[], []]
+    [[], [], []]
   );
 
   try {
+    // must first unset any default pipeline associated with any existing indices
+    // by setting empty string
+    await Promise.all(
+      indexAssets.map((asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }))
+    );
     // must delete index templates and pipelines first
     await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
     // then the other asset types
@@ -174,7 +201,7 @@ async function deleteAssets(
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
-    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
     }
   }
@@ -222,7 +249,7 @@ export async function deleteKibanaSavedObjectsAssets({
     await deleteKibanaAssets(assetsToDelete, spaceId);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
-    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
     }
   }

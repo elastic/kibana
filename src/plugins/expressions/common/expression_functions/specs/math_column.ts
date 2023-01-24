@@ -14,6 +14,7 @@ import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../
 export type MathColumnArguments = MathArguments & {
   id: string;
   name?: string;
+  castColumns?: string[];
   copyMetaFrom?: string | null;
 };
 
@@ -52,6 +53,14 @@ export const mathColumn: ExpressionFunctionDefinition<
       }),
       required: true,
     },
+    castColumns: {
+      types: ['string'],
+      multi: true,
+      help: i18n.translate('expressions.functions.mathColumn.args.castColumnsHelpText', {
+        defaultMessage: 'The ids of columns to cast to numbers before applying the formula',
+      }),
+      required: false,
+    },
     copyMetaFrom: {
       types: ['string', 'null'],
       help: i18n.translate('expressions.functions.mathColumn.args.copyMetaFromHelpText', {
@@ -77,11 +86,31 @@ export const mathColumn: ExpressionFunctionDefinition<
 
     const newRows = await Promise.all(
       input.rows.map(async (row) => {
+        let preparedRow = row;
+        if (args.castColumns) {
+          preparedRow = { ...row };
+          args.castColumns.forEach((columnId) => {
+            switch (typeof row[columnId]) {
+              case 'string':
+                const parsedAsDate = Number(new Date(preparedRow[columnId]));
+                if (!isNaN(parsedAsDate)) {
+                  preparedRow[columnId] = parsedAsDate;
+                  return;
+                } else {
+                  preparedRow[columnId] = Number(preparedRow[columnId]);
+                  return;
+                }
+              case 'boolean':
+                preparedRow[columnId] = Number(preparedRow[columnId]);
+                return;
+            }
+          });
+        }
         const result = await math.fn(
           {
-            type: 'datatable',
+            ...input,
             columns: input.columns,
-            rows: [row],
+            rows: [preparedRow],
           },
           {
             expression: args.expression,
@@ -128,7 +157,7 @@ export const mathColumn: ExpressionFunctionDefinition<
     columns.push(newColumn);
 
     return {
-      type: 'datatable',
+      ...input,
       columns,
       rows: newRows,
     } as Datatable;

@@ -5,40 +5,29 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
-// @ts-ignore
 import { handleError } from '../../../../lib/errors';
-// @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
-// @ts-ignore
 import { metricSet } from './metric_set_instance';
-import { LegacyRequest, LegacyServer } from '../../../../types';
+import { LegacyRequest } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
+import {
+  postKibanaInstanceRequestParamsRT,
+  postKibanaInstanceRequestPayloadRT,
+  postKibanaInstanceResponsePayloadRT,
+} from '../../../../../common/http_api/kibana';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
-/**
- * Kibana instance: This will fetch all data required to display a Kibana
- * instance's page. The current details returned are:
- * - Kibana Instance Summary (Status)
- * - Metrics
- */
-export function kibanaInstanceRoute(server: LegacyServer) {
+export function kibanaInstanceRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postKibanaInstanceRequestParamsRT);
+  const validateBody = createValidationFunction(postKibanaInstanceRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/{kibanaUuid}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          kibanaUuid: schema.string(),
-        }),
-        payload: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req: LegacyRequest) {
       const clusterUuid = req.params.clusterUuid;
@@ -50,10 +39,10 @@ export function kibanaInstanceRoute(server: LegacyServer) {
           getKibanaInfo(req, { clusterUuid, kibanaUuid }),
         ]);
 
-        return {
+        return postKibanaInstanceResponsePayloadRT.encode({
           metrics,
           kibanaSummary,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }

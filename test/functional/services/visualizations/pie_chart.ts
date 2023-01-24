@@ -35,7 +35,7 @@ export class PieChartService extends FtrService {
       if (name === 'Other') {
         sliceLabel = '__other__';
       }
-      const pieSlice = slices.find((slice) => slice.name === sliceLabel);
+      const pieSlice = slices.find((slice) => String(slice.name) === sliceLabel);
       const pie = await this.testSubjects.find(partitionVisChartSelector);
       if (pieSlice) {
         const pieSize = await pie.getSize();
@@ -101,6 +101,17 @@ export class PieChartService extends FtrService {
     return await pieSlice.getAttribute('style');
   }
 
+  async getAllPieSlicesColors() {
+    const slicesColors = [];
+    const slices =
+      (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+        ?.partitions ?? [];
+    for (const slice of slices) {
+      slicesColors.push(slice.color);
+    }
+    return slicesColors;
+  }
+
   async getAllPieSliceColor(name: string) {
     this.log.debug(`VisualizePage.getAllPieSliceColor(${name})`);
     if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
@@ -142,8 +153,8 @@ export class PieChartService extends FtrService {
     await this.inspector.expectTableData(expectedTableData);
   }
 
-  async getPieChartLabels() {
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
+  async getPieChartLabels(isNewLibrary: boolean = true) {
+    if (isNewLibrary) {
       const slices =
         (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
           ?.partitions ?? [];
@@ -167,9 +178,25 @@ export class PieChartService extends FtrService {
     );
   }
 
-  async getPieSliceCount() {
+  async getPieChartValues(isNewLibrary: boolean = true) {
+    this.log.debug('PieChart.getPieChartValues');
+    if (isNewLibrary) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      return slices.map((slice) => {
+        return slice.value;
+      });
+    }
+    const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
+    return await Promise.all(
+      chartTypes.map(async (chart) => await chart.getAttribute('data-value'))
+    );
+  }
+
+  async getPieSliceCount(isNewLibrary: boolean = true) {
     this.log.debug('PieChart.getPieSliceCount');
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
+    if (isNewLibrary) {
       const slices =
         (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
           ?.partitions ?? [];
@@ -179,6 +206,24 @@ export class PieChartService extends FtrService {
     return slices.length;
   }
 
+  async getSliceCountForAllPies() {
+    let pieSlices = 0;
+    const charts =
+      (await this.visChart.getAllESChartsDebugDataByTestSubj(partitionVisChartSelector)) ?? [];
+    for (const chart of charts) {
+      const visContainer = await chart.findByCssSelector('.echChartStatus');
+      const debugDataString: string | undefined = await visContainer.getAttribute(
+        'data-ech-debug-state'
+      );
+      if (debugDataString) {
+        const parsedData = JSON.parse(debugDataString);
+        const partition = parsedData?.partition?.[0] ?? [];
+        pieSlices += partition.partitions.length;
+      }
+    }
+    return pieSlices;
+  }
+
   async expectPieSliceCountEsCharts(expectedCount: number) {
     const slices =
       (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
@@ -186,18 +231,30 @@ export class PieChartService extends FtrService {
     expect(slices.length).to.be(expectedCount);
   }
 
-  async expectPieSliceCount(expectedCount: number) {
+  async expectPieSliceCount(expectedCount: number, isNewLibrary: boolean = true) {
     this.log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
     await this.retry.try(async () => {
-      const slicesCount = await this.getPieSliceCount();
+      const slicesCount = await this.getPieSliceCount(isNewLibrary);
       expect(slicesCount).to.be(expectedCount);
     });
   }
 
-  async expectPieChartLabels(expectedLabels: string[]) {
+  async expectSliceCountForAllPies(expectedCount: number) {
+    await this.retry.try(async () => {
+      const slicesCount = await this.getSliceCountForAllPies();
+      expect(slicesCount).to.be(expectedCount);
+    });
+  }
+
+  async expectEmptyPieChart() {
+    const noResult = await this.testSubjects.exists('partitionVisEmptyValues');
+    expect(noResult).to.be(true);
+  }
+
+  async expectPieChartLabels(expectedLabels: string[], isNewLibrary: boolean = true) {
     this.log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
     await this.retry.try(async () => {
-      const pieData = await this.getPieChartLabels();
+      const pieData = await this.getPieChartLabels(isNewLibrary);
       expect(pieData.sort()).to.eql(expectedLabels);
     });
   }

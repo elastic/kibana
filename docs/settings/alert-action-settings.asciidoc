@@ -92,7 +92,7 @@ URLs can use both the `ssl` and `smtp` options.
 +
 No other URL values should be part of this URL, including paths,
 query strings, and authentication information.  When an http or smtp request
-is made as part of executing an action, only the protocol, hostname, and
+is made as part of running an action, only the protocol, hostname, and
 port of the URL for that request are used to look up these configuration
 values.
 
@@ -125,8 +125,13 @@ The contents of a PEM-encoded certificate file, or multiple files appended
 into a single string.  This configuration can be used for environments where
 the files cannot be made available.
 
+[[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
+A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
+
+WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -138,6 +143,22 @@ Specifies preconfigured connector IDs and configs. Default: {}.
 
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
++
+Proxies may be used to proxy http or https requests through a proxy using the http or https protocol.  Kibana only uses proxies in "CONNECT" mode (sometimes referred to as "tunneling" TCP mode, compared to HTTP mode).  That is, Kibana will always make requests through a proxy using the HTTP `CONNECT` method.
++
+If your proxy is using the https protocol (vs the http protocol), the setting `xpack.actions.ssl.proxyVerificationMode: none` will likely be needed, unless your proxy's certificates are signed using a publicly available certificate authority.
++
+There is currently no support for using basic authentication with a proxy (authentication for the proxy itself, not the URL being requested through the proxy).
++
+To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the
+proxy in tunneling mode, and display some of the interaction between the client and the proxy.
++
+[source,sh]
+--
+curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
+--
++
+
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
 Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
@@ -178,26 +199,82 @@ Specifies the time allowed for requests to external resources. Requests that tak
 +
 For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 
+`xpack.actions.run.maxAttempts` {ess-icon}::
+Specifies the maximum number of times an action can be attempted to run. Can be minimum 1 and maximum 10.
+
+`xpack.actions.run.connectorTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.actions.run` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.actions.run:
+    maxAttempts: 1
+    connectorTypeOverrides:
+        - id: '.server-log'
+          maxAttempts: 5
+--
+
 [float]
 [[alert-settings]]
 ==== Alerting settings
 
-`xpack.alerting.maxEphemeralActionsPerAlert`::
-Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
+`xpack.alerting.maxEphemeralActionsPerAlert` {ess-icon}::
+Sets the number of actions that will run ephemerally. To use this, enable
+ephemeral tasks in task manager first with
+<<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
 
-`xpack.alerting.defaultRuleTaskTimeout`::
-Specifies the default timeout for the all rule types tasks. The time is formatted as:
-+
-`<count>[ms,s,m,h,d,w,M,Y]` 
-+
-For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
+`xpack.alerting.cancelAlertsOnRuleTimeout` {ess-icon}::
+Specifies whether to skip writing alerts and scheduling actions if rule
+processing was cancelled due to a timeout. Default: `true`. This setting can be
+overridden by individual rule types.
 
-`xpack.alerting.cancelAlertsOnRuleTimeout`::
-Specifies whether to skip writing alerts and scheduling actions if rule execution is cancelled due to timeout. Default: `true`. This setting can be overridden by individual rule types.
-
-`xpack.alerting.minimumScheduleInterval`::
-Specifies the minimum interval allowed for the all rules. This minimum is enforced for all rules created or updated after the introduction of this setting. The time is formatted as:
+`xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::
+Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as:
 +
 `<count>[s,m,h,d]` 
 +
-For example, `20m`, `24h`, `7d`. Default: `1m`.
+For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`. Default: `1m`.
+
+`xpack.alerting.rules.minimumScheduleInterval.enforce` {ess-icon}::
+Specifies the behavior when a new or changed rule has a schedule interval less than the value defined in `xpack.alerting.rules.minimumScheduleInterval.value`. If `false`, rules with schedules less than the interval will be created but warnings will be logged. If `true`, rules with schedules less than the interval cannot be created. Default: `false`.
+
+`xpack.alerting.rules.run.actions.max` {ess-icon}::
+Specifies the maximum number of actions that a rule can generate each time detection checks run.
+
+`xpack.alerting.rules.run.alerts.max` {ess-icon}::
+Specifies the maximum number of alerts that a rule can generate each time detection checks run. Default: 1000.
+
+`xpack.alerting.rules.run.timeout` {ess-icon}::
+Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
++
+`<count>[ms,s,m,h,d,w,M,Y]`
++
+For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
+
+`xpack.alerting.rules.run.ruleTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.alerting.rules.run:
+    timeout: '5m'
+    ruleTypeOverrides:
+        - id: '.index-threshold'
+          timeout: '15m'
+--
+
+`xpack.alerting.rules.run.actions.connectorTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.alerting.rules.run.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.alerting.rules.run:
+    actions:
+        max: 10
+        connectorTypeOverrides:
+            - id: '.server-log'
+              max: 5
+--

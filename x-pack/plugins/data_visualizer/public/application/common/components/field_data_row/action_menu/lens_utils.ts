@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
-import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
+import { DataView } from '@kbn/data-views-plugin/public';
 import type {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -16,10 +15,11 @@ import type {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
   XYLayerConfig,
-} from '../../../../../../../lens/public';
-import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../../../../../lens/common/constants';
+} from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
+import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { FieldVisConfig } from '../../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 
 interface ColumnsAndLayer {
   columns: Record<string, GenericIndexPatternColumn>;
@@ -33,9 +33,9 @@ const COUNT = i18n.translate('xpack.dataVisualizer.index.lensChart.countLabel', 
   defaultMessage: 'Count',
 });
 
-export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IndexPattern) {
+export function getNumberSettings(item: FieldVisConfig, defaultDataView: DataView) {
   // if index has no timestamp field
-  if (defaultIndexPattern.timeFieldName === undefined) {
+  if (defaultDataView.timeFieldName === undefined) {
     const columns: Record<string, GenericIndexPatternColumn> = {
       col1: {
         label: item.fieldName!,
@@ -82,11 +82,11 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     col1: {
       dataType: 'date',
       isBucketed: true,
-      label: defaultIndexPattern.timeFieldName!,
+      label: defaultDataView.timeFieldName!,
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
-      sourceField: defaultIndexPattern.timeFieldName!,
+      sourceField: defaultDataView.timeFieldName!,
     } as DateHistogramIndexPatternColumn,
   };
 
@@ -157,7 +157,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
     accessors: ['col2'],
     layerId: 'layer1',
     layerType: 'data',
-    seriesType: 'bar_horizontal',
+    seriesType: 'bar',
     xAccessor: 'col1',
   };
 
@@ -200,19 +200,20 @@ export function getBooleanSettings(item: FieldVisConfig) {
 export function getCompatibleLensDataType(type: FieldVisConfig['type']): string | undefined {
   let lensType: string | undefined;
   switch (type) {
-    case JOB_FIELD_TYPES.KEYWORD:
+    case SUPPORTED_FIELD_TYPES.KEYWORD:
+    case SUPPORTED_FIELD_TYPES.VERSION:
       lensType = 'string';
       break;
-    case JOB_FIELD_TYPES.DATE:
+    case SUPPORTED_FIELD_TYPES.DATE:
       lensType = 'date';
       break;
-    case JOB_FIELD_TYPES.NUMBER:
+    case SUPPORTED_FIELD_TYPES.NUMBER:
       lensType = 'number';
       break;
-    case JOB_FIELD_TYPES.IP:
+    case SUPPORTED_FIELD_TYPES.IP:
       lensType = 'ip';
       break;
-    case JOB_FIELD_TYPES.BOOLEAN:
+    case SUPPORTED_FIELD_TYPES.BOOLEAN:
       lensType = 'string';
       break;
     default:
@@ -224,20 +225,24 @@ export function getCompatibleLensDataType(type: FieldVisConfig['type']): string 
 function getColumnsAndLayer(
   fieldType: FieldVisConfig['type'],
   item: FieldVisConfig,
-  defaultIndexPattern: IndexPattern
+  defaultDataView: DataView
 ): ColumnsAndLayer | undefined {
   if (item.fieldName === undefined) return;
 
-  if (fieldType === JOB_FIELD_TYPES.DATE) {
+  if (fieldType === SUPPORTED_FIELD_TYPES.DATE) {
     return getDateSettings(item);
   }
-  if (fieldType === JOB_FIELD_TYPES.NUMBER) {
-    return getNumberSettings(item, defaultIndexPattern);
+  if (fieldType === SUPPORTED_FIELD_TYPES.NUMBER) {
+    return getNumberSettings(item, defaultDataView);
   }
-  if (fieldType === JOB_FIELD_TYPES.IP || fieldType === JOB_FIELD_TYPES.KEYWORD) {
+  if (
+    fieldType === SUPPORTED_FIELD_TYPES.IP ||
+    fieldType === SUPPORTED_FIELD_TYPES.KEYWORD ||
+    fieldType === SUPPORTED_FIELD_TYPES.VERSION
+  ) {
     return getKeywordSettings(item);
   }
-  if (fieldType === JOB_FIELD_TYPES.BOOLEAN) {
+  if (fieldType === SUPPORTED_FIELD_TYPES.BOOLEAN) {
     return getBooleanSettings(item);
   }
 }
@@ -245,15 +250,15 @@ function getColumnsAndLayer(
 // currently only supports the following types:
 // 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip'
 export function getLensAttributes(
-  defaultIndexPattern: IndexPattern | undefined,
+  defaultDataView: DataView | undefined,
   combinedQuery: CombinedQuery,
   filters: Filter[],
   item: FieldVisConfig
 ): TypedLensByValueInput['attributes'] | undefined {
-  if (defaultIndexPattern === undefined || item.type === undefined || item.fieldName === undefined)
+  if (defaultDataView === undefined || item.type === undefined || item.fieldName === undefined)
     return;
 
-  const presets = getColumnsAndLayer(item.type, item, defaultIndexPattern);
+  const presets = getColumnsAndLayer(item.type, item, defaultDataView);
 
   if (!presets) return;
 
@@ -265,19 +270,19 @@ export function getLensAttributes(
     }),
     references: [
       {
-        id: defaultIndexPattern.id!,
+        id: defaultDataView.id!,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: defaultIndexPattern.id!,
+        id: defaultDataView.id!,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: {
               columnOrder: ['col1', 'col2'],

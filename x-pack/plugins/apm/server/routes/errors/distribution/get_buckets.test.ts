@@ -6,8 +6,7 @@
  */
 
 import { getBuckets } from './get_buckets';
-import { APMConfig } from '../../..';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 describe('get buckets', () => {
   let clientSpy: jest.Mock;
@@ -29,30 +28,9 @@ describe('get buckets', () => {
       serviceName: 'myServiceName',
       bucketSize: 10,
       kuery: '',
-      setup: {
-        apmEventClient: {
-          search: clientSpy,
-        } as any,
-        internalClient: {
-          search: clientSpy,
-        } as any,
-        config: new Proxy(
-          {},
-          {
-            get: () => 'myIndex',
-          }
-        ) as APMConfig,
-        indices: {
-          sourcemap: 'apm-*',
-          error: 'apm-*',
-          onboarding: 'apm-*',
-          span: 'apm-*',
-          transaction: 'apm-*',
-          metric: 'apm-*',
-          apmAgentConfigurationIndex: '.apm-agent-configuration',
-          apmCustomLinkIndex: '.apm-custom-link',
-        },
-      },
+      apmEventClient: {
+        search: clientSpy,
+      } as any,
       start: 1528113600000,
       end: 1528977600000,
     });

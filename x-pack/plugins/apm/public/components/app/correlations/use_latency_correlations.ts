@@ -8,7 +8,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
 
 import {
   DEBOUNCE_INTERVAL,
@@ -20,6 +23,7 @@ import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -68,7 +72,7 @@ export function useLatencyCorrelations() {
       latencyCorrelations: undefined,
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
-      fieldStats: undefined,
+      totalDocCount: undefined,
     });
     setResponse.flush();
 
@@ -81,19 +85,27 @@ export function useLatencyCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram, percentileThresholdValue } = await callApmApi(
-        'POST /internal/apm/latency/overall_distribution',
+      const {
+        overallHistogram,
+        totalDocCount,
+        percentileThresholdValue,
+        durationMin,
+        durationMax,
+      } = await callApmApi(
+        'POST /internal/apm/latency/overall_distribution/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {
             body: {
               ...fetchParams,
               percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              chartType: LatencyDistributionChartType.latencyCorrelations,
             },
           },
         }
       );
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       if (abortCtrl.current.signal.aborted) {
@@ -107,7 +119,7 @@ export function useLatencyCorrelations() {
       setResponse.flush();
 
       const { fieldCandidates } = await callApmApi(
-        'GET /internal/apm/correlations/field_candidates',
+        'GET /internal/apm/correlations/field_candidates/transactions',
         {
           signal: abortCtrl.current.signal,
           params: {
@@ -133,7 +145,7 @@ export function useLatencyCorrelations() {
 
       for (const fieldCandidateChunk of fieldCandidateChunks) {
         const fieldValuePairChunkResponse = await callApmApi(
-          'POST /internal/apm/correlations/field_value_pairs',
+          'POST /internal/apm/correlations/field_value_pairs/transactions',
           {
             signal: abortCtrl.current.signal,
             params: {
@@ -177,13 +189,19 @@ export function useLatencyCorrelations() {
         chunkSize
       );
 
+      const fallbackResults: LatencyCorrelation[] = [];
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi(
-          'POST /internal/apm/correlations/significant_correlations',
+          'POST /internal/apm/correlations/significant_correlations/transactions',
           {
             signal: abortCtrl.current.signal,
             params: {
-              body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
+              body: {
+                ...fetchParams,
+                durationMin,
+                durationMax,
+                fieldValuePairs: fieldValuePairChunk,
+              },
             },
           }
         );
@@ -197,6 +215,12 @@ export function useLatencyCorrelations() {
           );
           responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
+        } else {
+          // If there's no correlation results that matches the criteria
+          // Consider the fallback results
+          if (significantCorrelations.fallbackResult) {
+            fallbackResults.push(significantCorrelations.fallbackResult);
+          }
         }
 
         chunkLoadCounter++;
@@ -213,22 +237,25 @@ export function useLatencyCorrelations() {
         }
       }
 
+      if (latencyCorrelations.length === 0 && fallbackResults.length > 0) {
+        // Rank the fallback results and show at least one value
+        const sortedFallbackResults = fallbackResults
+          .filter((r) => r.correlation > 0)
+          .sort((a, b) => b.correlation - a.correlation);
+
+        responseUpdate.latencyCorrelations = sortedFallbackResults
+          .slice(0, 1)
+          .map((r) => ({ ...r, isFallbackResult: true }));
+        setResponse({
+          ...responseUpdate,
+          loaded:
+            LOADED_FIELD_VALUE_PAIRS +
+            (chunkLoadCounter / fieldValuePairChunks.length) *
+              PROGRESS_STEP_CORRELATIONS,
+        });
+      }
       setResponse.flush();
 
-      const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldsToSample: [...fieldsToSample],
-            },
-          },
-        }
-      );
-
-      responseUpdate.fieldStats = stats;
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,

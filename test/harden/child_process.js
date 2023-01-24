@@ -25,10 +25,7 @@ test('test setup ok', (t) => {
   t.end();
 });
 
-// TODO: fork() has been omitted as it doesn't validate its arguments in
-// Node.js 10 and will throw an internal error asynchronously. This is fixed in
-// newer versions. See https://github.com/elastic/kibana/issues/59628
-const functions = ['exec', 'execFile', 'spawn', 'execFileSync', 'execSync', 'spawnSync'];
+const functions = ['exec', 'execFile', 'fork', 'spawn', 'execFileSync', 'execSync', 'spawnSync'];
 for (const name of functions) {
   test(`${name}()`, (t) => {
     t.throws(() => cp[name](), /argument must be of type string/);

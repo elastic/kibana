@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Logger } from 'src/core/server';
-
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { Filter } from '@kbn/es-query';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import {
+import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
@@ -33,62 +32,72 @@ import {
   WrapHits,
 } from '../types';
 import {
+  addToSearchAfterReturn,
   createSearchAfterReturnType,
-  createSearchAfterReturnTypeFromResponse,
-  mergeReturns,
+  getUnprocessedExceptionsWarnings,
 } from '../utils';
-import { BuildRuleMessage } from '../rule_messages';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const thresholdExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
-  exceptionItems,
-  experimentalFeatures,
+  ruleExecutionLogger,
   services,
   version,
-  logger,
-  buildRuleMessage,
   startedAt,
   state,
   bulkCreate,
   wrapHits,
+  ruleDataReader,
+  primaryTimestamp,
+  secondaryTimestamp,
+  aggregatableTimestampField,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
-  exceptionItems: ExceptionListItemSchema[];
-  experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   version: string;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
   startedAt: Date;
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  ruleDataReader: IRuleDataReader;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
-  let result = createSearchAfterReturnType();
+  const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('thresholdExecutor', async () => {
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+    if (exceptionsWarning) {
+      result.warningMessages.push(exceptionsWarning);
+    }
+
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
       ? { signalHistory: state.signalHistory, searchErrors: [] }
       : await getThresholdSignalHistory({
-          indexPattern: ['*'], // TODO: get outputIndex?
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          services,
-          logger,
-          ruleId: ruleParams.ruleId,
+          frameworkRuleId: completeRule.alertId,
           bucketByFields: ruleParams.threshold.field,
-          timestampOverride: ruleParams.timestampOverride,
-          buildRuleMessage,
+          ruleDataReader,
         });
 
-    if (!state.initialized) {
+    if (state.initialized) {
       // Clean up any signal history that has fallen outside the window
       const toDelete: string[] = [];
       for (const [hash, entry] of Object.entries(signalHistory)) {
@@ -101,24 +110,10 @@ export const thresholdExecutor = async ({
       }
     }
 
-    if (hasLargeValueItem(exceptionItems)) {
-      result.warningMessages.push(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
-      );
-      result.warning = true;
-    }
-
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
-
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
-      timestampOverride: ruleParams.timestampOverride,
+      aggregatableTimestampField,
     });
 
     // Combine dupe filter with other filters
@@ -130,61 +125,50 @@ export const thresholdExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     // Look for new events over threshold
-    const {
-      searchResult: thresholdResults,
-      searchErrors,
-      searchDuration: thresholdSearchDuration,
-    } = await findThresholdSignals({
+    const { buckets, searchErrors, searchDurations } = await findThresholdSignals({
       inputIndexPattern: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
+      maxSignals: tuple.maxSignals,
       services,
-      logger,
+      ruleExecutionLogger,
       filter: esFilter,
       threshold: ruleParams.threshold,
-      timestampOverride: ruleParams.timestampOverride,
-      buildRuleMessage,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+      aggregatableTimestampField,
     });
 
     // Build and index new alerts
-    const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
-      await bulkCreateThresholdSignals({
-        someResult: thresholdResults,
-        completeRule,
-        filter: esFilter,
-        services,
-        logger,
-        inputIndexPattern: inputIndex,
-        signalsIndex: ruleParams.outputIndex,
-        startedAt,
-        from: tuple.from.toDate(),
-        signalHistory,
-        bulkCreate,
-        wrapHits,
-      });
 
-    result = mergeReturns([
-      result,
-      createSearchAfterReturnTypeFromResponse({
-        searchResult: thresholdResults,
-        timestampOverride: ruleParams.timestampOverride,
-      }),
-      createSearchAfterReturnType({
-        success,
-        errors: [...errors, ...previousSearchErrors, ...searchErrors],
-        createdSignalsCount: createdItemsCount,
-        createdSignals: createdItems,
-        bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-        searchAfterTimes: [thresholdSearchDuration],
-      }),
-    ]);
+    const createResult = await bulkCreateThresholdSignals({
+      buckets,
+      completeRule,
+      filter: esFilter,
+      services,
+      inputIndexPattern: inputIndex,
+      signalsIndex: ruleParams.outputIndex,
+      startedAt,
+      from: tuple.from.toDate(),
+      signalHistory,
+      bulkCreate,
+      wrapHits,
+      ruleExecutionLogger,
+    });
 
-    const createdAlerts = createdItems.map((alert) => {
-      const { _id, _index, ...source } = alert as { _id: string; _index: string };
+    addToSearchAfterReturn({ current: result, next: createResult });
+
+    result.errors.push(...previousSearchErrors);
+    result.errors.push(...searchErrors);
+    result.searchAfterTimes = searchDurations;
+
+    const createdAlerts = createResult.createdItems.map((alert) => {
+      const { _id, _index, ...source } = alert;
       return {
         _id,
         _index,

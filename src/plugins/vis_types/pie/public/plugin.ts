@@ -6,19 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, DocLinksStart, ThemeServiceStart } from 'src/core/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { LEGACY_PIE_CHARTS_LIBRARY } from '../common';
+import { CoreSetup, CoreStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { pieVisType } from './vis_type';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypePieSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   usageCollection: UsageCollectionSetup;
+}
+
+/** @internal */
+export interface VisTypePieStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /** @internal */
@@ -42,18 +48,16 @@ export class VisTypePiePlugin {
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_PIE_CHARTS_LIBRARY, false)) {
-      const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_pie');
-      visualizations.createBaseVisualization(
-        pieVisType({
-          showElasticChartsOptions: true,
-          palettes: charts.palettes,
-          trackUiMetric,
-        })
-      );
-    }
+    visualizations.createBaseVisualization(
+      pieVisType({
+        showElasticChartsOptions: true,
+        palettes: charts.palettes,
+      })
+    );
     return {};
   }
 
-  start() {}
+  start(core: CoreStart, { dataViews }: VisTypePieStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
 }

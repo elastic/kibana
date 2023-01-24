@@ -5,44 +5,46 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/logging';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Logger } from '@kbn/logging';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
-import {
+import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
+import type { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
   WithoutReservedActionGroups,
-} from '../../../../../alerting/common';
-import { ListClient } from '../../../../../lists/server';
-import { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
-import { BaseHit } from '../../../../common/detection_engine/types';
-import { ConfigType } from '../../../config';
-import { SetupPlugins } from '../../../plugin';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { BuildRuleMessage } from '../signals/rule_messages';
-import {
+} from '@kbn/alerting-plugin/common';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type {
+  PersistenceServices,
+  IRuleDataClient,
+  IRuleDataReader,
+} from '@kbn/rule-registry-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+
+import type { Filter } from '@kbn/es-query';
+import type { ConfigType } from '../../../config';
+import type { SetupPlugins } from '../../../plugin';
+import type { CompleteRule, RuleParams } from '../rule_schema';
+import type {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
   WrapSequences,
 } from '../signals/types';
-import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { IEventLogService } from '../../../../../event_log/server';
-import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
-import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
-import { commonParamsCamelToSnake } from '../schemas/rule_converters';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
 
-export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
+export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
+  enrichmentTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
@@ -55,24 +57,33 @@ export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
 }
 
 export interface RunOpts<TParams extends RuleParams> {
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
   completeRule: CompleteRule<TParams>;
-  searchAfterSize: number;
   tuple: {
     to: Moment;
     from: Moment;
     maxSignals: number;
   };
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  listClient: ListClient;
+  searchAfterSize: number;
+  bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  ruleDataReader: IRuleDataReader;
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  aggregatableTimestampField: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
+  alertTimestampOverride: Date | undefined;
 }
 
 export type SecurityAlertType<
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
@@ -80,7 +91,7 @@ export type SecurityAlertType<
   'executor'
 > & {
   executor: (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       TParams,
       TState,
       AlertInstanceState,
@@ -98,31 +109,20 @@ export interface CreateSecurityRuleTypeWrapperProps {
   logger: Logger;
   config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  eventLogService: IEventLogService;
-  ruleExecutionLoggerFactory: RuleExecutionLogForExecutorsFactory;
+  ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
+  version: string;
+  isPreview?: boolean;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {}
 >(
   type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
 ) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
-
-export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
-export type RACAlert = Omit<
-  TypeOfFieldMap<TechnicalRuleFieldMap> & RACAlertSignal,
-  '@timestamp' | typeof ALERT_RULE_PARAMETERS
-> & {
-  '@timestamp': string;
-  [ALERT_RULE_PARAMETERS]: ReturnType<typeof commonParamsCamelToSnake>;
-};
-
-export type RACSourceHit = SearchHit<RACAlert>;
-export type WrappedRACAlert = BaseHit<RACAlert>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
@@ -130,4 +130,16 @@ export interface CreateRuleOptions {
   ml?: SetupPlugins['ml'];
   eventsTelemetry?: ITelemetryEventsSender | undefined;
   version: string;
+}
+
+export interface CreateQueryRuleAdditionalOptions {
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
+}
+
+export interface CreateQueryRuleOptions
+  extends CreateRuleOptions,
+    CreateQueryRuleAdditionalOptions {
+  id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
+  name: 'Custom Query Rule' | 'Saved Query Rule';
 }

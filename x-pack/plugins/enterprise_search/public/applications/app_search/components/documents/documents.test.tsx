@@ -23,6 +23,7 @@ describe('Documents', () => {
   const values = {
     isMetaEngine: false,
     myRole: { canManageEngineDocuments: true },
+    engine: { elasticsearchIndexName: 'my-elasticsearch-index' },
   };
 
   beforeEach(() => {
@@ -66,6 +67,17 @@ describe('Documents', () => {
       const wrapper = shallow(<Documents />);
       expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(false);
     });
+
+    it('does not render a DocumentCreationButton for elasticsearch engines even if the user can manage engine documents', () => {
+      setMockValues({
+        ...values,
+        myRole: { canManageEngineDocuments: true },
+        isElasticsearchEngine: true,
+      });
+
+      const wrapper = shallow(<Documents />);
+      expect(getPageHeaderActions(wrapper).find(DocumentCreationButton).exists()).toBe(false);
+    });
   });
 
   describe('Meta Engines', () => {
@@ -87,6 +99,28 @@ describe('Documents', () => {
 
       const wrapper = shallow(<Documents />);
       expect(wrapper.find('[data-test-subj="MetaEnginesCallout"]').exists()).toBe(false);
+    });
+  });
+
+  describe('Elasticsearch indices', () => {
+    it('renders an Elasticsearch indices message if this is an Elasticsearch index', () => {
+      setMockValues({
+        ...values,
+        isElasticsearchEngine: true,
+      });
+
+      const wrapper = shallow(<Documents />);
+      expect(wrapper.find('[data-test-subj="ElasticsearchEnginesCallout"]').exists()).toBe(true);
+    });
+
+    it('does not render an Elasticsearch indices message if this is not an Elasticsearch index', () => {
+      setMockValues({
+        ...values,
+        isElasticsearchEngine: false,
+      });
+
+      const wrapper = shallow(<Documents />);
+      expect(wrapper.find('[data-test-subj="ElasticsearchEnginesCallout"]').exists()).toBe(false);
     });
   });
 });

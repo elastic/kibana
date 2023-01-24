@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublicUiSettingsParams, UserProvidedValues, SavedObjectAttribute } from 'src/core/public';
+import { PublicUiSettingsParams, UserProvidedValues, SavedObjectAttribute } from '@kbn/core/public';
 import { FieldSetting } from '../types';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';

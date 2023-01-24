@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 
@@ -30,7 +30,7 @@ export function getKibanaStats({
       port: number;
     };
   };
-  getStatus: () => ServiceStatus<unknown>;
+  getStatus: () => ServiceStatus<unknown> | undefined;
 }) {
   const status = getStatus();
   return {
@@ -42,6 +42,6 @@ export function getKibanaStats({
     transport_address: `${config.server.hostname}:${config.server.port}`,
     version: config.kibanaVersion.replace(SNAPSHOT_REGEX, ''),
     snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
-    status: ServiceStatusToLegacyState[status.level.toString()],
+    status: status ? ServiceStatusToLegacyState[status.level.toString()] : 'unknown', // If not status, not available yet
   };
 }

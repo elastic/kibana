@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ServiceList } from '.';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { ServiceList } from './';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { items } from './__fixtures__/service_api_mock_data';
 
 type Args = ComponentProps<typeof ServiceList>;
@@ -24,11 +23,7 @@ const coreMock = {
       return { fallBackToTransactions: false };
     },
   },
-  notifications: { toasts: { add: () => {} } },
-  uiSettings: { get: () => ({}) },
 } as unknown as CoreStart;
-
-const KibanaReactContext = createKibanaReactContext(coreMock);
 
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
@@ -36,17 +31,12 @@ const stories: Meta<Args> = {
   decorators: [
     (StoryComponent) => {
       return (
-        <KibanaReactContext.Provider>
-          <MemoryRouter
-            initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
-          >
-            <MockApmPluginContextWrapper
-              value={{ core: coreMock } as unknown as ApmPluginContextValue}
-            >
-              <StoryComponent />
-            </MockApmPluginContextWrapper>
-          </MemoryRouter>
-        </KibanaReactContext.Provider>
+        <MockApmPluginStorybook
+          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+          routePath="/services?rangeFrom=now-15m&rangeTo=now"
+        >
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],
@@ -59,6 +49,11 @@ export const Example: Story<Args> = (args) => {
 Example.args = {
   isLoading: false,
   items,
+  displayHealthStatus: true,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  initialPageSize: 25,
+  sortFn: (sortItems) => sortItems,
 };
 
 export const EmptyState: Story<Args> = (args) => {
@@ -67,6 +62,11 @@ export const EmptyState: Story<Args> = (args) => {
 EmptyState.args = {
   isLoading: false,
   items: [],
+  displayHealthStatus: true,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  initialPageSize: 25,
+  sortFn: (sortItems) => sortItems,
 };
 
 export const WithHealthWarnings: Story<Args> = (args) => {
@@ -74,8 +74,10 @@ export const WithHealthWarnings: Story<Args> = (args) => {
 };
 WithHealthWarnings.args = {
   isLoading: false,
+  initialPageSize: 25,
   items: items.map((item) => ({
     ...item,
     healthStatus: ServiceHealthStatus.warning,
   })),
+  sortFn: (sortItems) => sortItems,
 };

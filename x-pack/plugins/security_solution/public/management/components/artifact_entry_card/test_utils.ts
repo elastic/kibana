@@ -6,11 +6,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import uuid from 'uuid';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { v4 as uuidv4 } from 'uuid';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { TrustedApp } from '../../../../common/endpoint/types';
+import type { TrustedApp } from '../../../../common/endpoint/types';
 
 const getCommonItemDataOverrides = () => {
   return {
@@ -57,7 +57,7 @@ export const getExceptionProviderMock = (): ExceptionListItemSchema => {
       tags: ['policy:all'],
       comments: [
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           comment: 'test',
           created_at: new Date().toISOString(),
           created_by: 'Justa',

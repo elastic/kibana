@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { LicensingPluginStart } from '../../../licensing/server';
+import { LicenseLicense } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface PutLicenseArg {
   acknowledge: boolean;
   client: IScopedClusterClient;
   licensing: LicensingPluginStart;
-  license: { [key: string]: any };
+  licenses: LicenseLicense[];
 }
 
-export async function putLicense({ acknowledge, client, licensing, license }: PutLicenseArg) {
+export async function putLicense({ acknowledge, client, licensing, licenses }: PutLicenseArg) {
   try {
     const response = await client.asCurrentUser.license.post({
-      // @ts-expect-error license is not typed in LM code
-      body: license,
+      licenses,
       acknowledge,
     });
     const { acknowledged, license_status: licenseStatus } = response;

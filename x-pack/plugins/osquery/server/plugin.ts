@@ -5,189 +5,43 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsClient,
-  DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
+  Ecs,
+} from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
+import { upgradeIntegration } from './utils/upgrade_integration';
+import type { PackSavedObjectAttributes } from './common/types';
+import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
+import { packSavedObjectType } from '../common/types';
+import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 import { createConfig } from './create_config';
-import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
+import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
-import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
-import { ConfigType } from './config';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
-import { PLUGIN_ID } from '../common';
+import type { OsqueryAppContext } from './lib/osquery_app_context_services';
+import { OsqueryAppContextService } from './lib/osquery_app_context_services';
+import type { ConfigType } from '../common/config';
+import { OSQUERY_INTEGRATION_NAME } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeTransforms } from './create_transforms/create_transforms';
+import { createDataViews } from './create_data_views';
+import { createActionHandler } from './handlers/action';
 
-const registerFeatures = (features: SetupPlugins['features']) => {
-  features.registerKibanaFeature({
-    id: PLUGIN_ID,
-    name: i18n.translate('xpack.osquery.features.osqueryFeatureName', {
-      defaultMessage: 'Osquery',
-    }),
-    category: DEFAULT_APP_CATEGORIES.management,
-    app: [PLUGIN_ID, 'kibana'],
-    catalogue: [PLUGIN_ID],
-    order: 2300,
-    excludeFromBasePrivileges: true,
-    privileges: {
-      all: {
-        api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],
-        app: [PLUGIN_ID, 'kibana'],
-        catalogue: [PLUGIN_ID],
-        savedObject: {
-          all: [],
-          read: [],
-        },
-        ui: ['write'],
-      },
-      read: {
-        api: [`${PLUGIN_ID}-read`],
-        app: [PLUGIN_ID, 'kibana'],
-        catalogue: [PLUGIN_ID],
-        savedObject: {
-          all: [],
-          read: [],
-        },
-        ui: ['read'],
-      },
-    },
-    subFeatures: [
-      {
-        name: i18n.translate('xpack.osquery.features.liveQueriesSubFeatureName', {
-          defaultMessage: 'Live queries',
-        }),
-        privilegeGroups: [
-          {
-            groupType: 'mutually_exclusive',
-            privileges: [
-              {
-                api: [`${PLUGIN_ID}-writeLiveQueries`, `${PLUGIN_ID}-readLiveQueries`],
-                id: 'live_queries_all',
-                includeIn: 'all',
-                name: 'All',
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: ['writeLiveQueries', 'readLiveQueries'],
-              },
-              {
-                api: [`${PLUGIN_ID}-readLiveQueries`],
-                id: 'live_queries_read',
-                includeIn: 'read',
-                name: 'Read',
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: ['readLiveQueries'],
-              },
-            ],
-          },
-          {
-            groupType: 'independent',
-            privileges: [
-              {
-                api: [`${PLUGIN_ID}-runSavedQueries`],
-                id: 'run_saved_queries',
-                name: i18n.translate('xpack.osquery.features.runSavedQueriesPrivilegeName', {
-                  defaultMessage: 'Run Saved queries',
-                }),
-                includeIn: 'all',
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: ['runSavedQueries'],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: i18n.translate('xpack.osquery.features.savedQueriesSubFeatureName', {
-          defaultMessage: 'Saved queries',
-        }),
-        privilegeGroups: [
-          {
-            groupType: 'mutually_exclusive',
-            privileges: [
-              {
-                api: [`${PLUGIN_ID}-writeSavedQueries`, `${PLUGIN_ID}-readSavedQueries`],
-                id: 'saved_queries_all',
-                includeIn: 'all',
-                name: 'All',
-                savedObject: {
-                  all: [savedQuerySavedObjectType],
-                  read: [],
-                },
-                ui: ['writeSavedQueries', 'readSavedQueries'],
-              },
-              {
-                api: [`${PLUGIN_ID}-readSavedQueries`],
-                id: 'saved_queries_read',
-                includeIn: 'read',
-                name: 'Read',
-                savedObject: {
-                  all: [],
-                  read: [savedQuerySavedObjectType],
-                },
-                ui: ['readSavedQueries'],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: i18n.translate('xpack.osquery.features.packsSubFeatureName', {
-          defaultMessage: 'Packs',
-        }),
-        privilegeGroups: [
-          {
-            groupType: 'mutually_exclusive',
-            privileges: [
-              {
-                api: [`${PLUGIN_ID}-writePacks`, `${PLUGIN_ID}-readPacks`],
-                id: 'packs_all',
-                includeIn: 'all',
-                name: 'All',
-                savedObject: {
-                  all: [packSavedObjectType],
-                  read: [],
-                },
-                ui: ['writePacks', 'readPacks'],
-              },
-              {
-                api: [`${PLUGIN_ID}-readPacks`],
-                id: 'packs_read',
-                includeIn: 'read',
-                name: 'Read',
-                savedObject: {
-                  all: [],
-                  read: [packSavedObjectType],
-                },
-                ui: ['readPacks'],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  });
-};
+import { registerFeatures } from './utils/register_features';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -195,8 +49,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly osqueryAppContextService = new OsqueryAppContextService();
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
-
-  private telemetryUsageCounter?: UsageCounter;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
@@ -211,7 +63,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     registerFeatures(plugins.features);
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     const osqueryContext: OsqueryAppContext = {
       logFactory: this.context.logger,
@@ -229,24 +81,22 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       usageCollection: plugins.usageCollection,
     });
 
-    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
-
-    defineRoutes(router, osqueryContext);
-
-    core.getStartServices().then(([, depsStart]) => {
-      const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
+    core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
+      const osquerySearchStrategy = osquerySearchStrategyProvider(
+        depsStart.data,
+        elasticsearch.client
+      );
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+      defineRoutes(router, osqueryContext);
     });
 
-    this.telemetryEventsSender.setup(
-      this.telemetryReceiver,
-      plugins.telemetry,
-      plugins.taskManager,
-      this.telemetryUsageCounter
-    );
+    this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
-    return {};
+    return {
+      osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema, ecsData?: Ecs) =>
+        createActionHandler(osqueryContext, params, { ecsData }),
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
@@ -255,6 +105,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.osqueryAppContextService.start({
       ...plugins.fleet,
+      ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
@@ -264,17 +115,58 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryReceiver.start(core, this.osqueryAppContextService);
 
-    this.telemetryEventsSender.start(
-      plugins.telemetry,
-      plugins.taskManager,
-      this.telemetryReceiver
-    );
+    this.telemetryEventsSender.start(plugins.taskManager, this.telemetryReceiver);
 
-    if (registerIngestCallback) {
+    plugins.fleet?.fleetSetupCompleted().then(async () => {
+      const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
+        OSQUERY_INTEGRATION_NAME
+      );
       const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
-      registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
-    }
+      const esClient = core.elasticsearch.client.asInternalUser;
+      const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+        client,
+        esClient,
+        undefined,
+        true
+      );
+
+      // If package is installed we want to make sure all needed assets are installed
+      if (packageInfo) {
+        await this.initialize(core, dataViewsService);
+      }
+
+      // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
+      upgradeIntegration({ packageInfo, client, esClient, logger: this.logger });
+
+      if (registerIngestCallback) {
+        registerIngestCallback(
+          'packagePolicyCreate',
+          async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
+            if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
+              await this.initialize(core, dataViewsService);
+
+              const allPacks = await client.find<PackSavedObjectAttributes>({
+                type: packSavedObjectType,
+              });
+
+              if (allPacks.saved_objects) {
+                return updateGlobalPacksCreateCallback(
+                  newPackagePolicy,
+                  client,
+                  allPacks,
+                  this.osqueryAppContextService
+                );
+              }
+            }
+
+            return newPackagePolicy;
+          }
+        );
+
+        registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
+      }
+    });
 
     return {};
   }
@@ -283,5 +175,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Stopped');
     this.telemetryEventsSender.stop();
     this.osqueryAppContextService.stop();
+  }
+
+  async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
+    this.logger.debug('initialize');
+    await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    await createDataViews(dataViewsService);
   }
 }

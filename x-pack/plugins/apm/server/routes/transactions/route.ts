@@ -11,22 +11,18 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../common/latency_aggregation_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
 import { getTransactionBreakdown } from './breakdown';
-import { getTransactionTraceSamples } from './trace_samples';
 import { getLatencyPeriods } from './get_latency_charts';
 import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
 import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  comparisonRangeRt,
-  environmentRt,
-  kueryRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { offsetRt } from '../../../common/comparison_rt';
+import { getTraceSamples } from './trace_samples';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -60,8 +56,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     isAggregationAccurate: boolean;
     bucketSize: number;
   }> => {
-    const { params } = resources;
-    const setup = await setupRequest(resources);
+    const { params, config } = resources;
+    const apmEventClient = await getApmEventClient(resources);
     const {
       path: { serviceName },
       query: {
@@ -73,9 +69,9 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         end,
       },
     } = params;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
       kuery,
       start,
       end,
@@ -84,7 +80,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     return getServiceTransactionGroups({
       environment,
       kuery,
-      setup,
+      config,
+      apmEventClient,
       serviceName,
       searchAggregatedTransactions,
       transactionType,
@@ -104,7 +101,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      comparisonRangeRt,
+      offsetRt,
       t.type({
         transactionNames: jsonRt.pipe(t.array(t.string)),
         numBuckets: toNumberRt,
@@ -143,8 +140,8 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       impact: number;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
 
     const {
       path: { serviceName },
@@ -155,15 +152,15 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
         latencyAggregationType,
         numBuckets,
         transactionType,
-        comparisonStart,
-        comparisonEnd,
         start,
         end,
+        offset,
       },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -172,17 +169,16 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
     return await getServiceTransactionGroupDetailedStatisticsPeriods({
       environment,
       kuery,
-      setup,
+      apmEventClient,
       serviceName,
       transactionNames,
       searchAggregatedTransactions,
       transactionType,
       numBuckets,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -200,7 +196,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
       }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -227,8 +223,8 @@ const transactionLatencyChartsRoute = createApmServerRoute({
           overallAvgDuration: null;
         };
   }> => {
-    const setup = await setupRequest(resources);
-    const { params, logger } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, logger, config } = resources;
 
     const { serviceName } = params.path;
     const {
@@ -237,14 +233,14 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       transactionType,
       transactionName,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -256,7 +252,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       serviceName,
       transactionType,
       transactionName,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
       logger,
       start,
@@ -266,8 +262,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     const { currentPeriod, previousPeriod } = await getLatencyPeriods({
       ...options,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
     });
 
     return {
@@ -306,7 +301,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
   ): Promise<{
     traceSamples: Array<{ transactionId: string; traceId: string }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const {
@@ -322,7 +317,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    return getTransactionTraceSamples({
+    return getTraceSamples({
       environment,
       kuery,
       serviceName,
@@ -332,7 +327,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       traceId,
       sampleRangeFrom,
       sampleRangeTo,
-      setup,
+      apmEventClient,
       start,
       end,
     });
@@ -367,8 +362,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       legendValue: string;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
-    const { params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
 
     const { serviceName } = params.path;
     const { environment, kuery, transactionName, transactionType, start, end } =
@@ -380,7 +375,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       serviceName,
       transactionName,
       transactionType,
-      setup,
+      config,
+      apmEventClient,
       start,
       end,
     });
@@ -397,7 +393,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     query: t.intersection([
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -424,23 +420,23 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
           average: null;
         };
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { params } = resources;
+    const { params, config } = resources;
     const { serviceName } = params.path;
     const {
       environment,
       kuery,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -452,12 +448,11 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       serviceName,
       transactionType,
       transactionName,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -471,7 +466,7 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
-      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -500,22 +495,16 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
           average: null;
         };
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
-    const { params } = resources;
+    const { params, config } = resources;
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      transactionType,
-      comparisonStart,
-      comparisonEnd,
-      start,
-      end,
-    } = params.query;
+    const { environment, kuery, transactionType, start, end, offset } =
+      params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -526,12 +515,11 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       kuery,
       serviceName,
       transactionType,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
-      comparisonStart,
-      comparisonEnd,
       start,
       end,
+      offset,
     });
   },
 });
@@ -546,7 +534,7 @@ const transactionChartsColdstartRateByTransactionNameRoute =
       }),
       query: t.intersection([
         t.type({ transactionType: t.string, transactionName: t.string }),
-        t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
+        t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       ]),
     }),
     options: { tags: ['access:apm'] },
@@ -575,28 +563,27 @@ const transactionChartsColdstartRateByTransactionNameRoute =
             average: null;
           };
     }> => {
-      const setup = await setupRequest(resources);
+      const apmEventClient = await getApmEventClient(resources);
 
-      const { params } = resources;
+      const { params, config } = resources;
       const { serviceName } = params.path;
       const {
         environment,
         kuery,
         transactionType,
         transactionName,
-        comparisonStart,
-        comparisonEnd,
         start,
         end,
+        offset,
       } = params.query;
 
-      const searchAggregatedTransactions =
-        await getSearchAggregatedTransactions({
-          ...setup,
-          kuery,
-          start,
-          end,
-        });
+      const searchAggregatedTransactions = await getSearchTransactionsEvents({
+        config,
+        apmEventClient,
+        kuery,
+        start,
+        end,
+      });
 
       return getColdstartRatePeriods({
         environment,
@@ -604,12 +591,11 @@ const transactionChartsColdstartRateByTransactionNameRoute =
         serviceName,
         transactionType,
         transactionName,
-        setup,
+        apmEventClient,
         searchAggregatedTransactions,
-        comparisonStart,
-        comparisonEnd,
         start,
         end,
+        offset,
       });
     },
   });

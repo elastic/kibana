@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import type { Map as MbMap, VectorSource as MbVectorSource } from '@kbn/mapbox-gl';
+import type { Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { syncBoundsData, MvtSourceData, syncMvtSourceData } from '../vector_layer';
+import {
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+  syncBoundsData,
+  MvtSourceData,
+  syncMvtSourceData,
+} from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { IMvtVectorSource } from '../../sources/vector_source';
+import { getAggsMeta } from '../../util/tile_meta_feature_utils';
 
 export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
@@ -42,10 +48,9 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  destroy() {
-    if (this.getSource()) {
-      this.getSource().destroy();
-    }
+  getLayerIcon(isTocIcon: boolean) {
+    const { docCount } = getAggsMeta(this._getMetaFromTiles());
+    return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);
   }
 
   getSource(): ESGeoGridSource {
@@ -82,14 +87,17 @@ export class HeatmapLayer extends AbstractLayer {
 
   async syncData(syncContext: DataRequestContext) {
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: this.getId(),
+      layerName: await this.getDisplayName(),
       prevDataRequest: this.getSourceDataRequest(),
       requestMeta: buildVectorRequestMeta(
         this.getSource(),
         this.getSource().getFieldNames(),
         syncContext.dataFilters,
         this.getQuery(),
-        syncContext.isForceRefresh
+        syncContext.isForceRefresh,
+        syncContext.isFeatureEditorOpenForLayer
       ),
       source: this.getSource() as IMvtVectorSource,
       syncContext,
@@ -97,7 +105,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId()) as VectorTileSource;
     if (!mbSource) {
       return false;
     }
@@ -192,10 +200,10 @@ export class HeatmapLayer extends AbstractLayer {
     return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     return await syncBoundsData({
       layerId: this.getId(),
-      syncContext,
+      syncContext: getDataRequestContext(this.getId()),
       source: this.getSource(),
       sourceQuery: this.getQuery(),
     });

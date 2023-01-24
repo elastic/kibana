@@ -19,7 +19,7 @@ import { ApiToken } from '../types';
 
 import { Key } from './key';
 
-import { CredentialsList } from './';
+import { CredentialsList } from '.';
 
 describe('CredentialsList', () => {
   const apiToken: ApiToken = {
@@ -131,7 +131,7 @@ describe('CredentialsList', () => {
         pageIndex: 5,
         pageSize: 55,
         totalItemCount: 1004,
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       });
     });
   });

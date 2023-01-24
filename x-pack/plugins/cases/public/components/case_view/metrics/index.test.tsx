@@ -6,34 +6,48 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import {
   basicCaseMetrics,
   basicCaseNumericValueFeatures,
   basicCaseStatusFeatures,
 } from '../../../containers/mock';
-import { CaseViewMetrics } from './index';
-import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { CaseViewMetrics } from '.';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import { TestProviders } from '../../../common/mock';
+import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
+import { useCasesFeatures } from '../../../common/use_cases_features';
+
+jest.mock('../../../containers/use_get_case_metrics');
+jest.mock('../../../common/use_cases_features');
+
+const useFetchCaseMetricsMock = useGetCaseMetrics as jest.Mock;
+const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 const renderCaseMetrics = ({
   metrics = basicCaseMetrics,
   features = [...basicCaseNumericValueFeatures, ...basicCaseStatusFeatures],
   isLoading = false,
 }: {
-  metrics?: CaseMetrics;
-  features?: CaseMetricsFeature[];
+  metrics?: SingleCaseMetrics;
+  features?: SingleCaseMetricsFeature[];
   isLoading?: boolean;
 } = {}) => {
+  useFetchCaseMetricsMock.mockImplementation(() => ({
+    data: { metrics },
+    isLoading,
+  }));
+
+  useCasesFeaturesMock.mockReturnValue({ metricsFeatures: features });
   return render(
     <TestProviders>
-      <CaseViewMetrics metrics={metrics} isLoading={isLoading} features={features} />
+      <CaseViewMetrics caseId={'1234'} />
     </TestProviders>
   );
 };
 
 interface FeatureTest {
-  feature: CaseMetricsFeature;
+  feature: SingleCaseMetricsFeature;
   items: Array<{
     title: string;
     value: string | number;
@@ -92,6 +106,7 @@ const metricsFeaturesTests: FeatureTest[] = [
 ];
 
 describe('CaseViewMetrics', () => {
+  beforeEach(() => {});
   it('should render', () => {
     const { getByTestId } = renderCaseMetrics();
     expect(getByTestId('case-view-metrics-panel')).toBeInTheDocument();
@@ -102,18 +117,25 @@ describe('CaseViewMetrics', () => {
     expect(getByTestId('case-view-metrics-spinner')).toBeInTheDocument();
   });
 
-  it('should render metrics with default value 0', () => {
+  it('should render metrics with default value 0', async () => {
     const { getAllByText } = renderCaseMetrics({
       metrics: {},
       features: basicCaseNumericValueFeatures,
     });
-    expect(getAllByText('0')).toHaveLength(basicCaseNumericValueFeatures.length);
+    await waitFor(() => {
+      expect(getAllByText('0')).toHaveLength(basicCaseNumericValueFeatures.length);
+    });
   });
 
   it('should render status metrics with default value of a dash', () => {
     const { getAllByText } = renderCaseMetrics({ metrics: {} });
     // \u2014 is the unicode for a long dash
     expect(getAllByText('\u2014')).toHaveLength(3);
+  });
+
+  it('should not render if no features are returned', () => {
+    const result = renderCaseMetrics({ features: [] });
+    expect(result.container.innerHTML).toEqual('');
   });
 
   it('should render open to close duration with the icon when it is reopened', () => {

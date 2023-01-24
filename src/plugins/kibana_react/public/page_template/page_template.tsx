@@ -9,7 +9,7 @@
 import './page_template.scss';
 
 import React, { FunctionComponent } from 'react';
-import { EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageTemplateProps_Deprecated } from '@elastic/eui';
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
 import {
@@ -21,8 +21,9 @@ import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './pa
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
+ * @deprecated Use `KibanaPageTemplateProps` from `@kbn/shared-ux-page-kibana-template-types`.
  */
-export type KibanaPageTemplateProps = EuiPageTemplateProps & {
+export type KibanaPageTemplateProps = EuiPageTemplateProps_Deprecated & {
   /**
    * Changes the template type depending on other props provided.
    * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.
@@ -41,6 +42,7 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
   noDataConfig?: NoDataPageProps;
 };
 
+/** @deprecated Use `KibanaPageTemplate` from `@kbn/shared-ux-page-kibana-template`. */
 export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   template,
   className,

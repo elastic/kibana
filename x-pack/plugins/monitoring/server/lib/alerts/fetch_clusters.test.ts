@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
 
 jest.mock('../../static_globals', () => ({
@@ -83,7 +83,7 @@ describe('fetchClusters', () => {
     await fetchClusters(esClient);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_settings.cluster.metadata.display_name',
         'hits.hits._source.cluster_uuid',
@@ -101,7 +101,11 @@ describe('fetchClusters', () => {
                   should: [
                     { term: { type: 'cluster_stats' } },
                     { term: { 'metricset.name': 'cluster_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                    {
+                      term: {
+                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
+                      },
+                    },
                   ],
                   minimum_should_match: 1,
                 },
@@ -125,6 +129,8 @@ describe('fetchClusters', () => {
     });
     await fetchClusters(esClient);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

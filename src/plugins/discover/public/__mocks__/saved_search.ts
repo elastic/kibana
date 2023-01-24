@@ -6,17 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { SavedSearch } from '../services/saved_searches';
-import { createSearchSourceMock } from '../../../data/public/mocks';
-import { indexPatternMock } from './index_pattern';
-import { indexPatternWithTimefieldMock } from './index_pattern_with_timefield';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewMock } from './data_view';
+import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',
-  searchSource: createSearchSourceMock({ index: indexPatternMock }),
+  searchSource: createSearchSourceMock({ index: dataViewMock }),
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',
-  searchSource: createSearchSourceMock({ index: indexPatternWithTimefieldMock }),
+  searchSource: createSearchSourceMock({ index: dataViewWithTimefieldMock }),
+} as unknown as SavedSearch;
+
+export const savedSearchMockWithSQL = {
+  id: 'the-saved-search-id-sql',
+  searchSource: createSearchSourceMock({
+    index: dataViewWithTimefieldMock,
+    query: { sql: 'SELECT * FROM "the-saved-search-id-sql"' },
+  }),
 } as unknown as SavedSearch;

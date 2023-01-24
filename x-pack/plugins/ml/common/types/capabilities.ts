@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
@@ -16,11 +16,9 @@ import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
-  canAccessML: false,
 };
 
 export const userMlCapabilities = {
-  canAccessML: false,
   // Anomaly Detection
   canGetJobs: false,
   canGetDatafeeds: false,
@@ -38,6 +36,9 @@ export const userMlCapabilities = {
   canUseMlAlerts: false,
   // Trained models
   canGetTrainedModels: false,
+  canTestTrainedModels: false,
+  canGetFieldInfo: false,
+  canGetMlInfo: false,
 };
 
 export const adminMlCapabilities = {
@@ -82,9 +83,11 @@ export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
 export type MlCapabilitiesKey = keyof MlCapabilities;
 
-export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
-  keyof MlCapabilities
->;
+export const basicLicenseMlCapabilities = [
+  'canFindFileStructure',
+  'canGetFieldInfo',
+  'canGetMlInfo',
+] as Array<keyof MlCapabilities>;
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {

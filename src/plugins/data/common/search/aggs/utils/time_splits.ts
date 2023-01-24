@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-import _, { isArray } from 'lodash';
+import moment from 'moment-timezone';
+import { isArray } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
-import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../../../common';
+import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../..';
 import { IBucketAggConfig } from '../buckets';
 
 /**
@@ -226,7 +226,6 @@ export function mergeTimeShifts(
               const bucketKey = bucketAgg.type.getShiftedKey(bucketAgg, bucket.key, shift);
               // if a bucket is missing in the map, create an empty one
               if (!baseBucketMap[bucketKey]) {
-                // @ts-expect-error 'number' is not comparable to type 'AggregationsAggregate'.
                 baseBucketMap[String(bucketKey)] = {
                   key: bucketKey,
                 } as GenericBucket;
@@ -412,7 +411,8 @@ export function insertTimeShiftSplit(
   aggConfigs: AggConfigs,
   config: AggConfig,
   timeShifts: Record<string, moment.Duration>,
-  dslLvlCursor: Record<string, any>
+  dslLvlCursor: Record<string, any>,
+  defaultTimeZone: string
 ) {
   if ('splitForTimeShift' in config.type && !config.type.splitForTimeShift(config, aggConfigs)) {
     return dslLvlCursor;
@@ -426,18 +426,24 @@ export function insertTimeShiftSplit(
   const timeRange = aggConfigs.timeRange;
   const filters: Record<string, unknown> = {};
   const timeField = aggConfigs.timeFields[0];
+  const timeFilter = getTime(aggConfigs.indexPattern, timeRange, {
+    fieldName: timeField,
+    forceNow: aggConfigs.forceNow,
+  }) as RangeFilter;
   Object.entries(timeShifts).forEach(([key, shift]) => {
-    const timeFilter = getTime(aggConfigs.indexPattern, timeRange, {
-      fieldName: timeField,
-      forceNow: aggConfigs.forceNow,
-    }) as RangeFilter;
     if (timeFilter) {
       filters[key] = {
         range: {
           [timeField]: {
             format: 'strict_date_optional_time',
-            gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
-            lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
+            gte: moment
+              .tz(timeFilter.query.range[timeField].gte, defaultTimeZone)
+              .subtract(shift)
+              .toISOString(),
+            lte: moment
+              .tz(timeFilter.query.range[timeField].lte, defaultTimeZone)
+              .subtract(shift)
+              .toISOString(),
           },
         },
       };

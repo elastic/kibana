@@ -8,14 +8,59 @@
 import { get, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../common/cti/constants';
 
-import type { SignalSearchResponse, SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 import type {
   GetMatchedThreats,
   ThreatEnrichment,
   ThreatListItem,
   ThreatMatchNamedQuery,
+  SignalMatch,
 } from './types';
 import { extractNamedQueries } from './utils';
+
+export const MAX_NUMBER_OF_SIGNAL_MATCHES = 1000;
+
+export const getSignalMatchesFromThreatList = (
+  threatList: ThreatListItem[] = []
+): SignalMatch[] => {
+  const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
+
+  threatList.forEach((threatHit) =>
+    extractNamedQueries(threatHit).forEach((item) => {
+      const signalId = item.id;
+      if (!signalId) {
+        return;
+      }
+
+      if (!signalMap[signalId]) {
+        signalMap[signalId] = [];
+      }
+
+      // creating map of signal with large number of threats could lead to out of memory Kibana crash
+      // large number of threats also can cause signals bulk create failure due too large payload (413)
+      // large number of threats significantly slower alert details page render
+      // so, its number is limited to MAX_NUMBER_OF_SIGNAL_MATCHES
+      // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
+      if (signalMap[signalId].length >= MAX_NUMBER_OF_SIGNAL_MATCHES) {
+        return;
+      }
+
+      signalMap[signalId].push({
+        id: threatHit._id,
+        index: threatHit._index,
+        field: item.field,
+        value: item.value,
+      });
+    })
+  );
+
+  const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
+    signalId: key,
+    queries: value,
+  }));
+
+  return signalMatches;
+};
 
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
@@ -75,26 +120,41 @@ export const buildEnrichments = ({
   });
 
 export const enrichSignalThreatMatches = async (
-  signals: SignalSearchResponse,
+  signals: SignalSourceHit[],
   getMatchedThreats: GetMatchedThreats,
-  indicatorPath: string
-): Promise<SignalSearchResponse> => {
-  const signalHits = signals.hits.hits;
-  if (signalHits.length === 0) {
+  indicatorPath: string,
+  signalMatchesArg?: SignalMatch[]
+): Promise<SignalSourceHit[]> => {
+  if (signals.length === 0) {
     return signals;
   }
 
-  const uniqueHits = groupAndMergeSignalMatches(signalHits);
-  const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
-  const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
+  const uniqueHits = groupAndMergeSignalMatches(signals);
+  const signalMatches: SignalMatch[] = signalMatchesArg
+    ? signalMatchesArg
+    : uniqueHits.map((signalHit) => ({
+        signalId: signalHit._id,
+        queries: extractNamedQueries(signalHit),
+      }));
+
+  const matchedThreatIds = [
+    ...new Set(
+      signalMatches
+        .map((signalMatch) => signalMatch.queries)
+        .flat()
+        .map(({ id }) => id)
+    ),
+  ];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
-  const enrichmentsWithoutAtomic = signalMatches.map((queries) =>
-    buildEnrichments({
+
+  const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
+  signalMatches.forEach((signalMatch) => {
+    enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
       indicatorPath,
-      queries,
+      queries: signalMatch.queries,
       threats: matchedThreats,
-    })
-  );
+    });
+  });
 
   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
     const threat = get(signalHit._source, 'threat') ?? {};
@@ -107,7 +167,7 @@ export const enrichSignalThreatMatches = async (
     // new issues.
     const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
     const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[i];
+    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id] ?? [];
     const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
       ...enrichment,
       matched: {
@@ -128,14 +188,5 @@ export const enrichSignalThreatMatches = async (
     };
   });
 
-  return {
-    ...signals,
-    hits: {
-      ...signals.hits,
-      hits: enrichedSignals,
-      total: isObject(signals.hits.total)
-        ? { ...signals.hits.total, value: enrichedSignals.length }
-        : enrichedSignals.length,
-    },
-  };
+  return enrichedSignals;
 };

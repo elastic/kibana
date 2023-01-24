@@ -5,23 +5,24 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
-import { CoreStart } from 'kibana/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { Popover } from '.';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
 interface Args {
   nodeData: cytoscape.NodeDataDefinition;
 }
+
+type DependencyAPIReturnype =
+  APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
 const stories: Meta<Args> = {
   title: 'app/ServiceMap/popover',
@@ -30,40 +31,36 @@ const stories: Meta<Args> = {
     (StoryComponent) => {
       const coreMock = {
         http: {
-          get: () => {
+          get: async (): Promise<DependencyAPIReturnype> => {
             return {
-              avgCpuUsage: 0.32809666568309237,
-              avgErrorRate: 0.556068173242986,
-              avgMemoryUsage: 0.5504868173242986,
-              transactionStats: {
-                avgRequestsPerMinute: 164.47222031860858,
-                avgTransactionDuration: 61634.38905590272,
+              currentPeriod: {
+                cpuUsage: { value: 0.32809666568309237 },
+                failedTransactionsRate: { value: 0.556068173242986 },
+                memoryUsage: { value: 0.5504868173242986 },
+                transactionStats: {
+                  latency: {
+                    value: 61634.38905590272,
+                  },
+                  throughput: {
+                    value: 164.47222031860858,
+                  },
+                },
               },
+              previousPeriod: {},
             };
           },
         },
-        notifications: { toasts: { add: () => {} } },
-        uiSettings: { get: () => ({}) },
       } as unknown as CoreStart;
 
-      const KibanaReactContext = createKibanaReactContext(coreMock);
-
-      createCallApmApi(coreMock);
-
       return (
-        <MemoryRouter
-          initialEntries={['/service-map?rangeFrom=now-15m&rangeTo=now']}
+        <MockApmPluginStorybook
+          routePath="/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d"
+          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
         >
-          <KibanaReactContext.Provider>
-            <MockUrlParamsContextProvider>
-              <MockApmPluginContextWrapper>
-                <div style={{ height: 325 }}>
-                  <StoryComponent />
-                </div>
-              </MockApmPluginContextWrapper>
-            </MockUrlParamsContextProvider>
-          </KibanaReactContext.Provider>
-        </MemoryRouter>
+          <div style={{ height: 325 }}>
+            <StoryComponent />
+          </div>
+        </MockApmPluginStorybook>
       );
     },
     (StoryComponent, { args }) => {
@@ -99,7 +96,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Backend: Story<Args> = () => {
+export const Dependency: Story<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -109,7 +106,7 @@ export const Backend: Story<Args> = () => {
     />
   );
 };
-Backend.args = {
+Dependency.args = {
   nodeData: {
     'span.subtype': 'postgresql',
     'span.destination.service.resource': 'postgresql',
@@ -119,7 +116,7 @@ Backend.args = {
   },
 };
 
-export const BackendWithLongTitle: Story<Args> = () => {
+export const DependencyWithLongTitle: Story<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -129,7 +126,7 @@ export const BackendWithLongTitle: Story<Args> = () => {
     />
   );
 };
-BackendWithLongTitle.args = {
+DependencyWithLongTitle.args = {
   nodeData: {
     'span.subtype': 'http',
     'span.destination.service.resource':

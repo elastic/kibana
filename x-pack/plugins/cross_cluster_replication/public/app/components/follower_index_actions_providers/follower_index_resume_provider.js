@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, EuiLink } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { routing } from '../../services/routing';
 import { resumeFollowerIndex } from '../../store/actions';
 import { arrify } from '../../../../common/services/utils';

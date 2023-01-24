@@ -32,13 +32,13 @@ export const getAutoplayTextField = (wrapper: ReactWrapper) =>
   getAutoplayPanel(wrapper).find('EuiFieldText').find('input[type="text"]');
 
 export const getAutoplaySubmit = (wrapper: ReactWrapper) =>
-  getAutoplayPanel(wrapper).find('EuiButton');
+  getAutoplayPanel(wrapper).find('EuiButton button');
 
 export const getSettingsPanel = (wrapper: ReactWrapper) =>
   wrapper.find('Settings > SettingsComponent');
 
 export const getSettingsTrigger = (wrapper: ReactWrapper) =>
-  getSettingsPanel(wrapper).find('EuiButtonIcon');
+  getSettingsPanel(wrapper).find('EuiButtonIcon button');
 
 export const getPopover = (wrapper: ReactWrapper) => wrapper.find('EuiPopover');
 

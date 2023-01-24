@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 /**
  * We're importing specific files here instead of passing them
@@ -18,9 +18,9 @@ import type { CoreStart } from 'src/core/public';
  * It happens because the bundle starts to also include all the sync dependencies
  * available through the index file.
  */
-import { getChangePasswordComponent } from '../account_management/change_password/change_password_async';
-import { getPersonalInfoComponent } from '../account_management/personal_info/personal_info_async';
+import { getChangePasswordComponent } from './change_password/change_password_async';
 import { LazyWrapper } from './lazy_wrapper';
+import { getPersonalInfoComponent } from './personal_info/personal_info_async';
 
 export interface GetComponentsOptions {
   core: CoreStart;

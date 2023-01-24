@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { StartDependencies as Start } from '../../plugin';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { txtGoToDiscover } from './i18n';
-import {
-  ApplyGlobalFilterActionContext,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../src/plugins/data/public';
 
 const isOutputWithIndexPatterns = (
   output: unknown
@@ -33,9 +30,7 @@ export interface Params {
 export class DashboardToDiscoverDrilldown
   implements Drilldown<Config, ApplyGlobalFilterActionContext>
 {
-  constructor(protected readonly params: Params) {
-    this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
-  }
+  constructor(protected readonly params: Params) {}
 
   public readonly id = SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN;
 
@@ -49,9 +44,9 @@ export class DashboardToDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  private readonly ReactCollectConfig!: React.FC<CollectConfigProps>;
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+  public readonly CollectConfig = (props: CollectConfigProps) => (
+    <CollectConfigContainer {...props} params={this.params} />
+  );
 
   public readonly createConfig = () => ({
     customIndexPattern: false,

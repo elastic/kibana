@@ -36,6 +36,7 @@ export class EnvironmentService {
        * This API should not be extended for new features and will be removed in future versions
        * in favor of display specific extension apis.
        * @deprecated
+       * @removeBy 8.8.0
        * @param update
        */
       update: (update: Partial<Environment>) => {

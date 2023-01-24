@@ -1,0 +1,34 @@
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{}",
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "Dashboard with missing refs",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "dash-with-missing-refs",
+  "migrationVersion": {
+    "dashboard": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "missing-vis-ref",
+      "name": "some missing ref",
+      "type": "visualization"
+    },
+    {
+      "id": "missing-dashboard-ref",
+      "name": "some other missing ref",
+      "type": "dashboard"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2019-01-22T19:32:47.232Z",
+  "version": "WzEsMl0="
+}

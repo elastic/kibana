@@ -10,3 +10,5 @@ export { EditIndexPattern } from './edit_index_pattern';
 export { EditIndexPatternContainer } from './edit_index_pattern_container';
 export { CreateEditField } from './create_edit_field';
 export { CreateEditFieldContainer } from './create_edit_field/create_edit_field_container';
+export type { RemoveDataViewProps } from './remove_data_view';
+export { removeDataView } from './remove_data_view';

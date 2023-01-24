@@ -7,30 +7,40 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
-import { CasesProvider, CasesContextProps } from '../../components/cases_context';
+import type { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
+import type { CasesContextProps } from '../../components/cases_context';
+import { CasesProvider } from '../../components/cases_context';
 
-export type GetAllCasesSelectorModalProps = AllCasesSelectorModalProps & CasesContextProps;
+type GetAllCasesSelectorModalPropsInternal = AllCasesSelectorModalProps & CasesContextProps;
+export type GetAllCasesSelectorModalProps = Omit<
+  GetAllCasesSelectorModalPropsInternal,
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
+>;
 
 const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
   () => import('../../components/all_cases/selector_modal')
 );
 export const getAllCasesSelectorModalLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
-  alertData,
+  permissions,
   hiddenStatuses,
   onRowClick,
-  updateCase,
   onClose,
-}: GetAllCasesSelectorModalProps) => (
-  <CasesProvider value={{ owner, userCanCrud }}>
+}: GetAllCasesSelectorModalPropsInternal) => (
+  <CasesProvider
+    value={{
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      permissions,
+    }}
+  >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy
-        alertData={alertData}
         hiddenStatuses={hiddenStatuses}
         onRowClick={onRowClick}
-        updateCase={updateCase}
         onClose={onClose}
       />
     </Suspense>
@@ -42,20 +52,14 @@ export const getAllCasesSelectorModalLazy = ({
  * cases provider. to be further refactored https://github.com/elastic/kibana/issues/123183
  */
 export const getAllCasesSelectorModalNoProviderLazy = ({
-  alertData,
-  attachments,
   hiddenStatuses,
   onRowClick,
-  updateCase,
   onClose,
 }: AllCasesSelectorModalProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <AllCasesSelectorModalLazy
-      alertData={alertData}
-      attachments={attachments}
       hiddenStatuses={hiddenStatuses}
       onRowClick={onRowClick}
-      updateCase={updateCase}
       onClose={onClose}
     />
   </Suspense>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-import { EndpointAppContext } from '../../types';
+import type { IRouter } from '@kbn/core/server';
+import type { EndpointAppContext } from '../../types';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
@@ -30,12 +30,17 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       options: { authRequired: true },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
       logger,
       getHostPolicyResponseHandler()
     )
   );
 
+  /**
+   * @deprecated
+   * @removeBy 9.0.0
+   *
+   */
   router.get(
     {
       path: AGENT_POLICY_SUMMARY_ROUTE,

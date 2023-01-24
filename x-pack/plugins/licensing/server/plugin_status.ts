@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { takeUntil, startWith, map } from 'rxjs/operators';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../src/core/server';
+import { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import { ILicense } from '../common/types';
 
 export const getPluginStatus$ = (

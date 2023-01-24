@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldFormat } from 'src/plugins/field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { SampleInput } from '../../types';
 import { DefaultFormatEditor, convertSampleInput } from './default';

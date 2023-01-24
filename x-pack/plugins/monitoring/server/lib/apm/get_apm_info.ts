@@ -6,13 +6,9 @@
  */
 
 import { upperFirst } from 'lodash';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { getDiffCalculation } from '../beats/_beats_stats';
-// @ts-ignore
 import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 import { LegacyRequest } from '../../types';
@@ -85,8 +81,8 @@ export async function getApmInfo(
   }: {
     clusterUuid: string;
     apmUuid: string;
-    start: number;
-    end: number;
+    start?: number;
+    end?: number;
   }
 ) {
   checkParam(apmIndexPattern, 'apmIndexPattern in beats/getBeatSummary');

@@ -8,8 +8,9 @@
 import { Legacy } from '../legacy_shims';
 
 /**
- * Possible temporary work arround to establish if APM might also be monitoring fleet:
- * https://github.com/elastic/kibana/pull/95129/files#r604815886
+ * Checks if on cloud and >= 7.13
+ * In this configuration APM server should be running within elastic agent.
+ * See https://github.com/elastic/kibana/issues/97879 for details.
  */
 export const checkAgentTypeMetric = (versions?: string[]) => {
   if (!Legacy.shims.isCloud || !versions) {

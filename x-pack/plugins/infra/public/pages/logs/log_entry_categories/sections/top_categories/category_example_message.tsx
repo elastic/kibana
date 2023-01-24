@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import moment from 'moment';
 
+import { useUiTracker, useLinkProps } from '@kbn/observability-plugin/public';
 import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
 import { TimeRange } from '../../../../../../common/time';
 import {
   getFriendlyNameForPartitionId,
   partitionField,
 } from '../../../../../../common/log_analysis';
-import { ViewLogInContext } from '../../../../../containers/logs/view_log_in_context';
+import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
 import {
   LogEntryColumn,
   LogEntryFieldColumn,
@@ -26,7 +27,6 @@ import {
 } from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
-import { useUiTracker, useLinkProps } from '../../../../../../../observability/public';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
@@ -41,7 +41,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   context: LogEntryContext;
 }> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
   const trackMetric = useUiTracker({ app: 'infra_logs' });
-  const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
+  const [, { setContextEntry }] = useViewLogInProviderContext();
   // handle special cases for the dataset value
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
 

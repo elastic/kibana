@@ -9,7 +9,7 @@ import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 
-import { CoreStart, ScopedHistory, CoreTheme } from '../../../../../src/core/public';
+import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 

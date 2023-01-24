@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerApiError } from '../../../../../common/types';
 
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.hostIsolationExceptions.form.name.placeholder',
@@ -63,67 +62,3 @@ export const IP_ERROR = i18n.translate(
     defaultMessage: 'The IP is invalid. Only IPv4 with optional CIDR is supported',
   }
 );
-
-export const DELETE_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.hostIsolationExceptions.list.action.delete',
-  {
-    defaultMessage: 'Delete Exception',
-  }
-);
-
-export const EDIT_HOST_ISOLATION_EXCEPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.hostIsolationExceptions.list.action.edit',
-  {
-    defaultMessage: 'Edit Exception',
-  }
-);
-
-export const getCreateErrorMessage = (creationError: ServerApiError) => {
-  return i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.form.failedToastTitle.create',
-    {
-      defaultMessage: 'There was an error creating the exception: "{error}"',
-      values: { error: creationError.message },
-    }
-  );
-};
-
-export const getUpdateErrorMessage = (updateError: ServerApiError) => {
-  return i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.form.failedToastTitle.update',
-    {
-      defaultMessage: 'There was an error updating the exception: "{error}"',
-      values: { error: updateError.message },
-    }
-  );
-};
-
-export const getLoadErrorMessage = (getError: ServerApiError) => {
-  return i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.form.failedToastTitle.get',
-    {
-      defaultMessage: 'Unable to edit exception: "{error}"',
-      values: { error: getError.message },
-    }
-  );
-};
-
-export const getUpdateSuccessMessage = (name: string) => {
-  return i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.form.editingSuccessToastTitle',
-    {
-      defaultMessage: '"{name}" has been updated.',
-      values: { name },
-    }
-  );
-};
-
-export const getCreationSuccessMessage = (name: string) => {
-  return i18n.translate(
-    'xpack.securitySolution.hostIsolationExceptions.form.creationSuccessToastTitle',
-    {
-      defaultMessage: '"{name}" has been added to the host isolation exceptions list.',
-      values: { name },
-    }
-  );
-};

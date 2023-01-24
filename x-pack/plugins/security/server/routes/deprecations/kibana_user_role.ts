@@ -27,8 +27,9 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
     },
     createLicensedRouteHandler(async (context, request, response) => {
       let users: estypes.SecurityGetUserResponse;
+      const esClient = (await context.core).elasticsearch.client;
       try {
-        users = await context.core.elasticsearch.client.asCurrentUser.security.getUser();
+        users = await esClient.asCurrentUser.security.getUser();
       } catch (err) {
         if (getErrorStatusCode(err) === 403) {
           logger.warn(
@@ -65,7 +66,7 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
         }
 
         try {
-          await context.core.elasticsearch.client.asCurrentUser.security.putUser({
+          await esClient.asCurrentUser.security.putUser({
             username: userToUpdate.username,
             body: { ...userToUpdate, roles },
           });
@@ -89,10 +90,10 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const esClient = (await context.core).elasticsearch.client;
       let roleMappings: estypes.SecurityGetRoleMappingResponse;
       try {
-        roleMappings =
-          await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping();
+        roleMappings = await esClient.asCurrentUser.security.getRoleMapping();
       } catch (err) {
         logger.error(`Failed to retrieve role mappings: ${getDetailedErrorMessage(err)}.`);
         return response.customError(wrapIntoCustomErrorResponse(err));
@@ -119,7 +120,7 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
         }
 
         try {
-          await context.core.elasticsearch.client.asCurrentUser.security.putRoleMapping({
+          await esClient.asCurrentUser.security.putRoleMapping({
             name: mappingNameToUpdate,
             body: { ...mappingToUpdate, roles },
           });

@@ -1,13 +1,18 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["server/**/*"],
-  "references": [
-    { "path": "../security/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/security-plugin",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/utility-types",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-common",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

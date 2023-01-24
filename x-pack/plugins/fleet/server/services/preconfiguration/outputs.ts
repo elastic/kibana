@@ -5,16 +5,39 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
-import type { PreconfiguredOutput, Output } from '../../../common';
-import { normalizeHostsForAgents } from '../../../common';
+import type { PreconfiguredOutput, Output, NewOutput } from '../../../common/types';
+import { normalizeHostsForAgents } from '../../../common/services';
+import type { FleetConfigType } from '../../config';
+import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
-
 import { appContextService } from '../app_context';
+
+import { isDifferent } from './utils';
+
+export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
+  const { outputs: outputsOrUndefined } = config;
+
+  const outputs: PreconfiguredOutput[] = (outputsOrUndefined || []).concat([
+    ...(config?.agents.elasticsearch.hosts
+      ? [
+          {
+            ...DEFAULT_OUTPUT,
+            id: DEFAULT_OUTPUT_ID,
+            hosts: config?.agents.elasticsearch.hosts,
+            ca_sha256: config?.agents.elasticsearch.ca_sha256,
+            is_preconfigured: true,
+          } as PreconfiguredOutput,
+        ]
+      : []),
+  ]);
+
+  return outputs;
+}
 
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
@@ -50,10 +73,14 @@ export async function createOrUpdatePreconfiguredOutputs(
 
       const configYaml = config ? safeDump(config) : undefined;
 
-      const data = {
+      const data: NewOutput = {
         ...outputData,
-        config_yaml: configYaml,
         is_preconfigured: true,
+        config_yaml: configYaml ?? null,
+        // Set value to null to update these fields on update
+        ca_sha256: outputData.ca_sha256 ?? null,
+        ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
+        ssl: outputData.ssl ?? null,
       };
 
       if (!data.hosts || data.hosts.length === 0) {
@@ -131,18 +158,26 @@ function isPreconfiguredOutputDifferentFromCurrent(
 ): boolean {
   return (
     !existingOutput.is_preconfigured ||
-    existingOutput.is_default !== preconfiguredOutput.is_default ||
-    existingOutput.is_default_monitoring !== preconfiguredOutput.is_default_monitoring ||
-    existingOutput.name !== preconfiguredOutput.name ||
-    existingOutput.type !== preconfiguredOutput.type ||
+    isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
+    isDifferent(existingOutput.is_default_monitoring, preconfiguredOutput.is_default_monitoring) ||
+    isDifferent(existingOutput.name, preconfiguredOutput.name) ||
+    isDifferent(existingOutput.type, preconfiguredOutput.type) ||
     (preconfiguredOutput.hosts &&
       !isEqual(
-        existingOutput.hosts?.map(normalizeHostsForAgents),
-        preconfiguredOutput.hosts.map(normalizeHostsForAgents)
+        existingOutput?.type === 'elasticsearch'
+          ? existingOutput.hosts?.map(normalizeHostsForAgents)
+          : existingOutput.hosts,
+        preconfiguredOutput.type === 'elasticsearch'
+          ? preconfiguredOutput.hosts.map(normalizeHostsForAgents)
+          : preconfiguredOutput.hosts
       )) ||
-    (preconfiguredOutput.ssl && !isEqual(preconfiguredOutput.ssl, existingOutput.ssl)) ||
-    existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
-    existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
-    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
+    isDifferent(preconfiguredOutput.ssl, existingOutput.ssl) ||
+    isDifferent(existingOutput.ca_sha256, preconfiguredOutput.ca_sha256) ||
+    isDifferent(
+      existingOutput.ca_trusted_fingerprint,
+      preconfiguredOutput.ca_trusted_fingerprint
+    ) ||
+    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)
   );
 }

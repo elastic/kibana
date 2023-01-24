@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/stdio",
-  "types": "../target_types/stdio"
-}

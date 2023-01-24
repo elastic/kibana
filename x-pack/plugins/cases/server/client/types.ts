@@ -6,10 +6,15 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
-import { User } from '../../common/api';
-import { Authorization } from '../authorization/authorization';
-import {
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { KueryNode } from '@kbn/es-query';
+import type { CasesFindRequest, User } from '../../common/api';
+import type { Authorization } from '../authorization/authorization';
+import type {
   CaseConfigureService,
   CasesService,
   CaseUserActionService,
@@ -17,23 +22,43 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { ActionsClient } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { LicensingService } from '../services/licensing';
+import type { NotificationService } from '../services/notifications/types';
+
+export interface CasesServices {
+  alertsService: AlertService;
+  caseService: CasesService;
+  caseConfigureService: CaseConfigureService;
+  connectorMappingsService: ConnectorMappingsService;
+  userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
+  licensingService: LicensingService;
+  notificationService: NotificationService;
+}
 
 /**
  * Parameters for initializing a cases client
  */
 export interface CasesClientArgs {
-  readonly caseConfigureService: CaseConfigureService;
-  readonly caseService: CasesService;
-  readonly connectorMappingsService: ConnectorMappingsService;
+  readonly services: CasesServices;
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  readonly userActionService: CaseUserActionService;
-  readonly alertsService: AlertService;
-  readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
+  readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  readonly securityStartPlugin: SecurityPluginStart;
+  readonly spaceId: string;
+  readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
+
+export type CasesFindQueryParams = Partial<
+  Pick<
+    CasesFindRequest,
+    'tags' | 'reporters' | 'status' | 'severity' | 'owner' | 'from' | 'to' | 'assignees'
+  > & { sortByField?: string; authorizationFilter?: KueryNode }
+>;

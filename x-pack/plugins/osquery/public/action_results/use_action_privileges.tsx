@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../common/lib/kibana';
 
 export const useActionResultsPrivileges = () => {

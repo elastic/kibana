@@ -17,6 +17,7 @@ require('@kbn/flot-charts');
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
 export const KbnI18nReact = require('@kbn/i18n-react');
+export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
@@ -38,10 +39,10 @@ export const RxjsOperators = require('rxjs/operators');
 export const ElasticNumeral = require('@elastic/numeral');
 export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
-export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
-export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
+export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services');
+export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
-export const ElasticDatemath = require('@elastic/datemath');
+export const KbnDatemath = require('@kbn/datemath');
 export const ReactBeautifulDnD = require('react-beautiful-dnd');
 
 export const Lodash = require('lodash');
@@ -52,9 +53,13 @@ export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
+export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
+export const KbnEsQuery = require('@kbn/es-query');
 export const KbnStd = require('@kbn/std');
-export const SaferLodashSet = require('@elastic/safer-lodash-set');
-export const RisonNode = require('rison-node');
+export const SaferLodashSet = require('@kbn/safer-lodash-set');
+export const KbnRison = require('@kbn/rison');
 export const History = require('history');
 export const Classnames = require('classnames');
+export const ReactQuery = require('@tanstack/react-query');
+export const ReactQueryDevtools = require('@tanstack/react-query-devtools');

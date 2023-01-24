@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import { TimelineStatus, TimelineType, SavedTimeline } from '../../../../../common/types/timeline';
-import { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { SavedTimeline } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
@@ -119,6 +120,30 @@ describe('pickSavedTimeline', () => {
       expect(result.updatedBy).toEqual(userInfo.username);
     });
 
+    test('Creating a timeline with user email', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = null;
+      const userInfo = { username: 'elastic', email: 'some@email.com' } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(userInfo.email);
+      expect(result.updatedBy).toEqual(userInfo.email);
+    });
+
+    test('Creating a timeline with user full name', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = null;
+      const userInfo = {
+        username: 'elastic',
+        email: 'some@email.com',
+        full_name: 'Some Full Name',
+      } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(userInfo.full_name);
+      expect(result.updatedBy).toEqual(userInfo.full_name);
+    });
+
     test('Updating a timeline', () => {
       const savedTimeline = getMockSavedTimeline();
       const timelineId = savedTimeline.savedObjectId ?? null;
@@ -127,6 +152,30 @@ describe('pickSavedTimeline', () => {
 
       expect(result.createdBy).toEqual(savedTimeline.createdBy);
       expect(result.updatedBy).toEqual(userInfo.username);
+    });
+
+    test('Updating a timeline with user email', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = savedTimeline.savedObjectId ?? null;
+      const userInfo = { username: 'elastic', email: 'some@email.com' } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(savedTimeline.createdBy);
+      expect(result.updatedBy).toEqual(userInfo.email);
+    });
+
+    test('Updating a timeline with user full name', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = savedTimeline.savedObjectId ?? null;
+      const userInfo = {
+        username: 'elastic',
+        email: 'some@email.com',
+        full_name: 'Some Full Name',
+      } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(savedTimeline.createdBy);
+      expect(result.updatedBy).toEqual(userInfo.full_name);
     });
   });
 

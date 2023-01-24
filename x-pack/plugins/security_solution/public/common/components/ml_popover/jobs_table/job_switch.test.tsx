@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 import { JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
 import { mockSecurityJobs } from '../api.mock';
-import { SecurityJob } from '../types';
+import type { SecurityJob } from '../types';
 
 describe('JobSwitch', () => {
   let securityJobs: SecurityJob[];

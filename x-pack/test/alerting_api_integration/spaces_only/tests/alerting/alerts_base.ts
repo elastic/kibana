@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Response as SupertestResponse } from 'supertest';
-import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
@@ -22,11 +23,6 @@ import {
   ensureDatetimeIsWithinRange,
   TaskManagerUtils,
 } from '../../../common/lib';
-import {
-  TaskRunning,
-  TaskRunningStage,
-} from '../../../../../plugins/task_manager/server/task_running';
-import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -101,7 +97,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           reference,
         },
         alertInfo: {
-          alertId,
+          id: alertId,
           consumer: 'alertsFixture',
           spaceId: space.id,
           namespace: space.namespace,

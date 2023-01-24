@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING_TIMELINE_DATA = i18n.translate(
-  'xpack.securitySolution.footer.loadingTimelineData',
-  {
-    defaultMessage: 'Loading Timeline data',
-  }
-);
-
 export const EVENTS = i18n.translate('xpack.securitySolution.footer.events', {
   defaultMessage: 'Events',
 });

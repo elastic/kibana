@@ -7,12 +7,11 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Datatable, ExpressionType } from '../expression_types';
-import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { TablesAdapter } from '../util/tables_adapter';
 import { ExpressionsInspectorAdapter } from '../util';
 
@@ -65,6 +64,16 @@ export interface ExecutionContext<
    * Returns the state (true|false) of the sync colors across panels switch.
    */
   isSyncColorsEnabled?: () => boolean;
+
+  /**
+   * Returns the state (true|false) of the sync cursor across panels switch.
+   */
+  isSyncCursorEnabled?: () => boolean;
+
+  /**
+   * Returns the state (true|false) of the sync tooltips across panels switch.
+   */
+  isSyncTooltipsEnabled?: () => boolean;
 
   /**
    * Contains the meta-data about the source of the expression.

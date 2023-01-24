@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as useUiSettingHook from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import { render } from '../../../../utils/test_helper';
 import type { TopAlert } from '../../containers/alerts_page';
@@ -41,6 +41,17 @@ describe('AlertsFlyout', () => {
 
     expect(flyout.getByText('Recovered')).toBeInTheDocument();
   });
+
+  it('should NOT show the Alert details button as the feature flag is disabled', async () => {
+    const flyout = render(
+      <AlertsFlyout
+        alert={recoveredAlert}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
+        onClose={jest.fn()}
+      />
+    );
+    expect(flyout.queryByTestId('alertsFlyoutAlertDetailsButton')).not.toBeInTheDocument();
+  });
 });
 
 const activeAlert: TopAlert = {
@@ -70,6 +81,7 @@ const activeAlert: TopAlert = {
   },
   active: true,
   start: 1630587249674,
+  lastUpdated: 1630588131750,
 };
 
 const recoveredAlert: TopAlert = {
@@ -98,4 +110,5 @@ const recoveredAlert: TopAlert = {
   },
   active: false,
   start: 1630587936699,
+  lastUpdated: 1630588125729,
 };

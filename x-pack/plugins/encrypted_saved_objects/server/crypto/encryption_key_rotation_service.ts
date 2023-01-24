@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
@@ -13,9 +13,10 @@ import type {
   SavedObject,
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';
@@ -107,7 +108,7 @@ export class EncryptionKeyRotationService {
     const user = this.options.security?.authc.getCurrentUser(request) ?? undefined;
     const retrieveClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,
-      excludedWrappers: ['encryptedSavedObjects'],
+      excludedExtensions: [ENCRYPTION_EXTENSION_ID],
     });
     const updateClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,

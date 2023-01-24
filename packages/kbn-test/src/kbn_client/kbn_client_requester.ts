@@ -11,7 +11,9 @@ import Https from 'https';
 import Qs from 'querystring';
 
 import Axios, { AxiosResponse, ResponseType } from 'axios';
-import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
   return (
@@ -165,7 +167,7 @@ export class KbnClientRequester {
           continue;
         }
 
-        throw new Error(`${errorMessage} -- and ran out of retries`);
+        throw new KbnClientRequesterError(`${errorMessage} -- and ran out of retries`, error);
       }
     }
   }

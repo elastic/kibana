@@ -6,31 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
+import { TelemetryConstants } from '../..';
 
 interface TelemetryNotificationsConstructor {
-  http: CoreStart['http'];
-  overlays: CoreStart['overlays'];
+  http: HttpStart;
+  overlays: OverlayStart;
+  theme: ThemeServiceStart;
   telemetryService: TelemetryService;
+  telemetryConstants: TelemetryConstants;
 }
 
 /**
  * Helpers to the Telemetry banners spread through the code base in Welcome and Home landing pages.
  */
 export class TelemetryNotifications {
-  private readonly http: CoreStart['http'];
-  private readonly overlays: CoreStart['overlays'];
+  private readonly http: HttpStart;
+  private readonly overlays: OverlayStart;
+  private readonly theme: ThemeServiceStart;
+  private readonly telemetryConstants: TelemetryConstants;
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;
 
-  constructor({ http, overlays, telemetryService }: TelemetryNotificationsConstructor) {
+  constructor({
+    http,
+    overlays,
+    theme,
+    telemetryService,
+    telemetryConstants,
+  }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
     this.http = http;
     this.overlays = overlays;
+    this.theme = theme;
+    this.telemetryConstants = telemetryConstants;
   }
 
   /**
@@ -50,6 +63,8 @@ export class TelemetryNotifications {
       http: this.http,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
+      theme: this.theme,
+      telemetryConstants: this.telemetryConstants,
     });
 
     this.optedInNoticeBannerId = bannerId;
@@ -71,6 +86,7 @@ export class TelemetryNotifications {
     const bannerId = renderOptInBanner({
       setOptIn: this.onSetOptInClick,
       overlays: this.overlays,
+      telemetryConstants: this.telemetryConstants,
     });
 
     this.optInBannerId = bannerId;

@@ -6,25 +6,39 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import type { BucketHistory } from '../../signals/alert_suppression/group_and_bulk_create';
+import type { UnifiedQueryRuleParams } from '../../rule_schema';
+import { unifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from '../../signals/executors/query';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
+
+export interface QueryRuleState {
+  suppressionGroupHistory?: BucketHistory[];
+  [key: string]: unknown;
+}
 
 export const createQueryAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  createOptions: CreateQueryRuleOptions
+): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState, {}, 'default'> => {
+  const {
+    eventsTelemetry,
+    experimentalFeatures,
+    version,
+    osqueryCreateAction,
+    licensing,
+    id,
+    name,
+  } = createOptions;
   return {
-    id: QUERY_RULE_TYPE_ID,
-    name: 'Custom Query Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
+    id,
+    name,
     validate: {
       params: {
         validate: (object: unknown) => {
-          const [validated, errors] = validateNonExact(object, queryRuleParams);
+          const [validated, errors] = validateNonExact(object, unifiedQueryRuleParams);
           if (errors != null) {
             throw new Error(errors);
           }
@@ -32,6 +46,17 @@ export const createQueryAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -49,37 +74,18 @@ export const createQueryAlertType = (
     isExportable: false,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
-      const {
-        runOpts: {
-          buildRuleMessage,
-          bulkCreate,
-          exceptionItems,
-          listClient,
-          completeRule,
-          searchAfterSize,
-          tuple,
-          wrapHits,
-        },
-        services,
-        state,
-      } = execOptions;
-
-      const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
+      const { runOpts, services, spaceId, state } = execOptions;
+      return queryExecutor({
+        runOpts,
         experimentalFeatures,
         eventsTelemetry,
-        listClient,
-        logger,
-        completeRule,
-        searchAfterSize,
         services,
-        tuple,
         version,
-        wrapHits,
+        spaceId,
+        bucketHistory: state.suppressionGroupHistory,
+        osqueryCreateAction,
+        licensing,
       });
-      return { ...result, state };
     },
   };
 };

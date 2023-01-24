@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { runBuildApiDocsCli } from './api_docs';
+export * from './build_api_docs_cli';

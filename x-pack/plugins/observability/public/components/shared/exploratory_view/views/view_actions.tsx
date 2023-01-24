@@ -9,7 +9,12 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual, pickBy } from 'lodash';
-import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from '../hooks/use_series_storage';
+import {
+  allSeriesKey,
+  convertAllShortSeries,
+  reportTypeKey,
+  useSeriesStorage,
+} from '../hooks/use_series_storage';
 import { SeriesUrl } from '../types';
 
 interface Props {
@@ -32,11 +37,12 @@ export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
 }
 
 export function ViewActions({ onApply }: Props) {
-  const { allSeries, storage, applyChanges } = useSeriesStorage();
+  const { allSeries, storage, applyChanges, reportType } = useSeriesStorage();
 
   const urlAllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
+  const urlReportType = storage.get(reportTypeKey) ?? '';
 
-  let noChanges = allSeries.length === urlAllSeries.length;
+  let noChanges = allSeries.length === urlAllSeries.length && reportType === urlReportType;
 
   if (noChanges) {
     noChanges = !allSeries.some(

@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
@@ -21,8 +21,9 @@ import { TransactionDetailsTabs } from './transaction_details_tabs';
 import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionDetails() {
-  const { path, query } = useApmParams(
-    '/services/{serviceName}/transactions/view'
+  const { path, query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
   );
   const {
     transactionName,
@@ -30,7 +31,7 @@ export function TransactionDetails() {
     rangeTo,
     transactionType: transactionTypeFromUrl,
     comparisonEnabled,
-    comparisonType,
+    offset,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
@@ -44,13 +45,16 @@ export function TransactionDetails() {
     replace(history, { query: { transactionType } });
   }
 
-  useBreadcrumb({
-    title: transactionName,
-    href: apmRouter.link('/services/{serviceName}/transactions/view', {
-      path,
-      query,
+  useBreadcrumb(
+    () => ({
+      title: transactionName,
+      href: apmRouter.link('/services/{serviceName}/transactions/view', {
+        path,
+        query,
+      }),
     }),
-  });
+    [apmRouter, path, query, transactionName]
+  );
 
   const isServerless = isServerlessAgent(runtimeName);
 
@@ -74,7 +78,7 @@ export function TransactionDetails() {
           transactionName={transactionName}
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
+          offset={offset}
         />
       </ChartPointerEventContextProvider>
 

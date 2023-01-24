@@ -6,9 +6,9 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
@@ -63,7 +63,7 @@ describe('getRuleState useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -103,9 +103,9 @@ function mockStateSetter() {
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',
@@ -167,6 +167,7 @@ function mockRuleSummary(overloads: Partial<any> = {}): any {
       foo: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
     },
     executionDuration: {

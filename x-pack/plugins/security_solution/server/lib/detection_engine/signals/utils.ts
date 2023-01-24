@@ -7,9 +7,9 @@
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -18,26 +18,22 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import {
-  TimestampOverrideOrUndefined,
-  Privilege,
-  RuleExecutionStatus,
-} from '../../../../common/detection_engine/schemas/common';
 import type {
   ElasticsearchClient,
   IUiSettingsClient,
-  Logger,
   SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
-import {
+} from '@kbn/core/server';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-  parseDuration,
-} from '../../../../../alerting/server';
-import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { TimestampOverride } from '../../../../common/detection_engine/rule_schema';
+import type { Privilege } from '../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -51,53 +47,33 @@ import type {
   SimpleHit,
   WrappedEventHit,
 } from './types';
-import type { BuildRuleMessage } from './rule_messages';
 import type { ShardError } from '../../types';
 import type {
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
-  SavedQueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
-} from '../schemas/rule_schemas';
-import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
-import type { SearchTypes } from '../../../../common/detection_engine/types';
-import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
+} from '../rule_schema';
+import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+} from '../../../../common/detection_engine/schemas/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
-
-interface SortExceptionsReturn {
-  exceptionsWithValueLists: ExceptionListItemSchema[];
-  exceptionsWithoutValueLists: ExceptionListItemSchema[];
-}
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
-export const shorthandMap = {
-  s: {
-    momentString: 'seconds',
-    asFn: (duration: moment.Duration) => duration.asSeconds(),
-  },
-  m: {
-    momentString: 'minutes',
-    asFn: (duration: moment.Duration) => duration.asMinutes(),
-  },
-  h: {
-    momentString: 'hours',
-    asFn: (duration: moment.Duration) => duration.asHours(),
-  },
-};
-
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
+  const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
 
@@ -111,19 +87,16 @@ export const hasReadIndexPrivileges = async (args: {
     (indexName) => privileges.index[indexName].read
   );
 
+  // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
-    // some indices have read privileges others do not.
-    // set a warning status
-    const errorString = `This rule may not have the required read privileges to the following indices/index patterns: ${JSON.stringify(
-      indexesWithNoReadPrivileges
-    )}`;
-    logger.warn(buildRuleMessage(errorString));
+    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
-      message: errorString,
+      message: `This rule may not have the required read privileges to the following indices/index patterns: ${indexesString}`,
     });
     return true;
   }
+
   return false;
 };
 
@@ -135,18 +108,8 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
-}): Promise<boolean> => {
-  const {
-    timestampField,
-    timestampFieldCapsResponse,
-    inputIndices,
-    ruleExecutionLogger,
-    logger,
-    buildRuleMessage,
-  } = args;
-
+}): Promise<{ wroteWarningStatus: boolean; foundNoIndices: boolean }> => {
+  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
@@ -157,12 +120,13 @@ export const hasTimestampFields = async (args: {
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
     }`;
-    logger.warn(buildRuleMessage(errorString.trimEnd()));
+
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString.trimEnd(),
     });
-    return true;
+
+    return { wroteWarningStatus: true, foundNoIndices: true };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -181,19 +145,19 @@ export const hasTimestampFields = async (args: {
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
 
-    logger.warn(buildRuleMessage(errorString));
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatus['partial failure'],
       message: errorString,
     });
 
-    return true;
+    return { wroteWarningStatus: true, foundNoIndices: false };
   }
-  return false;
+
+  return { wroteWarningStatus: false, foundNoIndices: false };
 };
 
 export const checkPrivileges = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
   checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
@@ -247,7 +211,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;
@@ -309,28 +273,6 @@ export const getExceptions = async ({
   }
 };
 
-export const sortExceptionItems = (exceptions: ExceptionListItemSchema[]): SortExceptionsReturn => {
-  return exceptions.reduce<SortExceptionsReturn>(
-    (acc, exception) => {
-      const { entries } = exception;
-      const { exceptionsWithValueLists, exceptionsWithoutValueLists } = acc;
-
-      if (hasLargeValueList(entries)) {
-        return {
-          exceptionsWithValueLists: [...exceptionsWithValueLists, { ...exception }],
-          exceptionsWithoutValueLists,
-        };
-      } else {
-        return {
-          exceptionsWithValueLists,
-          exceptionsWithoutValueLists: [...exceptionsWithoutValueLists, { ...exception }],
-        };
-      }
-    },
-    { exceptionsWithValueLists: [], exceptionsWithoutValueLists: [] }
-  );
-};
-
 export const generateId = (
   docIndex: string,
   docId: string,
@@ -383,14 +325,6 @@ export const wrapBuildingBlocks = (
       },
     };
   });
-};
-
-export const wrapSignal = (signal: SignalHit, index: string): WrappedSignalHit => {
-  return {
-    _id: generateSignalId(signal.signal),
-    _index: index,
-    _source: signal,
-  };
 };
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
@@ -448,14 +382,15 @@ export const errorAggregator = (
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
     if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
-      if (accum[item.create.error.reason] == null) {
-        accum[item.create.error.reason] = {
+      const reason = item.create.error.reason ?? 'unknown';
+      if (accum[reason] == null) {
+        accum[reason] = {
           count: 1,
           statusCode: item.create.status,
         };
       } else {
-        accum[item.create.error.reason] = {
-          count: accum[item.create.error.reason].count + 1,
+        accum[reason] = {
+          count: accum[reason].count + 1,
           statusCode: item.create.status,
         };
       }
@@ -465,29 +400,28 @@ export const errorAggregator = (
 };
 
 export const getRuleRangeTuples = ({
-  logger,
+  startedAt,
   previousStartedAt,
   from,
   to,
   interval,
   maxSignals,
-  buildRuleMessage,
-  startedAt,
+  ruleExecutionLogger,
 }: {
-  logger: Logger;
+  startedAt: Date;
   previousStartedAt: Date | null | undefined;
   from: string;
   to: string;
   interval: string;
   maxSignals: number;
-  buildRuleMessage: BuildRuleMessage;
-  startedAt: Date;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }) => {
-  const originalTo = dateMath.parse(to, { forceNow: startedAt });
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
-  if (originalTo == null || originalFrom == null) {
-    throw new Error(buildRuleMessage('dateMath parse failed'));
+  const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  if (originalFrom == null || originalTo == null) {
+    throw new Error('Failed to parse date math of rule.from or rule.to');
   }
+
   const tuples = [
     {
       to: originalTo,
@@ -495,11 +429,15 @@ export const getRuleRangeTuples = ({
       maxSignals,
     },
   ];
+
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
-    logger.error(`Failed to compute gap between rule runs: could not parse rule interval`);
+    ruleExecutionLogger.error(
+      'Failed to compute gap between rule runs: could not parse rule interval'
+    );
     return { tuples, remainingGap: moment.duration(0) };
   }
+
   const gap = getGapBetweenRuns({
     previousStartedAt,
     originalTo,
@@ -517,13 +455,19 @@ export const getRuleRangeTuples = ({
     catchup,
     intervalDuration,
   });
+
   tuples.push(...catchupTuples);
+
   // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
   const remainingGapMilliseconds = Math.max(
     gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
     0
   );
-  return { tuples: tuples.reverse(), remainingGap: moment.duration(remainingGapMilliseconds) };
+
+  return {
+    tuples: tuples.reverse(),
+    remainingGap: moment.duration(remainingGapMilliseconds),
+  };
 };
 
 /**
@@ -604,20 +548,22 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
  * is not correctly ISO8601 or epoch milliseconds formatted.
  * @param searchResult The result to try and parse out the timestamp.
- * @param timestampOverride The timestamp override to use its values if we have it.
+ * @param primaryTimestamp The primary timestamp to use.
  */
-export const lastValidDate = ({
+export const lastValidDate = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   searchResult,
-  timestampOverride,
+  primaryTimestamp,
 }: {
-  searchResult: SignalSearchResponse;
-  timestampOverride: TimestampOverrideOrUndefined;
+  searchResult: SignalSearchResponse<TAggregations>;
+  primaryTimestamp: TimestampOverride;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
     return undefined;
   } else {
     const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    return getValidDateFromDoc({ doc: lastRecord, timestampOverride });
+    return getValidDateFromDoc({ doc: lastRecord, primaryTimestamp });
   }
 };
 
@@ -627,21 +573,20 @@ export const lastValidDate = ({
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
  * is not correctly ISO8601 or epoch milliseconds formatted.
  * @param searchResult The result to try and parse out the timestamp.
- * @param timestampOverride The timestamp override to use its values if we have it.
+ * @param primaryTimestamp The primary timestamp to use.
  */
 export const getValidDateFromDoc = ({
   doc,
-  timestampOverride,
+  primaryTimestamp,
 }: {
   doc: BaseSignalHit;
-  timestampOverride: TimestampOverrideOrUndefined;
+  primaryTimestamp: TimestampOverride;
 }): Date | undefined => {
-  const timestamp = timestampOverride ?? '@timestamp';
   const timestampValue =
-    doc.fields != null && doc.fields[timestamp] != null
-      ? doc.fields[timestamp][0]
+    doc.fields != null && doc.fields[primaryTimestamp] != null
+      ? doc.fields[primaryTimestamp][0]
       : doc._source != null
-      ? (doc._source as { [key: string]: unknown })[timestamp]
+      ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
       : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
@@ -652,7 +597,7 @@ export const getValidDateFromDoc = ({
     if (tempMoment.isValid()) {
       return tempMoment.toDate();
     } else if (typeof timestampValue === 'string') {
-      // worse case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // worst case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
       // so we try one last time to parse this best we can by converting from string to a number
       const maybeDate = moment(+lastTimestamp);
       if (maybeDate.isValid()) {
@@ -666,12 +611,14 @@ export const getValidDateFromDoc = ({
   }
 };
 
-export const createSearchAfterReturnTypeFromResponse = ({
+export const createSearchAfterReturnTypeFromResponse = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   searchResult,
-  timestampOverride,
+  primaryTimestamp,
 }: {
-  searchResult: SignalSearchResponse;
-  timestampOverride: TimestampOverrideOrUndefined;
+  searchResult: SignalSearchResponse<TAggregations>;
+  primaryTimestamp: TimestampOverride;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
     success:
@@ -682,11 +629,11 @@ export const createSearchAfterReturnTypeFromResponse = ({
             'No mapping found for [@timestamp] in order to sort on'
           ) ||
           failure.reason?.reason?.includes(
-            `No mapping found for [${timestampOverride}] in order to sort on`
+            `No mapping found for [${primaryTimestamp}] in order to sort on`
           )
         );
       }),
-    lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
+    lastLookBackDate: lastValidDate({ searchResult, primaryTimestamp }),
   });
 };
 
@@ -697,17 +644,11 @@ export interface PreviewReturnType {
   warningMessages?: string[] | undefined;
 }
 
-export const createPreviewReturnType = (): PreviewReturnType => ({
-  matrixHistogramData: [],
-  totalCount: 0,
-  errors: [],
-  warningMessages: [],
-});
-
 export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
+  enrichmentTimes,
   bulkCreateTimes,
   lastLookBackDate,
   createdSignalsCount,
@@ -718,6 +659,7 @@ export const createSearchAfterReturnType = ({
   success?: boolean | undefined;
   warning?: boolean;
   searchAfterTimes?: string[] | undefined;
+  enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
@@ -729,6 +671,7 @@ export const createSearchAfterReturnType = ({
     success: success ?? true,
     warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
+    enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
@@ -738,7 +681,9 @@ export const createSearchAfterReturnType = ({
   };
 };
 
-export const createSearchResultReturnType = (): SignalSearchResponse => {
+export const createSearchResultReturnType = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>(): SignalSearchResponse<TAggregations> => {
   const hits: SignalSourceHit[] = [];
   return {
     took: 0,
@@ -758,6 +703,24 @@ export const createSearchResultReturnType = (): SignalSearchResponse => {
   };
 };
 
+/**
+ * Merges the return values from bulk creating alerts into the appropriate fields in the combined return object.
+ */
+export const addToSearchAfterReturn = ({
+  current,
+  next,
+}: {
+  current: SearchAfterAndBulkCreateReturnType;
+  next: GenericBulkCreateResponse<BaseFieldsLatest>;
+}) => {
+  current.success = current.success && next.success;
+  current.createdSignalsCount += next.createdItemsCount;
+  current.createdSignals.push(...next.createdItems);
+  current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.enrichmentTimes.push(next.enrichmentDuration);
+  current.errors = [...new Set([...current.errors, ...next.errors])];
+};
+
 export const mergeReturns = (
   searchAfters: SearchAfterAndBulkCreateReturnType[]
 ): SearchAfterAndBulkCreateReturnType => {
@@ -767,6 +730,7 @@ export const mergeReturns = (
       warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
+      enrichmentTimes: existingEnrichmentTimes,
       lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
@@ -778,6 +742,7 @@ export const mergeReturns = (
       success: newSuccess,
       warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
+      enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
@@ -790,6 +755,7 @@ export const mergeReturns = (
       success: existingSuccess && newSuccess,
       warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
@@ -800,14 +766,16 @@ export const mergeReturns = (
   });
 };
 
-export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
+export const mergeSearchResults = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>(
+  searchResults: Array<SignalSearchResponse<TAggregations>>
+) => {
   return searchResults.reduce((prev, next) => {
     const {
       took: existingTook,
       timed_out: existingTimedOut,
-      // _scroll_id: existingScrollId,
       _shards: existingShards,
-      // aggregations: existingAggregations,
       hits: existingHits,
     } = prev;
 
@@ -871,7 +839,7 @@ export const calculateThresholdSignalUuid = (
   thresholdFields: string[],
   key?: string
 ): string => {
-  // used to generate constant Threshold Signals ID when run with the same params
+  // used to generate stable Threshold Signals ID when run with the same params
   const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
   const startedAtString = startedAt.toISOString();
@@ -879,30 +847,6 @@ export const calculateThresholdSignalUuid = (
   const baseString = `${ruleId}${startedAtString}${thresholdFields.join(',')}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
-};
-
-export const getThresholdAggregationParts = (
-  data: object,
-  index?: number
-):
-  | {
-      field: string;
-      index: number;
-      name: string;
-    }
-  | undefined => {
-  const idx = index != null ? index.toString() : '\\d';
-  const pattern = `threshold_(?<index>${idx}):(?<name>.*)`;
-  for (const key of Object.keys(data)) {
-    const matches = key.match(pattern);
-    if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {
-      return {
-        field: matches.groups.name,
-        index: parseInt(matches.groups.index, 10),
-        name: key,
-      };
-    }
-  }
 };
 
 export const getThresholdTermsHash = (
@@ -915,8 +859,8 @@ export const getThresholdTermsHash = (
     .update(
       terms
         .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
-        .map((field) => {
-          return field.value;
+        .map((term) => {
+          return `${term.field}:${term.value}`;
         })
         .join(',')
     )
@@ -928,8 +872,6 @@ export const isThresholdParams = (params: RuleParams): params is ThresholdRulePa
   params.type === 'threshold';
 export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
   params.type === 'query';
-export const isSavedQueryParams = (params: RuleParams): params is SavedQueryRuleParams =>
-  params.type === 'saved_query';
 export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
   params.type === 'threat_match';
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
@@ -971,18 +913,18 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
-  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+  return !isWrappedSignalHit(event) && !isWrappedDetectionAlert(event);
 };
 
 export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
   return (event as WrappedSignalHit)?._source?.signal != null;
 };
 
-export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
+export const isWrappedDetectionAlert = (event: SimpleHit): event is BaseHit<DetectionAlert> => {
+  return (event as BaseHit<DetectionAlert>)?._source?.[ALERT_UUID] != null;
 };
 
-export const isRACAlert = (event: unknown): event is RACAlert => {
+export const isDetectionAlert = (event: unknown): event is DetectionAlert => {
   return get(event, ALERT_UUID) != null;
 };
 
@@ -1019,19 +961,30 @@ export const racFieldMappings: Record<string, string> = {
   'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
 };
 
-export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
-  if (isWrappedRACAlert(event)) {
+export const getField = (event: SimpleHit, field: string): SearchTypes | undefined => {
+  if (isWrappedDetectionAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     const parts = mappedField.split('.');
     if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {
       const params = get(event._source, ALERT_RULE_PARAMETERS);
       return get(params, parts[parts.length - 1]);
     }
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedSignalHit(event)) {
     const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedEventHit(event)) {
-    return get(event._source, field) as T;
+    return get(event._source, field) as SearchTypes | undefined;
+  }
+};
+
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
+  if (unprocessedExceptions.length > 0) {
+    const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
   }
 };

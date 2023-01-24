@@ -6,11 +6,9 @@
  */
 
 import { adminTestUser } from '@kbn/test';
+import { getSupertest, type createRoot, type HttpMethod } from '@kbn/core-test-helpers-kbn-server';
 
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
-import type { HttpMethod } from 'src/core/test_helpers/kbn_server';
-
-type Root = ReturnType<typeof kbnTestServer.createRoot>;
+type Root = ReturnType<typeof createRoot>;
 
 export * from './docker_registry_helper';
 
@@ -33,7 +31,8 @@ export const waitForFleetSetup = async (root: Root) => {
 
 export function getSupertestWithAdminUser(root: Root, method: HttpMethod, path: string) {
   const testUserCredentials = Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`);
-  return kbnTestServer
-    .getSupertest(root, method, path)
-    .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
+  return getSupertest(root, method, path).set(
+    'Authorization',
+    `Basic ${testUserCredentials.toString('base64')}`
+  );
 }

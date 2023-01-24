@@ -6,31 +6,53 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { DataView } from '../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { EditIndexPattern } from '.';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-import { EditIndexPattern } from '../edit_index_pattern';
-
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
-  const { dataViews, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;
+  const { dataViews, setBreadcrumbs, notifications } =
+    useKibana<IndexPatternManagmentContext>().services;
+  const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataView>();
 
   useEffect(() => {
-    dataViews.get(props.match.params.id).then((ip: DataView) => {
-      setIndexPattern(ip);
-      setBreadcrumbs(getEditBreadcrumbs(ip));
-    });
-  }, [dataViews, props.match.params.id, setBreadcrumbs]);
+    dataViews
+      .get(props.match.params.id)
+      .then((ip: DataView) => {
+        setIndexPattern(ip);
+        setBreadcrumbs(getEditBreadcrumbs(ip));
+      })
+      .catch((err) => {
+        setError(err);
+      });
+  }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
 
-  if (indexPattern) {
-    return <EditIndexPattern indexPattern={indexPattern} />;
-  } else {
-    return <></>;
+  if (error) {
+    const [errorTitle, errorMessage] = [
+      i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoadTitle', {
+        defaultMessage: 'Unable to load data view',
+      }),
+      i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoadMessage', {
+        defaultMessage:
+          'The data view with id:{objectId} could not be loaded. Try creating a new one.',
+        values: { objectId: props.match.params.id },
+      }),
+    ];
+
+    notifications.toasts.addError(error ?? new Error(errorTitle), {
+      title: errorTitle,
+      toastMessage: errorMessage,
+    });
+    props.history.push('/');
   }
+
+  return indexPattern != null ? <EditIndexPattern indexPattern={indexPattern} /> : null;
 };
 
 export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);

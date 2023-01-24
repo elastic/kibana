@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/ensure_node_preserve_symlinks');
-require('source-map-support/register');
+require('../src/setup_node_env');
+
+var Path = require('path');
+
 require('@kbn/optimizer').runKbnOptimizerCli({
-  defaultLimitsPath: require.resolve('../packages/kbn-optimizer/limits.yml'),
+  defaultLimitsPath: Path.resolve(
+    require('@kbn/repo-info').REPO_ROOT,
+    'packages/kbn-optimizer/limits.yml'
+  ),
 });

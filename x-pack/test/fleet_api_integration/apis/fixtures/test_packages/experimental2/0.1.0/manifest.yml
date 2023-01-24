@@ -7,6 +7,8 @@ categories: []
 release: experimental
 type: integration
 license: basic
+owner:
+  github: elastic/fleet
 
 requirement:
   elasticsearch:

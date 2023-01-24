@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
-import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildRouteValidation } from './utils/route_validation';
@@ -42,7 +41,8 @@ export const updateAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) 
     },
     async (context, req, response) => {
       try {
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
         const { status, ids, index, _version } = req.body;
 
         const updatedAlert = await alertsClient.update({

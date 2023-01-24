@@ -5,56 +5,29 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
+import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
-import { BackendDetailOverview } from '../../app/backend_detail_overview';
-import { BackendInventory } from '../../app/backend_inventory';
+import { TraceSearchType } from '../../../../common/trace_explorer';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
+import { TopTracesOverview } from '../../app/top_traces_overview';
+import { TraceExplorer } from '../../app/trace_explorer';
+import { TraceExplorerAggregatedCriticalPath } from '../../app/trace_explorer/trace_explorer_aggregated_critical_path';
+import { TraceExplorerWaterfall } from '../../app/trace_explorer/trace_explorer_waterfall';
 import { TraceOverview } from '../../app/trace_overview';
-import { ApmMainTemplate } from '../templates/apm_main_template';
-import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
-import { ServiceGroupTemplate } from '../templates/service_group_template';
-import { ServiceGroupsRedirect } from '../service_groups_redirect';
+import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { RedirectTo } from '../redirect_to';
-
-function page<TPath extends string>({
-  path,
-  element,
-  title,
-  showServiceGroupSaveButton = false,
-}: {
-  path: TPath;
-  element: React.ReactElement<any, any>;
-  title: string;
-  showServiceGroupSaveButton?: boolean;
-}): Record<
-  TPath,
-  {
-    element: React.ReactElement<any, any>;
-  }
-> {
-  return {
-    [path]: {
-      element: (
-        <Breadcrumb title={title} href={path}>
-          <ApmMainTemplate
-            pageTitle={title}
-            showServiceGroupSaveButton={showServiceGroupSaveButton}
-          >
-            {element}
-          </ApmMainTemplate>
-        </Breadcrumb>
-      ),
-    },
-  } as Record<TPath, { element: React.ReactElement<any, any> }>;
-}
+import { ServiceGroupTemplate } from '../templates/service_group_template';
+import { dependencies } from './dependencies';
+import { legacyBackends } from './legacy_backends';
+import { storageExplorer } from './storage_explorer';
 
 function serviceGroupPage<TPath extends string>({
   path,
@@ -116,16 +89,20 @@ export const ServiceMapTitle = i18n.translate(
   }
 );
 
-export const DependenciesInventoryTitle = i18n.translate(
-  'xpack.apm.views.dependenciesInventory.title',
+export const DependenciesOperationsTitle = i18n.translate(
+  'xpack.apm.views.dependenciesOperations.title',
   {
-    defaultMessage: 'Dependencies',
+    defaultMessage: 'Operations',
   }
 );
 
 export const home = {
   '/': {
-    element: <Outlet />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <Outlet />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.type({
       query: t.intersection([
         environmentRt,
@@ -133,13 +110,17 @@ export const home = {
           rangeFrom: t.string,
           rangeTo: t.string,
           kuery: t.string,
+          comparisonEnabled: toBooleanRt,
         }),
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
-          comparisonEnabled: toBooleanRt,
-          comparisonType: comparisonTypeRt,
+          page: toNumberRt,
+          pageSize: toNumberRt,
+          sortField: t.string,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
+        offsetRt,
       ]),
     }),
     defaults: {
@@ -155,58 +136,88 @@ export const home = {
         element: <ServiceInventory />,
         serviceGroupContextTab: 'service-inventory',
       }),
-      ...page({
-        path: '/traces',
-        title: i18n.translate('xpack.apm.views.traceOverview.title', {
-          defaultMessage: 'Traces',
-        }),
-        element: <TraceOverview />,
-      }),
       ...serviceGroupPage({
         path: '/service-map',
         title: ServiceMapTitle,
         element: <ServiceMapHome />,
         serviceGroupContextTab: 'service-map',
       }),
-      '/backends': {
-        element: <Outlet />,
-        params: t.partial({
-          query: t.partial({
-            comparisonEnabled: toBooleanRt,
-            comparisonType: comparisonTypeRt,
-          }),
-        }),
+      '/traces': {
+        element: (
+          <TraceOverview>
+            <Outlet />
+          </TraceOverview>
+        ),
         children: {
-          '/backends/{backendName}/overview': {
-            element: <RedirectToBackendOverviewRouteView />,
-            params: t.type({
-              path: t.type({
-                backendName: t.string,
-              }),
-            }),
-          },
-          '/backends/overview': {
-            element: <BackendDetailOverview />,
+          '/traces/explorer': {
+            element: (
+              <TraceExplorer>
+                <Outlet />
+              </TraceExplorer>
+            ),
+            children: {
+              '/traces/explorer/waterfall': {
+                element: <TraceExplorerWaterfall />,
+                params: t.type({
+                  query: t.intersection([
+                    t.type({
+                      traceId: t.string,
+                      transactionId: t.string,
+                      waterfallItemId: t.string,
+                      detailTab: t.union([
+                        t.literal(TransactionTab.timeline),
+                        t.literal(TransactionTab.metadata),
+                        t.literal(TransactionTab.logs),
+                      ]),
+                    }),
+                    t.partial({
+                      flyoutDetailTab: t.string,
+                    }),
+                  ]),
+                }),
+                defaults: {
+                  query: {
+                    waterfallItemId: '',
+                    traceId: '',
+                    transactionId: '',
+                    detailTab: TransactionTab.timeline,
+                  },
+                },
+              },
+              '/traces/explorer/critical_path': {
+                element: <TraceExplorerAggregatedCriticalPath />,
+              },
+              '/traces/explorer': {
+                element: <RedirectTo pathname="/traces/explorer/waterfall" />,
+              },
+            },
             params: t.type({
               query: t.type({
-                backendName: t.string,
+                query: t.string,
+                type: t.union([
+                  t.literal(TraceSearchType.kql),
+                  t.literal(TraceSearchType.eql),
+                ]),
+                showCriticalPath: toBooleanRt,
               }),
             }),
+            defaults: {
+              query: {
+                query: '',
+                type: TraceSearchType.kql,
+                showCriticalPath: '',
+              },
+            },
           },
-          ...page({
-            path: '/backends',
-            title: DependenciesInventoryTitle,
-            element: <BackendInventory />,
-          }),
+          '/traces': {
+            element: <TopTracesOverview />,
+          },
         },
       },
-      '/': {
-        element: (
-          <ServiceGroupsRedirect>
-            <RedirectTo pathname="/service-groups" />
-          </ServiceGroupsRedirect>
-        ),
-      },
+      ...dependencies,
+      ...legacyBackends,
+      ...storageExplorer,
+      '/': { element: <RedirectTo pathname="/services" /> },
     },
   },
 };

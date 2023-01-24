@@ -11,3 +11,6 @@ import { ExpressionMetricPlugin } from './plugin';
 export function plugin() {
   return new ExpressionMetricPlugin();
 }
+
+export { getDataBoundsForPalette } from './utils';
+export { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../common';

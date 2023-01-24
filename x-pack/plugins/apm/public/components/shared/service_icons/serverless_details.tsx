@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiDescriptionListProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
@@ -65,6 +68,18 @@ export function ServerlessDetails({ serverless }: Props) {
             </li>
           ))}
         </ul>
+      ),
+    });
+  }
+
+  if (serverless.hostArchitecture) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.architecture',
+        { defaultMessage: 'Architecture' }
+      ),
+      description: (
+        <EuiBadge color="hollow">{serverless.hostArchitecture}</EuiBadge>
       ),
     });
   }

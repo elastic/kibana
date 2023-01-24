@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { deleteMigrationSavedObject } from './delete_migration_saved_object';
 import { isMigrationFailed, isMigrationPending, isMigrationSuccess } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
-import { SignalsMigrationSO } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
 
 /**
  * Deletes a completed migration:

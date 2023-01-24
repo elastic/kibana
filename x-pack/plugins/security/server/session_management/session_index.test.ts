@@ -9,17 +9,24 @@ import { errors } from '@elastic/elasticsearch';
 import type {
   BulkResponse,
   ClosePointInTimeResponse,
+  DeleteByQueryResponse,
+  MsearchMultiSearchResult,
   OpenPointInTimeResponse,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
-import { getSessionIndexTemplate, SessionIndex } from './session_index';
+import {
+  getSessionIndexSettings,
+  SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME,
+  SessionIndex,
+} from './session_index';
 import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {
@@ -29,21 +36,25 @@ describe('Session index', () => {
   let sessionIndex: SessionIndex;
   let auditLogger: AuditLogger;
   const indexName = '.kibana_some_tenant_security_session_1';
+  const aliasName = '.kibana_some_tenant_security_session';
   const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
+
+  const createSessionIndexOptions = (
+    config: Record<string, any> = { session: { idleTimeout: null, lifespan: null } }
+  ) => ({
+    logger: loggingSystemMock.createLogger(),
+    kibanaIndexName: '.kibana_some_tenant',
+    config: createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
+      isTLSEnabled: false,
+    }),
+    elasticsearchClient: mockElasticsearchClient,
+    auditLogger,
+  });
+
   beforeEach(() => {
     mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
     auditLogger = auditLoggerMock.create();
-    sessionIndex = new SessionIndex({
-      logger: loggingSystemMock.createLogger(),
-      kibanaIndexName: '.kibana_some_tenant',
-      config: createConfig(
-        ConfigSchema.validate({ session: { idleTimeout: null, lifespan: null } }),
-        loggingSystemMock.createLogger(),
-        { isTLSEnabled: false }
-      ),
-      elasticsearchClient: mockElasticsearchClient,
-      auditLogger,
-    });
+    sessionIndex = new SessionIndex(createSessionIndexOptions());
   });
 
   describe('#initialize', () => {
@@ -55,7 +66,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({
-        index: getSessionIndexTemplate(indexTemplateName, indexName).index_patterns[0],
+        index: getSessionIndexSettings({ indexName, aliasName }).index,
       });
     }
 
@@ -85,62 +96,48 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
     });
 
-    it('deletes legacy index template if needed and creates both index template and index if they do not exist', async () => {
+    it('deletes legacy index template if needed and creates index if it does not exist', async () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(true);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
       mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
-      const expectedIndexTemplate = getSessionIndexTemplate(indexTemplateName, indexName);
       assertExistenceChecksPerformed();
       expect(mockElasticsearchClient.indices.deleteTemplate).toHaveBeenCalledWith({
         name: indexTemplateName,
       });
-      expect(mockElasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        expectedIndexTemplate
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings({ indexName, aliasName })
       );
-      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: expectedIndexTemplate.index_patterns[0],
-      });
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
     });
 
-    it('creates both index template and index if they do not exist', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+    it('deletes legacy & modern index templates if needed and creates index if it does not exist', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(true);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
       mockElasticsearchClient.indices.exists.mockResponse(false);
 
       await sessionIndex.initialize();
 
-      const expectedIndexTemplate = getSessionIndexTemplate(indexTemplateName, indexName);
       assertExistenceChecksPerformed();
-      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        expectedIndexTemplate
-      );
-      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: expectedIndexTemplate.index_patterns[0],
+      expect(mockElasticsearchClient.indices.deleteTemplate).toHaveBeenCalledWith({
+        name: indexTemplateName,
       });
-    });
-
-    it('creates only index template if it does not exist even if index exists', async () => {
-      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
-      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
-      mockElasticsearchClient.indices.exists.mockResponse(true);
-
-      await sessionIndex.initialize();
-
-      assertExistenceChecksPerformed();
-      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        getSessionIndexTemplate(indexTemplateName, indexName)
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).toHaveBeenCalledWith({
+        name: indexTemplateName,
+      });
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings({ indexName, aliasName })
       );
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
     });
 
-    it('creates only index if it does not exist even if index template exists', async () => {
+    it('deletes modern index template if needed and creates index if it does not exist', async () => {
       mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
       mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(true);
       mockElasticsearchClient.indices.exists.mockResponse(false);
@@ -149,10 +146,143 @@ describe('Session index', () => {
 
       assertExistenceChecksPerformed();
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: getSessionIndexTemplate(indexTemplateName, indexName).index_patterns[0],
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).toHaveBeenCalledWith({
+        name: indexTemplateName,
       });
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings({ indexName, aliasName })
+      );
+    });
+
+    it('attaches an alias to the index if the index already exists', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+    });
+
+    it('updates mappings for existing index without version in the meta', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getMapping.mockResolvedValue({
+        [indexName]: {
+          mappings: { _meta: {} },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
+        index: indexName,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
+      });
+    });
+
+    it('updates mappings for existing index if version in meta is lower than the current version', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getMapping.mockResolvedValue({
+        [indexName]: {
+          mappings: { _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: '8.6.9' } },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
+        index: indexName,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
+      });
+    });
+
+    it('does not update mappings for existing index if version in meta is greater or equal to the current version', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(true);
+      mockElasticsearchClient.indices.getMapping.mockResolvedValue({
+        [indexName]: {
+          mappings: { _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: '8.7.0' } },
+        },
+      });
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
+      expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
+    });
+
+    it('creates index if it does not exist', async () => {
+      mockElasticsearchClient.indices.existsTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.existsIndexTemplate.mockResponse(false);
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      await sessionIndex.initialize();
+
+      assertExistenceChecksPerformed();
+      expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.getMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith(
+        getSessionIndexSettings({ indexName, aliasName })
+      );
     });
 
     it('does not fail if tries to create index when it exists already', async () => {
@@ -244,6 +374,50 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
     });
 
+    it('creates the index/alias if missing', async () => {
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      let callCount = 0;
+      mockElasticsearchClient.openPointInTime.mockResponseImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return { statusCode: 404 };
+        }
+
+        return {
+          body: {
+            id: 'PIT_ID',
+          } as OpenPointInTimeResponse,
+        };
+      });
+
+      await sessionIndex.cleanUp();
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenNthCalledWith(
+        1,
+        {
+          index: aliasName,
+          keep_alive: '5m',
+        },
+        { ignore: [404], meta: true }
+      );
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenNthCalledWith(
+        2,
+        {
+          index: aliasName,
+          keep_alive: '5m',
+        },
+        { meta: true }
+      );
+
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
+    });
+
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
       await sessionIndex.cleanUp();
 
@@ -302,9 +476,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -393,9 +568,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -480,9 +656,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -577,9 +754,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -722,9 +900,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -772,6 +951,318 @@ describe('Session index', () => {
           event: { action: 'session_cleanup', category: ['authentication'], outcome: 'unknown' },
         })
       );
+    });
+
+    describe('concurrent session limit', () => {
+      const expectedSearchParameters = () => ({
+        index: '.kibana_some_tenant_security_session',
+        query: {
+          bool: {
+            filter: [
+              { exists: { field: 'usernameHash' } },
+              {
+                bool: {
+                  must_not: [{ term: { 'provider.type': AnonymousAuthenticationProvider.type } }],
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          sessions_grouped_by_user: {
+            multi_terms: {
+              size: 10000,
+              terms: [
+                { field: 'usernameHash' },
+                { field: 'provider.type' },
+                { field: 'provider.name' },
+              ],
+              min_doc_count: 3,
+            },
+          },
+        },
+        size: 0,
+        filter_path: [
+          'aggregations.sessions_grouped_by_user.sum_other_doc_count',
+          'aggregations.sessions_grouped_by_user.buckets.key',
+          'aggregations.sessions_grouped_by_user.buckets.doc_count',
+        ],
+        track_total_hits: false,
+      });
+
+      const expectedMultiSearchParameters = (
+        usernameHash: string,
+        providerType: string,
+        providerName: string
+      ) => ({
+        query: {
+          bool: {
+            must: [
+              { term: { usernameHash } },
+              { term: { 'provider.type': providerType } },
+              { term: { 'provider.name': providerName } },
+            ],
+          },
+        },
+        sort: [{ createdAt: { order: 'desc' } }],
+        from: 2,
+        size: 9998,
+        _source: false,
+        track_total_hits: false,
+      });
+
+      beforeEach(() => {
+        // The first search call is used by the invalid/expired sessions cleanup routine.
+        mockElasticsearchClient.search.mockResolvedValueOnce({
+          hits: { hits: [] },
+        } as unknown as SearchResponse);
+
+        sessionIndex = new SessionIndex(
+          createSessionIndexOptions({
+            session: { idleTimeout: null, lifespan: null, concurrentSessions: { maxSessions: 2 } },
+          })
+        );
+      });
+
+      it('when concurrent session limit is not configured', async () => {
+        sessionIndex = new SessionIndex(createSessionIndexOptions());
+
+        await sessionIndex.cleanUp();
+
+        // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
+        // routine doesn't rely on PIT).
+        expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+        expect(mockElasticsearchClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({ pit: { id: 'PIT_ID', keep_alive: '5m' } })
+        );
+        expect(mockElasticsearchClient.msearch).not.toHaveBeenCalled();
+        expect(mockElasticsearchClient.bulk).not.toHaveBeenCalled();
+        expect(mockElasticsearchClient.indices.refresh).not.toHaveBeenCalled();
+      });
+
+      it('when the concurrent session limit is not exceeded', async () => {
+        mockElasticsearchClient.search.mockResolvedValueOnce({
+          aggregations: { sessions_grouped_by_user: { sum_other_doc_count: 1 } },
+        } as unknown as SearchResponse);
+
+        await sessionIndex.cleanUp();
+
+        // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
+        // routine doesn't rely on PIT).
+        expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
+        expect(mockElasticsearchClient.search).toHaveBeenNthCalledWith(
+          2,
+          expectedSearchParameters()
+        );
+        expect(mockElasticsearchClient.msearch).not.toHaveBeenCalled();
+        expect(mockElasticsearchClient.bulk).not.toHaveBeenCalled();
+        expect(mockElasticsearchClient.indices.refresh).not.toHaveBeenCalled();
+      });
+
+      it('when the concurrent session limit is exceeded', async () => {
+        mockElasticsearchClient.search.mockResolvedValueOnce({
+          aggregations: {
+            sessions_grouped_by_user: {
+              sum_other_doc_count: 1,
+              buckets: [{ key: ['user-hash-name', 'basic', 'basic1'], doc_count: 10 }],
+            },
+          },
+        } as unknown as SearchResponse);
+        mockElasticsearchClient.msearch.mockResolvedValue({
+          responses: [{ status: 200, hits: { hits: [{ _id: 'some-id' }, { _id: 'some-id-2' }] } }],
+        } as MsearchMultiSearchResult);
+
+        await sessionIndex.cleanUp();
+
+        // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
+        // routine doesn't rely on PIT).
+        expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
+        expect(mockElasticsearchClient.search).toHaveBeenNthCalledWith(
+          2,
+          expectedSearchParameters()
+        );
+
+        expect(mockElasticsearchClient.msearch).toHaveBeenCalledTimes(1);
+        expect(mockElasticsearchClient.msearch).toHaveBeenCalledWith({
+          index: '.kibana_some_tenant_security_session',
+          searches: [{}, expectedMultiSearchParameters('user-hash-name', 'basic', 'basic1')],
+          filter_path: ['responses.status', 'responses.hits.hits._id'],
+        });
+        expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+        expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
+          {
+            index: '.kibana_some_tenant_security_session',
+            operations: [{ delete: { _id: 'some-id' } }, { delete: { _id: 'some-id-2' } }],
+            refresh: false,
+            require_alias: true,
+          },
+          { ignore: [409, 404] }
+        );
+        expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
+      });
+
+      it('when the concurrent session limit is exceeded for multiple providers', async () => {
+        mockElasticsearchClient.search.mockResolvedValueOnce({
+          aggregations: {
+            sessions_grouped_by_user: {
+              sum_other_doc_count: 1,
+              buckets: [
+                { key: ['user-hash-name', 'basic', 'basic1'], doc_count: 10 },
+                // For this we simulate a race condition, when the limit is exceeded during aggregation, but not during
+                // `msearch` query.
+                { key: ['user-hash-name-2', 'basic', 'basic1'], doc_count: 1 },
+                { key: ['user-hash-name-3', 'saml', 'saml1'], doc_count: 10 },
+              ],
+            },
+          },
+        } as unknown as SearchResponse);
+        mockElasticsearchClient.msearch.mockResolvedValue({
+          responses: [
+            { status: 200, hits: { hits: [{ _id: 'some-id' }, { _id: 'some-id-2' }] } },
+            { status: 200 },
+            { status: 200, hits: { hits: [{ _id: 'some-id-3' }] } },
+          ],
+        } as MsearchMultiSearchResult);
+
+        await sessionIndex.cleanUp();
+
+        // Only search call for the invalid sessions (use `pit` as marker, since concurrent session limit cleanup
+        // routine doesn't rely on PIT).
+        expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
+        expect(mockElasticsearchClient.search).toHaveBeenNthCalledWith(
+          2,
+          expectedSearchParameters()
+        );
+
+        expect(mockElasticsearchClient.msearch).toHaveBeenCalledTimes(1);
+        expect(mockElasticsearchClient.msearch).toHaveBeenCalledWith({
+          index: '.kibana_some_tenant_security_session',
+          searches: [
+            {},
+            expectedMultiSearchParameters('user-hash-name', 'basic', 'basic1'),
+            {},
+            expectedMultiSearchParameters('user-hash-name-2', 'basic', 'basic1'),
+            {},
+            expectedMultiSearchParameters('user-hash-name-3', 'saml', 'saml1'),
+          ],
+          filter_path: ['responses.status', 'responses.hits.hits._id'],
+        });
+        expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+        expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
+          {
+            index: '.kibana_some_tenant_security_session',
+            operations: [
+              { delete: { _id: 'some-id' } },
+              { delete: { _id: 'some-id-2' } },
+              { delete: { _id: 'some-id-3' } },
+            ],
+            refresh: false,
+            require_alias: true,
+          },
+          { ignore: [409, 404] }
+        );
+        expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
+      });
+
+      it('should call bulk_delete in multiple chunks if total number of session to delete exceeds 10_000', async () => {
+        mockElasticsearchClient.search.mockResolvedValueOnce({
+          aggregations: {
+            sessions_grouped_by_user: {
+              sum_other_doc_count: 1,
+              buckets: [{ key: ['user-hash-name', 'basic', 'basic1'], doc_count: 10 }],
+            },
+          },
+        } as unknown as SearchResponse);
+        mockElasticsearchClient.msearch.mockResolvedValue({
+          responses: [
+            {
+              status: 200,
+              hits: {
+                hits: Array.from({ length: 10002 }).map((_, index) => ({
+                  _id: `some-id-${index}`,
+                })),
+              },
+            },
+          ],
+        } as MsearchMultiSearchResult);
+
+        await sessionIndex.cleanUp();
+
+        expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(2);
+        expect(mockElasticsearchClient.bulk).toHaveBeenNthCalledWith(
+          1,
+          {
+            index: '.kibana_some_tenant_security_session',
+            operations: expect.arrayContaining([
+              { delete: { _id: 'some-id-0' } },
+              { delete: { _id: 'some-id-9999' } },
+            ]),
+            refresh: false,
+            require_alias: true,
+          },
+          { ignore: [409, 404] }
+        );
+        expect(mockElasticsearchClient.bulk).toHaveBeenNthCalledWith(
+          2,
+          {
+            index: '.kibana_some_tenant_security_session',
+            operations: [
+              { delete: { _id: 'some-id-10000' } },
+              { delete: { _id: 'some-id-10001' } },
+            ],
+            refresh: false,
+            require_alias: true,
+          },
+          { ignore: [409, 404] }
+        );
+        expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
+      });
+
+      it('should log audit event', async () => {
+        mockElasticsearchClient.search.mockResolvedValueOnce({
+          aggregations: {
+            sessions_grouped_by_user: {
+              sum_other_doc_count: 1,
+              buckets: [
+                { key: ['user-hash-name', 'basic', 'basic1'], doc_count: 3 },
+                { key: ['user-hash-name-2', 'saml', 'saml1'], doc_count: 3 },
+              ],
+            },
+          },
+        } as unknown as SearchResponse);
+        mockElasticsearchClient.msearch.mockResolvedValue({
+          responses: [
+            { status: 200, hits: { hits: [{ _id: 'some-id' }] } },
+            { status: 200, hits: { hits: [{ _id: 'some-id-2' }] } },
+          ],
+        } as MsearchMultiSearchResult);
+
+        await sessionIndex.cleanUp();
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: { action: 'session_cleanup', category: ['authentication'], outcome: 'unknown' },
+            user: { hash: 'user-hash-name' },
+            kibana: {
+              session_id: 'some-id',
+              authentication_provider: 'basic1',
+              authentication_type: 'basic',
+            },
+          })
+        );
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: { action: 'session_cleanup', category: ['authentication'], outcome: 'unknown' },
+            user: { hash: 'user-hash-name-2' },
+            kibana: {
+              session_id: 'some-id-2',
+              authentication_provider: 'saml1',
+              authentication_type: 'saml',
+            },
+          })
+        );
+      });
     });
   });
 
@@ -837,7 +1328,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.get).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.get).toHaveBeenCalledWith(
-        { id: 'some-sid', index: indexName },
+        { id: 'some-sid', index: aliasName },
         { ignore: [404], meta: true }
       );
     });
@@ -862,7 +1353,78 @@ describe('Session index', () => {
       ).rejects.toBe(failureReason);
     });
 
-    it('properly stores session value in the index', async () => {
+    it('properly stores session value in the index, creating the index first if it does not exist', async () => {
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      let callCount = 0;
+      mockElasticsearchClient.create.mockResponseImplementation(() => {
+        callCount++;
+        // Fail the first create attempt because the index/alias doesn't exist
+        if (callCount === 1) {
+          return { statusCode: 404 };
+        }
+        // Pass the second create attempt
+        return {
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'created',
+          },
+          statusCode: 201,
+        };
+      });
+
+      const sid = 'some-long-sid';
+      const sessionValue = {
+        usernameHash: 'some-username-hash',
+        provider: { type: 'basic', name: 'basic1' },
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        content: 'some-encrypted-content',
+      };
+
+      await expect(sessionIndex.create({ sid, ...sessionValue })).resolves.toEqual({
+        ...sessionValue,
+        sid,
+        metadata: { primaryTerm: 321, sequenceNumber: 654 },
+      });
+
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+
+      expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.create).toHaveBeenNthCalledWith(
+        1,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [404], meta: true }
+      );
+      expect(mockElasticsearchClient.create).toHaveBeenNthCalledWith(
+        2,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [], meta: true }
+      );
+    });
+
+    it('properly stores session value in the index, skipping index creation if it already exists', async () => {
+      mockElasticsearchClient.indices.exists.mockResolvedValue(true);
+
       mockElasticsearchClient.create.mockResponse({
         _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
         _index: 'my-index',
@@ -888,13 +1450,21 @@ describe('Session index', () => {
         metadata: { primaryTerm: 321, sequenceNumber: 654 },
       });
 
+      expect(mockElasticsearchClient.indices.exists).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+
       expect(mockElasticsearchClient.create).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.create).toHaveBeenCalledWith({
-        id: sid,
-        index: indexName,
-        body: sessionValue,
-        refresh: 'wait_for',
-      });
+      expect(mockElasticsearchClient.create).toHaveBeenCalledWith(
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { meta: true, ignore: [404] }
+      );
     });
   });
 
@@ -959,13 +1529,14 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.index).toHaveBeenCalledWith(
         {
           id: sid,
-          index: indexName,
+          index: aliasName,
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
           refresh: 'wait_for',
+          require_alias: true,
         },
-        { ignore: [409], meta: true }
+        { ignore: [404, 409], meta: true }
       );
     });
 
@@ -1000,11 +1571,80 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.index).toHaveBeenCalledWith(
         {
           id: sid,
-          index: indexName,
+          index: aliasName,
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
           refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [404, 409], meta: true }
+      );
+    });
+
+    it('properly stores session value in the index, recreating the index/alias if missing', async () => {
+      let callCount = 0;
+      mockElasticsearchClient.index.mockResponseImplementation(() => {
+        callCount++;
+        // Fail the first update attempt because the index/alias doesn't exist
+        if (callCount === 1) {
+          return { statusCode: 404 };
+        }
+        // Pass the second update attempt
+        return {
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'created',
+          },
+          statusCode: 201,
+        };
+      });
+
+      const sid = 'some-long-sid';
+      const metadata = { primaryTerm: 123, sequenceNumber: 456 };
+      const sessionValue = {
+        usernameHash: 'some-username-hash',
+        provider: { type: 'basic', name: 'basic1' },
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        content: 'some-encrypted-content',
+      };
+
+      await expect(sessionIndex.update({ sid, metadata, ...sessionValue })).resolves.toEqual({
+        ...sessionValue,
+        sid,
+        metadata: { primaryTerm: 321, sequenceNumber: 654 },
+      });
+
+      expect(mockElasticsearchClient.index).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.index).toHaveBeenNthCalledWith(
+        1,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          if_seq_no: 456,
+          if_primary_term: 123,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [404, 409], meta: true }
+      );
+      expect(mockElasticsearchClient.index).toHaveBeenNthCalledWith(
+        2,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          if_seq_no: 456,
+          if_primary_term: 123,
+          refresh: 'wait_for',
+          require_alias: true,
         },
         { ignore: [409], meta: true }
       );
@@ -1013,7 +1653,7 @@ describe('Session index', () => {
 
   describe('#invalidate', () => {
     beforeEach(() => {
-      mockElasticsearchClient.deleteByQuery.mockResponse({ deleted: 10 });
+      mockElasticsearchClient.deleteByQuery.mockResponse({ deleted: 10 } as DeleteByQueryResponse);
     });
 
     it('[match=sid] throws if call to Elasticsearch fails', async () => {
@@ -1032,7 +1672,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
-        { id: 'some-long-sid', index: indexName, refresh: 'wait_for' },
+        { id: 'some-long-sid', index: aliasName, refresh: 'wait_for' },
         { ignore: [404], meta: true }
       );
     });
@@ -1051,7 +1691,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: { query: { match_all: {} } },
       });
@@ -1075,7 +1715,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: { query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } } },
       });
@@ -1091,7 +1731,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: {
           query: {
@@ -1116,7 +1756,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: {
           query: {
@@ -1141,7 +1781,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: {
           query: {
@@ -1155,6 +1795,169 @@ describe('Session index', () => {
           },
         },
       });
+    });
+  });
+
+  describe('#isWithinConcurrentSessionLimit', () => {
+    const expectedSearchParameters = () => ({
+      index: '.kibana_some_tenant_security_session',
+      query: {
+        bool: {
+          filter: [
+            { term: { usernameHash: 'some-username-hash' } },
+            { term: { 'provider.type': 'basic' } },
+            { term: { 'provider.name': 'basic1' } },
+          ],
+        },
+      },
+      sort: [{ createdAt: { order: 'desc' } }],
+      _source_includes: 'createdAt',
+      filter_path: 'hits.hits._source',
+      from: 2,
+      size: 1,
+      track_total_hits: false,
+    });
+
+    beforeEach(() => {
+      sessionIndex = new SessionIndex(
+        createSessionIndexOptions({
+          session: { idleTimeout: null, lifespan: null, concurrentSessions: { maxSessions: 2 } },
+        })
+      );
+    });
+
+    it('throws if call to Elasticsearch fails', async () => {
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
+      );
+      mockElasticsearchClient.search.mockRejectedValue(failureReason);
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(sessionIndexMock.createValue())
+      ).rejects.toBe(failureReason);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
+    });
+
+    it('returns `true` if concurrent session limit is not configured', async () => {
+      sessionIndex = new SessionIndex(createSessionIndexOptions());
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(sessionIndexMock.createValue())
+      ).resolves.toBe(true);
+      expect(mockElasticsearchClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns `true` for unauthenticated sessions', async () => {
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({ usernameHash: undefined })
+        )
+      ).resolves.toBe(true);
+      expect(mockElasticsearchClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns `true` if session belongs to the anonymous user', async () => {
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({
+            createdAt: 100,
+            provider: { type: AnonymousAuthenticationProvider.type, name: 'anonymous1' },
+          })
+        )
+      ).resolves.toBe(true);
+      expect(mockElasticsearchClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns `true` if session is within limit', async () => {
+      for (const value of [
+        {} as SearchResponse,
+        { hits: { hits: [] } } as unknown as SearchResponse,
+      ]) {
+        mockElasticsearchClient.search.mockResolvedValue(value);
+
+        await expect(
+          sessionIndex.isWithinConcurrentSessionLimit(sessionIndexMock.createValue())
+        ).resolves.toBe(true);
+
+        expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+        expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
+
+        mockElasticsearchClient.search.mockClear();
+      }
+    });
+
+    it('returns `true` if the specified session is not a legacy session, but the first session that is outside the limit is a legacy one', async () => {
+      mockElasticsearchClient.search.mockResolvedValue({
+        hits: { hits: [{ _source: {} }] },
+      } as SearchResponse);
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(sessionIndexMock.createValue())
+      ).resolves.toBe(true);
+
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
+    });
+
+    it('returns `true` if the first session that is outside the limit is older than the specified session', async () => {
+      mockElasticsearchClient.search.mockResolvedValue({
+        hits: { hits: [{ _source: { createdAt: 100 } }] },
+      } as SearchResponse);
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({ createdAt: 200 })
+        )
+      ).resolves.toBe(true);
+
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
+    });
+
+    it('returns `false` if the limit is exceeded and specified session is a legacy session', async () => {
+      mockElasticsearchClient.search.mockResolvedValue({
+        hits: { hits: [{ _source: { createdAt: 100 } }] },
+      } as SearchResponse);
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({ createdAt: undefined })
+        )
+      ).resolves.toBe(false);
+
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
+    });
+
+    it('returns `false` if the first session that is outside the limit was created at the same time as the specified session', async () => {
+      mockElasticsearchClient.search.mockResolvedValue({
+        hits: { hits: [{ _source: { createdAt: 100 } }] },
+      } as SearchResponse);
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({ createdAt: 100 })
+        )
+      ).resolves.toBe(false);
+
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
+    });
+
+    it('returns `false` if the specified session is older than the first session that is outside the limit', async () => {
+      mockElasticsearchClient.search.mockResolvedValue({
+        hits: { hits: [{ _source: { createdAt: 200 } }] },
+      } as SearchResponse);
+
+      await expect(
+        sessionIndex.isWithinConcurrentSessionLimit(
+          sessionIndexMock.createValue({ createdAt: 100 })
+        )
+      ).resolves.toBe(false);
+
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(expectedSearchParameters());
     });
   });
 });

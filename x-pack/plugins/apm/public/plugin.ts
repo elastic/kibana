@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
-import type { ConfigSchema } from '.';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -16,34 +16,44 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import type {
-  DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+  DataPublicPluginSetup,
+} from '@kbn/data-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
-import type { FeaturesPluginSetup } from '../../features/public';
-import type { FleetStart } from '../../fleet/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { MapsStartApi } from '../../maps/public';
-import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+} from '@kbn/alerting-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
   FetchDataParams,
   METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -52,9 +62,8 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import type { SecurityPluginStart } from '../../security/public';
-import { SpacesPluginStart } from '../../spaces/public';
-import { enableServiceGroups } from '../../observability/public';
+import type { ConfigSchema } from '.';
+import { APMServiceDetailLocator } from './locator/service_detail_locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -63,16 +72,19 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
+  charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
@@ -83,13 +95,27 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
+  fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  infra?: InfraClientStartExports;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  storage: IStorageWrapper;
+  lens: LensPublicStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
+
+const serviceGroupsTitle = i18n.translate(
+  'xpack.apm.navigation.serviceGroupsTitle',
+  {
+    defaultMessage: 'Service groups',
+  }
+);
+
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
@@ -101,6 +127,20 @@ const dependenciesTitle = i18n.translate(
   'xpack.apm.navigation.dependenciesTitle',
   {
     defaultMessage: 'Dependencies',
+  }
+);
+
+const apmSettingsTitle = i18n.translate(
+  'xpack.apm.navigation.apmSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+const apmStorageExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.apmStorageExplorerTitle',
+  {
+    defaultMessage: 'Storage Explorer',
   }
 );
 
@@ -119,11 +159,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const serviceGroupsEnabled = core.uiSettings.get<boolean>(
-      enableServiceGroups,
-      false
-    );
-
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -135,31 +170,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 label: 'APM',
                 sortKey: 400,
                 entries: [
-                  serviceGroupsEnabled
-                    ? {
-                        label: servicesTitle,
-                        app: 'apm',
-                        path: '/service-groups',
-                        matchPath(currentPath: string) {
-                          return [
-                            '/service-groups',
-                            '/services',
-                            '/service-map',
-                          ].some((testPath) =>
-                            currentPath.startsWith(testPath)
-                          );
-                        },
-                      }
-                    : {
-                        label: servicesTitle,
-                        app: 'apm',
-                        path: '/services',
-                      },
+                  {
+                    label: servicesTitle,
+                    app: 'apm',
+                    path: '/services',
+                    matchPath(currentPath: string) {
+                      return [
+                        '/service-groups',
+                        '/services',
+                        '/service-map',
+                      ].some((testPath) => currentPath.startsWith(testPath));
+                    },
+                  },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends',
+                    path: '/dependencies/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -169,20 +196,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_backend'
+                          'side_nav_dependency'
                         );
                       }
                     },
                   },
-                  ...(serviceGroupsEnabled
-                    ? []
-                    : [
-                        {
-                          label: serviceMapTitle,
-                          app: 'apm',
-                          path: '/service-map',
-                        },
-                      ]),
                 ],
               },
             ];
@@ -264,32 +282,28 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
         {
+          id: 'service-groups-list',
+          title: serviceGroupsTitle,
+          path: '/service-groups',
+        },
+        {
           id: 'services',
           title: servicesTitle,
-          // path: serviceGroupsEnabled ? '/service-groups' : '/services',
-          deepLinks: serviceGroupsEnabled
-            ? [
-                {
-                  id: 'service-groups-list',
-                  title: 'Service groups',
-                  path: '/service-groups',
-                },
-                {
-                  id: 'service-groups-services',
-                  title: servicesTitle,
-                  path: '/services',
-                },
-                {
-                  id: 'service-groups-service-map',
-                  title: serviceMapTitle,
-                  path: '/service-map',
-                },
-              ]
-            : [],
+          path: '/services',
         },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        {
+          id: 'dependencies',
+          title: dependenciesTitle,
+          path: '/dependencies/inventory',
+        },
+        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'storage-explorer',
+          title: apmStorageExplorerTitle,
+          path: '/storage-explorer',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
@@ -310,9 +324,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    registerApmAlerts(observabilityRuleTypeRegistry);
+    registerApmRuleTypes(observabilityRuleTypeRegistry);
 
-    return {};
+    const locator = plugins.share.url.locators.create(
+      new APMServiceDetailLocator(core.uiSettings)
+    );
+
+    return {
+      locator,
+    };
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;

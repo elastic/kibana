@@ -52,6 +52,8 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
           field={INDICATOR_MATCHED_TYPE}
           isDraggable={isDraggable}
           value={indicatorType}
+          isAggregatable={true}
+          fieldType={'keyword'}
         />
       </EuiFlexItem>
     )}
@@ -73,6 +75,8 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             field={FEED_NAME}
             isDraggable={isDraggable}
             value={feedName}
+            isAggregatable={true}
+            fieldType={'keyword'}
           />
         </EuiFlexItem>
       </>
@@ -90,6 +94,8 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             fieldName={INDICATOR_REFERENCE}
             isDraggable={isDraggable}
             value={indicatorReference}
+            isAggregatable={true}
+            fieldType={'keyword'}
           />
         </EuiFlexItem>
       </>

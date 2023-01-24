@@ -4,22 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { combineLatest, Observable } from 'rxjs';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MonitoredHealth } from '../routes/health';
 import { TaskManagerUsage } from './types';
+import { MonitoredUtilization } from '../routes/background_task_utilization';
 
 export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
   monitoringStats$: Observable<MonitoredHealth>,
+  monitoredUtilization$: Observable<MonitoredUtilization>,
   ephemeralTasksEnabled: boolean,
   ephemeralRequestCapacity: number,
   excludeTaskTypes: string[]
 ) {
   let lastMonitoredHealth: MonitoredHealth | null = null;
-  monitoringStats$.subscribe((health) => {
-    lastMonitoredHealth = health;
-  });
+  let lastMonitoredUtilization: MonitoredUtilization | null = null;
+  combineLatest([monitoringStats$, monitoredUtilization$])
+    .pipe()
+    .subscribe(([health, utilization]) => {
+      lastMonitoredHealth = health;
+      lastMonitoredUtilization = utilization;
+    });
 
   return usageCollection.makeUsageCollector<TaskManagerUsage>({
     type: 'task_manager',
@@ -61,6 +67,21 @@ export function createTaskManagerUsageCollector(
           },
           0
         ),
+        recurring_tasks: {
+          actual_service_time:
+            lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.actual ?? 0,
+          adjusted_service_time:
+            lastMonitoredUtilization?.stats?.value.recurring.ran.service_time.adjusted ?? 0,
+        },
+        adhoc_tasks: {
+          actual_service_time:
+            lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.actual ?? 0,
+          adjusted_service_time:
+            lastMonitoredUtilization?.stats?.value.adhoc.ran.service_time.adjusted ?? 0,
+        },
+        capacity:
+          lastMonitoredHealth?.stats.capacity_estimation?.value.observed
+            .max_throughput_per_minute_per_kibana ?? 0,
       };
     },
     schema: {
@@ -89,6 +110,15 @@ export function createTaskManagerUsageCollector(
       },
       task_type_exclusion: { type: 'array', items: { type: 'keyword' } },
       failed_tasks: { type: 'long' },
+      recurring_tasks: {
+        actual_service_time: { type: 'long' },
+        adjusted_service_time: { type: 'long' },
+      },
+      adhoc_tasks: {
+        actual_service_time: { type: 'long' },
+        adjusted_service_time: { type: 'long' },
+      },
+      capacity: { type: 'long' },
     },
   });
 }
@@ -96,6 +126,7 @@ export function createTaskManagerUsageCollector(
 export function registerTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
   monitoringStats$: Observable<MonitoredHealth>,
+  monitoredUtilization$: Observable<MonitoredUtilization>,
   ephemeralTasksEnabled: boolean,
   ephemeralRequestCapacity: number,
   excludeTaskTypes: string[]
@@ -103,6 +134,7 @@ export function registerTaskManagerUsageCollector(
   const collector = createTaskManagerUsageCollector(
     usageCollection,
     monitoringStats$,
+    monitoredUtilization$,
     ephemeralTasksEnabled,
     ephemeralRequestCapacity,
     excludeTaskTypes

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KibanaServerError } from '../../../../kibana_utils/common';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export interface FailedShard {
   shard: number;
@@ -17,7 +17,7 @@ export interface FailedShard {
 
 export interface Reason {
   type: string;
-  reason: string;
+  reason?: string;
   script_stack?: string[];
   position?: {
     offset: number;

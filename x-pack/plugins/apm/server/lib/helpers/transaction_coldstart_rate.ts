@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FAAS_COLDSTART } from '../../../common/elasticsearch_fieldnames';
-import {
+import type {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../../src/core/types/elasticsearch';
+} from '@kbn/es-types';
+import { FAAS_COLDSTART } from '../../../common/es_fields/apm';
 
 export const getColdstartAggregation = () => ({
   terms: {

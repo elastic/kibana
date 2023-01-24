@@ -47,8 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should show the Trusted Apps page when link is clicked', async () => {
         await (await fleetIntegrations.findIntegrationDetailCustomTab()).click();
-        await (await testSubjects.find('linkToTrustedApps')).click();
-        await trustedApps.ensureIsOnTrustedAppsListPage();
+        await (await testSubjects.find('trustedApps-artifactsLink')).click();
+        await trustedApps.ensureIsOnTrustedAppsEmptyPage();
       });
     });
   });

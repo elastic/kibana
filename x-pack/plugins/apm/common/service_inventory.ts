@@ -17,4 +17,16 @@ export interface ServiceListItem {
   latency?: number | null;
   transactionErrorRate?: number | null;
   environments?: string[];
+  alertsCount?: number;
+}
+
+export enum ServiceInventoryFieldName {
+  ServiceName = 'serviceName',
+  HealthStatus = 'healthStatus',
+  Environments = 'environments',
+  TransactionType = 'transactionType',
+  Throughput = 'throughput',
+  Latency = 'latency',
+  TransactionErrorRate = 'transactionErrorRate',
+  AlertsCount = 'alertsCount',
 }

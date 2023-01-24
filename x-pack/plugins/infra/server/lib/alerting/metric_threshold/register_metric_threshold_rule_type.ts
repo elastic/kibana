@@ -7,29 +7,43 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf } from '../../../../../alerting/common';
-import { PluginSetupContract, RuleType } from '../../../../../alerting/server';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { PluginSetupContract, RuleType } from '@kbn/alerting-plugin/server';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
 import {
+  alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
+  cloudActionVariableDescription,
+  containerActionVariableDescription,
   groupActionVariableDescription,
+  groupByKeysActionVariableDescription,
+  hostActionVariableDescription,
+  labelsActionVariableDescription,
   metricActionVariableDescription,
+  orchestratorActionVariableDescription,
   reasonActionVariableDescription,
+  tagsActionVariableDescription,
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
+  viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  getAlertDetailsPageEnabledForApp,
+  oneOfLiterals,
+  validateIsStringElasticsearchJSONFilter,
+} from '../common/utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   WARNING_ACTIONS,
+  NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
 >;
 export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
   ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
@@ -39,6 +53,8 @@ export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
+  const config = libs.getAlertDetailsConfig();
+
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -78,27 +94,39 @@ export async function registerMetricThresholdRuleType(
           sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          shouldDropPartialBuckets: schema.maybe(schema.boolean()),
         },
         { unknowns: 'allow' }
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
+    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS, NO_DATA_ACTIONS],
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createMetricThresholdExecutor(libs),
+    doesSetRecoveryContext: true,
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
+        { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
+        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
+          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          : []),
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        { name: 'cloud', description: cloudActionVariableDescription },
+        { name: 'host', description: hostActionVariableDescription },
+        { name: 'container', description: containerActionVariableDescription },
+        { name: 'orchestrator', description: orchestratorActionVariableDescription },
+        { name: 'labels', description: labelsActionVariableDescription },
+        { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
     producer: 'infrastructure',
+    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
   });
 }

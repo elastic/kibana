@@ -10,7 +10,7 @@ import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntriesSummaryBucket } from '../../../../common/http_api';
 
 interface DensityChartProps {
@@ -38,10 +38,10 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   const xScale = scaleLinear().domain([0, xMax]).range([0, width]);
 
   const path = area<LogEntriesSummaryBucket>()
-    .x0(xScale(0))
-    .x1((bucket) => xScale(bucket.entriesCount))
-    .y0((bucket) => yScale(bucket.start))
-    .y1((bucket) => yScale(bucket.end))
+    .x0(xScale(0) ?? 0)
+    .x1((bucket) => xScale(bucket.entriesCount) ?? 0)
+    .y0((bucket) => yScale(bucket.start) ?? 0)
+    .y1((bucket) => yScale(bucket.end) ?? 0)
     .curve(curveMonotoneY);
 
   const firstBucket = buckets[0];

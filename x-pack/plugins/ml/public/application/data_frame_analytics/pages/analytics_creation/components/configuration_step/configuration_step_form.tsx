@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
+import { Query } from '@kbn/data-plugin/common/query';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
@@ -27,10 +28,10 @@ import {
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
-  FieldSelectionItem,
 } from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
+import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 import {
   isRuntimeMappings,
   isRuntimeField,
@@ -56,7 +57,6 @@ import { ExplorationQueryBar } from '../../../analytics_exploration/components/e
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
-import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
@@ -285,9 +285,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
       const formStateUpdated = {
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-        ...(depVarIsRuntimeField || jobTypeChanged || depVarNotIncluded
-          ? { includes: formToUse.includes }
-          : {}),
+        ...(depVarIsRuntimeField || depVarNotIncluded ? { includes: formToUse.includes } : {}),
         requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
       };
 
@@ -335,6 +333,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     setFormState({ sourceIndex: currentDataView.title });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const indexPatternFieldsTableItems = useMemo(() => {
@@ -346,12 +345,14 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       }));
     }
     return [];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [`${indexData?.indexPatternFields}`]);
 
   useEffect(() => {
     if (typeof savedSearchQueryStr === 'string') {
       setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(savedSearchQuery), savedSearchQueryStr]);
 
   useEffect(() => {
@@ -365,6 +366,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
       loadDepVarOptions(form, runtimeOptions);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobType]);
 
   const handleRuntimeUpdate = useCallback(async () => {
@@ -476,10 +478,12 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(runtimeMappings)]);
 
   useEffect(() => {
     handleRuntimeUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(runtimeMappings)]);
 
   useEffect(() => {
@@ -490,6 +494,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
   const scatterplotMatrixProps = useMemo(
@@ -504,6 +509,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       runtimeMappings,
       indexPattern: currentDataView,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       currentDataView.title,
       dependentVariable,
@@ -523,6 +529,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ||
         (isJobTypeWithDepVar && !dependentVariableEmpty)) &&
       scatterplotMatrixProps.fields.length > 1,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dependentVariableEmpty, jobType, scatterplotMatrixProps.fields.length]
   );
 

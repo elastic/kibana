@@ -9,7 +9,6 @@ import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
-  EuiSpacer,
   EuiButton,
   EuiLink,
   EuiIconTip,
@@ -21,11 +20,14 @@ import {
   EuiEmptyPrompt,
   Criteria,
   EuiButtonEmpty,
+  EuiBadge,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -39,19 +41,19 @@ import {
   ActionConnector,
   ActionConnectorTableItem,
   ActionTypeIndex,
-  EditConectorTabs,
+  EditConnectorTabs,
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
-import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 import {
   connectorDeprecatedMessage,
   deprecatedMessage,
-  checkConnectorIsDeprecated,
 } from '../../../../common/connectors_selection';
+import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
+import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -83,6 +85,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     notifications: { toasts },
     application: { capabilities },
     actionTypeRegistry,
+    setBreadcrumbs,
+    chrome,
+    docLinks,
   } = useKibana().services;
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canExecute = hasExecuteActionsCapability(capabilities);
@@ -97,7 +102,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<{
     initialConnector?: ActionConnector;
-    tab?: EditConectorTabs;
+    tab?: EditConnectorTabs;
     isFix?: boolean;
   }>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
@@ -105,6 +110,13 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  // Set breadcrumb and page title
+  useEffect(() => {
+    setBreadcrumbs([getAlertingSectionBreadcrumb('connectors')]);
+    chrome.docTitle.change(getCurrentDocTitle('connectors'));
+  }, [chrome, setBreadcrumbs]);
 
   useEffect(() => {
     (async () => {
@@ -131,29 +143,41 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   }, []);
 
   const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
-    ? actions
-        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-        .filter((action) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(action.actionTypeId))
-        .map((action) => {
-          return {
-            ...action,
-            actionType: actionTypesIndex[action.actionTypeId]
-              ? actionTypesIndex[action.actionTypeId].name
-              : action.actionTypeId,
-          };
-        })
+    ? actions.map((action) => {
+        return {
+          ...action,
+          actionType: actionTypesIndex[action.actionTypeId]
+            ? actionTypesIndex[action.actionTypeId].name
+            : action.actionTypeId,
+          compatibility: actionTypesIndex[action.actionTypeId]
+            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
+            : [],
+        };
+      })
     : [];
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
-        // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-        .filter((actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id))
         .map((actionType) => ({
           value: actionType.id,
           name: `${actionType.name} (${getActionsCountByActionType(actions, actionType.id)})`,
         }))
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
+
+  function setDeleteConnectorWarning(connectors: string[]) {
+    const show = connectors.some((c) => {
+      const action = actions.find((a) => a.id === c);
+      return (action && action.referencedByCount ? action.referencedByCount : 0) > 0;
+    });
+    setShowWarningText(show);
+  }
+
+  function onDelete(items: ActionConnectorTableItem[]) {
+    const itemIds = items.map((item: any) => item.id);
+    setConnectorsToDelete(itemIds);
+    setDeleteConnectorWarning(itemIds);
+  }
 
   async function loadActions() {
     setIsLoadingActions(true);
@@ -176,7 +200,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
 
   async function editItem(
     actionConnector: ActionConnector,
-    tab: EditConectorTabs,
+    tab: EditConnectorTabs,
     isFix?: boolean
   ) {
     setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
@@ -203,14 +227,14 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
          * TODO: Remove when connectors can provide their own UX message.
          * Issue: https://github.com/elastic/kibana/issues/114507
          */
-        const showDeprecatedTooltip = checkConnectorIsDeprecated(item);
+        const showDeprecatedTooltip = item.isDeprecated;
         const name = getConnectorName(value, item);
 
         const link = (
           <>
             <EuiLink
               data-test-subj={`edit${item.id}`}
-              onClick={() => editItem(item, EditConectorTabs.Configuration)}
+              onClick={() => editItem(item, EditConnectorTabs.Configuration)}
               key={item.id}
               disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
             >
@@ -259,15 +283,41 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
+      field: 'compatibility',
+      'data-test-subj': 'connectorsTableCell-compatibility',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.compatibility',
+        {
+          defaultMessage: 'Compatibility',
+        }
+      ),
+      sortable: false,
+      truncateText: true,
+      render: (compatibility: string[]) => {
+        return (
+          <EuiFlexGroup
+            wrap
+            responsive={false}
+            gutterSize="xs"
+            data-test-subj="compatibility-content"
+          >
+            {compatibility.map((compatibilityItem: string) => (
+              <EuiFlexItem grow={false} key={compatibilityItem}>
+                <EuiBadge data-test-subj="connectorsTableCell-compatibility-badge" color="default">
+                  {compatibilityItem}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      },
+    },
+    {
       name: '',
       render: (item: ActionConnectorTableItem) => {
         return (
           <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
-            <DeleteOperation
-              canDelete={canDelete}
-              item={item}
-              onDelete={() => setConnectorsToDelete([item.id])}
-            />
+            <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {item.isMissingSecrets ? (
               <>
                 {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
@@ -281,7 +331,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                       <EuiButtonEmpty
                         size="xs"
                         data-test-subj="fixConnectorButton"
-                        onClick={() => editItem(item, EditConectorTabs.Configuration, true)}
+                        onClick={() => editItem(item, EditConnectorTabs.Configuration, true)}
                       >
                         {i18n.translate(
                           'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
@@ -298,7 +348,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               <RunOperation
                 canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
                 item={item}
-                onRun={() => editItem(item, EditConectorTabs.Test)}
+                onRun={() => editItem(item, EditConnectorTabs.Test)}
               />
             )}
           </EuiFlexGroup>
@@ -361,124 +411,147 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             options: actionTypesList,
           },
         ],
-        toolsLeft:
-          selectedItems.length === 0 || !canDelete
-            ? []
-            : [
-                <EuiButton
-                  key="delete"
-                  iconType="trash"
-                  color="danger"
-                  data-test-subj="bulkDelete"
-                  onClick={() => {
-                    setConnectorsToDelete(selectedItems.map((selected: any) => selected.id));
-                  }}
-                  title={
-                    canDelete
-                      ? undefined
-                      : i18n.translate(
-                          'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                          { defaultMessage: 'Unable to delete connectors' }
-                        )
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                    defaultMessage="Delete {count}"
-                    values={{
-                      count: selectedItems.length,
-                    }}
-                  />
-                </EuiButton>,
-              ],
-        toolsRight: canSave
-          ? [
+        toolsLeft: (selectedItems.length === 0 || !canDelete
+          ? []
+          : [
               <EuiButton
-                data-test-subj="createActionButton"
-                key="create-action"
-                fill
-                onClick={() => setAddFlyoutVisibility(true)}
+                key="delete"
+                iconType="trash"
+                color="danger"
+                data-test-subj="bulkDelete"
+                onClick={() => onDelete(selectedItems)}
+                title={
+                  canDelete
+                    ? undefined
+                    : i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
+                        { defaultMessage: 'Unable to delete connectors' }
+                      )
+                }
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                  defaultMessage="Create connector"
+                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
+                  defaultMessage="Delete {count}"
+                  values={{
+                    count: selectedItems.length,
+                  }}
                 />
               </EuiButton>,
             ]
-          : [],
+        ).concat(
+          canSave
+            ? [
+                <EuiButton
+                  data-test-subj="createActionButton"
+                  key="create-action"
+                  fill
+                  onClick={() => setAddFlyoutVisibility(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+                    defaultMessage="Create connector"
+                  />
+                </EuiButton>,
+              ]
+            : []
+        ),
       }}
     />
   );
 
   return (
-    <section data-test-subj="actionsList">
-      <DeleteModalConfirmation
-        onDeleted={(deleted: string[]) => {
-          if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
-            const updatedActions = actions.filter(
-              (action) => action.id && !connectorsToDelete.includes(action.id)
-            );
-            setActions(updatedActions);
-            setSelectedItems([]);
-          }
-          setConnectorsToDelete([]);
-        }}
-        onErrors={async () => {
-          // Refresh the actions from the server, some actions may have beend deleted
-          await loadActions();
-          setConnectorsToDelete([]);
-        }}
-        onCancel={async () => {
-          setConnectorsToDelete([]);
-        }}
-        apiDeleteCall={deleteActions}
-        idsToDelete={connectorsToDelete}
-        singleTitle={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.singleTitle',
-          { defaultMessage: 'connector' }
-        )}
-        multipleTitle={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
-          { defaultMessage: 'connectors' }
-        )}
-        setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
-      />
-      <EuiSpacer size="m" />
-      {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
-      {actionConnectorTableItems.length !== 0 && table}
-      {actionConnectorTableItems.length === 0 &&
-        canSave &&
-        !isLoadingActions &&
-        !isLoadingActionTypes && (
-          <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
-        )}
-      {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
-      {addFlyoutVisible ? (
-        <ConnectorAddFlyout
-          onClose={() => {
-            setAddFlyoutVisibility(false);
+    <>
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="actionsList"
+        alignment={actionConnectorTableItems.length === 0 ? 'center' : 'top'}
+      >
+        <DeleteModalConfirmation
+          data-test-subj="deleteConnectorsConfirmation"
+          onDeleted={(deleted: string[]) => {
+            if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
+              const updatedActions = actions.filter(
+                (action) => action.id && !connectorsToDelete.includes(action.id)
+              );
+              setActions(updatedActions);
+              setSelectedItems([]);
+            }
+            setConnectorsToDelete([]);
           }}
-          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
-          reloadConnectors={loadActions}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ) : null}
-      {editConnectorProps.initialConnector ? (
-        <ConnectorEditFlyout
-          key={`${editConnectorProps.initialConnector.id}${
-            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
-          }`}
-          initialConnector={editConnectorProps.initialConnector}
-          tab={editConnectorProps.tab}
-          onClose={() => {
-            setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+          onErrors={async () => {
+            // Refresh the actions from the server, some actions may have beend deleted
+            await loadActions();
+            setConnectorsToDelete([]);
           }}
-          reloadConnectors={loadActions}
-          actionTypeRegistry={actionTypeRegistry}
+          onCancel={async () => {
+            setConnectorsToDelete([]);
+          }}
+          apiDeleteCall={deleteActions}
+          idsToDelete={connectorsToDelete}
+          singleTitle={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.singleTitle',
+            { defaultMessage: 'connector' }
+          )}
+          multipleTitle={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
+            { defaultMessage: 'connectors' }
+          )}
+          showWarningText={showWarningText}
+          warningText={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.warningText',
+            {
+              defaultMessage:
+                '{connectors, plural, one {This connector is} other {Some connectors are}} currently in use.',
+              values: {
+                connectors: connectorsToDelete.length,
+              },
+            }
+          )}
+          setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
         />
-      ) : null}
-    </section>
+
+        {/* Render the view based on if there's data or if they can save */}
+        {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
+        {actionConnectorTableItems.length !== 0 && table}
+        {actionConnectorTableItems.length === 0 &&
+          canSave &&
+          !isLoadingActions &&
+          !isLoadingActionTypes && (
+            <EmptyConnectorsPrompt
+              onCTAClicked={() => setAddFlyoutVisibility(true)}
+              docLinks={docLinks}
+            />
+          )}
+        {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
+        {addFlyoutVisible ? (
+          <CreateConnectorFlyout
+            onClose={() => {
+              setAddFlyoutVisibility(false);
+            }}
+            onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+            onConnectorCreated={loadActions}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+        {editConnectorProps.initialConnector ? (
+          <EditConnectorFlyout
+            key={`${editConnectorProps.initialConnector.id}${
+              editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+            }`}
+            connector={editConnectorProps.initialConnector}
+            tab={editConnectorProps.tab}
+            onClose={() => {
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+            }}
+            onConnectorUpdated={(connector) => {
+              setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
+              loadActions();
+            }}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+      </EuiPageTemplate.Section>
+    </>
   );
 };
 
@@ -490,7 +563,7 @@ function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: s
 }
 
 function getConnectorName(name: string, connector: ActionConnector): string {
-  return checkConnectorIsDeprecated(connector) ? `${name} ${deprecatedMessage}` : name;
+  return connector.isDeprecated ? `${name} ${deprecatedMessage}` : name;
 }
 
 const DeleteOperation: React.FunctionComponent<{

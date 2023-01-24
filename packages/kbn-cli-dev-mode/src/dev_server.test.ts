@@ -15,7 +15,7 @@ import { extendedEnvSerializer } from './test_helpers';
 import { DevServer, Options } from './dev_server';
 import { TestLog } from './log';
 
-jest.useFakeTimers('modern');
+jest.useFakeTimers();
 
 class MockProc extends EventEmitter {
   public readonly signalsSent: string[] = [];
@@ -72,6 +72,7 @@ const defaultOptions: Options = {
   processExit$,
   sigint$,
   sigterm$,
+  forceColor: true,
 };
 
 expect.addSnapshotSerializer(extendedEnvSerializer);
@@ -80,7 +81,6 @@ beforeEach(() => {
   jest.clearAllMocks();
   log.messages.length = 0;
   process.execArgv = ['--inheritted', '--exec', '--argv'];
-  process.env.FORCE_COLOR = process.env.FORCE_COLOR || '1';
   currentProc = undefined;
 });
 

@@ -6,27 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
-import { mockTelemetryService } from './mocks';
+import { mockTelemetryConstants, mockTelemetryService } from './mocks';
 
 describe('renderWelcomeTelemetryNotice', () => {
-  test('it should show the opt-out message', () => {
+  const telemetryConstants = mockTelemetryConstants();
+
+  test('it should render the WelcomeTelemetryNotice component', () => {
+    const reactLazySpy = jest.spyOn(React, 'lazy');
     const telemetryService = mockTelemetryService();
-    const component = mountWithIntl(renderWelcomeTelemetryNotice(telemetryService, (url) => url));
-    expect(component.exists('[id="telemetry.dataManagementDisableCollectionLink"]')).toBe(true);
-  });
-
-  test('it should show the opt-in message', () => {
-    const telemetryService = mockTelemetryService({ config: { optIn: false } });
-    const component = mountWithIntl(renderWelcomeTelemetryNotice(telemetryService, (url) => url));
-    expect(component.exists('[id="telemetry.dataManagementEnableCollectionLink"]')).toBe(true);
-  });
-
-  test('it should not show opt-in/out options if user cannot change the settings', () => {
-    const telemetryService = mockTelemetryService({ config: { allowChangingOptInStatus: false } });
-    const component = mountWithIntl(renderWelcomeTelemetryNotice(telemetryService, (url) => url));
-    expect(component.exists('[id="telemetry.dataManagementDisableCollectionLink"]')).toBe(false);
-    expect(component.exists('[id="telemetry.dataManagementEnableCollectionLink"]')).toBe(false);
+    shallowWithIntl(
+      renderWelcomeTelemetryNotice(telemetryService, (url) => url, telemetryConstants)
+    );
+    expect(reactLazySpy).toHaveBeenCalledTimes(1);
   });
 });

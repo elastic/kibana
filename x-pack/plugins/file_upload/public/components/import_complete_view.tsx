@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
 import { ImportResults } from '../importer';
 
@@ -30,7 +30,7 @@ const services = {
 interface Props {
   failedPermissionCheck: boolean;
   importResults?: ImportResults;
-  indexPatternResp?: object;
+  dataViewResp?: object;
   indexName: string;
 }
 
@@ -128,13 +128,20 @@ export class ImportCompleteView extends Component<Props, {}> {
     }
 
     if (!this.props.importResults || !this.props.importResults.success) {
-      const errorMsg =
-        this.props.importResults && this.props.importResults.error
-          ? i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock', {
-              defaultMessage: 'Error: {reason}',
-              values: { reason: this.props.importResults.error.error.reason },
-            })
-          : '';
+      let reason: string | undefined;
+      if (this.props.importResults?.error?.body?.message) {
+        // Display http request error message
+        reason = this.props.importResults.error.body.message;
+      } else if (this.props.importResults?.error?.error?.reason) {
+        // Display elasticxsearch request error message
+        reason = this.props.importResults.error.error.reason;
+      }
+      const errorMsg = reason
+        ? i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock', {
+            defaultMessage: 'Error: {reason}',
+            values: { reason },
+          })
+        : '';
       return (
         <EuiCallOut
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
@@ -213,11 +220,11 @@ export class ImportCompleteView extends Component<Props, {}> {
           'indexRespCopyButton'
         )}
         {this._renderCodeEditor(
-          this.props.indexPatternResp,
-          i18n.translate('xpack.fileUpload.importComplete.indexPatternResponse', {
+          this.props.dataViewResp,
+          i18n.translate('xpack.fileUpload.importComplete.dataViewResponse', {
             defaultMessage: 'Data view response',
           }),
-          'indexPatternRespCopyButton'
+          'dataViewRespCopyButton'
         )}
         {this._renderIndexManagementMsg()}
       </KibanaContextProvider>

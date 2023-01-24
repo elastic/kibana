@@ -5,49 +5,42 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
-import { unwrapEsResponse } from '../../../../observability/server';
-import { APMConfig } from '../..';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+import { APMConfig } from '../..';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
-import {
-  collectDataTelemetry,
-  CollectTelemetryParams,
-} from './collect_data_telemetry';
+import { collectDataTelemetry } from './collect_data_telemetry';
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import { getTelemetryClient } from './telemetry_client';
 
-const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
+export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,
-  config$,
+  config,
   usageCollector,
   taskManager,
   logger,
   kibanaVersion,
+  isProd,
 }: {
   core: CoreSetup;
-  config$: Observable<APMConfig>;
+  config: APMConfig;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   kibanaVersion: string;
+  isProd: boolean;
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
@@ -63,41 +56,18 @@ export async function createApmTelemetry({
     },
   });
 
-  const savedObjectsClient = await getInternalSavedObjectsClient(core);
+  const [coreStart] = await core.getStartServices();
+  const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+  const indices = await getApmIndices({ config, savedObjectsClient });
+  const telemetryClient = await getTelemetryClient({ core });
 
   const collectAndStore = async () => {
-    const config = await config$.pipe(take(1)).toPromise();
-    const [{ elasticsearch }] = await core.getStartServices();
-    const esClient = elasticsearch.client;
-
-    const indices = await getApmIndices({
-      config,
-      savedObjectsClient,
-    });
-
-    const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.search(params, { meta: true })
-      ) as any;
-
-    const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.indices.stats(params, { meta: true })
-      );
-
-    const transportRequest: CollectTelemetryParams['transportRequest'] = (
-      params
-    ) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.transport.request(params, { meta: true })
-      );
-
     const dataTelemetry = await collectDataTelemetry({
-      search,
       indices,
+      telemetryClient,
       logger,
-      indicesStats,
-      transportRequest,
+      savedObjectsClient,
+      isProd,
     });
 
     await savedObjectsClient.create(
@@ -164,7 +134,7 @@ export async function createApmTelemetry({
         logger.debug(
           `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
         );
-        await taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+        await taskManagerStart.runSoon(APM_TELEMETRY_TASK_NAME);
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

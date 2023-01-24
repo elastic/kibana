@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { DynamicSettings } from '@kbn/synthetics-plugin/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DynamicSettings } from '../../../../plugins/uptime/common/runtime_types';
 
 export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -45,6 +45,7 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
         certAgeThreshold: parseInt(age, 10),
         certExpirationThreshold: parseInt(expiration, 10),
         defaultConnectors: [],
+        defaultEmail: { to: [], cc: [], bcc: [] },
       };
     },
     applyButtonIsDisabled: async () => {

@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { IInspectorInfo, isCompleteResponse } from '../../../../../src/plugins/data/common';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IInspectorInfo, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
 import { useInspectorContext } from '../context/inspector/use_inspector_context';
 import { getInspectResponse } from '../../common/utils/get_inspect_response';
@@ -69,6 +69,34 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
                 search$.unsubscribe();
               }
             },
+            error: (err) => {
+              if (isErrorResponse(err)) {
+                console.error(err);
+                if (addInspectorRequest) {
+                  addInspectorRequest({
+                    data: {
+                      _inspect: [
+                        getInspectResponse({
+                          startTime,
+                          esRequestParams: params,
+                          esResponse: null,
+                          esError: { originalError: err, name: err.name, message: err.message },
+                          esRequestStatus: 2,
+                          operationName: name,
+                          kibanaRequest: {
+                            route: {
+                              path: '/internal/bsearch',
+                              method: 'POST',
+                            },
+                          } as any,
+                        }),
+                      ],
+                    },
+                    status: FETCH_STATUS.SUCCESS,
+                  });
+                }
+              }
+            },
           });
       });
     }
@@ -77,7 +105,10 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
 
   const { rawResponse } = response as any;
 
-  return { data: rawResponse as ESSearchResponse<DocumentSource, TParams>, loading };
+  return {
+    data: rawResponse as ESSearchResponse<DocumentSource, TParams>,
+    loading: Boolean(loading),
+  };
 };
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {

@@ -5,35 +5,31 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { Position, ScaleType } from '@elastic/charts';
-import { EuiSelectOption } from '@elastic/eui';
-import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Unit } from '@elastic/datemath';
-import type { Filter } from '@kbn/es-query';
+import type { EuiSelectOption } from '@elastic/eui';
+import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
-import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { FieldValueQueryBar } from '../query_bar';
-import { ESQuery } from '../../../../../common/typed_json';
+import type { ChartSeriesConfigs } from '../../../../common/components/charts/common';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
  * @param hits Total query search hits
  * @param timeframe Range selected by user (last hour, day...)
  */
-export const isNoisy = (hits: number, timeframe: Unit): boolean => {
-  if (timeframe === 'h') {
-    return hits > 1;
-  } else if (timeframe === 'd') {
-    return hits / 24 > 1;
-  } else if (timeframe === 'w') {
-    return hits / 168 > 1;
-  } else if (timeframe === 'M') {
-    return hits / 30 > 1;
-  }
-
-  return false;
+export const isNoisy = (hits: number, timeframe: TimeframePreviewOptions): boolean => {
+  const oneHour = 1000 * 60 * 60;
+  const durationInHours = Math.max(
+    (timeframe.timeframeEnd.valueOf() - timeframe.timeframeStart.valueOf()) / oneHour,
+    1.0
+  );
+  return hits / durationInHours > 1;
 };
 
 /**
@@ -62,52 +58,6 @@ export const getTimeframeOptions = (ruleType: Type): EuiSelectOption[] => {
       { value: 'd', text: i18n.LAST_DAY },
       { value: 'M', text: i18n.LAST_MONTH },
     ];
-  }
-};
-
-/**
- * Quick little helper to extract the query info from the
- * queryBar object.
- * @param queryBar Object containing all query info
- * @param index Indices searched
- * @param ruleType
- */
-export const getInfoFromQueryBar = (
-  queryBar: FieldValueQueryBar,
-  index: string[],
-  ruleType: Type
-): {
-  queryString: string;
-  language: Language;
-  filters: Filter[];
-  queryFilter: ESQuery | undefined;
-} => {
-  const queryString = typeof queryBar.query.query === 'string' ? queryBar.query.query : '';
-  const language = queryBar.query.language as Language;
-  const filters = queryBar.filters;
-
-  // hm?? Why a try catch here? Because if the
-  // query is invalid, it throws an error and
-  // entire UI shows gross KQLSyntax error screen
-  try {
-    const queryFilter =
-      ruleType !== 'eql'
-        ? getQueryFilter(queryString, language, filters, index, [], true)
-        : undefined;
-
-    return {
-      queryString,
-      language,
-      filters,
-      queryFilter,
-    };
-  } catch {
-    return {
-      queryString,
-      language,
-      filters,
-      queryFilter: undefined,
-    };
   }
 };
 
@@ -159,46 +109,8 @@ export const getHistogramConfig = (
   };
 };
 
-/**
- * Threshold histogram is displayed a bit differently,
- * x-axis is not time based, but ordinal.
- */
-export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
-  return {
-    series: {
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-      stackAccessors: ['g'],
-    },
-    axis: {
-      yTickFormatter: (value: string | number): string => value.toLocaleString(),
-      tickSize: 8,
-    },
-    yAxisTitle: i18n.THRESHOLD_QUERY_GRAPH_COUNT,
-    settings: {
-      legendPosition: Position.Right,
-      showLegend: true,
-      showLegendExtra: true,
-      theme: {
-        scales: {
-          barsPadding: 0.08,
-        },
-        chartMargins: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-        chartPaddings: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-      },
-    },
-    customHeight: 200,
-  };
+const isNewTermsPreviewDisabled = (newTermsFields: string[]): boolean => {
+  return newTermsFields.length === 0 || newTermsFields.length > MAX_NUMBER_OF_NEW_TERMS_FIELDS;
 };
 
 export const getIsRulePreviewDisabled = ({
@@ -206,19 +118,33 @@ export const getIsRulePreviewDisabled = ({
   isQueryBarValid,
   isThreatQueryBarValid,
   index,
+  dataViewId,
+  dataSourceType,
   threatIndex,
   threatMapping,
   machineLearningJobId,
+  queryBar,
+  newTermsFields,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
   index: string[];
+  dataViewId: string | undefined;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
+  queryBar: FieldValueQueryBar;
+  newTermsFields: string[];
 }) => {
-  if (!isQueryBarValid || index.length === 0) return true;
+  if (
+    !isQueryBarValid ||
+    (dataSourceType === DataSourceType.DataView && !dataViewId) ||
+    (dataSourceType === DataSourceType.IndexPatterns && index.length === 0)
+  ) {
+    return true;
+  }
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
@@ -231,6 +157,12 @@ export const getIsRulePreviewDisabled = ({
   }
   if (ruleType === 'machine_learning') {
     return machineLearningJobId.length === 0;
+  }
+  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
+    return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
+  }
+  if (ruleType === 'new_terms') {
+    return isNewTermsPreviewDisabled(newTermsFields);
   }
   return false;
 };

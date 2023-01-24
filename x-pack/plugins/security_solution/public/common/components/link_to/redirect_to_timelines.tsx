@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../common/types/timeline';
 import { appendSearch } from './helpers';
 
 export const getTimelineTabsUrl = (tabName: TimelineTypeLiteral, search?: string) =>

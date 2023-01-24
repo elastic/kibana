@@ -17,7 +17,7 @@ export function MachineLearningNavigationProvider({
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   return {
     async navigateToMl() {
@@ -42,6 +42,13 @@ export function MachineLearningNavigationProvider({
         } else {
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
         }
+      });
+    },
+
+    async navigateToDiscoverViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Discover');
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },
 
@@ -79,15 +86,6 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async assertMainTabsExist() {
-      await this.assertTabsExist('mlMainTab', [
-        'anomalyDetection',
-        'dataFrames',
-        'dataFrameAnalytics',
-        'dataVisualizer',
-      ]);
-    },
-
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
       await retry.tryForTime(10000, async () => {
         const isEnabled = await testSubjects.isEnabled(tabSubject);
@@ -102,6 +100,10 @@ export function MachineLearningNavigationProvider({
 
     async assertOverviewTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~overview', expectedValue);
+    },
+
+    async assertNotificationsTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~notifications', expectedValue);
     },
 
     async assertAnomalyDetectionTabEnabled(expectedValue: boolean) {
@@ -148,8 +150,36 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~overview', 'mlPageOverview');
     },
 
+    async navigateToNotifications() {
+      await this.navigateToArea('~mlMainTab & ~notifications', 'mlPageNotifications');
+    },
+
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
+    },
+
+    async navigateToAnomalyExplorer(
+      jobId: string,
+      timeRange: { from: string; to: string },
+      callback?: () => Promise<void>
+    ) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/explorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'${timeRange.from}'%2Cto%3A'${timeRange.to}'))`
+      );
+      if (callback) {
+        await callback();
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async navigateToSingleMetricViewer(jobId: string) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/timeseriesexplorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0))`
+      );
     },
 
     async navigateToDataFrameAnalytics() {
@@ -185,7 +215,7 @@ export function MachineLearningNavigationProvider({
         // verify that the overall page is present
         await testSubjects.existOrFail('mlPageStackManagementJobsList');
         // verify that the default tab with the anomaly detection jobs list got loaded
-        await testSubjects.existOrFail('ml-jobs-list');
+        await testSubjects.existOrFail('mlSpacesManagementTable');
       });
     },
 
@@ -200,19 +230,19 @@ export function MachineLearningNavigationProvider({
 
     async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
       // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
+      await testSubjects.click('mlStackManagementAnomalyDetectionTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('ml-jobs-list');
+        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detector loaded');
       });
     },
 
     async navigateToStackManagementJobsListPageAnalyticsTab() {
       // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementJobsListAnalyticsTab');
+      await testSubjects.click('mlStackManagementAnalyticsTab');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlAnalyticsJobList');
+        await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics loaded');
       });
     },
 

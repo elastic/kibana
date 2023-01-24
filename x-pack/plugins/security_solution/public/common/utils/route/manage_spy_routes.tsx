@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, memo, useReducer } from 'react';
+import type { FC } from 'react';
+import React, { memo, useReducer } from 'react';
 
-import { ManageRoutesSpyProps, RouteSpyState, RouteSpyAction } from './types';
+import type { ManageRoutesSpyProps, RouteSpyState, RouteSpyAction } from './types';
 import { RouterSpyStateContext, initRouteSpy } from './helpers';
 
 const ManageRoutesSpyComponent: FC<ManageRoutesSpyProps> = ({ children }) => {
-  const reducerSpyRoute = (state: RouteSpyState, action: RouteSpyAction) => {
+  const reducerSpyRoute = (state: RouteSpyState, action: RouteSpyAction): RouteSpyState => {
     switch (action.type) {
       case 'updateRoute':
         return action.route;
       case 'updateRouteWithOutSearch':
-        return { ...state, ...action.route };
+        return { ...state, ...action.route } as RouteSpyState;
       case 'updateSearch':
         return { ...state, search: action.search };
       default:

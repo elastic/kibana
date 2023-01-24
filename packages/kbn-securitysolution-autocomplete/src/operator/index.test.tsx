@@ -132,6 +132,9 @@ describe('operator', () => {
       {
         label: 'matches',
       },
+      {
+        label: 'does not match',
+      },
     ]);
   });
 

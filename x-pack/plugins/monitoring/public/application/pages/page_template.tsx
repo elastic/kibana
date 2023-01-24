@@ -7,19 +7,20 @@
 
 import {
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiTab,
   EuiTabs,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 import {
   getSetupModeState,
@@ -31,8 +32,7 @@ import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
-import { HeaderMenuPortal } from '../../../../observability/public';
-import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
+import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
 
 export interface TabMenuItem {
   id: string;
@@ -58,7 +58,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 }) => {
   useTitle('', title);
 
-  const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
+  const { currentTimerange } = useMonitoringTimeContainerContext();
   const [loaded, setLoaded] = useState(false);
   const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
@@ -148,7 +148,11 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
               })}
             </EuiTabs>
           )}
-          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
+          <EuiPageContentBody>
+            <EuiPage paddingSize="m">
+              <EuiPageBody>{renderContent()}</EuiPageBody>
+            </EuiPage>
+          </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

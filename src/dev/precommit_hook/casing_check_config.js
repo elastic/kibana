@@ -26,12 +26,13 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/server/templates/assets/*.{png,jpg,svg}',
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
-  'src/core/server/core_app/assets/fonts/**/*',
+  'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
@@ -53,13 +54,16 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-body.html',
   '**/preview-head.html',
 
-  // filename required by api-extractor
-  'api-documenter.json',
-
   // filename must match upstream filenames from lodash
-  'packages/elastic-safer-lodash-set/**/*',
+  'packages/kbn-safer-lodash-set/**/*',
+
+  // filename must match upstream filenames from handlebars
+  'packages/kbn-handlebars/src/upstream/**/*',
+  'packages/kbn-handlebars/.patches/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+
+  'x-pack/plugins/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -67,6 +71,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // Buildkite
   '.buildkite/**/*',
+
+  // generator templates use weird filenames based on the requirements for the files they're generating
+  'packages/kbn-generate/templates/**/*',
 ];
 
 /**
@@ -95,6 +102,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
+  'packages/core/*/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
@@ -107,10 +115,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = [
-  'packages/kbn-plugin-generator/template/**/*.ejs',
-  'packages/kbn-generate/templates/**/*.ejs',
-];
+export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
@@ -146,10 +151,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
+  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/assets/img/logo-grey.png',
 ];

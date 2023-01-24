@@ -6,7 +6,7 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
@@ -123,6 +123,7 @@ describe('Workload Statistics Aggregator', () => {
             schedule: {
               terms: {
                 field: 'task.schedule.interval',
+                size: 100,
               },
             },
             nonRecurringTasks: {

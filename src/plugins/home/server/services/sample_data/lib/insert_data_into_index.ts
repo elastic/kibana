@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IScopedClusterClient, Logger } from 'kibana/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { DataIndexSchema } from './sample_dataset_registry_types';
 import {
   translateTimeRelativeToDifference,
@@ -47,7 +47,7 @@ export const insertDataIntoIndex = ({
   };
 
   const bulkInsert = async (docs: unknown[]) => {
-    const insertCmd = { index: { _index: index } };
+    const insertCmd = { create: { _index: index } };
     const bulk: unknown[] = [];
     docs.forEach((doc: unknown) => {
       bulk.push(insertCmd);

@@ -6,10 +6,21 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isEqual, xor } from 'lodash';
-import { merge, Subscription } from 'rxjs';
-import { startWith, pairwise } from 'rxjs/operators';
+import { EMPTY, merge, Subscription } from 'rxjs';
+import {
+  catchError,
+  combineLatestWith,
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  pairwise,
+  switchMap,
+  take,
+} from 'rxjs/operators';
+import deepEqual from 'fast-deep-equal';
+
 import {
   Embeddable,
   EmbeddableInput,
@@ -19,7 +30,13 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '../embeddables';
-import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
+import {
+  IContainer,
+  ContainerInput,
+  ContainerOutput,
+  PanelState,
+  EmbeddableContainerSettings,
+} from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
@@ -39,22 +56,66 @@ export abstract class Container<
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
 
-  private subscription: Subscription;
+  private subscription: Subscription | undefined;
+  private readonly anyChildOutputChange$;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
-    parent?: Container
+    parent?: IContainer,
+    settings?: EmbeddableContainerSettings<TContainerInput>
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
-    this.subscription = this.getInput$()
-      // At each update event, get both the previous and current state
-      .pipe(startWith(input), pairwise())
-      .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
+
+    // if there is no special initialization logic, we can immediately start updating children on input updates.
+    const awaitingInitialize = Boolean(
+      settings?.initializeSequentially || settings?.childIdInitializeOrder
+    );
+
+    const initSource = settings?.readyToInitializeChildren$
+      ? settings?.readyToInitializeChildren$
+      : this.getInput$();
+
+    const init$ = initSource.pipe(
+      take(1),
+      mergeMap(async (currentInput) => {
+        const initPromise = this.initializeChildEmbeddables(currentInput, settings);
+        if (awaitingInitialize) await initPromise;
+      })
+    );
+
+    // on all subsequent input changes, diff and update children on changes.
+    const update$ = this.getInput$()
+      // At each update event, get both the previous and current state.
+      .pipe(pairwise());
+
+    this.subscription = init$
+      .pipe(combineLatestWith(update$))
+      .subscribe(([_, [{ panels: prevPanels }, { panels: currentPanels }]]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+
+    this.anyChildOutputChange$ = this.getOutput$().pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                map(() => childId)
+              )
+          )
+        )
+      )
+    );
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {
@@ -115,12 +176,53 @@ export abstract class Container<
     return this.createAndSaveEmbeddable(type, panelState);
   }
 
+  public async replaceEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(id: string, newExplicitInput: Partial<EEI>, newType?: string) {
+    if (!this.input.panels[id]) {
+      throw new PanelNotFoundError();
+    }
+
+    if (newType && newType !== this.input.panels[id].type) {
+      const factory = this.getFactory(newType) as EmbeddableFactory<EEI, EEO, E> | undefined;
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(newType);
+      }
+      this.updateInput({
+        panels: {
+          ...this.input.panels,
+          [id]: {
+            ...this.input.panels[id],
+            explicitInput: { ...newExplicitInput, id },
+            type: newType,
+          },
+        },
+      } as Partial<TContainerInput>);
+    } else {
+      this.updateInputForChild(id, newExplicitInput);
+    }
+
+    await this.untilEmbeddableLoaded<E>(id);
+  }
+
   public removeEmbeddable(embeddableId: string) {
     // Just a shortcut for removing the panel from input state, all internal state will get cleaned up naturally
     // by the listener.
+    const panels = this.onRemoveEmbeddable(embeddableId);
+    this.updateInput({ panels } as Partial<TContainerInput>);
+  }
+
+  /**
+   * Control the panels that are pushed to the input stream when an embeddable is
+   * removed. This can be used if removing one embeddable has knock-on effects, like
+   * re-ordering embeddables that come after it.
+   */
+  protected onRemoveEmbeddable(embeddableId: string): ContainerInput['panels'] {
     const panels = { ...this.input.panels };
     delete panels[embeddableId];
-    this.updateInput({ panels } as Partial<TContainerInput>);
+    return panels;
   }
 
   public getChildIds(): string[] {
@@ -163,10 +265,14 @@ export abstract class Container<
     } as unknown as TEmbeddableInput;
   }
 
+  public getAnyChildOutputChange$() {
+    return this.anyChildOutputChange$;
+  }
+
   public destroy() {
     super.destroy();
     Object.values(this.children).forEach((child) => child.destroy());
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public async untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(
@@ -230,7 +336,7 @@ export abstract class Container<
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): PanelState<TEmbeddableInput> {
-    const embeddableId = partial.id || uuid.v4();
+    const embeddableId = partial.id || uuidv4();
 
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
       embeddableId,
@@ -264,7 +370,38 @@ export abstract class Container<
    */
   protected abstract getInheritedInput(id: string): TChildInput;
 
-  private async createAndSaveEmbeddable<
+  private async initializeChildEmbeddables(
+    initialInput: TContainerInput,
+    initializeSettings?: EmbeddableContainerSettings<TContainerInput>
+  ) {
+    let initializeOrder = Object.keys(initialInput.panels);
+
+    if (initializeSettings?.childIdInitializeOrder) {
+      const initializeOrderSet = new Set<string>();
+
+      for (const id of [...initializeSettings.childIdInitializeOrder, ...initializeOrder]) {
+        if (!initializeOrderSet.has(id) && Boolean(this.getInput().panels[id])) {
+          initializeOrderSet.add(id);
+        }
+      }
+
+      initializeOrder = Array.from(initializeOrderSet);
+    }
+
+    for (const id of initializeOrder) {
+      if (initializeSettings?.initializeSequentially) {
+        const embeddable = await this.onPanelAdded(initialInput.panels[id]);
+
+        if (embeddable && !isErrorEmbeddable(embeddable)) {
+          await this.untilEmbeddableLoaded(id);
+        }
+      } else {
+        this.onPanelAdded(initialInput.panels[id]);
+      }
+    }
+  }
+
+  protected async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
   >(type: string, panelState: PanelState) {

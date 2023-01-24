@@ -6,22 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   CaseResponse,
+  CaseSeverity,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
   getCaseUserActionUrl,
-} from '../../../../../../plugins/cases/common/api';
-import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
+} from '@kbn/cases-plugin/common/api';
+import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  getCaseUserActions,
   superUserSpace1Auth,
   deleteCases,
   createComment,
@@ -29,6 +29,7 @@ import {
   deleteComment,
   extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -50,6 +51,23 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
+    it('populates the action_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].action_id).not.to.be(undefined);
+      expect(userActions[0]).not.to.have.property('id');
+    });
+
+    it('populates the case_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].case_id).not.to.be(undefined);
+    });
+
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
@@ -67,19 +85,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
-    it('creates a delete case user action when a case is deleted', async () => {
+    it('deletes all user actions when a case is deleted', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       await deleteCases({ supertest, caseIDs: [theCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
 
-      const userAction = userActions[1];
-
-      // One for creation and one for deletion
-      expect(userActions.length).to.eql(2);
-
-      expect(userAction.action).to.eql('delete');
-      expect(userAction.type).to.eql('delete_case');
-      expect(userAction.payload).to.eql({});
+      expect(userActions.length).to.be(0);
     });
 
     it('creates a status update user action when changing the status', async () => {
@@ -104,6 +115,30 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusUserAction.type).to.eql('status');
       expect(statusUserAction.action).to.eql('update');
       expect(statusUserAction.payload).to.eql({ status: 'closed' });
+    });
+
+    it('creates a severity update user action when changing the severity', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: theCase.id,
+              version: theCase.version,
+              severity: CaseSeverity.HIGH,
+            },
+          ],
+        },
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const statusUserAction = userActions[1];
+
+      expect(userActions.length).to.eql(2);
+      expect(statusUserAction.type).to.eql('severity');
+      expect(statusUserAction.action).to.eql('update');
+      expect(statusUserAction.payload).to.eql({ severity: 'high' });
     });
 
     it('creates a connector update user action', async () => {

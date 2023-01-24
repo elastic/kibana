@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
   registerTestBed,
@@ -26,14 +27,12 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateList), testBedConfig);
-
 export type ComponentTemplateListTestBed = TestBed<ComponentTemplateTestSubjects> & {
   actions: ReturnType<typeof createActions>;
 };
 
 const createActions = (testBed: TestBed) => {
-  const { find } = testBed;
+  const { find, component } = testBed;
 
   /**
    * User Actions
@@ -43,7 +42,7 @@ const createActions = (testBed: TestBed) => {
   };
 
   const clickComponentTemplateAt = async (index: number) => {
-    const { component, table, router } = testBed;
+    const { table, router } = testBed;
     const { rows } = table.getMetaData('componentTemplatesTable');
     const componentTemplateLink = findTestSubject(
       rows[index].reactWrapper,
@@ -56,6 +55,13 @@ const createActions = (testBed: TestBed) => {
       await nextTick();
       component.update();
     });
+  };
+
+  const clickTableColumnSortButton = async (index: number) => {
+    await act(async () => {
+      find('tableHeaderSortButton').at(index).simulate('click');
+    });
+    component.update();
   };
 
   const clickDeleteActionAt = (index: number) => {
@@ -71,10 +77,15 @@ const createActions = (testBed: TestBed) => {
     clickReloadButton,
     clickComponentTemplateAt,
     clickDeleteActionAt,
+    clickTableColumnSortButton,
   };
 };
 
-export const setup = async (): Promise<ComponentTemplateListTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateListTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(ComponentTemplateList, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

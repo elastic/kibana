@@ -7,10 +7,10 @@
  */
 
 import React, { useCallback } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IndexPattern } from 'src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { AnnotationRow } from './annotation_row';
 import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
@@ -18,15 +18,17 @@ import { collectionActions, CollectionActionsProps } from './lib/collection_acti
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
+import './_annotations_editor.scss';
+
 interface AnnotationsEditorProps {
   fields: VisFields;
   model: Panel;
   onChange: (partialModel: Partial<Panel>) => void;
-  defaultIndexPattern?: IndexPattern;
+  defaultIndexPattern?: DataView;
 }
 
-export const newAnnotation = (defaultIndexPattern?: IndexPattern) => () => ({
-  id: uuid.v1(),
+export const newAnnotation = (defaultIndexPattern?: DataView) => () => ({
+  id: uuidv1(),
   color: '#F00',
   index_pattern:
     defaultIndexPattern && defaultIndexPattern.id ? { id: defaultIndexPattern.id } : '',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolverSchema } from '../../../common/endpoint/types';
+import type { ResolverSchema } from '../../../common/endpoint/types';
 
 /*
  * This file provides simple factory functions which return mock schemas for various data sources such as endpoint and winlogbeat.

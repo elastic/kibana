@@ -7,7 +7,7 @@
 
 import { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 export function useTheme() {
   const theme: EuiTheme = useContext(ThemeContext);

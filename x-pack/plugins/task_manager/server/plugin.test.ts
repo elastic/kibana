@@ -6,44 +6,85 @@
  */
 
 import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs/operators';
-import { CoreStatus, ServiceStatusLevels } from 'src/core/server';
+import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
+import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
+import { TaskPollingLifecycle } from './polling_lifecycle';
+import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
+import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import type { EphemeralTaskLifecycle as EphemeralTaskLifecycleClass } from './ephemeral_task_lifecycle';
+
+let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
+jest.mock('./polling_lifecycle', () => {
+  return {
+    TaskPollingLifecycle: jest.fn().mockImplementation(() => {
+      return mockTaskPollingLifecycle;
+    }),
+  };
+});
+
+let mockEphemeralTaskLifecycle = ephemeralTaskLifecycleMock.create({});
+jest.mock('./ephemeral_task_lifecycle', () => {
+  return {
+    EphemeralTaskLifecycle: jest.fn().mockImplementation(() => {
+      return mockEphemeralTaskLifecycle;
+    }),
+  };
+});
+
+const coreStart = coreMock.createStart();
+const pluginInitializerContextParams = {
+  max_workers: 10,
+  max_attempts: 9,
+  poll_interval: 3000,
+  version_conflict_threshold: 80,
+  max_poll_inactivity_cycles: 10,
+  request_capacity: 1000,
+  monitored_aggregated_stats_refresh_rate: 5000,
+  monitored_stats_health_verbose_log: {
+    enabled: false,
+    level: 'debug' as const,
+    warn_delayed_task_start_in_seconds: 60,
+  },
+  monitored_stats_required_freshness: 5000,
+  monitored_stats_running_average_window: 50,
+  monitored_task_execution_thresholds: {
+    default: {
+      error_threshold: 90,
+      warn_threshold: 80,
+    },
+    custom: {},
+  },
+  ephemeral_tasks: {
+    enabled: false,
+    request_capacity: 10,
+  },
+  unsafe: {
+    exclude_task_types: [],
+  },
+  event_loop_delay: {
+    monitor: true,
+    warn_threshold: 5000,
+  },
+};
 
 describe('TaskManagerPlugin', () => {
+  beforeEach(() => {
+    mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
+    (TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).mockClear();
+    mockEphemeralTaskLifecycle = ephemeralTaskLifecycleMock.create({});
+    (EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>).mockClear();
+  });
+
   describe('setup', () => {
     test('throws if no valid UUID is available', async () => {
-      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        max_workers: 10,
-        max_attempts: 9,
-        poll_interval: 3000,
-        version_conflict_threshold: 80,
-        max_poll_inactivity_cycles: 10,
-        request_capacity: 1000,
-        monitored_aggregated_stats_refresh_rate: 5000,
-        monitored_stats_health_verbose_log: {
-          enabled: false,
-          warn_delayed_task_start_in_seconds: 60,
-        },
-        monitored_stats_required_freshness: 5000,
-        monitored_stats_running_average_window: 50,
-        monitored_task_execution_thresholds: {
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
-          custom: {},
-        },
-        ephemeral_tasks: {
-          enabled: false,
-          request_capacity: 10,
-        },
-        unsafe: {
-          exclude_task_types: [],
-        },
-      });
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
 
       pluginInitializerContext.env.instanceUuid = '';
 
@@ -56,35 +97,9 @@ describe('TaskManagerPlugin', () => {
     });
 
     test('throws if setup methods are called after start', async () => {
-      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        max_workers: 10,
-        max_attempts: 9,
-        poll_interval: 3000,
-        version_conflict_threshold: 80,
-        max_poll_inactivity_cycles: 10,
-        request_capacity: 1000,
-        monitored_aggregated_stats_refresh_rate: 5000,
-        monitored_stats_health_verbose_log: {
-          enabled: false,
-          warn_delayed_task_start_in_seconds: 60,
-        },
-        monitored_stats_required_freshness: 5000,
-        monitored_stats_running_average_window: 50,
-        monitored_task_execution_thresholds: {
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
-          custom: {},
-        },
-        ephemeral_tasks: {
-          enabled: true,
-          request_capacity: 10,
-        },
-        unsafe: {
-          exclude_task_types: [],
-        },
-      });
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
 
@@ -127,30 +142,7 @@ describe('TaskManagerPlugin', () => {
 
     test('it logs a warning when the unsafe `exclude_task_types` config is used', async () => {
       const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        max_workers: 10,
-        max_attempts: 9,
-        poll_interval: 3000,
-        version_conflict_threshold: 80,
-        max_poll_inactivity_cycles: 10,
-        request_capacity: 1000,
-        monitored_aggregated_stats_refresh_rate: 5000,
-        monitored_stats_health_verbose_log: {
-          enabled: false,
-          warn_delayed_task_start_in_seconds: 60,
-        },
-        monitored_stats_required_freshness: 5000,
-        monitored_stats_running_average_window: 50,
-        monitored_task_execution_thresholds: {
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
-          custom: {},
-        },
-        ephemeral_tasks: {
-          enabled: false,
-          request_capacity: 10,
-        },
+        ...pluginInitializerContextParams,
         unsafe: {
           exclude_task_types: ['*'],
         },
@@ -163,6 +155,38 @@ describe('TaskManagerPlugin', () => {
       expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
         'Excluding task types from execution: *'
       );
+    });
+  });
+
+  describe('start', () => {
+    test('should initialize task polling lifecycle if node.roles.backgroundTasks is true', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart);
+
+      expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
+      expect(
+        EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    test('should not initialize task polling lifecycle if node.roles.backgroundTasks is false', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = false;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart);
+
+      expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
+      expect(
+        EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>
+      ).not.toHaveBeenCalled();
     });
   });
 

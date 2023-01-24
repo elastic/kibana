@@ -6,17 +6,91 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { DataViewsService } from './data_views';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataViewsServicePublicMethods } from './data_views';
+import { HasDataService } from '../common';
 
+export enum INDEX_PATTERN_TYPE {
+  ROLLUP = 'rollup',
+  DEFAULT = 'default',
+}
+
+export enum IndicesResponseItemIndexAttrs {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  HIDDEN = 'hidden',
+  FROZEN = 'frozen',
+}
+
+export interface IndicesResponseModified {
+  name: string;
+  item: {
+    name: string;
+    backing_indices?: string[];
+    timestamp_field?: string;
+    indices?: string[];
+    aliases?: string[];
+    attributes?: IndicesResponseItemIndexAttrs[];
+    data_stream?: string;
+  };
+}
+
+export interface IndicesResponseItem {
+  name: string;
+}
+
+export interface IndicesResponseItemAlias extends IndicesResponseItem {
+  indices: string[];
+}
+
+export interface IndicesResponseItemDataStream extends IndicesResponseItem {
+  backing_indices: string[];
+  timestamp_field: string;
+}
+
+export interface IndicesResponseItemIndex extends IndicesResponseItem {
+  aliases?: string[];
+  attributes?: IndicesResponseItemIndexAttrs[];
+  data_stream?: string;
+}
+
+export interface IndicesResponse {
+  indices?: IndicesResponseItemIndex[];
+  aliases?: IndicesResponseItemAlias[];
+  data_streams?: IndicesResponseItemDataStream[];
+}
+
+export interface IndicesViaSearchResponse {
+  total: number;
+}
+
+export interface HasDataViewsResponse {
+  hasDataView: boolean;
+  hasUserDataView: boolean;
+}
+
+/**
+ * Data views public setup dependencies
+ */
 export interface DataViewsPublicSetupDependencies {
+  /**
+   * Expressions
+   */
   expressions: ExpressionsSetup;
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsSetup;
 }
 
+/**
+ * Data views public start dependencies
+ */
 export interface DataViewsPublicStartDependencies {
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsStart;
 }
 
@@ -26,13 +100,71 @@ export interface DataViewsPublicStartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataViewsPublicPluginSetup {}
 
-export interface DataViewsServicePublic extends DataViewsService {
+export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   getCanSaveSync: () => boolean;
+  hasData: HasDataService;
+  getIndices: (props: {
+    pattern: string;
+    showAllIndices?: boolean;
+    isRollupIndex: (indexName: string) => boolean;
+  }) => Promise<MatchedItem[]>;
 }
 
-export type DataViewsContract = PublicMethodsOf<DataViewsServicePublic>;
+export type DataViewsContract = DataViewsServicePublic;
 
 /**
  * Data views plugin public Start contract
  */
-export type DataViewsPublicPluginStart = PublicMethodsOf<DataViewsServicePublic>;
+export type DataViewsPublicPluginStart = DataViewsServicePublic;
+
+export interface MatchedItem {
+  name: string;
+  tags: Tag[];
+  item: {
+    name: string;
+    backing_indices?: string[];
+    timestamp_field?: string;
+    indices?: string[];
+    aliases?: string[];
+    attributes?: ResolveIndexResponseItemIndexAttrs[];
+    data_stream?: string;
+  };
+}
+
+// for showing index matches
+export interface ResolveIndexResponse {
+  indices?: ResolveIndexResponseItemIndex[];
+  aliases?: ResolveIndexResponseItemAlias[];
+  data_streams?: ResolveIndexResponseItemDataStream[];
+}
+
+export interface ResolveIndexResponseItem {
+  name: string;
+}
+
+export interface ResolveIndexResponseItemDataStream extends ResolveIndexResponseItem {
+  backing_indices: string[];
+  timestamp_field: string;
+}
+
+export interface ResolveIndexResponseItemAlias extends ResolveIndexResponseItem {
+  indices: string[];
+}
+
+export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem {
+  aliases?: string[];
+  attributes?: ResolveIndexResponseItemIndexAttrs[];
+  data_stream?: string;
+}
+
+export interface Tag {
+  name: string;
+  key: string;
+  color: string;
+}
+export enum ResolveIndexResponseItemIndexAttrs {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  HIDDEN = 'hidden',
+  FROZEN = 'frozen',
+}

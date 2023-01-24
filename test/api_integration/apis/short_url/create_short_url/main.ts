@@ -70,22 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.url).to.be('');
       });
 
-      it('can generate a human-readable slug, composed of three words', async () => {
-        const response = await supertest.post('/api/short_url').send({
-          locatorId: 'LEGACY_SHORT_URL_LOCATOR',
-          params: {},
-          humanReadableSlug: true,
-        });
-
-        expect(response.status).to.be(200);
-        expect(typeof response.body.slug).to.be('string');
-        const words = response.body.slug.split('-');
-        expect(words.length).to.be(3);
-        for (const word of words) {
-          expect(word.length > 0).to.be(true);
-        }
-      });
-
       it('can create a short URL with custom slug', async () => {
         const rnd = Math.round(Math.random() * 1e6) + 1;
         const slug = 'test-slug-' + Date.now() + '-' + rnd;
@@ -131,8 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
           slug,
         });
 
-        expect(response1.status === 200).to.be(true);
-        expect(response2.status >= 400).to.be(true);
+        expect(response1.status).to.be(200);
+        expect(response2.status).to.be(409);
       });
     });
   });

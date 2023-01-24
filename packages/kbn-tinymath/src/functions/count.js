@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { size } = require('./size.js');
+const { size } = require('./size');
 
 /**
  * Returns the length of an array. Alias for size
@@ -19,10 +19,10 @@ const { size } = require('./size.js');
  * count(100) // returns 1
  */
 
-module.exports = { count };
-
 function count(a) {
   return size(a);
 }
 
 count.skipNumberValidation = true;
+
+module.exports = { count };

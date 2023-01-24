@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { serializeProvider } from '../../../../../../src/plugins/expressions/common';
-import { RouteInitializerDeps } from '../';
+import { serializeProvider } from '@kbn/expressions-plugin/common';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
 
 interface FunctionCall {
@@ -23,7 +23,7 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
       validate: false,
     },
     async (context, request, response) => {
-      const functions = expressions.getFunctions();
+      const functions = expressions.getFunctions('canvas');
       const body = JSON.stringify(functions);
       return response.ok({
         body,
@@ -39,7 +39,7 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
     const { functionName, args, context } = fnCall;
     const { deserialize } = serializeProvider(expressions.getTypes());
 
-    const fnDef = expressions.getFunctions()[functionName];
+    const fnDef = expressions.getFunctions('canvas')[functionName];
     if (!fnDef) throw new Error(`Function "${functionName}" could not be found.`);
 
     const deserialized = deserialize(context);

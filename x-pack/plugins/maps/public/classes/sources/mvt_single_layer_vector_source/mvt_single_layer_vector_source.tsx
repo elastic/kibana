@@ -6,11 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsRequestMeta, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import {
+  BoundsRequestMeta,
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+} from '../vector_source';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -24,11 +29,11 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  TooltipFeatureAction,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -48,7 +53,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuid(),
+      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:
@@ -63,11 +68,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
   readonly _tooltipFields: MVTField[];
 
-  constructor(
-    sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: Adapters
-  ) {
-    super(sourceDescriptor, inspectorAdapters);
+  constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor) {
+    super(sourceDescriptor);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
 
     this._tooltipFields = this._descriptor.tooltipProperties
@@ -244,6 +246,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
 
   getJoinsDisabledReason(): string | null {
     return null;
+  }
+
+  getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    // Its not possible to filter by geometry for vector tile sources since there is no way to get original geometry
+    return [];
   }
 }
 

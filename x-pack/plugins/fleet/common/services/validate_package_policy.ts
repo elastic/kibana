@@ -19,7 +19,13 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from './';
+import {
+  isValidNamespace,
+  doesPackageHaveIntegrations,
+  isInputOnlyPolicyTemplate,
+  getNormalizedInputs,
+  getNormalizedDataStreams,
+} from '.';
 
 type Errors = string[] | null;
 
@@ -55,6 +61,7 @@ export const validatePackagePolicy = (
     description: null,
     namespace: null,
     inputs: {},
+    vars: {},
   };
   const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 
@@ -89,7 +96,9 @@ export const validatePackagePolicy = (
     !packageInfo.policy_templates ||
     packageInfo.policy_templates.length === 0 ||
     !packageInfo.policy_templates.find(
-      (policyTemplate) => policyTemplate.inputs && policyTemplate.inputs.length > 0
+      (policyTemplate) =>
+        isInputOnlyPolicyTemplate(policyTemplate) ||
+        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
     )
   ) {
     validationResults.inputs = null;
@@ -100,7 +109,8 @@ export const validatePackagePolicy = (
   const inputVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, policyTemplate) => {
-    (policyTemplate.inputs || []).forEach((input) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
 
       if ((input.vars || []).length) {
@@ -110,14 +120,16 @@ export const validatePackagePolicy = (
     return varDefs;
   }, {});
 
-  const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
-    Record<string, RegistryStream>
-  >((streams, dataStream) => {
-    dataStream.streams?.forEach((stream) => {
-      streams[`${dataStream.dataset}-${stream.input}`] = stream;
-    });
-    return streams;
-  }, {});
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
+    (streams, dataStream) => {
+      dataStream.streams?.forEach((stream) => {
+        streams[`${dataStream.dataset}-${stream.input}`] = stream;
+      });
+      return streams;
+    },
+    {}
+  );
   const streamVarDefsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, [path, stream]) => {
@@ -249,6 +261,7 @@ export const validatePackagePolicyConfig = (
           defaultMessage: 'Invalid format',
         })
       );
+      return errors;
     }
     if (varDef.required && Array.isArray(parsedValue) && parsedValue.length === 0) {
       errors.push(
@@ -260,8 +273,8 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
-    if (varDef.type === 'text' && parsedValue && Array.isArray(parsedValue)) {
-      const invalidStrings = parsedValue.filter((cand) => /^[*&]/.test(cand));
+    if (varDef.type === 'text' && parsedValue) {
+      const invalidStrings = parsedValue.filter((cand: any) => /^[*&]/.test(cand));
       // only show one error if multiple strings in array are invalid
       if (invalidStrings.length > 0) {
         errors.push(
@@ -272,6 +285,20 @@ export const validatePackagePolicyConfig = (
         );
       }
     }
+
+    if (varDef.type === 'integer' && parsedValue) {
+      const invalidIntegers = parsedValue.filter((val: any) => !Number.isInteger(Number(val)));
+      // only show one error if multiple strings in array are invalid
+      if (invalidIntegers.length > 0) {
+        errors.push(
+          i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerMultiErrorMessage', {
+            defaultMessage: 'Invalid integer',
+          })
+        );
+      }
+    }
+
+    return errors.length ? errors : null;
   }
 
   if (varDef.type === 'text' && parsedValue && !Array.isArray(parsedValue)) {
@@ -295,6 +322,16 @@ export const validatePackagePolicyConfig = (
         defaultMessage: 'Boolean values must be either true or false',
       })
     );
+  }
+
+  if (varDef.type === 'integer' && parsedValue && !Array.isArray(parsedValue)) {
+    if (!Number.isInteger(Number(parsedValue))) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
+          defaultMessage: 'Invalid integer',
+        })
+      );
+    }
   }
 
   return errors.length ? errors : null;

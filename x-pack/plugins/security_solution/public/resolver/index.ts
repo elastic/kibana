@@ -6,9 +6,10 @@
  */
 
 import { Provider } from 'react-redux';
-import { ResolverPluginSetup } from './types';
-import { resolverStoreFactory } from './store/index';
+import type { ResolverPluginSetup } from './types';
+import { resolverStoreFactory } from './store';
 import { ResolverWithoutProviders } from './view/resolver_without_providers';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from './data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 
 /**

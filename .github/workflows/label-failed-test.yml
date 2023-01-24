@@ -1,0 +1,28 @@
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  issue_commented:
+    name: Label failed test issue
+    if: |
+      !github.event.issue.pull_request
+      && github.event.label.name == 'failed-test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kibana-operations
+        uses: actions/checkout@v2
+        with:
+          repository: 'elastic/kibana-operations'
+          ref: main
+          path: ./kibana-operations
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
+
+      - name: Label failed test issue
+        working-directory: ./kibana-operations/triage
+        env:
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        run: |
+          npm install
+          node failed-test-label ${{github.event.issue.number}} || true

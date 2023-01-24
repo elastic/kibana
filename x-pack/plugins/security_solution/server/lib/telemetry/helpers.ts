@@ -7,21 +7,29 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { PolicyData } from '../../../common/endpoint/types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { merge } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import { copyAllowlistedFields, filterList } from './filterlists';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
   ESClusterInfo,
   ESLicense,
   ListTemplate,
   TelemetryEvent,
+  ValueListResponseAggregation,
+  ValueListExceptionListResponseAggregation,
+  ValueListItemsResponseAggregation,
+  ValueListIndicatorMatchResponseAggregation,
+  TaskMetric,
 } from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
+  DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 
@@ -183,7 +191,7 @@ export const templateExceptionList = (
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListEventFields,
+      filterList.exceptionLists,
       item as unknown as TelemetryEvent
     );
 
@@ -227,4 +235,66 @@ export const createUsageCounterLabel = (labelList: string[]): string => labelLis
 export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
   const epPolicyConfig = policyData?.inputs[0]?.config?.policy;
   return epPolicyConfig ? epPolicyConfig : null;
+};
+
+export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {
+  return merge(DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS, policyConfig);
+};
+
+export const metricsResponseToValueListMetaData = ({
+  listMetricsResponse,
+  itemMetricsResponse,
+  exceptionListMetricsResponse,
+  indicatorMatchMetricsResponse,
+}: {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}) => ({
+  total_list_count: listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
+  types:
+    listMetricsResponse?.aggregations?.type_breakdown?.buckets.map((breakdown) => ({
+      type: breakdown.key,
+      count: breakdown.doc_count,
+    })) ?? [],
+  lists:
+    itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map((itemCount) => ({
+      id: itemCount.key,
+      count: itemCount.doc_count,
+    })) ?? [],
+  included_in_exception_lists_count:
+    exceptionListMetricsResponse?.aggregations?.vl_included_in_exception_lists_count?.value ?? 0,
+  used_in_indicator_match_rule_count:
+    indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+});
+
+export let isElasticCloudDeployment = false;
+export const setIsElasticCloudDeployment = (value: boolean) => {
+  isElasticCloudDeployment = value;
+};
+
+export const tlog = (logger: Logger, message: string) => {
+  if (isElasticCloudDeployment) {
+    logger.info(message);
+  } else {
+    logger.debug(message);
+  }
+};
+
+export const createTaskMetric = (
+  name: string,
+  passed: boolean,
+  startTime: number,
+  errorMessage?: string
+): TaskMetric => {
+  const endTime = Date.now();
+  return {
+    name,
+    passed,
+    time_executed_in_ms: endTime - startTime,
+    start_time: startTime,
+    end_time: endTime,
+    error_message: errorMessage,
+  };
 };

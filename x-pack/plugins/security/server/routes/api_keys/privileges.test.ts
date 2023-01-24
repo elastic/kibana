@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import type { LicenseCheck } from '../../../../licensing/server';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCheckPrivilegesRoutes } from './privileges';
@@ -34,17 +34,21 @@ describe('Check API keys privileges', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
       const authc = authenticationServiceMock.createStart();
       authc.apiKeys.areAPIKeysEnabled.mockResolvedValue(areAPIKeysEnabled);
       mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResponseImplementation(
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResponseImplementation(
           // @ts-expect-error unknown return
           () => {
             return {
@@ -70,11 +74,11 @@ describe('Check API keys privileges', () => {
 
       if (asserts.apiArguments) {
         expect(
-          mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges
         ).toHaveBeenCalledWith(asserts.apiArguments);
       }
 
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 

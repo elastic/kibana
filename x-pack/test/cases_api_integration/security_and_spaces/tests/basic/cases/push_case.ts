@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -14,13 +15,12 @@ import {
   deleteComments,
   deleteConfiguration,
   getConfigurationRequest,
-  getServiceNowConnector,
-  createConnector,
   createConfiguration,
   createCase,
   pushCase,
 } from '../../../../common/lib/utils';
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+
+import { getServiceNowConnector, createConnector } from '../../../../common/lib/connectors';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

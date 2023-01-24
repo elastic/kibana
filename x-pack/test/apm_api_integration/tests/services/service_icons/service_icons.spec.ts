@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
 
 type ServiceIconMetadata = APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/icons'>;
 
@@ -43,35 +43,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'Service icons when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      let body: ServiceIconMetadata;
-      let status: number;
+  registry.when('Service icons when data is generated', { config: 'basic', archives: [] }, () => {
+    let body: ServiceIconMetadata;
+    let status: number;
 
-      before(async () => {
-        await generateData({ synthtraceEsClient, start, end });
-        const response = await callApi();
-        body = response.body;
-        status = response.status;
-      });
+    before(async () => {
+      await generateData({ synthtraceEsClient, start, end });
+      const response = await callApi();
+      body = response.body;
+      status = response.status;
+    });
 
-      after(() => synthtraceEsClient.clean());
+    after(() => synthtraceEsClient.clean());
 
-      it('returns correct HTTP status', () => {
-        expect(status).to.be(200);
-      });
+    it('returns correct HTTP status', () => {
+      expect(status).to.be(200);
+    });
 
-      it('returns correct metadata', () => {
-        const { agentName, cloud } = dataConfig;
-        const { provider, serviceName: cloudServiceName } = cloud;
+    it('returns correct metadata', () => {
+      const { agentName, cloud } = dataConfig;
+      const { provider, serviceName: cloudServiceName } = cloud;
 
-        expect(body.agentName).to.be(agentName);
-        expect(body.cloudProvider).to.be(provider);
-        expect(body.containerType).to.be('Kubernetes');
-        expect(body.serverlessType).to.be(cloudServiceName);
-      });
-    }
-  );
+      expect(body.agentName).to.be(agentName);
+      expect(body.cloudProvider).to.be(provider);
+      expect(body.containerType).to.be('Kubernetes');
+      expect(body.serverlessType).to.be(cloudServiceName);
+    });
+  });
 }

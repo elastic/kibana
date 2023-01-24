@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/common/config.js')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
@@ -30,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../security_api_integration/fixtures/saml/saml_provider'
   );
 
-  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
+  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 
   return {
     testFiles: [resolve(__dirname, './tests/saml')],

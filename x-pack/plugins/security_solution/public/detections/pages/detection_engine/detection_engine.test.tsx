@@ -20,11 +20,13 @@ import {
 import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -55,9 +57,8 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../../components/alerts_info', () => ({
-  useAlertInfo: jest.fn().mockReturnValue([]),
-}));
+
+const mockFilterManager = createFilterManagerMock();
 
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -82,7 +83,7 @@ jest.mock('../../../common/lib/kibana', () => {
         timelines: { ...mockTimelines },
         data: {
           query: {
-            filterManager: jest.fn().mockReturnValue({}),
+            filterManager: mockFilterManager,
           },
         },
         docLinks: {
@@ -92,12 +93,17 @@ jest.mock('../../../common/lib/kibana', () => {
             },
           },
         },
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      remove: jest.fn(),
     }),
   };
 });
@@ -108,6 +114,14 @@ const state: State = {
 
 const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline', () => ({
+  useAddBulkToTimelineAction: jest.fn(() => {}),
+}));
+
+jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions', () => ({
+  useBulkAddToCaseActions: jest.fn(() => []),
+}));
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
@@ -135,6 +149,20 @@ describe('DetectionEnginePageComponent', () => {
     );
     await waitFor(() => {
       expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
+    });
+  });
+
+  it('renders the chart panels', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="chartPanels"]').exists()).toBe(true);
     });
   });
 });

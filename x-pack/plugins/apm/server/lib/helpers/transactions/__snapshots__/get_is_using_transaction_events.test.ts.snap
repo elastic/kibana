@@ -31,8 +31,10 @@ Object {
         ],
       },
     },
+    "size": 0,
+    "terminate_after": 1,
+    "track_total_hits": 1,
   },
-  "terminate_after": 1,
 }
 `;
 
@@ -55,8 +57,10 @@ Object {
         ],
       },
     },
+    "size": 0,
+    "terminate_after": 1,
+    "track_total_hits": 1,
   },
-  "terminate_after": 1,
 }
 `;
 
@@ -82,8 +86,10 @@ Array [
             ],
           },
         },
+        "size": 0,
+        "terminate_after": 1,
+        "track_total_hits": 1,
       },
-      "terminate_after": 1,
     },
   ],
   Array [
@@ -100,6 +106,8 @@ Array [
             "filter": Array [],
           },
         },
+        "size": 0,
+        "track_total_hits": 1,
       },
       "terminate_after": 1,
     },

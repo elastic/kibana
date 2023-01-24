@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { pagePathGetters } from '../common/page_paths';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERY_ID } from './constants';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 interface UseSavedQueryProps {
   savedQueryId: string;
@@ -24,13 +25,22 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
+  return useQuery<
+    { data: SavedQuerySO } & {
+      error?: {
+        error: string;
+        message: string;
+      };
+    },
+    { body: { error: string; message: string } },
+    SavedQuerySO
+  >(
     [SAVED_QUERY_ID, { savedQueryId }],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    () => http.get<any>(`/internal/osquery/saved_query/${savedQueryId}`),
+    () => http.get(`/api/osquery/saved_queries/${savedQueryId}`),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
+      select: (response) => response.data,
       onSuccess: (data) => {
         if (data.error) {
           setErrorToast(data.error, {

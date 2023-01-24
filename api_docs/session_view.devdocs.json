@@ -1,0 +1,134 @@
+{
+  "id": "sessionView",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.SessionViewStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SessionViewStart",
+        "description": [],
+        "path": "x-pack/plugins/session_view/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.SessionViewStart.getSessionView",
+            "type": "Function",
+            "tags": [],
+            "label": "getSessionView",
+            "description": [],
+            "signature": [
+              "(props: ",
+              "SessionViewDeps",
+              ") => JSX.Element"
+            ],
+            "path": "x-pack/plugins/session_view/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "sessionView",
+                "id": "def-public.SessionViewStart.getSessionView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "SessionViewDeps"
+                ],
+                "path": "x-pack/plugins/session_view/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.EventAction",
+        "type": "Enum",
+        "tags": [],
+        "label": "EventAction",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/process_tree/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.ENTRY_SESSION_ENTITY_ID_PROPERTY",
+        "type": "string",
+        "tags": [],
+        "label": "ENTRY_SESSION_ENTITY_ID_PROPERTY",
+        "description": [],
+        "signature": [
+          "\"process.entry_leader.entity_id\""
+        ],
+        "path": "x-pack/plugins/session_view/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.EventAction",
+        "type": "Enum",
+        "tags": [],
+        "label": "EventAction",
+        "description": [],
+        "path": "x-pack/plugins/session_view/common/types/process_tree/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-common.ENTRY_SESSION_ENTITY_ID_PROPERTY",
+        "type": "string",
+        "tags": [],
+        "label": "ENTRY_SESSION_ENTITY_ID_PROPERTY",
+        "description": [],
+        "signature": [
+          "\"process.entry_leader.entity_id\""
+        ],
+        "path": "x-pack/plugins/session_view/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

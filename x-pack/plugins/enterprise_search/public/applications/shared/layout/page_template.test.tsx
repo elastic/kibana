@@ -13,7 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { FlashMessages } from '../flash_messages';
 import { Loading } from '../loading';
 
@@ -176,29 +177,26 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
     it('passes down any ...pageTemplateProps that EuiPageTemplate accepts', () => {
       const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper
-          template="empty"
+          panelled
           paddingSize="s"
           pageHeader={{ pageTitle: 'hello world' }}
         />
       );
 
-      expect(wrapper.find(KibanaPageTemplate).prop('template')).toEqual('empty');
+      expect(wrapper.find(KibanaPageTemplate).prop('panelled')).toEqual(true);
       expect(wrapper.find(KibanaPageTemplate).prop('paddingSize')).toEqual('s');
       expect(wrapper.find(KibanaPageTemplate).prop('pageHeader')!.pageTitle).toEqual('hello world');
     });
 
     it('sets enterpriseSearchPageTemplate classNames while still accepting custom classNames', () => {
       const wrapper = shallow(
-        <EnterpriseSearchPageTemplateWrapper
-          className="hello"
-          pageContentProps={{ className: 'world' }}
-        />
+        <EnterpriseSearchPageTemplateWrapper className="hello" mainProps={{ className: 'world' }} />
       );
 
       expect(wrapper.find(KibanaPageTemplate).prop('className')).toEqual(
         'enterpriseSearchPageTemplate hello'
       );
-      expect(wrapper.find(KibanaPageTemplate).prop('pageContentProps')!.className).toEqual(
+      expect(wrapper.find(KibanaPageTemplate).prop('mainProps')!.className).toEqual(
         'enterpriseSearchPageTemplate__content world'
       );
     });

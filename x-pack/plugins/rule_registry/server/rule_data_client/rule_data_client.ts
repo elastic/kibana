@@ -9,10 +9,11 @@ import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
-import { ElasticsearchClient } from 'kibana/server';
-import { Logger } from 'kibana/server';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import {
   RuleDataWriteDisabledError,
   RuleDataWriterInitializationError,
@@ -20,6 +21,8 @@ import {
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { IResourceInstaller } from '../rule_data_plugin_service/resource_installer';
 import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 
 export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;
@@ -35,10 +38,13 @@ export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
+  private _isWriteInitializationFailed: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
 
   // Writers cached by namespace
   private writerCache: Map<string, IRuleDataWriter>;
+
+  private clusterClient: ElasticsearchClient | null = null;
 
   constructor(private readonly options: RuleDataClientConstructorOptions) {
     this.writeEnabled = this.options.isWriteEnabled;
@@ -64,6 +70,14 @@ export class RuleDataClient implements IRuleDataClient {
 
   private set writeEnabled(isEnabled: boolean) {
     this._isWriteEnabled = isEnabled;
+  }
+
+  private get writeInitializationFailed(): boolean {
+    return this._isWriteInitializationFailed;
+  }
+
+  private set writeInitializationFailed(isFailed: boolean) {
+    this._isWriteInitializationFailed = isFailed;
   }
 
   public isWriteEnabled(): boolean {
@@ -92,15 +106,24 @@ export class RuleDataClient implements IRuleDataClient {
     };
 
     return {
-      search: async (request) => {
-        const clusterClient = await waitUntilReady();
-
-        const body = await clusterClient.search({
-          ...request,
-          index: indexPattern,
-        });
-
-        return body as any;
+      search: async <TSearchRequest extends ESSearchRequest>(
+        request: TSearchRequest
+      ): Promise<
+        ESSearchResponse<Partial<ParsedTechnicalFields & ParsedExperimentalFields>, TSearchRequest>
+      > => {
+        try {
+          const clusterClient = await waitUntilReady();
+          return (await clusterClient.search({
+            ...request,
+            index: indexPattern,
+          })) as unknown as ESSearchResponse<
+            Partial<ParsedTechnicalFields & ParsedExperimentalFields>,
+            TSearchRequest
+          >;
+        } catch (err) {
+          this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);
+          throw err;
+        }
       },
 
       getDynamicIndexPattern: async () => {
@@ -108,7 +131,7 @@ export class RuleDataClient implements IRuleDataClient {
         const indexPatternsFetcher = new IndexPatternsFetcher(clusterClient);
 
         try {
-          const fields = await indexPatternsFetcher.getFieldsForWildcard({
+          const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
             pattern: indexPattern,
           });
 
@@ -125,20 +148,23 @@ export class RuleDataClient implements IRuleDataClient {
               title: indexPattern,
             };
           }
+          this.options.logger.error(
+            `Error fetching index patterns in RuleDataClient - ${err.message}`
+          );
           throw err;
         }
       },
     };
   }
 
-  public getWriter(options: { namespace?: string } = {}): IRuleDataWriter {
+  public async getWriter(options: { namespace?: string } = {}): Promise<IRuleDataWriter> {
     const namespace = options.namespace || 'default';
     const cachedWriter = this.writerCache.get(namespace);
     const isWriterCacheEnabled = () => this.writerCacheEnabled;
 
     // There is no cached writer, so we'll install / update the namespace specific resources now.
     if (!isWriterCacheEnabled() || !cachedWriter) {
-      const writerForNamespace = this.initializeWriter(namespace);
+      const writerForNamespace = await this.initializeWriter(namespace);
       this.writerCache.set(namespace, writerForNamespace);
       return writerForNamespace;
     } else {
@@ -146,19 +172,27 @@ export class RuleDataClient implements IRuleDataClient {
     }
   }
 
-  private initializeWriter(namespace: string): IRuleDataWriter {
+  private async initializeWriter(namespace: string): Promise<IRuleDataWriter> {
     const isWriteEnabled = () => this.writeEnabled;
-    const turnOffWrite = () => (this.writeEnabled = false);
+    const isWriteInitializationError = () => this.writeInitializationFailed;
+    const turnOffWriteDueToInitializationError = () => {
+      this.writeEnabled = false;
+      this.writeInitializationFailed = true;
+    };
 
     const { indexInfo, resourceInstaller } = this.options;
     const alias = indexInfo.getPrimaryAlias(namespace);
 
     // Wait until both index and namespace level resources have been installed / updated.
-    const prepareForWriting = async () => {
-      if (!isWriteEnabled()) {
-        throw new RuleDataWriteDisabledError();
-      }
+    if (!isWriteEnabled()) {
+      this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+      throw new RuleDataWriteDisabledError({
+        reason: isWriteInitializationError() ? 'error' : 'config',
+        registrationContext: indexInfo.indexOptions.registrationContext,
+      });
+    }
 
+    try {
       const indexLevelResourcesResult = await this.options.waitUntilReadyForWriting;
 
       if (isLeft(indexLevelResourcesResult)) {
@@ -170,7 +204,7 @@ export class RuleDataClient implements IRuleDataClient {
       } else {
         try {
           await resourceInstaller.installAndUpdateNamespaceLevelResources(indexInfo, namespace);
-          return indexLevelResourcesResult.right;
+          this.clusterClient = indexLevelResourcesResult.right;
         } catch (e) {
           throw new RuleDataWriterInitializationError(
             'namespace',
@@ -179,33 +213,31 @@ export class RuleDataClient implements IRuleDataClient {
           );
         }
       }
-    };
-
-    const prepareForWritingResult = prepareForWriting().catch((error) => {
+    } catch (error) {
       if (error instanceof RuleDataWriterInitializationError) {
         this.options.logger.error(error);
         this.options.logger.error(
           `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
         );
-        turnOffWrite();
-      } else if (error instanceof RuleDataWriteDisabledError) {
-        this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
+        turnOffWriteDueToInitializationError();
       }
-      return undefined;
-    });
+
+      throw error;
+    }
 
     return {
       bulk: async (request: estypes.BulkRequest) => {
         try {
-          const clusterClient = await prepareForWritingResult;
-          if (clusterClient) {
+          if (this.clusterClient) {
             const requestWithDefaultParameters = {
               ...request,
               require_alias: true,
               index: alias,
             };
 
-            const response = await clusterClient.bulk(requestWithDefaultParameters, { meta: true });
+            const response = await this.clusterClient.bulk(requestWithDefaultParameters, {
+              meta: true,
+            });
 
             if (response.body.errors) {
               const error = new errors.ResponseError(response);
@@ -215,11 +247,9 @@ export class RuleDataClient implements IRuleDataClient {
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
           }
-          return undefined;
         } catch (error) {
           this.options.logger.error(error);
-
-          return undefined;
+          throw error;
         }
       },
     };

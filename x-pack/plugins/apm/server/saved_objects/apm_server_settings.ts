@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
 

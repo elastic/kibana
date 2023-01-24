@@ -8,10 +8,9 @@
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
 import { TransportResult } from '@elastic/elasticsearch';
-import { Logger } from 'src/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
   ReindexOperation,
@@ -19,9 +18,8 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { MAJOR_VERSION } from '../../../common/constants';
-import { licensingMock } from '../../../../licensing/server/mocks';
-import { LicensingPluginSetup } from '../../../../licensing/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
@@ -80,7 +78,7 @@ describe('reindexService', () => {
       licensingPluginSetup
     );
 
-    versionService.setup(MAJOR_VERSION);
+    versionService.setup('8.0.0');
   });
 
   describe('hasRequiredPrivileges', () => {

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import {
+import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import type {
   HostInfo,
   HostMetadata,
   MaybeImmutable,
@@ -21,12 +24,6 @@ import {
   PolicyData,
   UnitedAgentMetadata,
 } from '../../../../common/endpoint/types';
-import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
-import {
-  AgentNotFoundError,
-  AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
-} from '../../../../../fleet/server';
 import {
   EndpointHostNotFoundError,
   EndpointHostUnEnrolledError,
@@ -50,12 +47,10 @@ import {
   wrapErrorIfNeeded,
 } from '../../utils';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
-import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
-import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
-import { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
+import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -64,14 +59,7 @@ type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
 const isAgentPolicyWithPackagePolicies = (
   agentPolicy: AgentPolicy | AgentPolicyWithPackagePolicies
 ): agentPolicy is AgentPolicyWithPackagePolicies => {
-  if (
-    agentPolicy.package_policies.length === 0 ||
-    typeof agentPolicy.package_policies[0] !== 'string'
-  ) {
-    return true;
-  }
-
-  return false;
+  return agentPolicy.package_policies ? true : false;
 };
 
 export class EndpointMetadataService {
@@ -84,7 +72,7 @@ export class EndpointMetadataService {
   constructor(
     private savedObjectsStart: SavedObjectsServiceStart,
     private readonly agentPolicyService: AgentPolicyServiceInterface,
-    private readonly packagePolicyService: PackagePolicyServiceInterface,
+    private readonly packagePolicyService: PackagePolicyClient,
     private readonly logger?: Logger
   ) {}
 
@@ -141,6 +129,7 @@ export class EndpointMetadataService {
   ): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
 
+    // @ts-expect-error `size` not defined as top level property when using `typesWithBodyKey`
     query.size = fleetAgentIds.length;
 
     const searchResult = await esClient
@@ -212,7 +201,7 @@ export class EndpointMetadataService {
      * If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata.
      * If passing in an `Agent` record that was retrieved from the Endpoint Unified transform index,
      * ensure that its `.status` property is properly set to the calculated value done by
-     * fleet `getAgentStatus()` method.
+     * fleet.
      */
     _fleetAgent?: MaybeImmutable<Agent>,
     /** If undefined, it will be retrieved from Fleet using data from the endpointMetadata  */
@@ -281,7 +270,6 @@ export class EndpointMetadataService {
         this.logger?.error(error);
       }
     }
-
     return {
       metadata: endpointMetadata,
       host_status: fleetAgent
@@ -369,33 +357,6 @@ export class EndpointMetadataService {
   }
 
   /**
-   * Returns whether the united metadata index exists
-   *
-   * @param esClient
-   *
-   * @throws
-   */
-  async doesUnitedIndexExist(esClient: ElasticsearchClient): Promise<boolean> {
-    try {
-      await esClient.search({
-        index: METADATA_UNITED_INDEX,
-        size: 1,
-      });
-      return true;
-    } catch (error) {
-      const errorType = error?.meta?.body?.error?.type ?? '';
-      // only index not found is expected
-      if (errorType !== 'index_not_found_exception') {
-        const err = wrapErrorIfNeeded(error);
-        this.logger?.error(err);
-        throw err;
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * Retrieve list of host metadata. Only supports new united index.
    *
    * @param esClient
@@ -405,18 +366,27 @@ export class EndpointMetadataService {
    */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
     fleetServices: EndpointFleetServicesInterface,
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
-    const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
+    const unitedIndexQuery = await buildUnitedIndexQuery(soClient, queryOptions, endpointPolicyIds);
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadata>;
 
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
     } catch (error) {
+      const errorType = error?.meta?.body?.error?.type ?? '';
+      if (errorType === 'index_not_found_exception') {
+        return {
+          data: [],
+          total: 0,
+        };
+      }
+
       const err = wrapErrorIfNeeded(error);
       this.logger?.error(err);
       throw err;
@@ -452,22 +422,17 @@ export class EndpointMetadataService {
 
     for (const doc of docs) {
       const { endpoint: metadata, agent: _agent } = doc?._source?.united ?? {};
-
       if (metadata && _agent) {
-        // `_agent: Agent` here is the record stored in the unified index, whose `status` **IS NOT** the
-        // calculated status returned by the normal fleet API/Service. So lets calculated it before
-        // passing this on to other methods that expect an `Agent` type
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const agentPolicy = agentPoliciesMap[_agent.policy_id!];
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
+        // add the agent status from the fleet runtime field to
+        // the agent object
         const agent: typeof _agent = {
           ..._agent,
-          // Casting below necessary to remove `Immutable<>` from the type
-          status: getAgentStatus(_agent as Agent),
+          status: doc?.fields?.status?.[0] as AgentStatus,
         };
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const agentPolicy = agentPoliciesMap[agent.policy_id!];
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
-
         hosts.push(
           await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );

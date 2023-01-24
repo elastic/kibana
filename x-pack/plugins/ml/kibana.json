@@ -7,6 +7,8 @@
     "ml"
   ],
   "requiredPlugins": [
+    "aiops",
+    "charts",
     "cloud",
     "data",
     "dataViews",
@@ -15,15 +17,16 @@
     "embeddable",
     "features",
     "fieldFormats",
+    "lens",
     "licensing",
     "share",
     "taskManager",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "alerting",
-    "charts",
     "dashboard",
     "home",
     "licenseManagement",
@@ -31,21 +34,25 @@
     "maps",
     "security",
     "spaces",
-    "usageCollection"
+    "usageCollection",
+    "cases"
   ],
   "server": true,
   "ui": true,
   "requiredBundles": [
+    "cases",
     "charts",
     "dashboard",
     "esUiShared",
     "fieldFormats",
-    "home",
     "kibanaReact",
     "kibanaUtils",
+    "lens",
     "maps",
     "savedObjects",
-    "usageCollection"
+    "usageCollection",
+    "unifiedFieldList",
+    "unifiedSearch"
   ],
   "extraPublicDirs": [
     "common"

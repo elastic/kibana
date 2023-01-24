@@ -36,10 +36,13 @@ export const useInvalidFilterQuery = ({
   const getErrorsSelector = useMemo(() => appSelectors.errorsSelector(), []);
   const errors = useDeepEqualSelector(getErrorsSelector);
 
+  const name = kqlError?.name;
+  const message = kqlError?.message;
+
   useEffect(() => {
-    if (filterQuery === undefined && kqlError != null) {
+    if (!filterQuery && message && name) {
       // Local util for creating an replicatable error hash
-      const hashCode = kqlError.message
+      const hashCode = message
         .split('')
         // eslint-disable-next-line no-bitwise
         .reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
@@ -48,14 +51,12 @@ export const useInvalidFilterQuery = ({
         appActions.addErrorHash({
           id,
           hash: hashCode,
-          title: kqlError.name,
-          message: [kqlError.message],
+          title: name,
+          message: [message],
         })
       );
     }
-    // This disable is required to only trigger the toast once per render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, filterQuery, addError, query, startDate, endDate]);
+  }, [id, filterQuery, addError, query, startDate, endDate, dispatch, message, name]);
 
   useEffect(() => {
     const myError = errors.find((e) => e.id === id);

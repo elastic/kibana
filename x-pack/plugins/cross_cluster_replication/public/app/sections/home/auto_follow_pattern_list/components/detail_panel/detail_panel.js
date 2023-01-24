@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 
-import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
+import { getIndexListUri } from '@kbn/index-management-plugin/public';
 
 import {
   EuiButtonEmpty,
@@ -102,9 +102,9 @@ export class DetailPanel extends Component {
 
           <EuiSpacer size="s" />
 
-          <EuiDescriptionList data-test-subj="settingsValues">
-            <EuiFlexGroup>
-              <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList data-test-subj="settingsValues">
                 <EuiDescriptionListTitle>
                   <EuiTitle size="xs">
                     <FormattedMessage
@@ -117,9 +117,11 @@ export class DetailPanel extends Component {
                 <EuiDescriptionListDescription data-test-subj="remoteCluster">
                   {remoteCluster}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
+              </EuiDescriptionList>
+            </EuiFlexItem>
 
-              <EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList data-test-subj="settingsValues">
                 <EuiDescriptionListTitle>
                   <EuiTitle size="xs">
                     <FormattedMessage
@@ -132,13 +134,15 @@ export class DetailPanel extends Component {
                 <EuiDescriptionListDescription data-test-subj="leaderIndexPatterns">
                   {leaderIndexPatterns.join(', ')}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-            <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-            <EuiFlexGroup>
-              <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList data-test-subj="settingsValues">
                 <EuiDescriptionListTitle>
                   <EuiTitle size="xs">
                     <FormattedMessage
@@ -158,9 +162,11 @@ export class DetailPanel extends Component {
                     </em>
                   )}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
+              </EuiDescriptionList>
+            </EuiFlexItem>
 
-              <EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList data-test-subj="settingsValues">
                 <EuiDescriptionListTitle>
                   <EuiTitle size="xs">
                     <FormattedMessage
@@ -180,9 +186,9 @@ export class DetailPanel extends Component {
                     </em>
                   )}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiDescriptionList>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </section>
       </>
     );

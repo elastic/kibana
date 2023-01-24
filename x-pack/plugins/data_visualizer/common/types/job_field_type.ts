@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import { JOB_FIELD_TYPES } from '../constants';
-export type JobFieldType = typeof JOB_FIELD_TYPES[keyof typeof JOB_FIELD_TYPES];
+import { SUPPORTED_FIELD_TYPES } from '../constants';
+export type SupportedFieldType = typeof SUPPORTED_FIELD_TYPES[keyof typeof SUPPORTED_FIELD_TYPES];

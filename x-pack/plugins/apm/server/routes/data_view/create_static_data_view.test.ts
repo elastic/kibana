@@ -6,41 +6,56 @@
  */
 
 import { createStaticDataView } from './create_static_data_view';
-import { Setup } from '../../lib/helpers/setup_request';
-import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
-import { InternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
+import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { APMRouteHandlerResources, APMCore } from '../typings';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
 
-function getMockSavedObjectsClient(existingDataViewTitle: string) {
+function getMockedDataViewService(existingDataViewTitle: string) {
   return {
     get: jest.fn(() => ({
-      attributes: {
-        title: existingDataViewTitle,
-      },
+      title: existingDataViewTitle,
     })),
-    create: jest.fn(),
-  } as unknown as InternalSavedObjectsClient;
+    createAndSave: jest.fn(),
+  } as unknown as DataViewsService;
 }
 
-const setup = {
+const coreMock = {
+  start: () => {
+    return {
+      savedObjects: {
+        getScopedClient: () => {
+          return {
+            updateObjectsSpaces: () => {},
+          };
+        },
+      },
+    };
+  },
+} as unknown as APMCore;
+
+const apmEventClientMock = {
+  search: jest.fn(),
   indices: {
     transaction: 'apm-*-transaction-*',
     span: 'apm-*-span-*',
     error: 'apm-*-error-*',
     metric: 'apm-*-metrics-*',
   } as APMConfig['indices'],
-} as unknown as Setup;
+} as unknown as APMEventClient;
 
 describe('createStaticDataView', () => {
   it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
-    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
+    const dataViewService = getMockedDataViewService('apm-*');
     await createStaticDataView({
-      setup,
-      config: { autoCreateApmDataView: false } as APMConfig,
-      savedObjectsClient,
-      spaceId: 'default',
+      apmEventClient: apmEventClientMock,
+      resources: {
+        config: { autoCreateApmDataView: false },
+      } as APMRouteHandlerResources,
+      dataViewService,
     });
-    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
 
   it(`should not create data view if no APM data is found`, async () => {
@@ -49,15 +64,16 @@ describe('createStaticDataView', () => {
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(false);
 
-    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
+    const dataViewService = getMockedDataViewService('apm-*');
 
     await createStaticDataView({
-      setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
-      savedObjectsClient,
-      spaceId: 'default',
+      apmEventClient: apmEventClientMock,
+      resources: {
+        config: { autoCreateApmDataView: false },
+      } as APMRouteHandlerResources,
+      dataViewService,
     });
-    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
 
   it(`should create data view`, async () => {
@@ -66,16 +82,18 @@ describe('createStaticDataView', () => {
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(true);
 
-    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
+    const dataViewService = getMockedDataViewService('apm-*');
 
     await createStaticDataView({
-      setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
-      savedObjectsClient,
-      spaceId: 'default',
+      apmEventClient: apmEventClientMock,
+      resources: {
+        core: coreMock,
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
+      dataViewService,
     });
 
-    expect(savedObjectsClient.create).toHaveBeenCalled();
+    expect(dataViewService.createAndSave).toHaveBeenCalled();
   });
 
   it(`should overwrite the data view if the new data view title does not match the old data view title`, async () => {
@@ -84,25 +102,27 @@ describe('createStaticDataView', () => {
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(true);
 
-    const savedObjectsClient = getMockSavedObjectsClient('apm-*');
+    const dataViewService = getMockedDataViewService('apm-*');
     const expectedDataViewTitle =
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
     await createStaticDataView({
-      setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
-      savedObjectsClient,
-      spaceId: 'default',
+      apmEventClient: apmEventClientMock,
+      resources: {
+        core: coreMock,
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
+      dataViewService,
     });
 
-    expect(savedObjectsClient.get).toHaveBeenCalled();
-    expect(savedObjectsClient.create).toHaveBeenCalled();
+    expect(dataViewService.get).toHaveBeenCalled();
+    expect(dataViewService.createAndSave).toHaveBeenCalled();
     // @ts-ignore
-    expect(savedObjectsClient.create.mock.calls[0][1].title).toBe(
+    expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(
       expectedDataViewTitle
     );
     // @ts-ignore
-    expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
+    expect(dataViewService.createAndSave.mock.calls[0][1]).toBe(true);
   });
 
   it(`should not overwrite an data view if the new data view title matches the old data view title`, async () => {
@@ -111,20 +131,20 @@ describe('createStaticDataView', () => {
       .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
       .mockResolvedValue(true);
 
-    const savedObjectsClient = getMockSavedObjectsClient(
+    const dataViewService = getMockedDataViewService(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
     );
 
     await createStaticDataView({
-      setup,
-      config: { autoCreateApmDataView: true } as APMConfig,
-      savedObjectsClient,
-      spaceId: 'default',
+      apmEventClient: apmEventClientMock,
+      resources: {
+        core: coreMock,
+        config: { autoCreateApmDataView: true },
+      } as APMRouteHandlerResources,
+      dataViewService,
     });
 
-    expect(savedObjectsClient.get).toHaveBeenCalled();
-    expect(savedObjectsClient.create).toHaveBeenCalled();
-    // @ts-ignore
-    expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(false);
+    expect(dataViewService.get).toHaveBeenCalled();
+    expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
 });

@@ -7,10 +7,10 @@
  */
 
 import { Datum, PartitionLayer } from '@elastic/charts';
-import { FieldFormat } from '../../../../../field_formats/common';
-import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import { PaletteRegistry } from '../../../../../charts/public';
-import type { Datatable, DatatableRow } from '../../../../../expressions/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
@@ -58,7 +58,10 @@ export const getLayers = (
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
-      fillLabel,
+      fillLabel:
+        layerIndex === 0 && chartType === ChartTypes.MOSAIC
+          ? { ...fillLabel, minFontSize: 14, maxFontSize: 14, clipText: true }
+          : fillLabel,
       sortPredicate,
       shape: {
         fillColor: (d) =>
@@ -76,7 +79,8 @@ export const getLayers = (
             syncColors,
             isDarkMode,
             formatter,
-            col.format
+            col,
+            formatters
           ),
       },
     };

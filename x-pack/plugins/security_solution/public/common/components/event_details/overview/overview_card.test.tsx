@@ -8,8 +8,33 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
-import { TestProviders } from '../../../../common/mock';
-import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../mock';
+import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import type { State } from '../../../store';
+import { createStore } from '../../../store';
+import { TimelineId } from '../../../../../common/types';
+
+const state: State = {
+  ...mockGlobalState,
+  timeline: {
+    ...mockGlobalState.timeline,
+    timelineById: {
+      [TimelineId.casePage]: {
+        ...mockGlobalState.timeline.timelineById[TimelineId.test],
+        id: TimelineId.casePage,
+      },
+    },
+  },
+};
+
+const { storage } = createSecuritySolutionStorageMock();
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const props = {
   title: 'Severity',
@@ -18,7 +43,6 @@ const props = {
     contextId: 'timeline-case',
     eventId: 'testid',
     fieldType: 'string',
-    timelineId: 'timeline-case',
     data: {
       field: 'kibana.alert.rule.severity',
       format: 'string',
@@ -44,6 +68,7 @@ const props = {
       example: '',
       fields: {},
     },
+    scopeId: 'timeline-case',
   },
 };
 
@@ -52,7 +77,7 @@ jest.mock('../../../lib/kibana');
 describe('OverviewCardWithActions', () => {
   test('it renders correctly', () => {
     const { getByText } = render(
-      <TestProviders>
+      <TestProviders store={store}>
         <OverviewCardWithActions {...props}>
           <SeverityBadge value="medium" />
         </OverviewCardWithActions>

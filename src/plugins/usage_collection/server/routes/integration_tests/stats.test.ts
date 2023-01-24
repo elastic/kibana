@@ -9,17 +9,18 @@
 import { BehaviorSubject } from 'rxjs';
 
 import {
-  MetricsServiceSetup,
+  type MetricsServiceSetup,
+  RequestHandlerContext,
   ServiceStatus,
   ServiceStatusLevels,
-} from '../../../../../core/server';
+} from '@kbn/core/server';
 import {
   contextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
-} from '../../../../../core/server/mocks';
-import { createHttpServer } from '../../../../../core/server/test_utils';
+} from '@kbn/core/server/mocks';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
@@ -46,7 +47,7 @@ describe('/api/stats', () => {
     });
     metrics = metricsServiceMock.createSetupContract();
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter<RequestHandlerContext>('');
     registerStatsRoute({
       router,
       collectorSet: new CollectorSet({

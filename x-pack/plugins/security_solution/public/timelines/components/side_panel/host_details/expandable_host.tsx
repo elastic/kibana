@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { HostItem } from '../../../../../common/search_strategy';
+import type { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
+import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -64,7 +66,8 @@ export const ExpandableHostDetails = ({
     Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
     (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
   */
-  const { docValueFields, selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useSourcererDataView();
+  const dispatch = useDispatch();
 
   const [loading, { hostDetails: hostOverview }] = useHostDetails({
     endDate: to,
@@ -72,6 +75,19 @@ export const ExpandableHostDetails = ({
     indexNames: selectedPatterns,
     startDate: from,
   });
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
   return (
     <AnomalyTableProvider
       criteriaFields={hostToCriteria(hostOverview)}
@@ -79,10 +95,9 @@ export const ExpandableHostDetails = ({
       endDate={to}
       skip={isInitializing}
     >
-      {({ isLoadingAnomaliesData, anomaliesData }) => (
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
-          docValueFields={docValueFields}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}
@@ -93,15 +108,9 @@ export const ExpandableHostDetails = ({
           loading={loading}
           startDate={from}
           endDate={to}
-          narrowDateRange={(score, interval) => {
-            const fromTo = scoreIntervalToDateTime(score, interval);
-            setAbsoluteRangeDatePicker({
-              id: 'global',
-              from: fromTo.from,
-              to: fromTo.to,
-            });
-          }}
+          narrowDateRange={narrowDateRange}
           hostName={hostName}
+          jobNameById={jobNameById}
         />
       )}
     </AnomalyTableProvider>

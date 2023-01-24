@@ -6,17 +6,27 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import userEvent, { specialChars } from '@testing-library/user-event';
 
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Description } from './description';
-import { schema, FormProps } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 describe('Description', () => {
   let globalForm: FormHook;
+  let appMockRender: AppMockRenderer;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
+  const defaultProps = {
+    draftStorageKey,
+    isLoading: false,
+  };
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
@@ -33,32 +43,33 @@ describe('Description', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
   it('it renders', async () => {
-    const wrapper = mount(
+    const result = appMockRender.render(
       <MockHookWrapperComponent>
-        <Description isLoading={false} />
+        <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
+    expect(result.getByTestId('caseDescription')).toBeInTheDocument();
   });
 
   it('it changes the description', async () => {
-    const wrapper = mount(
+    const result = appMockRender.render(
       <MockHookWrapperComponent>
-        <Description isLoading={false} />
+        <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
-    await act(async () => {
-      wrapper
-        .find(`[data-test-subj="caseDescription"] textarea`)
-        .first()
-        .simulate('change', { target: { value: 'My new description' } });
-    });
+    userEvent.type(
+      result.getByRole('textbox'),
+      `${specialChars.selectAll}${specialChars.delete}My new description`
+    );
 
-    expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
+    await waitFor(() => {
+      expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
+    });
   });
 });

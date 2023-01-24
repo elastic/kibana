@@ -18,14 +18,21 @@ import {
   AppMountParameters,
   CoreStart,
   APP_WRAPPER_CLASS,
-} from '../../../../../src/core/public';
+} from '@kbn/core/public';
 
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 
+import {
+  DatePickerContextProvider,
+  InspectorContextProvider,
+  useBreadcrumbs,
+} from '@kbn/observability-plugin/public';
+import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
   RumHome,
@@ -33,10 +40,6 @@ import {
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
-import {
-  InspectorContextProvider,
-  useBreadcrumbs,
-} from '../../../observability/public';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
@@ -88,11 +91,7 @@ function UxApp() {
         darkMode,
       })}
     >
-      <div
-        className={APP_WRAPPER_CLASS}
-        data-test-subj="csmMainContainer"
-        role="main"
-      >
+      <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
         <RumHome />
       </div>
     </ThemeProvider>
@@ -105,7 +104,15 @@ export function UXAppRoot({
   appMountParameters,
   core,
   deps,
-  corePlugins: { embeddable, inspector, maps, observability, data },
+  corePlugins: {
+    embeddable,
+    inspector,
+    maps,
+    observability,
+    data,
+    dataViews,
+    lens,
+  },
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -115,6 +122,8 @@ export function UXAppRoot({
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
+
+  createCallApmApi(core);
 
   return (
     <RedirectAppLinks
@@ -129,20 +138,36 @@ export function UXAppRoot({
           observability,
           embeddable,
           data,
+          dataViews,
+          lens,
         }}
       >
-        <i18nCore.Context>
-          <RouterProvider history={history} router={uxRouter}>
-            <InspectorContextProvider>
-              <UrlParamsProvider>
-                <EuiErrorBoundary>
-                  <UxApp />
-                </EuiErrorBoundary>
-                <UXActionMenu appMountParameters={appMountParameters} />
-              </UrlParamsProvider>
-            </InspectorContextProvider>
-          </RouterProvider>
-        </i18nCore.Context>
+        <KibanaThemeProvider
+          theme$={appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
+          <i18nCore.Context>
+            <RouterProvider history={history} router={uxRouter}>
+              <DatePickerContextProvider>
+                <InspectorContextProvider>
+                  <UrlParamsProvider>
+                    <EuiErrorBoundary>
+                      <CsmSharedContextProvider>
+                        <UxApp />
+                      </CsmSharedContextProvider>
+                    </EuiErrorBoundary>
+                    <UXActionMenu appMountParameters={appMountParameters} />
+                  </UrlParamsProvider>
+                </InspectorContextProvider>
+              </DatePickerContextProvider>
+            </RouterProvider>
+          </i18nCore.Context>
+        </KibanaThemeProvider>
       </KibanaContextProvider>
     </RedirectAppLinks>
   );

@@ -363,6 +363,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               type: 'dashboard',
               updated_at: objects[0].updated_at,
+              created_at: objects[0].created_at,
               version: objects[0].version,
             });
             expect(objects[0].migrationVersion).to.be.ok();
@@ -423,6 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               type: 'dashboard',
               updated_at: objects[0].updated_at,
+              created_at: objects[0].created_at,
               version: objects[0].version,
             });
             expect(objects[0].migrationVersion).to.be.ok();
@@ -488,6 +490,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               type: 'dashboard',
               updated_at: objects[0].updated_at,
+              created_at: objects[0].updated_at,
               version: objects[0].version,
             });
             expect(objects[0].migrationVersion).to.be.ok();

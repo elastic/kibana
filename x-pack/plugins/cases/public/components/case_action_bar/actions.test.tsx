@@ -8,13 +8,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import { TestProviders } from '../../common/mock';
+import { noDeleteCasesPermissions, TestProviders } from '../../common/mock';
 import { basicCase, basicPush } from '../../containers/mock';
 import { Actions } from './actions';
 import * as i18n from '../case_view/translations';
-jest.mock('../../containers/use_delete_cases');
-const useDeleteCasesMock = useDeleteCases as jest.Mock;
+import * as api from '../../containers/api';
+import { waitFor } from '@testing-library/dom';
+
+jest.mock('../../containers/api');
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -26,6 +27,7 @@ jest.mock('react-router-dom', () => {
     }),
   };
 });
+
 const defaultProps = {
   allCasesNavigation: {
     href: 'all-cases-href',
@@ -34,23 +36,10 @@ const defaultProps = {
   caseData: basicCase,
   currentExternalIncident: null,
 };
-describe('CaseView actions', () => {
-  const handleOnDeleteConfirm = jest.fn();
-  const handleToggleModal = jest.fn();
-  const dispatchResetIsDeleted = jest.fn();
-  const defaultDeleteState = {
-    dispatchResetIsDeleted,
-    handleToggleModal,
-    handleOnDeleteConfirm,
-    isLoading: false,
-    isError: false,
-    isDeleted: false,
-    isDisplayConfirmDeleteModal: false,
-  };
 
+describe('CaseView actions', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    useDeleteCasesMock.mockImplementation(() => defaultDeleteState);
   });
 
   it('clicking trash toggles modal', () => {
@@ -61,28 +50,70 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-
     wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
     wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
-    expect(handleToggleModal).toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
   });
 
-  it('toggle delete modal and confirm', () => {
-    useDeleteCasesMock.mockImplementation(() => ({
-      ...defaultDeleteState,
-      isDisplayConfirmDeleteModal: true,
-    }));
+  it('clicking copyClipboard icon copies case id', () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+      },
+      writable: true,
+    });
+
     const wrapper = mount(
       <TestProviders>
         <Actions {...defaultProps} />
       </TestProviders>
     );
 
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-copyClipboard"]').simulate('click');
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
+  });
+
+  it('does not show trash icon when user does not have deletion privileges', () => {
+    const wrapper = mount(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
+        <Actions {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="property-actions-trash"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="property-actions-copyClipboard"]').exists()).toBeTruthy();
+  });
+
+  it('toggle delete modal and confirm', async () => {
+    const deleteCasesSpy = jest
+      .spyOn(api, 'deleteCases')
+      .mockRejectedValue(new Error('useDeleteCases: Test error'));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
-    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([
-      { id: basicCase.id, title: basicCase.title },
-    ]);
+
+    await waitFor(() => {
+      expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+    });
   });
 
   it('displays active incident link', () => {

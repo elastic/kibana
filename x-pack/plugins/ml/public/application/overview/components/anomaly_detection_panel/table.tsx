@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
@@ -44,9 +45,10 @@ export enum AnomalyDetectionListColumns {
 interface Props {
   items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
+  chartsService: ChartsPluginStart;
 }
 
-export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
+export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsService }) => {
   const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -91,19 +93,14 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
 
         if (!swimLaneData) return null;
 
-        const hasResults = swimLaneData.points.length > 0;
-
-        const noDatWarning = hasResults ? (
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
-            defaultMessage="No anomalies found"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.noResultsFoundMessage"
-            defaultMessage="No results found"
-          />
-        );
+        if (swimLaneData.points.length > 0 && swimLaneData.points.every((v) => v.value === 0)) {
+          return (
+            <FormattedMessage
+              id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
+              defaultMessage="No anomalies found"
+            />
+          );
+        }
 
         return (
           <SwimlaneContainer
@@ -116,7 +113,13 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
             showTimeline={false}
             showYAxis={false}
             showLegend={false}
-            noDataWarning={noDatWarning}
+            noDataWarning={
+              <FormattedMessage
+                id="xpack.ml.overview.anomalyDetection.noResultsFoundMessage"
+                defaultMessage="No results found"
+              />
+            }
+            chartsService={chartsService}
           />
         );
       },
@@ -181,7 +184,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
     initialPageSize: pageSize,
     totalItemCount: groupsList.length,
     pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const sorting = {

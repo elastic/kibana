@@ -8,7 +8,12 @@
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePageUrlState } from '../../../util/url_state';
+import { usePageUrlState } from '@kbn/ml-url-state';
+
+interface TableIntervalPageUrlState {
+  pageKey: 'mlSelectInterval';
+  pageUrlState: TableInterval;
+}
 
 export interface TableInterval {
   display: string;
@@ -55,7 +60,11 @@ function optionValueToInterval(value: string) {
 export const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 
 export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
-  return usePageUrlState<TableInterval>('mlSelectInterval', TABLE_INTERVAL_DEFAULT);
+  const [interval, updateCallback] = usePageUrlState<TableIntervalPageUrlState>(
+    'mlSelectInterval',
+    TABLE_INTERVAL_DEFAULT
+  );
+  return [interval, updateCallback];
 };
 
 /*

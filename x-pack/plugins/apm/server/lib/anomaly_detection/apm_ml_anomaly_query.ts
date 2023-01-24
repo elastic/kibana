@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { termQuery, termsQuery } from '../../../../observability/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ApmMlDetectorType,
   getApmMlDetectorIndex,

@@ -6,15 +6,11 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchModifiedSource) {
@@ -36,7 +32,7 @@ async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchMo
   const dataset = 'shard'; // data_stream.dataset
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPattern = getNewIndexPatterns({
+  const indexPattern = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -51,7 +47,7 @@ async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchMo
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,

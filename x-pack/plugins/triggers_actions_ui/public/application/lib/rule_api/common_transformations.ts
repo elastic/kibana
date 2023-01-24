@@ -4,29 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertExecutionStatus } from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
-import { Rule, RuleAction, ResolvedRule } from '../../../types';
+import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({
   group,
   id,
   connector_type_id: actionTypeId,
   params,
+  frequency,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  frequency,
 });
 
-const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
+const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
   last_duration: lastDuration,
   ...rest
 }) => ({
   lastExecutionDate,
   lastDuration,
+  ...rest,
+});
+
+const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
+  outcome_msg: outcomeMsg,
+  alerts_count: alertsCount,
+  ...rest
+}) => ({
+  outcomeMsg,
+  alertsCount,
   ...rest,
 });
 
@@ -43,6 +55,11 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus,
   actions: actions,
+  snooze_schedule: snoozeSchedule,
+  is_snoozed_until: isSnoozedUntil,
+  active_snoozes: activeSnoozes,
+  last_run: lastRun,
+  next_run: nextRun,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -54,23 +71,31 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
+  snoozeSchedule,
   executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
   actions: actions
     ? actions.map((action: AsApiContract<RuleAction>) => transformAction(action))
     : [],
   scheduledTaskId,
+  isSnoozedUntil,
+  activeSnoozes,
+  ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+  ...(nextRun ? { nextRun } : {}),
   ...rest,
 });
 
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   alias_target_id,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  alias_purpose,
   outcome,
   ...rest
 }: any) => {
   return {
     ...transformRule(rest),
     alias_target_id,
+    alias_purpose,
     outcome,
   };
 };

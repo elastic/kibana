@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from 'src/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
@@ -13,10 +13,19 @@ import {
 import { APMConfig } from '../../..';
 import { APMRouteHandlerResources } from '../../typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ApmIndicesConfig } from '../../../../../observability/common/typings';
 import { APMIndices } from '../../../saved_objects/apm_indices';
 
-export type { ApmIndicesConfig };
+export type ApmIndicesConfig = Readonly<{
+  error: string;
+  onboarding: string;
+  span: string;
+  transaction: string;
+  metric: string;
+}>;
+
+export const APM_AGENT_CONFIGURATION_INDEX = '.apm-agent-configuration';
+export const APM_CUSTOM_LINK_INDEX = '.apm-custom-link';
+export const APM_SOURCE_MAP_INDEX = '.apm-source-map';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
@@ -36,15 +45,11 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    sourcemap: config.indices.sourcemap,
     error: config.indices.error,
     onboarding: config.indices.onboarding,
     span: config.indices.span,
     transaction: config.indices.transaction,
     metric: config.indices.metric,
-    // system indices, not configurable
-    apmAgentConfigurationIndex: '.apm-agent-configuration',
-    apmCustomLinkIndex: '.apm-custom-link',
   };
 }
 
@@ -74,9 +79,8 @@ export async function getApmIndexSettings({
     ReturnType<typeof getApmIndicesSavedObject>
   >;
   try {
-    apmIndicesSavedObject = await getApmIndicesSavedObject(
-      context.core.savedObjects.client
-    );
+    const soClient = (await context.core).savedObjects.client;
+    apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);
   } catch (error: any) {
     if (error.output && error.output.statusCode === 404) {
       apmIndicesSavedObject = {};

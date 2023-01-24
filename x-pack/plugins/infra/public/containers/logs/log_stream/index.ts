@@ -12,8 +12,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import { LogViewColumnConfiguration } from '../../../../common/log_views';
 import { useSubscription } from '../../../utils/use_observable';
-import { LogSourceConfigurationProperties } from '../log_source';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
@@ -26,7 +26,7 @@ interface LogStreamProps {
   endTimestamp: number;
   query?: BuiltEsQuery;
   center?: LogEntryCursor;
-  columns?: LogSourceConfigurationProperties['logColumns'];
+  columns?: LogViewColumnConfiguration[];
 }
 
 interface LogStreamState {

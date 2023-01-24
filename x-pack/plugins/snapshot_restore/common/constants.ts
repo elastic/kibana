@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { RepositoryType } from './types';
 
 const basicLicense: LicenseType = 'basic';
@@ -65,3 +65,5 @@ export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
   MINUTE: 'm',
   SECOND: 's',
 };
+
+export const FEATURE_STATES_NONE_OPTION = 'none';

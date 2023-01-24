@@ -30,7 +30,8 @@ import { Loading } from '../../../../../shared/loading';
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { SETTINGS_PATH } from '../../../../routes';
 import { DataPanel } from '../../../data_panel';
-import { LogRetentionLogic, LogRetentionOptions } from '../../../log_retention';
+
+import { EngineLogic } from '../../../engine';
 
 import { AutomatedIcon } from '../../components/automated_icon';
 
@@ -50,26 +51,17 @@ export const CurationsSettings: React.FC = () => {
     toggleCurationsMode,
   } = useActions(CurationsSettingsLogic);
 
-  const { isLogRetentionUpdating, logRetention } = useValues(LogRetentionLogic);
-  const { fetchLogRetention } = useActions(LogRetentionLogic);
-
-  const analyticsDisabled = !logRetention?.[LogRetentionOptions.Analytics].enabled;
-
-  useEffect(() => {
-    if (hasPlatinumLicense) {
-      fetchLogRetention();
-    }
-  }, [hasPlatinumLicense]);
+  const {
+    engine: { analytics_enabled: analyticsEnabled },
+  } = useValues(EngineLogic);
 
   useEffect(() => {
-    if (logRetention) {
-      if (!analyticsDisabled) {
-        loadCurationsSettings();
-      } else {
-        onSkipLoadingCurationsSettings();
-      }
+    if (analyticsEnabled && dataLoading) {
+      loadCurationsSettings();
+    } else {
+      onSkipLoadingCurationsSettings();
     }
-  }, [logRetention]);
+  }, [analyticsEnabled, dataLoading]);
 
   if (!hasPlatinumLicense)
     return (
@@ -117,7 +109,7 @@ export const CurationsSettings: React.FC = () => {
         </EuiButtonEmpty>
       </DataPanel>
     );
-  if (dataLoading || isLogRetentionUpdating) return <Loading />;
+  if (dataLoading) return <Loading />;
 
   return (
     <>
@@ -139,7 +131,7 @@ export const CurationsSettings: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {analyticsDisabled && (
+      {!analyticsEnabled && (
         <>
           <EuiCallOut
             iconType="iInCircle"
@@ -189,7 +181,7 @@ export const CurationsSettings: React.FC = () => {
               }
             )}
             checked={enabled}
-            disabled={analyticsDisabled}
+            disabled={!analyticsEnabled}
             onChange={toggleCurationsEnabled}
           />
         </EuiFlexItem>
@@ -202,7 +194,7 @@ export const CurationsSettings: React.FC = () => {
               }
             )}
             checked={mode === 'automatic'}
-            disabled={analyticsDisabled}
+            disabled={!analyticsEnabled}
             onChange={toggleCurationsMode}
           />
         </EuiFlexItem>

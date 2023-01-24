@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../src/plugins/data/common';
+import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -56,6 +56,14 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
               await actionsCell.click();
               await find.clickByCssSelector(
                 '[data-test-subj="sessionManagementPopoverAction-delete"]'
+              );
+              await PageObjects.common.clickConfirmOnModal();
+            },
+            extend: async () => {
+              log.debug('management ui: extend the session');
+              await actionsCell.click();
+              await find.clickByCssSelector(
+                '[data-test-subj="sessionManagementPopoverAction-extend"]'
               );
               await PageObjects.common.clickConfirmOnModal();
             },

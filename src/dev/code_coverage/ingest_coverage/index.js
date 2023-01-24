@@ -8,7 +8,8 @@
 
 import { resolve } from 'path';
 import { prok } from './process';
-import { run, createFlagError, createFailError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { pathExists } from './team_assignment/enumeration_helpers';
 import { always, ccMark } from './utils';
 

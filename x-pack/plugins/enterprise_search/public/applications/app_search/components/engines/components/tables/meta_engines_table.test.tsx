@@ -43,7 +43,7 @@ describe('MetaEnginesTable', () => {
       pageIndex: 0,
       pageSize: 10,
       totalItemCount: 1,
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
     },
     onChange: () => {},
   };

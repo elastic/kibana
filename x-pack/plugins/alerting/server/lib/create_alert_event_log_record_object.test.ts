@@ -28,6 +28,7 @@ describe('createAlertEventLogRecordObject', () => {
         executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'execute-start',
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
@@ -42,6 +43,7 @@ describe('createAlertEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -53,9 +55,11 @@ describe('createAlertEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'rule-consumer',
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -67,6 +71,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -88,12 +93,12 @@ describe('createAlertEventLogRecordObject', () => {
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'recovered-instance',
         instanceId: 'test1',
         group: 'group 1',
         message: 'message text here',
         namespace: 'default',
-        subgroup: 'subgroup value',
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -107,6 +112,7 @@ describe('createAlertEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       event: {
@@ -120,14 +126,15 @@ describe('createAlertEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'rule-consumer',
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
           action_group_id: 'group 1',
-          action_subgroup: 'subgroup value',
           instance_id: 'test1',
         },
         saved_objects: [
@@ -139,6 +146,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: 'message text here',
       rule: {
@@ -158,12 +166,12 @@ describe('createAlertEventLogRecordObject', () => {
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
+        consumer: 'rule-consumer',
         action: 'execute-action',
         instanceId: 'test1',
         group: 'group 1',
         message: 'action execution start',
         namespace: 'default',
-        subgroup: 'subgroup value',
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -182,6 +190,7 @@ describe('createAlertEventLogRecordObject', () => {
             typeId: '.email',
           },
         ],
+        spaceId: 'default',
       })
     ).toStrictEqual({
       event: {
@@ -195,14 +204,15 @@ describe('createAlertEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'rule-consumer',
             execution: {
               uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
           action_group_id: 'group 1',
-          action_subgroup: 'subgroup value',
           instance_id: 'test1',
         },
         saved_objects: [
@@ -220,6 +230,7 @@ describe('createAlertEventLogRecordObject', () => {
             type_id: '.email',
           },
         ],
+        space_ids: ['default'],
       },
       message: 'action execution start',
       rule: {

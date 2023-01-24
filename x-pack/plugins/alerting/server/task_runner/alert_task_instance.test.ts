@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import uuid from 'uuid';
-import { SanitizedAlert } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { SanitizedRule } from '../types';
 
-const alert: SanitizedAlert<{
+const alert: SanitizedRule<{
   bar: boolean;
 }> = {
   id: 'alert-123',
@@ -43,7 +43,7 @@ describe('Alert Task Instance', () => {
   test(`validates that a TaskInstance has valid Alert Task State`, () => {
     const lastScheduledActionsDate = new Date();
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -165,7 +165,7 @@ describe('Alert Task Instance', () => {
 
   test(`allows an initial empty state`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -188,7 +188,7 @@ describe('Alert Task Instance', () => {
 
   test(`validates that a TaskInstance has valid Params`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',

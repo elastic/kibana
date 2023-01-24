@@ -29,6 +29,9 @@
       "actionId": {
         "type": "keyword"
       },
+      "consumer": {
+        "type": "keyword"
+      },
       "params": {
         "enabled": false,
         "type": "object"

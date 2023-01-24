@@ -16,7 +16,7 @@ import {
   policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
 } from '../endpoint/models/policy_config';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { ProtectionModes } from '../endpoint/types';
 
 describe('policy_config and licenses', () => {
@@ -121,6 +121,40 @@ describe('policy_config and licenses', () => {
       policy.linux.behavior_protection.supported = true;
       const valid = isEndpointPolicyValidForLicense(policy, Platinum);
       expect(valid).toBeTruthy();
+    });
+
+    it('allows advanced rollback option when Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks advanced rollback option when below Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
+    });
+
+    it('allows credential hardening option when Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
+      const valid = isEndpointPolicyValidForLicense(policy, Platinum);
+      expect(valid).toBeTruthy();
+    });
+
+    it('blocks credential hardening option when below Platinum', () => {
+      const policy = policyFactory();
+      policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
+      let valid = isEndpointPolicyValidForLicense(policy, Gold);
+      expect(valid).toBeFalsy();
+
+      valid = isEndpointPolicyValidForLicense(policy, Basic);
+      expect(valid).toBeFalsy();
     });
 
     describe('ransomware protection checks', () => {
@@ -472,6 +506,31 @@ describe('policy_config and licenses', () => {
       expect(['', DefaultPolicyRuleNotificationMessage]).toContain(
         retPolicy.linux.popup.behavior_protection.message
       );
+    });
+
+    it('resets Platinum-paid advanced fields for lower license tiers', () => {
+      const defaults = policyFactoryWithoutPaidFeatures(); // reference
+      const policy = policyFactory(); // what we will modify, and should be reset
+
+      policy.windows.advanced = {
+        alerts: {
+          rollback: {
+            self_healing: {
+              enabled: true,
+            },
+          },
+          cloud_lookup: false,
+        },
+        another_advanced: true,
+      };
+
+      const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
+
+      expect(retPolicy.windows.advanced?.rollback).toEqual(defaults.windows.advanced?.rollback);
+
+      // Preserves non-license gated advanced settings.
+      expect(retPolicy.windows.advanced?.another_advanced).toEqual(true);
+      expect(retPolicy.windows.advanced?.alerts?.cloud_lookup).toEqual(false);
     });
 
     it('sets ransomware supported field to false when license is below Platinum', () => {

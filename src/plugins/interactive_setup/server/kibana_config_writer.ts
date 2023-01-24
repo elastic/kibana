@@ -12,8 +12,8 @@ import fs from 'fs/promises';
 import yaml from 'js-yaml';
 import path from 'path';
 
+import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
-import type { Logger } from 'src/core/server';
 
 import { getDetailedErrorMessage } from './errors';
 

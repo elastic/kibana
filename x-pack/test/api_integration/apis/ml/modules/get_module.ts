@@ -7,18 +7,16 @@
 
 import expect from '@kbn/expect';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-
-import { isPopulatedObject } from '../../../../../plugins/ml/common/util/object_utils';
 
 const moduleIds = [
   'apache_data_stream',
   'apache_ecs',
   'apm_transaction',
   'auditbeat_process_docker_ecs',
-  'auditbeat_process_hosts_ecs',
   'logs_ui_analysis',
   'logs_ui_categories',
   'metricbeat_system_ecs',
@@ -29,15 +27,11 @@ const moduleIds = [
   'sample_data_ecommerce',
   'sample_data_weblogs',
   'security_auth',
-  'security_linux',
+  'security_cloudtrail',
+  'security_linux_v3',
   'security_network',
-  'security_windows',
-  'siem_auditbeat',
-  'siem_auditbeat_auth',
-  'siem_cloudtrail',
-  'siem_packetbeat',
-  'siem_winlogbeat',
-  'siem_winlogbeat_auth',
+  'security_packetbeat',
+  'security_windows_v3',
   'uptime_heartbeat',
 ];
 
@@ -46,11 +40,11 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   async function executeGetModuleRequest(module: string, user: USER, rspCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/modules/get_module/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(rspCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

@@ -7,11 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DataViewSpec, DataViewsService } from 'src/plugins/data_views/common';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService, DataView } from '../../common/data_views';
+import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   SPECIFIC_DATA_VIEW_PATH,
@@ -36,6 +37,7 @@ const indexPatternUpdateSchema = schema.object({
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
+  name: schema.maybe(schema.string()),
 });
 
 interface UpdateDataViewArgs {
@@ -66,43 +68,49 @@ export const updateDataView = async ({
     typeMeta,
     fields,
     runtimeFieldMap,
+    name,
   } = spec;
 
-  let changeCount = 0;
+  let isChanged = false;
   let doRefreshFields = false;
 
   if (title !== undefined && title !== dataView.title) {
-    changeCount++;
+    isChanged = true;
     dataView.title = title;
   }
 
   if (timeFieldName !== undefined && timeFieldName !== dataView.timeFieldName) {
-    changeCount++;
+    isChanged = true;
     dataView.timeFieldName = timeFieldName;
   }
 
   if (sourceFilters !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.sourceFilters = sourceFilters;
   }
 
   if (fieldFormats !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.fieldFormatMap = fieldFormats;
   }
 
   if (type !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.type = type;
   }
 
   if (typeMeta !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.typeMeta = typeMeta;
   }
 
+  if (name !== undefined) {
+    isChanged = true;
+    dataView.name = name;
+  }
+
   if (fields !== undefined) {
-    changeCount++;
+    isChanged = true;
     doRefreshFields = true;
     dataView.fields.replaceAll(
       Object.values(fields || {}).map((field) => ({
@@ -114,19 +122,19 @@ export const updateDataView = async ({
   }
 
   if (runtimeFieldMap !== undefined) {
-    changeCount++;
+    isChanged = true;
     dataView.replaceAllRuntimeFields(runtimeFieldMap);
   }
 
-  if (changeCount < 1) {
-    throw new Error('Index pattern change set is empty.');
+  if (isChanged) {
+    const result = (await dataViewsService.updateSavedObject(dataView)) as DataView;
+
+    if (doRefreshFields && refreshFields) {
+      await dataViewsService.refreshFields(dataView);
+    }
+    return result;
   }
 
-  await dataViewsService.updateSavedObject(dataView);
-
-  if (doRefreshFields && refreshFields) {
-    await dataViewsService.refreshFields(dataView);
-  }
   return dataView;
 };
 
@@ -161,8 +169,9 @@ const updateDataViewRouteFactory =
       },
       router.handleLegacyErrors(
         handleErrors(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
           const [, , { dataViewsServiceFactory }] = await getStartServices();
 
           const dataViewsService = await dataViewsServiceFactory(

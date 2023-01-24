@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -19,22 +19,26 @@ import { useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
 import { hasValueToDisplay } from '../../utils/validators';
-import { EMPTY_VALUE_LABEL } from '../charts/translation';
+import { EMPTY_VALUE_LABEL } from './translation';
 
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
   chartDefaultSettings,
-  ChartSeriesConfigs,
-  ChartSeriesData,
   checkIfAllValuesAreZero,
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
   useTheme,
+  Wrapper,
+  BarChartWrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
-import { LegendItem } from './draggable_legend_item';
-import type { ChartData } from './common';
+import type { LegendItem } from './draggable_legend_item';
+import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
+import { VisualizationActions } from '../visualization_actions';
+import type { VisualizationActionsProps } from '../visualization_actions/types';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;
@@ -83,6 +87,34 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
+  const xAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.bottom.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const yAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.left.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const xAxisLabelFormat = get('configs.axis.bottom.labelFormat', chartConfigs);
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
@@ -102,6 +134,7 @@ export const BarChartBaseComponent = ({
             data={series.value ?? []}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
+            barSeriesStyle={get('configs.series.barSeriesStyle', chartConfigs)}
           />
         ) : null;
       })}
@@ -110,22 +143,15 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        style={{
-          tickLine: {
-            size: tickSize,
-          },
-        }}
+        style={xAxisStyle}
         tickFormat={xTickFormatter}
+        labelFormat={xAxisLabelFormat}
       />
 
       <Axis
         id={yAxisId}
         position={Position.Left}
-        style={{
-          tickLine: {
-            size: tickSize,
-          },
-        }}
+        style={yAxisStyle}
         tickFormat={yTickFormatter}
         title={yAxisTitle}
       />
@@ -139,11 +165,12 @@ export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
-interface BarChartComponentProps {
+export interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
-  timelineId?: string;
+  scopeId?: string;
+  visualizationActionsOptions?: VisualizationActionsProps;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -152,7 +179,8 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   barChart,
   configs,
   stackByField,
-  timelineId,
+  scopeId,
+  visualizationActionsOptions,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
@@ -161,14 +189,14 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
         ? barChart.map((d, i) => ({
             color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
-              `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
+              `draggable-legend-item-${uuidv4()}-${stackByField}-${d.key}`
             ),
-            timelineId,
+            scopeId,
             field: stackByField,
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [barChart, stackByField, timelineId]
+    [barChart, stackByField, scopeId]
   );
 
   const yAxisTitle = get('yAxisTitle', configs);
@@ -176,27 +204,39 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
+  const isValidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(barChart), [barChart]);
 
-  return checkIfAnyValidSeriesExist(barChart) ? (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={true}>
-        <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
-          <BarChartBase
-            configs={configs}
-            data={barChart}
-            yAxisTitle={yAxisTitle}
-            forceHiddenLegend={stackByField != null}
-            height={chartHeight}
-            width={chartHeight}
-          />
-        </WrappedByAutoSizer>
-      </EuiFlexItem>
-      <LegendFlexItem grow={false}>
-        <DraggableLegend legendItems={legendItems} height={height} />
-      </LegendFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
+  return (
+    <Wrapper>
+      <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
+        {isValidSeriesExist && barChart && (
+          <BarChartWrapper gutterSize="none">
+            <EuiFlexItem grow={true}>
+              <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+                <BarChartBase
+                  configs={configs}
+                  data={barChart}
+                  yAxisTitle={yAxisTitle}
+                  forceHiddenLegend={stackByField != null}
+                  height={chartHeight}
+                  width={chartHeight}
+                />
+              </WrappedByAutoSizer>
+            </EuiFlexItem>
+
+            <LegendFlexItem grow={false}>
+              <DraggableLegend legendItems={legendItems} height={height} />
+            </LegendFlexItem>
+          </BarChartWrapper>
+        )}
+        {!isValidSeriesExist && (
+          <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
+        )}
+        {visualizationActionsOptions != null && (
+          <VisualizationActions {...visualizationActionsOptions} className="viz-actions" />
+        )}
+      </HoverVisibilityContainer>
+    </Wrapper>
   );
 };
 
@@ -204,7 +244,7 @@ export const BarChart = React.memo(
   BarChartComponent,
   (prevProps, nextProps) =>
     prevProps.stackByField === nextProps.stackByField &&
-    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.scopeId === nextProps.scopeId &&
     deepEqual(prevProps.configs, nextProps.configs) &&
     deepEqual(prevProps.barChart, nextProps.barChart)
 );

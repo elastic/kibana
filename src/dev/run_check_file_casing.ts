@@ -8,10 +8,9 @@
 
 import globby from 'globby';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { run } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { run } from '@kbn/dev-cli-runner';
 import { File } from './file';
-// @ts-expect-error precommit hooks aren't migrated to TypeScript yet.
 import { checkFileCasing } from './precommit_hook/check_file_casing';
 
 run(async ({ log }) => {

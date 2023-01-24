@@ -10,13 +10,11 @@ import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
-import { singleSeriesCheckerFactory } from './single_series_checker';
-import { polledDataCheckerFactory } from './polled_data_checker';
+import { SingleSeriesChecker } from './single_series_checker';
+import { PolledDataChecker } from './polled_data_checker';
 
 export function estimateBucketSpanFactory(client) {
   const { asCurrentUser, asInternalUser } = client;
-  const PolledDataChecker = polledDataCheckerFactory(client);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(client);
 
   class BucketSpanEstimator {
     constructor(
@@ -79,6 +77,7 @@ export function estimateBucketSpanFactory(client) {
       });
 
       this.polledDataChecker = new PolledDataChecker(
+        asCurrentUser,
         this.index,
         this.timeField,
         this.duration,
@@ -93,6 +92,7 @@ export function estimateBucketSpanFactory(client) {
             // either a single metric job or no data split
             this.checkers.push({
               check: new SingleSeriesChecker(
+                asCurrentUser,
                 this.index,
                 this.timeField,
                 this.aggTypes[i],
@@ -117,6 +117,7 @@ export function estimateBucketSpanFactory(client) {
               });
               this.checkers.push({
                 check: new SingleSeriesChecker(
+                  asCurrentUser,
                   this.index,
                   this.timeField,
                   this.aggTypes[i],
@@ -262,21 +263,24 @@ export function estimateBucketSpanFactory(client) {
   const getFieldCardinality = function (index, field, runtimeMappings, indicesOptions) {
     return new Promise((resolve, reject) => {
       asCurrentUser
-        .search({
-          index,
-          size: 0,
-          body: {
-            aggs: {
-              field_count: {
-                cardinality: {
-                  field,
+        .search(
+          {
+            index,
+            size: 0,
+            body: {
+              aggs: {
+                field_count: {
+                  cardinality: {
+                    field,
+                  },
                 },
               },
+              ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
             },
-            ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+            ...(indicesOptions ?? {}),
           },
-          ...(indicesOptions ?? {}),
-        })
+          { maxRetries: 0 }
+        )
         .then((body) => {
           const value = get(body, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
@@ -297,26 +301,29 @@ export function estimateBucketSpanFactory(client) {
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           asCurrentUser
-            .search({
-              index,
-              size: 0,
-              body: {
-                query,
-                aggs: {
-                  fields_bucket_counts: {
-                    terms: {
-                      field,
-                      include: {
-                        partition: 0,
-                        num_partitions: numPartitions,
+            .search(
+              {
+                index,
+                size: 0,
+                body: {
+                  query,
+                  aggs: {
+                    fields_bucket_counts: {
+                      terms: {
+                        field,
+                        include: {
+                          partition: 0,
+                          num_partitions: numPartitions,
+                        },
                       },
                     },
                   },
+                  ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
                 },
-                ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+                ...(indicesOptions ?? {}),
               },
-              ...(indicesOptions ?? {}),
-            })
+              { maxRetries: 0 }
+            )
             .then((body) => {
               // eslint-disable-next-line camelcase
               if (body.aggregations?.fields_bucket_counts?.buckets !== undefined) {

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import {
@@ -302,7 +302,6 @@ export async function fetchHighLevelStats<
 
   const params: estypes.SearchRequest = {
     index: getIndexPatternForStackProduct(product) as string,
-    size: maxBucketSize,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._source.cluster_uuid',
@@ -317,6 +316,7 @@ export async function fetchHighLevelStats<
       `hits.hits._source.${product}_stats.cloud.zone`,
     ],
     body: {
+      size: maxBucketSize,
       query: createQuery({
         start,
         end,

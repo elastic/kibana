@@ -15,6 +15,12 @@ export function writeToFileTask({ roots }: TaskContext) {
     task: async () => {
       const fullPath = path.resolve(process.cwd(), root.config.output);
       if (root.mapping && Object.keys(root.mapping.properties).length > 0) {
+        // Sort first-level properties alphabetically
+        root.mapping.properties = Object.fromEntries(
+          Object.entries(root.mapping.properties).sort(([a], [b]) => {
+            return a > b ? 1 : -1;
+          })
+        );
         const serializedMapping = JSON.stringify(root.mapping, null, 2).concat('\n');
         await writeFileAsync(fullPath, serializedMapping);
       }

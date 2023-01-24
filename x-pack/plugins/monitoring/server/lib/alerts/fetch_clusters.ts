@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster } from '../../../common/types/alerts';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 interface RangeFilter {
   [field: string]: {
@@ -24,11 +24,11 @@ export async function fetchClusters(
   esClient: ElasticsearchClient,
   rangeFilter: RangeFilter = { timestamp: { gte: 'now-2m' } }
 ): Promise<AlertCluster[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -44,7 +44,11 @@ export async function fetchClusters(
       query: {
         bool: {
           filter: [
-            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter(
+              'cluster_stats',
+              'cluster_stats',
+              getElasticsearchDataset('cluster_stats')
+            ),
             {
               range: rangeFilter,
             },

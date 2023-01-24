@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
+import type { Logger, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
-import { ConnectorMappings } from '../../../common/api';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { ConnectorMappings } from '../../../common/api';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { IndexRefresh } from '../types';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -18,12 +19,12 @@ interface FindConnectorMappingsArgs extends ClientArgs {
   options?: SavedObjectFindOptionsKueryNode;
 }
 
-interface PostConnectorMappingsArgs extends ClientArgs {
+interface PostConnectorMappingsArgs extends ClientArgs, IndexRefresh {
   attributes: ConnectorMappings;
   references: SavedObjectReference[];
 }
 
-interface UpdateConnectorMappingsArgs extends ClientArgs {
+interface UpdateConnectorMappingsArgs extends ClientArgs, IndexRefresh {
   mappingId: string;
   attributes: Partial<ConnectorMappings>;
   references: SavedObjectReference[];
@@ -49,6 +50,7 @@ export class ConnectorMappingsService {
     unsecuredSavedObjectsClient,
     attributes,
     references,
+    refresh,
   }: PostConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
@@ -57,6 +59,7 @@ export class ConnectorMappingsService {
         attributes,
         {
           references,
+          refresh,
         }
       );
     } catch (error) {
@@ -70,6 +73,7 @@ export class ConnectorMappingsService {
     mappingId,
     attributes,
     references,
+    refresh,
   }: UpdateConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
@@ -79,6 +83,7 @@ export class ConnectorMappingsService {
         attributes,
         {
           references,
+          refresh,
         }
       );
     } catch (error) {

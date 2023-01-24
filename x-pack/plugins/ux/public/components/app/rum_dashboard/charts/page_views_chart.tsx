@@ -5,134 +5,87 @@
  * 2.0.
  */
 
-import {
-  Axis,
-  BarSeries,
-  BrushEndListener,
-  Chart,
-  DARK_THEME,
-  LIGHT_THEME,
-  niceTimeFormatByDay,
-  ScaleType,
-  SeriesNameFn,
-  Settings,
-  timeFormatter,
-  Position,
-} from '@elastic/charts';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
-import numeral from '@elastic/numeral';
 import moment from 'moment';
-import React from 'react';
+import React, { useCallback } from 'react';
+import {
+  AllSeries,
+  fromQuery,
+  RECORDS_FIELD,
+  toQuery,
+  useTheme,
+} from '@kbn/observability-plugin/public';
 import { useHistory } from 'react-router-dom';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+
+import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { ChartWrapper } from '../chart_wrapper';
-import { I18LABELS } from '../translations';
-import { fromQuery, toQuery } from '../../../../../../observability/public';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { useDataView } from '../local_uifilters/use_data_view';
+import { useExpViewAttributes } from './use_exp_view_attrs';
 
 interface Props {
-  data?: {
-    topItems: string[];
-    items: Array<Record<string, number | null>>;
-  };
-  loading: boolean;
+  breakdown: BreakdownItem | null;
 }
 
-export function PageViewsChart({ data, loading }: Props) {
+export function PageViewsChart({ breakdown }: Props) {
+  const { dataViewTitle } = useDataView();
   const history = useHistory();
-  const { urlParams } = useLegacyUrlParams();
+  const kibana = useKibanaServices();
+  const { ExploratoryViewEmbeddable } = kibana.observability;
 
-  const { start, end } = urlParams;
-  const diffInDays = moment(new Date(end as string)).diff(
-    moment(new Date(start as string)),
-    'day'
+  const { uxUiFilters, urlParams } = useLegacyUrlParams();
+
+  const theme = useTheme();
+
+  const { reportDefinitions, time } = useExpViewAttributes();
+
+  const allSeries: AllSeries = [
+    {
+      time,
+      reportDefinitions,
+      dataType: 'ux',
+      name: 'ux-series-1',
+      selectedMetricField: RECORDS_FIELD,
+      breakdown: breakdown?.fieldName,
+      color: theme.eui.euiColorVis1,
+      filters: getExploratoryViewFilter(uxUiFilters, urlParams),
+    },
+  ];
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (!range) {
+        return;
+      }
+      const [minX, maxX] = range;
+
+      const rangeFrom = moment(minX).toISOString();
+      const rangeTo = moment(maxX).toISOString();
+
+      history.push({
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          rangeFrom,
+          rangeTo,
+        }),
+      });
+    },
+    [history]
   );
 
-  const formatter = timeFormatter(niceTimeFormatByDay(diffInDays > 1 ? 2 : 1));
-
-  const onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
-    }
-    const [minX, maxX] = x;
-
-    const rangeFrom = moment(minX).toISOString();
-    const rangeTo = moment(maxX).toISOString();
-
-    history.push({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        rangeFrom,
-        rangeTo,
-      }),
-    });
-  };
-
-  const hasBreakdowns = !!data?.topItems?.length;
-
-  const breakdownAccessors = data?.topItems?.length ? data?.topItems : ['y'];
-
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
-  const customSeriesNaming: SeriesNameFn = ({ yAccessor }) => {
-    if (yAccessor === 'y') {
-      return I18LABELS.overall;
-    }
-
-    return yAccessor;
-  };
-
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
+  if (!dataViewTitle) {
+    return null;
+  }
 
   return (
-    <ChartWrapper loading={loading} height="250px">
-      {(!loading || data) && (
-        <Chart>
-          <Settings
-            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-            theme={euiChartTheme.theme}
-            showLegend
-            onBrushEnd={onBrushEnd}
-            xDomain={{
-              min: new Date(start as string).valueOf(),
-              max: new Date(end as string).valueOf(),
-            }}
-          />
-          <Axis
-            id="date_time"
-            position={Position.Bottom}
-            tickFormat={formatter}
-          />
-          <Axis
-            id="page_views"
-            title={I18LABELS.pageViews}
-            position={Position.Left}
-            tickFormat={(d) => numeral(d).format('0')}
-            labelFormat={(d) => numeral(d).format('0a')}
-          />
-          <BarSeries
-            id={I18LABELS.pageViews}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={Array.from(breakdownAccessors)}
-            stackAccessors={['x']}
-            data={data?.items ?? []}
-            name={customSeriesNaming}
-            color={
-              !hasBreakdowns
-                ? euiChartTheme.theme.colors?.vizColors?.[1]
-                : undefined
-            }
-          />
-        </Chart>
-      )}
-    </ChartWrapper>
+    <ExploratoryViewEmbeddable
+      customHeight={'300px'}
+      attributes={allSeries}
+      onBrushEnd={onBrushEnd}
+      reportType="kpi-over-time"
+      isSingleMetric={true}
+      axisTitlesVisibility={{ x: false, yRight: true, yLeft: true }}
+      legendIsVisible={Boolean(breakdown)}
+    />
   );
 }

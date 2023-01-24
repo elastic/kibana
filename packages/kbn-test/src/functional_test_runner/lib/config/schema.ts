@@ -70,6 +70,7 @@ const dockerServerSchema = () =>
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
       waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
+      waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
       args: Joi.array().items(Joi.string()).optional(),
     })
@@ -114,6 +115,7 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+        kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
 
@@ -161,12 +163,15 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(!!process.env.CI && !process.env.DISABLE_JUNIT_REPORTER),
         reportName: Joi.string(),
+        metadata: Joi.object().unknown(true).default(),
       })
       .default(),
 
     mochaReporter: Joi.object()
       .keys({
-        captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        captureLogOutput: Joi.boolean().default(
+          !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
+        ),
         sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
@@ -212,6 +217,7 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
+        useDedicatedTaskRunner: Joi.boolean().default(false),
         /** Options for how FTR should execute and interact with Kibana */
         runOptions: Joi.object()
           .keys({
@@ -223,6 +229,11 @@ export const schema = Joi.object()
             wait: Joi.object()
               .regex()
               .default(/Kibana is now available/),
+
+            /**
+             * Does this test config only work when run against source?
+             */
+            alwaysUseSource: Joi.boolean().default(false),
           })
           .default(),
         env: Joi.object().unknown().default(),
@@ -248,6 +259,13 @@ export const schema = Joi.object()
 
     // definition of apps that work with `common.navigateToApp()`
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
+
+    // settings for the saved objects svc
+    esArchiver: Joi.object()
+      .keys({
+        baseDirectory: Joi.string().optional(),
+      })
+      .default(),
 
     // settings for the saved objects svc
     kbnArchiver: Joi.object()

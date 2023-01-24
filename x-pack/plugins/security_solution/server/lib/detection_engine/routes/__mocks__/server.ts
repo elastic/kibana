@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import {
-  RequestHandler,
-  RouteConfig,
-  KibanaRequest,
-} from '../../../../../../../../src/core/server';
-import { httpServiceMock } from '../../../../../../../../src/core/server/mocks';
+import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';
 import { responseAdapter } from './test_adapters';
-import { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 
 interface Route {
   config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
   handler: RequestHandler;
 }
+
 const getRoute = (routerMock: MockServer['router']): Route => {
   const routeCalls = [
     ...routerMock.get.mock.calls,
@@ -45,7 +42,7 @@ class MockServer {
   constructor(
     public readonly router = httpServiceMock.createRouter(),
     private responseMock = responseFactoryMock.create(),
-    private contextMock = requestContextMock.create(),
+    private contextMock = requestContextMock.convertContext(requestContextMock.create()),
     private resultMock = buildResultMock()
   ) {}
 

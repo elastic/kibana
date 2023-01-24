@@ -7,9 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
+  EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
@@ -34,11 +35,17 @@ export type TileMetaFeature = Feature & {
     'hits.total.value': number;
 
     // For _mvt requests with "aggs" property in request: aggregation statistics returned in the pattern outined below
+    // aggregations._count.avg
+    // aggregations._count.count
     // aggregations._count.min
     // aggregations._count.max
+    // aggregations._count.sum
+    // aggregations.<agg_name>.avg
+    // aggregations.<agg_name>.count
     // aggregations.<agg_name>.min
     // aggregations.<agg_name>.max
-    [key: string]: number | string;
+    // aggregations.<agg_name>.sum
+    [key: string]: number | string | boolean;
   };
 };
 
@@ -54,6 +61,7 @@ export type LayerDescriptor = {
   attribution?: Attribution;
   id: string;
   label?: string | null;
+  locale?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
@@ -63,15 +71,29 @@ export type LayerDescriptor = {
   style?: StyleDescriptor | null;
   query?: Query;
   includeInFitToBounds?: boolean;
+  parent?: string;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
   joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
+  disableTooltips?: boolean;
 };
 
 export type HeatmapLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
+};
+
+export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.EMS_VECTOR_TILE;
+  style: EMSVectorTileStyleDescriptor;
+};
+
+export type LayerGroupDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.LAYER_GROUP;
+  label: string;
+  sourceDescriptor: null;
+  visible: boolean;
 };

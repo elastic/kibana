@@ -9,9 +9,9 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { ArchiveAsset } from './install';
 

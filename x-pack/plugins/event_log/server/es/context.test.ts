@@ -6,11 +6,20 @@
  */
 
 import { createEsContext } from './context';
-import { Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { createReadySignal } from '../lib/ready_signal';
 
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
+jest.mock('../lib/ready_signal', () => {
+  const createReadySignalActual = jest.requireActual('../lib/ready_signal');
+  return {
+    createReadySignal: jest.fn(createReadySignalActual.createReadySignal),
+  };
+});
+
+const mockCreateReadySignal = createReadySignal as jest.MockedFunction<typeof createReadySignal>;
 
 let logger: Logger;
 let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -97,6 +106,31 @@ describe('createEsContext', () => {
       context.esNames.indexTemplate
     );
     expect(doesIndexTemplateExist).toBeTruthy();
+  });
+
+  test('should cancel initialization in case of server shutdown', async () => {
+    const readySignal = createReadySignal();
+
+    const wait = jest.fn(() => readySignal.wait());
+    const signal = jest.fn((value) => readySignal.signal(value));
+    const isEmitted = jest.fn(() => readySignal.isEmitted());
+    const createReadySignalMock = jest.fn(() => ({ wait, signal, isEmitted }));
+    mockCreateReadySignal.mockReset();
+    mockCreateReadySignal.mockImplementation(createReadySignalMock);
+
+    const context = createEsContext({
+      logger,
+      indexNameRoot: 'test2',
+      kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
+    });
+    expect(mockCreateReadySignal).toBeCalledTimes(1);
+    elasticsearchClient.indices.existsTemplate.mockResponse(true);
+    expect(signal).toBeCalledTimes(0);
+    context.initialize();
+    await context.shutdown();
+    expect(signal).toBeCalledTimes(1);
+    expect(signal).toBeCalledWith(false);
   });
 
   test('should handled failed initialization', async () => {

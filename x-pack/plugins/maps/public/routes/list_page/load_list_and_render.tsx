@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
 import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
-export class LoadListAndRender extends React.Component<{ stateTransfer: EmbeddableStateTransfer }> {
+interface Props {
+  history: ScopedHistory;
+  stateTransfer: EmbeddableStateTransfer;
+}
+
+export class LoadListAndRender extends Component<Props> {
   _isMounted: boolean = false;
   state = {
     mapsLoaded: false,
@@ -57,7 +63,7 @@ export class LoadListAndRender extends React.Component<{ stateTransfer: Embeddab
     const { mapsLoaded, hasSavedMaps } = this.state;
 
     if (mapsLoaded) {
-      return hasSavedMaps ? <MapsListView /> : <Redirect to="/map" />;
+      return hasSavedMaps ? <MapsListView history={this.props.history} /> : <Redirect to="/map" />;
     } else {
       return null;
     }

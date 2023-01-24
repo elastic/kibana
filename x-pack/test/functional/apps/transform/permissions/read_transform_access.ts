@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPivotTransformConfig } from '../index';
+import { getPivotTransformConfig } from '..';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

@@ -19,22 +19,21 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isEsIngestPipelines } from '../../../../../../common/api_schemas/type_guards';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { UseEditTransformFlyoutReturnType } from './use_edit_transform_flyout';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { useApi } from '../../../../hooks/use_api';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-
 interface EditTransformFlyoutFormProps {
   editTransformFlyout: UseEditTransformFlyoutReturnType;
-  indexPatternId?: string;
+  dataViewId?: string;
 }
 
 export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   editTransformFlyout: [state, dispatch],
-  indexPatternId,
+  dataViewId,
 }) => {
   const { formFields, formSections } = state;
   const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
@@ -43,16 +42,16 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   const isRetentionPolicyAvailable = dateFieldNames.length > 0;
 
   const appDeps = useAppDependencies();
-  const indexPatternsClient = appDeps.data.indexPatterns;
+  const dataViewsClient = appDeps.data.dataViews;
   const api = useApi();
 
   useEffect(
     function getDateFields() {
       let unmounted = false;
-      if (indexPatternId !== undefined) {
-        indexPatternsClient.get(indexPatternId).then((indexPattern) => {
-          if (indexPattern) {
-            const dateTimeFields = indexPattern.fields
+      if (dataViewId !== undefined) {
+        dataViewsClient.get(dataViewId).then((dataView) => {
+          if (dataView) {
+            const dateTimeFields = dataView.fields
               .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
               .map((f) => f.name)
               .sort();
@@ -66,7 +65,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         };
       }
     },
-    [indexPatternId, indexPatternsClient]
+    [dataViewId, dataViewsClient]
   );
 
   useEffect(function fetchPipelinesOnMount() {
@@ -111,7 +110,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
           defaultMessage:
-            'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
+            'The interval to check for changes in source indices when the transformation runs continuously.',
         })}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
           defaultMessage: 'Frequency',
@@ -153,7 +152,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
-            indexPatternId ? (
+            dataViewId ? (
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
@@ -324,7 +323,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutDocsPerSecondInput"
             errorMessages={formFields.docsPerSecond.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
               {
                 defaultMessage:
                   'To enable throttling, set a limit of documents to input per second.',
@@ -344,10 +343,10 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
             errorMessages={formFields.maxPageSearchSize.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
               {
                 defaultMessage:
-                  'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+                  'The initial page size to use for the composite aggregation for each checkpoint.',
               }
             )}
             label={i18n.translate(
@@ -365,6 +364,22 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                 values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
               }
             )}
+          />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutNumFailureRetriesInput"
+            errorMessages={formFields.numFailureRetries.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',
+              {
+                defaultMessage:
+                  'The number of retries on a recoverable failure before the transform task is marked as failed. Set it to -1 for infinite retries.',
+              }
+            )}
+            label={i18n.translate('xpack.transform.transformList.numFailureRetriesLabel', {
+              defaultMessage: 'Number of failure retries',
+            })}
+            onChange={(value) => dispatch({ field: 'numFailureRetries', value })}
+            value={formFields.numFailureRetries.value}
           />
         </div>
       </EuiAccordion>

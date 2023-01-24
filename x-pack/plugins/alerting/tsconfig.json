@@ -1,29 +1,47 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "common/*"
+    "common/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../actions/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../task_manager/tsconfig.json" },
-    { "path": "../event_log/tsconfig.json" },
-    { "path": "../encrypted_saved_objects/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/event-log-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/monitoring-collection-plugin",
+    "@kbn/features-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-server",
+    "@kbn/es-query",
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/rule-data-utils",
+    "@kbn/logging-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-common",
+    "@kbn/securitysolution-rules",
+    "@kbn/apm-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/share-plugin",
+    "@kbn/safer-lodash-set",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

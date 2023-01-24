@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchError } from 'kibana/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import Boom from '@hapi/boom';
 
 export interface EsErrorRootCause {
@@ -45,16 +45,13 @@ export interface MLErrorObject {
   fullError?: EsErrorBody;
 }
 
-export interface MLHttpFetchError<T> extends HttpFetchError {
+export interface MLHttpFetchErrorBase<T> extends IHttpFetchError<T> {
   body: T;
 }
 
-export type ErrorType =
-  | MLHttpFetchError<MLResponseError>
-  | EsErrorBody
-  | Boom.Boom
-  | string
-  | undefined;
+export type MLHttpFetchError = MLHttpFetchErrorBase<MLResponseError>;
+
+export type ErrorType = MLHttpFetchError | EsErrorBody | Boom.Boom | string | undefined;
 
 export function isEsErrorBody(error: any): error is EsErrorBody {
   return error && error.error?.reason !== undefined;

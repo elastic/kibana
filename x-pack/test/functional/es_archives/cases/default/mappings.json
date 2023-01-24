@@ -298,13 +298,8 @@
           }
         },
         "type": {
-          "fields": {
-            "keyword": {
-              "ignore_above": 256,
-              "type": "keyword"
-            }
-          },
-          "type": "text"
+          "ignore_above": 256,
+          "type": "keyword"
         },
         "updated_at": {
           "type": "date"

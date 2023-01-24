@@ -8,17 +8,17 @@
 import { cloneDeep } from 'lodash';
 
 import { RulesClient, ConstructorOptions } from './rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsClientMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../actions/server';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
-import { TaskStatus } from '../../task_manager/server/task';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
 
 let rulesClient: RulesClient;
@@ -52,7 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -116,7 +116,7 @@ async function update(success: boolean) {
     expect(logger.warn).lastCalledWith(`rulesClient.update('alert-id') conflict, exceeded retries`);
     return expectConflict(success, err, 'create');
   }
-  expectSuccess(success, 3, 'create');
+  expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
   expect(logger.debug).nthCalledWith(1, `rulesClient.update('alert-id') conflict, retrying ...`);
@@ -141,9 +141,9 @@ async function enable(success: boolean) {
     return expectConflict(success, err);
   }
 
-  // a successful enable call makes 2 calls to update, so that's 3 total,
-  // 1 with conflict + 2 on success
-  expectSuccess(success, 3);
+  // a successful enable call makes 1 call to update, so with
+  // conflict, we would expect 1 on conflict, 1 on success
+  expectSuccess(success, 2);
 }
 
 async function disable(success: boolean) {
@@ -294,14 +294,13 @@ function setupRawAlertMocks(
   encryptedSavedObjects.getDecryptedAsInternalUser.mockReset();
 
   // splitting this out as it's easier to set a breakpoint :-)
-  // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () => 
-    cloneDeep(rawAlert)
-  );
+  unsecuredSavedObjectsClient.get.mockImplementation(async () => {
+    return cloneDeep(rawAlert);
+  });
 
-  encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () =>
-    cloneDeep(decryptedRawAlert)
-  );
+  encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () => {
+    return cloneDeep(decryptedRawAlert);
+  });
 }
 
 // setup for each test
@@ -311,7 +310,7 @@ beforeEach(() => {
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
 
-  taskManager.runNow.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '' });
   taskManager.schedule.mockResolvedValue({
     id: 'scheduled-task-id',
     scheduledAt: new Date(),
@@ -354,7 +353,9 @@ beforeEach(() => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   }));
 
@@ -366,7 +367,9 @@ beforeEach(() => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   });
 

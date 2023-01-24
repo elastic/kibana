@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  forwardRef,
-  useCallback,
-  useRef,
-  useState,
-  useImperativeHandle,
-  ElementRef,
-} from 'react';
-import { PluggableList } from 'unified';
-import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
-import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import type { ElementRef } from 'react';
+import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
+import type { PluggableList } from 'unified';
+import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
+import { EuiMarkdownEditor } from '@elastic/eui';
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 
@@ -92,6 +86,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
   }
 );
 
-MarkdownEditorComponent.displayName = 'MarkdownEditorComponent';
+MarkdownEditorComponent.displayName = 'MarkdownEditor';
 
 export const MarkdownEditor = memo(MarkdownEditorComponent);

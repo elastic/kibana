@@ -6,12 +6,12 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { ISearchOptions } from '@kbn/data-plugin/common';
+import { ISearchStart } from '@kbn/data-plugin/public';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { FieldStatsError } from '../../../../../common/types/field_stats';
-import type { ISearchOptions } from '../../../../../../../../src/plugins/data/common';
-import { ISearchStart } from '../../../../../../../../src/plugins/data/public';
 import type { FieldStats } from '../../../../../common/types/field_stats';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import { fetchDateFieldsStats } from './get_date_field_stats';
 import { fetchBooleanFieldsStats } from './get_boolean_field_stats';
 import { fetchFieldsExamples } from './get_field_examples';
@@ -31,16 +31,17 @@ export const getFieldsStats = (
 ): Observable<FieldStats[] | FieldStatsError> | undefined => {
   const fieldType = fields[0].type;
   switch (fieldType) {
-    case JOB_FIELD_TYPES.NUMBER:
+    case SUPPORTED_FIELD_TYPES.NUMBER:
       return fetchNumericFieldsStats(dataSearch, params, fields, options);
-    case JOB_FIELD_TYPES.KEYWORD:
-    case JOB_FIELD_TYPES.IP:
+    case SUPPORTED_FIELD_TYPES.KEYWORD:
+    case SUPPORTED_FIELD_TYPES.IP:
+    case SUPPORTED_FIELD_TYPES.VERSION:
       return fetchStringFieldsStats(dataSearch, params, fields, options);
-    case JOB_FIELD_TYPES.DATE:
+    case SUPPORTED_FIELD_TYPES.DATE:
       return fetchDateFieldsStats(dataSearch, params, fields, options);
-    case JOB_FIELD_TYPES.BOOLEAN:
+    case SUPPORTED_FIELD_TYPES.BOOLEAN:
       return fetchBooleanFieldsStats(dataSearch, params, fields, options);
-    case JOB_FIELD_TYPES.TEXT:
+    case SUPPORTED_FIELD_TYPES.TEXT:
       return fetchFieldsExamples(dataSearch, params, fields, options);
     default:
       // Use an exists filter on the the field name to get

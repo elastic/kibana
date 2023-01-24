@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   Logger,
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsType,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
-import { ESCaseAttributes } from '../services/cases/types';
+import type { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
 
@@ -27,6 +27,13 @@ export const createCaseSavedObjectType = (
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
+      assignees: {
+        properties: {
+          uid: {
+            type: 'keyword',
+          },
+        },
+      },
       closed_at: {
         type: 'date',
       },
@@ -39,6 +46,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -57,7 +67,13 @@ export const createCaseSavedObjectType = (
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
+      },
+      duration: {
+        type: 'unsigned_long',
       },
       description: {
         type: 'text',
@@ -98,6 +114,9 @@ export const createCaseSavedObjectType = (
               email: {
                 type: 'keyword',
               },
+              profile_uid: {
+                type: 'keyword',
+              },
             },
           },
           connector_name: {
@@ -119,9 +138,14 @@ export const createCaseSavedObjectType = (
       },
       title: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
       },
       status: {
-        type: 'keyword',
+        type: 'short',
       },
       tags: {
         type: 'keyword',
@@ -140,6 +164,9 @@ export const createCaseSavedObjectType = (
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       settings: {
@@ -149,13 +176,22 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      severity: {
+        type: 'short',
+      },
+      total_alerts: {
+        type: 'integer',
+      },
+      total_comments: {
+        type: 'integer',
+      },
     },
   },
   migrations: caseMigrations,
   management: {
     importableAndExportable: true,
     defaultSearchField: 'title',
-    icon: 'folderExclamation',
+    icon: 'casesApp',
     getTitle: (savedObject: SavedObject<ESCaseAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,

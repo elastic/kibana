@@ -8,8 +8,8 @@
 
 import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { UI_SETTINGS } from '../../../../../../../data/common';
+import { getInterval } from '../../get_interval';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 describe('dateHistogram(req, panel, series)', () => {
   let panel;
@@ -46,8 +46,10 @@ describe('dateHistogram(req, panel, series)', () => {
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
-    buildSeriesMetaParams = jest.fn(async () => {
-      return getIntervalAndTimefield(
+    buildSeriesMetaParams = jest.fn(async () => ({
+      timeField: '@timestamp',
+      ...getInterval(
+        '@timestamp',
         panel,
         indexPattern,
         {
@@ -56,8 +58,8 @@ describe('dateHistogram(req, panel, series)', () => {
           maxBuckets: 1000,
         },
         series
-      );
-    });
+      ),
+    }));
   });
 
   test('calls next when finished', async () => {
@@ -163,7 +165,7 @@ describe('dateHistogram(req, panel, series)', () => {
   test('returns valid date histogram with overridden index pattern', async () => {
     series.override_index_pattern = 1;
     series.series_index_pattern = '*';
-    series.series_time_field = 'timestamp';
+    series.series_time_field = '@timestamp';
     series.series_interval = '20s';
     const next = (doc) => doc;
     const doc = await dateHistogram(
@@ -183,7 +185,7 @@ describe('dateHistogram(req, panel, series)', () => {
           aggs: {
             timeseries: {
               date_histogram: {
-                field: 'timestamp',
+                field: '@timestamp',
                 fixed_interval: '20s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
@@ -196,7 +198,7 @@ describe('dateHistogram(req, panel, series)', () => {
           },
           meta: {
             intervalString: '20s',
-            timeField: 'timestamp',
+            timeField: '@timestamp',
             seriesId: 'test',
             panelId: 'panelId',
           },

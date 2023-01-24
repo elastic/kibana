@@ -31,10 +31,9 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === APM_ALERT_INDEX
-    );
-    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(
+      indexNames?.index_name?.filter((indexName) => indexName.startsWith(APM_ALERT_INDEX)).length
+    ).to.eql(1); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
@@ -43,10 +42,11 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const securitySolution = indexNames?.index_name?.find((indexName) =>
-      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
-    );
-    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(
+      indexNames?.index_name?.filter((indexName) =>
+        indexName.startsWith(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`)
+      ).length
+    ).to.eql(1); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   describe('Alerts - GET - RBAC', () => {

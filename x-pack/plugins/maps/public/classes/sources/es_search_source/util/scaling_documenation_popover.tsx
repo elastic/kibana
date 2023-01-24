@@ -41,21 +41,21 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
   _renderContent() {
     return (
       <div>
-        <EuiText grow={false}>
+        <EuiText style={{ maxWidth: '36em' }}>
           <dl>
-            <dt>{this.props.mvtOptionLabel}</dt>
+            <dt>{this.props.mvtOptionLabel} (Default)</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtDetails"
-                  defaultMessage="Partition your map into tiles, with each tile displaying features from the first {maxResultWindow} documents. Results exceeding {maxResultWindow} are not displayed in a tile. A bounding box indicates the area where data is incomplete."
+                  defaultMessage="Vector tiles partition your map into tiles, with each tile displaying features from the first {maxResultWindow} documents. Results exceeding {maxResultWindow} are not displayed in a tile. A bounding box indicates the area where data is incomplete."
                   values={{ maxResultWindow: this.props.maxResultWindow }}
                 />
               </p>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtUseCase"
-                  defaultMessage="Use this option to display large data sets with the fastest loading times. Does not support term joins, formatted labels, and data driven styling from scripted fields."
+                  defaultMessage="Use this option to display large data sets with the fastest loading times."
                 />
               </p>
             </dd>
@@ -88,9 +88,35 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.maps.scalingDocs.limitUseCase"
-                  defaultMessage="Use this option to create choropleth maps that compare statistics across boundaries."
+                  id="xpack.maps.scalingDocs.limitUseCases"
+                  defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
                 />
+                <ul>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase.formatLabels"
+                      defaultMessage="Formatted labels"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
+                      defaultMessage="Multiple term joins"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
+                      defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase.scriptedFields"
+                      defaultMessage="Data driven styling from scripted fields"
+                    />
+                  </li>
+                </ul>
               </p>
             </dd>
           </dl>

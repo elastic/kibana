@@ -74,13 +74,6 @@ export const ADD_TIMELINE = i18n.translate(
   }
 );
 
-export const ATTACH_TIMELINE_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.newCaseButtonLabel',
-  {
-    defaultMessage: 'Attach timeline to new case',
-  }
-);
-
 export const ATTACH_TO_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachToCaseButtonLabel',
   {
@@ -94,24 +87,9 @@ export const ATTACH_TO_NEW_CASE = i18n.translate(
     defaultMessage: 'Attach to new case',
   }
 );
-
-export const ATTACH_TIMELINE_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.existingCaseButtonLabel',
-  {
-    defaultMessage: 'Attach timeline to existing case...',
-  }
-);
-
 export const ATTACH_TO_EXISTING_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel',
   {
-    defaultMessage: 'Attach to existing case...',
-  }
-);
-
-export const ATTACH_TIMELINE_TO_CASE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip',
-  {
-    defaultMessage: 'Please provide a title for your timeline in order to attach it to a case',
+    defaultMessage: 'Attach to existing case',
   }
 );

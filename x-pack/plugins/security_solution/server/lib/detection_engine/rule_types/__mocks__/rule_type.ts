@@ -8,23 +8,22 @@
 import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { Logger, SavedObject } from 'kibana/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
+import type { Logger, SavedObject } from '@kbn/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
-import type { IRuleDataClient } from '../../../../../../rule_registry/server';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
-import { eventLogServiceMock } from '../../../../../../event_log/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
-import { ConfigType } from '../../../../config';
-import { AlertAttributes } from '../../signals/types';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
+import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { ConfigType } from '../../../../config';
+import type { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import type { QueryRuleParams, RuleParams } from '../../rule_schema';
 // this is only used in tests
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
-import { getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
+import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor.test_helpers';
+import { getCompleteRuleMock } from '../../rule_schema/mocks';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
@@ -77,6 +76,10 @@ export const createRuleTypeMocks = (
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions })),
+      alertLimit: {
+        getValue: jest.fn(() => 1000),
+        setLimitReached: jest.fn(() => {}),
+      },
       done: jest.fn().mockResolvedValue({}),
     },
     findAlerts: jest.fn(), // TODO: does this stay?
@@ -88,7 +91,6 @@ export const createRuleTypeMocks = (
   return {
     dependencies: {
       alerting,
-      buildRuleMessage: jest.fn(),
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,
@@ -112,6 +114,7 @@ export const createRuleTypeMocks = (
           params,
           alertId: v4(),
           state: {},
+          logger: loggerMock,
         }),
         runOpts: {
           completeRule: getCompleteRuleMock(params as QueryRuleParams),

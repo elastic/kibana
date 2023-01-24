@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionLicense,
-  AllCases,
-  BulkUpdateStatus,
+  Cases,
   Case,
   CasesStatus,
   CaseUserActions,
   FetchCasesProps,
-  SortFieldCase,
 } from '../types';
+import { SortFieldCase } from '../types';
 import {
   actionLicenses,
   allCases,
@@ -26,18 +25,20 @@ import {
   casesStatus,
   caseUserActions,
   pushedCase,
-  respReporters,
   tags,
 } from '../mock';
-import { ResolvedCase } from '../../../common/ui/types';
-import {
+import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
+import { SeverityAll } from '../../../common/ui/types';
+import type {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
-  User,
-  CaseStatuses,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
 } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import { userProfiles } from '../user_profiles/api.mock';
 
 export const getCase = async (
   caseId: string,
@@ -51,18 +52,17 @@ export const resolveCase = async (
   signal: AbortSignal
 ): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
 
-export const getCaseMetrics = async (
+export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
-): Promise<CaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
+): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
-export const getReporters = async (signal: AbortSignal): Promise<User[]> =>
-  Promise.resolve(respReporters);
+export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
 
 export const getCaseUserActions = async (
   caseId: string,
@@ -71,7 +71,10 @@ export const getCaseUserActions = async (
 
 export const getCases = async ({
   filterOptions = {
+    severity: SeverityAll,
     search: '',
+    searchFields: [],
+    assignees: [],
     reporters: [],
     status: CaseStatuses.open,
     tags: [],
@@ -84,7 +87,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<AllCases> => Promise.resolve(allCases);
+}: FetchCasesProps): Promise<Cases> => Promise.resolve(allCases);
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> =>
   Promise.resolve(basicCasePost);
@@ -96,16 +99,22 @@ export const patchCase = async (
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve([basicCase]);
 
-export const patchCasesStatus = async (
-  cases: BulkUpdateStatus[],
+export const updateCases = async (
+  cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve(allCases.cases);
 
-export const postComment = async (
+export const createAttachments = async (
   newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal
 ): Promise<Case> => Promise.resolve(basicCase);
+
+export const deleteComment = async (
+  caseId: string,
+  commentId: string,
+  signal: AbortSignal
+): Promise<void> => Promise.resolve(undefined);
 
 export const patchComment = async (
   caseId: string,
@@ -126,3 +135,8 @@ export const pushCase = async (
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> =>
   Promise.resolve(actionLicenses);
+
+export const getFeatureIds = async (
+  _query: { registrationContext: string[] },
+  _signal: AbortSignal
+): Promise<ValidFeatureId[]> => Promise.resolve(['siem', 'observability']);

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -31,6 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           query: {
             ...commonQuery,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
+            probability: 1,
           },
         },
       }),
@@ -58,70 +59,66 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
-  registry.when(
-    'Service maps APIs',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded ', () => {
-        const GO_PROD_RATE = 80;
-        const GO_DEV_RATE = 20;
-        const GO_PROD_DURATION = 1000;
-        const GO_DEV_DURATION = 500;
-        before(async () => {
-          const serviceGoProdInstance = apm
-            .service(serviceName, 'production', 'go')
-            .instance('instance-a');
-          const serviceGoDevInstance = apm
-            .service(serviceName, 'development', 'go')
-            .instance('instance-b');
+  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+    describe('when data is loaded ', () => {
+      const GO_PROD_RATE = 80;
+      const GO_DEV_RATE = 20;
+      const GO_PROD_DURATION = 1000;
+      const GO_DEV_DURATION = 500;
+      before(async () => {
+        const serviceGoProdInstance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance('instance-a');
+        const serviceGoDevInstance = apm
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
+          .instance('instance-b');
 
-          await synthtraceEsClient.index([
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_RATE)
-              .spans((timestamp) =>
-                serviceGoProdInstance
-                  .transaction('GET /api/product/list', 'Worker')
-                  .duration(GO_PROD_DURATION)
-                  .timestamp(timestamp)
-                  .serialize()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_DEV_RATE)
-              .spans((timestamp) =>
-                serviceGoDevInstance
-                  .transaction('GET /api/product/:id')
-                  .duration(GO_DEV_DURATION)
-                  .timestamp(timestamp)
-                  .serialize()
-              ),
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction({
+                  transactionName: 'GET /api/product/list',
+                  transactionType: 'Worker',
+                })
+                .duration(GO_PROD_DURATION)
+                .timestamp(timestamp)
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_DEV_RATE)
+            .generator((timestamp) =>
+              serviceGoDevInstance
+                .transaction({ transactionName: 'GET /api/product/:id' })
+                .duration(GO_DEV_DURATION)
+                .timestamp(timestamp)
+            ),
+        ]);
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('compare latency value between service inventory and service maps', () => {
+        before(async () => {
+          [latencyTransactionValues, latencyMetricValues] = await Promise.all([
+            getLatencyValues('transaction'),
+            getLatencyValues('metric'),
           ]);
         });
 
-        after(() => synthtraceEsClient.clean());
+        it('returns same avg latency value for Transaction-based and Metric-based data', () => {
+          const expectedLatencyAvgValueMs = ((GO_DEV_RATE * GO_DEV_DURATION) / GO_DEV_RATE) * 1000;
 
-        describe('compare latency value between service inventory and service maps', () => {
-          before(async () => {
-            [latencyTransactionValues, latencyMetricValues] = await Promise.all([
-              getLatencyValues('transaction'),
-              getLatencyValues('metric'),
-            ]);
-          });
-
-          it('returns same avg latency value for Transaction-based and Metric-based data', () => {
-            const expectedLatencyAvgValueMs =
-              ((GO_DEV_RATE * GO_DEV_DURATION) / GO_DEV_RATE) * 1000;
-
-            [
-              latencyTransactionValues.serviceMapsNodeDetailsLatency,
-              latencyTransactionValues.serviceInventoryLatency,
-              latencyMetricValues.serviceMapsNodeDetailsLatency,
-              latencyMetricValues.serviceInventoryLatency,
-            ].forEach((value) => expect(value).to.be.equal(expectedLatencyAvgValueMs));
-          });
+          [
+            latencyTransactionValues.serviceMapsNodeDetailsLatency,
+            latencyTransactionValues.serviceInventoryLatency,
+            latencyMetricValues.serviceMapsNodeDetailsLatency,
+            latencyMetricValues.serviceInventoryLatency,
+          ].forEach((value) => expect(value).to.be.equal(expectedLatencyAvgValueMs));
         });
       });
-    }
-  );
+    });
+  });
 }

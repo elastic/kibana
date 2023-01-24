@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
-import { HttpHandler } from 'src/core/public';
+import { HttpHandler } from '@kbn/core/public';
 import {
   Sort,
   Pagination,

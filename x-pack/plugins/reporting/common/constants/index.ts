@@ -67,7 +67,7 @@ export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';
-export const LICENSE_TYPE_STANDARD = 'standard';
+export const LICENSE_TYPE_CLOUD_STANDARD = 'standard';
 export const LICENSE_TYPE_GOLD = 'gold';
 export const LICENSE_TYPE_PLATINUM = 'platinum';
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise';
@@ -83,6 +83,10 @@ export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 
 export const ILM_POLICY_NAME = 'kibana-reporting';
+
+// Usage counter types
+export const API_USAGE_COUNTER_TYPE = 'reportingApi';
+export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';

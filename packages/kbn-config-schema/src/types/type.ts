@@ -15,6 +15,11 @@ export interface TypeOptions<T> {
   validate?: (value: T) => string | void;
 }
 
+export interface SchemaStructureEntry {
+  path: string[];
+  type: string;
+}
+
 export const convertValidationFunction = <T = unknown>(
   validate: (value: T) => string | void
 ): CustomValidator<T> => {
@@ -98,6 +103,10 @@ export abstract class Type<V> {
     return this.internalSchema;
   }
 
+  public getSchemaStructure() {
+    return recursiveGetSchemaStructure(this.internalSchema);
+  }
+
   protected handleError(
     type: string,
     context: Record<string, any>,
@@ -140,4 +149,18 @@ export abstract class Type<V> {
     const message = error.toString();
     return new SchemaTypeError(message || code, convertedPath);
   }
+}
+
+function recursiveGetSchemaStructure(internalSchema: AnySchema, path: string[] = []) {
+  const array: SchemaStructureEntry[] = [];
+  // Note: we are relying on Joi internals to obtain the schema structure (recursive keys).
+  // This is not ideal, but it works for now and we only need it for some integration test assertions.
+  // If it breaks in the future, we'll need to update our tests.
+  for (const [key, val] of (internalSchema as any)._ids._byKey.entries()) {
+    array.push(...recursiveGetSchemaStructure(val.schema, [...path, key]));
+  }
+  if (!array.length) {
+    array.push({ path, type: internalSchema.type ?? 'unknown' });
+  }
+  return array;
 }

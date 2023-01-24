@@ -6,8 +6,8 @@
  */
 
 import { getSuggestions } from './suggestions';
-import { layerTypes } from '../../../common';
-import { GaugeShapes } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { GaugeVisualizationState } from './constants';
 
 const metricColumn = {
@@ -43,7 +43,7 @@ describe('gauge suggestions', () => {
         state: {
           shape: GaugeShapes.HORIZONTAL_BULLET,
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
       };
@@ -59,7 +59,7 @@ describe('gauge suggestions', () => {
         },
         state: {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
       };
@@ -77,7 +77,7 @@ describe('gauge suggestions', () => {
           state: {
             shape: GaugeShapes.HORIZONTAL_BULLET,
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             minAccessor: 'some-field',
             labelMajorMode: 'auto',
             ticksPosition: 'auto',
@@ -97,7 +97,7 @@ describe('gauge suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as GaugeVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -120,7 +120,7 @@ describe('gauge suggestions', () => {
           },
           state: {
             layerId: 'first',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           } as GaugeVisualizationState,
           keptLayerIds: ['first'],
         })
@@ -141,7 +141,7 @@ describe('shows suggestions', () => {
         },
         state: {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
         } as GaugeVisualizationState,
         keptLayerIds: ['first'],
       })
@@ -149,7 +149,7 @@ describe('shows suggestions', () => {
       {
         state: {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           shape: GaugeShapes.HORIZONTAL_BULLET,
           metricAccessor: 'metric-column',
           labelMajorMode: 'auto',
@@ -187,7 +187,7 @@ describe('shows suggestions', () => {
         },
         state: {
           layerId: 'first',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           shape: GaugeShapes.HORIZONTAL_BULLET,
           metricAccessor: 'metric-column',
         } as GaugeVisualizationState,
@@ -197,7 +197,7 @@ describe('shows suggestions', () => {
     ).toEqual([
       {
         state: {
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           shape: GaugeShapes.VERTICAL_BULLET,
           metricAccessor: 'metric-column',
           labelMajorMode: 'auto',

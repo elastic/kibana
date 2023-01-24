@@ -8,27 +8,27 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useParams } from 'react-router-dom';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
-// @ts-ignore
 import { AdvancedIndex } from '../../../components/elasticsearch/index/advanced';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { services } = useKibana<{ data: any }>();
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
+  const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
 
@@ -60,6 +60,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
       const response = await services.http?.fetch(url, {
         method: 'POST',
         body: JSON.stringify({
+          ccs,
           timeRange: {
             min: bounds.min.toISOString(),
             max: bounds.max.toISOString(),
@@ -84,7 +85,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
       });
       setAlerts(alertsResponse);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [services.data?.query.timefilter.timefilter, services.http, clusterUuid, index, ccs]);
 
   return (
     <ItemTemplate

@@ -18,8 +18,8 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
+import { getTemplateDetailsLink } from '@kbn/index-management-plugin/public';
 import { useKibana } from '../../shared_imports';
-import { getTemplateDetailsLink } from '../../../../index_management/public/';
 
 interface Props {
   policyName: string;

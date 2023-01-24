@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { PaletteOutput } from '../../../charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
   PieVisExpressionFunctionDefinition,
   PartitionVisParams,
   LabelsParams,
-} from '../../../chart_expressions/expression_partition_vis/common';
-import { getEsaggsFn } from './to_ast_esaggs';
+} from '@kbn/expression-partition-vis-plugin/common';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -62,15 +61,16 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     addTooltip: vis.params.addTooltip,
     legendDisplay: vis.params.legendDisplay,
     legendPosition: vis.params.legendPosition,
-    nestedLegend: vis.params?.nestedLegend ?? false,
+    nestedLegend: vis.params.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    distinctColors: vis.params?.distinctColors,
+    legendSize: vis.params.legendSize,
+    distinctColors: vis.params.distinctColors,
     isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,
-    palette: preparePalette(vis.params?.palette),
+    palette: preparePalette(vis.params.palette),
     labels: prepareLabels(vis.params.labels),
-    metric: schemas.metric.map(prepareDimension),
+    metrics: prepareDimension(schemas.metric[schemas.metric.length - 1]),
     buckets: schemas.segment?.map(prepareDimension),
     splitColumn: schemas.split_column?.map(prepareDimension),
     splitRow: schemas.split_row?.map(prepareDimension),
@@ -82,7 +82,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     args
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypePie]);
+  const ast = buildExpression([visTypePie]);
 
   return ast.toAst();
 };

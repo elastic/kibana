@@ -9,9 +9,9 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import { Note } from '../../../common/lib/note';
+import type { Note } from '../../../common/lib/note';
 
 import * as i18n from './translations';
 import { CountBadge } from '../../../common/components/page';
@@ -20,12 +20,8 @@ import { CountBadge } from '../../../common/components/page';
 export type UpdateNote = (note: Note) => void;
 /** Performs IO to associate a note with something (e.g. a timeline, an event, etc). (The "something" is opaque to the caller) */
 export type AssociateNote = (noteId: string) => void;
-/** Performs IO to get a new note ID */
-export type GetNewNoteId = () => string;
 /** Updates the local state containing a new note being edited by the user */
 export type UpdateInternalNewNote = (newNote: string) => void;
-/** Closes the notes popover */
-export type OnClosePopover = () => void;
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -75,13 +71,13 @@ export const NotesCount = React.memo<{
 NotesCount.displayName = 'NotesCount';
 
 /** Creates a new instance of a `note` */
-export const createNote = ({ newNote }: { newNote: string }): Note => ({
+export const createNote = ({ newNote, user }: { newNote: string; user: string }): Note => ({
   created: moment.utc().toDate(),
-  id: uuid.v4(),
+  id: uuidv4(),
   lastEdit: null,
   note: newNote,
   saveObjectId: null,
-  user: 'elastic', // TODO: get the logged-in Kibana user
+  user,
   version: null,
 });
 
@@ -90,6 +86,7 @@ interface UpdateAndAssociateNodeParams {
   newNote: string;
   updateNewNote: UpdateInternalNewNote;
   updateNote: UpdateNote;
+  user: string;
 }
 
 export const updateAndAssociateNode = ({
@@ -97,8 +94,9 @@ export const updateAndAssociateNode = ({
   newNote,
   updateNewNote,
   updateNote,
+  user,
 }: UpdateAndAssociateNodeParams) => {
-  const note = createNote({ newNote });
+  const note = createNote({ newNote, user });
   updateNote(note); // perform IO to store the newly-created note
   associateNote(note.id); // associate the note with the (opaque) thing
   updateNewNote(''); // clear the input

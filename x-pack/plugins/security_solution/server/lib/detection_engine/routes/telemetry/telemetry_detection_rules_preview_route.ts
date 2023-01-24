@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { SECURITY_TELEMETRY_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { ITelemetryReceiver } from '../../../telemetry/receiver';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { ITelemetryReceiver } from '../../../telemetry/receiver';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { getDetectionRulesPreview } from './utils/get_detecton_rules_preview';
 import { getSecurityListsPreview } from './utils/get_security_lists_preview';
 import { getEndpointPreview } from './utils/get_endpoint_preview';

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+// import { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 type AutocompleteStart = any;
 
 import * as i18n from '../translations';
@@ -23,6 +23,7 @@ import {
 } from '../get_generic_combo_box_props';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { paramIsValid } from '../param_is_valid';
+import { paramContainsSpace } from '../param_contains_space';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;
@@ -56,6 +57,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
   const [isLoadingSuggestions, isSuggestingValues, suggestions] = useFieldValueAutocomplete({
     autocompleteService,
     fieldValue: selectedValue,
@@ -78,7 +80,11 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       }),
     [optionsMemo, selectedValue, getLabel]
   );
-
+  const handleSpacesWarning = useCallback(
+    (params: string[]) =>
+      setShowSpacesWarning(!!params.find((param: string) => paramContainsSpace(param))),
+    [setShowSpacesWarning]
+  );
   const handleError = useCallback(
     (err: string | undefined): void => {
       setError((existingErr): string | undefined => {
@@ -98,9 +104,10 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     (newOptions: EuiComboBoxOptionOption[]): void => {
       const newValues: string[] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
       handleError(undefined);
+      handleSpacesWarning(newValues);
       onChange(newValues);
     },
-    [handleError, labels, onChange, optionsMemo]
+    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(
@@ -113,10 +120,12 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
         const err = paramIsValid(searchVal, selectedField, isRequired, touched);
         handleError(err);
 
+        if (!err) handleSpacesWarning([searchVal]);
+
         setSearchQuery(searchVal);
       }
     },
-    [handleError, isRequired, selectedField, touched]
+    [handleError, handleSpacesWarning, isRequired, selectedField, touched]
   );
 
   const handleCreateOption = useCallback(
@@ -126,13 +135,15 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
 
       if (err != null) {
         // Explicitly reject the user's input
+        setShowSpacesWarning(false);
         return false;
-      } else {
-        onChange([...(selectedValue || []), option]);
-        return true;
       }
+
+      onChange([...(selectedValue || []), option]);
+      handleSpacesWarning([option]);
+      return true;
     },
-    [handleError, isRequired, onChange, selectedField, selectedValue, touched]
+    [handleError, handleSpacesWarning, isRequired, onChange, selectedField, selectedValue, touched]
   );
 
   const setIsTouchedValue = useCallback((): void => {
@@ -149,6 +160,9 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     (): boolean => isLoading || isLoadingSuggestions,
     [isLoading, isLoadingSuggestions]
   );
+  useEffect((): void => {
+    handleSpacesWarning(selectedValue);
+  }, [selectedField, selectedValue, handleSpacesWarning]);
 
   const defaultInput = useMemo((): JSX.Element => {
     return (
@@ -156,6 +170,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
         label={rowLabel}
         error={error}
         isInvalid={selectedField != null && error != null}
+        helpText={showSpacesWarning && i18n.FIELD_SPACE_WARNING}
         fullWidth
       >
         <EuiComboBox
@@ -189,6 +204,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     rowLabel,
     selectedComboOptions,
     selectedField,
+    showSpacesWarning,
     setIsTouchedValue,
   ]);
 

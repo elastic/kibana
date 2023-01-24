@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesPatchRequest } from '../../../../common/api';
+import type { CasesPatchRequest } from '../../../../common/api';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -15,7 +15,8 @@ export const patchCaseRoute = createCasesRoute({
   path: CASES_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const cases = request.body as CasesPatchRequest;
 
       return response.ok({

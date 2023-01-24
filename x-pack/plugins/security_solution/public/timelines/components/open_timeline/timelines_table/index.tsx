@@ -10,9 +10,10 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
-import {
+import type {
   ActionTimelineToShow,
   DeleteTimelines,
+  OnCreateRuleFromTimeline,
   OnOpenTimeline,
   OnSelectionChange,
   OnTableChange,
@@ -25,12 +26,9 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import {
-  TimelineTypeLiteralWithNull,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../../common/types/timeline';
-
+import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -57,22 +55,26 @@ export const getTimelinesTableColumns = ({
   deleteTimelines,
   enableExportTimelineDownloader,
   itemIdToExpandedNotesRowMap,
+  onCreateRule,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
   onToggleShowNotes,
   showExtendedColumns,
   timelineType,
+  hasCrudAccess,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  onCreateRule?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
   timelineType: TimelineTypeLiteralWithNull;
+  hasCrudAccess: boolean;
 }) => {
   return [
     ...getCommonColumns({
@@ -85,11 +87,13 @@ export const getTimelinesTableColumns = ({
     ...getIconHeaderColumns({ timelineType }),
     ...(actionTimelineToShow.length
       ? getActionsColumns({
+          onCreateRule,
           actionTimelineToShow,
           deleteTimelines,
           enableExportTimelineDownloader,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
+          hasCrudAccess,
         })
       : []),
   ];
@@ -102,6 +106,7 @@ export interface TimelinesTableProps {
   loading: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
+  onCreateRule?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
@@ -131,6 +136,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     loading: isLoading,
     itemIdToExpandedNotesRowMap,
     enableExportTimelineDownloader,
+    onCreateRule,
     onOpenDeleteTimelineModal,
     onOpenTimeline,
     onSelectionChange,
@@ -147,7 +153,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     totalSearchResultsCount,
   }) => {
     const pagination = {
-      hidePerPageOptions: !showExtendedColumns,
+      showPerPageOptions: showExtendedColumns,
       pageIndex,
       pageSize,
       pageSizeOptions: [
@@ -173,7 +179,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       onSelectionChange,
     };
     const basicTableProps = tableRef != null ? { ref: tableRef } : {};
-
+    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
     const columns = useMemo(
       () =>
         getTimelinesTableColumns({
@@ -181,24 +187,28 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
           enableExportTimelineDownloader,
+          onCreateRule,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
           timelineType,
+          hasCrudAccess: kibanaSecuritySolutionsPrivileges.crud,
         }),
       [
         actionTimelineToShow,
         deleteTimelines,
         itemIdToExpandedNotesRowMap,
         enableExportTimelineDownloader,
+        onCreateRule,
         onOpenDeleteTimelineModal,
         onOpenTimeline,
         onSelectionChange,
         onToggleShowNotes,
         showExtendedColumns,
         timelineType,
+        kibanaSecuritySolutionsPrivileges,
       ]
     );
 

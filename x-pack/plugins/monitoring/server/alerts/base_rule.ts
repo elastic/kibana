@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient } from 'kibana/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   RuleType,
-  AlertExecutorOptions,
+  RuleNotifyWhen,
+  RuleExecutorOptions,
   Alert,
   RulesClient,
-  AlertServices,
-} from '../../../alerting/server';
-import {
-  Alert as Rule,
-  AlertTypeParams,
-  RawAlertInstance,
-  SanitizedAlert,
-} from '../../../alerting/common';
-import { ActionsClient } from '../../../actions/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   AlertState,
   AlertNodeState,
@@ -34,7 +31,6 @@ import {
 } from '../../common/types/alerts';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { AlertSeverity } from '../../common/enums';
-import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 
 type ExecutedState =
@@ -70,7 +66,7 @@ export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
-    public sanitizedRule?: SanitizedAlert,
+    public sanitizedRule?: SanitizedRule,
     public ruleOptions: RuleOptions = defaultRuleOptions()
   ) {
     const defaultOptions = defaultRuleOptions();
@@ -99,7 +95,7 @@ export class BaseRule {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: (
-        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+        options: RuleExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;
         }
       ): Promise<any> => this.execute(options),
@@ -118,7 +114,7 @@ export class BaseRule {
     rulesClient: RulesClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<SanitizedAlert<AlertTypeParams>> {
+  ): Promise<SanitizedRule<RuleTypeParams>> {
     const existingRuleData = await rulesClient.find({
       options: {
         search: this.ruleOptions.id,
@@ -128,6 +124,14 @@ export class BaseRule {
     if (existingRuleData.total > 0) {
       return existingRuleData.data[0] as Rule;
     }
+
+    const {
+      defaultParams: params = {},
+      name,
+      id: alertTypeId,
+      throttle = '1d',
+      interval = '1m',
+    } = this.ruleOptions;
 
     const ruleActions = [];
     for (const actionData of actions) {
@@ -142,17 +146,15 @@ export class BaseRule {
           message: '{{context.internalShortMessage}}',
           ...actionData.config,
         },
+        frequency: {
+          summary: false,
+          notifyWhen: RuleNotifyWhen.THROTTLE,
+          throttle,
+        },
       });
     }
 
-    const {
-      defaultParams: params = {},
-      name,
-      id: alertTypeId,
-      throttle = '1d',
-      interval = '1m',
-    } = this.ruleOptions;
-    return await rulesClient.create<AlertTypeParams>({
+    return await rulesClient.create<RuleTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -160,8 +162,6 @@ export class BaseRule {
         consumer: 'monitoring',
         name,
         alertTypeId,
-        throttle,
-        notifyWhen: null,
         schedule: { interval },
         actions: ruleActions,
       },
@@ -220,7 +220,7 @@ export class BaseRule {
     services,
     params,
     state,
-  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+  }: RuleExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
     state: ExecutedState;
   }): Promise<any> {
     this.scopedLogger.debug(
@@ -260,7 +260,7 @@ export class BaseRule {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices<AlertInstanceState, never, 'default'>,
+    services: RuleExecutorServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -349,6 +349,7 @@ export class BaseRule {
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }
-    return `${Globals.app.url}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
+
+    return `${Globals.app.url ?? ''}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }

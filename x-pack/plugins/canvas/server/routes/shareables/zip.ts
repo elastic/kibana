@@ -11,6 +11,7 @@ import {
   SHAREABLE_RUNTIME_FILE,
   SHAREABLE_RUNTIME_NAME,
   SHAREABLE_RUNTIME_SRC,
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../../shareable_runtime/constants';
 import { RenderedWorkpadSchema } from './rendered_workpad_schema';
 import { RouteInitializerDeps } from '..';

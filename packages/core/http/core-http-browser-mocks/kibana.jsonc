@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-http-browser-mocks",
+  "owner": "@elastic/kibana-core"
+}

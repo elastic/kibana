@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
-import { shallow, mount } from 'enzyme';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
@@ -24,6 +25,8 @@ import {
   createMockWaffleParams,
 } from '../mocks';
 import { ChartTypes } from '../../common/types';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { cloneDeep } from 'lodash';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -33,6 +36,17 @@ jest.mock('@elastic/charts', () => {
     getSpecId: jest.fn(() => {}),
   };
 });
+
+const actWithTimeout = (action: Function, timer: number = 1) =>
+  act(
+    () =>
+      new Promise((resolve) =>
+        setTimeout(async () => {
+          await action();
+          resolve();
+        }, timer)
+      )
+  );
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
@@ -63,6 +77,8 @@ describe('PartitionVisComponent', function () {
       syncColors: false,
       fireEvent: jest.fn(),
       renderComplete: jest.fn(),
+      interactive: true,
+      columnCellValueActions: [],
       services: {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -70,8 +86,24 @@ describe('PartitionVisComponent', function () {
     };
   });
 
+  afterEach(() => {
+    mockState.clear();
+    jest.clearAllMocks();
+  });
+
   it('should render correct structure for pie', function () {
     const component = shallow(<PartitionVisComponent {...wrapperProps} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render correct structure for multi-metric pie', function () {
+    const localParams = cloneDeep(wrapperProps.visParams);
+
+    localParams.dimensions.metrics = [...localParams.dimensions.metrics, 'col-3-1'];
+
+    localParams.metricsToLabels = { 'col-3-1': 'metric1 label', 'col-1-1': 'metric2 label' };
+
+    const component = shallow(<PartitionVisComponent {...wrapperProps} visParams={localParams} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -123,7 +155,7 @@ describe('PartitionVisComponent', function () {
       <PartitionVisComponent
         {...{
           ...wrapperProps,
-          visType: ChartTypes.MOSAIC,
+          visType: ChartTypes.WAFFLE,
           visParams: waffleVisParams,
         }}
       />
@@ -131,20 +163,32 @@ describe('PartitionVisComponent', function () {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders the legend on the correct position', () => {
-    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('legendPosition')).toEqual('right');
-  });
-
   it('renders the legend toggle component', async () => {
-    const component = mount(<PartitionVisComponent {...wrapperProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
+
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
   });
 
+  it('should render legend actions when it is interactive', async () => {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={true} />);
+    expect(component.find(Settings).prop('legendAction')).toBeDefined();
+  });
+
+  it('should not render legend actions when it is not interactive', async () => {
+    const component = shallow(<PartitionVisComponent {...wrapperProps} interactive={false} />);
+    expect(component.find(Settings).prop('legendAction')).toBeUndefined();
+  });
+
   it('hides the legend if the legend toggle is clicked', async () => {
-    const component = mount(<PartitionVisComponent {...wrapperProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     findTestSubject(component, 'vislibToggleLegend').simulate('click');
     await act(async () => {
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
@@ -161,6 +205,35 @@ describe('PartitionVisComponent', function () {
     const newProps = { ...wrapperProps, visParams: newParams };
     const component = shallow(<PartitionVisComponent {...newProps} />);
     expect(component.find(Settings).prop('legendMaxDepth')).toBeUndefined();
+  });
+
+  it('sets correct legend sizes', () => {
+    const component = shallow(
+      <PartitionVisComponent
+        {...wrapperProps}
+        visParams={{
+          ...visParams,
+          legendSize: LegendSize.SMALL,
+        }}
+      />
+    );
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      visParams: {
+        ...visParams,
+        legendSize: LegendSize.AUTO,
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      visParams: {
+        ...visParams,
+        legendSize: undefined,
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   it('defaults on displaying the tooltip', () => {
@@ -220,7 +293,7 @@ describe('PartitionVisComponent', function () {
       ],
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
-    const component = mount(<PartitionVisComponent {...newProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'partitionVisEmptyValues').text()).toEqual(
       'No results found'
     );
@@ -251,7 +324,7 @@ describe('PartitionVisComponent', function () {
       ],
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
-    const component = mount(<PartitionVisComponent {...newProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
       "Pie chart can't render with negative values."
     );

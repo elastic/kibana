@@ -108,6 +108,7 @@ export function Cytoscape({
         cy.removeListener('data', undefined, dataHandler as cytoscape.EventHandler);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cy, elements, height, width]);
 
   // Trigger a custom "data" event when data changes
@@ -122,6 +123,7 @@ export function Cytoscape({
 
       cy.trigger('data');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cy, elements]);
 
   // Reset the graph to original zoom and pan

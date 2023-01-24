@@ -7,24 +7,25 @@
 
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { PackagePolicy } from '../../../fleet/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
+import { PACKS_ID } from './constants';
+import type { PackSavedObject } from './types';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 interface ActiveStateSwitchProps {
   disabled?: boolean;
-  item: PackagePolicy & { policy_ids: string[] };
+  item: PackSavedObject & { policy_ids: string[] };
 }
 
 const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) => {
@@ -53,35 +54,29 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   const { isLoading, mutateAsync } = useUpdatePack({
     options: {
-      // @ts-expect-error update types
       onSuccess: (response) => {
-        queryClient.invalidateQueries('packList');
+        queryClient.invalidateQueries([PACKS_ID]);
         setErrorToast();
         toasts.addSuccess(
-          response.attributes.enabled
+          response?.data?.attributes.enabled
             ? i18n.translate('xpack.osquery.pack.table.activatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully activated "{packName}" pack',
                 values: {
-                  packName: response.attributes.name,
+                  packName: response?.data?.attributes.name,
                 },
               })
             : i18n.translate('xpack.osquery.pack.table.deactivatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully deactivated "{packName}" pack',
                 values: {
-                  packName: response.attributes.name,
+                  packName: response?.data?.attributes.name,
                 },
               })
         );
-      },
-      // @ts-expect-error update types
-      onError: (error) => {
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
     },
   });
 
   const handleToggleActive = useCallback(() => {
-    // @ts-expect-error update types
     mutateAsync({ id: item.id, enabled: !item.attributes.enabled });
     hideConfirmationModal();
   }, [hideConfirmationModal, item, mutateAsync]);
@@ -98,8 +93,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     <>
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
-        // @ts-expect-error update types
-        checked={item.attributes.enabled}
+        checked={!!item.attributes.enabled}
         disabled={!permissions.writePacks || isLoading}
         showLabel={false}
         label=""

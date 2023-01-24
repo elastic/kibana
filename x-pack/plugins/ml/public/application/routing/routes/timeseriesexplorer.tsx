@@ -12,7 +12,11 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { useUrlState } from '@kbn/ml-url-state';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { NavigateToPath, useNotifications } from '../../contexts/kibana';
+import { useMlContext } from '../../contexts/ml';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -29,7 +33,6 @@ import {
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
-import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 
@@ -37,7 +40,6 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { useTimefilter } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
@@ -46,6 +48,7 @@ import type { TimeSeriesExplorerAppState } from '../../../../common/types/locato
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { useRefresh } from '../use_refresh';
+import { TimeseriesexplorerNoChartData } from '../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -106,6 +109,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const dataViewsService = useMlContext().dataViewsContract;
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
@@ -136,6 +140,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setBounds(timefilter.getBounds());
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
@@ -151,12 +156,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const previousSelectedJobIds = usePrevious(selectedJobIds);
   const isJobChange = !isEqual(previousSelectedJobIds, selectedJobIds);
 
-  // Next we get globalState and appState information to pass it on as props later.
-  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
-  // otherwise the page could break.
-  const selectedDetectorIndex = isJobChange
-    ? 0
-    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? 0;
   const selectedEntities = isJobChange
     ? undefined
     : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.entities;
@@ -172,6 +171,15 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
+
+  const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0]?.index ?? 0 : 0;
+
+  // Next we get globalState and appState information to pass it on as props later.
+  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
+  // otherwise the page could break.
+  const selectedDetectorIndex = isJobChange
+    ? viewableDetector
+    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.detectorIndex ?? viewableDetector;
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {
@@ -232,7 +240,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
       setTimeSeriesExplorerUrlState({ mlTimeSeriesExplorer }, isInitUpdate);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(timeSeriesExplorerUrlState?.mlTimeSeriesExplorer),
       setTimeSeriesExplorerUrlState,
     ]
@@ -255,6 +265,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
   const boundsMinMs = bounds?.min?.valueOf();
@@ -305,6 +316,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();
@@ -321,6 +333,14 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     );
   }
 
+  if (!bounds) {
+    return (
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+        <TimeseriesexplorerNoChartData />
+      </TimeSeriesExplorerPage>
+    );
+  }
+
   const zoomProp: AppStateZoom | undefined =
     typeof selectedForecastId === 'string' && selectedForecastIdProp === undefined
       ? undefined
@@ -329,6 +349,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
+        dataViewsService,
         toastNotificationService,
         appStateHandler,
         autoZoomDuration,

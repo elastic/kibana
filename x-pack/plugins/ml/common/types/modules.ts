@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from 'kibana/public';
-import { Datafeed, Job } from './anomaly_detection_jobs';
-import { ErrorType } from '../util/errors';
+import type { SavedObjectAttributes } from '@kbn/core/types';
+import type { Datafeed, Job } from './anomaly_detection_jobs';
+import type { ErrorType } from '../util/errors';
 
 export interface ModuleJob {
   id: string;

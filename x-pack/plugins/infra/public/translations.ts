@@ -35,7 +35,7 @@ export const settingsTitle = i18n.translate('xpack.infra.logs.index.settingsTabT
 });
 
 export const metricsTitle = i18n.translate('xpack.infra.header.infrastructureTitle', {
-  defaultMessage: 'Metrics',
+  defaultMessage: 'Infrastructure',
 });
 
 export const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {
@@ -44,4 +44,12 @@ export const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageT
 
 export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
   defaultMessage: 'Metrics Explorer',
+});
+
+export const hostsTitle = i18n.translate('xpack.infra.metrics.hostsTitle', {
+  defaultMessage: 'Hosts',
+});
+
+export const errorTitle = i18n.translate('xpack.infra.metricDetailPage.documentTitleError', {
+  defaultMessage: 'Uh oh',
 });

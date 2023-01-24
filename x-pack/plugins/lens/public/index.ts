@@ -11,29 +11,40 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState } from './xy_visualization/types';
-export type { DataType, OperationMetadata, Visualization } from './types';
 export type {
-  AxesSettingsConfig,
+  XYState,
+  XYReferenceLineLayerConfig,
   XYLayerConfig,
-  LegendConfig,
-  SeriesType,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
   YAxisMode,
-  XYCurveType,
+  SeriesType,
   YConfig,
-} from '../common/expressions';
+} from './visualizations/xy/types';
 export type {
+  DatasourcePublicAPI,
+  DataType,
+  OperationMetadata,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationSuggestion,
+} from './types';
+export type {
+  LegacyMetricState as MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
+  LayerType,
 } from '../common/types';
 
-export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
-  IndexPatternPersistedState,
+  FormBasedPersistedState,
   PersistedIndexPatternLayer,
   OperationType,
   IncompleteColumn,
@@ -49,7 +60,9 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -61,9 +74,40 @@ export type {
   OverallSumIndexPatternColumn,
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
-} from './indexpattern_datasource/types';
-export type { LensEmbeddableInput } from './embeddable';
-export { layerTypes } from '../common';
+  TimeScaleIndexPatternColumn,
+  FormBasedLayer,
+} from './datasources/form_based/types';
+export type {
+  XYArgs,
+  XYRender,
+  LineStyle,
+  FillStyle,
+  YScaleType,
+  XScaleType,
+  AxisConfig,
+  XYCurveType,
+  XYChartProps,
+  LegendConfig,
+  IconPosition,
+  DataLayerArgs,
+  ValueLabelMode,
+  AxisExtentMode,
+  DataLayerConfig,
+  FittingFunction,
+  AxisExtentConfig,
+  LegendConfigResult,
+  AxesSettingsConfig,
+  AxisExtentConfigResult,
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfig,
+} from '@kbn/expression-xy-plugin/common';
+
+export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+
+export type { ChartInfo } from './chart_info_api';
+
+export { layerTypes } from '../common/layer_types';
+export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

@@ -5,49 +5,17 @@
     "functions": [
       {
         "parentPluginId": "visTypeXy",
-        "id": "def-public.getAggId",
-        "type": "Function",
-        "tags": [],
-        "label": "getAggId",
-        "description": [
-          "\nGet agg id from accessor\n\nFor now this is determined by the esaggs column name. Could be cleaned up in the future."
-        ],
-        "signature": [
-          "(accessor: string) => string"
-        ],
-        "path": "src/plugins/vis_types/xy/public/config/get_agg_id.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.getAggId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/vis_types/xy/public/config/get_agg_id.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
         "id": "def-public.getPositions",
         "type": "Function",
         "tags": [],
         "label": "getPositions",
         "description": [],
         "signature": [
-          "() => ({ text: string; value: \"top\"; } | { text: string; value: \"left\"; } | { text: string; value: \"right\"; } | { text: string; value: \"bottom\"; })[]"
+          "() => ({ text: any; value: \"top\"; } | { text: any; value: \"left\"; } | { text: any; value: \"right\"; } | { text: any; value: \"bottom\"; })[]"
         ],
         "path": "src/plugins/vis_types/xy/public/editor/positions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -60,7 +28,7 @@
         "label": "getScaleTypes",
         "description": [],
         "signature": [
-          "() => { text: string; value: ",
+          "() => { text: any; value: ",
           {
             "pluginId": "visTypeXy",
             "scope": "public",
@@ -72,6 +40,7 @@
         ],
         "path": "src/plugins/vis_types/xy/public/editor/scale_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -90,6 +59,7 @@
         ],
         "path": "src/plugins/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -103,6 +73,7 @@
             ],
             "path": "src/plugins/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -120,6 +91,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -129,7 +101,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -148,7 +121,8 @@
               }
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -161,7 +135,8 @@
               "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -174,7 +149,8 @@
               "Scale"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -184,7 +160,8 @@
             "label": "show",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -197,7 +174,8 @@
               "{ text?: string | undefined; }"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -216,7 +194,8 @@
               }
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -239,7 +218,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -253,6 +233,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -272,7 +253,8 @@
               " | null"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -292,7 +274,8 @@
               "[]"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -312,7 +295,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -332,7 +316,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -352,7 +337,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -372,7 +358,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -392,7 +379,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -406,6 +394,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -415,7 +404,8 @@
             "label": "categoryLines",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -428,7 +418,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -442,6 +433,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -454,7 +446,8 @@
               "{ label: string; id: string; }"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -467,7 +460,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -481,7 +475,8 @@
               " | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -494,7 +489,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -507,7 +503,8 @@
               "ChartMode"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -517,7 +514,8 @@
             "label": "show",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -527,7 +525,8 @@
             "label": "showCircles",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -537,7 +536,8 @@
             "label": "circlesRadius",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -556,7 +556,8 @@
               }
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -566,7 +567,8 @@
             "label": "valueAxis",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -580,6 +582,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -589,7 +592,8 @@
             "label": "show",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -602,7 +606,8 @@
               "number | null"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -615,7 +620,8 @@
               "number | null"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -628,7 +634,8 @@
               "ThresholdLineStyle"
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeXy",
@@ -638,7 +645,8 @@
             "label": "color",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -670,6 +678,7 @@
         ],
         "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -683,6 +692,7 @@
             ],
             "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visTypeXy",
@@ -696,6 +706,7 @@
                 ],
                 "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -710,6 +721,7 @@
                 ],
                 "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -744,6 +756,7 @@
         ],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeXy",
@@ -753,7 +766,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -769,6 +783,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -782,6 +797,7 @@
         ],
         "path": "src/plugins/vis_types/xy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -793,6 +809,7 @@
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -808,13 +825,27 @@
           "Omit<",
           {
             "pluginId": "visualizations",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.SchemaConfig",
+            "section": "def-common.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"params\"> & { params: {} | ",
-          "DateHistogramParams",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.SupportedAggregation",
+            "text": "SupportedAggregation"
+          },
+          ">, \"params\"> & { params: {} | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.DateHistogramParams",
+            "text": "DateHistogramParams"
+          },
           " | ",
           "HistogramParams",
           " | ",
@@ -823,29 +854,7 @@
         ],
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
-        "id": "def-public.XyVisType",
-        "type": "Type",
-        "tags": [],
-        "label": "XyVisType",
-        "description": [
-          "\nType of xy visualizations"
-        ],
-        "signature": [
-          {
-            "pluginId": "visTypeXy",
-            "scope": "common",
-            "docId": "kibVisTypeXyPluginApi",
-            "section": "def-common.ChartType",
-            "text": "ChartType"
-          },
-          " | \"horizontal_bar\""
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -859,6 +868,7 @@
       "description": [],
       "path": "src/plugins/vis_types/xy/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -888,34 +898,11 @@
         ],
         "path": "src/plugins/vis_types/xy/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "misc": [
-      {
-        "parentPluginId": "visTypeXy",
-        "id": "def-common.XyVisType",
-        "type": "Type",
-        "tags": [],
-        "label": "XyVisType",
-        "description": [
-          "\nType of xy visualizations"
-        ],
-        "signature": [
-          {
-            "pluginId": "visTypeXy",
-            "scope": "common",
-            "docId": "kibVisTypeXyPluginApi",
-            "section": "def-common.ChartType",
-            "text": "ChartType"
-          },
-          " | \"horizontal_bar\""
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

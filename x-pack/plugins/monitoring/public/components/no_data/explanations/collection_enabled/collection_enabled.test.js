@@ -26,7 +26,7 @@ describe('ExplainCollectionEnabled', () => {
 
   test('should explain about xpack.monitoring.collection.enabled setting', () => {
     const rendered = mountWithIntl(component);
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   test('should have a button that triggers ajax action', () => {

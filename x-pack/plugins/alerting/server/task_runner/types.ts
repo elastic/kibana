@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import { Dictionary } from 'lodash';
-import { Logger } from 'kibana/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { TaskRunnerContext } from './task_runner_factory';
 import {
-  ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
   IntervalSchedule,
-  RuleExecutionState,
   RuleMonitoring,
   RuleTaskState,
-  SanitizedAlert,
+  SanitizedRule,
+  RuleTypeState,
 } from '../../common';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
-import { Alert as CreatedAlert } from '../alert';
-import { IEventLogger } from '../../../event_log/server';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { ExecutionHandler } from './create_execution_handler';
-
-export interface RuleTaskRunResultWithActions {
-  state: RuleExecutionState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}
+import { RawRule, RulesClientApi } from '../types';
+import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -37,69 +31,57 @@ export interface RuleTaskRunResult {
   schedule: IntervalSchedule | undefined;
 }
 
+// This is the state of the alerting task after rule execution, which includes run metrics plus the task state
+export type RuleTaskStateAndMetrics = RuleTaskState & {
+  metrics: RuleRunMetrics;
+};
+
+export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
+  rulesClient: RulesClientApi;
+  stateWithMetrics: RuleTaskStateAndMetrics;
+};
+
+export interface RunRuleParams<Params extends RuleTypeParams> {
+  fakeRequest: KibanaRequest;
+  rulesClient: RulesClientApi;
+  rule: SanitizedRule<Params>;
+  apiKey: RawRule['apiKey'];
+  validatedParams: Params;
+}
+
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-export interface TrackAlertDurationsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-}
+// / ExecutionHandler
 
-export interface GenerateNewAndRecoveredAlertEventsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
-> {
-  eventLogger: IEventLogger;
-  executionId: string;
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  ruleId: string;
-  ruleLabel: string;
-  namespace: string | undefined;
-  ruleType: NormalizedRuleType<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
-    {
-      [x: string]: unknown;
-    },
-    {
-      [x: string]: unknown;
-    },
-    string,
-    string
-  >;
-  rule: SanitizedAlert<AlertTypeParams>;
-}
-
-export interface ScheduleActionsForRecoveredAlertsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
-> {
-  logger: Logger;
-  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
-  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
-  mutedAlertIdsSet: Set<string>;
-  ruleLabel: string;
-}
-
-export interface LogActiveAndRecoveredAlertsParams<
-  InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
+export interface ExecutionHandlerOptions<
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  RuleState extends RuleTypeState,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    RuleState,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
   logger: Logger;
-  activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
+  rule: SanitizedRule<Params>;
+  taskRunnerContext: TaskRunnerContext;
+  taskInstance: RuleTaskInstance;
+  ruleRunMetricsStore: RuleRunMetricsStore;
+  apiKey: RawRule['apiKey'];
+  ruleConsumer: string;
+  executionId: string;
   ruleLabel: string;
-  canSetRecoveryContext: boolean;
+  actionsClient: PublicMethodsOf<ActionsClient>;
 }

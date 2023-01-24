@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EcsEventCategory, EcsEventOutcome, EcsEventType } from 'kibana/server';
+import type { EcsEventCategory, EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
-import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
-import { CasesSupportedOperations } from '../../../security/server';
+import type { Verbs, OperationDetails } from './types';
+import { ReadOperations, WriteOperations } from './types';
 
 export * from './authorization';
 export * from './audit_logger';
@@ -126,6 +127,14 @@ const CaseOperations = {
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.GetCasesMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'cases_get_metrics',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
   [WriteOperations.CreateCase]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateCase as const,
@@ -156,6 +165,14 @@ const CaseOperations = {
     action: 'case_push',
     verbs: updateVerbs,
     docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [ReadOperations.BulkGetCases]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'case_bulk_get',
+    verbs: accessVerbs,
+    docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
 };
@@ -293,10 +310,26 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'cases',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.FindUserActions]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_USER_ACTION_OPERATION,
+    action: 'case_user_actions_find',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
   [ReadOperations.GetUserActions]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_USER_ACTION_OPERATION,
     action: 'case_user_actions_get',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
+  [ReadOperations.GetConnectors]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_USER_ACTION_OPERATION,
+    action: 'case_connectors_get',
     verbs: accessVerbs,
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,

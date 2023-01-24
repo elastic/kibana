@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
+import type { PackageInfo, AgentPolicy } from '../types';
 
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
   return (packageInfo.policy_templates || []).some(
@@ -17,10 +17,10 @@ export const doesAgentPolicyAlreadyIncludePackage = (
   agentPolicy: AgentPolicy,
   packageName: string
 ): boolean => {
-  if (agentPolicy.package_policies.length && typeof agentPolicy.package_policies[0] === 'string') {
+  if (!agentPolicy.package_policies) {
     throw new Error('Unable to read full package policy information');
   }
-  return (agentPolicy.package_policies as PackagePolicy[])
+  return agentPolicy.package_policies
     .map((packagePolicy) => packagePolicy.package?.name || '')
     .includes(packageName);
 };

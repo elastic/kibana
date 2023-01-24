@@ -9,8 +9,26 @@
 import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { flattenHit, DataViewField } from '../../../../data/common';
-import { DiscoverGridContext } from './discover_grid_context';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { DiscoverGridContext, GridContext } from './discover_grid_context';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { copyValueToClipboard } from '../../utils/copy_value_to_clipboard';
+
+function onFilterCell(
+  context: GridContext,
+  rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
+  columnId: EuiDataGridColumnCellActionProps['columnId'],
+  mode: '+' | '-'
+) {
+  const row = context.rows[rowIndex];
+  const value = row.flattened[columnId];
+  const field = context.dataView.fields.getByName(columnId);
+
+  if (field && context.onFilter) {
+    context.onFilter(field, value, mode);
+  }
+}
 
 export const FilterInBtn = ({
   Component,
@@ -26,12 +44,7 @@ export const FilterInBtn = ({
   return (
     <Component
       onClick={() => {
-        const row = context.rows[rowIndex];
-        const flattened = flattenHit(row, context.indexPattern);
-
-        if (flattened) {
-          context.onFilter(columnId, flattened[columnId], '+');
-        }
+        onFilterCell(context, rowIndex, columnId, '+');
       }}
       iconType="plusInCircle"
       aria-label={buttonTitle}
@@ -59,12 +72,7 @@ export const FilterOutBtn = ({
   return (
     <Component
       onClick={() => {
-        const row = context.rows[rowIndex];
-        const flattened = flattenHit(row, context.indexPattern);
-
-        if (flattened) {
-          context.onFilter(columnId, flattened[columnId], '-');
-        }
+        onFilterCell(context, rowIndex, columnId, '-');
       }}
       iconType="minusInCircle"
       aria-label={buttonTitle}
@@ -78,8 +86,41 @@ export const FilterOutBtn = ({
   );
 };
 
-export function buildCellActions(field: DataViewField) {
-  if (!field.filterable) {
+export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
+  const { valueToStringConverter } = useContext(DiscoverGridContext);
+  const { toastNotifications } = useDiscoverServices();
+
+  const buttonTitle = i18n.translate('discover.grid.copyClipboardButtonTitle', {
+    defaultMessage: 'Copy value of {column}',
+    values: { column: columnId },
+  });
+
+  return (
+    <Component
+      onClick={() => {
+        copyValueToClipboard({
+          rowIndex,
+          columnId,
+          toastNotifications,
+          valueToStringConverter,
+        });
+      }}
+      iconType="copyClipboard"
+      aria-label={buttonTitle}
+      title={buttonTitle}
+      data-test-subj="copyClipboardButton"
+    >
+      {i18n.translate('discover.grid.copyClipboardButton', {
+        defaultMessage: 'Copy to clipboard',
+      })}
+    </Component>
+  );
+};
+
+export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterFn) {
+  if (field?.type === '_source') {
+    return [CopyBtn];
+  } else if (!onFilter || !field.filterable) {
     return undefined;
   }
 

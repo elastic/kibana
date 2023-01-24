@@ -9,7 +9,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { EmptyPage } from './';
+import { EmptyPage } from '.';
 
 describe('EmptyPage component', () => {
   it('renders actions without descriptions', () => {

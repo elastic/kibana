@@ -7,8 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import {
   DrawState,
   EditState,
@@ -16,11 +17,10 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../common/constants';
-import { TimeRange } from '../../../../../../src/plugins/data/public';
 
 export interface MapExtentState {
   zoom: number;
@@ -33,7 +33,6 @@ export type MapViewContext = MapExtentState & {
 };
 
 export type MapContext = Partial<MapViewContext> & {
-  scrollZoom: boolean;
   mouseCoordinates?: {
     lat: number;
     lon: number;
@@ -42,37 +41,14 @@ export type MapContext = Partial<MapViewContext> & {
   timeslice?: Timeslice;
   query?: Query;
   filters: Filter[];
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   drawState?: DrawState;
   editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
-};
-
-export type MapSettings = {
-  autoFitToDataBounds: boolean;
-  backgroundColor: string;
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  initialLocation: INITIAL_LOCATION;
-  fixedLocation: {
-    lat: number;
-    lon: number;
-    zoom: number;
-  };
-  browserLocation: {
-    zoom: number;
-  };
-  maxZoom: number;
-  minZoom: number;
-  showScaleControl: boolean;
-  showSpatialFilters: boolean;
-  showTimesliderToggleButton: boolean;
-  spatialFiltersAlpa: number;
-  spatialFiltersFillColor: string;
-  spatialFiltersLineColor: string;
 };
 
 export type MapState = {

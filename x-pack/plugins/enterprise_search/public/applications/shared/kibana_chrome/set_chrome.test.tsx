@@ -32,7 +32,7 @@ jest.mock('./generate_title', () => ({
 }));
 import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
-import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from './';
+import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
   const mockCurrentPath = (pathname: string) =>

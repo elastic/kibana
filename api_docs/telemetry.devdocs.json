@@ -6,6 +6,40 @@
     "interfaces": [
       {
         "parentPluginId": "telemetry",
+        "id": "def-public.TelemetryConstants",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryConstants",
+        "description": [
+          "\nPublic's start exposed APIs by the telemetry plugin"
+        ],
+        "path": "src/plugins/telemetry/public/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryConstants.getPrivacyStatementUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrivacyStatementUrl",
+            "description": [
+              "Elastic's privacy statement url"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "telemetry",
         "id": "def-public.TelemetryPluginConfig",
         "type": "Interface",
         "tags": [],
@@ -15,19 +49,8 @@
         ],
         "path": "src/plugins/telemetry/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "telemetry",
-            "id": "def-public.TelemetryPluginConfig.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [
-              "Is the plugin enabled?"
-            ],
-            "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "telemetry",
             "id": "def-public.TelemetryPluginConfig.banner",
@@ -38,7 +61,8 @@
               "The banner is expected to be shown when needed"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -50,7 +74,8 @@
               "Does the cluster allow changing the opt-in/out status via the UI?"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -65,7 +90,8 @@
               "boolean | null"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -80,7 +106,8 @@
               "\"prod\" | \"staging\""
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -95,7 +122,8 @@
               "\"browser\" | \"server\""
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -110,7 +138,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -125,7 +154,40 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.hidePrivacyStatement",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePrivacyStatement",
+            "description": [
+              "Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.labels",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [
+              "Extra labels to add to the telemetry context"
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -141,6 +203,7 @@
         ],
         "path": "src/plugins/telemetry/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "telemetry",
@@ -156,6 +219,7 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -169,7 +233,8 @@
               "Is the user allowed to change the opt-in/out status?"
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -185,6 +250,7 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -202,6 +268,7 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -219,6 +286,7 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -236,6 +304,7 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "telemetry",
@@ -251,6 +320,7 @@
                 ],
                 "path": "src/plugins/telemetry/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -269,11 +339,10 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryPluginStart",
-      "description": [
-        "\nPublic's start exposed APIs by the telemetry plugin"
-      ],
+      "description": [],
       "path": "src/plugins/telemetry/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "telemetry",
@@ -294,7 +363,8 @@
             }
           ],
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "telemetry",
@@ -309,7 +379,8 @@
             "{ setOptedInNoticeSeen: () => Promise<void>; }"
           ],
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "telemetry",
@@ -321,10 +392,17 @@
             "Set of publicly exposed telemetry constants"
           ],
           "signature": [
-            "{ getPrivacyStatementUrl: () => string; }"
+            {
+              "pluginId": "telemetry",
+              "scope": "public",
+              "docId": "kibTelemetryPluginApi",
+              "section": "def-public.TelemetryConstants",
+              "text": "TelemetryConstants"
+            }
           ],
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -341,6 +419,7 @@
       ],
       "path": "src/plugins/telemetry/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "telemetry",
@@ -361,7 +440,8 @@
             }
           ],
           "path": "src/plugins/telemetry/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -383,6 +463,7 @@
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "telemetry",
@@ -394,7 +475,8 @@
               "How many indices match the declared pattern"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -409,7 +491,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -424,7 +507,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -439,7 +523,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -472,6 +557,7 @@
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "telemetry",
@@ -486,7 +572,8 @@
               "{ dataset?: string | undefined; type?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -501,7 +588,8 @@
               "{ name: string; } | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -516,7 +604,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "telemetry",
@@ -528,10 +617,11 @@
               "When the data comes from a matching index-pattern, the name of the pattern"
             ],
             "signature": [
-              "\"search\" | \"logstash\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"metricbeat\" | \"apm\" | \"functionbeat\" | \"heartbeat\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"zeek\" | \"sigma_doc\" | \"ecs-corelight\" | \"suricata\" | \"wazuh\" | \"meow\" | \"host_risk_score\" | undefined"
+              "\"search\" | \"apm\" | \"logstash\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"metricbeat\" | \"functionbeat\" | \"heartbeat\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"zeek\" | \"sigma_doc\" | \"ecs-corelight\" | \"suricata\" | \"wazuh\" | \"meow\" | \"host_risk_score\" | \"user_risk_score\" | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -558,6 +648,7 @@
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "telemetry",
@@ -569,7 +660,8 @@
               "\nThe Node ID as reported by ES"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_nodes_usage.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -598,6 +690,7 @@
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -611,7 +704,7 @@
         ],
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Omit<",
-          "ClusterStatsResponse",
+          "ClusterStatsStatsResponseBase",
           ", \"cluster_name\" | \"_nodes\">; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",
@@ -624,6 +717,7 @@
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -639,6 +733,7 @@
       ],
       "path": "src/plugins/telemetry/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "telemetry",
@@ -656,6 +751,7 @@
           ],
           "path": "src/plugins/telemetry/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -674,21 +770,59 @@
       ],
       "path": "src/plugins/telemetry/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "telemetry",
           "id": "def-server.TelemetryPluginStart.getIsOptedIn",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "track-adoption"
+          ],
           "label": "getIsOptedIn",
           "description": [
-            "\nResolves `true` if the user has opted into send Elastic usage data.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out)."
+            "\nResolves `true` if the user has opted into send Elastic usage data.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
           ],
           "signature": [
             "() => Promise<boolean>"
           ],
           "path": "src/plugins/telemetry/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": true,
+          "references": [
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/telemetry/sender.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/synthetics/server/legacy_uptime/lib/telemetry/sender.test.ts"
+            }
+          ],
           "children": [],
           "returnComment": []
         }

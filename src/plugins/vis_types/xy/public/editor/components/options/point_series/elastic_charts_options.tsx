@@ -7,38 +7,31 @@
  */
 
 import React, { useState, useEffect } from 'react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
-import {
-  SelectOption,
-  SwitchOption,
-  PalettePicker,
-} from '../../../../../../../vis_default_editor/public';
-import { PaletteRegistry } from '../../../../../../../charts/public';
+import { SelectOption, SwitchOption, PalettePicker } from '@kbn/vis-default-editor-plugin/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
-import { getPalettesService, getTrackUiMetric } from '../../../../services';
+import { getPalettesService } from '../../../../services';
 import { getFittingFunctions } from '../../../collections';
 
 const fittingFunctions = getFittingFunctions();
 
 export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
-  const trackUiMetric = getTrackUiMetric();
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   const { stateParams, setValue, aggs } = props;
 
   const isLineChart = stateParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
-      type === ChartType.Line && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+      type === ChartType.Line && aggs?.aggs.find(({ id }) => id === paramId)?.enabled
   );
 
   const isAreaChart = stateParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
-      type === ChartType.Area && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+      type === ChartType.Area && aggs?.aggs.find(({ id }) => id === paramId)?.enabled
   );
 
   useEffect(() => {
@@ -63,9 +56,6 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
         paramName="detailedTooltip"
         value={stateParams.detailedTooltip}
         setValue={(paramName, value) => {
-          if (trackUiMetric) {
-            trackUiMetric(METRIC_TYPE.CLICK, 'detailed_tooltip_switched');
-          }
           setValue(paramName, value);
         }}
       />
@@ -80,9 +70,6 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
           paramName="fittingFunction"
           value={stateParams.fittingFunction ?? fittingFunctions[2].value}
           setValue={(paramName, value) => {
-            if (trackUiMetric) {
-              trackUiMetric(METRIC_TYPE.CLICK, 'fitting_function_selected');
-            }
             setValue(paramName, value);
           }}
         />
@@ -94,9 +81,6 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
           activePalette={stateParams.palette}
           paramName="palette"
           setPalette={(paramName, value) => {
-            if (trackUiMetric) {
-              trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
-            }
             setValue(paramName, value);
           }}
         />

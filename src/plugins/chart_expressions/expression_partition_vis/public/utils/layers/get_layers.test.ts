@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 import { ShapeTreeNode } from '@elastic/charts';
-import { PaletteDefinition, SeriesLayer } from '../../../../../charts/public';
-import { dataPluginMock } from '../../../../../data/public/mocks';
-import type { DataPublicPluginStart } from '../../../../../data/public';
+import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
+import { generateFormatters } from '../formatters';
 import { ChartTypes } from '../../../common/types';
 
 const visData = createMockVisData();
@@ -22,6 +24,8 @@ interface RangeProps {
   gte: number;
   lt: number;
 }
+const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
+const formatters = generateFormatters(visData, defaultFormatter);
 
 dataMock.fieldFormats = {
   deserialize: jest.fn(() => ({
@@ -82,7 +86,9 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats
+      dataMock.fieldFormats,
+      visData.columns[0],
+      formatters
     );
     expect(color).toEqual(colors[0]);
   });
@@ -111,7 +117,9 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats
+      dataMock.fieldFormats,
+      visData.columns[0],
+      formatters
     );
     expect(color).toEqual('color3');
   });
@@ -139,7 +147,9 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats
+      dataMock.fieldFormats,
+      visData.columns[0],
+      formatters
     );
     expect(color).toEqual('#000028');
   });
@@ -175,6 +185,15 @@ describe('computeColor', () => {
       ...visParams,
       distinctColors: true,
     };
+    const column = {
+      ...visData.columns[0],
+      format: {
+        id: 'range',
+        params: {
+          id: 'number',
+        },
+      },
+    };
     const color = getColor(
       ChartTypes.PIE,
       d,
@@ -189,13 +208,91 @@ describe('computeColor', () => {
       false,
       false,
       dataMock.fieldFormats,
-      {
-        id: 'range',
-        params: {
-          id: 'number',
-        },
-      }
+      column,
+      formatters
     );
     expect(color).toEqual('#3F6833');
+  });
+
+  it('should only pass the second layer for mosaic', () => {
+    const d = {
+      dataName: 'Second level 1',
+      depth: 2,
+      sortIndex: 0,
+      parent: {
+        children: [['Second level 1'], ['Second level 2']],
+        depth: 1,
+        sortIndex: 0,
+        parent: {
+          children: [['First level']],
+          depth: 0,
+          sortIndex: 0,
+        },
+      },
+    } as unknown as ShapeTreeNode;
+    const registry = getPaletteRegistry();
+    getColor(
+      ChartTypes.MOSAIC,
+      d,
+      1,
+      true,
+      {},
+      buckets,
+      visData.rows,
+      visParams,
+      registry,
+      undefined,
+      true,
+      false,
+      dataMock.fieldFormats,
+      visData.columns[0],
+      formatters
+    );
+    expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: 'Second level 1' })],
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it('should only pass the first layer for treemap', () => {
+    const d = {
+      dataName: 'Second level 1',
+      depth: 2,
+      sortIndex: 0,
+      parent: {
+        children: [['Second level 1'], ['Second level 2']],
+        depth: 1,
+        sortIndex: 0,
+        parent: {
+          children: [['First level']],
+          depth: 0,
+          sortIndex: 0,
+        },
+      },
+    } as unknown as ShapeTreeNode;
+    const registry = getPaletteRegistry();
+    getColor(
+      ChartTypes.TREEMAP,
+      d,
+      1,
+      true,
+      {},
+      buckets,
+      visData.rows,
+      visParams,
+      registry,
+      undefined,
+      true,
+      false,
+      dataMock.fieldFormats,
+      visData.columns[0],
+      formatters
+    );
+    expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
+      [expect.objectContaining({ name: 'First level' })],
+      expect.anything(),
+      expect.anything()
+    );
   });
 });

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkUsersRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkQueries,
   NetworkUsersFields,
-  NetworkUsersRequestOptions,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkUsersRequestOptions = {
@@ -28,7 +28,7 @@ export const mockOptions: NetworkUsersRequestOptions = {
   ],
   factoryQueryType: NetworkQueries.users,
   filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  flowTarget: FlowTarget.source,
+  flowTarget: FlowTargetSourceDest.source,
   ip: '10.142.0.7',
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   sort: { field: NetworkUsersFields.name, direction: Direction.asc },

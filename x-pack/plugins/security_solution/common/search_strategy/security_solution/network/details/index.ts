@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { HostEcs } from '../../../../ecs/host';
-import { GeoEcs } from '../../../../ecs/geo';
-import { Inspect, Maybe, TotalValue, Hit, ShardsResponse } from '../../../common';
-import { RequestBasicOptions } from '../..';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { HostEcs, GeoEcs } from '@kbn/securitysolution-ecs';
+import type { Inspect, Maybe, TotalValue, Hit, ShardsResponse } from '../../../common';
+import type { RequestBasicOptions } from '../..';
 
 export interface NetworkDetailsRequestOptions extends Omit<RequestBasicOptions, 'timerange'> {
   ip: string;
@@ -49,7 +48,7 @@ interface ResultHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;
@@ -81,30 +80,4 @@ export interface NetworkHit {
     value: number;
     value_as_string: string;
   };
-}
-
-export type NetworkDetailsHostHit = ResultHit<object>;
-
-export interface NetworkDetailsHit {
-  aggregations: {
-    destination?: NetworkHit;
-    source?: NetworkHit;
-    host: ResultHit<object>;
-  };
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    max_score: number | null;
-    hits: [];
-  };
-  took: number;
-  timeout: number;
 }

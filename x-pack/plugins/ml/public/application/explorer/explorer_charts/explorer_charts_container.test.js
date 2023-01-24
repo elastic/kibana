@@ -10,10 +10,8 @@ import { mount, shallow } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { chartLimits } from '../../util/chart_utils';
-
 import { getDefaultChartsData } from './explorer_charts_container_service';
-import { ExplorerChartsContainer } from './explorer_charts_container';
+import { ExplorerChartsContainer, getEntitiesQuery } from './explorer_charts_container';
 
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
@@ -33,9 +31,43 @@ jest.mock('../../services/job_service', () => ({
   },
 }));
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
+  },
+}));
+
+jest.mock('../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => {
+                return {
+                  getLocation: jest.fn(() => ({ path: '/#maps' })),
+                };
+              }),
+            },
+          },
+        },
+        data: {
+          query: {
+            timefilter: {
+              timefilter: {
+                getTime: jest.fn(() => {
+                  return { from: '', to: '' };
+                }),
+              },
+            },
+          },
+        },
+        application: {
+          navigateToApp: jest.fn(),
+        },
+      },
+    };
   },
 }));
 
@@ -67,8 +99,8 @@ describe('ExplorerChartsContainer', () => {
       </I18nProvider>
     );
 
-    expect(wrapper.html()).toBe(
-      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive" data-test-subj="mlExplorerChartsContainer"></div>'
+    expect(wrapper.html()).toEqual(
+      '<div class="euiFlexGrid css-17f5jta-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 
@@ -79,7 +111,7 @@ describe('ExplorerChartsContainer', () => {
         {
           ...seriesConfig,
           chartData,
-          chartLimits: chartLimits(chartData),
+          chartLimits: { min: 201039318, max: 625736376 },
         },
       ],
       chartsPerRow: 1,
@@ -93,8 +125,8 @@ describe('ExplorerChartsContainer', () => {
     );
 
     // We test child components with snapshots separately
-    // so we just do some high level sanity check here.
-    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
+    // so we just do a high level check here.
+    expect(wrapper.find('div.ml-explorer-chart-container').children()).toHaveLength(1);
 
     // Check if the additional y-axis information for rare charts is not part of the chart
     expect(wrapper.html().search(rareChartUniqueString)).toBe(-1);
@@ -107,7 +139,6 @@ describe('ExplorerChartsContainer', () => {
         {
           ...seriesConfigRare,
           chartData,
-          chartLimits: chartLimits(chartData),
         },
       ],
       chartsPerRow: 1,
@@ -121,10 +152,75 @@ describe('ExplorerChartsContainer', () => {
     );
 
     // We test child components with snapshots separately
-    // so we just do some high level sanity check here.
-    expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
+    // so we just do a high level check here.
+    expect(wrapper.find('div.ml-explorer-chart-container').children()).toHaveLength(1);
 
     // Check if the additional y-axis information for rare charts is part of the chart
     expect(wrapper.html().search(rareChartUniqueString)).toBeGreaterThan(0);
+  });
+
+  describe('getEntitiesQuery', () => {
+    test('no entity fields', () => {
+      const series = {};
+      const expected = {
+        query: { language: 'kuery', query: undefined },
+        queryString: undefined,
+      };
+      const actual = getEntitiesQuery(series);
+      expect(actual).toMatchObject(expected);
+    });
+
+    test('with entity field', () => {
+      const series = {
+        entityFields: [{ fieldName: 'testFieldName', fieldValue: 'testFieldValue' }],
+      };
+      const expected = {
+        query: { language: 'kuery', query: 'testFieldName:testFieldValue' },
+        queryString: 'testFieldName:testFieldValue',
+      };
+      const actual = getEntitiesQuery(series);
+      expect(actual).toMatchObject(expected);
+    });
+
+    test('with multiple entity fields', () => {
+      const series = {
+        entityFields: [
+          { fieldName: 'testFieldName1', fieldValue: 'testFieldValue1' },
+          { fieldName: 'testFieldName2', fieldValue: 'testFieldValue2' },
+        ],
+      };
+      const expected = {
+        query: {
+          language: 'kuery',
+          query: 'testFieldName1:testFieldValue1 or testFieldName2:testFieldValue2',
+        },
+        queryString: 'testFieldName1:testFieldValue1 or testFieldName2:testFieldValue2',
+      };
+      const actual = getEntitiesQuery(series);
+      expect(actual).toMatchObject(expected);
+    });
+
+    test('with entity field with special characters', () => {
+      const series = {
+        entityFields: [
+          {
+            fieldName: 'agent.keyword',
+            fieldValue:
+              'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
+          },
+        ],
+      };
+      const expected = {
+        query: {
+          language: 'kuery',
+          query:
+            'agent.keyword:Mozilla/5.0 \\(X11; Linux i686\\) AppleWebKit/534.24 \\(KHTML, like Gecko\\) Chrome/11.0.696.50 Safari/534.24',
+        },
+        queryString:
+          'agent.keyword:Mozilla/5.0 \\(X11; Linux i686\\) AppleWebKit/534.24 \\(KHTML, like Gecko\\) Chrome/11.0.696.50 Safari/534.24',
+      };
+      const actual = getEntitiesQuery(series);
+      expect(actual).toMatchObject(expected);
+    });
   });
 });

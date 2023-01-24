@@ -15,14 +15,15 @@ import type { ReindexState } from '../use_reindex_state';
 import { ChecklistFlyoutStep } from './checklist_step';
 
 jest.mock('../../../../../app_context', () => {
-  const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
-  );
+  const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
 
   return {
     useAppContext: () => {
       return {
         services: {
+          api: {
+            useLoadNodeDiskSpace: () => [],
+          },
           core: {
             docLinks: docLinksServiceMock.createStartContract(),
           },

@@ -20,15 +20,13 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import {
+import type {
   ImportDataResponse,
   ImportDataProps,
-  ImportResponseError,
-  ImportRulesResponseError,
-  ExceptionsImportError,
-} from '../../../detections/containers/detection_engine/rules';
+} from '../../../detection_engine/rule_management/logic';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
+import { showToasterMessage } from './utils';
 
 interface ImportDataModalProps {
   checkBoxLabel: string;
@@ -50,6 +48,7 @@ interface ImportDataModalProps {
 /**
  * Modal component for importing Rules from a json file
  */
+// TODO split into two: timelines and rules
 export const ImportDataModalComponent = ({
   checkBoxLabel,
   closeModal,
@@ -72,27 +71,13 @@ export const ImportDataModalComponent = ({
   const [overwriteExceptions, setOverwriteExceptions] = useState(false);
   const { addError, addSuccess } = useAppToasts();
 
-  const formatError = useCallback(
-    (
-      importResponse: ImportDataResponse,
-      errors: Array<ImportRulesResponseError | ImportResponseError | ExceptionsImportError>
-    ) => {
-      const formattedErrors = errors.map((e) => failedDetailed(e.error.message));
-      const error: Error & { raw_network_error?: object } = new Error(formattedErrors.join('. '));
-      error.stack = undefined;
-      error.name = 'Network errors';
-      error.raw_network_error = importResponse;
-
-      return error;
-    },
-    [failedDetailed]
-  );
-
   const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
     setSelectedFiles(null);
     closeModal();
-  }, [setIsImporting, setSelectedFiles, closeModal]);
+    setOverwrite(false);
+    setOverwriteExceptions(false);
+  }, [setIsImporting, setSelectedFiles, closeModal, setOverwrite, setOverwriteExceptions]);
 
   const importDataCallback = useCallback(async () => {
     if (selectedFiles != null) {
@@ -107,35 +92,15 @@ export const ImportDataModalComponent = ({
           signal: abortCtrl.signal,
         });
 
-        // rules response actions
-        if (importResponse.success) {
-          addSuccess(successMessage(importResponse.success_count));
-        }
-        if (importResponse.errors.length > 0) {
-          const error = formatError(importResponse, importResponse.errors);
-          addError(error, { title: errorMessage(importResponse.errors.length) });
-        }
-
-        // if import includes exceptions
-        if (showExceptionsCheckBox) {
-          // exceptions response actions
-          if (
-            importResponse.exceptions_success &&
-            importResponse.exceptions_success_count != null
-          ) {
-            addSuccess(
-              i18n.SUCCESSFULLY_IMPORTED_EXCEPTIONS(importResponse.exceptions_success_count)
-            );
-          }
-
-          if (
-            importResponse.exceptions_errors != null &&
-            importResponse.exceptions_errors.length > 0
-          ) {
-            const error = formatError(importResponse, importResponse.exceptions_errors);
-            addError(error, { title: i18n.IMPORT_FAILED(importResponse.exceptions_errors.length) });
-          }
-        }
+        showToasterMessage({
+          importResponse,
+          exceptionsIncluded: showExceptionsCheckBox,
+          successMessage,
+          errorMessage,
+          errorMessageDetailed: failedDetailed,
+          addError,
+          addSuccess,
+        });
 
         importComplete();
         cleanupAndCloseModal();
@@ -146,23 +111,22 @@ export const ImportDataModalComponent = ({
     }
   }, [
     selectedFiles,
+    importData,
     overwrite,
     overwriteExceptions,
+    showExceptionsCheckBox,
+    successMessage,
+    errorMessage,
+    failedDetailed,
     addError,
     addSuccess,
-    cleanupAndCloseModal,
-    errorMessage,
     importComplete,
-    importData,
-    successMessage,
-    showExceptionsCheckBox,
-    formatError,
+    cleanupAndCloseModal,
   ]);
 
   const handleCloseModal = useCallback(() => {
-    setSelectedFiles(null);
-    closeModal();
-  }, [closeModal]);
+    cleanupAndCloseModal();
+  }, [cleanupAndCloseModal]);
 
   const handleCheckboxClick = useCallback(() => {
     setOverwrite((shouldOverwrite) => !shouldOverwrite);
@@ -175,7 +139,7 @@ export const ImportDataModalComponent = ({
   return (
     <>
       {showModal && (
-        <EuiModal onClose={closeModal} maxWidth={'750px'}>
+        <EuiModal onClose={handleCloseModal} maxWidth={'750px'}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -187,6 +151,8 @@ export const ImportDataModalComponent = ({
 
             <EuiSpacer size="s" />
             <EuiFilePicker
+              data-test-subj="rule-file-picker"
+              accept=".ndjson"
               id="rule-file-picker"
               initialPromptText={subtitle}
               onChange={(files: FileList | null) => {
@@ -200,6 +166,7 @@ export const ImportDataModalComponent = ({
             {showCheckBox && (
               <>
                 <EuiCheckbox
+                  data-test-subj="import-data-modal-checkbox-label"
                   id="import-data-modal-checkbox-label"
                   label={checkBoxLabel}
                   checked={overwrite}
@@ -207,6 +174,7 @@ export const ImportDataModalComponent = ({
                 />
                 {showExceptionsCheckBox && (
                   <EuiCheckbox
+                    data-test-subj="import-data-modal-exceptions-checkbox-label"
                     id="import-data-modal-exceptions-checkbox-label"
                     label={i18n.OVERWRITE_EXCEPTIONS_LABEL}
                     checked={overwriteExceptions}

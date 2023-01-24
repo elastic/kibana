@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { groupBy, keyBy, memoize } from 'lodash';
-import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
+import { groupBy, keyBy, memoize, partition } from 'lodash';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
 import { MlClient } from '../ml_client';
 import { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
@@ -30,16 +31,19 @@ import {
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { isDefined } from '../../../common/types/guards';
 import {
   jobAuditMessagesProvider,
   JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
-interface TestResult {
+export interface TestResult {
   name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
+  /**
+   * Indicates if the health check is  successful.
+   */
+  isHealthy: boolean;
 }
 
 type TestsResults = TestResult[];
@@ -152,7 +156,7 @@ export function jobsHealthServiceProvider(
      * Gets not started datafeeds for opened jobs.
      * @param jobIds
      */
-    async getNotStartedDatafeeds(jobIds: string[]): Promise<NotStartedDatafeedResponse[] | void> {
+    async getDatafeedsReport(jobIds: string[]): Promise<NotStartedDatafeedResponse[] | void> {
       const datafeeds = await getDatafeeds(jobIds);
 
       if (datafeeds) {
@@ -176,13 +180,13 @@ export function jobsHealthServiceProvider(
             };
           })
           .filter((datafeedStat) => {
-            // Find opened jobs with not started datafeeds
-            return datafeedStat.job_state === 'opened' && datafeedStat.datafeed_state !== 'started';
+            // Find opened jobs
+            return datafeedStat.job_state === 'opened';
           });
       }
     },
     /**
-     * Gets jobs that reached soft or hard model memory limits.
+     * Gets the model memory report for opened jobs.
      * @param jobIds
      */
     async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
@@ -191,7 +195,7 @@ export function jobsHealthServiceProvider(
       const { dateFormatter, bytesFormatter } = await getFormatters();
 
       return jobsStats
-        .filter((j) => j.state === 'opened' && j.model_size_stats.memory_status !== 'ok')
+        .filter((j) => j.state === 'opened')
         .map(({ job_id: jobId, model_size_stats: modelSizeStats }) => {
           return {
             job_id: jobId,
@@ -210,12 +214,14 @@ export function jobsHealthServiceProvider(
      * @param jobs
      * @param timeInterval - Custom time interval provided by the user.
      * @param docsCount - The threshold for a number of missing documents to alert upon.
+     *
+     * @return {Promise<[DelayedDataResponse[], DelayedDataResponse[]]>} - Collections of annotations exceeded and not exceeded the docs threshold.
      */
     async getDelayedDataReport(
       jobs: MlJob[],
       timeInterval: string | null,
       docsCount: number | null
-    ): Promise<DelayedDataResponse[]> {
+    ): Promise<[DelayedDataResponse[], DelayedDataResponse[]]> {
       const jobIds = getJobIds(jobs);
       const datafeeds = await getDatafeeds(jobIds);
 
@@ -231,13 +237,14 @@ export function jobsHealthServiceProvider(
 
       const { dateFormatter } = await getFormatters();
 
-      return (
+      const annotationsData = (
         await annotationService.getDelayedDataAnnotations({
           jobIds: resultJobIds,
           earliestMs,
         })
       )
         .map((v) => {
+          // TODO Update when https://github.com/elastic/elasticsearch/issues/76088 is resolved.
           const match = v.annotation.match(/Datafeed has missed (\d+)\s/);
           const missedDocsCount = match ? parseInt(match[1], 10) : 0;
           return {
@@ -255,14 +262,12 @@ export function jobsHealthServiceProvider(
           const job = jobsMap[v.job_id];
           const datafeed = datafeedsMap[v.job_id];
 
-          const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
-
           const jobLookbackInterval = resolveLookbackInterval([job], [datafeed]);
 
           const isEndTimestampWithinRange =
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
 
-          return isDocCountExceededThreshold && isEndTimestampWithinRange;
+          return isEndTimestampWithinRange;
         })
         .map((v) => {
           return {
@@ -270,6 +275,11 @@ export function jobsHealthServiceProvider(
             end_timestamp: dateFormatter(v.end_timestamp),
           };
         });
+
+      return partition(annotationsData, (v) => {
+        const isDocCountExceededThreshold = docsCount ? v.missed_docs_count >= docsCount : true;
+        return isDocCountExceededThreshold;
+      });
     },
     /**
      * Retrieves a list of the latest errors per jobs.
@@ -322,21 +332,39 @@ export function jobsHealthServiceProvider(
       logger.debug(`Performing health checks for job IDs: ${jobIds.join(', ')}`);
 
       if (config.datafeed.enabled) {
-        const response = await this.getNotStartedDatafeeds(jobIds);
+        const response = await this.getDatafeedsReport(jobIds);
         if (response && response.length > 0) {
-          const { count, jobsString } = getJobsAlertingMessageValues(response);
+          const [startedDatafeeds, notStartedDatafeeds] = partition(
+            response,
+            (datafeedStat) => datafeedStat.datafeed_state === 'started'
+          );
+
+          const isHealthy = notStartedDatafeeds.length === 0;
+          const datafeedResults = isHealthy ? startedDatafeeds : notStartedDatafeeds;
+          const { count, jobsString } = getJobsAlertingMessageValues(datafeedResults);
+
           results.push({
+            isHealthy,
             name: HEALTH_CHECK_NAMES.datafeed.name,
             context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
-                {
-                  defaultMessage:
-                    'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
-                  values: { count, jobsString },
-                }
-              ),
+              results: datafeedResults,
+              message: isHealthy
+                ? i18n.translate(
+                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage',
+                    {
+                      defaultMessage:
+                        'Datafeed is started for {count, plural, one {job} other {jobs}} {jobsString}',
+                      values: { count, jobsString },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
+                    {
+                      defaultMessage:
+                        'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
+                      values: { count, jobsString },
+                    }
+                  ),
             },
           });
         }
@@ -345,49 +373,62 @@ export function jobsHealthServiceProvider(
       if (config.mml.enabled) {
         const response = await this.getMmlReport(jobIds);
         if (response && response.length > 0) {
-          const { hard_limit: hardLimitJobs, soft_limit: softLimitJobs } = groupBy(
-            response,
-            'memory_status'
-          );
+          const {
+            hard_limit: hardLimitJobs,
+            soft_limit: softLimitJobs,
+            ok: okJobs,
+          } = groupBy(response, 'memory_status');
 
-          const { count: hardLimitCount, jobsString: hardLimitJobsString } =
-            getJobsAlertingMessageValues(hardLimitJobs);
-          const { count: softLimitCount, jobsString: softLimitJobsString } =
-            getJobsAlertingMessageValues(softLimitJobs);
+          const isHealthy = !hardLimitJobs?.length && !softLimitJobs?.length;
 
           let message = '';
 
-          if (hardLimitCount > 0) {
-            message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
-              defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.`,
-              values: {
-                count: hardLimitCount,
-                jobsString: hardLimitJobsString,
-              },
-            });
-          }
-
-          if (softLimitCount > 0) {
-            if (message.length > 0) {
-              message += '\n';
-            }
-            message += i18n.translate(
-              'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+          if (isHealthy) {
+            message = i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlRecoveredMessage',
               {
-                defaultMessage:
-                  '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign the job more memory or edit the datafeed filter to limit scope of analysis.',
-                values: {
-                  count: softLimitCount,
-                  jobsString: softLimitJobsString,
-                },
+                defaultMessage: `All jobs are running within configured model memory limits.`,
               }
             );
+          } else {
+            const { count: hardLimitCount, jobsString: hardLimitJobsString } =
+              getJobsAlertingMessageValues(hardLimitJobs);
+            const { count: softLimitCount, jobsString: softLimitJobsString } =
+              getJobsAlertingMessageValues(softLimitJobs);
+
+            if (hardLimitCount > 0) {
+              message = i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.mmlMessage', {
+                defaultMessage: `{count, plural, one {Job} other {Jobs}} {jobsString} reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.`,
+                values: {
+                  count: hardLimitCount,
+                  jobsString: hardLimitJobsString,
+                },
+              });
+            }
+
+            if (softLimitCount > 0) {
+              if (message.length > 0) {
+                message += '\n';
+              }
+              message += i18n.translate(
+                'xpack.ml.alertTypes.jobsHealthAlertingRule.mmlSoftLimitMessage',
+                {
+                  defaultMessage:
+                    '{count, plural, one {Job} other {Jobs}} {jobsString} reached the soft model memory limit. Assign more memory to the job or edit the datafeed filter to limit the scope of analysis.',
+                  values: {
+                    count: softLimitCount,
+                    jobsString: softLimitJobsString,
+                  },
+                }
+              );
+            }
           }
 
           results.push({
+            isHealthy,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
-              results: response,
+              results: isHealthy ? okJobs : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])],
               message,
             },
           });
@@ -395,51 +436,63 @@ export function jobsHealthServiceProvider(
       }
 
       if (config.delayedData.enabled) {
-        const response = await this.getDelayedDataReport(
-          jobs,
-          config.delayedData.timeInterval,
-          config.delayedData.docsCount
-        );
+        const [exceededThresholdAnnotations, withinThresholdAnnotations] =
+          await this.getDelayedDataReport(
+            jobs,
+            config.delayedData.timeInterval,
+            config.delayedData.docsCount
+          );
 
-        const { count, jobsString } = getJobsAlertingMessageValues(response);
+        const isHealthy = exceededThresholdAnnotations.length === 0;
+        const { count, jobsString } = getJobsAlertingMessageValues(exceededThresholdAnnotations);
 
-        if (response.length > 0) {
-          results.push({
-            name: HEALTH_CHECK_NAMES.delayedData.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage',
-                {
+        results.push({
+          isHealthy,
+          name: HEALTH_CHECK_NAMES.delayedData.name,
+          context: {
+            results: isHealthy ? withinThresholdAnnotations : exceededThresholdAnnotations,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
+                  {
+                    defaultMessage: 'No data delay has occurred.',
+                  }
+                )
+              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
                   defaultMessage:
                     '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
                   values: { count, jobsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       if (config.errorMessages.enabled && previousStartedAt) {
         const response = await this.getErrorsReport(jobIds, previousStartedAt);
-        if (response.length > 0) {
-          const { count, jobsString } = getJobsAlertingMessageValues(response);
-          results.push({
-            name: HEALTH_CHECK_NAMES.errorMessages.name,
-            context: {
-              results: response,
-              message: i18n.translate(
-                'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage',
-                {
+        const { count, jobsString } = getJobsAlertingMessageValues(response);
+        const isHealthy = response.length === 0;
+
+        results.push({
+          isHealthy,
+          name: HEALTH_CHECK_NAMES.errorMessages.name,
+          context: {
+            results: response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
+                  {
+                    defaultMessage:
+                      'No errors in the {count, plural, one {job} other {jobs}} messages.',
+                    values: { count },
+                  }
+                )
+              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
                   defaultMessage:
                     '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
                   values: { count, jobsString },
-                }
-              ),
-            },
-          });
-        }
+                }),
+          },
+        });
       }
 
       return results;

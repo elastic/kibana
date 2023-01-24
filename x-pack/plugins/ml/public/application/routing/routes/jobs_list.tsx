@@ -8,18 +8,20 @@
 import React, { useEffect, FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import {
+  mlTimefilterRefresh$,
+  useRefreshIntervalUpdates,
+  useTimefilter,
+} from '@kbn/ml-date-picker';
 import { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { JobsPage } from '../../jobs/jobs_list';
-import { useTimefilter } from '../../contexts/kibana';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { useRefreshIntervalUpdates } from '../../contexts/kibana/use_timefilter';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: 'anomaly_detection',
@@ -59,14 +61,13 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   const refreshValue = refresh.value ?? 0;
   const refreshPause = refresh.pause ?? true;
 
-  const blockRefresh = refreshValue === 0 || refreshPause === true;
-
   useEffect(() => {
     const refreshInterval =
-      refreshValue === 0 && refreshPause === true
+      refreshValue === 0 || refreshPause === true
         ? { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS }
         : { pause: refreshPause, value: refreshValue };
     timefilter.setRefreshInterval(refreshInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
@@ -74,7 +75,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        <JobsPage blockRefresh={blockRefresh} lastRefresh={lastRefresh} />
+        <JobsPage lastRefresh={lastRefresh} />
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );

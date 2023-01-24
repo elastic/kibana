@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataAccessLayer, TimeRange } from '../../types';
+import type { DataAccessLayer, TimeRange } from '../../types';
 import { mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin } from '../../mocks/resolver_tree';
-import {
+import type {
   ResolverRelatedEvents,
   ResolverEntityIndex,
   SafeResolverEvent,
@@ -67,7 +67,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         indexPatterns,
       }: {
         entityID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
         /**
@@ -97,7 +97,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         entityID: string;
         category: string;
         after?: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         const events =
@@ -129,7 +129,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         eventTimestamp: string;
         eventID?: string | number;
         winlogRecordID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null;

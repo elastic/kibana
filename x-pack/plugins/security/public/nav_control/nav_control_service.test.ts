@@ -7,14 +7,28 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import type { httpServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
-import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { securityMock } from '../mocks';
+import { UserProfileAPIClient } from '../account_management';
+import { authenticationMock } from '../authentication/index.mock';
+import * as UseCurrentUserImports from '../components/use_current_user';
+import { UserAPIClient } from '../management';
 import { SecurityNavControlService } from './nav_control_service';
+
+const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
+const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
+
+useUserProfileMock.mockReturnValue({
+  loading: true,
+});
+
+useCurrentUserMock.mockReturnValue({
+  loading: true,
+});
 
 const validLicense = {
   isAvailable: true,
@@ -29,25 +43,28 @@ const validLicense = {
   hasAtLeast: (...candidates) => true,
 } as ILicense;
 
+const authc = authenticationMock.createStart();
+
+const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContract>) => ({
+  userProfiles: new UserProfileAPIClient(http),
+  users: new UserAPIClient(http),
+});
+
 describe('SecurityNavControlService', () => {
   it('can render and cleanup the control via the mount() function', async () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
-    const mockSecuritySetup = securityMock.createSetup();
-    mockSecuritySetup.authc.getCurrentUser.mockResolvedValue(
-      mockAuthenticatedUser({ username: 'some-user', full_name: undefined })
-    );
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: mockSecuritySetup.authc,
       logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     coreStart.chrome.navControls.registerRight = jest.fn();
 
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
     const [{ mount }] = coreStart.chrome.navControls.registerRight.mock.calls[0];
 
@@ -59,48 +76,44 @@ describe('SecurityNavControlService', () => {
     expect(target).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiPopover euiPopover--anchorDownRight"
-          id="headerUserMenu"
+          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
         >
           <div
-            class="euiPopover__anchor"
+            class="euiPopover emotion-euiPopover"
+            id="headerUserMenu"
           >
-            <button
-              aria-controls="headerUserMenu"
-              aria-expanded="false"
-              aria-haspopup="true"
-              aria-label="Account menu"
-              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-              data-test-subj="userMenuButton"
-              type="button"
+            <div
+              class="euiPopover__anchor css-16vtueo-render"
             >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
+              <button
+                aria-controls="headerUserMenu"
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Account menu"
+                class="euiButtonEmpty euiHeaderSectionItemButton css-wvaqcf-empty-text"
+                data-test-subj="userMenuButton"
+                style="line-height: normal;"
+                type="button"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="euiButtonContent euiButtonEmpty__content"
                 >
                   <span
-                    class="euiHeaderSectionItemButton__content"
+                    class="euiButtonEmpty__text"
                   >
-                    <div
-                      aria-label="some-user"
-                      class="euiAvatar euiAvatar--s euiAvatar--user"
-                      data-test-subj="userMenuAvatar"
-                      role="img"
-                      style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
-                      title="some-user"
+                    <span
+                      class="euiHeaderSectionItemButton__content"
                     >
                       <span
-                        aria-hidden="true"
-                      >
-                        s
-                      </span>
-                    </div>
+                        aria-label="Loading"
+                        class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                        role="progressbar"
+                      />
+                    </span>
                   </span>
                 </span>
-              </span>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -113,16 +126,16 @@ describe('SecurityNavControlService', () => {
 
   it('should register the nav control once the license supports it', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
 
@@ -133,33 +146,33 @@ describe('SecurityNavControlService', () => {
 
   it('should not register the nav control for anonymous paths', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
   });
 
   it('should only register the nav control once', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
 
@@ -172,48 +185,52 @@ describe('SecurityNavControlService', () => {
 
   it('should allow for re-registration if the service is restarted', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-      authc: securityMock.createSetup().authc,
       logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
-    const coreStart = coreMock.createStart();
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
 
     navControlService.stop();
 
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(2);
   });
 
   describe(`#start`, () => {
     let navControlService: SecurityNavControlService;
     beforeEach(() => {
+      const coreSetup = coreMock.createSetup();
       const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
       navControlService = new SecurityNavControlService();
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
-        authc: securityMock.createSetup().authc,
         logoutUrl: '/some/logout/url',
+        securityApiClients: mockApiClients(coreSetup.http),
       });
     });
 
     it('should return functions to register and retrieve user menu links', () => {
       const coreStart = coreMock.createStart();
-      const navControlServiceStart = navControlService.start({ core: coreStart });
+      const navControlServiceStart = navControlService.start({ core: coreStart, authc });
       expect(navControlServiceStart).toHaveProperty('getUserMenuLinks$');
       expect(navControlServiceStart).toHaveProperty('addUserMenuLinks');
     });
 
     it('should register custom user menu links to be displayed in the nav controls', (done) => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       addUserMenuLinks([
@@ -240,7 +257,10 @@ describe('SecurityNavControlService', () => {
 
     it('should retrieve user menu links sorted by order', (done) => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       addUserMenuLinks([
@@ -307,7 +327,10 @@ describe('SecurityNavControlService', () => {
 
     it('should allow adding a custom profile link', () => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       addUserMenuLinks([
@@ -327,7 +350,10 @@ describe('SecurityNavControlService', () => {
 
     it('should not allow adding more than one custom profile link', () => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       expect(() => {

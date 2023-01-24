@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validIDs } from './index';
+import { validIDs } from '.';
 
 describe('validIDs', () => {
   it('removes empty strings', () => {

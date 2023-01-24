@@ -5,57 +5,32 @@
  * 2.0.
  */
 
-import type { ExpressionsSetup } from 'src/plugins/expressions/public';
-
-import {
-  axisExtentConfig,
-  yAxisConfig,
-  axisTitlesVisibilityConfig,
-} from '../common/expressions/xy_chart/axis_config';
-import { gridlinesConfig } from '../common/expressions/xy_chart/grid_lines_config';
-import { labelsOrientationConfig } from '../common/expressions/xy_chart/labels_orientation_config';
-import {
-  dataLayerConfig,
-  referenceLineLayerConfig,
-} from '../common/expressions/xy_chart/layer_config';
-import { legendConfig } from '../common/expressions/xy_chart/legend_config';
-import { tickLabelsConfig } from '../common/expressions/xy_chart/tick_labels_config';
-import { xyChart } from '../common/expressions/xy_chart/xy_chart';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
-
-import { mergeTables } from '../common/expressions/merge_tables';
-import { renameColumns } from '../common/expressions/rename_columns/rename_columns';
+import { mapToColumns } from '../common/expressions/map_to_columns/map_to_columns';
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
-import { lensMultitable } from '../common/expressions';
+import { collapse } from '../common/expressions/collapse';
+
+type TimeScaleArguments = Parameters<typeof getTimeScale>;
 
 export const setupExpressions = (
   expressions: ExpressionsSetup,
   formatFactory: Parameters<typeof getDatatable>[0],
-  getTimeZone: Parameters<typeof getTimeScale>[0]
+  getDatatableUtilities: TimeScaleArguments[0],
+  getTimeZone: TimeScaleArguments[1],
+  getForceNow: TimeScaleArguments[2]
 ) => {
-  [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
-
   [
-    xyChart,
-    mergeTables,
+    collapse,
     counterRate,
-    yAxisConfig,
-    dataLayerConfig,
-    referenceLineLayerConfig,
     formatColumn,
-    legendConfig,
-    renameColumns,
-    gridlinesConfig,
+    mapToColumns,
     datatableColumn,
-    tickLabelsConfig,
-    axisTitlesVisibilityConfig,
-    axisExtentConfig,
-    labelsOrientationConfig,
     getDatatable(formatFactory),
-    getTimeScale(getTimeZone),
+    getTimeScale(getDatatableUtilities, getTimeZone, getForceNow),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

@@ -35,7 +35,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const {
           cursor,
           filter: filterOrUndefined,
@@ -52,7 +52,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
         const {
           isValid,
           errorMessage,
-          cursor: [currentIndexPosition, searchAfter],
+          cursor: [currentIndexPosition, searchAfter = []],
         } = decodeCursor({
           cursor,
           page,
@@ -72,6 +72,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
             listId,
             page,
             perPage,
+            runtimeMappings: undefined,
             searchAfter,
             sortField,
             sortOrder,

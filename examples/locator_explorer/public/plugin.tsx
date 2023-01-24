@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SharePluginSetup, SharePluginStart } from '../../../src/plugins/share/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/public';
-import { prepareLogTable, Dimension } from '../../../visualizations/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
 import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
 import { tableVisResponseHandler } from './utils';
@@ -17,6 +17,7 @@ export interface TableVisRenderValue {
   visData: TableVisData;
   visType: typeof VIS_TYPE_TABLE;
   visConfig: TableVisConfig;
+  canNavigateToLens: boolean;
 }
 
 export type TableExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -166,13 +167,18 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(inspectorData, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
+
     return {
       type: 'render',
       as: 'table_vis',
       value: {
         visData: convertedData,
         visType: VIS_TYPE_TABLE,
-        visConfig: args,
+        visConfig: {
+          ...args,
+          title: (handlers.variables.embeddableTitle as string) ?? args.title,
+        },
+        canNavigateToLens: handlers.variables.canNavigateToLens as boolean,
       },
     };
   },

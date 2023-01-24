@@ -11,25 +11,38 @@ cat <<EOF > $KIBANA_DIR/.bazelrc
   build --build_metadata=ROLE=CI
 EOF
 
-if [[ "${BAZEL_CACHE_MODE:-none}" == read* ]]; then
-  echo "[bazel] enabling caching"
+BAZEL_CACHE_MODE=${BAZEL_CACHE_MODE:-gcs}
+
+if [[ "$BAZEL_CACHE_MODE" == "gcs" ]]; then
+  echo "[bazel] enabling caching with GCS buckets"
+
+  BAZEL_REGION="${BUILDKITE_AGENT_GCP_REGION:-us-central1}"
+
+  if ! [[ "$BAZEL_REGION" =~ ^(us-central1|northamerica-northeast2|europe-west2|southamerica-east1|asia-south2)$ ]]; then
+    echo "unsupported bazel cache region $BAZEL_REGION"
+    exit 1
+  fi
+
+  BAZEL_BUCKET="kibana-ci-bazel_$BAZEL_REGION"
+
+  echo "[bazel] using GCS bucket: $BAZEL_BUCKET"
+
 cat <<EOF >> $KIBANA_DIR/.bazelrc
-  build --bes_results_url=https://app.buildbuddy.io/invocation/
-  build --bes_backend=grpcs://cloud.buildbuddy.io
-  build --remote_cache=grpcs://cloud.buildbuddy.io
-  build --remote_timeout=3600
-  build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY
+  build --remote_cache=https://storage.googleapis.com/$BAZEL_BUCKET
+  build --google_default_credentials
 EOF
 fi
 
-if [[ "${BAZEL_CACHE_MODE:-none}" == "read" ]]; then
-  echo "[bazel] cache set to read-only"
+if [[ "$BAZEL_CACHE_MODE" == "populate-local-gcs" ]]; then
+  echo "[bazel] enabling caching with GCS buckets for local dev"
+
 cat <<EOF >> $KIBANA_DIR/.bazelrc
-  build --noremote_upload_local_results
+  build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
+  build --google_credentials=$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 EOF
 fi
 
-if [[ "${BAZEL_CACHE_MODE:-none}" != @(read|read-write|none|) ]]; then
-  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [read,read-write,none]"
+if [[ "$BAZEL_CACHE_MODE" != @(gcs|populate-local-gcs|none|) ]]; then
+  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,populate-local-gcs|none]"
   exit 1
 fi

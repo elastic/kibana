@@ -7,7 +7,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 import { getEsCause } from './es_error_parser';
 
 interface EsErrorHandlerParams {

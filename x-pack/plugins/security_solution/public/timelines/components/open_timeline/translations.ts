@@ -116,6 +116,13 @@ export const ONLY_FAVORITES = i18n.translate(
   }
 );
 
+export const CREATE_RULE_FROM_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.createRuleFromTimelineTooltip',
+  {
+    defaultMessage: 'Create rule from timeline',
+  }
+);
+
 export const CREATE_TEMPLATE_FROM_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.createTemplateFromTimelineTooltip',
   {
@@ -164,10 +171,6 @@ export const PINNED_EVENTS = i18n.translate(
     defaultMessage: 'Pinned events',
   }
 );
-
-export const POSTED = i18n.translate('xpack.securitySolution.open.timeline.postedLabel', {
-  defaultMessage: 'Posted:',
-});
 
 export const REFRESH = i18n.translate('xpack.securitySolution.open.timeline.refreshTitle', {
   defaultMessage: 'Refresh',
@@ -227,34 +230,6 @@ export const ZERO_TIMELINE_TEMPLATES_MATCH = i18n.translate(
   'xpack.securitySolution.open.timeline.zeroTimelineTemplatesMatchLabel',
   {
     defaultMessage: '0 timeline templates match the search criteria',
-  }
-);
-
-export const SINGLE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.open.timeline.singleTimelineLabel',
-  {
-    defaultMessage: 'timeline',
-  }
-);
-
-export const PLURAL_TIMELINES = i18n.translate(
-  'xpack.securitySolution.open.timeline.pluralTimelinesLabel',
-  {
-    defaultMessage: 'timelines',
-  }
-);
-
-export const SINGLE_TEMPLATE = i18n.translate(
-  'xpack.securitySolution.open.timeline.singleTemplateLabel',
-  {
-    defaultMessage: 'template',
-  }
-);
-
-export const PLURAL_TEMPLATES = i18n.translate(
-  'xpack.securitySolution.open.timeline.pluralTemplatesLabel',
-  {
-    defaultMessage: 'templates',
   }
 );
 
@@ -379,7 +354,7 @@ export const IMPORT_FAILED = (totalTimelines: number) =>
     {
       values: { totalTimelines },
       defaultMessage:
-        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {rule} other {rules}}',
+        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {timeline} other {timelines}}',
     }
   );
 

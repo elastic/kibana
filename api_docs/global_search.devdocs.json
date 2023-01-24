@@ -15,6 +15,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -30,7 +31,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -46,6 +48,7 @@
         ],
         "path": "x-pack/plugins/global_search/public/services/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -60,7 +63,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/global_search/public/services/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -76,7 +80,8 @@
               "<void> | undefined"
             ],
             "path": "x-pack/plugins/global_search/public/services/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -92,6 +97,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -106,7 +112,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -121,7 +128,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -136,7 +144,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -152,6 +161,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -163,7 +173,8 @@
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -179,7 +190,8 @@
               "<void>"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -191,7 +203,8 @@
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -207,6 +220,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -218,7 +232,8 @@
               "an id that should be unique for an individual provider's results"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -230,7 +245,8 @@
               "the title/label of the result"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -242,7 +258,8 @@
               "the type of result"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -257,7 +274,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -272,7 +290,8 @@
               "string | { path: string; prependBasePath: boolean; }"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -284,7 +303,8 @@
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -297,11 +317,18 @@
             ],
             "signature": [
               "Record<string, ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -317,6 +344,7 @@
         ],
         "path": "x-pack/plugins/global_search/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -328,7 +356,8 @@
               "\nid of the provider"
             ],
             "path": "x-pack/plugins/global_search/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -352,6 +381,7 @@
             ],
             "path": "x-pack/plugins/global_search/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "globalSearch",
@@ -365,6 +395,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -379,6 +410,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -398,6 +430,7 @@
             ],
             "path": "x-pack/plugins/global_search/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -419,6 +452,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -435,6 +469,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -453,6 +488,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -477,6 +513,7 @@
       ],
       "path": "x-pack/plugins/global_search/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -506,6 +543,7 @@
       ],
       "path": "x-pack/plugins/global_search/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -525,6 +563,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -540,7 +579,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -556,6 +596,7 @@
         ],
         "path": "x-pack/plugins/global_search/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -570,7 +611,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -586,7 +628,8 @@
               "<void> | undefined"
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -602,6 +645,7 @@
         ],
         "path": "x-pack/plugins/global_search/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -613,36 +657,43 @@
             "signature": [
               "{ savedObjects: { client: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
               "; typeRegistry: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               },
               "; }; uiSettings: { client: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               "; }; capabilities: ",
               "Observable",
               "<",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               ">; }"
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -658,6 +709,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -669,7 +721,8 @@
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -685,7 +738,8 @@
               "<void>"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -697,7 +751,8 @@
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -713,6 +768,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -724,7 +780,8 @@
               "an id that should be unique for an individual provider's results"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -736,7 +793,8 @@
               "the title/label of the result"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -748,7 +806,8 @@
               "the type of result"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -763,7 +822,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -778,7 +838,8 @@
               "string | { path: string; prependBasePath: boolean; }"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -790,7 +851,8 @@
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -803,11 +865,18 @@
             ],
             "signature": [
               "Record<string, ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/global_search/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -823,6 +892,7 @@
         ],
         "path": "x-pack/plugins/global_search/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -834,7 +904,8 @@
               "\nid of the provider"
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "globalSearch",
@@ -866,6 +937,7 @@
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "globalSearch",
@@ -879,6 +951,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -893,6 +966,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -913,6 +987,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -940,6 +1015,7 @@
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "globalSearch",
@@ -959,6 +1035,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -978,6 +1055,7 @@
         ],
         "path": "x-pack/plugins/global_search/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "globalSearch",
@@ -1007,6 +1085,7 @@
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "globalSearch",
@@ -1020,6 +1099,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1040,6 +1120,7 @@
                 ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1059,6 +1140,7 @@
             ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1082,6 +1164,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1100,6 +1183,7 @@
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1124,10 +1208,10 @@
         },
         ", request: ",
         {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCoreHttpPluginApi",
-          "section": "def-server.KibanaRequest",
+          "pluginId": "@kbn/core-http-server",
+          "scope": "common",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-common.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => ",
@@ -1136,16 +1220,17 @@
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: (request: ",
         {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCoreHttpPluginApi",
-          "section": "def-server.KibanaRequest",
+          "pluginId": "@kbn/core-http-server",
+          "scope": "common",
+          "docId": "kibKbnCoreHttpServerPluginApi",
+          "section": "def-common.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
       "path": "x-pack/plugins/global_search/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     },
@@ -1169,6 +1254,7 @@
       ],
       "path": "x-pack/plugins/global_search/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     }

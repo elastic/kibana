@@ -9,7 +9,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { mountHook } from '@kbn/test-jest-helpers';
-import { ScopedHistory } from '../../../../../../../../src/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { useMetricsTime } from './use_metrics_time';
 
 describe('useMetricsTime hook', () => {
@@ -68,7 +68,7 @@ const createProviderWrapper = () => {
   const history = createMemoryHistory();
 
   history.push(INITIAL_URL);
-  const scopedHistory = new ScopedHistory(history, INITIAL_URL);
+  const scopedHistory = new CoreScopedHistory(history, INITIAL_URL);
 
   const ProviderWrapper: React.FC = ({ children }) => {
     return <Router history={scopedHistory}>{children}</Router>;

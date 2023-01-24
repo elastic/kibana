@@ -219,6 +219,19 @@ describe('TelemetryService', () => {
   });
 
   describe('getUserShouldSeeOptInNotice', () => {
+    it('should return false if the telemetry notice is hidden by config', () => {
+      const telemetryService = mockTelemetryService({
+        config: {
+          userCanChangeSettings: true,
+          telemetryNotifyUserAboutOptInDefault: true,
+          hidePrivacyStatement: true,
+        },
+      });
+      expect(telemetryService.config.userCanChangeSettings).toBe(true);
+      expect(telemetryService.userCanChangeSettings).toBe(true);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
+    });
+
     it('returns whether the user can update the telemetry config (has SavedObjects access)', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },

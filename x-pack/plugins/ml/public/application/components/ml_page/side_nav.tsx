@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
+import { AIOPS_ENABLED, CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
+import { useUrlState } from '@kbn/ml-url-state';
+import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
-import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
@@ -18,7 +20,7 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
-  name: string;
+  name: ReactNode;
   disabled?: boolean;
   items?: Tab[];
   testSubj?: string;
@@ -26,6 +28,8 @@ export interface Tab {
   onClick?: () => Promise<void>;
   /** Indicates if item should be marked as active with nested routes */
   highlightNestedRoutes?: boolean;
+  /** List of route IDs related to the side nav entry */
+  relatedRouteIds?: string[];
 }
 
 export function useSideNavItems(activeRoute: MlRoute | undefined) {
@@ -58,13 +62,14 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
       await navigateToPath(path, false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pageState]
   );
 
   const tabsDefinition: Tab[] = useMemo((): Tab[] => {
     const disableLinks = mlFeaturesDisabled;
 
-    return [
+    const mlTabs: Tab[] = [
       {
         id: 'main_section',
         name: '',
@@ -78,6 +83,19 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab overview',
           },
+          {
+            id: 'notifications',
+            pathId: ML_PAGES.NOTIFICATIONS,
+            name: disableLinks ? (
+              i18n.translate('xpack.ml.navMenu.notificationsTabLinkText', {
+                defaultMessage: 'Notifications',
+              })
+            ) : (
+              <NotificationsIndicator />
+            ),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab notifications',
+          },
         ],
       },
       {
@@ -85,6 +103,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
           defaultMessage: 'Anomaly Detection',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'anomaly_detection',
@@ -140,6 +159,24 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalytics',
+          },
+          {
+            id: 'data_frame_analytics_results_explorer',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
+              defaultMessage: 'Results Explorer',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
+          },
+          {
+            id: 'data_frame_analytics_job_map',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
+              defaultMessage: 'Analytics Map',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsMap',
           },
         ],
       },
@@ -200,17 +237,76 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         ],
       },
     ];
+
+    if (AIOPS_ENABLED) {
+      mlTabs.push({
+        id: 'aiops_section',
+        name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
+          defaultMessage: 'AIOps Labs',
+        }),
+        disabled: disableLinks,
+        items: [
+          {
+            id: 'explainlogratespikes',
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
+              defaultMessage: 'Explain Log Rate Spikes',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab explainLogRateSpikes',
+            relatedRouteIds: ['explain_log_rate_spikes'],
+          },
+          {
+            id: 'logCategorization',
+            pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
+              defaultMessage: 'Log Pattern Analysis',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab logCategorization',
+            relatedRouteIds: ['log_categorization'],
+          },
+          ...(CHANGE_POINT_DETECTION_ENABLED
+            ? [
+                {
+                  id: 'changePointDetection',
+                  pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
+                  name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
+                    defaultMessage: 'Change Point Detection',
+                  }),
+                  disabled: disableLinks,
+                  testSubj: 'mlMainTab changePointDetection',
+                  relatedRouteIds: ['change_point_detection'],
+                },
+              ]
+            : []),
+        ],
+      });
+    }
+
+    return mlTabs;
   }, [mlFeaturesDisabled, canViewMlNodes]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {
-      const { id, disabled, items, onClick, pathId, name, testSubj, highlightNestedRoutes } = tab;
+      const {
+        id,
+        disabled,
+        items,
+        onClick,
+        pathId,
+        name,
+        testSubj,
+        highlightNestedRoutes,
+        relatedRouteIds,
+      } = tab;
 
       const onClickCallback = onClick ?? (pathId ? redirectToTab.bind(null, pathId) : undefined);
 
       const isSelected =
         `/${pathId}` === activeRoute?.path ||
-        (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`));
+        (!!highlightNestedRoutes && activeRoute?.path.includes(`${pathId}/`)) ||
+        (Array.isArray(relatedRouteIds) && relatedRouteIds.includes(activeRoute?.id!));
 
       return {
         id,
@@ -223,7 +319,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         forceOpen: true,
       };
     },
-    [activeRoute?.path, redirectToTab]
+    [activeRoute, redirectToTab]
   );
 
   return useMemo(() => tabsDefinition.map(getTabItem), [tabsDefinition, getTabItem]);

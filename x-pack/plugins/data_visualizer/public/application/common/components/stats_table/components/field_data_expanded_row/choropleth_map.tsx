@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
+import { EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,8 +16,10 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VectorLayerDescriptor,
-} from '../../../../../../../../maps/common';
-import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
+} from '@kbn/maps-plugin/common';
+import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
 import { ExpandedRowPanel } from './expanded_row_panel';
@@ -97,12 +99,58 @@ interface Props {
 }
 
 export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
-  const { fieldName, isTopValuesSampled, topValues, topValuesSamplerShardSize } = stats!;
+  const {
+    services: {
+      data: { fieldFormats },
+    },
+  } = useDataVisualizerKibana();
+
+  const { fieldName, isTopValuesSampled, topValues, sampleCount } = stats!;
 
   const layerList: VectorLayerDescriptor[] = useMemo(
     () => [getChoroplethTopValuesLayer(fieldName || '', topValues || [], suggestion)],
     [suggestion, fieldName, topValues]
   );
+
+  if (!stats) return null;
+
+  const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
+
+  const countsElement = totalDocuments ? (
+    <EuiText color="subdued" size="xs">
+      {isTopValuesSampled ? (
+        <FormattedMessage
+          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleRecordsLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+          values={{
+            sampledDocuments: sampleCount,
+            sampledDocumentsFormatted: (
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(sampleCount)}
+              </strong>
+            ),
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromTotalRecordsLabel"
+          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+          values={{
+            totalDocuments,
+            totalDocumentsFormatted: (
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(totalDocuments ?? 0)}
+              </strong>
+            ),
+          }}
+        />
+      )}
+    </EuiText>
+  ) : null;
 
   return (
     <ExpandedRowPanel
@@ -114,20 +162,7 @@ export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
         <EmbeddedMapComponent layerList={layerList} />
       </div>
 
-      {isTopValuesSampled === true && (
-        <div>
-          <EuiSpacer size={'s'} />
-          <EuiText size="xs" textAlign={'center'}>
-            <FormattedMessage
-              id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleDescription"
-              defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
-              values={{
-                topValuesSamplerShardSize,
-              }}
-            />
-          </EuiText>
-        </div>
-      )}
+      {countsElement}
     </ExpandedRowPanel>
   );
 };

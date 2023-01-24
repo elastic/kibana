@@ -20,9 +20,7 @@ exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = 
 />
 `;
 
-exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from custom 1`] = `""`;
-
-exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from default 1`] = `
+exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from color ramp 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -82,26 +80,11 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
         styleName="lineColor"
       />
     </EuiFlexItem>
-    <EuiFlexItem
-      key="2"
-    >
-      <Category
-        color="#D36086"
-        isLinesOnly={false}
-        isPointsOnly={true}
-        label={
-          <EuiTextColor
-            color="success"
-          >
-            Other
-          </EuiTextColor>
-        }
-        styleName="lineColor"
-      />
-    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;
+
+exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from custom 1`] = `""`;
 
 exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with breaks 1`] = `
 <div>

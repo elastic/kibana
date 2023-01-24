@@ -7,27 +7,45 @@
 
 import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 
-export const DEFAULT_QUERY = 'select * from processes, users;';
+export const DEFAULT_QUERY = 'select * from processes;';
+export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
-  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
+  cy.react('AgentsTable').find('input').should('not.be.disabled');
+  cy.react('AgentsTable EuiComboBox', {
+    props: { placeholder: 'Select agents or groups to query' },
+  }).click();
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
-  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
-    '{downArrow}{enter}'
-  );
+  cy.react('AgentsTable EuiComboBox').type('{downArrow}{enter}{esc}');
+  cy.contains('1 agent selected.');
 };
+
+export const clearInputQuery = () =>
+  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
 
-export const submitQuery = () => cy.contains('Submit').click();
+export const submitQuery = () => {
+  cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+  cy.contains('Submit').click();
+};
 
-export const checkResults = () =>
-  cy.getBySel('dataGridRowCell', { timeout: 60000 }).should('have.lengthOf.above', 0);
+// sometimes the results get stuck in the tests, this is a workaround
+export const checkResults = () => {
+  cy.getBySel('osqueryResultsTable').then(($table) => {
+    if ($table.find('div .euiDataGridRow').length > 0) {
+      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+    } else {
+      cy.getBySel('osquery-status-tab').click();
+      cy.getBySel('osquery-results-tab').click();
+      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+    }
+  });
+};
 
-export const typeInECSFieldInput = (text: string) =>
-  cy.getBySel('ECS-field-input').click().type(text);
+export const typeInECSFieldInput = (text: string) => cy.getBySel('ECS-field-input').type(text);
 export const typeInOsqueryFieldInput = (text: string) =>
-  cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').click().type(text);
+  cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').type(text);
 
 export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
   cy.react('EuiFormRow', { props: { label } }).type(text);

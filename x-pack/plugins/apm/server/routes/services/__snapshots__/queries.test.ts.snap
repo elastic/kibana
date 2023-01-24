@@ -11,6 +11,7 @@ Object {
   },
   "body": Object {
     "size": 0,
+    "track_total_hits": 1,
   },
   "terminate_after": 1,
 }
@@ -66,6 +67,7 @@ Object {
         "order": "desc",
       },
     },
+    "track_total_hits": 1,
   },
   "terminate_after": 1,
 }
@@ -81,30 +83,99 @@ Array [
     },
     "body": Object {
       "aggs": Object {
-        "services": Object {
+        "sample": Object {
           "aggs": Object {
-            "transactionType": Object {
+            "services": Object {
               "aggs": Object {
-                "avg_duration": Object {
-                  "avg": Object {
-                    "field": "transaction.duration.us",
+                "transactionType": Object {
+                  "aggs": Object {
+                    "avg_duration": Object {
+                      "avg": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
+                    "environments": Object {
+                      "terms": Object {
+                        "field": "service.environment",
+                      },
+                    },
+                    "outcomes": Object {
+                      "terms": Object {
+                        "field": "event.outcome",
+                        "include": Array [
+                          "failure",
+                          "success",
+                        ],
+                      },
+                    },
+                    "sample": Object {
+                      "top_metrics": Object {
+                        "metrics": Array [
+                          Object {
+                            "field": "agent.name",
+                          },
+                        ],
+                        "sort": Object {
+                          "@timestamp": "desc",
+                        },
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "transaction.type",
                   },
                 },
+              },
+              "terms": Object {
+                "field": "service.name",
+                "size": 500,
+              },
+            },
+          },
+          "random_sampler": Object {
+            "probability": 1,
+            "seed": 0,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 0,
+                  "lte": 50000,
+                },
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+      "track_total_hits": false,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+        "error",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "sample": Object {
+          "aggs": Object {
+            "services": Object {
+              "aggs": Object {
                 "environments": Object {
                   "terms": Object {
                     "field": "service.environment",
                   },
                 },
-                "outcomes": Object {
-                  "terms": Object {
-                    "field": "event.outcome",
-                    "include": Array [
-                      "failure",
-                      "success",
-                    ],
-                  },
-                },
-                "sample": Object {
+                "latest": Object {
                   "top_metrics": Object {
                     "metrics": Array [
                       Object {
@@ -118,66 +189,14 @@ Array [
                 },
               },
               "terms": Object {
-                "field": "transaction.type",
+                "field": "service.name",
+                "size": 500,
               },
             },
           },
-          "terms": Object {
-            "field": "service.name",
-            "size": 50,
-          },
-        },
-      },
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 0,
-                  "lte": 50000,
-                },
-              },
-            },
-          ],
-        },
-      },
-      "size": 0,
-    },
-  },
-  Object {
-    "apm": Object {
-      "events": Array [
-        "metric",
-        "error",
-      ],
-    },
-    "body": Object {
-      "aggs": Object {
-        "services": Object {
-          "aggs": Object {
-            "environments": Object {
-              "terms": Object {
-                "field": "service.environment",
-              },
-            },
-            "latest": Object {
-              "top_metrics": Object {
-                "metrics": Array [
-                  Object {
-                    "field": "agent.name",
-                  },
-                ],
-                "sort": Object {
-                  "@timestamp": "desc",
-                },
-              },
-            },
-          },
-          "terms": Object {
-            "field": "service.name",
-            "size": 50,
+          "random_sampler": Object {
+            "probability": 1,
+            "seed": 0,
           },
         },
       },
@@ -197,8 +216,10 @@ Array [
         },
       },
       "size": 0,
+      "track_total_hits": false,
     },
   },
+  undefined,
 ]
 `;
 
@@ -239,6 +260,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
   },
 }
 `;

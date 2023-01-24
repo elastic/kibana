@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
@@ -28,6 +28,8 @@ import { JobCreatorContext } from '../../job_creator_context';
 import { isAdvancedJobCreator } from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
 import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
+
+const { collapseLiteralStrings } = XJson;
 
 export enum EDITOR_MODE {
   HIDDEN,
@@ -56,6 +58,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
     setDatafeedConfigString(jobCreator.formattedDatafeedJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -72,6 +75,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     } else {
       setTempCombinedJob(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
   const editJsonMode =

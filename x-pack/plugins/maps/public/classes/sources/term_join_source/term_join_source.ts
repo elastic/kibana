@@ -6,8 +6,9 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
+import { Query } from '@kbn/data-plugin/common/query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import { VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -21,7 +22,8 @@ export interface ITermJoinSource extends ISource {
     searchFilters: VectorJoinSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ): Promise<PropertiesMap>;
 
   /*

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DataPanel } from './data_panel';
+export { DataPanel } from '../../../shared/data_panel/data_panel';

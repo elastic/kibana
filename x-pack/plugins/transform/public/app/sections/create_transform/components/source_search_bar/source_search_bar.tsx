@@ -11,21 +11,35 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { QueryStringInput } from '../../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
+import { PLUGIN } from '../../../../../../common/constants';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { StepDefineFormHook, QUERY_LANGUAGE_KUERY } from '../step_define';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SourceSearchBarProps {
-  indexPattern: SearchItems['indexPattern'];
+  dataView: SearchItems['dataView'];
   searchBar: StepDefineFormHook['searchBar'];
 }
-export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, searchBar }) => {
+export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar }) => {
   const {
     actions: { searchChangeHandler, searchSubmitHandler, setErrorMessage },
     state: { errorMessage, searchInput },
   } = searchBar;
+
+  const {
+    uiSettings,
+    notifications,
+    http,
+    docLinks,
+    data,
+    dataViews,
+    storage,
+    unifiedSearch,
+    usageCollection,
+  } = useAppDependencies();
 
   return (
     <EuiInputPopover
@@ -35,7 +49,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, search
         <QueryStringInput
           bubbleSubmitEvent={true}
           query={searchInput}
-          indexPatterns={[indexPattern]}
+          indexPatterns={[dataView]}
           onChange={searchChangeHandler}
           onSubmit={searchSubmitHandler}
           placeholder={
@@ -52,6 +66,18 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, search
           disableAutoFocus={true}
           dataTestSubj="transformQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
+          appName={PLUGIN.getI18nName()}
+          deps={{
+            unifiedSearch,
+            notifications,
+            http,
+            docLinks,
+            uiSettings,
+            data,
+            dataViews,
+            storage,
+            usageCollection,
+          }}
         />
       }
       isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}

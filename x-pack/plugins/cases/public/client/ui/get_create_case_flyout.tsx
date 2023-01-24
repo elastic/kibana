@@ -8,23 +8,38 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CreateCaseFlyoutProps } from '../../components/create/flyout';
-import { CasesProvider, CasesContextProps } from '../../components/cases_context';
+import type { CasesContextProps } from '../../components/cases_context';
+import { CasesProvider } from '../../components/cases_context';
 
-export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & CasesContextProps;
+type GetCreateCaseFlyoutPropsInternal = CreateCaseFlyoutProps & CasesContextProps;
+export type GetCreateCaseFlyoutProps = Omit<
+  GetCreateCaseFlyoutPropsInternal,
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
+>;
 
 export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
   () => import('../../components/create/flyout')
 );
 export const getCreateCaseFlyoutLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   features,
   afterCaseCreated,
   onClose,
   onSuccess,
   attachments,
-}: GetCreateCaseFlyoutProps) => (
-  <CasesProvider value={{ owner, userCanCrud, features }}>
+}: GetCreateCaseFlyoutPropsInternal) => (
+  <CasesProvider
+    value={{
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      permissions,
+      features,
+    }}
+  >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyoutLazy
         afterCaseCreated={afterCaseCreated}

@@ -6,18 +6,19 @@
  */
 
 import { createFieldAndSetTuples } from './create_field_and_set_tuples';
-import { mockLogger, sampleDocWithSortId } from '../__mocks__/es_results';
+import { sampleDocWithSortId } from '../__mocks__/es_results';
 
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import type { EntryList } from '@kbn/securitysolution-io-ts-list-types';
-import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
   let exceptionItem = getExceptionListItemSchemaMock();
   let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,10 +56,9 @@ describe('filterEventsAgainstList', () => {
     exceptionItem.entries = [];
     const field = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(field).toEqual([]);
   });
@@ -66,10 +66,9 @@ describe('filterEventsAgainstList', () => {
   test('it returns a single field and set tuple if entries has a single item', async () => {
     const field = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(field.length).toEqual(1);
   });
@@ -78,10 +77,9 @@ describe('filterEventsAgainstList', () => {
     (exceptionItem.entries[0] as EntryList).operator = 'included';
     const [{ operator }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(operator).toEqual('included');
   });
@@ -90,10 +88,9 @@ describe('filterEventsAgainstList', () => {
     (exceptionItem.entries[0] as EntryList).operator = 'excluded';
     const [{ operator }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(operator).toEqual('excluded');
   });
@@ -102,10 +99,9 @@ describe('filterEventsAgainstList', () => {
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ field }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(field).toEqual('source.ip');
   });
@@ -115,10 +111,9 @@ describe('filterEventsAgainstList', () => {
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ matchedSet }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1'])]);
   });
@@ -131,10 +126,9 @@ describe('filterEventsAgainstList', () => {
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ matchedSet }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
   });
@@ -144,10 +138,9 @@ describe('filterEventsAgainstList', () => {
     (exceptionItem.entries[0] as EntryList).field = 'source.ip';
     const [{ matchedSet }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1', '2.2.2.2'])]);
   });
@@ -179,10 +172,9 @@ describe('filterEventsAgainstList', () => {
     ];
     const fields = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(fields.length).toEqual(2);
   });
@@ -214,10 +206,9 @@ describe('filterEventsAgainstList', () => {
     ];
     const [{ operator: operator1 }, { operator: operator2 }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(operator1).toEqual('included');
     expect(operator2).toEqual('excluded');
@@ -250,10 +241,9 @@ describe('filterEventsAgainstList', () => {
     ];
     const [{ field: field1 }, { field: field2 }] = await createFieldAndSetTuples({
       listClient,
-      logger: mockLogger,
+      ruleExecutionLogger,
       events,
       exceptionItem,
-      buildRuleMessage,
     });
     expect(field1).toEqual('source.ip');
     expect(field2).toEqual('destination.ip');
@@ -287,10 +277,9 @@ describe('filterEventsAgainstList', () => {
     const [{ matchedSet: matchedSet1 }, { matchedSet: matchedSet2 }] =
       await createFieldAndSetTuples({
         listClient,
-        logger: mockLogger,
+        ruleExecutionLogger,
         events,
         exceptionItem,
-        buildRuleMessage,
       });
     expect([...matchedSet1]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
     expect([...matchedSet2]).toEqual([JSON.stringify(['3.3.3.3']), JSON.stringify(['5.5.5.5'])]);

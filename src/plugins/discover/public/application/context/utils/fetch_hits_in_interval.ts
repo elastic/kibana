@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../data/public';
+import { lastValueFrom } from 'rxjs';
+import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
+import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import { EsQuerySearchAfter } from './get_es_query_search_after';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;
@@ -22,7 +23,7 @@ interface RangeQuery {
  * Fetch the hits between a given `interval` up to a maximum of `maxCount` documents.
  * The documents are sorted by `sort`
  *
- * The `searchSource` is assumed to have the appropriate index pattern
+ * The `searchSource` is assumed to have the appropriate data view
  * and filters set.
  */
 export async function fetchHitsInInterval(
@@ -35,7 +36,7 @@ export async function fetchHitsInInterval(
   maxCount: number,
   nanosValue: string,
   anchorId: string
-): Promise<EsHitRecordList> {
+): Promise<DataTableRecord[]> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };
@@ -48,7 +49,7 @@ export async function fetchHitsInInterval(
   if (stop) {
     range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(stop, nanosValue);
   }
-  const response = await searchSource
+  const fetch$ = searchSource
     .setField('size', maxCount)
     .setField('query', {
       query: {
@@ -74,8 +75,11 @@ export async function fetchHitsInInterval(
     .setField('searchAfter', searchAfter)
     .setField('sort', sort)
     .setField('version', true)
-    .fetch();
+    .fetch$();
 
-  // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
-  return (response.hits?.hits as unknown as EsHitRecord[]) || [];
+  const { rawResponse } = await lastValueFrom(fetch$);
+  const dataView = searchSource.getField('index');
+  const records = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
+
+  return records ?? [];
 }

@@ -7,7 +7,7 @@
 
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
-import type { CoreSetup, Logger } from 'kibana/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';

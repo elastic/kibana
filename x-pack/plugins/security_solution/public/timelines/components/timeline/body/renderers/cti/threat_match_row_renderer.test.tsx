@@ -5,25 +5,36 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { TimelineId } from '../../../../../../../common/types';
+import { render } from '@testing-library/react';
 import React from 'react';
 
-import { getThreatMatchDetectionAlert } from '../../../../../../common/mock';
+import { getThreatMatchDetectionAlert, TestProviders } from '../../../../../../common/mock';
 
 import { threatMatchRowRenderer } from './threat_match_row_renderer';
+import { useKibana } from '../../../../../../common/lib/kibana';
+import { mockTimelines } from '../../../../../../common/mock/mock_timelines_plugin';
 
+jest.mock('../../../../../../common/lib/kibana');
 describe('threatMatchRowRenderer', () => {
   let threatMatchData: ReturnType<typeof getThreatMatchDetectionAlert>;
 
   beforeEach(() => {
     threatMatchData = getThreatMatchDetectionAlert();
+    (useKibana as jest.Mock).mockImplementation(() => {
+      return {
+        services: {
+          timelines: { ...mockTimelines },
+        },
+      };
+    });
   });
 
   describe('#isInstance', () => {
     it('is false for an empty event', () => {
       const emptyEvent = {
         _id: 'my_id',
-        '@timestamp': ['2020-11-17T14:48:08.922Z'],
+        '@timestamp': '2020-11-17T14:48:08.922Z',
       };
       expect(threatMatchRowRenderer.isInstance(emptyEvent)).toBe(false);
     });
@@ -52,15 +63,15 @@ describe('threatMatchRowRenderer', () => {
   });
 
   describe('#renderRow', () => {
-    it('renders correctly against snapshot', () => {
+    it('renders with minimum required props', () => {
       const children = threatMatchRowRenderer.renderRow({
-        browserFields: {},
         data: threatMatchData,
         isDraggable: true,
-        timelineId: 'test',
+        scopeId: TimelineId.test,
       });
-      const wrapper = shallow(<span>{children}</span>);
-      expect(wrapper).toMatchSnapshot();
+      const { getByTestId } = render(<TestProviders>{children}</TestProviders>);
+
+      expect(getByTestId('threat-match-details')).toBeInTheDocument();
     });
   });
 });

@@ -13,7 +13,7 @@ The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/
 
 Jira connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector.
 URL::       Jira instance URL.
 Project key:: Jira project key.
 Email::  The account email for HTTP Basic authentication.
@@ -54,7 +54,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-jira-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define Jira connector properties.
 

@@ -9,7 +9,7 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import { render } from '@testing-library/react';
 import { createMemoryHistory, Location, MemoryHistory } from 'history';
 import qs from 'query-string';
-import { RedirectWithDefaultEnvironment } from './';
+import { RedirectWithDefaultEnvironment } from '.';
 import { apmRouter } from '../../routing/apm_route_config';
 import * as useApmPluginContextExports from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';

@@ -8,22 +8,33 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { REPO_ROOT } from '@kbn/utils';
-import { exec, mkdirp, copyAll, Task } from '../lib';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { exec, Task } from '../lib';
 
 export const BuildKibanaExamplePlugins: Task = {
   description: 'Building distributable versions of Kibana example plugins',
   async run(config, log, build) {
-    const examplesDir = Path.resolve(REPO_ROOT, 'examples');
+    const pluginsDir = build.resolvePath('plugins');
     const args = [
-      '../../scripts/plugin_helpers',
+      Path.resolve(REPO_ROOT, 'scripts/plugin_helpers'),
       'build',
+      '--skip-archive',
       `--kibana-version=${config.getBuildVersion()}`,
     ];
 
-    const folders = Fs.readdirSync(examplesDir, { withFileTypes: true })
-      .filter((f) => f.isDirectory())
-      .map((f) => Path.resolve(REPO_ROOT, 'examples', f.name));
+    const getExampleFolders = (dir: string) => {
+      return Fs.readdirSync(dir, { withFileTypes: true })
+        .filter((f) => f.isDirectory())
+        .map((f) => Path.resolve(dir, f.name));
+    };
+
+    // https://github.com/elastic/kibana/issues/127338
+    const skipExamples = ['alerting_example'];
+
+    const folders = [
+      ...getExampleFolders(Path.resolve(REPO_ROOT, 'examples')),
+      ...getExampleFolders(Path.resolve(REPO_ROOT, 'x-pack/examples')),
+    ].filter((p) => !skipExamples.includes(Path.basename(p)));
 
     for (const examplePlugin of folders) {
       try {
@@ -33,15 +44,12 @@ export const BuildKibanaExamplePlugins: Task = {
           cwd: examplePlugin,
           level: 'info',
         });
+        log.info('Copying build to distribution');
+        const pluginBuild = Path.resolve(examplePlugin, 'build', 'kibana');
+        Fs.cpSync(pluginBuild, pluginsDir, { recursive: true });
       } catch (e) {
         log.info(`Skipping ${examplePlugin}, no kibana.json`);
       }
     }
-
-    const pluginsDir = config.resolveFromTarget('example_plugins');
-    await mkdirp(pluginsDir);
-    await copyAll(examplesDir, pluginsDir, {
-      select: ['*/build/*.zip'],
-    });
   },
 };

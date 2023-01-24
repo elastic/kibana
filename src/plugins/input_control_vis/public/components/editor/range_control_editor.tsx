@@ -11,11 +11,11 @@ import React, { Component, Fragment, ComponentType } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPatternSelectProps } from '../../../../data/public';
-import { DataView, DataViewField } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface RangeControlEditorProps {
@@ -53,9 +53,9 @@ export class RangeControlEditor extends Component<
   }
 
   async getIndexPatternSelect() {
-    const [, { data }] = await this.props.deps.core.getStartServices();
+    const [, { unifiedSearch }] = await this.props.deps.core.getStartServices();
     this.setState({
-      IndexPatternSelect: data.ui.IndexPatternSelect,
+      IndexPatternSelect: unifiedSearch.ui.IndexPatternSelect,
     });
   }
 

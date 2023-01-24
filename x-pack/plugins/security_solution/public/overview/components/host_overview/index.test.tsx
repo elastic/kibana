@@ -11,98 +11,101 @@ import React from 'react';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
-import { HostOverview } from './index';
+import { HostOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useHostRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../explore/containers/risk_score/all';
 
-jest.mock('../../../risk_score/containers/all', () => ({
-  useHostRiskScore: jest.fn().mockReturnValue([
-    true,
-    {
-      data: [],
-      isModuleEnabled: false,
-    },
-  ]),
-}));
+const defaultProps = {
+  data: undefined,
+  inspect: null,
+  refetch: () => {},
+  isModuleEnabled: true,
+  isLicenseValid: true,
+  loading: true,
+};
+
+jest.mock('../../../explore/containers/risk_score/all');
+
+const mockUseRiskScore = useRiskScore as jest.Mock;
 
 describe('Host Summary Component', () => {
-  describe('rendering', () => {
-    const mockProps = {
-      anomaliesData: mockAnomalies,
-      data: mockData.Hosts.edges[0].node,
-      docValueFields: [],
-      endDate: '2019-06-18T06:00:00.000Z',
-      id: 'hostOverview',
-      indexNames: [],
-      isInDetailsSidePanel: false,
-      isLoadingAnomaliesData: false,
-      loading: false,
-      narrowDateRange: jest.fn(),
-      startDate: '2019-06-15T06:00:00.000Z',
-      hostName: 'testHostName',
+  const mockProps = {
+    anomaliesData: mockAnomalies,
+    data: mockData.Hosts.edges[0].node,
+    endDate: '2019-06-18T06:00:00.000Z',
+    id: 'hostOverview',
+    indexNames: [],
+    isInDetailsSidePanel: false,
+    isLoadingAnomaliesData: false,
+    loading: false,
+    narrowDateRange: jest.fn(),
+    startDate: '2019-06-15T06:00:00.000Z',
+    hostName: 'testHostName',
+    jobNameById: {},
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
+  });
+
+  test('it renders the default Host Summary', () => {
+    const wrapper = shallow(
+      <TestProviders>
+        <HostOverview {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+  });
+
+  test('it renders the panel view Host Summary', () => {
+    const panelViewProps = {
+      ...mockProps,
+      isInDetailsSidePanel: true,
     };
 
-    test('it renders the default Host Summary', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <HostOverview {...mockProps} />
-        </TestProviders>
-      );
+    const wrapper = shallow(
+      <TestProviders>
+        <HostOverview {...panelViewProps} />
+      </TestProviders>
+    );
 
-      expect(wrapper.find('HostOverview')).toMatchSnapshot();
-    });
+    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+  });
 
-    test('it renders the panel view Host Summary', () => {
-      const panelViewProps = {
-        ...mockProps,
-        isInDetailsSidePanel: true,
-      };
-
-      const wrapper = shallow(
-        <TestProviders>
-          <HostOverview {...panelViewProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('HostOverview')).toMatchSnapshot();
-    });
-
-    test('it renders host risk score and level', () => {
-      const panelViewProps = {
-        ...mockProps,
-        isInDetailsSidePanel: true,
-      };
-      const risk = 'very high hos risk';
-      const riskScore = 9999999;
-
-      (useHostRiskScore as jest.Mock).mockReturnValue([
-        false,
+  test('it renders host risk score and level', () => {
+    const panelViewProps = {
+      ...mockProps,
+      isInDetailsSidePanel: true,
+    };
+    const risk = 'very high host risk';
+    const riskScore = 9999999;
+    mockUseRiskScore.mockReturnValue({
+      ...defaultProps,
+      loading: false,
+      data: [
         {
-          data: [
-            {
-              host: {
-                name: 'testHostmame',
-              },
-              risk,
-              risk_stats: {
-                rule_risks: [],
-                risk_score: riskScore,
-              },
+          host: {
+            name: 'testHostmame',
+            risk: {
+              rule_risks: [],
+              calculated_score_norm: riskScore,
+              calculated_level: risk,
             },
-          ],
-          isModuleEnabled: true,
+          },
         },
-      ]);
-
-      const { getByTestId } = render(
-        <TestProviders>
-          <HostOverview {...panelViewProps} />
-        </TestProviders>
-      );
-
-      expect(getByTestId('host-risk-overview')).toHaveTextContent(risk);
-      expect(getByTestId('host-risk-overview')).toHaveTextContent(riskScore.toString());
+      ],
     });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostOverview {...panelViewProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('host-risk-overview')).toHaveTextContent(risk);
+    expect(getByTestId('host-risk-overview')).toHaveTextContent(riskScore.toString());
   });
 });

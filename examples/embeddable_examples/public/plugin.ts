@@ -10,8 +10,9 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
-} from '../../../src/plugins/embeddable/public';
-import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '../../../src/core/public';
+} from '@kbn/embeddable-plugin/public';
+import { Plugin, CoreSetup, CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -40,15 +41,14 @@ import {
   TodoRefEmbeddableFactory,
   TodoRefEmbeddableFactoryDefinition,
 } from './todo/todo_ref_embeddable_factory';
-import { createEditBookAction } from './book/edit_book_action';
+import { createEditBookActionDefinition } from './book/edit_book_action';
 import { BOOK_EMBEDDABLE } from './book/book_embeddable';
 import {
   BookEmbeddableFactory,
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
-import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
+import { createAddBookToLibraryActionDefinition } from './book/add_book_to_library_action';
+import { createUnlinkBookFromLibraryActionDefinition } from './book/unlink_book_from_library_action';
 import {
   SIMPLE_EMBEDDABLE,
   SimpleEmbeddableFactory,
@@ -62,7 +62,7 @@ export interface EmbeddableExamplesSetupDependencies {
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface ExampleEmbeddableFactories {
@@ -157,7 +157,7 @@ export class EmbeddableExamplesPlugin
         }))
       );
 
-    const editBookAction = createEditBookAction(async () => ({
+    const editBookAction = createEditBookActionDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
       openModal: (await core.getStartServices())[0].overlays.openModal,
       savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
@@ -165,11 +165,11 @@ export class EmbeddableExamplesPlugin
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
 
-    const addBookToLibraryAction = createAddBookToLibraryAction();
+    const addBookToLibraryAction = createAddBookToLibraryActionDefinition();
     deps.uiActions.registerAction(addBookToLibraryAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
 
-    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryAction();
+    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryActionDefinition();
     deps.uiActions.registerAction(unlinkBookFromLibraryAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
   }

@@ -7,13 +7,14 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IRouter, Logger, SavedObjectsClient } from 'kibana/server';
-import type { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import type { IRouter, Logger, SavedObjectsClient } from '@kbn/core/server';
+import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { TelemetryConfigType } from '../config';
+import { registerTelemetryConfigRoutes } from './telemetry_config';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
-import { registerTelemetryUsageStatsRoutes, SecurityGetter } from './telemetry_usage_stats';
+import { registerTelemetryUsageStatsRoutes, type SecurityGetter } from './telemetry_usage_stats';
 import { registerTelemetryOptInStatsRoutes } from './telemetry_opt_in_stats';
 import { registerTelemetryUserHasSeenNotice } from './telemetry_user_has_seen_notice';
-import type { TelemetryConfigType } from '../config';
 import { registerTelemetryLastReported } from './telemetry_last_reported';
 
 interface RegisterRoutesParams {
@@ -31,6 +32,7 @@ export function registerRoutes(options: RegisterRoutesParams) {
   const { isDev, telemetryCollectionManager, router, savedObjectsInternalClient$, getSecurity } =
     options;
   registerTelemetryOptInRoutes(options);
+  registerTelemetryConfigRoutes(options);
   registerTelemetryUsageStatsRoutes(router, telemetryCollectionManager, isDev, getSecurity);
   registerTelemetryOptInStatsRoutes(router, telemetryCollectionManager);
   registerTelemetryUserHasSeenNotice(router);

@@ -20,6 +20,8 @@ const allGenericInputKeys: Readonly<Array<keyof EmbeddableInput>> = [
   'disableTriggers',
   'enhancements',
   'syncColors',
+  'syncCursor',
+  'syncTooltips',
   'viewMode',
   'title',
   'id',
@@ -31,6 +33,8 @@ const genericInputKeysToCompare = [
   'disableTriggers',
   'enhancements',
   'syncColors',
+  'syncCursor',
+  'syncTooltips',
   'title',
   'id',
 ] as const;

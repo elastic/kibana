@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleParams } from '../../../schemas/rule_schemas';
+import type { Logger } from '@kbn/core/server';
+import type { RuleParams } from '../../../rule_schema';
+
+type Keys = keyof RuleParams;
+type PossibleRuleParamValues = RuleParams[Keys];
 
 /**
  * This will log a warning that we are missing an object reference.
  * @param logger The kibana injected logger
- * @param exceptionItem The exception item to log the warning out as
+ * @param missingFieldValue The value of the field not found in saved object references
+ * @param missingField The name of the field not found in saved object references
  */
 export const logMissingSavedObjectError = ({
   logger,
-  exceptionItem,
+  missingFieldValue,
+  missingField,
 }: {
   logger: Logger;
-  exceptionItem: RuleParams['exceptionsList'][0];
+  missingFieldValue: PossibleRuleParamValues;
+  missingField: string;
 }): void => {
   logger.error(
     [
-      'The saved object references were not found for our exception list when we were expecting to find it. ',
+      `The saved object references were not found for our ${missingField} when we were expecting to find it. `,
       'Kibana migrations might not have run correctly or someone might have removed the saved object references manually. ',
-      'Returning the last known good exception list id which might not work. exceptionItem with its id being returned is: ',
-      JSON.stringify(exceptionItem),
+      `Returning the last known good ${missingField} which might not work. Value being returned is: `,
+      JSON.stringify(missingFieldValue),
     ].join('')
   );
 };

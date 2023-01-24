@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
-import { PolicyConfig } from '../../../common/endpoint/types';
-import { LicenseService } from '../../../common/license';
+import type { PolicyConfig } from '../../../common/endpoint/types';
+import type { LicenseService } from '../../../common/license';
 
 export const validatePolicyAgainstLicense = (
   policyConfig: PolicyConfig,

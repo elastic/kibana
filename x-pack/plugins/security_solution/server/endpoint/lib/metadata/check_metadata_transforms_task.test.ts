@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CheckMetadataTransformsTask,
   TYPE,
@@ -14,24 +14,21 @@ import {
   BASE_NEXT_ATTEMPT_DELAY,
 } from './check_metadata_transforms_task';
 import { createMockEndpointAppContext } from '../../mocks';
-import { coreMock } from '../../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../../task_manager/server/mocks';
-import { TaskManagerSetupContract, TaskStatus } from '../../../../../task_manager/server';
-import { CoreSetup } from '../../../../../../../src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
-import { RunResult } from '../../../../../task_manager/server/task';
-import {
-  ElasticsearchAssetType,
-  EsAssetReference,
-  Installation,
-} from '../../../../../fleet/common';
+import type { RunResult } from '@kbn/task-manager-plugin/server/task';
+import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
 import type { EndpointAppContext } from '../../types';
-import type { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
-import type { PackageClient } from '../../../../../fleet/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { PackageClient } from '@kbn/fleet-plugin/server';
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -280,7 +277,7 @@ describe('check metadata transforms task', () => {
     });
 
     describe('transforms reinstall', () => {
-      let getRegistryPackageSpy: jest.SpyInstance;
+      let getPackageSpy: jest.SpyInstance;
       let reinstallEsAssetsSpy: jest.SpyInstance;
       let mockPackageClient: jest.Mocked<PackageClient>;
 
@@ -294,7 +291,7 @@ describe('check metadata transforms task', () => {
 
         mockPackageClient = mockEndpointAppContext.service.getInternalFleetServices()
           .packages as jest.Mocked<PackageClient>;
-        getRegistryPackageSpy = jest.spyOn(mockPackageClient, 'getRegistryPackage');
+        getPackageSpy = jest.spyOn(mockPackageClient, 'getPackage');
         reinstallEsAssetsSpy = jest.spyOn(mockPackageClient, 'reinstallEsAssets');
 
         const transformStatsResponseMock = {
@@ -316,7 +313,7 @@ describe('check metadata transforms task', () => {
           packageInfo: { name: 'package name' },
           paths: ['some/test/transform/path'],
         };
-        getRegistryPackageSpy.mockResolvedValue(expectedArgs);
+        getPackageSpy.mockResolvedValue(expectedArgs);
         reinstallEsAssetsSpy.mockResolvedValue([{}]);
         await runTask();
 
@@ -341,7 +338,7 @@ describe('check metadata transforms task', () => {
       });
 
       it('should return correct runAt', async () => {
-        getRegistryPackageSpy.mockResolvedValue({
+        getPackageSpy.mockResolvedValue({
           packageInfo: { name: 'package name' },
           paths: ['some/test/transform/path'],
         });

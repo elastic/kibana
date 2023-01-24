@@ -7,7 +7,7 @@
  */
 
 import { sortFilters } from './sort_filters';
-import { FilterStateStore, buildQueryFilter } from '../../../../common';
+import { FilterStateStore, buildQueryFilter } from '@kbn/es-query';
 
 describe('sortFilters', () => {
   describe('sortFilters()', () => {

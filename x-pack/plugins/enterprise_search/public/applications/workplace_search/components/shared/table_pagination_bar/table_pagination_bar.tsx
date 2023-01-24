@@ -15,7 +15,7 @@ interface TablePaginationBarProps {
   totalPages: number;
   totalItems: number;
   activePage?: number;
-  hidePerPageOptions?: boolean;
+  showPerPageOptions?: boolean;
   hideLabelCount?: boolean;
   clearFiltersLink?: React.ReactElement;
   onChangePage(nextPage: number): void;
@@ -29,7 +29,7 @@ export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
   totalPages,
   totalItems,
   activePage = 1,
-  hidePerPageOptions = true,
+  showPerPageOptions = false,
   hideLabelCount = false,
   onChangePage,
   clearFiltersLink,
@@ -71,7 +71,7 @@ export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
       {!hideLabelCount && <EuiFlexItem>{pageRangeText()}</EuiFlexItem>}
       <EuiFlexItem>
         <EuiTablePagination
-          hidePerPageOptions={hidePerPageOptions}
+          showPerPageOptions={showPerPageOptions}
           activePage={currentPage}
           itemsPerPage={itemsPerPage}
           pageCount={showAllPages ? totalPages : MAX_PAGES}

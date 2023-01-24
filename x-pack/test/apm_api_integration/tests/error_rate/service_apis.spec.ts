@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -41,6 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         params: {
           query: {
             ...commonQuery,
+            probability: 1,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
           },
         },
@@ -113,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
@@ -121,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_ID_ERROR_RATE = 50;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
         const transactionNameProductList = 'GET /api/product/list';
@@ -131,46 +132,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductList)
+                .transaction({ transactionName: transactionNameProductList })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
-                .serialize()
             ),
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_ERROR_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductList)
+                .transaction({ transactionName: transactionNameProductList })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
-                .serialize()
             ),
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductId)
+                .transaction({ transactionName: transactionNameProductId })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
-                .serialize()
             ),
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_ERROR_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductId)
+                .transaction({ transactionName: transactionNameProductId })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
-                .serialize()
             ),
         ]);
       });

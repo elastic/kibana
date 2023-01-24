@@ -7,20 +7,22 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
-  getServiceNowConnector,
-  createConnector,
   createConfiguration,
   getConfiguration,
   getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
-  getServiceNowSimulationServer,
 } from '../../../../common/lib/utils';
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import {
+  getServiceNowConnector,
+  getServiceNowSimulationServer,
+  createConnector,
+} from '../../../../common/lib/connectors';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

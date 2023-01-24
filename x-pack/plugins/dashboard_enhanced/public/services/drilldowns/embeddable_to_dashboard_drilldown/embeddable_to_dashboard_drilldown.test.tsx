@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type { Filter, RangeFilter } from '@kbn/es-query';
+import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
-import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
-import { FilterStateStore, Query, TimeRange } from '../../../../../../../src/plugins/data/common';
-import { ApplyGlobalFilterActionContext } from '../../../../../../../src/plugins/data/public';
-import {
-  DashboardAppLocatorDefinition,
-  DashboardAppLocatorParams,
-} from '../../../../../../../src/plugins/dashboard/public/locator';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
 import { StartDependencies } from '../../../plugin';
-import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
-import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
+import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
+import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public/dashboard_app/locator/locator';
 
 describe('.isConfigValid()', () => {
   const drilldown = new EmbeddableToDashboardDrilldown({} as any);

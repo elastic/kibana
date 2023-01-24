@@ -2,12 +2,12 @@
   "id": "enterpriseSearch",
   "version": "kibana",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["features", "spaces", "security", "licensing", "data", "charts", "infra", "cloud"],
+  "requiredPlugins": ["features", "spaces", "security", "licensing", "data", "discover", "charts", "infra", "cloud", "esUiShared", "guidedOnboarding"],
   "configPath": ["enterpriseSearch"],
-  "optionalPlugins": ["usageCollection", "home", "cloud", "customIntegrations"],
+  "optionalPlugins": ["usageCollection", "home", "customIntegrations", "ml"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home", "kibanaReact"],
+  "requiredBundles": ["kibanaReact", "cloudChat"],
   "owner": {
     "name": "Enterprise Search",
     "githubTeam": "enterprise-search-frontend"

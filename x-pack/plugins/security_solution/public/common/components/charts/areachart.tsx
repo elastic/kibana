@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  Axis,
-  AreaSeries,
-  Chart,
-  Position,
-  ScaleType,
-  Settings,
-  AreaSeriesStyle,
-  RecursivePartial,
-} from '@elastic/charts';
+import React, { useMemo } from 'react';
+import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
+import { Axis, AreaSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 
+import { EuiFlexItem } from '@elastic/eui';
 import { useThrottledResizeObserver } from '../utils';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../lib/kibana';
+import type { ChartSeriesConfigs, ChartSeriesData } from './common';
 import {
   chartDefaultSettings,
-  ChartSeriesConfigs,
-  ChartSeriesData,
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
   useTheme,
+  Wrapper,
+  ChartWrapper,
 } from './common';
+import { VisualizationActions } from '../visualization_actions';
+import type { VisualizationActionsProps } from '../visualization_actions/types';
+
+import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 // custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
@@ -138,21 +138,47 @@ AreaChartBase.displayName = 'AreaChartBase';
 interface AreaChartComponentProps {
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
+  visualizationActionsOptions?: VisualizationActionsProps;
 }
 
-export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChart, configs }) => {
+export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
+  areaChart,
+  configs,
+  visualizationActionsOptions,
+}) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
   const chartWidth = getChartWidth(customWidth, width);
 
-  return checkIfAnyValidSeriesExist(areaChart) ? (
-    <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
-      <AreaChartBase data={areaChart} height={chartHeight} width={chartWidth} configs={configs} />
-    </WrappedByAutoSizer>
-  ) : (
-    <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
+  const isValidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(areaChart), [areaChart]);
+
+  return (
+    <Wrapper>
+      <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
+        {isValidSeriesExist && areaChart && (
+          <ChartWrapper gutterSize="none">
+            <EuiFlexItem grow={true}>
+              <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
+                <AreaChartBase
+                  data={areaChart}
+                  height={chartHeight}
+                  width={chartWidth}
+                  configs={configs}
+                />
+              </WrappedByAutoSizer>
+            </EuiFlexItem>
+          </ChartWrapper>
+        )}
+        {!isValidSeriesExist && (
+          <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />
+        )}
+        {visualizationActionsOptions != null && (
+          <VisualizationActions {...visualizationActionsOptions} className="viz-actions" />
+        )}
+      </HoverVisibilityContainer>
+    </Wrapper>
   );
 };
 

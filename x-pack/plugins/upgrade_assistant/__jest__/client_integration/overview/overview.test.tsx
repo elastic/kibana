@@ -10,15 +10,9 @@ import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
-  const { server } = setupEnvironment();
-
   beforeEach(async () => {
-    testBed = await setupOverviewPage();
+    testBed = await setupOverviewPage(setupEnvironment().httpSetup);
     testBed.component.update();
-  });
-
-  afterAll(() => {
-    server.restore();
   });
 
   describe('Documentation links', () => {
@@ -26,7 +20,7 @@ describe('Overview Page', () => {
       const { exists, find } = testBed;
 
       expect(exists('whatsNewLink')).toBe(true);
-      expect(find('whatsNewLink').text()).toContain('8');
+      expect(find('whatsNewLink').text()).toContain('latest release');
     });
 
     test('Has a link for upgrade assistant in page header', () => {

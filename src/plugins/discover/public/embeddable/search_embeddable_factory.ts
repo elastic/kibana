@@ -7,26 +7,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
-} from '../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 
-import { TimeRange } from '../../../data/public';
+import type { TimeRange } from '@kbn/es-query';
 
-import { SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import {
   getSavedSearch,
   getSavedSearchUrl,
   throwErrorOnSavedSearchUrlConflict,
-} from '../services/saved_searches';
+} from '@kbn/saved-search-plugin/public';
+import { SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
 
-interface StartServices {
+export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
   isEditable: () => boolean;
 }
@@ -76,11 +76,12 @@ export class SearchEmbeddableFactory
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
       await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
-      const indexPattern = savedSearch.searchSource.getField('index');
+      const dataView = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
@@ -92,7 +93,7 @@ export class SearchEmbeddableFactory
           editPath: url,
           filterManager,
           editable: services.capabilities.discover.save as boolean,
-          indexPatterns: indexPattern ? [indexPattern] : [],
+          indexPatterns: dataView ? [dataView] : [],
           services,
         },
         input,

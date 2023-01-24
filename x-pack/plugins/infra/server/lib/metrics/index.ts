@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
-import { MetricsAPIRequest, MetricsAPIResponse, afterKeyObjectRT } from '../../../common/http_api';
+import { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api';
 import {
   ESSearchClient,
-  GroupingResponseRT,
+  CompositeResponseRT,
   MetricsESResponse,
-  HistogramResponseRT,
+  AggregationResponseRT,
+  AggregationResponse,
+  CompositeResponse,
+  HistogramBucketRT,
 } from './types';
 import { EMPTY_RESPONSE } from './constants';
-import { createAggregations } from './lib/create_aggregations';
-import { convertHistogramBucketsToTimeseries } from './lib/convert_histogram_buckets_to_timeseries';
+import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
+import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';
 import { calculateBucketSize } from './lib/calculate_bucket_size';
 import { calculatedInterval } from './lib/calculate_interval';
+
+const DEFAULT_LIMIT = 9;
 
 export const query = async (
   search: ESSearchClient,
   rawOptions: MetricsAPIRequest
 ): Promise<MetricsAPIResponse> => {
   const interval = await calculatedInterval(search, rawOptions);
+
   const options = {
     ...rawOptions,
     timerange: {
@@ -53,24 +58,10 @@ export const query = async (
     index: options.indexPattern,
     body: {
       size: 0,
-      query: { bool: { filter } },
-      aggs: { ...createAggregations(options) },
+      query: { bool: { filter: [...filter, ...(options.filters ?? [])] } },
+      aggs: hasGroupBy ? createCompositeAggregations(options) : createAggregations(options),
     },
   };
-
-  if (hasGroupBy) {
-    if (options.afterKey) {
-      if (afterKeyObjectRT.is(options.afterKey)) {
-        set(params, 'body.aggs.groupings.composite.after', options.afterKey);
-      } else {
-        set(params, 'body.aggs.groupings.composite.after', { groupBy0: options.afterKey });
-      }
-    }
-  }
-
-  if (options.filters) {
-    params.body.query.bool.filter = [...params.body.query.bool.filter, ...options.filters];
-  }
 
   const response = await search<{}, MetricsESResponse>(params);
 
@@ -84,50 +75,56 @@ export const query = async (
 
   const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
 
-  if (hasGroupBy && GroupingResponseRT.is(response.aggregations)) {
-    const { groupings } = response.aggregations;
-    const { after_key: afterKey } = groupings;
-    const limit = options.limit || 9;
-    const returnAfterKey = afterKey && groupings.buckets.length === limit ? true : false;
+  if (hasGroupBy) {
+    const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
+    const { groupings } = aggregations;
+    const limit = options.limit ?? DEFAULT_LIMIT;
+    const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
+    const afterKey = returnAfterKey ? groupings.after_key : null;
+
     return {
-      series: groupings.buckets.map((bucket) => {
-        const keys = Object.values(bucket.key);
-        const metricsetNames = bucket.metricsets.buckets.map((m) => m.key);
-        const timeseries = convertHistogramBucketsToTimeseries(
-          keys,
-          options,
-          bucket.histogram.buckets,
-          bucketSize * 1000
-        );
-        return { ...timeseries, metricsets: metricsetNames };
-      }),
+      series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
       info: {
-        afterKey: returnAfterKey ? afterKey : null,
-        interval: bucketSize,
+        afterKey,
+        interval: rawOptions.includeTimeseries ? bucketSize : undefined,
       },
     };
-  } else if (hasGroupBy) {
-    ThrowReporter.report(GroupingResponseRT.decode(response.aggregations));
   }
 
-  if (HistogramResponseRT.is(response.aggregations)) {
-    return {
-      series: [
-        convertHistogramBucketsToTimeseries(
-          ['*'],
-          options,
-          response.aggregations.histogram.buckets,
-          bucketSize * 1000
-        ),
-      ],
-      info: {
-        afterKey: null,
-        interval: bucketSize,
-      },
-    };
-  } else {
-    ThrowReporter.report(HistogramResponseRT.decode(response.aggregations));
-  }
+  const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
+  return {
+    series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
+    info: {
+      afterKey: null,
+      interval: bucketSize,
+    },
+  };
+};
 
-  throw new Error('Elasticsearch responded with an unrecognized format.');
+const getSeriesFromHistogram = (
+  aggregations: AggregationResponse,
+  options: MetricsAPIRequest,
+  bucketSize: number
+): MetricsAPIResponse['series'] => {
+  return [
+    convertBucketsToMetricsApiSeries(['*'], options, aggregations.histogram.buckets, bucketSize),
+  ];
+};
+
+const getSeriesFromCompositeAggregations = (
+  groupings: CompositeResponse['groupings'],
+  options: MetricsAPIRequest,
+  bucketSize: number
+): MetricsAPIResponse['series'] => {
+  return groupings.buckets.map((bucket) => {
+    const keys = Object.values(bucket.key);
+    const metricsetNames = bucket.metricsets.buckets.map((m) => m.key);
+    const metrics = convertBucketsToMetricsApiSeries(
+      keys,
+      options,
+      HistogramBucketRT.is(bucket) ? bucket.histogram.buckets : [bucket],
+      bucketSize
+    );
+    return { ...metrics, metricsets: metricsetNames };
+  });
 };

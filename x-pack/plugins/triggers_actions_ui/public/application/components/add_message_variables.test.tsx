@@ -28,7 +28,7 @@ describe('AddMessageVariables', () => {
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
 
     expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').first().text()
+      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
     ).toEqual('{{myVar}}');
   });
 
@@ -51,7 +51,7 @@ describe('AddMessageVariables', () => {
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
 
     expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').first().text()
+      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
     ).toEqual('{{{myVar}}}');
   });
 
@@ -76,10 +76,7 @@ describe('AddMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper
-      .find('[data-test-subj="variableMenuButton-1-templated-name"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-1-templated-name"]').last().simulate('click');
 
     expect(onSelectEventHandler).toHaveBeenCalledTimes(1);
     expect(onSelectEventHandler).toHaveBeenCalledWith({
@@ -128,5 +125,23 @@ describe('AddMessageVariables', () => {
     );
 
     expect(wrapper.find('[data-test-subj="fooAddVariableButton"]')).toHaveLength(0);
+  });
+
+  test('it renders button title when passed', () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+          },
+        ]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+        showButtonTitle
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="fooAddVariableButton-Title"]').exists()).toEqual(true);
   });
 });

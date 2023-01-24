@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { CaseConnectorsRegistry } from './types';
+import type { CaseConnectorsRegistry } from './types';
 import { createCaseConnectorsRegistry } from './connectors_registry';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
 import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
+import { getCaseConnector as getCasesWebhookCaseConnector } from './cases_webhook';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
-import {
+import type {
   JiraFieldsType,
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
@@ -41,6 +42,7 @@ class CaseConnectors {
     );
     this.caseConnectorsRegistry.register<ServiceNowSIRFieldsType>(getServiceNowSIRCaseConnector());
     this.caseConnectorsRegistry.register<SwimlaneFieldsType>(getSwimlaneCaseConnector());
+    this.caseConnectorsRegistry.register<null>(getCasesWebhookCaseConnector());
   }
 
   registry(): CaseConnectorsRegistry {

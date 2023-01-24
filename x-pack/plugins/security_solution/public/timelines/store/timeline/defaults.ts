@@ -8,14 +8,14 @@
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
-import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
-import { SubsetTimelineModel, TimelineModel } from './model';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
+import type { SubsetTimelineModel, TimelineModel } from './model';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
 export const timelineDefaults: SubsetTimelineModel &
-  Pick<TimelineModel, 'filters' | 'eqlOptions' | 'resolveTimelineConfig'> = {
+  Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
@@ -24,7 +24,6 @@ export const timelineDefaults: SubsetTimelineModel &
   dataProviders: [],
   dataViewId: null,
   dateRange: { start, end },
-  deletedEventIds: [],
   description: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
@@ -39,11 +38,9 @@ export const timelineDefaults: SubsetTimelineModel &
   expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
-  filters: [],
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isSelectAllChecked: false,
   isLoading: false,
   isSaving: false,
   itemsPerPage: 25,
@@ -64,16 +61,31 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventsSaveObject: {},
   savedObjectId: null,
   selectAll: false,
-  selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
-  showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],
   status: TimelineStatus.draft,
   version: null,
+  deletedEventIds: [],
+  selectedEventIds: {},
+  isSelectAllChecked: false,
+  filters: [],
 };
+
+export const getTimelineManageDefaults = (id: string) => ({
+  defaultColumns: defaultHeaders,
+  documentType: '',
+  selectAll: false,
+  id,
+  isLoading: false,
+  queryFields: [],
+  title: '',
+  graphEventId: '',
+});

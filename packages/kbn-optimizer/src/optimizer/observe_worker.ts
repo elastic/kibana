@@ -8,7 +8,7 @@
 
 import { inspect } from 'util';
 
-import execa from 'execa';
+import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
 import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
@@ -31,7 +31,7 @@ export interface WorkerStarted {
 export type WorkerStatus = WorkerStdio | WorkerStarted;
 
 interface ProcResource extends Rx.Unsubscribable {
-  proc: execa.ExecaChildProcess;
+  proc: ChildProcess;
 }
 const isNumeric = (input: any) => String(input).match(/^[0-9]+$/);
 
@@ -55,32 +55,19 @@ if (inspectFlagIndex !== -1) {
   }
 }
 
-function usingWorkerProc<T>(
-  config: OptimizerConfig,
-  fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
-) {
+function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) => Rx.Observable<T>) {
   return Rx.using(
     (): ProcResource => {
-      const workerPath = require.resolve('../worker/run_worker');
-      const proc = execa.node(
-        workerPath.endsWith('.ts')
-          ? require.resolve('../worker/run_worker_from_source') // workerFromSourcePath
-          : workerPath,
-        [],
-        {
-          nodeOptions: [
-            '--preserve-symlinks',
-            '--preserve-symlinks-main',
-            ...(inspectFlag && config.inspectWorkers
-              ? [`${inspectFlag}=${inspectPortCounter++}`]
-              : []),
-            ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
-          ],
-          buffer: false,
-          stderr: 'pipe',
-          stdout: 'pipe',
-        }
-      );
+      const proc = fork(require.resolve('../worker/run_worker'), [], {
+        execArgv: [
+          '--openssl-legacy-provider',
+          `--require=@kbn/babel-register/install`,
+          ...(inspectFlag && config.inspectWorkers
+            ? [`${inspectFlag}=${inspectPortCounter++}`]
+            : []),
+        ],
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+      });
 
       return {
         proc,
@@ -105,7 +92,7 @@ function usingWorkerProc<T>(
  * be initialized in the worker before most of the code is run.
  */
 function initWorker(
-  proc: execa.ExecaChildProcess,
+  proc: ChildProcess,
   config: OptimizerConfig,
   workerConfig: WorkerConfig,
   bundles: Bundle[]
@@ -159,7 +146,7 @@ export function observeWorker(
     let lastMsg: WorkerMsg;
     const worker$: Rx.Observable<WorkerMsg | WorkerStatus> = Rx.merge(
       Rx.of({
-        type: 'worker started',
+        type: 'worker started' as const,
         bundles,
       }),
       // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null

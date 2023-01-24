@@ -6,76 +6,87 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import {
-  Plugin,
   CoreSetup,
   CoreStart,
+  Plugin,
   PluginInitializerContext,
   StartServicesAccessor,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import type { ISearchSetup, ISearchStart } from './types';
-
-import { handleResponse } from './fetch';
 import {
-  kibana,
-  kibanaContext,
-  ISearchGeneric,
-  SearchSourceDependencies,
-  SearchSourceService,
-  extendedBoundsFunction,
-  ipRangeFunction,
-  kibanaTimerangeFunction,
-  luceneFunction,
-  kqlFunction,
-  fieldFunction,
-  numericalRangeFunction,
-  rangeFunction,
   cidrFunction,
   dateRangeFunction,
+  eqlRawResponse,
+  esRawResponse,
   existsFilterFunction,
+  extendedBoundsFunction,
+  fieldFunction,
   geoBoundingBoxFunction,
   geoPointFunction,
+  ipRangeFunction,
+  ISearchGeneric,
+  kibana,
+  kibanaContext,
+  kibanaFilterFunction,
+  kibanaTimerangeFunction,
+  kqlFunction,
+  luceneFunction,
+  numericalRangeFunction,
+  phraseFilterFunction,
   queryFilterFunction,
   rangeFilterFunction,
+  rangeFunction,
   removeFilterFunction,
+  SearchRequest,
+  SearchSourceDependencies,
+  SearchSourceService,
   selectFilterFunction,
-  kibanaFilterFunction,
-  phraseFilterFunction,
-  esRawResponse,
-  eqlRawResponse,
 } from '../../common/search';
-import { AggsService, AggsStartDependencies } from './aggs';
-import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
-import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { SearchUsageCollector, createUsageCollector } from './collectors';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
-import { ExpressionsSetup } from '../../../expressions/public';
-import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
-import { ConfigSchema } from '../../config';
 import {
-  SHARD_DELAY_AGG_NAME,
   getShardDelayBucketAgg,
+  SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { ConfigSchema } from '../../config';
 import { NowProviderInternalContract } from '../now_provider';
+import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { AggsService } from './aggs';
+import { createUsageCollector, SearchUsageCollector } from './collectors';
+import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
+import { handleWarnings } from './fetch/handle_warnings';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
+import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
+import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
+import { createConnectedSearchSessionIndicator } from './session/session_indicator';
+import { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
   bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
+  management: ManagementSetup;
   nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
 export interface SearchServiceStartDependencies {
-  fieldFormats: AggsStartDependencies['fieldFormats'];
-  indexPatterns: IndexPatternsContract;
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: DataViewsContract;
+  screenshotMode: ScreenshotModePluginStart;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -89,9 +100,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
-    { http, getStartServices, notifications, uiSettings, executionContext, theme }: CoreSetup,
-    { bfetch, expressions, usageCollection, nowProvider }: SearchServiceSetupDependencies
+    core: CoreSetup,
+    {
+      bfetch,
+      expressions,
+      usageCollection,
+      nowProvider,
+      management,
+    }: SearchServiceSetupDependencies
   ): ISearchSetup {
+    const { http, getStartServices, notifications, uiSettings, executionContext, theme } = core;
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
     this.sessionsClient = new SessionsClient({ http });
@@ -99,7 +117,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.initializerContext,
       getStartServices,
       this.sessionsClient,
-      nowProvider
+      nowProvider,
+      this.usageCollector
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -115,6 +134,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
       theme,
+      searchConfig: this.initializerContext.config.get().search,
     });
 
     expressions.registerFunction(
@@ -155,6 +175,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(
+      getEssql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
       getEql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
@@ -163,14 +188,29 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerType(eqlRawResponse);
 
     const aggs = this.aggsService.setup({
-      registerFunction: expressions.registerFunction,
       uiSettings,
+      registerFunction: expressions.registerFunction,
       nowProvider,
     });
 
     if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
       aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
       expressions.registerFunction(aggShardDelay);
+    }
+
+    const config = this.initializerContext.config.get<ConfigSchema>();
+    if (config.search.sessions.enabled) {
+      const sessionsConfig = config.search.sessions;
+      registerSearchSessionsMgmt(
+        core as CoreSetup<DataStartDependencies>,
+        {
+          searchUsageCollector: this.usageCollector!,
+          sessionsClient: this.sessionsClient,
+          management,
+        },
+        sessionsConfig,
+        this.initializerContext.env.packageInfo.version
+      );
     }
 
     return {
@@ -182,8 +222,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, theme, uiSettings }: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { http, theme, uiSettings, chrome, application }: CoreStart,
+    { fieldFormats, indexPatterns, screenshotMode }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
@@ -192,18 +232,70 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
+
     const searchSourceDependencies: SearchSourceDependencies = {
+      aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
-        handleResponse(request, response, theme),
+      onResponse: (request, response, options) => {
+        if (!options.disableShardFailureWarning) {
+          const { rawResponse } = response;
+
+          handleWarnings({
+            request: request.body,
+            response: rawResponse,
+            theme,
+            sessionId: options.sessionId,
+            requestId: request.id,
+          });
+        }
+        return response;
+      },
     };
 
+    const config = this.initializerContext.config.get();
+    if (config.search.sessions.enabled) {
+      chrome.setBreadcrumbsAppendExtension({
+        content: toMountPoint(
+          React.createElement(
+            createConnectedSearchSessionIndicator({
+              sessionService: this.sessionService,
+              application,
+              basePath: http.basePath,
+              storage: new Storage(window.localStorage),
+              usageCollector: this.usageCollector,
+              tourDisabled: screenshotMode.isScreenshotMode(),
+            })
+          ),
+          { theme$: theme.theme$ }
+        ),
+      });
+    }
+
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs,
       search,
-      showError: (e: Error) => {
+      showError: (e) => {
         this.searchInterceptor.showError(e);
+      },
+      showWarnings: (adapter, callback) => {
+        adapter?.getRequests().forEach((request) => {
+          const rawResponse = (
+            request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
+          )?.rawResponse;
+
+          if (!rawResponse) {
+            return;
+          }
+          handleWarnings({
+            request: request.json as SearchRequest,
+            response: rawResponse,
+            theme,
+            callback,
+            requestId: request.id,
+          });
+        });
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,

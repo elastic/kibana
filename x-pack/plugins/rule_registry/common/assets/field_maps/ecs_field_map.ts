@@ -1480,6 +1480,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.boot.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.cpu.usage': {
     type: 'scaled_float',
     array: false,
@@ -1633,6 +1638,41 @@ export const ecsFieldMap = {
   },
   'host.os.version': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.pid_ns_ino': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.risk.calculated_level': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.risk.calculated_score': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'host.risk.calculated_score_norm': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'host.risk.static_level': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'host.risk.static_score': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'host.risk.static_score_norm': {
+    type: 'float',
     array: false,
     required: false,
   },
@@ -2071,6 +2111,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'orchestrator.cluster.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'orchestrator.cluster.name': {
     type: 'keyword',
     array: false,
@@ -2096,7 +2141,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'orchestrator.resource.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.resource.ip': {
+    type: 'ip',
+    array: true,
+    required: false,
+  },
   'orchestrator.resource.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.resource.parent.type': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2397,6 +2457,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'process.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entity_id': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2813,6 +2878,11 @@ export const ecsFieldMap = {
   },
   'process.pid': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entity_id': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -5868,6 +5938,36 @@ export const ecsFieldMap = {
   },
   'user.name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.risk.calculated_level': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.risk.calculated_score': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'user.risk.calculated_score_norm': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'user.risk.static_level': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'user.risk.static_score': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'user.risk.static_score_norm': {
+    type: 'float',
     array: false,
     required: false,
   },

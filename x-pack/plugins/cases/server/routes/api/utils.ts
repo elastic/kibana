@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { Boom, boomify, isBoom } from '@hapi/boom';
+import type { Boom } from '@hapi/boom';
+import { boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { CustomHttpResponseOptions, ResponseError, Headers, Logger } from 'kibana/server';
-import { CaseError, isCaseError, HTTPError, isHTTPError } from '../../common/error';
+import type { CustomHttpResponseOptions, ResponseError, Headers, Logger } from '@kbn/core/server';
+import type { CaseError, HTTPError } from '../../common/error';
+import { isCaseError, isHTTPError } from '../../common/error';
 
 /**
  * Transforms an error into the correct format for a kibana response.

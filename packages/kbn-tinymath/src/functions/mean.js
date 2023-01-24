@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { add } = require('./add.js');
+const { add } = require('./add');
 
 /**
  * Finds the mean value of one of more numbers/arrays of numbers into the function. If at least one array of numbers is passed into the function, the function will find the mean by index.
@@ -18,8 +18,6 @@ const { add } = require('./add.js');
  * mean([10, 20, 30, 40], 20) // returns [15, 20, 25, 30]
  * mean([1, 9], 5, [3, 4]) // returns [mean([1, 5, 3]), mean([9, 5, 4])] = [3, 6]
  */
-
-module.exports = { mean };
 
 function mean(...args) {
   if (args.length === 1) {
@@ -34,3 +32,4 @@ function mean(...args) {
 
   return sum / args.length;
 }
+module.exports = { mean };

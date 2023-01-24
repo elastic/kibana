@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
 import { TestCase, TestUser, ExpectResponseBody } from './types';

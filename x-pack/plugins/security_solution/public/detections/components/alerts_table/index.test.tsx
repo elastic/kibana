@@ -9,16 +9,16 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import '../../../common/mock/match_media';
-import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
-import { AlertsTableComponent } from './index';
+import { AlertsTableComponent } from '.';
+import { TableId } from '../../../../common/types';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
       <TestProviders>
         <AlertsTableComponent
-          timelineId={TimelineId.test}
+          tableId={TableId.test}
           hasIndexWrite
           hasIndexMaintenance
           from={'2020-07-07T08:20:18.966Z'}
@@ -29,17 +29,13 @@ describe('AlertsTableComponent', () => {
             language: 'language',
           }}
           globalFilters={[]}
-          deletedEventIds={[]}
           loadingEventIds={[]}
-          selectedEventIds={{}}
           isSelectAllChecked={false}
-          clearSelected={jest.fn()}
-          setEventsLoading={jest.fn()}
-          setEventsDeleted={jest.fn()}
           showBuildingBlockAlerts={false}
           onShowBuildingBlockAlertsChanged={jest.fn()}
           showOnlyThreatIndicatorAlerts={false}
           onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+          dispatch={jest.fn()}
         />
       </TestProviders>
     );

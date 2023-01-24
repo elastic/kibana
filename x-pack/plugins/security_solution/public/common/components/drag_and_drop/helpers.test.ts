@@ -6,10 +6,9 @@
  */
 
 import { omit } from 'lodash/fp';
-import { DropResult } from 'react-beautiful-dnd';
-import { getTimelineIdFromColumnDroppableId } from '../../../../../timelines/public';
+import type { DropResult } from 'react-beautiful-dnd';
 
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
+import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 
 import {
   addProviderToTimeline,
@@ -653,7 +652,8 @@ describe('helpers', () => {
     test('it returns true for an aggregatable field that is an allowed type', () => {
       expect(
         allowTopN({
-          browserField: aggregatableAllowedType,
+          fieldType: 'keyword',
+          isAggregatable: true,
           fieldName: aggregatableAllowedType.name,
           hideTopN: false,
         })
@@ -663,7 +663,8 @@ describe('helpers', () => {
     test('it returns true for a allowlisted non-BrowserField', () => {
       expect(
         allowTopN({
-          browserField: undefined,
+          fieldType: 'not right',
+          isAggregatable: false,
           fieldName: 'kibana.alert.rule.name',
           hideTopN: false,
         })
@@ -678,7 +679,8 @@ describe('helpers', () => {
 
       expect(
         allowTopN({
-          browserField: nonAggregatableAllowedType,
+          fieldType: 'keyword',
+          isAggregatable: false,
           fieldName: nonAggregatableAllowedType.name,
           hideTopN: false,
         })
@@ -693,20 +695,9 @@ describe('helpers', () => {
 
       expect(
         allowTopN({
-          browserField: aggregatableNotAllowedType,
+          fieldType: 'text',
+          isAggregatable: false,
           fieldName: aggregatableNotAllowedType.name,
-          hideTopN: false,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false if the BrowserField is missing the aggregatable property', () => {
-      const missingAggregatable = omit('aggregatable', aggregatableAllowedType);
-
-      expect(
-        allowTopN({
-          browserField: missingAggregatable,
-          fieldName: missingAggregatable.name,
           hideTopN: false,
         })
       ).toBe(false);
@@ -717,7 +708,8 @@ describe('helpers', () => {
 
       expect(
         allowTopN({
-          browserField: missingType,
+          fieldType: 'not real',
+          isAggregatable: false,
           fieldName: missingType.name,
           hideTopN: false,
         })
@@ -727,7 +719,8 @@ describe('helpers', () => {
     test('it returns false for a non-allowlisted field when a BrowserField is not provided', () => {
       expect(
         allowTopN({
-          browserField: undefined,
+          fieldType: 'string',
+          isAggregatable: false,
           fieldName: 'non-allowlisted',
           hideTopN: false,
         })
@@ -737,7 +730,8 @@ describe('helpers', () => {
     test('it returns false when hideTopN is true', () => {
       expect(
         allowTopN({
-          browserField: aggregatableAllowedType,
+          fieldType: 'keyword',
+          isAggregatable: true,
           fieldName: aggregatableAllowedType.name,
           hideTopN: true, // <-- the Top N action shall not be shown for this (otherwise valid) field
         })
@@ -1001,18 +995,6 @@ describe('helpers', () => {
         },
         type: 'x-pack/security_solution/local/drag_and_drop/NO_PROVIDER_FOUND',
       });
-    });
-  });
-
-  describe('getTimelineIdFromColumnDroppableId', () => {
-    test('it returns the expected timelineId from a column droppableId', () => {
-      expect(getTimelineIdFromColumnDroppableId(DROPPABLE_ID_TIMELINE_COLUMNS)).toEqual(
-        'timeline-1'
-      );
-    });
-
-    test('it returns an empty string when the droppableId is an empty string', () => {
-      expect(getTimelineIdFromColumnDroppableId('')).toEqual('');
     });
   });
 });

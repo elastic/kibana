@@ -33,6 +33,7 @@
         ],
         "path": "src/plugins/custom_integrations/public/services/find.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -53,6 +54,7 @@
             ],
             "path": "src/plugins/custom_integrations/public/services/find.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -67,6 +69,7 @@
             ],
             "path": "src/plugins/custom_integrations/public/services/find.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -89,6 +92,7 @@
         ],
         "path": "src/plugins/custom_integrations/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -102,7 +106,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -121,6 +126,7 @@
         ],
         "path": "src/plugins/custom_integrations/public/components/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -136,6 +142,7 @@
             ],
             "path": "src/plugins/custom_integrations/public/components/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -152,6 +159,7 @@
             ],
             "path": "src/plugins/custom_integrations/public/components/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -172,6 +180,7 @@
       "description": [],
       "path": "src/plugins/custom_integrations/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "customIntegrations",
@@ -193,6 +202,7 @@
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -216,6 +226,7 @@
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -232,6 +243,7 @@
       "description": [],
       "path": "src/plugins/custom_integrations/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "customIntegrations",
@@ -245,6 +257,7 @@
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -258,7 +271,8 @@
                 "P & { children?: React.ReactNode; }"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "customIntegrations",
@@ -271,9 +285,24 @@
                 "any"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "customIntegrations",
+          "id": "def-public.CustomIntegrationsStart.languageClientsUiComponents",
+          "type": "Object",
+          "tags": [],
+          "label": "languageClientsUiComponents",
+          "description": [],
+          "signature": [
+            "{ [x: string]: React.FC<{}>; }"
+          ],
+          "path": "src/plugins/custom_integrations/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -295,6 +324,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -304,7 +334,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -314,7 +345,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -324,7 +356,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -337,7 +370,8 @@
               "\"ui_link\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -347,7 +381,22 @@
             "label": "uiInternalPath",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-server.CustomIntegration.uiExternalLink",
+            "type": "string",
+            "tags": [],
+            "label": "uiExternalLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -357,7 +406,8 @@
             "label": "isBeta",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -377,7 +427,8 @@
               "[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -387,10 +438,11 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -400,10 +452,11 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -416,7 +469,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -434,10 +488,11 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -451,6 +506,7 @@
       "description": [],
       "path": "src/plugins/custom_integrations/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "customIntegrations",
@@ -472,6 +528,7 @@
           ],
           "path": "src/plugins/custom_integrations/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "customIntegrations",
@@ -493,6 +550,7 @@
               ],
               "path": "src/plugins/custom_integrations/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -518,6 +576,7 @@
           ],
           "path": "src/plugins/custom_integrations/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }
@@ -534,6 +593,7 @@
       "description": [],
       "path": "src/plugins/custom_integrations/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -554,6 +614,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -563,7 +624,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -573,7 +635,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -583,7 +646,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -596,7 +660,8 @@
               "\"ui_link\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -606,7 +671,22 @@
             "label": "uiInternalPath",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.CustomIntegration.uiExternalLink",
+            "type": "string",
+            "tags": [],
+            "label": "uiExternalLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -616,7 +696,8 @@
             "label": "isBeta",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -636,7 +717,8 @@
               "[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -646,10 +728,11 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -659,10 +742,11 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -675,7 +759,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -691,6 +776,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -700,7 +786,8 @@
             "label": "src",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -713,7 +800,8 @@
               "\"eui\" | \"svg\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -729,6 +817,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -738,7 +827,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -748,10 +838,11 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+              "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -769,10 +860,11 @@
           "\nThe list of all available categories."
         ],
         "signature": [
-          "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+          "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -785,10 +877,11 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"infrastructure\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -803,6 +896,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -817,6 +911,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -828,6 +923,7 @@
         "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -839,6 +935,7 @@
         "description": [],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -851,10 +948,11 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\")[]"
+          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -867,14 +965,57 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "customIntegrations",
+        "id": "def-common.FEATURED_INTEGRATIONS_BY_CATEGORY",
+        "type": "Object",
+        "tags": [],
+        "label": "FEATURED_INTEGRATIONS_BY_CATEGORY",
+        "description": [],
+        "path": "src/plugins/custom_integrations/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.FEATURED_INTEGRATIONS_BY_CATEGORY.security",
+            "type": "Array",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.FEATURED_INTEGRATIONS_BY_CATEGORY.",
+            "type": "Array",
+            "tags": [],
+            "label": "''",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "customIntegrations",
         "id": "def-common.INTEGRATION_CATEGORY_DISPLAY",
@@ -886,6 +1027,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -895,7 +1037,8 @@
             "label": "aws",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -905,7 +1048,8 @@
             "label": "azure",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -915,7 +1059,8 @@
             "label": "cloud",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -925,7 +1070,8 @@
             "label": "config_management",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -935,7 +1081,8 @@
             "label": "containers",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -945,7 +1092,8 @@
             "label": "crm",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -955,7 +1103,8 @@
             "label": "custom",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -965,7 +1114,8 @@
             "label": "datastore",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -975,7 +1125,8 @@
             "label": "elastic_stack",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -985,7 +1136,19 @@
             "label": "google_cloud",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.infrastructure",
+            "type": "string",
+            "tags": [],
+            "label": "infrastructure",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -995,7 +1158,8 @@
             "label": "kubernetes",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1005,7 +1169,8 @@
             "label": "languages",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1015,7 +1180,19 @@
             "label": "message_queue",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.microsoft_365",
+            "type": "string",
+            "tags": [],
+            "label": "microsoft_365",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1025,7 +1202,8 @@
             "label": "monitoring",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1035,7 +1213,8 @@
             "label": "network",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1045,7 +1224,8 @@
             "label": "notification",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1055,7 +1235,8 @@
             "label": "os_system",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1065,7 +1246,8 @@
             "label": "productivity",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1075,7 +1257,8 @@
             "label": "security",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1085,7 +1268,8 @@
             "label": "sample_data",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1095,7 +1279,19 @@
             "label": "support",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.threat_intel",
+            "type": "string",
+            "tags": [],
+            "label": "threat_intel",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1105,7 +1301,8 @@
             "label": "ticketing",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1115,7 +1312,8 @@
             "label": "version_control",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1125,7 +1323,8 @@
             "label": "web",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1137,7 +1336,19 @@
               "// Kibana added"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search",
+            "type": "string",
+            "tags": [],
+            "label": "enterprise_search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1147,7 +1358,8 @@
             "label": "file_storage",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1157,7 +1369,8 @@
             "label": "language_client",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1167,7 +1380,8 @@
             "label": "upload_file",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1177,7 +1391,8 @@
             "label": "website_search",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1187,7 +1402,8 @@
             "label": "geo",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1203,6 +1419,7 @@
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "customIntegrations",
@@ -1212,7 +1429,8 @@
             "label": "beats",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1222,7 +1440,8 @@
             "label": "enterprise_search",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1232,7 +1451,8 @@
             "label": "language_clients",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1242,7 +1462,8 @@
             "label": "other",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1252,7 +1473,8 @@
             "label": "sample_data",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1262,7 +1484,8 @@
             "label": "tests",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "customIntegrations",
@@ -1272,7 +1495,19 @@
             "label": "tutorial",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.SHIPPER_DISPLAY.placeholders",
+            "type": "string",
+            "tags": [],
+            "label": "placeholders",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

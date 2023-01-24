@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 export const mockAADEcsDataWithAlert: Ecs = {
   _id: '1',
@@ -48,7 +48,20 @@ export const mockAADEcsDataWithAlert: Ecs = {
         enabled: [true],
         false_positives: ['test-1'],
         parameters: {
-          filters: [],
+          filters: [
+            {
+              meta: {
+                key: 'host.name',
+                negate: false,
+                params: '"{"query":"placeholder"}"',
+                type: 'phrase',
+              },
+              query: { match_phrase: { 'host.name': 'placeholder' } },
+            },
+            {
+              query: { match_all: {} },
+            },
+          ],
           language: ['kuery'],
           query: ['user.id:1'],
         },
@@ -77,11 +90,6 @@ export const mockAADEcsDataWithAlert: Ecs = {
     },
   },
 };
-
-export const getDetectionAlertAADMock = (overrides: Partial<Ecs> = {}): Ecs => ({
-  ...mockAADEcsDataWithAlert,
-  ...overrides,
-});
 
 export const getThresholdDetectionAlertAADMock = (overrides: Partial<Ecs> = {}): Ecs[] => [
   {

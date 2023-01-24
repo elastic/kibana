@@ -10,7 +10,7 @@ import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
-import { search, UI_SETTINGS } from '../../../../../../../../plugins/data/server';
+import { search, UI_SETTINGS } from '@kbn/data-plugin/server';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -34,7 +34,7 @@ export function dateHistogram(
     let bucketInterval;
 
     const overwriteDateHistogramForLastBucketMode = () => {
-      const { timezone } = capabilities;
+      const { timezone, forceFixedInterval } = capabilities;
 
       const { intervalString } = getBucketSize(
         req,
@@ -51,7 +51,7 @@ export function dateHistogram(
           min: from.valueOf(),
           max: to.valueOf(),
         },
-        ...dateHistogramInterval(intervalString),
+        ...dateHistogramInterval(intervalString, forceFixedInterval),
       });
 
       bucketInterval = intervalString;

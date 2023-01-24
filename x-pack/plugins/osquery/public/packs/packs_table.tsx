@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiText,
   EuiPopover,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiToolTip,
   EuiLoadingContent,
@@ -20,17 +21,20 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useHistory } from 'react-router-dom';
+import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
-import { PackSavedObject } from './types';
+import type { PackSavedObject } from './types';
 
 const UpdatedBy = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
+
+const EMPTY_ARRAY: PackSavedObject[] = [];
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
   <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
@@ -42,7 +46,7 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
-export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?: string[] }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(
@@ -65,12 +69,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: strin
   }
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      initialFocus={false}
-    >
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiText size="s">
         {agentPolicyIds?.map((policyId) => (
           <div key={policyId}>
@@ -83,6 +82,8 @@ export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: strin
 };
 
 const PacksTableComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const { push } = useHistory();
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
@@ -104,6 +105,7 @@ const PacksTableComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
         <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
@@ -112,6 +114,34 @@ const PacksTableComponent = () => {
       '-'
     );
   }, []);
+
+  const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
+    (item) => () =>
+      push('/live_queries/new', {
+        form: {
+          packId: item.id,
+        },
+      }),
+    [push]
+  );
+
+  const renderPlayAction = useCallback(
+    (item, enabled) => {
+      const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
+        defaultMessage: 'Run {packName}',
+        values: {
+          packName: item.attributes.name,
+        },
+      });
+
+      return (
+        <EuiToolTip position="top" content={playText}>
+          <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
+        </EuiToolTip>
+      );
+    },
+    [handlePlayClick]
+  );
 
   const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
     () => [
@@ -164,8 +194,28 @@ const PacksTableComponent = () => {
         width: '80px',
         render: renderActive,
       },
+      {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '80px',
+        actions: [
+          {
+            render: renderPlayAction,
+            enabled: () => permissions.writeLiveQueries || permissions.runSavedQueries,
+          },
+        ],
+      } as EuiTableActionsColumnType<PackSavedObject>,
     ],
-    [renderActive, renderAgentPolicy, renderQueries, renderUpdatedAt]
+    [
+      permissions.runSavedQueries,
+      permissions.writeLiveQueries,
+      renderActive,
+      renderAgentPolicy,
+      renderPlayAction,
+      renderQueries,
+      renderUpdatedAt,
+    ]
   );
 
   const sorting = useMemo(
@@ -184,8 +234,7 @@ const PacksTableComponent = () => {
 
   return (
     <EuiInMemoryTable<PackSavedObject>
-      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-      items={data?.saved_objects ?? []}
+      items={data?.data ?? EMPTY_ARRAY}
       columns={columns}
       pagination={true}
       sorting={sorting}

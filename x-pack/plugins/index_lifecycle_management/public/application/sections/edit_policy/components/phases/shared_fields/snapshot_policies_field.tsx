@@ -23,7 +23,7 @@ import { useLoadSnapshotPolicies } from '../../../../../services/api';
 
 import { UseField } from '../../../form';
 
-import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../../';
+import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../..';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 
@@ -159,7 +159,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
             defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
           />{' '}
-          <LearnMoreLink docPath={docLinks.links.alerting.ilmWaitForSnapshot} />
+          <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmWaitForSnapshot} />
         </>
       }
       titleSize="xs"

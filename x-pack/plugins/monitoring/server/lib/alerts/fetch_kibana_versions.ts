@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
   key: string;
@@ -22,11 +22,11 @@ export async function fetchKibanaVersions(
   size: number,
   filterQuery?: string
 ): Promise<AlertVersions[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'kibana',
     dataset: 'stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -41,7 +41,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('kibana_stats', 'stats', 'kibana.stats'),
+            createDatasetFilter('kibana_stats', 'stats', getKibanaDataset('stats')),
             {
               range: {
                 timestamp: {

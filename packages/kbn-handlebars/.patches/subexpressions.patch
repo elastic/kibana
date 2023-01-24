@@ -1,0 +1,318 @@
+1,2c1,12
+< describe('subexpressions', function() {
+<   it('arg-less helper', function() {
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+> 
+> import Handlebars from '../..';
+> import { expectTemplate } from '../__jest__/test_bench';
+> 
+> describe('subexpressions', () => {
+>   it('arg-less helper', () => {
+5c15
+<         foo: function(val) {
+---
+>         foo(val) {
+8c18
+<         bar: function() {
+---
+>         bar() {
+10c20
+<         }
+---
+>         },
+15c25
+<   it('helper w args', function() {
+---
+>   it('helper w args', () => {
+19c29
+<         blog: function(val) {
+---
+>         blog(val) {
+22c32
+<         equal: function(x, y) {
+---
+>         equal(x, y) {
+24c34
+<         }
+---
+>         },
+29c39
+<   it('mixed paths and helpers', function() {
+---
+>   it('mixed paths and helpers', () => {
+33c43
+<         blog: function(val, that, theOther) {
+---
+>         blog(val, that, theOther) {
+36c46
+<         equal: function(x, y) {
+---
+>         equal(x, y) {
+38c48
+<         }
+---
+>         },
+43c53
+<   it('supports much nesting', function() {
+---
+>   it('supports much nesting', () => {
+47c57
+<         blog: function(val) {
+---
+>         blog(val) {
+50c60
+<         equal: function(x, y) {
+---
+>         equal(x, y) {
+52c62
+<         }
+---
+>         },
+57,60c67,70
+<   it('GH-800 : Complex subexpressions', function() {
+<     var context = { a: 'a', b: 'b', c: { c: 'c' }, d: 'd', e: { e: 'e' } };
+<     var helpers = {
+<       dash: function(a, b) {
+---
+>   it('GH-800 : Complex subexpressions', () => {
+>     const context = { a: 'a', b: 'b', c: { c: 'c' }, d: 'd', e: { e: 'e' } };
+>     const helpers = {
+>       dash(a: any, b: any) {
+63c73
+<       concat: function(a, b) {
+---
+>       concat(a: any, b: any) {
+65c75
+<       }
+---
+>       },
+94,97c104,107
+<   it('provides each nested helper invocation its own options hash', function() {
+<     var lastOptions = null;
+<     var helpers = {
+<       equal: function(x, y, options) {
+---
+>   it('provides each nested helper invocation its own options hash', () => {
+>     let lastOptions: Handlebars.HelperOptions;
+>     const helpers = {
+>       equal(x: any, y: any, options: Handlebars.HelperOptions) {
+103c113
+<       }
+---
+>       },
+105,107c115
+<     expectTemplate('{{equal (equal true true) true}}')
+<       .withHelpers(helpers)
+<       .toCompileTo('true');
+---
+>     expectTemplate('{{equal (equal true true) true}}').withHelpers(helpers).toCompileTo('true');
+110c118
+<   it('with hashes', function() {
+---
+>   it('with hashes', () => {
+114c122
+<         blog: function(val) {
+---
+>         blog(val) {
+117c125
+<         equal: function(x, y) {
+---
+>         equal(x, y) {
+119c127
+<         }
+---
+>         },
+124c132
+<   it('as hashes', function() {
+---
+>   it('as hashes', () => {
+127c135
+<         blog: function(options) {
+---
+>         blog(options) {
+130c138
+<         equal: function(x, y) {
+---
+>         equal(x, y) {
+132c140
+<         }
+---
+>         },
+137,140c145,146
+<   it('multiple subexpressions in a hash', function() {
+<     expectTemplate(
+<       '{{input aria-label=(t "Name") placeholder=(t "Example User")}}'
+<     )
+---
+>   it('multiple subexpressions in a hash', () => {
+>     expectTemplate('{{input aria-label=(t "Name") placeholder=(t "Example User")}}')
+142,145c148,151
+<         input: function(options) {
+<           var hash = options.hash;
+<           var ariaLabel = Handlebars.Utils.escapeExpression(hash['aria-label']);
+<           var placeholder = Handlebars.Utils.escapeExpression(hash.placeholder);
+---
+>         input(options) {
+>           const hash = options.hash;
+>           const ariaLabel = Handlebars.Utils.escapeExpression(hash['aria-label']);
+>           const placeholder = Handlebars.Utils.escapeExpression(hash.placeholder);
+147,151c153
+<             '<input aria-label="' +
+<               ariaLabel +
+<               '" placeholder="' +
+<               placeholder +
+<               '" />'
+---
+>             '<input aria-label="' + ariaLabel + '" placeholder="' + placeholder + '" />'
+154c156
+<         t: function(defaultString) {
+---
+>         t(defaultString) {
+156c158
+<         }
+---
+>         },
+161,164c163,164
+<   it('multiple subexpressions in a hash with context', function() {
+<     expectTemplate(
+<       '{{input aria-label=(t item.field) placeholder=(t item.placeholder)}}'
+<     )
+---
+>   it('multiple subexpressions in a hash with context', () => {
+>     expectTemplate('{{input aria-label=(t item.field) placeholder=(t item.placeholder)}}')
+168,169c168,169
+<           placeholder: 'Example User'
+<         }
+---
+>           placeholder: 'Example User',
+>         },
+172,175c172,175
+<         input: function(options) {
+<           var hash = options.hash;
+<           var ariaLabel = Handlebars.Utils.escapeExpression(hash['aria-label']);
+<           var placeholder = Handlebars.Utils.escapeExpression(hash.placeholder);
+---
+>         input(options) {
+>           const hash = options.hash;
+>           const ariaLabel = Handlebars.Utils.escapeExpression(hash['aria-label']);
+>           const placeholder = Handlebars.Utils.escapeExpression(hash.placeholder);
+177,181c177
+<             '<input aria-label="' +
+<               ariaLabel +
+<               '" placeholder="' +
+<               placeholder +
+<               '" />'
+---
+>             '<input aria-label="' + ariaLabel + '" placeholder="' + placeholder + '" />'
+184c180
+<         t: function(defaultString) {
+---
+>         t(defaultString) {
+186,242d181
+<         }
+<       })
+<       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
+<   });
+< 
+<   it('in string params mode,', function() {
+<     expectTemplate('{{snog (blorg foo x=y) yeah a=b}}')
+<       .withCompileOptions({ stringParams: true })
+<       .withHelpers({
+<         snog: function(a, b, options) {
+<           equals(a, 'foo');
+<           equals(
+<             options.types.length,
+<             2,
+<             'string params for outer helper processed correctly'
+<           );
+<           equals(
+<             options.types[0],
+<             'SubExpression',
+<             'string params for outer helper processed correctly'
+<           );
+<           equals(
+<             options.types[1],
+<             'PathExpression',
+<             'string params for outer helper processed correctly'
+<           );
+<           return a + b;
+<         },
+< 
+<         blorg: function(a, options) {
+<           equals(
+<             options.types.length,
+<             1,
+<             'string params for inner helper processed correctly'
+<           );
+<           equals(
+<             options.types[0],
+<             'PathExpression',
+<             'string params for inner helper processed correctly'
+<           );
+<           return a;
+<         }
+<       })
+<       .withInput({
+<         foo: {},
+<         yeah: {}
+<       })
+<       .toCompileTo('fooyeah');
+<   });
+< 
+<   it('as hashes in string params mode', function() {
+<     expectTemplate('{{blog fun=(bork)}}')
+<       .withCompileOptions({ stringParams: true })
+<       .withHelpers({
+<         blog: function(options) {
+<           equals(options.hashTypes.fun, 'SubExpression');
+<           return 'val is ' + options.hash.fun;
+244,246d182
+<         bork: function() {
+<           return 'BORK';
+<         }
+248c184
+<       .toCompileTo('val is BORK');
+---
+>       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
+251c187
+<   it('subexpression functions on the context', function() {
+---
+>   it('subexpression functions on the context', () => {
+254c190
+<         bar: function() {
+---
+>         bar() {
+256c192
+<         }
+---
+>         },
+259c195
+<         foo: function(val) {
+---
+>         foo(val) {
+261c197
+<         }
+---
+>         },
+266c202
+<   it("subexpressions can't just be property lookups", function() {
+---
+>   it("subexpressions can't just be property lookups", () => {
+269c205
+<         bar: 'LOL'
+---
+>         bar: 'LOL',
+272c208
+<         foo: function(val) {
+---
+>         foo(val) {
+274c210
+<         }
+---
+>         },

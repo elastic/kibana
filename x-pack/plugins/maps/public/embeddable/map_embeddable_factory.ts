@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
+import { getApplication, getUsageCollection } from '../kibana_services';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -53,6 +52,15 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
     const { MapEmbeddable } = await lazyLoadMapModules();
+    const usageCollection = getUsageCollection();
+    if (usageCollection) {
+      // currentAppId$ is a BehaviorSubject exposed as an observable so subscription gets last value upon subscribe
+      getApplication()
+        .currentAppId$.pipe(first())
+        .subscribe((appId) => {
+          if (appId) usageCollection.reportUiCounter('map', 'loaded', `open_maps_vis_${appId}`);
+        });
+    }
     return new MapEmbeddable(
       {
         editable: await this.isEditable(),

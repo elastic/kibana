@@ -25,6 +25,7 @@ import {
   jobsExistSchema,
   datafeedPreviewSchema,
   bulkCreateSchema,
+  deleteJobsSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -119,7 +120,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/delete_jobs',
       validate: {
-        body: jobIdsSchema,
+        body: deleteJobsSchema,
       },
       options: {
         tags: ['access:ml:canDeleteJob'],
@@ -128,8 +129,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { deleteJobs } = jobServiceProvider(client, mlClient);
-        const { jobIds } = request.body;
-        const resp = await deleteJobs(jobIds);
+        const { jobIds, deleteUserAnnotations } = request.body;
+        const resp = await deleteJobs(jobIds, deleteUserAnnotations);
 
         return response.ok({
           body: resp,
@@ -187,7 +188,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/jobs/reset_jobs',
       validate: {
-        body: jobIdsSchema,
+        body: deleteJobsSchema,
       },
       options: {
         tags: ['access:ml:canResetJob'],
@@ -196,8 +197,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { resetJobs } = jobServiceProvider(client, mlClient);
-        const { jobIds } = request.body;
-        const resp = await resetJobs(jobIds);
+        const { jobIds, deleteUserAnnotations } = request.body;
+        const resp = await resetJobs(jobIds, deleteUserAnnotations);
 
         return response.ok({
           body: resp,
@@ -268,11 +269,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { jobsSummary } = jobServiceProvider(
-          client,
-          mlClient,
-          context.alerting?.getRulesClient()
-        );
+        const alerting = await context.alerting;
+        const { jobsSummary } = jobServiceProvider(client, mlClient, alerting?.getRulesClient());
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
 
@@ -304,10 +302,11 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response, context }) => {
       try {
+        const alerting = await context.alerting;
         const { getJobIdsWithGeo } = jobServiceProvider(
           client,
           mlClient,
-          context.alerting?.getRulesClient()
+          alerting?.getRulesClient()
         );
 
         const resp = await getJobIdsWithGeo();
@@ -409,10 +408,11 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
+        const alerting = await context.alerting;
         const { createFullJobsList } = jobServiceProvider(
           client,
           mlClient,
-          context.alerting?.getRulesClient()
+          alerting?.getRulesClient()
         );
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);
@@ -896,7 +896,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
                 },
               } as estypes.MlPreviewDatafeedRequest);
 
-        const body = await mlClient.previewDatafeed(payload, getAuthorizationHeader(request));
+        const body = await mlClient.previewDatafeed(payload, {
+          ...getAuthorizationHeader(request),
+          maxRetries: 0,
+        });
         return response.ok({
           body,
         });

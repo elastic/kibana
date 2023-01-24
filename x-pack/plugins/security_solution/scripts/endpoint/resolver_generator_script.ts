@@ -5,15 +5,45 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console,max-classes-per-file */
 import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
-import { KbnClient, KbnClientOptions } from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClientOptions } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
+import type { Role } from '@kbn/security-plugin/common';
+import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
+import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import { fetchStackVersion } from './common/stack_services';
+import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
+import { getWithResponseActionsRole } from './common/roles_users/with_response_actions_role';
+import { getNoResponseActionsRole } from './common/roles_users/without_response_actions_role';
+import { getT1Analyst } from './common/roles_users/t1_analyst';
+import { getT2Analyst } from './common/roles_users/t2_analyst';
+import { getEndpointOperationsAnalyst } from './common/roles_users/endpoint_operations_analyst';
+import { getEndpointSecurityPolicyManager } from './common/roles_users/endpoint_security_policy_manager';
+import { getHunter } from './common/roles_users/hunter';
+import { getPlatformEngineer } from './common/roles_users/platform_engineer';
+import { getSocManager } from './common/roles_users/soc_manager';
+import { getThreadIntelligenceAnalyst } from './common/roles_users/thread_intelligence_analyst';
+
+const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
+  t1Analyst: getT1Analyst(),
+  t2Analyst: getT2Analyst(),
+  hunter: getHunter(),
+  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  socManager: getSocManager(),
+  platformEngineer: getPlatformEngineer(),
+  endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
+  endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
+  withResponseActionsRole: getWithResponseActionsRole(),
+  noResponseActionsRole: getNoResponseActionsRole(),
+};
 
 main();
 
@@ -37,19 +67,44 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
+async function addRole(kbnClient: KbnClient, role: Role): Promise<string | undefined> {
+  if (!role) {
+    console.log('No role data given');
+    return;
+  }
+
+  const { name, ...permissions } = role;
+  const path = `/api/security/role/${name}?createOnly=true`;
+
+  // add role if doesn't exist already
+  try {
+    console.log(`Adding ${name} role`);
+    await kbnClient.request({
+      method: 'PUT',
+      path,
+      body: permissions,
+    });
+
+    return name;
+  } catch (error) {
+    console.log(error);
+    handleErr(error);
+  }
+}
+
 interface UserInfo {
   username: string;
   password: string;
+  full_name?: string;
+  roles?: string[];
 }
 
-async function addUser(
-  esClient: Client,
-  user?: { username: string; password: string }
-): Promise<UserInfo | undefined> {
+async function addUser(esClient: Client, user?: UserInfo): Promise<UserInfo | undefined> {
   if (!user) {
     return;
   }
 
+  const superuserRole = ['superuser', 'kibana_system'];
   const path = `_security/user/${user.username}`;
   // add user if doesn't exist already
   try {
@@ -59,8 +114,9 @@ async function addUser(
       path,
       body: {
         password: user.password,
-        roles: ['superuser', 'kibana_system'],
-        full_name: user.username,
+        roles: user.roles ?? superuserRole,
+        full_name: user.full_name ?? user.username,
+        username: user.username,
       },
     });
     if (addedUser.created) {
@@ -126,19 +182,19 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'logs-endpoint.events.process-default',
+      default: ENDPOINT_EVENTS_INDEX,
       type: 'string',
     },
     alertIndex: {
       alias: 'ai',
       describe: 'index to store alerts in',
-      default: 'logs-endpoint.alerts-default',
+      default: ENDPOINT_ALERTS_INDEX,
       type: 'string',
     },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint.metadata-default',
+      default: METADATA_DATASTREAM,
       type: 'string',
     },
     policyIndex: {
@@ -247,6 +303,20 @@ async function main() {
       type: 'string',
       default: '',
     },
+    randomVersions: {
+      describe:
+        'By default, the data generated (that contains a stack version - ex: `agent.version`) will have a ' +
+        'version number set to be the same as the version of the running stack. Using this flag (`--randomVersions=true`) ' +
+        'will result in random version being generated',
+      default: false,
+    },
+    rbacUser: {
+      alias: 'rbac',
+      describe:
+        'Creates a set of roles and users, password=changeme, with RBAC privileges enabled/disabled. Neither have the superuser role. ',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
   let ca: Buffer;
 
@@ -320,12 +390,31 @@ async function main() {
     );
   }
 
+  if (argv.rbacUser) {
+    // Add roles and users with response actions kibana privileges
+    for (const role of Object.keys(rolesMapping)) {
+      const addedRole = await addRole(kbnClient, {
+        name: role,
+        ...rolesMapping[role],
+      });
+      if (addedRole) {
+        console.log(`Successfully added ${role} role`);
+        await addUser(client, { username: role, password: 'changeme', roles: [role] });
+      } else {
+        console.log(`Failed to add role, ${role}`);
+      }
+    }
+  }
+
   let seed = argv.seed;
+
   if (!seed) {
     seed = Math.random().toString();
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
+
   const startTime = new Date().getTime();
+
   if (argv.fleet && !argv.withNewUser) {
     // warn and exit when using fleet flag
     console.log(
@@ -334,6 +423,29 @@ async function main() {
     // eslint-disable-next-line no-process-exit
     process.exit(0);
   }
+
+  let DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator;
+
+  // If `--randomVersions` is NOT set, then use custom generator that ensures all data generated
+  // has a stack version number that matches that of the running stack
+  if (!argv.randomVersions) {
+    const stackVersion = await fetchStackVersion(kbnClient);
+
+    // Document Generator override that uses a custom Endpoint Metadata generator and sets the
+    // `agent.version` to the current version
+    DocGenerator = class extends EndpointDocGenerator {
+      constructor(...args: ConstructorParameters<typeof EndpointDocGenerator>) {
+        const MetadataGenerator = class extends EndpointMetadataGenerator {
+          protected randomVersion(): string {
+            return stackVersion;
+          }
+        };
+
+        super(args[0], MetadataGenerator);
+      }
+    };
+  }
+
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -358,10 +470,11 @@ async function main() {
       ancestryArraySize: argv.ancestryArraySize,
       eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
-    }
+    },
+    DocGenerator
   );
-  // delete endpoint_user after
 
+  // delete endpoint_user after
   if (user) {
     const deleted = await deleteUser(client, user.username);
     if (deleted.found) {

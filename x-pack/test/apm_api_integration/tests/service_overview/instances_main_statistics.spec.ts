@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
-import { apm, timerange } from '@elastic/apm-synthtrace';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../plugins/apm/common/service_nodes';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { SERVICE_NODE_NAME_MISSING } from '@kbn/apm-plugin/common/service_nodes';
+import archives from '../../common/fixtures/es_archiver/archives_metadata';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -41,8 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start: moment(end).subtract(15, 'minutes').toISOString(),
                 end,
-                comparisonStart: start,
-                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                offset: '15m',
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },
@@ -214,8 +213,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start: moment(end).subtract(15, 'minutes').toISOString(),
                 end,
-                comparisonStart: start,
-                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                offset: '15m',
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },
@@ -285,7 +283,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service overview instances main statistics when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       describe('for two go instances and one java instance', () => {
         const GO_A_INSTANCE_RATE_SUCCESS = 10;
@@ -298,8 +296,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const rangeEnd = new Date('2021-01-01T12:15:00.000Z').getTime() - 1;
 
         before(async () => {
-          const goService = apm.service('opbeans-go', 'production', 'go');
-          const javaService = apm.service('opbeans-java', 'production', 'java');
+          const goService = apm.service({
+            name: 'opbeans-go',
+            environment: 'production',
+            agentName: 'go',
+          });
+          const javaService = apm.service({
+            name: 'opbeans-java',
+            environment: 'production',
+            agentName: 'java',
+          });
 
           const goInstanceA = goService.instance('go-instance-a');
           const goInstanceB = goService.instance('go-instance-b');
@@ -312,7 +318,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           function withSpans(timestamp: number) {
             return new Array(3).fill(undefined).map(() =>
               goInstanceA
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .timestamp(timestamp + 100)
                 .duration(300)
                 .destination('elasticsearch')
@@ -321,41 +331,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
 
           return synthtraceEsClient.index([
-            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceA
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(GO_A_INSTANCE_RATE_FAILURE).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_FAILURE).generator((timestamp) =>
               goInstanceA
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .failure()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceB
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(JAVA_INSTANCE_RATE).spans((timestamp) =>
+            interval.rate(JAVA_INSTANCE_RATE).generator((timestamp) =>
               javaInstance
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
           ]);
         });

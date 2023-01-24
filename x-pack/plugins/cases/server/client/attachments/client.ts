@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import { AlertResponse, CommentResponse } from '../../../common/api';
-import { CasesClient } from '../client';
+import type { AlertResponse, CommentResponse } from '../../../common/api';
+import type { CasesClient } from '../client';
 
-import { CasesClientInternal } from '../client_internal';
-import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
-import { AddArgs, addComment } from './add';
-import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
-import {
-  find,
-  FindArgs,
-  get,
-  getAll,
-  getAllAlertsAttachToCase,
-  GetAllAlertsAttachToCase,
-  GetAllArgs,
-  GetArgs,
-} from './get';
-import { update, UpdateArgs } from './update';
+import type { CasesClientInternal } from '../client_internal';
+import type { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
+import type { CasesClientArgs } from '../types';
+import type { AddArgs } from './add';
+import { addComment } from './add';
+import type { BulkCreateArgs } from './bulk_create';
+import { bulkCreate } from './bulk_create';
+import type { DeleteAllArgs, DeleteArgs } from './delete';
+import { deleteAll, deleteComment } from './delete';
+import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './get';
+import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import type { UpdateArgs } from './update';
+import { update } from './update';
 
 /**
  * API for interacting with the attachments to a case.
@@ -33,6 +30,7 @@ export interface AttachmentsSubClient {
    * Adds an attachment to a case.
    */
   add(params: AddArgs): Promise<ICaseResponse>;
+  bulkCreate(params: BulkCreateArgs): Promise<ICaseResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -76,7 +74,8 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: (params: AddArgs) => addComment(params, clientArgs, casesClientInternal),
+    add: (params: AddArgs) => addComment(params, clientArgs),
+    bulkCreate: (params: BulkCreateArgs) => bulkCreate(params, clientArgs),
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),

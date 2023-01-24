@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createStubDataView } from 'src/plugins/data_views/common/mocks';
-import type { DataViewsContract } from 'src/plugins/data_views/common';
-import type { DatatableColumn } from 'src/plugins/expressions/common';
-import { FieldFormat } from 'src/plugins/field_formats/common';
-import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { AggsCommonStart } from '../search';
+import { BUCKET_TYPES } from '../search/aggs/buckets/bucket_agg_types';
 import { DatatableUtilitiesService } from './datatable_utilities_service';
 
 describe('DatatableUtilitiesService', () => {
@@ -72,9 +73,9 @@ describe('DatatableUtilitiesService', () => {
     it('should return a data view field instance', async () => {
       const column = { meta: { field: 'field', index: 'index' } } as DatatableColumn;
       const dataView = createStubDataView({ spec: {} });
-      const field = {};
-      spyOn(datatableUtilitiesService, 'getDataView').and.returnValue(dataView);
-      spyOn(dataView, 'getFieldByName').and.returnValue(field);
+      const field = {} as any;
+      jest.spyOn(datatableUtilitiesService, 'getDataView').mockResolvedValue(dataView);
+      jest.spyOn(dataView, 'getFieldByName').mockReturnValue(field);
 
       await expect(datatableUtilitiesService.getField(column)).resolves.toBe(field);
       expect(dataView.getFieldByName).toHaveBeenCalledWith('field');
@@ -103,6 +104,138 @@ describe('DatatableUtilitiesService', () => {
       } as unknown as DatatableColumn;
 
       expect(datatableUtilitiesService.getInterval(column)).toBe('1d');
+    });
+  });
+
+  describe('getNumberHistogramInterval', () => {
+    it('should return nothing on column from other data source', () => {
+      expect(
+        datatableUtilitiesService.getNumberHistogramInterval({
+          id: 'test',
+          name: 'test',
+          meta: {
+            type: 'date',
+            source: 'essql',
+          },
+        })
+      ).toEqual(undefined);
+    });
+
+    it('should return nothing on non histogram column', () => {
+      expect(
+        datatableUtilitiesService.getNumberHistogramInterval({
+          id: 'test',
+          name: 'test',
+          meta: {
+            type: 'date',
+            source: 'esaggs',
+            sourceParams: {
+              type: BUCKET_TYPES.TERMS,
+            },
+          },
+        })
+      ).toEqual(undefined);
+    });
+
+    it('should return interval on resolved auto interval', () => {
+      expect(
+        datatableUtilitiesService.getNumberHistogramInterval({
+          id: 'test',
+          name: 'test',
+          meta: {
+            type: 'date',
+            source: 'esaggs',
+            sourceParams: {
+              type: BUCKET_TYPES.HISTOGRAM,
+              params: {
+                interval: 'auto',
+                used_interval: 20,
+              },
+            },
+          },
+        })
+      ).toEqual(20);
+    });
+
+    it('should return interval on fixed interval', () => {
+      expect(
+        datatableUtilitiesService.getNumberHistogramInterval({
+          id: 'test',
+          name: 'test',
+          meta: {
+            type: 'date',
+            source: 'esaggs',
+            sourceParams: {
+              type: BUCKET_TYPES.HISTOGRAM,
+              params: {
+                interval: 7,
+                used_interval: 7,
+              },
+            },
+          },
+        })
+      ).toEqual(7);
+    });
+
+    it('should return `undefined` if information is not available', () => {
+      expect(
+        datatableUtilitiesService.getNumberHistogramInterval({
+          id: 'test',
+          name: 'test',
+          meta: {
+            type: 'date',
+            source: 'esaggs',
+            sourceParams: {
+              type: BUCKET_TYPES.HISTOGRAM,
+              params: {},
+            },
+          },
+        })
+      ).toEqual(undefined);
+    });
+  });
+
+  describe('getTotalCount', () => {
+    it('should return a total hits count', () => {
+      const table = {
+        meta: { statistics: { totalCount: 100 } },
+      } as unknown as Datatable;
+
+      expect(datatableUtilitiesService.getTotalCount(table)).toBe(100);
+    });
+  });
+
+  describe('hasPrecisionError', () => {
+    test('should return true if there is a precision error in the column', () => {
+      expect(
+        datatableUtilitiesService.hasPrecisionError({
+          meta: {
+            sourceParams: {
+              hasPrecisionError: true,
+            },
+          },
+        } as unknown as DatatableColumn)
+      ).toBeTruthy();
+    });
+    test('should return false if there is no precision error in the column', () => {
+      expect(
+        datatableUtilitiesService.hasPrecisionError({
+          meta: {
+            sourceParams: {
+              hasPrecisionError: false,
+            },
+          },
+        } as unknown as DatatableColumn)
+      ).toBeFalsy();
+    });
+    test('should return false if precision error is not defined', () => {
+      expect(
+        datatableUtilitiesService.hasPrecisionError({
+          meta: {
+            sourceParams: {},
+          },
+        } as unknown as DatatableColumn)
+      ).toBeFalsy();
     });
   });
 

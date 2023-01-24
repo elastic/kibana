@@ -6,10 +6,7 @@
  */
 
 .productCard {
-  &__imageContainer {
-    @include euiBreakpoint('xs') {
-      max-height: 115px;
-      overflow: hidden;
-    }
+  & &-features {
+    padding-top: 1.5rem;
   }
 }

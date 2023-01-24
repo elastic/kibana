@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
@@ -19,23 +19,23 @@ import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
-  left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
+  left: ${({ theme }) => theme.eui.euiSize};
   position: absolute;
-  top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
+  top: ${({ theme }) => theme.eui.euiSizeS};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
 const Button = euiStyled(EuiButtonIcon)`
   display: block;
-  margin: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const ZoomInButton = euiStyled(Button)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const Panel = euiStyled(EuiPanel)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const steps = 5;
@@ -107,7 +107,11 @@ export function Controls() {
 
   const {
     query: { kuery },
-  } = useAnyOfApmParams('/service-map', '/services/{serviceName}/service-map');
+  } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);

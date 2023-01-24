@@ -5,136 +5,54 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseMetricsFeature } from '../../common/ui';
-import { useGetCaseMetrics, UseGetCaseMetrics } from './use_get_case_metrics';
-import { basicCase, basicCaseMetrics } from './mock';
+import type { SingleCaseMetricsFeature } from '../../common/ui';
+import { useGetCaseMetrics } from './use_get_case_metrics';
+import { basicCase } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
+const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
-  const features: CaseMetricsFeature[] = ['alerts.count'];
+  const features: SingleCaseMetricsFeature[] = ['alerts.count'];
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it('init', async () => {
+  it('calls getSingleCaseMetrics with correct arguments', async () => {
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        metrics: null,
-        isLoading: false,
-        isError: false,
-        fetchCaseMetrics: result.current.fetchCaseMetrics,
+      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+        wrapper,
       });
-    });
-  });
-
-  it('calls getCaseMetrics with correct arguments', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
     });
   });
 
-  it('does not call getCaseMetrics if empty feature parameter passed', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, [])
-      );
-      await waitForNextUpdate();
-      expect(spyOnGetCaseMetrics).not.toBeCalled();
-    });
-  });
+  it('shows an error toast when getSingleCaseMetrics throws', async () => {
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError });
 
-  it('fetch case metrics', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        metrics: basicCaseMetrics,
-        isLoading: false,
-        isError: false,
-        fetchCaseMetrics: result.current.fetchCaseMetrics,
-      });
-    });
-  });
-
-  it('refetch case metrics', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      result.current.fetchCaseMetrics();
-      expect(spyOnGetCaseMetrics).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  it('set isLoading to true when refetching case metrics', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      result.current.fetchCaseMetrics();
-
-      expect(result.current.isLoading).toBe(true);
-    });
-  });
-
-  it('set isLoading to false when refetching case metrics "silent"ly', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      result.current.fetchCaseMetrics(true);
-
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  it('returns an error when getCaseMetrics throws', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     spyOnGetCaseMetrics.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
-        useGetCaseMetrics(basicCase.id, features)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        metrics: null,
-        isLoading: false,
-        isError: true,
-        fetchCaseMetrics: result.current.fetchCaseMetrics,
-      });
+    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+      wrapper,
     });
+    await waitForNextUpdate();
+    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+    expect(addError).toHaveBeenCalled();
   });
 });

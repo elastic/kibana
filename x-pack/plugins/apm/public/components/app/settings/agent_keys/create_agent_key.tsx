@@ -43,12 +43,11 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
   const [agentKeyBody, setAgentKeyBody] = useState({
     name: '',
-    sourcemap: true,
     event: true,
     agentConfig: true,
   });
 
-  const { name, sourcemap, event, agentConfig } = agentKeyBody;
+  const { name, event, agentConfig } = agentKeyBody;
 
   const currentUser = useCurrentUser();
 
@@ -73,10 +72,6 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
     try {
       const privileges: PrivilegeType[] = [];
-      if (sourcemap) {
-        privileges.push(PrivilegeType.SOURCEMAP);
-      }
-
       if (event) {
         privileges.push(PrivilegeType.EVENT);
       }
@@ -201,27 +196,6 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                   setAgentKeyBody((state) => ({
                     ...state,
                     event: !state.event,
-                  }))
-                }
-              />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              helpText={i18n.translate(
-                'xpack.apm.settings.agentKeys.createKeyFlyout.sourcemaps',
-                {
-                  defaultMessage: 'Required for uploading sourcemaps.',
-                }
-              )}
-            >
-              <EuiCheckbox
-                id={htmlIdGenerator()()}
-                label="sourcemap:write"
-                checked={sourcemap}
-                onChange={() =>
-                  setAgentKeyBody((state) => ({
-                    ...state,
-                    sourcemap: !state.sourcemap,
                   }))
                 }
               />

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import { merge } from 'lodash';
-
+import { isEqual, merge } from 'lodash';
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { numberValidator } from '@kbn/ml-agg-utils';
+import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import {
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../../../../common/constants';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
-import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
   isValidFrequency,
@@ -40,7 +43,8 @@ type EditTransformFormFields =
   | 'docsPerSecond'
   | 'maxPageSearchSize'
   | 'retentionPolicyField'
-  | 'retentionPolicyMaxAge';
+  | 'retentionPolicyMaxAge'
+  | 'numFailureRetries';
 
 type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
@@ -103,15 +107,29 @@ type Validator = (value: any, isOptional?: boolean) => string[];
 // We do this so we have fine grained control over field validation and the option to
 // cast to special values like `null` for disabling `docs_per_second`.
 const numberAboveZeroNotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormNumberNotValidErrorMessage',
+  'xpack.transform.transformList.editFlyoutFormNumberAboveZeroNotValidErrorMessage',
   {
     defaultMessage: 'Value needs to be an integer above zero.',
   }
 );
+
+const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormNumberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',
+  {
+    defaultMessage: 'Number of retries needs to be between 0 and 100, or -1 for infinite retries.',
+  }
+);
+
 export const integerAboveZeroValidator: Validator = (value) =>
-  !isNaN(value) && Number.isInteger(+value) && +value > 0 && !(value + '').includes('.')
+  !(value + '').includes('.') && numberValidator({ min: 1, integerOnly: true })(+value) === null
     ? []
     : [numberAboveZeroNotValidErrorMessage];
+
+export const integerRangeMinus1To100Validator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
+    ? []
+    : [numberRangeMinus1To100NotValidErrorMessage];
 
 const numberRange10To10000NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
@@ -120,7 +138,8 @@ const numberRange10To10000NotValidErrorMessage = i18n.translate(
   }
 );
 export const integerRange10To10000Validator: Validator = (value) =>
-  integerAboveZeroValidator(value).length === 0 && +value >= 10 && +value <= 10000
+  !(value + '').includes('.') &&
+  numberValidator({ min: 10, max: 100001, integerOnly: true })(+value) === null
     ? []
     : [numberRange10To10000NotValidErrorMessage];
 
@@ -210,6 +229,7 @@ const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
+  integerRangeMinus1To100: integerRangeMinus1To100Validator,
   integerRange10To10000: integerRange10To10000Validator,
   retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
 } as const;
@@ -317,8 +337,12 @@ const getUpdateValue = (
         }, {})
       : {};
 
-  if (formValue === formStateAttribute.defaultValue && formStateAttribute.isOptional) {
-    return formValue !== configValue ? dependsOnConfig : {};
+  if (
+    formValue === formStateAttribute.defaultValue &&
+    formValue === configValue &&
+    formStateAttribute.isOptional
+  ) {
+    return {};
   }
 
   // If the resettable section the form field belongs to is disabled,
@@ -332,7 +356,11 @@ const getUpdateValue = (
   }
 
   return enabledBasedOnSection && (formValue !== configValue || enforceFormValue)
-    ? setNestedProperty(dependsOnConfig, formStateAttribute.configFieldName, formValue)
+    ? setNestedProperty(
+        dependsOnConfig,
+        formStateAttribute.configFieldName,
+        formValue === '' && formStateAttribute.isOptional ? undefined : formValue
+      )
     : {};
 };
 
@@ -357,7 +385,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // top level attributes
     description: initializeField('description', 'description', config),
     frequency: initializeField('frequency', 'frequency', config, {
-      defaultValue: '1m',
+      defaultValue: DEFAULT_TRANSFORM_FREQUENCY,
       validator: 'frequency',
     }),
 
@@ -379,6 +407,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
       isNullable: true,
+      isOptional: true,
       validator: 'integerAboveZero',
       valueParser: (v) => (v === '' ? null : +v),
     }),
@@ -387,8 +416,22 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       'settings.max_page_search_size',
       config,
       {
-        defaultValue: '500',
+        defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
+        isNullable: true,
+        isOptional: true,
         validator: 'integerRange10To10000',
+        valueParser: (v) => +v,
+      }
+    ),
+    numFailureRetries: initializeField(
+      'numFailureRetries',
+      'settings.num_failure_retries',
+      config,
+      {
+        defaultValue: undefined,
+        isNullable: true,
+        isOptional: true,
+        validator: 'integerRangeMinus1To100',
         valueParser: (v) => +v,
       }
     ),

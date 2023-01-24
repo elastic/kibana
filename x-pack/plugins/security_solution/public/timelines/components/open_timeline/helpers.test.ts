@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, getOr, omit } from 'lodash/fp';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 
 import {
   mockTimelineResults,
@@ -24,6 +24,7 @@ import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
+import type { QueryTimelineById } from './helpers';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
@@ -32,19 +33,14 @@ import {
   omitTypenameInTimeline,
   dispatchUpdateTimeline,
   queryTimelineById,
-  QueryTimelineById,
   formatTimelineResultToModel,
 } from './helpers';
-import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { Note } from '../../../common/lib/note';
+import type { OpenTimelineResult, DispatchUpdateTimeline } from './types';
+import type { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineStatus,
-  KueryFilterQueryKind,
-} from '../../../../common/types/timeline';
+import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -52,13 +48,13 @@ import {
 import { resolveTimeline } from '../../containers/api';
 
 jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 
@@ -77,7 +73,8 @@ const columns = [
   {
     columnHeaderType: 'not-filtered',
     id: '@timestamp',
-    type: 'number',
+    type: 'date',
+    esTypes: ['date'],
     initialWidth: 190,
   },
   {
@@ -879,7 +876,7 @@ describe('helpers', () => {
       })();
       const expectedNote: Note = {
         created: new Date(anchor),
-        id: 'uuid.v4()',
+        id: 'uuidv4()',
         lastEdit: null,
         note: '# this would be some markdown',
         saveObjectId: null,
@@ -891,7 +888,7 @@ describe('helpers', () => {
       expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
       expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
         id: TimelineId.active,
-        noteId: 'uuid.v4()',
+        noteId: 'uuidv4()',
       });
     });
   });

@@ -17,7 +17,7 @@ import { shallow } from 'enzyme';
 import { SearchUIForm } from './components/search_ui_form';
 import { SearchUIGraphic } from './components/search_ui_graphic';
 
-import { SearchUI } from './';
+import { SearchUI } from '.';
 
 describe('SearchUI', () => {
   const actions = {

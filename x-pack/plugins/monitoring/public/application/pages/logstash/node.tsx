@@ -13,33 +13,28 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiFlexGrid,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
-import { List } from '../../../components/logstash/pipeline_viewer/models/list';
-// @ts-ignore
 import { LogstashTemplate } from './logstash_template';
-// @ts-ignore
 import { DetailStatus } from '../../../components/logstash/detail_status';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { AlertsCallout } from '../../../alerts/callout';
 import { useCharts } from '../../hooks/use_charts';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ uuid: string | undefined }>();
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
   const cluster = find(clusters, {

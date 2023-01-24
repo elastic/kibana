@@ -9,13 +9,13 @@
 import fn from './subtract';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('subtract.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('it throws an error if first argument is not seriesList', async () => {

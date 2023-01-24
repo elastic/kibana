@@ -5,143 +5,169 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
-  ThresholdNormalized,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
-import { BuildRuleMessage } from '../rule_messages';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
+
+import type {
+  ThresholdNormalized,
+  TimestampOverride,
+} from '../../../../../common/detection_engine/rule_schema';
 import { singleSearchAfter } from '../single_search_after';
-import type { SignalSearchResponse } from '../types';
+import {
+  buildThresholdMultiBucketAggregation,
+  buildThresholdSingleBucketAggregation,
+} from './build_threshold_aggregation';
+import type {
+  ThresholdMultiBucketAggregationResult,
+  ThresholdBucket,
+  ThresholdSingleBucketAggregationResult,
+} from './types';
+import { shouldFilterByCardinality } from './utils';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 interface FindThresholdSignalsParams {
   from: string;
   to: string;
+  maxSignals: number;
   inputIndexPattern: string[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
-  filter: unknown;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  filter: ESBoolQuery;
   threshold: ThresholdNormalized;
-  buildRuleMessage: BuildRuleMessage;
-  timestampOverride: TimestampOverrideOrUndefined;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverride | undefined;
+  aggregatableTimestampField: string;
+}
+
+const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
+
+interface SearchAfterResults {
+  searchDurations: string[];
+  searchErrors: string[];
 }
 
 export const findThresholdSignals = async ({
   from,
   to,
+  maxSignals,
   inputIndexPattern,
   services,
-  logger,
+  ruleExecutionLogger,
   filter,
   threshold,
-  buildRuleMessage,
-  timestampOverride,
+  runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
+  aggregatableTimestampField,
 }: FindThresholdSignalsParams): Promise<{
-  searchResult: SignalSearchResponse;
-  searchDuration: string;
+  buckets: ThresholdBucket[];
+  searchDurations: string[];
   searchErrors: string[];
 }> => {
   // Leaf aggregations used below
-  const leafAggs = {
-    max_timestamp: {
-      max: {
-        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
-      },
-    },
-    min_timestamp: {
-      min: {
-        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
-      },
-    },
-    ...(threshold.cardinality?.length
-      ? {
-          cardinality_count: {
-            cardinality: {
-              field: threshold.cardinality[0].field,
-            },
-          },
-          cardinality_check: {
-            bucket_selector: {
-              buckets_path: {
-                cardinalityCount: 'cardinality_count',
-              },
-              script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
-            },
-          },
-        }
-      : {}),
+  let sortKeys;
+  const buckets: ThresholdBucket[] = [];
+  const searchAfterResults: SearchAfterResults = {
+    searchDurations: [],
+    searchErrors: [],
   };
 
-  const thresholdFields = threshold.field;
+  const includeCardinalityFilter = shouldFilterByCardinality(threshold);
 
-  // order buckets by cardinality (https://github.com/elastic/kibana/issues/95258)
-  const thresholdFieldCount = thresholdFields.length;
-  const orderByCardinality = (i: number = 0) =>
-    (thresholdFieldCount === 0 || i === thresholdFieldCount - 1) && threshold.cardinality?.length
-      ? { order: { cardinality_count: 'desc' } }
-      : {};
+  if (hasThresholdFields(threshold)) {
+    do {
+      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+        aggregations: buildThresholdMultiBucketAggregation({
+          threshold,
+          aggregatableTimestampField,
+          sortKeys,
+        }),
+        index: inputIndexPattern,
+        searchAfterSortIds: undefined,
+        from,
+        to,
+        services,
+        ruleExecutionLogger,
+        filter,
+        pageSize: 0,
+        sortOrder: 'desc',
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+      });
 
-  // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
-  // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
-  // 2) return the latest hit for each bucket so that we can persist the timestamp of the event in the
-  // `original_time` of the signal. This will be used for dupe mitigation purposes by the detection
-  // engine.
-  const aggregations = thresholdFields.length
-    ? thresholdFields.reduce((acc, field, i) => {
-        const aggPath = [...Array(i + 1).keys()]
-          .map((j) => {
-            return `['threshold_${j}:${thresholdFields[j]}']`;
-          })
-          .join(`['aggs']`);
-        set(acc, aggPath, {
-          terms: {
-            field,
-            ...orderByCardinality(i),
-            min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
-            size: 10000, // max 10k buckets
-          },
-        });
-        if (i === (thresholdFields.length ?? 0) - 1) {
-          set(acc, `${aggPath}['aggs']`, leafAggs);
-        }
-        return acc;
-      }, {})
-    : {
-        // No threshold grouping fields provided
-        threshold_0: {
-          terms: {
-            script: {
-              source: '""', // Group everything in the same bucket
-              lang: 'painless',
-            },
-            ...orderByCardinality(),
-            min_doc_count: threshold.value,
-          },
-          aggs: leafAggs,
-        },
-      };
+      const searchResultWithAggs = searchResult as ThresholdMultiBucketAggregationResult;
+      if (!searchResultWithAggs.aggregations) {
+        throw new Error('Aggregations were missing on threshold rule search result');
+      }
 
-  return singleSearchAfter({
-    aggregations,
-    searchAfterSortId: undefined,
-    timestampOverride,
-    index: inputIndexPattern,
-    from,
-    to,
-    services,
-    logger,
-    // @ts-expect-error refactor to pass type explicitly instead of unknown
-    filter,
-    pageSize: 0,
-    sortOrder: 'desc',
-    buildRuleMessage,
-  });
+      searchAfterResults.searchDurations.push(searchDuration);
+      searchAfterResults.searchErrors.push(...searchErrors);
+
+      const thresholdTerms = searchResultWithAggs.aggregations?.thresholdTerms;
+      sortKeys = thresholdTerms.after_key;
+
+      buckets.push(
+        ...(searchResultWithAggs.aggregations.thresholdTerms.buckets as ThresholdBucket[])
+      );
+    } while (sortKeys && buckets.length <= maxSignals);
+  } else {
+    const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+      aggregations: buildThresholdSingleBucketAggregation({
+        threshold,
+        aggregatableTimestampField,
+      }),
+      searchAfterSortIds: undefined,
+      index: inputIndexPattern,
+      from,
+      to,
+      services,
+      ruleExecutionLogger,
+      filter,
+      pageSize: 0,
+      sortOrder: 'desc',
+      trackTotalHits: true,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+    });
+
+    const searchResultWithAggs = searchResult as ThresholdSingleBucketAggregationResult;
+    if (!searchResultWithAggs.aggregations) {
+      throw new Error('Aggregations were missing on threshold rule search result');
+    }
+
+    searchAfterResults.searchDurations.push(searchDuration);
+    searchAfterResults.searchErrors.push(...searchErrors);
+
+    const docCount = searchResultWithAggs.hits.total.value;
+    if (
+      docCount >= threshold.value &&
+      (!includeCardinalityFilter ||
+        (searchResultWithAggs.aggregations.cardinality_count?.value ?? 0) >=
+          threshold.cardinality[0].value)
+    ) {
+      buckets.push({
+        doc_count: docCount,
+        key: {},
+        max_timestamp: searchResultWithAggs.aggregations.max_timestamp,
+        min_timestamp: searchResultWithAggs.aggregations.min_timestamp,
+        ...(includeCardinalityFilter
+          ? { cardinality_count: searchResultWithAggs.aggregations.cardinality_count }
+          : {}),
+      });
+    }
+  }
+
+  return {
+    buckets: buckets.slice(0, maxSignals),
+    ...searchAfterResults,
+  };
 };

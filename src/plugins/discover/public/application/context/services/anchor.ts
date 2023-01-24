@@ -5,23 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-
-import { ISearchSource, EsQuerySortValue, DataView } from '../../../../../data/common';
-import { EsHitRecord } from '../../types';
+import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DataTableRecord, EsHitRecord } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 export async function fetchAnchor(
   anchorId: string,
-  indexPattern: DataView,
+  dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
-): Promise<EsHitRecord> {
-  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
-
-  const response = await searchSource.fetch();
-  const doc = response.hits?.hits?.[0];
+): Promise<DataTableRecord> {
+  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
+  const { rawResponse } = await lastValueFrom(searchSource.fetch$());
+  const doc = rawResponse.hits?.hits?.[0] as EsHitRecord;
 
   if (!doc) {
     throw new Error(
@@ -30,11 +30,7 @@ export async function fetchAnchor(
       })
     );
   }
-
-  return {
-    ...doc,
-    isAnchor: true,
-  } as EsHitRecord;
+  return buildDataTableRecord(doc, dataView, true);
 }
 
 export function updateSearchSource(
@@ -42,11 +38,11 @@ export function updateSearchSource(
   anchorId: string,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean,
-  indexPattern: DataView
+  dataView: DataView
 ) {
   searchSource
     .setParent(undefined)
-    .setField('index', indexPattern)
+    .setField('index', dataView)
     .setField('version', true)
     .setField('size', 1)
     .setField('query', {

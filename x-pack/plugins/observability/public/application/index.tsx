@@ -9,20 +9,20 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { ConfigSchema } from '..';
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPublicPluginsStart } from '../plugin';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
@@ -45,19 +45,23 @@ function App() {
 }
 
 export const renderApp = ({
-  config,
   core,
+  config,
   plugins,
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
+  usageCollection,
+  isDev,
 }: {
-  config: ConfigSchema;
   core: CoreStart;
+  config: ConfigSchema;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -73,33 +77,37 @@ export const renderApp = ({
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
 
+  const ApplicationUsageTrackingProvider =
+    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
-      <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
-        <PluginContext.Provider
-          value={{
-            appMountParameters,
-            config,
-            core,
-            plugins,
-            observabilityRuleTypeRegistry,
-            ObservabilityPageTemplate,
-          }}
+    <ApplicationUsageTrackingProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaContextProvider
+          services={{ ...core, ...plugins, storage: new Storage(localStorage), isDev }}
         >
-          <Router history={history}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <i18nCore.Context>
-                <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                  <HasDataContextProvider>
-                    <App />
-                  </HasDataContextProvider>
-                </RedirectAppLinks>
-              </i18nCore.Context>
-            </EuiThemeProvider>
-          </Router>
-        </PluginContext.Provider>
-      </KibanaContextProvider>
-    </KibanaThemeProvider>,
+          <PluginContext.Provider
+            value={{
+              config,
+              appMountParameters,
+              observabilityRuleTypeRegistry,
+              ObservabilityPageTemplate,
+            }}
+          >
+            <Router history={history}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <i18nCore.Context>
+                  <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
+                    <HasDataContextProvider>
+                      <App />
+                    </HasDataContextProvider>
+                  </RedirectAppLinks>
+                </i18nCore.Context>
+              </EuiThemeProvider>
+            </Router>
+          </PluginContext.Provider>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
+    </ApplicationUsageTrackingProvider>,
     element
   );
   return () => {

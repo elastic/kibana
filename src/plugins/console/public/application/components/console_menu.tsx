@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup } from '@kbn/core/public';
 
 import {
   EuiIcon,
@@ -31,6 +31,7 @@ interface Props {
 interface State {
   isPopoverOpen: boolean;
   curlCode: string;
+  curlError: Error | null;
 }
 
 export class ConsoleMenu extends Component<Props, State> {
@@ -40,14 +41,20 @@ export class ConsoleMenu extends Component<Props, State> {
     this.state = {
       curlCode: '',
       isPopoverOpen: false,
+      curlError: null,
     };
   }
 
   mouseEnter = () => {
     if (this.state.isPopoverOpen) return;
-    this.props.getCurl().then((text) => {
-      this.setState({ curlCode: text });
-    });
+    this.props
+      .getCurl()
+      .then((text) => {
+        this.setState({ curlCode: text, curlError: null });
+      })
+      .catch((e) => {
+        this.setState({ curlError: e });
+      });
   };
 
   async copyAsCurl() {
@@ -69,6 +76,9 @@ export class ConsoleMenu extends Component<Props, State> {
   }
 
   async copyText(text: string) {
+    if (this.state.curlError) {
+      throw this.state.curlError;
+    }
     if (window.navigator?.clipboard) {
       await window.navigator.clipboard.writeText(text);
       return;
@@ -118,6 +128,7 @@ export class ConsoleMenu extends Component<Props, State> {
     const items = [
       <EuiContextMenuItem
         key="Copy as cURL"
+        data-test-subj="consoleMenuCopyAsCurl"
         id="ConCopyAsCurl"
         disabled={!window.navigator?.clipboard}
         onClick={() => {
@@ -164,7 +175,7 @@ export class ConsoleMenu extends Component<Props, State> {
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
         </EuiPopover>
       </span>
     );

@@ -12,8 +12,8 @@ import os from 'os';
 import crypto from 'crypto';
 
 import chalk from 'chalk';
-import simpleGit from 'simple-git/promise';
-import { ToolingLog } from '@kbn/dev-utils';
+import simpleGit from 'simple-git';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
@@ -81,6 +81,10 @@ async function sourceInfo(cwd: string, license: string, log: ToolingLog = defaul
   const { task, ext } = archiveForPlatform(os.platform(), license);
   const status = await git.status();
   const branch = status.current;
+  if (branch === null) {
+    throw new Error(`${cwd} git status is null`);
+  }
+
   const sha = (await git.revparse(['HEAD'])).trim();
 
   log.info('on %s at %s', chalk.bold(branch), chalk.bold(sha));

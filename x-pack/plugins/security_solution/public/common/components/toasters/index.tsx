@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import type { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { EuiButton, EuiGlobalToastList } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { createContext, Dispatch, useContext, useReducer, useState } from 'react';
+import type { Dispatch } from 'react';
+import React, { createContext, useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { ModalAllErrors } from './modal_all_errors';

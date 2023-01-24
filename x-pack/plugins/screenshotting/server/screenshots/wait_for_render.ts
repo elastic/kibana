@@ -5,72 +5,51 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export const waitForRenderComplete = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
-  loadDelay: number,
+  eventLogger: EventLogger,
   layout: Layout
 ) => {
-  const span = apm.startSpan('wait_for_render', 'wait');
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'wait for render complete',
+    Actions.WAIT_RENDER,
+    'wait'
+  );
 
-  logger.debug('waiting for rendering to complete');
+  await browser.evaluate<string[]>(
+    {
+      fn: async (selector) => {
+        const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
+        const visCount = visualizations.length;
+        const renderedTasks = [];
 
-  return await browser
-    .evaluate(
-      {
-        fn: (selector, visLoadDelay) => {
-          // wait for visualizations to finish loading
-          const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
-          const visCount = visualizations.length;
-          const renderedTasks = [];
+        function waitForRender(visualization: Element) {
+          return new Promise<void>((resolve) => {
+            visualization.addEventListener('renderComplete', () => resolve());
+          });
+        }
 
-          function waitForRender(visualization: Element) {
-            return new Promise<void>((resolve) => {
-              visualization.addEventListener('renderComplete', () => resolve());
-            });
+        for (let i = 0; i < visCount; i++) {
+          const visualization = visualizations[i];
+          const isRendered = visualization.getAttribute('data-render-complete');
+
+          if (isRendered === 'false') {
+            renderedTasks.push(waitForRender(visualization));
           }
+        }
 
-          function waitForRenderDelay() {
-            return new Promise((resolve) => {
-              setTimeout(resolve, visLoadDelay);
-            });
-          }
-
-          for (let i = 0; i < visCount; i++) {
-            const visualization = visualizations[i];
-            const isRendered = visualization.getAttribute('data-render-complete');
-
-            if (isRendered === 'disabled') {
-              renderedTasks.push(waitForRenderDelay());
-            } else if (isRendered === 'false') {
-              renderedTasks.push(waitForRender(visualization));
-            }
-          }
-
-          // The renderComplete fires before the visualizations are in the DOM, so
-          // we wait for the event loop to flush before telling reporting to continue. This
-          // seems to correct a timing issue that was causing reporting to occasionally
-          // capture the first visualization before it was actually in the DOM.
-          // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
-          // bumping to 250.
-          const hackyWaitForVisualizations = () => new Promise((r) => setTimeout(r, 250));
-
-          return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
-        },
-        args: [layout.selectors.renderComplete, loadDelay],
+        return await Promise.all(renderedTasks);
       },
-      { context: CONTEXT_WAITFORRENDER },
-      logger
-    )
-    .then(() => {
-      logger.debug('rendering is complete');
+      args: [layout.selectors.renderComplete],
+    },
+    { context: CONTEXT_WAITFORRENDER },
+    eventLogger.kbnLogger
+  );
 
-      span?.end();
-    });
+  spanEnd();
 };

@@ -51,10 +51,10 @@ export class CreateSourceEditor extends Component {
     );
   };
 
-  _onGeoFieldSelect = (geoField) => {
+  _onGeoFieldSelect = (geoFieldName) => {
     this.setState(
       {
-        geoField,
+        geoField: geoFieldName,
       },
       this.previewLayer
     );
@@ -85,7 +85,7 @@ export class CreateSourceEditor extends Component {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.esGeoGrid.geofieldLabel', {
-          defaultMessage: 'Geospatial field',
+          defaultMessage: 'Cluster field',
         })}
       >
         <SingleFieldSelect

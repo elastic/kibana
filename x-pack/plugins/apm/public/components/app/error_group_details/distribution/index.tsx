@@ -7,27 +7,31 @@
 
 import {
   Axis,
-  Chart,
   BarSeries,
+  Chart,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import React, { Suspense, useState } from 'react';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  EUI_CHARTS_THEME_DARK,
+  EUI_CHARTS_THEME_LIGHT,
+} from '@elastic/eui/dist/eui_charts_theme';
 import { i18n } from '@kbn/i18n';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { useTheme } from '../../../../hooks/use_theme';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { AlertType } from '../../../../../common/alert_types';
-import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
-import { ChartContainer } from '../../../shared/charts/chart_container';
+import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { LazyAlertsFlyout } from '../../../../../../observability/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { useTheme } from '../../../../hooks/use_theme';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { ChartContainer } from '../../../shared/charts/chart_container';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 type ErrorDistributionAPIResponse =
@@ -46,23 +50,24 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.ERROR_OCCURRENCES
+  );
   const timeseries = [
     {
       data: distribution.currentPeriod,
-      color: theme.eui.euiColorVis1,
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
-        defaultMessage: 'Occurrences',
+        defaultMessage: 'Error occurrences',
       }),
     },
     ...(comparisonEnabled
       ? [
           {
             data: distribution.previousPeriod,
-            color: theme.eui.euiColorMediumShade,
-            title: i18n.translate(
-              'xpack.apm.errorGroup.chart.ocurrences.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            color: previousPeriodColor,
+            title: previousPeriodLabel,
           },
         ]
       : []),
@@ -74,12 +79,6 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
-  const { observabilityRuleTypeRegistry } = useApmPluginContext();
-  const { alerts } = useApmServiceContext();
-  const { getFormatter } = observabilityRuleTypeRegistry;
-  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
-    undefined
-  );
 
   const timeZone = getTimeZone(core.uiSettings);
 
@@ -101,6 +100,11 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showLegend
             showLegendExtra
             legendPosition={Position.Bottom}
+            theme={
+              theme.darkMode
+                ? EUI_CHARTS_THEME_DARK.theme
+                : EUI_CHARTS_THEME_LIGHT.theme
+            }
           />
           <Axis
             id="x-axis"
@@ -131,27 +135,6 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
               />
             );
           })}
-          {getAlertAnnotations({
-            alerts: alerts?.filter(
-              (alert) => alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.ErrorCount
-            ),
-            chartStartTime: xValues[0],
-            getFormatter,
-            selectedAlertId,
-            setSelectedAlertId,
-            theme,
-          })}
-          <Suspense fallback={null}>
-            <LazyAlertsFlyout
-              alerts={alerts}
-              isInApp={true}
-              observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-              onClose={() => {
-                setSelectedAlertId(undefined);
-              }}
-              selectedAlertId={selectedAlertId}
-            />
-          </Suspense>
         </Chart>
       </ChartContainer>
     </>

@@ -17,7 +17,7 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { STATE_NAMES } from './states';
 

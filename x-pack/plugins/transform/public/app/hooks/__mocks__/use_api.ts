@@ -7,11 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpFetchError } from 'kibana/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
-import { TransformId } from '../../../../common/types/transform';
+import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../../common/api_schemas/audit_messages';
 import type {
@@ -39,7 +39,7 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
-import { EsIndex } from '../../../../common/types/es_index';
+import type { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';
 
@@ -54,30 +54,30 @@ export interface FieldHistogramRequestConfig {
 const apiFactory = () => ({
   async getTransform(
     transformId: TransformId
-  ): Promise<GetTransformsResponseSchema | HttpFetchError> {
+  ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  async getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
+  async getTransforms(): Promise<GetTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
   async getTransformStats(
     transformId: TransformId
-  ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+  ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
-  async getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+  async getTransformsStats(): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ count: 0, transforms: [] });
   },
   async createTransform(
     transformId: TransformId,
     transformConfig: PutTransformsRequestSchema
-  ): Promise<PutTransformsResponseSchema | HttpFetchError> {
+  ): Promise<PutTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({ transformsCreated: [], errors: [] });
   },
   async updateTransform(
     transformId: TransformId,
     transformConfig: PostTransformsUpdateRequestSchema
-  ): Promise<PostTransformsUpdateResponseSchema | HttpFetchError> {
+  ): Promise<PostTransformsUpdateResponseSchema | IHttpFetchError> {
     return Promise.resolve({
       id: 'the-test-id',
       source: { index: ['the-index-name'], query: { match_all: {} } },
@@ -95,12 +95,12 @@ const apiFactory = () => ({
   },
   async deleteTransforms(
     reqBody: DeleteTransformsRequestSchema
-  ): Promise<DeleteTransformsResponseSchema | HttpFetchError> {
+  ): Promise<DeleteTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({});
   },
   async getTransformsPreview(
     obj: PostTransformsPreviewRequestSchema
-  ): Promise<PostTransformsPreviewResponseSchema | HttpFetchError> {
+  ): Promise<PostTransformsPreviewResponseSchema | IHttpFetchError> {
     return Promise.resolve({
       generated_dest_index: {
         mappings: {
@@ -122,20 +122,20 @@ const apiFactory = () => ({
   },
   async startTransforms(
     reqBody: StartTransformsRequestSchema
-  ): Promise<StartTransformsResponseSchema | HttpFetchError> {
+  ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({});
   },
   async stopTransforms(
     transformsInfo: StopTransformsRequestSchema
-  ): Promise<StopTransformsResponseSchema | HttpFetchError> {
+  ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
     return Promise.resolve({});
   },
   async getTransformAuditMessages(
     transformId: TransformId
-  ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
-    return Promise.resolve([]);
+  ): Promise<GetTransformsAuditMessagesResponseSchema | IHttpFetchError> {
+    return Promise.resolve({ messages: [], total: 0 });
   },
-  async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
+  async esSearch(payload: any): Promise<estypes.SearchResponse | IHttpFetchError> {
     const hits = [];
 
     // simulate a cross cluster search result
@@ -162,15 +162,15 @@ const apiFactory = () => ({
     });
   },
 
-  async getEsIndices(): Promise<EsIndex[] | HttpFetchError> {
+  async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
     return Promise.resolve([]);
   },
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    dataViewTitle: string,
     fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
-  ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
+  ): Promise<FieldHistogramsResponseSchema | IHttpFetchError> {
     return Promise.resolve([]);
   },
 });

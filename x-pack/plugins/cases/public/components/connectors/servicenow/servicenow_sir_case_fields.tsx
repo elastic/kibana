@@ -8,16 +8,16 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 
-import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common/api';
+import type { ServiceNowSIRFieldsType } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorFieldsProps } from '../types';
+import type { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
-import { Choice, Fields } from './types';
+import type { Choice, Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
-import { connectorValidator } from './validator';
 import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
@@ -43,7 +43,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
 
   const { http, notifications } = useKibana().services;
   const [choices, setChoices] = useState<Fields>(defaultFields);
-  const showConnectorWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
+  const showConnectorWarning = connector.isDeprecated;
 
   const onChangeCb = useCallback(
     (

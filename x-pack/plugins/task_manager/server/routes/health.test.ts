@@ -8,20 +8,20 @@
 import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
-import uuid from 'uuid';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { v4 as uuidv4 } from 'uuid';
+import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   HealthStatus,
   MonitoringStats,
   RawMonitoringStats,
   summarizeMonitoringStats,
 } from '../monitoring';
-import { ServiceStatusLevels, Logger } from 'src/core/server';
+import { ServiceStatusLevels, Logger } from '@kbn/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
 import { FillPoolResult } from '../lib/fill_pool';
@@ -47,6 +47,7 @@ const createMockClusterClient = (response: any) => {
 
 describe('healthRoute', () => {
   const logger = loggingSystemMock.create().get();
+  const docLinks = docLinksServiceMock.create().setup();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -58,12 +59,14 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     const [config] = router.get.mock.calls[0];
@@ -80,12 +83,14 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -120,12 +125,14 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -166,11 +173,13 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
+      shouldRunTasks: true,
+      docLinks,
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -194,7 +203,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const id = uuid.v4();
+    const id = uuidv4();
     healthRoute({
       router,
       monitoringStats$: stats$,
@@ -204,6 +213,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 100,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -212,6 +222,8 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     stats$.next(mockStat);
@@ -252,7 +264,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const id = uuid.v4();
+    const id = uuidv4();
     healthRoute({
       router,
       monitoringStats$: stats$,
@@ -262,6 +274,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 120,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -270,6 +283,8 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     stats$.next(warnRuntimeStat);
@@ -328,7 +343,7 @@ describe('healthRoute', () => {
 
     const stats$ = new Subject<MonitoringStats>();
 
-    const id = uuid.v4();
+    const id = uuidv4();
     healthRoute({
       router,
       monitoringStats$: stats$,
@@ -338,6 +353,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 120,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -346,6 +362,8 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     stats$.next(errorRuntimeStat);
@@ -400,7 +418,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: stats$,
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -409,6 +427,8 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     const serviceStatus = getLatest(serviceStatus$);
@@ -481,7 +501,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: stats$,
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig({
         monitored_stats_required_freshness: 5000,
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -490,6 +510,8 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     await sleep(0);
@@ -554,7 +576,7 @@ describe('healthRoute', () => {
       router,
       monitoringStats$: stats$,
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -563,6 +585,8 @@ describe('healthRoute', () => {
       kibanaIndexName: '.kibana',
       getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
       usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
     });
 
     await sleep(0);

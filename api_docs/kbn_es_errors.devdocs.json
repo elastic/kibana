@@ -1,0 +1,148 @@
+{
+  "id": "@kbn/es-errors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.isResponseError",
+        "type": "Function",
+        "tags": [],
+        "label": "isResponseError",
+        "description": [
+          "\nChecks if the provided `error` is an {@link errors.ResponseError | elasticsearch response error}"
+        ],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-es-errors/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-errors",
+            "id": "def-common.isResponseError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-es-errors/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.isUnauthorizedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isUnauthorizedError",
+        "description": [
+          "\nChecks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}"
+        ],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-es-errors/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-errors",
+            "id": "def-common.isUnauthorizedError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-es-errors/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.ElasticsearchErrorDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchErrorDetails",
+        "description": [
+          "\nDetail information about an elasticsearch error."
+        ],
+        "path": "packages/kbn-es-errors/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-errors",
+            "id": "def-common.ElasticsearchErrorDetails.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ type: string; reason?: string | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-es-errors/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.UnauthorizedError",
+        "type": "Type",
+        "tags": [],
+        "label": "UnauthorizedError",
+        "description": [
+          "\nAn unauthorized (401) error returned by elasticsearch"
+        ],
+        "signature": [
+          "ResponseError",
+          " & { statusCode: 401; }"
+        ],
+        "path": "packages/kbn-es-errors/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

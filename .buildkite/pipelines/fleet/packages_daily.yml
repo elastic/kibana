@@ -1,0 +1,27 @@
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
+
+  - wait
+
+  - command: .buildkite/scripts/steps/fleet/install_all_packages.sh
+    label: Install All Packages
+    agents:
+      queue: n2-2
+    env:
+      # ensure that the FTR logs all output for these tests
+      DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'
+      # disable downloading a kibana build, this step does not use it
+      KIBANA_BUILD_ID: 'false'
+    timeout_in_minutes: 90
+
+  - wait: ~
+    continue_on_failure: true
+
+  - label: Post-Build
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    agents:
+      queue: kibana-default

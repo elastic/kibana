@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/es-errors",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

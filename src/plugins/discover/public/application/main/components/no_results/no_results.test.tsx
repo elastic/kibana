@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -34,10 +34,11 @@ function mountAndFindSubjects(props: Omit<DiscoverNoResultsProps, 'onDisableFilt
   );
   return {
     mainMsg: findTestSubject(component, 'discoverNoResults').exists(),
-    timeFieldMsg: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),
     errorMsg: findTestSubject(component, 'discoverNoResultsError').exists(),
+    adjustTimeRange: findTestSubject(component, 'discoverNoResultsTimefilter').exists(),
     adjustSearch: findTestSubject(component, 'discoverNoResultsAdjustSearch').exists(),
     adjustFilters: findTestSubject(component, 'discoverNoResultsAdjustFilters').exists(),
+    checkIndices: findTestSubject(component, 'discoverNoResultsCheckIndices').exists(),
     disableFiltersButton: findTestSubject(component, 'discoverNoResultsDisableFilters').exists(),
   };
 }
@@ -51,10 +52,11 @@ describe('DiscoverNoResults', () => {
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
+            "adjustTimeRange": false,
+            "checkIndices": true,
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
-            "timeFieldMsg": false,
           }
         `);
       });
@@ -68,10 +70,11 @@ describe('DiscoverNoResults', () => {
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
+            "adjustTimeRange": true,
+            "checkIndices": false,
             "disableFiltersButton": false,
             "errorMsg": false,
             "mainMsg": true,
-            "timeFieldMsg": true,
           }
         `);
       });
@@ -101,10 +104,11 @@ describe('DiscoverNoResults', () => {
           Object {
             "adjustFilters": false,
             "adjustSearch": false,
+            "adjustTimeRange": false,
+            "checkIndices": false,
             "disableFiltersButton": false,
             "errorMsg": true,
             "mainMsg": false,
-            "timeFieldMsg": false,
           }
         `);
       });

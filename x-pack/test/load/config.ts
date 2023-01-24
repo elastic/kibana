@@ -13,13 +13,18 @@ import { GatlingTestRunner } from './runner';
 // These "secret" values are intentionally written in the source.
 const APM_SERVER_URL = 'https://142fea2d3047486e925eb8b223559cae.apm.europe-west1.gcp.cloud.es.io';
 const APM_PUBLIC_TOKEN = 'pWFFEym07AKBBhUE2i';
+const AGGS_SHARD_DELAY = process.env.LOAD_TESTING_SHARD_DELAY;
+const DISABLE_PLUGINS = process.env.LOAD_TESTING_DISABLE_PLUGINS;
+const journeyName = process.env.GATLING_SIMULATIONS;
+const testBuildId = process.env.BUILD_ID;
+const branchName = process.env.KIBANA_BRANCH;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
@@ -43,6 +48,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'),
         '--no-base-path',
         '--env.name=development',
+        ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
+        ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
@@ -56,12 +63,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-          simulation: process.env.GATLING_SIMULATIONS
-            ? process.env.GATLING_SIMULATIONS
-            : 'unknown simulation',
+          journeyName,
+          testBuildId,
+          branchName,
         })
-          .filter(([, v]) => !!v)
-          .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
+          .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
+          .join(','),
       },
       // delay shutdown by 150 seconds to ensure that APM can report the data it collects during test execution
       delayShutdown: 150_000,

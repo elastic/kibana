@@ -7,8 +7,8 @@
 
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
@@ -65,4 +65,11 @@ test('it renders IndexPrivileges', () => {
   expect(
     mountWithIntl(<ElasticsearchPrivileges {...getProps()} />).find(IndexPrivileges)
   ).toHaveLength(1);
+});
+
+test('it renders fields as disabled when not editable', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} editable={false} />);
+  expect(wrapper.find('EuiComboBox').prop('isDisabled')).toBe(true);
+  expect(wrapper.find('ClusterPrivileges').prop('editable')).toBe(false);
+  expect(wrapper.find('IndexPrivileges').prop('editable')).toBe(false);
 });

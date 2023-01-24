@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/common';
+import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
 import {
   ExpressionValuePartitionLabels,
@@ -89,6 +89,15 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       ),
       options: [ValueFormats.PERCENT, ValueFormats.VALUE],
     },
+    colorOverrides: {
+      types: ['string'],
+      help: i18n.translate(
+        'expressionPartitionVis.partitionLabels.function.args.colorOverrides.help',
+        {
+          defaultMessage: 'Defines specific colors for specific labels.',
+        }
+      ),
+    },
   },
   fn: (context, args) => {
     return {
@@ -97,8 +106,9 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       position: args.position,
       percentDecimals: args.percentDecimals,
       values: args.values,
-      truncate: args.truncate,
       valuesFormat: args.valuesFormat,
+      colorOverrides: args.colorOverrides ? JSON.parse(args.colorOverrides) : {},
+      truncate: args.truncate,
       last_level: args.last_level,
     };
   },

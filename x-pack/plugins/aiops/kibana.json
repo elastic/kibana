@@ -1,0 +1,21 @@
+{
+  "id": "aiops",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "AIOps plugin maintained by ML team.",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "lens",
+    "licensing"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": ["fieldFormats", "kibanaReact", "kibanaUtils"],
+  "extraPublicDirs": ["common"]
+}

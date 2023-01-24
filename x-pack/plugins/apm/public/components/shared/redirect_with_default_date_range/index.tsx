@@ -8,6 +8,7 @@ import { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDateRangeRedirect } from '../../../hooks/use_date_range_redirect';
+import { isRouteWithTimeRange } from '../is_route_with_time_range';
 
 // This is a top-level component that blocks rendering of the routes
 // if there is no valid date range, and redirects to one if needed.
@@ -27,23 +28,9 @@ export function RedirectWithDefaultDateRange({
   const apmRouter = useApmRouter();
   const location = useLocation();
 
-  const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
+  const matchesRoute = isRouteWithTimeRange({ apmRouter, location });
 
-  if (
-    !isDateRangeSet &&
-    matchingRoutes.some((route) => {
-      return (
-        route.path === '/services' ||
-        route.path === '/traces' ||
-        route.path === '/service-map' ||
-        route.path === '/backends' ||
-        route.path === '/services/{serviceName}' ||
-        route.path === '/service-groups' ||
-        location.pathname === '/' ||
-        location.pathname === ''
-      );
-    })
-  ) {
+  if (!isDateRangeSet && matchesRoute) {
     redirect();
     return null;
   }

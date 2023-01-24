@@ -5,9 +5,37 @@
  * 2.0.
  */
 
-import type { RequestHandlerContext } from 'src/core/server';
-import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
-import { MlPluginSetup } from '../../ml/server';
+import type {
+  CoreSetup,
+  CustomRequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
+import { InfraServerPluginStartDeps } from './lib/adapters/framework';
+import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+
+export type { InfraConfig } from '../common/plugin_config_types';
+
+export type InfraPluginCoreSetup = CoreSetup<InfraServerPluginStartDeps, InfraPluginStart>;
+export type InfraPluginStartServicesAccessor = InfraPluginCoreSetup['getStartServices'];
+
+export interface InfraPluginSetup {
+  defineInternalSourceConfiguration: (
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) => void;
+  logViews: LogViewsServiceSetup;
+}
+
+export interface InfraPluginStart {
+  logViews: LogViewsServiceStart;
+  getMetricIndices: (
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId?: string
+  ) => Promise<string>;
+}
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
@@ -27,28 +55,7 @@ export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
 /**
  * @internal
  */
-export interface InfraPluginRequestHandlerContext extends RequestHandlerContext {
+export type InfraPluginRequestHandlerContext = CustomRequestHandlerContext<{
   infra: InfraRequestHandlerContext;
   search: SearchRequestHandlerContext;
-}
-
-export interface InfraConfig {
-  alerting: {
-    inventory_threshold: {
-      group_by_page_size: number;
-    };
-    metric_threshold: {
-      group_by_page_size: number;
-    };
-  };
-  inventory: {
-    compositeSize: number;
-  };
-  sources?: {
-    default?: {
-      fields?: {
-        message?: string[];
-      };
-    };
-  };
-}
+}>;

@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext } from 'react';
+import React, { createContext, useState } from 'react';
+import type { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import useUnmount from 'react-use/lib/useUnmount';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
-import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
+import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartServices['notifications']['toasts'];
+  uiSettings: MonitoringStartServices['uiSettings'];
 }
 
 export interface State {
@@ -27,15 +31,23 @@ export interface State {
 
 export const GlobalStateContext = createContext({} as State);
 
+const REFRESH_INTERVAL_OVERRIDE = {
+  pause: false,
+  value: 10000,
+};
+
 export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+  uiSettings,
   query,
   toasts,
   children,
 }) => {
   const localState: State = {};
-  const state = new GlobalState(query, toasts, localState as { [key: string]: unknown });
+  const [globalState] = useState(
+    () => new GlobalState(query, toasts, localState as { [key: string]: unknown })
+  );
 
-  const initialState: any = state.getState();
+  const initialState: any = globalState.getState();
   for (const key in initialState) {
     if (!initialState.hasOwnProperty(key)) {
       continue;
@@ -43,19 +55,22 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     localState[key] = initialState[key];
   }
 
-  localState.refreshInterval = { value: 10000, pause: false };
-
   localState.save = () => {
     const newState = { ...localState };
     delete newState.save;
-    state.setState(newState);
+    globalState.setState(newState);
   };
 
-  const { value, pause } = Legacy.shims.timefilter.getRefreshInterval();
-  if (!value && pause) {
+  // default to an active refresh interval if it's not conflicting with user-defined values
+  if (shouldOverrideRefreshInterval(uiSettings, Legacy.shims.timefilter)) {
+    localState.refreshInterval = REFRESH_INTERVAL_OVERRIDE;
     Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
-    localState.save?.();
+    localState.save();
   }
+
+  useUnmount(() => {
+    globalState.destroy();
+  });
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
 };

@@ -7,7 +7,7 @@
  */
 
 import { get, last } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export const commonAddSupportOfDualIndexSelectionModeInTSVB = (visState: any) => {
   if (visState && visState.type === 'metrics') {
@@ -93,7 +93,7 @@ export const commonAddEmptyValueColorRule = (visState: any) => {
 
     const convertRuleToEmpty = (rule: any = {}) => ({
       ...rule,
-      id: uuid.v4(),
+      id: uuidv4(),
       operator: 'empty',
       value: null,
     });
@@ -211,6 +211,58 @@ export const commonUpdatePieVisApi = (visState: any) => {
         legendDisplay: addLegend ? 'show' : 'hide',
       },
     };
+  }
+
+  return visState;
+};
+
+export const commonPreserveOldLegendSizeDefault = (visState: any) => {
+  const visualizationTypesWithLegends = [
+    'pie',
+    'area',
+    'histogram',
+    'horizontal_bar',
+    'line',
+    'heatmap',
+  ];
+
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
+  if (visualizationTypesWithLegends.includes(visState?.type)) {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        legendSize: pixelsToLegendSize[visState.params?.legendSize],
+      },
+    };
+  }
+
+  return visState;
+};
+
+export const commonRemoveExclamationCircleIcon = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    const { params } = visState;
+
+    if (params.annotations && Array.isArray(params.annotations)) {
+      params.annotations.forEach((annotation: any) => {
+        if (annotation.icon === 'fa-exclamation-circle') {
+          annotation.icon = 'fa-exclamation-triangle';
+        }
+      });
+    }
+
+    delete params.default_index_pattern;
+    delete params.default_timefield;
+
+    return visState;
   }
 
   return visState;

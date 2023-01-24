@@ -1,0 +1,17 @@
+---
+id: kibDevDocsOpsAmbientUiTypes
+slug: /kibana-dev-docs/ops/ambient-ui-types
+title: "@kbn/ambient-ui-types"
+description: A package holding ambient type definitions for files
+date: 2022-05-18
+tags: ['kibana', 'dev', 'contributor', 'operations', 'ambient', 'ui', 'types']
+---
+
+This package holds ambient typescript definitions for files with extensions like `.html, .png, .svg, .mdx` that might get imported by Webpack and therefore needed.
+
+## Plugins
+These types will automatically be included for plugins.
+
+## Packages
+
+To include these types in a package add `"@kbn/ambient-ui-types"` to the `types` portion of the `tsconfig.json` file.

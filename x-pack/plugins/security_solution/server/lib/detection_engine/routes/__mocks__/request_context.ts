@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { coreMock } from 'src/core/server/mocks';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { KibanaRequest } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 
-import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
-import { AlertingApiRequestHandlerContext } from '../../../../../../alerting/server';
-import { rulesClientMock } from '../../../../../../alerting/server/mocks';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
 // See: https://github.com/elastic/kibana/issues/117255, the moduleNameMapper creates mocks to avoid memory leaks from kibana core.
 // We cannot import from "../../../../../../actions/server" directly here or we have a really bad memory issue. We cannot add this to the existing mocks we created, this fix must be here.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
-import { licensingMock } from '../../../../../../licensing/server/mocks';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -30,8 +31,9 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
-import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz';
-import { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -62,10 +64,11 @@ export const createMockClients = () => {
 
 type MockClients = ReturnType<typeof createMockClients>;
 
-type SecuritySolutionRequestHandlerContextMock =
-  MockedKeys<SecuritySolutionRequestHandlerContext> & {
-    core: MockClients['core'];
-  };
+export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
+  AwaitedProperties<Omit<SecuritySolutionRequestHandlerContext, 'resolve'>>
+> & {
+  core: MockClients['core'];
+};
 
 const createRequestContextMock = (
   clients: MockClients = createMockClients(),
@@ -89,16 +92,27 @@ const createRequestContextMock = (
   };
 };
 
+const convertRequestContextMock = (
+  context: AwaitedProperties<SecuritySolutionRequestHandlerContextMock>
+): SecuritySolutionRequestHandlerContext => {
+  return coreMock.createCustomRequestHandlerContext(
+    context
+  ) as unknown as SecuritySolutionRequestHandlerContext;
+};
+
 const createSecuritySolutionRequestContextMock = (
   clients: MockClients,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
+  const licensing = licensingMock.createSetup();
 
   return {
     core,
-    endpointAuthz: getEndpointAuthzInitialStateMock(overrides.endpointAuthz),
+    getEndpointAuthz: jest.fn(async () =>
+      getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
+    ),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
@@ -111,10 +125,21 @@ const createSecuritySolutionRequestContextMock = (
       };
     }),
     getAppClient: jest.fn(() => clients.appClient),
+    getRacClient: jest.fn((req: KibanaRequest) => {
+      throw new Error('Not implemented');
+    }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
+    getInternalFleetServices: jest.fn(() => {
+      // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
+      throw new Error('Not implemented');
+    }),
+    getQueryRuleAdditionalOptions: {
+      licensing,
+      osqueryCreateAction: jest.fn(),
+    },
   };
 };
 
@@ -127,6 +152,7 @@ const createTools = () => {
 
 export const requestContextMock = {
   create: createRequestContextMock,
+  convertContext: convertRequestContextMock,
   createMockClients,
   createTools,
 };

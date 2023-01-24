@@ -6,10 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import rison from 'rison-node';
+import { i18n } from '@kbn/i18n';
+import rison from '@kbn/rison';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
-import type { MlDatafeed } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
+import { isDefined } from '@kbn/ml-is-defined';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -27,16 +33,10 @@ import {
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
-import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import {
-  FIELD_FORMAT_IDS,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../../src/plugins/field_formats/common';
 import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
@@ -51,7 +51,100 @@ type AggResultsResponse = { key?: number } & {
   };
 };
 
+interface AnomalyESQueryParams {
+  resultType: AnomalyResultType;
+  /** Appropriate score field for requested result type. */
+  anomalyScoreField: string;
+  anomalyScoreThreshold: number;
+  jobIds: string[];
+  topNBuckets: number;
+  maxBucketInSeconds: number;
+  lookBackTimeInterval: string;
+  includeInterimResults: boolean;
+  /** Source index from the datafeed. Required for retrieving field types for formatting results. */
+  indexPattern: string;
+}
+
 const TIME_RANGE_PADDING = 10;
+
+/**
+ * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
+ */
+export function buildExplorerUrl(
+  jobIds: string[],
+  timeRange: { from: string; to: string; mode?: string },
+  type: AnomalyResultType,
+  r?: AlertExecutionResult
+): string {
+  const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
+
+  /**
+   * Disabled until Anomaly Explorer page is fixed and properly
+   * support single point time selection
+   */
+  const highlightSwimLaneSelection = false;
+
+  const globalState = {
+    ml: {
+      jobIds,
+    },
+    time: {
+      from: timeRange.from,
+      to: timeRange.to,
+      mode: timeRange.mode ?? 'absolute',
+    },
+  };
+
+  const appState = {
+    explorer: {
+      mlExplorerFilter: {
+        ...(r && isInfluencerResult
+          ? {
+              filterActive: true,
+              filteredFields: [
+                r.topInfluencers![0].influencer_field_name,
+                r.topInfluencers![0].influencer_field_value,
+              ],
+              influencersFilterQuery: {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match_phrase: {
+                        [r.topInfluencers![0].influencer_field_name]:
+                          r.topInfluencers![0].influencer_field_value,
+                      },
+                    },
+                  ],
+                },
+              },
+              queryString: `${r.topInfluencers![0].influencer_field_name}:"${
+                r.topInfluencers![0].influencer_field_value
+              }"`,
+            }
+          : {}),
+      },
+      mlExplorerSwimlane: {
+        ...(r && highlightSwimLaneSelection
+          ? {
+              selectedLanes: [
+                isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
+              ],
+              selectedTimes: r.timestampEpoch,
+              selectedType: isInfluencerResult ? 'viewBy' : 'overall',
+              ...(isInfluencerResult
+                ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
+                : {}),
+              ...(isInfluencerResult ? {} : { showTopFieldValues: true }),
+            }
+          : {}),
+      },
+    },
+  };
+  return `/app/ml/explorer/?_g=${encodeURIComponent(
+    rison.encode(globalState)
+  )}&_a=${encodeURIComponent(rison.encode(appState))}`;
+}
 
 /**
  * Mapping for result types and corresponding score fields.
@@ -79,11 +172,11 @@ export function alertingServiceProvider(
    * Provides formatters based on the data view of the datafeed index pattern
    * and set of default formatters for fallback.
    */
-  const getFormatters = memoize(async (datafeed: MlDatafeed) => {
+  const getFormatters = memoize(async (indexPattern: string) => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
 
-    const fieldFormatMap = await getFieldsFormatMap(datafeed.indices[0]);
+    const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
       ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
@@ -313,8 +406,10 @@ export function alertingServiceProvider(
       return {
         count: aggTypeResults.doc_count,
         key: v.key,
-        message:
-          'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+        message: i18n.translate('xpack.ml.alertTypes.anomalyDetectionAlertingRule.alertMessage', {
+          defaultMessage:
+            'Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.',
+        }),
         alertInstanceKey,
         jobIds: [...new Set(requestedAnomalies.map((h) => h._source.job_id))],
         isInterim: requestedAnomalies.some((h) => h._source.is_interim),
@@ -463,7 +558,7 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters = await getFormatters(datafeeds![0]!);
+    const fieldsFormatters = await getFormatters(datafeeds![0]!.indices[0]);
 
     const formatter = getResultsFormatter(
       params.resultType,
@@ -495,14 +590,14 @@ export function alertingServiceProvider(
   };
 
   /**
-   * Fetches the most recent anomaly according the top N buckets within the lookback interval
-   * that satisfies a rule criteria.
+   * Gets ES query params for fetching anomalies.
    *
-   * @param params - Alert params
+   * @param params {MlAnomalyDetectionAlertParams}
+   * @return Params required for performing ES query for anomalies.
    */
-  const fetchResult = async (
+  const getQueryParams = async (
     params: MlAnomalyDetectionAlertParams
-  ): Promise<AlertExecutionResult | undefined> => {
+  ): Promise<AnomalyESQueryParams | void> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
       ...(params.jobSelection.groupIds ?? []),
@@ -534,6 +629,40 @@ export function alertingServiceProvider(
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 
+    return {
+      jobIds,
+      topNBuckets,
+      maxBucketInSeconds,
+      lookBackTimeInterval,
+      anomalyScoreField: resultTypeScoreMapping[params.resultType],
+      includeInterimResults: params.includeInterim,
+      resultType: params.resultType,
+      indexPattern: datafeeds![0]!.indices[0],
+      anomalyScoreThreshold: params.severity,
+    };
+  };
+
+  /**
+   * Fetches the most recent anomaly according the top N buckets within the lookback interval
+   * that satisfies a rule criteria.
+   *
+   * @param params - Alert params
+   */
+  const fetchResult = async (
+    params: AnomalyESQueryParams
+  ): Promise<AlertExecutionResult | undefined> => {
+    const {
+      resultType,
+      jobIds,
+      maxBucketInSeconds,
+      topNBuckets,
+      lookBackTimeInterval,
+      anomalyScoreField,
+      includeInterimResults,
+      anomalyScoreThreshold,
+      indexPattern,
+    } = params;
+
     const requestBody = {
       size: 0,
       query: {
@@ -554,7 +683,7 @@ export function alertingServiceProvider(
                 },
               },
             },
-            ...(params.includeInterim
+            ...(includeInterimResults
               ? []
               : [
                   {
@@ -576,10 +705,10 @@ export function alertingServiceProvider(
           aggs: {
             max_score: {
               max: {
-                field: resultTypeScoreMapping[params.resultType],
+                field: anomalyScoreField,
               },
             },
-            ...getResultTypeAggRequest(params.resultType, params.severity),
+            ...getResultTypeAggRequest(resultType, anomalyScoreThreshold),
             truncate: {
               bucket_sort: {
                 size: topNBuckets,
@@ -622,85 +751,9 @@ export function alertingServiceProvider(
       prev.max_score.value > current.max_score.value ? prev : current
     );
 
-    const formatters = await getFormatters(datafeeds![0]);
+    const formatters = await getFormatters(indexPattern);
 
     return getResultsFormatter(params.resultType, false, formatters)(topResult);
-  };
-
-  /**
-   * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
-   * @param r
-   * @param type
-   */
-  const buildExplorerUrl = (r: AlertExecutionResult, type: AnomalyResultType): string => {
-    const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
-
-    /**
-     * Disabled until Anomaly Explorer page is fixed and properly
-     * support single point time selection
-     */
-    const highlightSwimLaneSelection = false;
-
-    const globalState = {
-      ml: {
-        jobIds: r.jobIds,
-      },
-      time: {
-        from: r.bucketRange.start,
-        to: r.bucketRange.end,
-        mode: 'absolute',
-      },
-    };
-
-    const appState = {
-      explorer: {
-        mlExplorerFilter: {
-          ...(isInfluencerResult
-            ? {
-                filterActive: true,
-                filteredFields: [
-                  r.topInfluencers![0].influencer_field_name,
-                  r.topInfluencers![0].influencer_field_value,
-                ],
-                influencersFilterQuery: {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match_phrase: {
-                          [r.topInfluencers![0].influencer_field_name]:
-                            r.topInfluencers![0].influencer_field_value,
-                        },
-                      },
-                    ],
-                  },
-                },
-                queryString: `${r.topInfluencers![0].influencer_field_name}:"${
-                  r.topInfluencers![0].influencer_field_value
-                }"`,
-              }
-            : {}),
-        },
-        mlExplorerSwimlane: {
-          ...(highlightSwimLaneSelection
-            ? {
-                selectedLanes: [
-                  isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
-                ],
-                selectedTimes: r.timestampEpoch,
-                selectedType: isInfluencerResult ? 'viewBy' : 'overall',
-                ...(isInfluencerResult
-                  ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
-                  : {}),
-                ...(isInfluencerResult ? {} : { showTopFieldValues: true }),
-              }
-            : {}),
-        },
-      },
-    };
-    return `/app/ml/explorer/?_g=${encodeURIComponent(
-      rison.encode(globalState)
-    )}&_a=${encodeURIComponent(rison.encode(appState))}`;
   };
 
   return {
@@ -708,27 +761,63 @@ export function alertingServiceProvider(
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
-     * @param startedAt
-     * @param previousStartedAt
      */
     execute: async (
-      params: MlAnomalyDetectionAlertParams,
-      startedAt: Date,
-      previousStartedAt: Date | null
-    ): Promise<AnomalyDetectionAlertContext | undefined> => {
-      const result = await fetchResult(params);
+      params: MlAnomalyDetectionAlertParams
+    ): Promise<
+      { context: AnomalyDetectionAlertContext; name: string; isHealthy: boolean } | undefined
+    > => {
+      const queryParams = await getQueryParams(params);
 
-      if (!result) return;
+      if (!queryParams) {
+        return;
+      }
 
-      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType);
+      const result = await fetchResult(queryParams);
 
-      const executionResult = {
-        ...result,
-        name: result.alertInstanceKey,
-        anomalyExplorerUrl,
+      if (result) {
+        const anomalyExplorerUrl = buildExplorerUrl(
+          result.jobIds,
+          { from: result.bucketRange.start, to: result.bucketRange.end },
+          params.resultType,
+          result
+        );
+
+        const executionResult = {
+          ...result,
+          anomalyExplorerUrl,
+        };
+
+        return { context: executionResult, name: result.alertInstanceKey, isHealthy: false };
+      }
+
+      return {
+        name: '',
+        isHealthy: true,
+        context: {
+          anomalyExplorerUrl: buildExplorerUrl(
+            queryParams.jobIds,
+            {
+              from: `now-${queryParams.lookBackTimeInterval}`,
+              to: 'now',
+              mode: 'relative',
+            },
+            queryParams.resultType
+          ),
+          jobIds: queryParams.jobIds,
+          message: i18n.translate(
+            'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredMessage',
+            {
+              defaultMessage:
+                'No anomalies have been found in the past {lookbackInterval} that exceed the severity threshold of {severity}.',
+              values: {
+                severity: queryParams.anomalyScoreThreshold,
+                lookbackInterval: queryParams.lookBackTimeInterval,
+              },
+            }
+          ),
+        } as AnomalyDetectionAlertContext,
       };
-
-      return executionResult;
     },
     /**
      * Checks how often the alert condition will fire an alert instance

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { wrapRouteWithLicenseCheck, CheckLicense } from './wrap_route_with_license_check';
 

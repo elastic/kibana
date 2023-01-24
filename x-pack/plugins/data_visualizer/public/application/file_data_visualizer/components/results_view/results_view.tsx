@@ -12,14 +12,14 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiPageBody,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { useDocumentTitle } from '../../../../hooks/use_document_title';
 import { InvalidNodeError } from './invalid_node';
-import { DocumentTitle } from '../../../../components/document_title';
 import { ErrorPageBody } from '../../../error';
 import { InfraHttpError } from '../../../../types';
+import { errorTitle } from '../../../../translations';
 
 interface Props {
   name: string;
@@ -18,18 +18,10 @@ interface Props {
 }
 
 export const PageError = ({ error, name }: Props) => {
+  useDocumentTitle([{ text: errorTitle }]);
+
   return (
     <>
-      <DocumentTitle
-        title={(previousTitle: string) =>
-          i18n.translate('xpack.infra.metricDetailPage.documentTitleError', {
-            defaultMessage: '{previousTitle} | Uh oh',
-            values: {
-              previousTitle,
-            },
-          })
-        }
-      />
       {error.body?.statusCode === 404 ? (
         <InvalidNodeError nodeName={name} />
       ) : (

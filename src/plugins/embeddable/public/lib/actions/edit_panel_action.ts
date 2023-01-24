@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from 'kibana/public';
-import { Action } from 'src/plugins/ui_actions/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
@@ -75,13 +75,29 @@ export class EditPanelAction implements Action<ActionContext> {
       embeddable &&
         embeddable.getOutput().editable &&
         (embeddable.getOutput().editUrl ||
-          (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
+          (embeddable.getOutput().editApp && embeddable.getOutput().editPath) ||
+          embeddable.getOutput().editableWithExplicitInput)
     );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
   public async execute(context: ActionContext) {
+    const embeddable = context.embeddable;
+    const { editableWithExplicitInput } = embeddable.getOutput();
+
+    if (editableWithExplicitInput) {
+      const factory = this.getEmbeddableFactory(embeddable.type);
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(embeddable.type);
+      }
+
+      const oldExplicitInput = embeddable.getExplicitInput();
+      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput);
+      embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
+      return;
+    }
+
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
       if (this.stateTransfer && appTarget.state) {

@@ -69,38 +69,32 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem auditbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_auditbeat',
-      indexPattern: 'ft_module_siem_auditbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_auditbeat',
+      indexPattern: 'ft_module_security_auditbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_auth', 'siem_auditbeat', 'siem_auditbeat_auth'],
+        moduleIds: ['security_auth'],
       },
     },
     {
       testTitleSuffix: 'for siem packetbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
-      indexPattern: 'ft_module_siem_packetbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_packetbeat',
+      indexPattern: 'ft_module_security_packetbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_packetbeat'],
+        moduleIds: ['security_packetbeat'],
       },
     },
     {
       testTitleSuffix: 'for siem winlogbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_winlogbeat',
-      indexPattern: 'ft_module_siem_winlogbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_winlogbeat',
+      indexPattern: 'ft_module_security_winlogbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: [
-          'security_auth',
-          'security_network',
-          'security_windows',
-          'siem_winlogbeat',
-          'siem_winlogbeat_auth',
-        ],
+        moduleIds: ['security_auth', 'security_network', 'security_windows_v3'],
       },
     },
     {
@@ -129,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux', 'siem_auditbeat'],
+        moduleIds: ['security_linux_v3'],
       },
     },
     {
@@ -139,7 +133,12 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_auth', 'security_linux', 'security_network', 'security_windows'],
+        moduleIds: [
+          'security_auth',
+          'security_linux_v3',
+          'security_network',
+          'security_windows_v3',
+        ],
       },
     },
     {
@@ -149,17 +148,17 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['metricbeat_system_ecs', 'security_linux'],
+        moduleIds: ['metricbeat_system_ecs', 'security_linux_v3'],
       },
     },
     {
       testTitleSuffix: 'for siem clodutrail dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_cloudtrail',
-      indexPattern: 'ft_module_siem_cloudtrail',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_cloudtrail',
+      indexPattern: 'ft_module_security_cloudtrail',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_cloudtrail'],
+        moduleIds: ['security_cloudtrail'],
       },
     },
     {
@@ -169,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_linux'], // the metrics ui modules don't define a query and can't be recognized
+        moduleIds: ['security_linux_v3'], // the metrics ui modules don't define a query and can't be recognized
       },
     },
     {
@@ -205,11 +204,11 @@ export default ({ getService }: FtrProviderContext) => {
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(rspCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

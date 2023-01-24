@@ -49,5 +49,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./esaggs_significanttext'));
     loadTestFile(require.resolve('./esaggs_rareterms'));
     loadTestFile(require.resolve('./esaggs_topmetrics'));
+    loadTestFile(require.resolve('./esaggs_histogram'));
+    loadTestFile(require.resolve('./event_annotation/fetch_event_annotations'));
+    loadTestFile(require.resolve('./essql'));
   });
 }

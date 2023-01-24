@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Columns } from '../../paginated_table';
-import { AnomaliesBy, Anomaly } from '../types';
+import type { Columns } from '../../../../explore/components/paginated_table';
+import type { AnomaliesBy, Anomaly } from '../types';
 
 import { EntityDraggable } from '../entity_draggable';
 import { createCompoundAnomalyKey } from './create_compound_key';
@@ -32,14 +32,14 @@ export const getAnomaliesDefaultTableColumns = (
 ] => [
   {
     name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
+    field: 'jobName',
     sortable: true,
-    render: (jobId, anomalyBy) => (
+    render: (jobName, anomalyBy) => (
       <ExplorerLink
         score={anomalyBy.anomaly}
         startDate={startDate}
         endDate={endDate}
-        linkName={jobId}
+        linkName={jobName}
       />
     ),
   },

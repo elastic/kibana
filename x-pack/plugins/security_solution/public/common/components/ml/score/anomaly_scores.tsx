@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 import { getEmptyTagValue } from '../../empty_value';
-import { Anomalies, Anomaly, NarrowDateRange } from '../types';
+import type { Anomalies, Anomaly, NarrowDateRange } from '../types';
 import { getTopSeverityJobs } from './get_top_severity';
 import { AnomalyScore } from './anomaly_score';
 
@@ -19,6 +19,7 @@ interface Args {
   isLoading: boolean;
   narrowDateRange: NarrowDateRange;
   limit?: number;
+  jobNameById: Record<string, string | undefined>;
 }
 
 export const createJobKey = (score: Anomaly): string =>
@@ -31,6 +32,7 @@ export const AnomalyScoresComponent = ({
   isLoading,
   narrowDateRange,
   limit,
+  jobNameById,
 }: Args): JSX.Element => {
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;
@@ -50,6 +52,7 @@ export const AnomalyScoresComponent = ({
                 endDate={endDate}
                 index={index}
                 score={score}
+                jobName={jobNameById[score.jobId] ?? score.jobId}
                 interval={anomalies.interval}
                 narrowDateRange={narrowDateRange}
               />

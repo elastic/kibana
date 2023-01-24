@@ -8,7 +8,7 @@
 import { get, orderBy } from 'lodash';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { mergePipelineVersions } from './merge_pipeline_versions';
@@ -72,7 +72,7 @@ function fetchPipelineVersions({
   const dataset = 'node_stats';
   const type = 'logstash_stats';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -91,6 +91,9 @@ function fetchPipelineVersions({
               ignore_unmapped: true,
               query: {
                 bool: {
+                  // NOTE: Due to a historical bug it's possible to have documents indexed with an empty hash. This is due to a race condition between Metricbeat / Agent
+                  // and the Logstash API (the API being polled before setup is complete).
+                  must_not: { match: { 'logstash_stats.pipelines.hash': '' } },
                   filter: [{ term: { 'logstash_stats.pipelines.id': pipelineId } }],
                 },
               },
@@ -102,6 +105,9 @@ function fetchPipelineVersions({
               ignore_unmapped: true,
               query: {
                 bool: {
+                  // NOTE: Due to a historical bug it's possible to have documents indexed with an empty hash. This is due to a race condition between Metricbeat / Agent
+                  // and the Logstash API (the API being polled before setup is complete).
+                  must_not: { match: { 'logstash.node.stats.pipelines.hash': '' } },
                   filter: [{ term: { 'logstash.node.stats.pipelines.id': pipelineId } }],
                 },
               },
@@ -113,7 +119,7 @@ function fetchPipelineVersions({
   ];
   const query = createQuery({
     type,
-    dsDataset: `${moduleType}.${dataset}`,
+    dsDataset: getLogstashDataset(dataset),
     metricset: dataset,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,

@@ -9,9 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security app - login selector', function () {
-    this.tags('ciGroup13');
-
     loadTestFile(require.resolve('./basic_functionality'));
     loadTestFile(require.resolve('./auth_provider_hint'));
+    loadTestFile(require.resolve('./reset_session_page'));
   });
 }

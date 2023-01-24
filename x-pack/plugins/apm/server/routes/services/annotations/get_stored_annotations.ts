@@ -6,18 +6,18 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { rangeQuery } from '../../../../../observability/server';
-import { environmentQuery } from '../../../../common/utils/environment_query';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
-} from '../../../../../observability/server';
-import { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
-import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
-import { ScopedAnnotationsClient } from '../../../../../observability/server';
+} from '@kbn/observability-plugin/server';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getStoredAnnotations({

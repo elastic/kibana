@@ -36,22 +36,22 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   }
 );
 
-export const GENERATED_ALERT_COMMENT_LABEL_TITLE = i18n.translate(
-  'xpack.cases.caseView.generatedAlertCommentLabelTitle',
-  {
-    defaultMessage: 'were added from',
-  }
-);
-
-export const GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE = (totalCount: number) =>
-  i18n.translate('xpack.cases.caseView.generatedAlertCountCommentLabelTitle', {
-    values: { totalCount },
-    defaultMessage: `{totalCount} {totalCount, plural, =1 {alert} other {alerts}}`,
+export const MULTIPLE_ALERTS_COMMENT_LABEL_TITLE = (totalAlerts: number) =>
+  i18n.translate('xpack.cases.caseView.generatedAlertCommentLabelTitle', {
+    values: { totalAlerts },
+    defaultMessage: 'added {totalAlerts} alerts from',
   });
 
 export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
   defaultMessage: 'Show alert details',
 });
+
+export const SHOW_ALERT_TABLE_TOOLTIP = i18n.translate(
+  'xpack.cases.caseView.showAlertTableTooltip',
+  {
+    defaultMessage: 'Show alerts',
+  }
+);
 
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',
@@ -70,3 +70,34 @@ export const OTHER_ENDPOINTS = (endpoints: number): string =>
     values: { endpoints },
     defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
   });
+
+export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const DELETE = i18n.translate('xpack.cases.caseView.delete.confirm', {
+  defaultMessage: 'Delete',
+});
+
+export const ASSIGNED = i18n.translate('xpack.cases.caseView.assigned', {
+  defaultMessage: 'assigned',
+});
+
+export const UNASSIGNED = i18n.translate('xpack.cases.caseView.unAssigned', {
+  defaultMessage: 'unassigned',
+});
+
+export const THEMSELVES = i18n.translate('xpack.cases.caseView.assignee.themselves', {
+  defaultMessage: 'themselves',
+});
+
+export const AND = i18n.translate('xpack.cases.caseView.assignee.and', {
+  defaultMessage: 'and',
+});
+
+export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.description.unsavedDraftDescription',
+  {
+    defaultMessage: 'You have unsaved edits for the description',
+  }
+);

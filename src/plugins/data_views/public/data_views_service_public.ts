@@ -6,19 +6,54 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from '.';
+import { DataViewsService, MatchedItem } from '.';
 
 import { DataViewsServiceDeps } from '../common/data_views/data_views';
+import { HasDataService } from '../common';
 
-interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
+/**
+ * Data Views public service dependencies
+ * @public
+ */
+export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
+  /**
+   * Get can user save data view - sync version
+   */
   getCanSaveSync: () => boolean;
+  /**
+   * Has data service
+   */
+  hasData: HasDataService;
+  getIndices: (props: {
+    pattern: string;
+    showAllIndices?: boolean;
+    isRollupIndex: (indexName: string) => boolean;
+  }) => Promise<MatchedItem[]>;
 }
 
+/**
+ * Data Views public service
+ * @public
+ */
 export class DataViewsServicePublic extends DataViewsService {
   public getCanSaveSync: () => boolean;
+
+  public getIndices: (props: {
+    pattern: string;
+    showAllIndices?: boolean;
+    isRollupIndex: (indexName: string) => boolean;
+  }) => Promise<MatchedItem[]>;
+  public hasData: HasDataService;
+
+  /**
+   * Constructor
+   * @param deps Service dependencies
+   */
 
   constructor(deps: DataViewsServicePublicDeps) {
     super(deps);
     this.getCanSaveSync = deps.getCanSaveSync;
+    this.hasData = deps.hasData;
+    this.getIndices = deps.getIndices;
   }
 }

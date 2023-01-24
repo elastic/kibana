@@ -1,0 +1,51 @@
+@import './vars';
+
+/*
+This styling contains utility and minimal layout styles to help plugins create
+print-ready HTML.
+
+Observations:
+1. We currently do not control the user-agent's header and footer content
+   (including the style of fonts) for client-side printing.
+
+2. Page box model is quite different from what we have in browsers - page
+   margins define where the "no-mans-land" exists for actual content. Moving
+   content into this space by, for example setting negative margins resulted
+   in slightly unpredictable behaviour because the browser wants to either
+   move this content to another page or it may get split across two
+   pages.
+
+3. page-break-* is your friend!
+*/
+
+// Currently we cannot control or style the content the browser places in
+// margins, this might change in the future:
+// See https://drafts.csswg.org/css-page-3/#margin-boxes
+@page {
+  size: A4;
+  orientation: portrait;
+  margin: 0;
+  margin-top: $a4PageHeaderHeight;
+  margin-bottom: $a4PageFooterHeight;
+}
+
+@media print {
+
+  html {
+    background-color: #FFF;
+  }
+
+  // It is good practice to show the full URL in the final, printed output
+  a[href]:after {
+    content: ' [' attr(href) ']';
+  }
+
+  figure {
+    page-break-inside: avoid;
+  }
+
+  * {
+    print-color-adjust: exact !important;
+  }
+
+}

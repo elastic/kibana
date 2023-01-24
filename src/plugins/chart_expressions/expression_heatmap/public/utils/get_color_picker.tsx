@@ -9,8 +9,8 @@
 import React, { createContext, useCallback, useContext } from 'react';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
-import type { PersistedState } from '../../../../visualizations/public';
-import { ColorPicker } from '../../../../charts/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ColorPicker } from '@kbn/charts-plugin/public';
 
 const KEY_CODE_ENTER = 13;
 

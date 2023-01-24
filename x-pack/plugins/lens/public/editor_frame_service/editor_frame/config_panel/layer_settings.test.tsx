@@ -28,6 +28,7 @@ describe('LayerSettings', () => {
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         activeData: frame.activeData,
         setState: jest.fn(),
+        onChangeIndexPattern: jest.fn(),
       },
     };
   }

@@ -9,7 +9,7 @@
 /* eslint max-len: 0 */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -22,6 +22,7 @@ export const getSavedObjects = (): SavedObject[] => [
       runtimeFieldMap: '{}',
       timeFieldName: 'order_date',
       title: 'kibana_sample_data_ecommerce',
+      name: 'Kibana Sample Data eCommerce',
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.0.0',
@@ -176,7 +177,7 @@ export const getSavedObjects = (): SavedObject[] => [
       uiStateJSON: '{}',
       version: 1,
       visState:
-        '{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"### Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
+        '{"title":"[eCommerce] Markdown","type":"markdown","params":{"fontSize":12,"openLinksInNewTab":false,"markdown":"## Sample eCommerce Data\\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html)."},"aggs":[]}',
     },
     coreMigrationVersion: '8.0.0',
     id: 'c00d1f90-f5ea-11eb-a78e-83aac3c38a60',
@@ -187,44 +188,6 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-08-05T12:43:35.817Z',
     version: 'WzE3MSwxXQ==',
-  },
-  {
-    attributes: {
-      description: '',
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
-      },
-      title: '[eCommerce] Controls',
-      uiStateJSON: '{}',
-      version: 1,
-      visState:
-        '{"title":"[eCommerce] Controls","type":"input_control_vis","params":{"controls":[{"id":"1536977437774","fieldName":"manufacturer.keyword","parent":"","label":"Manufacturer","type":"list","options":{"type":"terms","multiselect":true,"dynamicOptions":true,"size":5,"order":"desc"},"indexPatternRefName":"control_0_index_pattern"},{"id":"1536977465554","fieldName":"category.keyword","parent":"","label":"Category","type":"list","options":{"type":"terms","multiselect":true,"dynamicOptions":true,"size":5,"order":"desc"},"indexPatternRefName":"control_1_index_pattern"},{"id":"1536977596163","fieldName":"total_quantity","parent":"","label":"Quantity","type":"range","options":{"decimalPlaces":0,"step":1},"indexPatternRefName":"control_2_index_pattern"}],"updateFiltersOnChange":false,"useTimeFilter":true,"pinFilters":false},"aggs":[]}',
-    },
-    coreMigrationVersion: '8.0.0',
-    id: 'c3378480-f5ea-11eb-a78e-83aac3c38a60',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
-    references: [
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'control_0_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'control_1_index_pattern',
-        type: 'index-pattern',
-      },
-      {
-        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-        name: 'control_2_index_pattern',
-        type: 'index-pattern',
-      },
-    ],
-    type: 'visualization',
-    updated_at: '2021-08-05T12:43:41.128Z',
-    version: 'WzE3NiwxXQ==',
   },
   {
     attributes: {
@@ -1284,113 +1247,132 @@ export const getSavedObjects = (): SavedObject[] => [
     version: 'WzIzMywxXQ==',
   },
   {
+    id: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+    type: 'dashboard',
+    namespaces: ['default'],
+    updated_at: '2022-09-26T17:19:19.470Z',
+    version: 'WzQ1MTgsMV0=',
     attributes: {
+      title: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardTitle', {
+        defaultMessage: '[eCommerce] Revenue Dashboard',
+      }),
+      hits: 0,
       description: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardDescription', {
         defaultMessage: 'Analyze mock eCommerce orders and revenue',
       }),
-      hits: 0,
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
-      },
-      optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
       panelsJSON:
-        '[{"version":"8.0.0-SNAPSHOT","type":"visualization","gridData":{"x":0,"y":22,"w":24,"h":10,"i":"5"},"panelIndex":"5","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_5"},{"version":"8.0.0-SNAPSHOT","type":"visualization","gridData":{"x":36,"y":15,"w":12,"h":7,"i":"7"},"panelIndex":"7","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_7"},{"version":"8.0.0-SNAPSHOT","type":"search","gridData":{"x":0,"y":55,"w":48,"h":18,"i":"10"},"panelIndex":"10","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_10"},{"version":"8.0.0-SNAPSHOT","type":"map","gridData":{"x":0,"y":32,"w":24,"h":14,"i":"11"},"panelIndex":"11","embeddableConfig":{"isLayerTOCOpen":false,"enhancements":{},"mapCenter":{"lat":45.88578,"lon":-15.07605,"zoom":2.11},"mapBuffer":{"minLon":-135,"minLat":0,"maxLon":90,"maxLat":66.51326},"openTOCDetails":[],"hiddenLayers":[]},"panelRefName":"panel_11"},{"version":"8.0.0-SNAPSHOT","type":"visualization","gridData":{"x":0,"y":0,"w":18,"h":7,"i":"a71cf076-6895-491c-8878-63592e429ed5"},"panelIndex":"a71cf076-6895-491c-8878-63592e429ed5","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_a71cf076-6895-491c-8878-63592e429ed5"},{"version":"8.0.0-SNAPSHOT","type":"visualization","gridData":{"x":18,"y":0,"w":30,"h":7,"i":"adc0a2f4-481c-45eb-b422-0ea59a3e5163"},"panelIndex":"adc0a2f4-481c-45eb-b422-0ea59a3e5163","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_adc0a2f4-481c-45eb-b422-0ea59a3e5163"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":0,"y":7,"w":24,"h":8,"i":"7077b79f-2a99-4fcb-bbd4-456982843278"},"panelIndex":"7077b79f-2a99-4fcb-bbd4-456982843278","embeddableConfig":{"enhancements":{},"hidePanelTitles":false},"title":"% of target revenue ($10k)","panelRefName":"panel_7077b79f-2a99-4fcb-bbd4-456982843278"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":24,"y":7,"w":12,"h":8,"i":"19a3c101-ad2e-4421-a71b-a4734ec1f03e"},"panelIndex":"19a3c101-ad2e-4421-a71b-a4734ec1f03e","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_19a3c101-ad2e-4421-a71b-a4734ec1f03e"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":36,"y":7,"w":12,"h":8,"i":"491469e7-7d24-4216-aeb3-bca00e5c8c1b"},"panelIndex":"491469e7-7d24-4216-aeb3-bca00e5c8c1b","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_491469e7-7d24-4216-aeb3-bca00e5c8c1b"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":0,"y":15,"w":24,"h":7,"i":"a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef"},"panelIndex":"a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":24,"y":15,"w":12,"h":7,"i":"da51079b-952f-43dc-96e6-6f9415a3708b"},"panelIndex":"da51079b-952f-43dc-96e6-6f9415a3708b","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_da51079b-952f-43dc-96e6-6f9415a3708b"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":24,"y":22,"w":24,"h":10,"i":"64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b"},"panelIndex":"64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":24,"y":32,"w":24,"h":14,"i":"bd330ede-2eef-4e2a-8100-22a21abf5038"},"panelIndex":"bd330ede-2eef-4e2a-8100-22a21abf5038","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_bd330ede-2eef-4e2a-8100-22a21abf5038"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":0,"y":46,"w":24,"h":9,"i":"b897d4be-cf83-46fb-a111-c7fbec9ef403"},"panelIndex":"b897d4be-cf83-46fb-a111-c7fbec9ef403","embeddableConfig":{"hidePanelTitles":false,"enhancements":{}},"title":"Top products this week","panelRefName":"panel_b897d4be-cf83-46fb-a111-c7fbec9ef403"},{"version":"8.0.0-SNAPSHOT","type":"lens","gridData":{"x":24,"y":46,"w":24,"h":9,"i":"e0f68f93-30f2-4da7-889a-6cd128a68d3f"},"panelIndex":"e0f68f93-30f2-4da7-889a-6cd128a68d3f","embeddableConfig":{"timeRange":{"from":"now-2w","to":"now-1w"},"hidePanelTitles":false,"enhancements":{}},"title":"Top products last week","panelRefName":"panel_e0f68f93-30f2-4da7-889a-6cd128a68d3f"}]',
+        '[{"version":"8.6.0","type":"visualization","gridData":{"x":0,"y":21,"w":24,"h":10,"i":"5"},"panelIndex":"5","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_5"},{"version":"8.6.0","type":"visualization","gridData":{"x":36,"y":7,"w":12,"h":7,"i":"7"},"panelIndex":"7","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_7"},{"version":"8.6.0","type":"search","gridData":{"x":0,"y":54,"w":48,"h":18,"i":"10"},"panelIndex":"10","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_10"},{"version":"8.6.0","type":"visualization","gridData":{"x":0,"y":31,"w":24,"h":14,"i":"11"},"panelIndex":"11","embeddableConfig":{"isLayerTOCOpen":false,"enhancements":{},"mapCenter":{"lat":45.88578,"lon":-15.07605,"zoom":2.11},"mapBuffer":{"minLon":-135,"minLat":0,"maxLon":90,"maxLat":66.51326},"openTOCDetails":[],"hiddenLayers":[]},"panelRefName":"panel_11"},{"version":"8.6.0","type":"visualization","gridData":{"x":0,"y":0,"w":24,"h":7,"i":"a71cf076-6895-491c-8878-63592e429ed5"},"panelIndex":"a71cf076-6895-491c-8878-63592e429ed5","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_a71cf076-6895-491c-8878-63592e429ed5"},{"version":"8.6.0","type":"lens","gridData":{"x":24,"y":7,"w":12,"h":7,"i":"da51079b-952f-43dc-96e6-6f9415a3708b"},"panelIndex":"da51079b-952f-43dc-96e6-6f9415a3708b","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_da51079b-952f-43dc-96e6-6f9415a3708b"},{"version":"8.6.0","type":"lens","gridData":{"x":36,"y":0,"w":12,"h":7,"i":"491469e7-7d24-4216-aeb3-bca00e5c8c1b"},"panelIndex":"491469e7-7d24-4216-aeb3-bca00e5c8c1b","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_491469e7-7d24-4216-aeb3-bca00e5c8c1b"},{"version":"8.6.0","type":"lens","gridData":{"x":0,"y":7,"w":24,"h":7,"i":"7077b79f-2a99-4fcb-bbd4-456982843278"},"panelIndex":"7077b79f-2a99-4fcb-bbd4-456982843278","embeddableConfig":{"enhancements":{},"hidePanelTitles":false},"title":"% of target revenue ($10k)","panelRefName":"panel_7077b79f-2a99-4fcb-bbd4-456982843278"},{"version":"8.6.0","type":"lens","gridData":{"x":24,"y":0,"w":12,"h":7,"i":"19a3c101-ad2e-4421-a71b-a4734ec1f03e"},"panelIndex":"19a3c101-ad2e-4421-a71b-a4734ec1f03e","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_19a3c101-ad2e-4421-a71b-a4734ec1f03e"},{"version":"8.6.0","type":"lens","gridData":{"x":0,"y":14,"w":24,"h":7,"i":"a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef"},"panelIndex":"a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef"},{"version":"8.6.0","type":"lens","gridData":{"x":24,"y":14,"w":24,"h":17,"i":"64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b"},"panelIndex":"64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b"},{"version":"8.6.0","type":"lens","gridData":{"x":24,"y":31,"w":24,"h":14,"i":"bd330ede-2eef-4e2a-8100-22a21abf5038"},"panelIndex":"bd330ede-2eef-4e2a-8100-22a21abf5038","embeddableConfig":{"enhancements":{}},"panelRefName":"panel_bd330ede-2eef-4e2a-8100-22a21abf5038"},{"version":"8.6.0","type":"lens","gridData":{"x":0,"y":45,"w":24,"h":9,"i":"b897d4be-cf83-46fb-a111-c7fbec9ef403"},"panelIndex":"b897d4be-cf83-46fb-a111-c7fbec9ef403","embeddableConfig":{"hidePanelTitles":false,"enhancements":{}},"title":"Top products this week","panelRefName":"panel_b897d4be-cf83-46fb-a111-c7fbec9ef403"},{"version":"8.6.0","type":"lens","gridData":{"x":24,"y":45,"w":24,"h":9,"i":"e0f68f93-30f2-4da7-889a-6cd128a68d3f"},"panelIndex":"e0f68f93-30f2-4da7-889a-6cd128a68d3f","embeddableConfig":{"timeRange":{"from":"now-2w","to":"now-1w"},"hidePanelTitles":false,"enhancements":{}},"title":"Top products last week","panelRefName":"panel_e0f68f93-30f2-4da7-889a-6cd128a68d3f"}]',
+      optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
+      version: 1,
+      timeRestore: true,
+      timeTo: 'now',
+      timeFrom: 'now-7d',
       refreshInterval: {
         pause: true,
         value: 0,
       },
-      timeFrom: 'now-7d',
-      timeRestore: true,
-      timeTo: 'now',
-      title: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardTitle', {
-        defaultMessage: '[eCommerce] Revenue Dashboard',
-      }),
-      version: 1,
-    },
-    coreMigrationVersion: '8.0.0',
-    id: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
-    migrationVersion: {
-      dashboard: '7.14.0',
+      controlGroupInput: {
+        controlStyle: 'oneLine',
+        chainingSystem: 'HIERARCHICAL',
+        panelsJSON:
+          '{"1ee1617f-fd8e-45e4-bc6a-d5736710ea20":{"order":0,"width":"small","grow":true,"type":"optionsListControl","explicitInput":{"title":"Manufacturer","fieldName":"manufacturer.keyword","parentFieldName":"manufacturer","id":"1ee1617f-fd8e-45e4-bc6a-d5736710ea20","enhancements":{}}},"afa9fa0f-a002-41a5-bab9-b738316d2590":{"order":1,"width":"small","grow":true,"type":"optionsListControl","explicitInput":{"title":"Category","fieldName":"category.keyword","parentFieldName":"category","id":"afa9fa0f-a002-41a5-bab9-b738316d2590","enhancements":{}}},"d3f766cb-5f96-4a12-8d3c-034e08be8855":{"order":2,"width":"small","grow":true,"type":"rangeSliderControl","explicitInput":{"title":"Quantity","fieldName":"total_quantity","id":"d3f766cb-5f96-4a12-8d3c-034e08be8855","enhancements":{}}}}',
+        ignoreParentSettingsJSON:
+          '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
+      },
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
+      },
     },
     references: [
       {
-        id: '45e07720-b890-11e8-a6d9-e546fe2bba5f',
         name: '5:panel_5',
         type: 'visualization',
+        id: '45e07720-b890-11e8-a6d9-e546fe2bba5f',
       },
       {
-        id: 'b80e6540-b891-11e8-a6d9-e546fe2bba5f',
         name: '7:panel_7',
         type: 'visualization',
+        id: 'b80e6540-b891-11e8-a6d9-e546fe2bba5f',
       },
       {
-        id: '3ba638e0-b894-11e8-a6d9-e546fe2bba5f',
         name: '10:panel_10',
         type: 'search',
+        id: '3ba638e0-b894-11e8-a6d9-e546fe2bba5f',
       },
       {
-        id: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
         name: '11:panel_11',
         type: 'visualization',
+        id: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
       },
       {
-        id: 'c00d1f90-f5ea-11eb-a78e-83aac3c38a60',
         name: 'a71cf076-6895-491c-8878-63592e429ed5:panel_a71cf076-6895-491c-8878-63592e429ed5',
         type: 'visualization',
+        id: 'c00d1f90-f5ea-11eb-a78e-83aac3c38a60',
       },
       {
-        id: 'c3378480-f5ea-11eb-a78e-83aac3c38a60',
-        name: 'adc0a2f4-481c-45eb-b422-0ea59a3e5163:panel_adc0a2f4-481c-45eb-b422-0ea59a3e5163',
-        type: 'visualization',
-      },
-      {
-        id: 'c762b7a0-f5ea-11eb-a78e-83aac3c38a60',
-        name: '7077b79f-2a99-4fcb-bbd4-456982843278:panel_7077b79f-2a99-4fcb-bbd4-456982843278',
-        type: 'lens',
-      },
-      {
-        id: 'ce02e260-f5ea-11eb-a78e-83aac3c38a60',
-        name: '19a3c101-ad2e-4421-a71b-a4734ec1f03e:panel_19a3c101-ad2e-4421-a71b-a4734ec1f03e',
-        type: 'lens',
-      },
-      {
-        id: 'd5f90030-f5ea-11eb-a78e-83aac3c38a60',
-        name: '491469e7-7d24-4216-aeb3-bca00e5c8c1b:panel_491469e7-7d24-4216-aeb3-bca00e5c8c1b',
-        type: 'lens',
-      },
-      {
-        id: 'dde978b0-f5ea-11eb-a78e-83aac3c38a60',
-        name: 'a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef:panel_a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef',
-        type: 'lens',
-      },
-      {
-        id: 'e3902840-f5ea-11eb-a78e-83aac3c38a60',
         name: 'da51079b-952f-43dc-96e6-6f9415a3708b:panel_da51079b-952f-43dc-96e6-6f9415a3708b',
         type: 'lens',
+        id: 'e3902840-f5ea-11eb-a78e-83aac3c38a60',
       },
       {
-        id: 'eddf7850-f5ea-11eb-a78e-83aac3c38a60',
+        name: '491469e7-7d24-4216-aeb3-bca00e5c8c1b:panel_491469e7-7d24-4216-aeb3-bca00e5c8c1b',
+        type: 'lens',
+        id: 'd5f90030-f5ea-11eb-a78e-83aac3c38a60',
+      },
+      {
+        name: '7077b79f-2a99-4fcb-bbd4-456982843278:panel_7077b79f-2a99-4fcb-bbd4-456982843278',
+        type: 'lens',
+        id: 'c762b7a0-f5ea-11eb-a78e-83aac3c38a60',
+      },
+      {
+        name: '19a3c101-ad2e-4421-a71b-a4734ec1f03e:panel_19a3c101-ad2e-4421-a71b-a4734ec1f03e',
+        type: 'lens',
+        id: 'ce02e260-f5ea-11eb-a78e-83aac3c38a60',
+      },
+      {
+        name: 'a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef:panel_a1b03eb9-a36b-4e12-aa1b-bb29b5d6c4ef',
+        type: 'lens',
+        id: 'dde978b0-f5ea-11eb-a78e-83aac3c38a60',
+      },
+      {
         name: '64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b:panel_64fd5dcf-30c5-4f5a-a78c-70b1fbf87e5b',
         type: 'lens',
+        id: 'eddf7850-f5ea-11eb-a78e-83aac3c38a60',
       },
       {
-        id: 'ff6a21b0-f5ea-11eb-a78e-83aac3c38a60',
         name: 'bd330ede-2eef-4e2a-8100-22a21abf5038:panel_bd330ede-2eef-4e2a-8100-22a21abf5038',
         type: 'lens',
+        id: 'ff6a21b0-f5ea-11eb-a78e-83aac3c38a60',
       },
       {
-        id: '03071e90-f5eb-11eb-a78e-83aac3c38a60',
         name: 'b897d4be-cf83-46fb-a111-c7fbec9ef403:panel_b897d4be-cf83-46fb-a111-c7fbec9ef403',
         type: 'lens',
+        id: '03071e90-f5eb-11eb-a78e-83aac3c38a60',
       },
       {
-        id: '06379e00-f5eb-11eb-a78e-83aac3c38a60',
         name: 'e0f68f93-30f2-4da7-889a-6cd128a68d3f:panel_e0f68f93-30f2-4da7-889a-6cd128a68d3f',
         type: 'lens',
+        id: '06379e00-f5eb-11eb-a78e-83aac3c38a60',
+      },
+      {
+        name: 'controlGroup_1ee1617f-fd8e-45e4-bc6a-d5736710ea20:optionsListDataView',
+        type: 'index-pattern',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      },
+      {
+        name: 'controlGroup_afa9fa0f-a002-41a5-bab9-b738316d2590:optionsListDataView',
+        type: 'index-pattern',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      },
+      {
+        name: 'controlGroup_d3f766cb-5f96-4a12-8d3c-034e08be8855:rangeSliderDataView',
+        type: 'index-pattern',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
       },
     ],
-    type: 'dashboard',
-    updated_at: '2021-08-05T12:45:46.525Z',
-    version: 'WzIzOSwxXQ==',
+    migrationVersion: {
+      dashboard: '8.5.0',
+    },
+    coreMigrationVersion: '8.6.0',
   },
 ];

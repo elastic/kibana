@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "__jest__/**/*",
@@ -14,16 +11,29 @@
     "__fixtures__/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../../../src/plugins/charts/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../license_api_guard/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/management-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/features-plugin",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/safer-lodash-set",
+    "@kbn/config-schema",
+    "@kbn/datemath",
+    "@kbn/field-formats-plugin",
+    "@kbn/i18n-react",
+    "@kbn/ace",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

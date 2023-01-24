@@ -56,9 +56,12 @@ describe('removeBoostStateProps', () => {
         },
       },
       precision: 10,
+      precision_enabled: true,
     };
+    const { precision_enabled: precisionEnabled, ...searchSettingsWithoutPrecisionEnabled } =
+      searchSettings;
     expect(removeBoostStateProps(searchSettings)).toEqual({
-      ...searchSettings,
+      ...searchSettingsWithoutPrecisionEnabled,
       boosts: {
         foo: [
           {

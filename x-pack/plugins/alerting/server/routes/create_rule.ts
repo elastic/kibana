@@ -6,21 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, AlertTypeDisabledError } from '../lib';
+import { validateDurationSchema, RuleTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
   RewriteResponseCase,
+  rewriteActions,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
+  actionsSchema,
+  rewriteRuleLastRun,
 } from './lib';
 import {
-  SanitizedAlert,
+  SanitizedRule,
   validateNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   BASE_ALERTING_API_PATH,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
 } from '../types';
 import { RouteOptions } from '.';
 
@@ -30,23 +33,16 @@ export const bodySchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
+  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationSchema }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    }),
-    { defaultValue: [] }
-  ),
-  notify_when: schema.string({ validate: validateNotifyWhenType }),
+  actions: actionsSchema,
+  notify_when: schema.maybe(schema.nullable(schema.string({ validate: validateNotifyWhenType }))),
 });
 
-const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
+const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
   ...rest
@@ -55,7 +51,8 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']>
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
+
+const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -67,12 +64,16 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
+  snoozeSchedule,
+  lastRun,
+  nextRun,
   executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
   ...rest
 }) => ({
   ...rest,
   rule_type_id: alertTypeId,
   scheduled_task_id: scheduledTaskId,
+  snooze_schedule: snoozeSchedule,
   created_by: createdBy,
   updated_by: updatedBy,
   created_at: createdAt,
@@ -92,6 +93,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
@@ -110,7 +113,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = context.alerting.getRulesClient();
+          const rulesClient = (await context.alerting).getRulesClient();
           const rule = req.body;
           const params = req.params;
 
@@ -121,11 +124,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: SanitizedAlert<AlertTypeParams> =
-              await rulesClient.create<AlertTypeParams>({
+            const createdRule: SanitizedRule<RuleTypeParams> =
+              await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
-                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                  actions: rewriteActions(rule.actions),
+                  notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id: params?.id },
               });
@@ -133,7 +137,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               body: rewriteBodyRes(createdRule),
             });
           } catch (e) {
-            if (e instanceof AlertTypeDisabledError) {
+            if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);
             }
             throw e;

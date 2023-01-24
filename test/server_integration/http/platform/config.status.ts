@@ -20,13 +20,11 @@ import { FtrConfigProviderContext } from '@kbn/test';
  */
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
-  // Find all folders in __fixtures__/plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, '../../__fixtures__/plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, '../../__fixtures__/plugins', file)).isDirectory()
-  );
+  // Find all folders in plugins since we treat all them as plugin folder
+  const pluginDir = path.resolve(__dirname, '../../plugins');
+  const pluginsDirs = fs.readdirSync(pluginDir).map((name) => path.resolve(pluginDir, name));
 
   return {
     testFiles: [
@@ -43,15 +41,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...httpConfig.get('kbnTestServer'),
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
-        ...plugins.map(
-          (pluginDir) =>
-            `--plugin-path=${path.resolve(__dirname, '../../__fixtures__/plugins', pluginDir)}`
-        ),
+        ...pluginsDirs.map((p) => `--plugin-path=${p}`),
       ],
       runOptions: {
         ...httpConfig.get('kbnTestServer.runOptions'),
         // Don't wait for Kibana to be completely ready so that we can test the status timeouts
         wait: /Kibana is now unavailable/,
+        alwaysUseSource: true,
       },
     },
   };

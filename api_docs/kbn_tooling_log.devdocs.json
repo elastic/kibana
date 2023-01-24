@@ -1,0 +1,1340 @@
+{
+  "id": "@kbn/tooling-log",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.ToolingLog",
+        "type": "Class",
+        "tags": [],
+        "label": "ToolingLog",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/some-dev-log",
+            "scope": "common",
+            "docId": "kibKbnSomeDevLogPluginApi",
+            "section": "def-common.SomeDevLog",
+            "text": "SomeDevLog"
+          }
+        ],
+        "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "writerConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLogTextWriterConfig",
+                    "text": "ToolingLogTextWriterConfig"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLogOptions",
+                    "text": "ToolingLogOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.getIndent",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndent",
+            "description": [
+              "\nGet the current indentation level of the ToolingLog"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.indent",
+            "type": "Function",
+            "tags": [],
+            "label": "indent",
+            "description": [],
+            "signature": [
+              "{ (delta: number): void; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.indent.$1",
+                "type": "number",
+                "tags": [],
+                "label": "delta",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.indent.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "block",
+                "description": [],
+                "signature": [
+                  "(() => T | Promise<T>) | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.verbose",
+            "type": "Function",
+            "tags": [],
+            "label": "verbose",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.verbose.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.debug.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.info",
+            "type": "Function",
+            "tags": [],
+            "label": "info",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.info.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.success",
+            "type": "Function",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.success.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.warning",
+            "type": "Function",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.warning.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "(error: string | Error) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.error.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "string | Error"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.write.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.getWriters",
+            "type": "Function",
+            "tags": [],
+            "label": "getWriters",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Writer",
+                "text": "Writer"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.setWriters",
+            "type": "Function",
+            "tags": [],
+            "label": "setWriters",
+            "description": [],
+            "signature": [
+              "(writers: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Writer",
+                "text": "Writer"
+              },
+              "[]) => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.setWriters.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "writers",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.Writer",
+                    "text": "Writer"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.getWritten$",
+            "type": "Function",
+            "tags": [],
+            "label": "getWritten$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLog.withType",
+            "type": "Function",
+            "tags": [],
+            "label": "withType",
+            "description": [
+              "\nCreate a new ToolingLog which sets a different \"type\", allowing messages to be filtered out by \"source\""
+            ],
+            "signature": [
+              "(type: string) => ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLog.withType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.ToolingLogCollectingWriter",
+        "type": "Class",
+        "tags": [],
+        "label": "ToolingLogCollectingWriter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLogCollectingWriter",
+            "text": "ToolingLogCollectingWriter"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLogTextWriter",
+            "text": "ToolingLogTextWriter"
+          }
+        ],
+        "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogCollectingWriter.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogCollectingWriter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogCollectingWriter.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "level",
+                "description": [],
+                "signature": [
+                  "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogCollectingWriter.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [
+              "\nCalled by ToolingLog, extends messages with the source if message includes one."
+            ],
+            "signature": [
+              "(msg: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogCollectingWriter.write.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  }
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.ToolingLogTextWriter",
+        "type": "Class",
+        "tags": [],
+        "label": "ToolingLogTextWriter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLogTextWriter",
+            "text": "ToolingLogTextWriter"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.Writer",
+            "text": "Writer"
+          }
+        ],
+        "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriter.level",
+            "type": "Object",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "{ name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriter.writeTo",
+            "type": "Object",
+            "tags": [],
+            "label": "writeTo",
+            "description": [],
+            "signature": [
+              "{ write(msg: string): void; }"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogTextWriter.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLogTextWriterConfig",
+                    "text": "ToolingLogTextWriterConfig"
+                  }
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriter.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [],
+            "signature": [
+              "(msg: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogTextWriter.write.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  }
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriter.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [],
+            "signature": [
+              "(writeTo: { write(msg: string): void; }, prefix: string, msg: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogTextWriter.write.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "writeTo",
+                "description": [],
+                "signature": [
+                  "{ write(msg: string): void; }"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogTextWriter.write.$2",
+                "type": "string",
+                "tags": [],
+                "label": "prefix",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.ToolingLogTextWriter.write.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  }
+                ],
+                "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.getLogLevelFlagsHelp",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelFlagsHelp",
+        "description": [],
+        "signature": [
+          "(defaultLogLevel: string) => string"
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.getLogLevelFlagsHelp.$1",
+            "type": "string",
+            "tags": [],
+            "label": "defaultLogLevel",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-tooling-log/src/log_levels.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.parseLogLevel",
+        "type": "Function",
+        "tags": [],
+        "label": "parseLogLevel",
+        "description": [],
+        "signature": [
+          "(name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.parseLogLevel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+            ],
+            "path": "packages/kbn-tooling-log/src/log_levels.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.pickLevelFromFlags",
+        "type": "Function",
+        "tags": [],
+        "label": "pickLevelFromFlags",
+        "description": [],
+        "signature": [
+          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.pickLevelFromFlags.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "flags",
+            "description": [],
+            "signature": [
+              "Record<string, string | boolean | string[] | undefined>"
+            ],
+            "path": "packages/kbn-tooling-log/src/log_levels.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.pickLevelFromFlags.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/kbn-tooling-log/src/log_levels.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.pickLevelFromFlags.$2.default",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "default",
+                "description": [],
+                "signature": [
+                  "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+                ],
+                "path": "packages/kbn-tooling-log/src/log_levels.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.Message",
+        "type": "Interface",
+        "tags": [],
+        "label": "Message",
+        "description": [
+          "\nThe object shape passed to ToolingLog writers each time the log is used."
+        ],
+        "path": "packages/kbn-tooling-log/src/message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.Message.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "level/type of message"
+            ],
+            "signature": [
+              "\"error\" | \"warning\" | \"success\" | \"write\" | \"info\" | \"debug\" | \"verbose\""
+            ],
+            "path": "packages/kbn-tooling-log/src/message.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.Message.indent",
+            "type": "number",
+            "tags": [],
+            "label": "indent",
+            "description": [
+              "indentation intended when message written to a text log"
+            ],
+            "path": "packages/kbn-tooling-log/src/message.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.Message.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "type of logger this message came from"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-tooling-log/src/message.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.Message.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [
+              "args passed to the logging method"
+            ],
+            "signature": [
+              "any[]"
+            ],
+            "path": "packages/kbn-tooling-log/src/message.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.ToolingLogOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolingLogOptions",
+        "description": [],
+        "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogOptions.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\ntype name for this logger, will be assigned to the \"source\"\nproperties of messages produced by this logger"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogOptions.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [
+              "\nparent ToolingLog. When a ToolingLog has a parent they will both\nshare indent and writers state. Changing the indent width or\nwriters on either log will update the other too."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.ToolingLogTextWriterConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolingLogTextWriterConfig",
+        "description": [],
+        "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriterConfig.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [
+              "\nLog level, messages below this level will be ignored"
+            ],
+            "signature": [
+              "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriterConfig.ignoreSources",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoreSources",
+            "description": [
+              "\nList of message sources/ToolingLog types which will be ignored. Create\na logger with `ToolingLog#withType()` to create messages with a specific\nsource. Ignored messages will be dropped without writing."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogTextWriterConfig.writeTo",
+            "type": "Object",
+            "tags": [],
+            "label": "writeTo",
+            "description": [
+              "\nTarget which will receive formatted message lines, a common value for `writeTo`\nis process.stdout"
+            ],
+            "signature": [
+              "{ write(s: string): void; }"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.Writer",
+        "type": "Interface",
+        "tags": [],
+        "label": "Writer",
+        "description": [
+          "\nAn object which received ToolingLog `Messages` and sends them to\nsome interface for collecting logs like stdio, or a file"
+        ],
+        "path": "packages/kbn-tooling-log/src/writer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.Writer.write",
+            "type": "Function",
+            "tags": [],
+            "label": "write",
+            "description": [
+              "\nCalled with every log message, should return true if the message\nwas written and false if it was ignored."
+            ],
+            "signature": [
+              "(msg: ",
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/kbn-tooling-log/src/writer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tooling-log",
+                "id": "def-common.Writer.write.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "The log message to write"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  }
+                ],
+                "path": "packages/kbn-tooling-log/src/writer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.DEFAULT_LOG_LEVEL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_LOG_LEVEL",
+        "description": [],
+        "signature": [
+          "\"info\""
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.LOG_LEVEL_FLAGS",
+        "type": "Array",
+        "tags": [],
+        "label": "LOG_LEVEL_FLAGS",
+        "description": [],
+        "signature": [
+          "{ name: string; help: string; }[]"
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.LogLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "LogLevel",
+        "description": [],
+        "signature": [
+          "\"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\""
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.ParsedLogLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "ParsedLogLevel",
+        "description": [],
+        "signature": [
+          "{ name: \"error\" | \"warning\" | \"success\" | \"info\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; warning: boolean; success: boolean; info: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+        ],
+        "path": "packages/kbn-tooling-log/src/log_levels.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

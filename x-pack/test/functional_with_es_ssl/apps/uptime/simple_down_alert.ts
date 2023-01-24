@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { MonitorStatusTranslations } from '@kbn/synthetics-plugin/common/translations';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteUptimeSettingsObject } from '../../../functional/apps/uptime';
 
@@ -47,7 +48,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays to define default connector', async () => {
-      await testSubjects.click('uptimeDismissSyntheticsCallout');
       await hideErrorToast();
       await testSubjects.click('uptimeDisplayDefineConnector');
       await testSubjects.existOrFail('uptimeSettingsDefineConnector');
@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('displays relevant alert in list drawer', async () => {
       await toasts.dismissAllToasts();
 
-      await testSubjects.click(`xpack.uptime.monitorList.${monitorId}.expandMonitorDetail`);
+      await testSubjects.click(`xpack.synthetics.monitorList.${monitorId}.expandMonitorDetail`);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('uptimeMonitorListDrawerAlert0');
     });
@@ -97,8 +97,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionTypeId: '.slack',
           group: 'recovered',
           params: {
-            message:
-              'Monitor 0000-intermittent with url http://localhost:5678/pattern?r=200x5,500x1 has recovered with status Up',
+            message: MonitorStatusTranslations.defaultRecoveryMessage,
           },
           id: 'my-slack1',
         },
@@ -106,8 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionTypeId: '.slack',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
-            message:
-              'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
+            message: MonitorStatusTranslations.defaultActionMessage,
           },
           id: 'my-slack1',
         },

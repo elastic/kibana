@@ -9,9 +9,9 @@
 import { join } from 'path';
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
+import { SavedObject } from '@kbn/core/types';
+import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
 import type { PluginFunctionalProviderContext } from '../../services';
-import { SavedObject } from '../../../../src/core/types';
-import type { SavedObjectManagementTypeInfo } from '../../../../src/plugins/saved_objects_management/common/types';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));

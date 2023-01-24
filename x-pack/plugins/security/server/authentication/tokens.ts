@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -70,8 +70,10 @@ export class Tokens {
 
       return {
         accessToken,
-        refreshToken,
-        // @ts-expect-error @elastic/elasticsearch user metadata defined as Record<string, any>
+        // We can safely use a non-null assertion for the refresh token since `refresh_token` grant type guarantees that
+        // getToken API will always return a new refresh token, unlike some other grant types (e.g. client_credentials).
+        refreshToken: refreshToken!,
+        // @ts-expect-error many optional properties are string | null | undefined while we declare them as string | undefined
         authenticationInfo: authenticationInfo as AuthenticationInfo,
       };
     } catch (err) {

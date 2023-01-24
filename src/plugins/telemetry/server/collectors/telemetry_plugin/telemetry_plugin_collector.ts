@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { ISavedObjectsRepository, SavedObjectsClient } from '../../../../../core/server';
-import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
-import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { Observable, firstValueFrom } from 'rxjs';
+import { ISavedObjectsRepository } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { getTelemetrySavedObject, TelemetrySavedObject } from '../../saved_objects';
 import { TelemetryConfigType } from '../../config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
 
 export interface TelemetryUsageStats {
   opt_in_status?: boolean | null;
@@ -32,11 +31,7 @@ export function createCollectorFetch({
   getSavedObjectsClient,
 }: TelemetryPluginUsageCollectorOptions) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
-    const {
-      sendUsageFrom,
-      allowChangingOptInStatus,
-      optIn = null,
-    } = await config$.pipe(take(1)).toPromise();
+    const { sendUsageFrom, allowChangingOptInStatus, optIn = null } = await firstValueFrom(config$);
     const configTelemetrySendUsageFrom = sendUsageFrom;
     const configTelemetryOptIn = optIn;
 
@@ -44,9 +39,7 @@ export function createCollectorFetch({
 
     try {
       const internalRepository = getSavedObjectsClient()!;
-      telemetrySavedObject = await getTelemetrySavedObject(
-        new SavedObjectsClient(internalRepository)
-      );
+      telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
     } catch (err) {
       // no-op
     }

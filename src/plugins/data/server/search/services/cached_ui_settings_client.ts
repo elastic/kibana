@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 
 /**
  * {@link IUiSettingsClient} wrapper to ensure uiSettings requested only once within a single KibanaRequest,

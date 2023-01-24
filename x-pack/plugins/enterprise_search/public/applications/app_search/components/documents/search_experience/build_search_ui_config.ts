@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import { Schema } from '../../../../shared/schema/types';
+import type { APIConnector, SortDirection } from '@elastic/search-ui';
+
+import { SchemaType, AdvancedSchema } from '../../../../shared/schema/types';
 
 import { Fields } from './types';
 
-export const buildSearchUIConfig = (apiConnector: object, schema: Schema, fields: Fields) => {
-  const facets = fields.filterFields.reduce(
-    (facetsConfig, fieldName) => ({
-      ...facetsConfig,
-      [fieldName]: { type: 'value', size: 30 },
-    }),
-    {}
-  );
+export const buildSearchUIConfig = (
+  apiConnector: APIConnector,
+  schema: AdvancedSchema,
+  fields: Fields,
+  initialState = { sortDirection: 'desc' as SortDirection, sortField: 'id' }
+) => {
+  const facets = fields.filterFields
+    .filter((fieldName) => !!schema[fieldName] && schema[fieldName].type !== SchemaType.Geolocation)
+    .filter((fieldName) => !!schema[fieldName].capabilities.facet)
+    .reduce((facetsConfig, fieldName) => {
+      return {
+        ...facetsConfig,
+        [fieldName]: { type: 'value', size: 30 },
+      };
+    }, {});
+
+  const resultFields = Object.entries(schema)
+    .filter(([, schemaField]) => schemaField.type !== SchemaType.Nested)
+    .reduce((acc, [fieldName, schemaField]) => {
+      if (schemaField.capabilities.snippet) {
+        return { ...acc, [fieldName]: { raw: {}, snippet: { size: 300 } } };
+      }
+      return { ...acc, [fieldName]: { raw: {} } };
+    }, {});
 
   return {
     alwaysSearchOnInitialLoad: true,
     apiConnector,
     trackUrlState: false,
-    initialState: {
-      sortDirection: 'desc',
-      sortField: 'id',
-    },
+    initialState,
     searchQuery: {
-      disjunctiveFacets: fields.filterFields,
+      disjunctiveFacets: Object.keys(facets),
       facets,
-      result_fields: Object.keys(schema).reduce((acc: { [key: string]: object }, key: string) => {
-        acc[key] = {
-          snippet: {
-            size: 300,
-            fallback: true,
-          },
-          raw: {},
-        };
-        return acc;
-      }, {}),
+      result_fields: resultFields,
     },
   };
 };

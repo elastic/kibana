@@ -8,3 +8,4 @@
 export { TrustedAppValidator } from './trusted_app_validator';
 export { EventFilterValidator } from './event_filter_validator';
 export { HostIsolationExceptionsValidator } from './host_isolation_exceptions_validator';
+export { BlocklistValidator } from './blocklist_validator';

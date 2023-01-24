@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { Switch, Route } from 'react-router-dom';
-import React from 'react';
-import { TrustedAppsPage } from './view';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
+import React, { memo } from 'react';
+import { TrustedAppsList } from './view/trusted_apps_list';
 import { MANAGEMENT_ROUTING_TRUSTED_APPS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 
-export function TrustedAppsContainer() {
+export const TrustedAppsContainer = memo(() => {
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} exact component={TrustedAppsPage} />
+      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} exact component={TrustedAppsList} />
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );
-}
+});
+
+TrustedAppsContainer.displayName = 'TrustedAppsContainer';

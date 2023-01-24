@@ -7,7 +7,7 @@
  */
 
 import { pollSearch } from './poll_search';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
   function getMockedSearch$(resolveOnI = 1, finishWithError = false) {
@@ -119,5 +119,63 @@ describe('pollSearch', () => {
 
     expect(searchFn).toBeCalledTimes(1);
     expect(cancelFn).toBeCalledTimes(1);
+  });
+
+  describe('default backoff interval', () => {
+    let dateNowSpy: jest.SpyInstance;
+    let now = Date.now();
+    const advanceTimersBy = (by: number) => {
+      now = now + by;
+      jest.advanceTimersByTime(by);
+    };
+    beforeEach(() => {
+      dateNowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      now = Date.now();
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      dateNowSpy.mockRestore();
+      jest.useRealTimers();
+    });
+
+    test('the interval should backoff as search takes longer', async () => {
+      const searchFn = getMockedSearch$(12);
+      const pollPromise = pollSearch(searchFn).toPromise();
+
+      // first 5 seconds it is called with 1000 seconds interval
+      for (let i = 0; i < 5; i++) {
+        advanceTimersBy(1000);
+        expect(searchFn).toBeCalledTimes(i + 1);
+        await Promise.resolve();
+      }
+
+      // 5000ms
+      expect(searchFn).toBeCalledTimes(5);
+      advanceTimersBy(1000); // 6000ms
+      // check that on 6s second it wasn't called after 1 second
+      expect(searchFn).toBeCalledTimes(5);
+
+      advanceTimersBy(1500); // 7500ms
+      expect(searchFn).toBeCalledTimes(6); // 6th was called after 2.5seconds interval
+      await Promise.resolve();
+
+      for (let i = 0; i < 5; i++) {
+        advanceTimersBy(2500);
+        expect(searchFn).toBeCalledTimes(i + 7);
+        await Promise.resolve();
+      }
+
+      // 20000ms
+      expect(searchFn).toBeCalledTimes(11);
+
+      advanceTimersBy(2500); // 22500ms
+      // check that after 20s seconds it wasn't called after 2.5 second
+      expect(searchFn).toBeCalledTimes(11);
+
+      advanceTimersBy(2500); // 25000ms
+      expect(searchFn).toBeCalledTimes(12); // finally backed-off to 5 seconds intervals
+
+      await pollPromise;
+    });
   });
 });

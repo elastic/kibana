@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { DragHandleProps, DropResult } from '../../../../../observability/public';
+import { DragHandleProps, DropResult } from '@kbn/observability-plugin/public';
 import {
   FieldLogColumnConfiguration,
   getLogColumnConfigurationId,

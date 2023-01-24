@@ -19,7 +19,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -29,9 +29,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should patch a case in space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCases = await updateCase({
-        supertest,
+        supertest: supertestWithoutAuth,
         params: {
           cases: [
             {
@@ -54,9 +54,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not patch a case in a different space', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       await updateCase({
-        supertest,
+        supertest: supertestWithoutAuth,
         params: {
           cases: [
             {

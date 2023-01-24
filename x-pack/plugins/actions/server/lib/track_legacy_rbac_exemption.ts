@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-export function trackLegacyRBACExemption(source: string, usageCounter?: UsageCounter) {
+export function trackLegacyRBACExemption(
+  source: string,
+  usageCounter?: UsageCounter,
+  increment?: number
+) {
   if (usageCounter) {
     usageCounter.incrementCounter({
       counterName: `source_${source}`,
       counterType: 'legacyRBACExemption',
-      incrementBy: 1,
+      incrementBy: increment ? increment : 1,
     });
   }
 }

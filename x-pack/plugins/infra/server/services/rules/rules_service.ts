@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
-import { createLifecycleExecutor } from '../../../../rule_registry/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import {
+  createLifecycleExecutor,
+  createGetSummarizedAlertsFn,
+} from '@kbn/rule-registry-plugin/server';
 import { InfraFeatureId } from '../../../common/constants';
 import { createRuleDataClient } from './rule_data_client';
 import {
@@ -37,9 +40,15 @@ export class RulesService {
     });
 
     const createLifecycleRuleExecutor = createLifecycleExecutor(this.logger, ruleDataClient);
+    const createGetSummarizedAlerts = createGetSummarizedAlertsFn({
+      ruleDataClient,
+      useNamespace: false,
+      isLifecycleAlert: true,
+    });
 
     return {
       createLifecycleRuleExecutor,
+      createGetSummarizedAlerts,
       ruleDataClient,
     };
   }

@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { ILicense } from '../../../../../licensing/common/types';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import type {
   AppLocation,
   Immutable,
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
   MaybeImmutable,
-  GetTrustedAppsListResponse,
-  TrustedApp,
-  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
-import { ImmutableMiddlewareAPI } from '../../../common/store';
-import { AppAction } from '../../../common/store/actions';
+import type { ServerApiError } from '../../../common/types';
+import type { ImmutableMiddlewareAPI } from '../../../common/store';
+import type { AppAction } from '../../../common/store/actions';
 
 export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
@@ -61,7 +58,10 @@ export interface PolicyDetailsState {
   /** artifacts namespace inside policy details page */
   artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
+  agentStatusSummary?: Omit<
+    GetAgentStatusResponse['results'],
+    'updating' | 'inactive' | 'unenrolled'
+  >;
   /** Status of an update to the policy  */
   updateStatus?: {
     success: boolean;
@@ -69,16 +69,6 @@ export interface PolicyDetailsState {
   };
   /** current license */
   license?: ILicense;
-}
-
-export interface PolicyAssignedTrustedApps {
-  location: PolicyDetailsArtifactsPageListLocationParams;
-  artifacts: GetTrustedAppsListResponse;
-}
-
-export interface PolicyRemoveTrustedApps {
-  artifacts: TrustedApp[];
-  response: PutTrustedAppUpdateResponse[];
 }
 
 /**
@@ -90,8 +80,8 @@ export interface PolicyArtifactsState {
 }
 
 export interface PolicyDetailsArtifactsPageListLocationParams {
-  page_index: number;
-  page_size: number;
+  page: number;
+  pageSize: number;
   filter: string;
 }
 

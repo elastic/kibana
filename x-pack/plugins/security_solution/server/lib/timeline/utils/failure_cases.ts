@@ -6,11 +6,8 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import {
-  TimelineSavedObject,
-  TimelineStatus,
-  TimelineTypeLiteral,
-} from '../../../../common/types/timeline';
+import type { TimelineSavedObject, TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';

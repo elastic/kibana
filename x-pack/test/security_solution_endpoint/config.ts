@@ -15,7 +15,9 @@ import {
 } from '../security_solution_endpoint_api_int/registry';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   return {
     ...xpackFunctionalConfig.getAll(),
@@ -34,6 +36,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ['security']: {
         pathname: '/app/security',
       },
+      ['securitySolutionTimelines']: {
+        pathname: '/app/security/timelines',
+      },
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
@@ -44,6 +49,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
+        // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
+        '--xpack.securitySolution.packagerTaskInterval=5s',
+        // this will be removed in 8.7 when the file upload feature is released
+        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
       ],
     },
     layout: {

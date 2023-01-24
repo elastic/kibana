@@ -10,7 +10,7 @@ import { EuiFormRow, EuiSpacer, EuiIcon, EuiToolTip, EuiLink, EuiText } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { useAppContext } from '../../context';
 

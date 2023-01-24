@@ -54,13 +54,14 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 +
 {kib} uses a <<data-views,{data-source}>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, make sure the {data-source} is set to **kibana_sample_data_ecommerce**.
+To view the ecommerce sample data, open the {data-source} menu, and then select **Kibana Sample Data Ecommerce**.
 +
 [role="screenshot"]
-image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width="40%"]
+
 +
 To create a data view for your own data,
-click the ellipsis icon (…​), and then click *Create new data view*.
+click *Create a data view*.
 For details, refer to <<data-views, Create a data view.>>
 
 . Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
@@ -76,9 +77,10 @@ click and drag the mouse over the chart.
 [[explore-fields-in-your-data]]
 === Explore the fields in your data
 
-**Discover** includes a table that shows all the documents that match your search.
-By default, the table includes columns for the time field and the document `_source`.
-You’ll modify this table to display your fields of interest.
+**Discover** includes a table
+that shows all the documents that match your search.
+By default, the document table includes a column for the time field and a column that lists all other fields in the document.
+You’ll modify the document table to display your fields of interest.
 
 . Scan through the list of **Available fields** until you find the `manufacturer` field.
 You can also search for the field by name.
@@ -86,23 +88,30 @@ You can also search for the field by name.
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
-. Click the `manufacturer` field to view its five most popular values.
+. Click `manufacturer` to view its most popular values.
 +
-[role="screenshot"]
-image:images/find-manufacturer-field.png[Fields list that displays the top five search results, width=75%]
+**Discover** shows the top 10 values and the number of records used to calculate those values.
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
++
+[role="screenshot"]
+image::images/discover-add-icon.png[How to add a field as a column in the table, width="50%"]
+
 
 . Find the `customer_first_name` and `customer_last_name` fields and add
-them to your document table. Your table should look similar to this:
+them to the document table. Your table should look similar to this:
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
-. To rearrange the table columns, hover the mouse over a
-column header, and then use the move control.
+. To rearrange the table columns, click a
+column header, and then select *Move left* or *Move right*.
 
-. To view more of the document table, click *Chart options > Hide chart*.
+. To view more of the document table,
+click
+image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
+to open the *Chart options* menu,
+and then select *Hide chart*.
 
 [float]
 [[add-field-in-discover]]
@@ -114,10 +123,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Click the ellipsis icon (...), and then click *Add field*.
-+
-[role="screenshot"]
-image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
+. In the sidebar, click *Add a field*.
 
 . In the *Create field* form, enter `hello` for the name.
 
@@ -131,10 +137,10 @@ emit("Hello World!");
 
 . Click *Save*.
 
-. In the fields list, search for the *hello* field, and then add it to the table to view it's value.
+. In the fields list, search for the *hello* field, and then add it to the document table.
 +
 [role="screenshot"]
-image:images/hello-field.png[hello field in the document table]
+image:images/hello-field.png[hello field in the document tables]
 
 . Create a second field named `customer` that combines customer last name and first initial.
 +
@@ -143,7 +149,7 @@ String str = doc['customer_first_name.keyword'].value;
 char ch1 = str.charAt(0);
 emit(doc['customer_last_name.keyword'].value + ", " + ch1);
 ```
-. Simplify the the document table by removing `customer_first_name` and `customer_last_name` and adding `customer` in their place.
+. Remove `customer_first_name` and `customer_last_name` from the document table, and then add `customer`.
 +
 [role="screenshot"]
 image:images/customer.png[Customer last name, first initial in the document table]
@@ -172,7 +178,7 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *:* for equals some value and *US*, and then click *Update*.
+. Select *:* for equals some value and *US*, and then click *Refresh*.
 . For a more complex search, try:
 +
 ```ts
@@ -190,13 +196,13 @@ and more.
 
 Exclude documents where day of week is not Wednesday:
 
-. Click **Add filter**.
-. Set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
+. Click image:images/add-icon.png[Add icon] next to the query bar.
+. In the *Add filter* pop-up, set *Field* to *day_of_week*, *Operator* to *is not*, and *Value* to *Wednesday*.
 +
 [role="screenshot"]
 image:images/discover-add-filter.png[Add filter dialog in Discover]
 
-. Save the filter.
+. Click **Add filter**.
 . Continue your exploration by adding more filters.
 . To remove a filter,
 click the close icon (x) next to its name in the filter bar.
@@ -208,31 +214,35 @@ click the close icon (x) next to its name in the filter bar.
 Dive into an individual document to view its fields and the documents
 that occurred before and after it.
 
-. In the document table, expand any document.
+. In the document table, click the expand icon
+image:images/expand-icon-2.png[double arrow icon to open a flyout with the document details]
+to show document details.
 +
 [role="screenshot"]
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-hover over its name for filters and other controls.
+hover your mouse over the *Actions* column for filters and other options.
+
+. To create a view of the document that you can bookmark and share, click **Single document**.
 
 . To view documents that occurred before or after the event you are looking at, click
-<<discover-view-surrounding-documents, View surrounding documents>>.
+**Surrounding documents**.
 
-. For direct access to a particular document, click **<<discover-view-single-document,View single document>>**.
-+
-You can bookmark this document and share the link.
 
 
 [float]
 [[save-your-search]]
 === Save your search for later use
 
-Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
+Save your search so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query text, filters,
-and current view of *Discover*, including the columns selected in the document table, the sort order, and the {data-source}.
+and current view of *Discover*, including the columns selected in
+the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
+
+. Optionally store <<managing-tags,tags>> and the time range with the search.
 
 . Give your search a title, and then click **Save**.
 
@@ -266,7 +276,26 @@ image:images/discover-maps.png[Map containing documents]
 [[share-your-findings]]
 === Share your findings
 
-To share your findings with a larger audience, click *Share* in the *Discover* toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+To share your findings with a larger audience, click *Share* in the *Discover* toolbar.
+For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+
+[float]
+[[alert-from-Discover]]
+=== Generate alerts
+
+From *Discover*, you can create a rule to periodically
+check when data goes above or below a certain threshold within a given time interval.
+
+. Ensure that your data view,
+query, and filters fetch the data for which you want an alert.
+. In the toolbar, click *Alerts > Create search threshold rule*.
++
+The *Create rule* form is pre-filled with the latest query sent to {es}.
+. <<rule-type-es-query, Configure your query>> and <<action-types, select a connector type>>.
+
+. Click *Save*.
+
+For more about this and other rules provided in {alert-features}, go to <<alerting-getting-started>>.
 
 
 [float]
@@ -276,20 +305,16 @@ To share your findings with a larger audience, click *Share* in the *Discover* t
 
 * <<discover-search-for-relevance, Search for relevance>>.
 
-* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
-Go to **Advanced Settings** to configure the number of documents to show,
-the table columns that display by default, and more.
+* <<document-explorer, Configure the chart and document table>> to better meet your needs.
+
 
 --
-
-include::{kib-repo-dir}/discover/view-document.asciidoc[]
+include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 
 include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
-
-include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
 
 include::{kib-repo-dir}/discover/field-statistics.asciidoc[]

@@ -9,41 +9,32 @@ import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { isIndexPattern } from '../../../../common/types/index_pattern';
+import { isDataView } from '../../../../common/types/data_view';
 
 import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../shared_imports';
 
 import { useAppDependencies } from '../../app_dependencies';
 
-import {
-  createSearchItems,
-  getIndexPatternIdByTitle,
-  loadCurrentIndexPattern,
-  loadIndexPatterns,
-  SearchItems,
-} from './common';
+import { createSearchItems, getDataViewIdByTitle, loadDataViews, SearchItems } from './common';
 
 export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const [savedObjectId, setSavedObjectId] = useState(defaultSavedObjectId);
   const [error, setError] = useState<string | undefined>();
 
   const appDeps = useAppDependencies();
-  const indexPatterns = appDeps.data.indexPatterns;
+  const dataViewsContract = appDeps.data.dataViews;
   const uiSettings = appDeps.uiSettings;
-  const savedObjectsClient = appDeps.savedObjects.client;
 
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
 
   async function fetchSavedObject(id: string) {
-    await loadIndexPatterns(savedObjectsClient, indexPatterns);
-
-    let fetchedIndexPattern;
+    let fetchedDataView;
     let fetchedSavedSearch;
 
     try {
-      fetchedIndexPattern = await loadCurrentIndexPattern(indexPatterns, id);
+      fetchedDataView = await dataViewsContract.get(id);
     } catch (e) {
-      // Just let fetchedIndexPattern stay undefined in case it doesn't exist.
+      // Just let fetchedDataView stay undefined in case it doesn't exist.
     }
 
     try {
@@ -61,7 +52,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
 
-    if (!isIndexPattern(fetchedIndexPattern) && fetchedSavedSearch === undefined) {
+    if (!isDataView(fetchedDataView) && fetchedSavedSearch === undefined) {
       setError(
         i18n.translate('xpack.transform.searchItems.errorInitializationTitle', {
           defaultMessage: `An error occurred initializing the Kibana data view or saved search.`,
@@ -70,7 +61,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
       return;
     }
 
-    setSearchItems(createSearchItems(fetchedIndexPattern, fetchedSavedSearch, uiSettings));
+    setSearchItems(createSearchItems(fetchedDataView, fetchedSavedSearch, uiSettings));
     setError(undefined);
   }
 
@@ -84,8 +75,8 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
 
   return {
     error,
-    getIndexPatternIdByTitle,
-    loadIndexPatterns,
+    getDataViewIdByTitle,
+    loadDataViews,
     searchItems,
     setSavedObjectId,
   };

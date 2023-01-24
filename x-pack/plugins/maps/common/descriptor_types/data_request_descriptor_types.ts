@@ -7,10 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { MapExtent } from './map_descriptor';
-import { TimeRange } from '../../../../../src/plugins/data/common';
 
 export type Timeslice = {
   from: number;
@@ -21,13 +21,18 @@ export type Timeslice = {
 export type DataFilters = {
   buffer?: MapExtent; // extent with additional buffer
   extent?: MapExtent; // map viewport
-  filters: Filter[];
-  query?: Query;
+  filters: Filter[]; // search bar filters
+  query?: Query; // search bar query
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   searchSessionId?: string;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
   zoom: number;
   isReadOnly: boolean;
+  joinKeyFilter?: Filter;
 };
 
 export type VectorSourceRequestMeta = DataFilters & {
@@ -40,6 +45,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   sourceQuery?: Query;
   sourceMeta: object | null;
   isForceRefresh: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 };
 
 export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
@@ -77,7 +83,10 @@ export type VectorTileLayerMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataRequestMeta = Partial<
+export type DataRequestMeta = {
+  // request stop time in milliseconds since epoch
+  requestStopTime?: number;
+} & Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
@@ -95,6 +104,7 @@ type NumericalStyleFieldData = {
 
 type CategoricalStyleFieldData = {
   buckets: Array<{ key: string; doc_count: number }>;
+  sum_other_doc_count: number;
 };
 
 export type StyleMetaData = {

@@ -1,126 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`OverwrittenSessionPage renders as expected 1`] = `
-<AuthenticationStatePage
-  title={
-    <FormattedMessage
-      defaultMessage="You previously logged in as a different user."
-      id="xpack.security.overwrittenSession.title"
-      values={Object {}}
-    />
-  }
+<div
+  class="secAuthenticationStatePage "
 >
-  <div
-    className="secAuthenticationStatePage "
+  <header
+    class="secAuthenticationStatePage__header"
   >
-    <header
-      className="secAuthenticationStatePage__header"
+    <div
+      class="secAuthenticationStatePage__content eui-textCenter"
     >
       <div
-        className="secAuthenticationStatePage__content eui-textCenter"
+        class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
+      />
+      <span
+        class="secAuthenticationStatePage__logo"
       >
-        <EuiSpacer
-          size="xxl"
-        >
-          <div
-            className="euiSpacer euiSpacer--xxl"
-          />
-        </EuiSpacer>
         <span
-          className="secAuthenticationStatePage__logo"
-        >
-          <EuiIcon
-            size="xxl"
-            type="logoElastic"
-          >
-            <span
-              data-euiicon-type="logoElastic"
-              size="xxl"
-            />
-          </EuiIcon>
-        </span>
-        <EuiTitle
-          className="secAuthenticationStatePage__title"
-          size="l"
-        >
-          <h1
-            className="euiTitle euiTitle--large secAuthenticationStatePage__title"
-          >
-            <FormattedMessage
-              defaultMessage="You previously logged in as a different user."
-              id="xpack.security.overwrittenSession.title"
-              values={Object {}}
-            >
-              You previously logged in as a different user.
-            </FormattedMessage>
-          </h1>
-        </EuiTitle>
-        <EuiSpacer
-          size="xl"
-        >
-          <div
-            className="euiSpacer euiSpacer--xl"
-          />
-        </EuiSpacer>
-      </div>
-    </header>
-    <div
-      className="secAuthenticationStatePage__content eui-textCenter"
-    >
-      <EuiButton
-        href="/mock-base-path/"
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <h1
+        class="euiTitle secAuthenticationStatePage__title emotion-euiTitle-l"
       >
-        <EuiButtonDisplay
-          baseClassName="euiButton"
-          element="a"
-          href="/mock-base-path/"
-          isDisabled={false}
-          rel="noreferrer"
-        >
-          <a
-            className="euiButton euiButton--primary"
-            disabled={false}
-            href="/mock-base-path/"
-            rel="noreferrer"
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
-          >
-            <EuiButtonContent
-              className="euiButton__content"
-              iconSide="left"
-              textProps={
-                Object {
-                  "className": "euiButton__text",
-                }
-              }
-            >
-              <span
-                className="euiButtonContent euiButton__content"
-              >
-                <span
-                  className="euiButton__text"
-                >
-                  <FormattedMessage
-                    defaultMessage="Continue as {username}"
-                    id="xpack.security.overwrittenSession.continueAsUserText"
-                    values={
-                      Object {
-                        "username": "mock-user",
-                      }
-                    }
-                  >
-                    Continue as mock-user
-                  </FormattedMessage>
-                </span>
-              </span>
-            </EuiButtonContent>
-          </a>
-        </EuiButtonDisplay>
-      </EuiButton>
+        You previously logged in as a different user.
+      </h1>
+      <div
+        class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
+      />
     </div>
+  </header>
+  <div
+    class="secAuthenticationStatePage__content eui-textCenter"
+  >
+    <a
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+      href="/mock-base-path/"
+      rel="noreferrer"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        Continue as mock-user
+      </span>
+    </a>
   </div>
-</AuthenticationStatePage>
+</div>
 `;

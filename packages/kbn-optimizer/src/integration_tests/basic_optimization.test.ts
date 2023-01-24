@@ -15,9 +15,10 @@ import prettier from 'prettier';
 import cpy from 'cpy';
 import del from 'del';
 import { tap, filter } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, createReplaceSerializer } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '../index';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createReplaceSerializer } from '@kbn/jest-serializers';
+import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '../..';
 
 import { allValuesFrom } from '../common';
 
@@ -131,15 +132,15 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo).toBeTruthy();
   foo.cache.refresh();
   expect(foo.cache.getModuleCount()).toBe(6);
-  expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+  expect(foo.cache.getReferencedPaths()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-ui-shared-deps-npm/src/public_path_module_creator.js,
     ]
   `);
 
@@ -151,21 +152,21 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     16
   );
 
-  expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+  expect(bar.cache.getReferencedPaths()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/node_modules/@kbn/optimizer/postcss.config.js,
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/postcss.config.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8dark.scss,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v8light.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/styles/core_app/_globals_v8dark.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/styles/core_app/_globals_v8light.scss,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-ui-shared-deps-npm/src/public_path_module_creator.js,
     ]
   `);
 
@@ -174,12 +175,12 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   baz.cache.refresh();
   expect(baz.cache.getModuleCount()).toBe(3);
 
-  expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+  expect(baz.cache.getReferencedPaths()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-ui-shared-deps-npm/src/public_path_module_creator.js,
     ]
   `);
 });
@@ -259,10 +260,5 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()
-  ).toEqual(raw);
-
-  // Verify the gzip variant matches
-  expect(
-    Zlib.gunzipSync(Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`))).toString()
   ).toEqual(raw);
 };

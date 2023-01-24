@@ -11,20 +11,20 @@ import ReactDOM from 'react-dom';
 import { EuiPage } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
-import { SharePluginSetup } from '../../../src/plugins/share/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
   HELLO_LOCATOR,
-} from '../../locator_examples/public';
+} from '@kbn/locator-examples-plugin/public';
 
 interface Props {
   share: SharePluginSetup;

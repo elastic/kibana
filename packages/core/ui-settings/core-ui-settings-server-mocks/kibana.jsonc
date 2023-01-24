@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-ui-settings-server-mocks",
+  "owner": "@elastic/kibana-core"
+}

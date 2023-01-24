@@ -5,26 +5,36 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
+// import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }) {
-  const es = getService('es');
-  const esArchiver = getService('esArchiver');
+  const config = getService('config');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
+  const isRunningCcs = config.get('esTestCluster.ccs') ? true : false;
+  let remoteEs;
+  if (isRunningCcs) {
+    remoteEs = getService('remoteEs');
+  }
 
   describe('rollup job', function () {
-    //Since rollups can only be created once with the same name (even if you delete it),
-    //we add the Date.now() to avoid name collision.
+    // Since rollups can only be created once with the same name (even if you delete it),
+    // we add the Date.now() to avoid name collision.
     const rollupJobName = 'rollup-to-be-' + Date.now();
     const targetIndexName = 'rollup-to-be';
-    const rollupSourceIndexPattern = 'to-be*';
+    const indexPatternToUse = 'to-be*';
+    const rollupSourceIndexPattern = isRunningCcs
+      ? 'ftr-remote:' + indexPatternToUse
+      : indexPatternToUse;
     const rollupSourceDataPrepend = 'to-be';
 
-    //make sure all dates have the same concept of "now"
+    // make sure all dates have the same concept of "now"
     const now = new Date();
     const pastDates = [
       datemath.parse('now-1d', { forceNow: now }),
@@ -32,15 +42,18 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-3d', { forceNow: now }),
     ];
     before(async () => {
-      await security.testUser.setRoles(['manage_rollups_role']);
+      // <issue for security roles not working as expected>
+      // https://github.com/elastic/kibana/issues/143720
+      // await security.testUser.setRoles(['manage_rollups_role', 'global_ccr_role']);
+      await security.testUser.setRoles(['superuser']);
       await PageObjects.common.navigateToApp('rollupJob');
     });
 
     it('create new rollup job', async () => {
       const interval = '1000ms';
-
+      const esNode = isRunningCcs ? remoteEs : es;
       for (const day of pastDates) {
-        await es.index(mockIndices(day, rollupSourceDataPrepend));
+        await esNode.index(mockIndices(day, rollupSourceDataPrepend));
       }
 
       await PageObjects.rollup.createNewRollUpJob(
@@ -58,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      //Stop the running rollup job.
+      // Stop the running rollup job.
       await es.transport.request({
         path: `/_rollup/job/${rollupJobName}/_stop?wait_for_completion=true`,
         method: 'POST',
@@ -69,9 +82,14 @@ export default function ({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      //Delete all data indices that were created.
-      await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      // Delete all data indices that were created.
+      await esDeleteAllIndices([targetIndexName], false);
+      if (isRunningCcs) {
+        await esDeleteAllIndices([indexPatternToUse], true);
+      } else {
+        await esDeleteAllIndices([indexPatternToUse], false);
+      }
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
     });
   });

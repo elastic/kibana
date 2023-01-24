@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
-import { InfraConfig } from '../types';
-import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
+import { Logger } from '@kbn/logging';
+import type { IBasePath } from '@kbn/core/server';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { RulesServiceSetup } from '../services/rules';
+import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
@@ -23,12 +25,15 @@ export interface InfraDomainLibs {
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
+  basePath: IBasePath;
   configuration: InfraConfig;
   framework: KibanaFramework;
-  sources: InfraSources;
-  sourceStatus: InfraSourceStatus;
-  getLogQueryFields: GetLogQueryFields;
-  handleEsError: typeof handleEsError;
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
+  sources: InfraSources;
+  sourceStatus: InfraSourceStatus;
+  getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
+  getStartServices: InfraPluginStartServicesAccessor;
+  handleEsError: typeof handleEsError;
+  logger: Logger;
 }

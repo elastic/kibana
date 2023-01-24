@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
 import { EnterpriseSearchPlugin } from './plugin';
 
@@ -15,9 +15,10 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export const configSchema = schema.object({
-  host: schema.maybe(schema.string()),
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  host: schema.maybe(schema.string()),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
@@ -32,8 +33,15 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
-  schema: configSchema,
   exposeToBrowser: {
     host: true,
   },
+  schema: configSchema,
 };
+export const CONNECTORS_INDEX = '.elastic-connectors';
+export const CURRENT_CONNECTORS_INDEX = '.elastic-connectors-v1';
+export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
+export const CONNECTORS_VERSION = 1;
+export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
+export const ANALYTICS_COLLECTIONS_INDEX = '.elastic-analytics-collections';
+export const ANALYTICS_VERSION = '1';

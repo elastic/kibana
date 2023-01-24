@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter';
+import usePrevious from 'react-use/lib/usePrevious';
+import deepEqual from 'react-fast-compare';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
@@ -29,8 +31,8 @@ const getMathValue = (argValue, columns) => {
     const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
     const mathValue = getFormObject(val);
 
-    const validColumn = columns.some(({ name }) => mathValue.column === name);
-    return { ...mathValue, column: validColumn ? mathValue.column : '' };
+    const isValidColumn = columns.some(({ name }) => mathValue.column === name);
+    return { ...mathValue, column: mathValue.column, isValidColumn };
   } catch (e) {
     return { error: e.message };
   }
@@ -46,11 +48,7 @@ const DatacolumnArgInput = ({
   typeInstance,
 }) => {
   const [mathValue, setMathValue] = useState(getMathValue(argValue, columns));
-
-  useEffect(() => {
-    setMathValue(getMathValue(argValue, columns));
-  }, [argValue, columns]);
-
+  const prevMathValue = usePrevious(mathValue);
   const allowedTypes = typeInstance.options.allowedTypes || false;
   const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
 
@@ -73,16 +71,41 @@ const DatacolumnArgInput = ({
       if (valueNotSet(fn)) {
         return onValueChange(column);
       }
-
       // fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     },
-    [mathValue, onValueChange, columns]
+    [onValueChange, columns, mathValue]
   );
 
+  useEffect(() => {
+    const newMathValue = getMathValue(argValue, columns);
+    setMathValue(newMathValue);
+  }, [argValue, columns]);
+
+  useEffect(() => {
+    if (
+      !mathValue.error &&
+      mathValue.column !== '' &&
+      !mathValue.isValidColumn &&
+      !deepEqual(mathValue, prevMathValue)
+    ) {
+      updateFunctionValue(mathValue.fn, columns[0].name);
+    }
+  }, [
+    mathValue.fn,
+    mathValue.column,
+    columns,
+    updateFunctionValue,
+    mathValue.error,
+    mathValue.isValidColumn,
+    prevMathValue,
+    mathValue,
+  ]);
+
   const onChangeFn = useCallback(
-    ({ target: { value } }) => updateFunctionValue(value, mathValue.column),
-    [mathValue.column, updateFunctionValue]
+    ({ target: { value } }) =>
+      updateFunctionValue(value, mathValue.isValidColumn ? mathValue.column : ''),
+    [mathValue.column, mathValue.isValidColumn, updateFunctionValue]
   );
 
   const onChangeColumn = useCallback(

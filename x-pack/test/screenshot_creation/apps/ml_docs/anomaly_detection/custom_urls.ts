@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { TIME_RANGE_TYPE } from '../../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
 
-import { ECOMMERCE_INDEX_PATTERN } from '../index';
+import { ECOMMERCE_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.openEditCustomUrlsForJobTab(ecommerceJobConfig.job_id);
       const existingCustomUrlCount = await ml.jobTable.getExistingCustomUrlCount();
       await ml.jobTable.fillInDashboardUrlForm(testDashboardCustomUrl);
-      await mlScreenshots.takeScreenshot('ml-customurl-edit', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-customurl-edit', screenshotDirectories);
 
       await ml.testExecution.logTestStep('add the custom url and save the job');
       await ml.jobTable.saveCustomUrl(testDashboardCustomUrl.label, existingCustomUrlCount);
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.anomaliesTable.scrollTableIntoView();
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
 
-      await mlScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-customurl', screenshotDirectories);
     });
   });
 }

@@ -5,15 +5,48 @@
  * 2.0.
  */
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../common';
+
 import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
+export const FLEET_INSTALL_FORMAT_VERSION = '1.0.0';
+
+export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.0.0';
+
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-1';
+export const FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME = '.fleet_globals-1';
 
-export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
+export const FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT = {
+  _meta: meta,
+  template: {
+    settings: {},
+    mappings: {
+      _meta: meta,
+      // All the dynamic field mappings
+      dynamic_templates: [
+        // This makes sure all mappings are keywords by default
+        {
+          strings_as_keyword: {
+            mapping: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            match_mapping_type: 'string',
+          },
+        },
+      ],
+      // As we define fields ahead, we don't need any automatic field detection
+      // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
+      date_detection: false,
+    },
+  },
+};
+export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME = '.fleet_agent_id_verification-1';
+
+export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
   _meta: meta,
   template: {
     settings: {
@@ -40,7 +73,15 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
   },
 };
 
-export const FLEET_FINAL_PIPELINE_VERSION = 2;
+export const FLEET_COMPONENT_TEMPLATES = [
+  { name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME, body: FLEET_GLOBALS_COMPONENT_TEMPLATE_CONTENT },
+  {
+    name: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+    body: FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT,
+  },
+];
+
+export const FLEET_FINAL_PIPELINE_VERSION = 3;
 
 // If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
@@ -51,14 +92,14 @@ _meta:
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:
-  - set:
-      description: Add time when event was ingested.
-      field: event.ingested
-      copy_from: _ingest.timestamp
-  - script:
-      description: Remove sub-seconds from event.ingested to improve storage efficiency.
+  - date:
+      description: Add time when event was ingested (and remove sub-seconds to improve storage efficiency)
       tag: truncate-subseconds-event-ingested
-      source: ctx.event.ingested = ctx.event.ingested.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      field: _ingest.timestamp
+      target_field: event.ingested
+      formats:
+        - ISO8601
+      output_format: date_time_no_millis
       ignore_failure: true
   - remove:
       description: Remove any pre-existing untrusted values.
@@ -155,3 +196,7 @@ on_failure:
       field: error.message
       value:
         - 'failed in Fleet agent final_pipeline: {{ _ingest.on_failure_message }}'`;
+
+// Fleet Agent indexes for storing files
+export const FILE_STORAGE_METADATA_AGENT_INDEX = getFileMetadataIndexName('agent');
+export const FILE_STORAGE_DATA_AGENT_INDEX = getFileDataIndexName('agent');

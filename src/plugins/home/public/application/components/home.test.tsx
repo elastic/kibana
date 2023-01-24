@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+
 import type { HomeProps } from './home';
 import { Home } from './home';
-
-import { FeatureCatalogueCategory } from '../../services';
 import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
+const mockNavigateToUrl = jest.fn();
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
@@ -24,6 +24,7 @@ jest.mock('../kibana_services', () => ({
       setBreadcrumbs: () => {},
     },
     application: {
+      navigateToUrl: mockNavigateToUrl,
       capabilities: {
         navLinks: {
           integrations: mockHasIntegrationsPermission,
@@ -33,7 +34,7 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
@@ -60,6 +61,7 @@ describe('home', () => {
         return `base_path/${url}`;
       },
       hasUserDataView: jest.fn(async () => true),
+      isCloudEnabled: false,
     };
   });
 
@@ -132,7 +134,7 @@ describe('home', () => {
         icon: 'indexPatternApp',
         path: 'index_management_landing_page',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin' as const,
       };
 
       const component = await renderHome({
@@ -150,7 +152,7 @@ describe('home', () => {
         icon: 'managementApp',
         path: 'management_landing_page',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin' as const,
       };
 
       const component = await renderHome({
@@ -172,7 +174,7 @@ describe('home', () => {
             path: 'path-to-advanced_settings',
             showOnHomePage: false,
             title: 'Advanced settings',
-            category: FeatureCatalogueCategory.ADMIN,
+            category: 'admin',
           },
         ],
       });
@@ -230,6 +232,16 @@ describe('home', () => {
       const component = await renderHome();
 
       expect(component.find(Welcome).exists()).toBe(false);
+    });
+
+    test('should redirect to guided onboarding on Cloud instead of welcome screen', async () => {
+      const isCloudEnabled = true;
+      const hasUserDataView = jest.fn(async () => false);
+
+      const component = await renderHome({ isCloudEnabled, hasUserDataView });
+
+      expect(component.find(Welcome).exists()).toBe(false);
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
     });
   });
 

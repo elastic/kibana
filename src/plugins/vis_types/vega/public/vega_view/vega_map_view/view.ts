@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Map, Style, MapboxOptions } from '@kbn/mapbox-gl';
+import type { Map, StyleSpecification, MapOptions } from '@kbn/mapbox-gl';
 
-import { View, parse } from 'vega';
+import { View, parse, expressionFunction } from 'vega';
 
-import { mapboxgl } from '@kbn/mapbox-gl';
+import { maplibregl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
@@ -45,6 +45,30 @@ async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   }
 }
 
+type SetMapViewArgs =
+  | [number, number, number]
+  | [number, number]
+  | [[number, number], number]
+  | [[number, number]]
+  | [[[number, number], [number, number]]];
+
+expressionFunction(
+  'setMapView',
+  function handlerFwd(
+    this: {
+      context: { dataflow: { _kibanaView: VegaMapView; runAfter: (fn: () => void) => void } };
+    },
+    ...args: SetMapViewArgs
+  ) {
+    const view = this.context.dataflow;
+    if (!('setMapViewHandler' in view._kibanaView)) {
+      // not a map view, don't do anything
+      return;
+    }
+    view.runAfter(() => view._kibanaView.setMapViewHandler(...args));
+  }
+);
+
 export class VegaMapView extends VegaBaseView {
   private mapBoxInstance?: Map;
 
@@ -52,7 +76,7 @@ export class VegaMapView extends VegaBaseView {
     return Boolean(this._parser.mapConfig.zoomControl);
   }
 
-  private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapboxOptions> {
+  private getMapParams(defaults: { maxZoom: number; minZoom: number }): Partial<MapOptions> {
     const { longitude, latitude, scrollWheelZoom } = this._parser.mapConfig;
     const { zoom, maxZoom, minZoom } = validateZoomSettings(
       this._parser.mapConfig,
@@ -82,8 +106,8 @@ export class VegaMapView extends VegaBaseView {
   }
 
   private async initMapContainer(vegaView: View) {
-    let style: Style = defaultMabBoxStyle;
-    let customAttribution: MapboxOptions['customAttribution'] = [];
+    let style: StyleSpecification = defaultMabBoxStyle;
+    let customAttribution: MapOptions['customAttribution'] = [];
     const zoomSettings = {
       minZoom: defaultMapConfig.minZoom,
       maxZoom: defaultMapConfig.maxZoom,
@@ -105,7 +129,7 @@ export class VegaMapView extends VegaBaseView {
       zoomSettings.maxZoom = defaultMapConfig.maxZoom;
       zoomSettings.minZoom = defaultMapConfig.minZoom;
       customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
-      style = (await tmsService.getVectorStyleSheet()) as Style;
+      style = (await tmsService.getVectorStyleSheet()) as StyleSpecification;
     } else {
       const config = this._serviceSettings.getTileMapConfig();
       customAttribution = config.options.attribution;
@@ -116,7 +140,7 @@ export class VegaMapView extends VegaBaseView {
 
     // For the correct geration of the PDF/PNG report, we must wait until the map is fully rendered.
     return new Promise((resolve) => {
-      const mapBoxInstance = new mapboxgl.Map({
+      const mapBoxInstance = new maplibregl.Map({
         style,
         customAttribution,
         container: this._$container.get(0),
@@ -147,7 +171,10 @@ export class VegaMapView extends VegaBaseView {
 
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
-      mapBoxInstance.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
+      mapBoxInstance.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        'top-left'
+      );
     }
 
     // disable map rotation using right click + drag
@@ -199,5 +226,87 @@ export class VegaMapView extends VegaBaseView {
 
   protected async onViewContainerResize() {
     this.mapBoxInstance?.resize();
+  }
+
+  public setMapViewHandler(...args: SetMapViewArgs) {
+    if (!this.mapBoxInstance) {
+      return;
+    }
+    function throwError() {
+      throw new Error(
+        i18n.translate('visTypeVega.visualization.setMapViewErrorMessage', {
+          defaultMessage:
+            'Unexpected setMapView() parameters. It could be called with a bounding box setMapView([[longitude1,latitude1],[longitude2,latitude2]]), or it could be the center point setMapView([longitude, latitude], optional_zoom), or it can be used as setMapView(latitude, longitude, optional_zoom)',
+        })
+      );
+    }
+
+    function checkArray(
+      val: number | [number, number] | [[number, number], [number, number]]
+    ): [number, number] {
+      if (
+        !Array.isArray(val) ||
+        val.length !== 2 ||
+        typeof val[0] !== 'number' ||
+        typeof val[1] !== 'number'
+      ) {
+        throwError();
+      }
+      return val as [number, number];
+    }
+
+    let lng: number | undefined;
+    let lat: number | undefined;
+    let zoom: number | undefined;
+    switch (args.length) {
+      default:
+        throwError();
+        break;
+      case 1: {
+        const arg = args[0];
+        if (
+          Array.isArray(arg) &&
+          arg.length === 2 &&
+          Array.isArray(arg[0]) &&
+          Array.isArray(arg[1])
+        ) {
+          // called with a bounding box, need to reverse order
+          const [lng1, lat1] = checkArray(arg[0]);
+          const [lng2, lat2] = checkArray(arg[1]);
+          this.mapBoxInstance.fitBounds([
+            { lat: lat1, lng: lng1 },
+            { lat: lat2, lng: lng2 },
+          ]);
+        } else {
+          // called with a center point and no zoom
+          [lng, lat] = checkArray(arg);
+        }
+        break;
+      }
+      case 2:
+        if (Array.isArray(args[0])) {
+          [lng, lat] = checkArray(args[0]);
+          zoom = args[1];
+        } else {
+          [lat, lng] = args;
+        }
+        break;
+      case 3:
+        [lat, lng, zoom] = args;
+        break;
+    }
+
+    if (lat !== undefined && lng !== undefined) {
+      if (typeof lat !== 'number' || typeof lng !== 'number') {
+        throwError();
+      }
+      if (zoom !== undefined && typeof zoom !== 'number') {
+        throwError();
+      }
+      this.mapBoxInstance.setCenter({ lat, lng });
+      if (zoom !== undefined) {
+        this.mapBoxInstance.zoomTo(zoom);
+      }
+    }
   }
 }

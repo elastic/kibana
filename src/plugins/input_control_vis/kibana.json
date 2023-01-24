@@ -9,6 +9,6 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["data", "expressions", "visDefaultEditor", "visualizations"],
+  "requiredPlugins": ["data", "expressions", "visDefaultEditor", "visualizations", "unifiedSearch"],
   "requiredBundles": ["kibanaReact"]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import moment from 'moment';
 
 export const roundTimestamp = (timestamp: number, unit: Unit) => {

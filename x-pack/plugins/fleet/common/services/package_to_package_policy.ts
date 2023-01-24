@@ -15,17 +15,27 @@ import type {
   NewPackagePolicyInputStream,
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
+  RegistryStreamWithDataStream,
 } from '../types';
 
-import { doesPackageHaveIntegrations } from './';
+import { doesPackageHaveIntegrations } from '.';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+} from './policy_template';
+
+type PackagePolicyStream = RegistryStream & {
+  data_stream: { type: string; dataset: string };
+};
 
 export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,
   dataStreamPaths: string[] = []
-): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
-  const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
-  const dataStreams = packageInfo.data_streams || [];
+): PackagePolicyStream[] => {
+  const streams: PackagePolicyStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
   const dataStreamsToSearch = dataStreamPaths.length
     ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
     : dataStreams;
@@ -38,6 +48,33 @@ export const getStreamsForInputType = (
           data_stream: {
             type: dataStream.type,
             dataset: dataStream.dataset,
+          },
+        });
+      }
+    });
+  });
+
+  return streams;
+};
+
+export const getRegistryStreamWithDataStreamForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo,
+  dataStreamPaths: string[] = []
+): RegistryStreamWithDataStream[] => {
+  const streams: RegistryStreamWithDataStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const dataStreamsToSearch = dataStreamPaths.length
+    ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
+    : dataStreams;
+
+  dataStreamsToSearch.forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          data_stream: {
+            ...dataStream,
           },
         });
       }
@@ -76,11 +113,12 @@ export const packageToPackagePolicyInputs = (
   } = {};
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
-    packagePolicyTemplate.inputs?.forEach((packageInput) => {
+    const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    normalizedInputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
         ...packageInput,
-        ...(packagePolicyTemplate.data_streams
+        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
           ? { data_streams: packagePolicyTemplate.data_streams }
           : {}),
         policy_template: packagePolicyTemplate.name,
@@ -162,12 +200,16 @@ export const packageToPackagePolicyInputs = (
 export const packageToPackagePolicy = (
   packageInfo: PackageInfo,
   agentPolicyId: string,
-  outputId: string,
   namespace: string = '',
   packagePolicyName?: string,
   description?: string,
   integrationToEnable?: string
 ): NewPackagePolicy => {
+  const experimentalDataStreamFeatures =
+    'savedObject' in packageInfo
+      ? packageInfo.savedObject?.attributes?.experimental_data_stream_features
+      : undefined;
+
   const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
@@ -176,10 +218,12 @@ export const packageToPackagePolicy = (
       name: packageInfo.name,
       title: packageInfo.title,
       version: packageInfo.version,
+      ...(experimentalDataStreamFeatures
+        ? { experimental_data_stream_features: experimentalDataStreamFeatures }
+        : undefined),
     },
     enabled: true,
     policy_id: agentPolicyId,
-    output_id: outputId,
     inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
   };

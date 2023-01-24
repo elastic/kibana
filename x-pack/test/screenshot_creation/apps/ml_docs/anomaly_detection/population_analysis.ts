@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
-import { LOGS_INDEX_PATTERN } from '../index';
+import { LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
-  const testSubjects = getService('testSubjects');
+  const commonScreenshots = getService('commonScreenshots');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
@@ -71,8 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('continue to the pick fields step and take screenshot');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('ml-population-job', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot('ml-population-job', screenshotDirectories);
     });
 
     it('anomaly explorer screenshots', async () => {
@@ -85,22 +84,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.filterWithSearchString(populationJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(populationJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-      await ml.testExecution.logTestStep('open tooltip and take screenshot');
-      const viewBySwimLanes = await testSubjects.find(viewBySwimLaneTestSubj);
-      const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
-      const sampleCell = cells[0];
-
-      await viewBySwimLanes.moveMouseTo({
-        xOffset: Math.floor(cellSize / 2.0),
-        yOffset: Math.floor(cellSize / 2.0),
-      });
-
-      await mlScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
-
+      await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
       await ml.testExecution.logTestStep(
         'select swim lane tile, expand anomaly row and take screenshot'
       );
+      const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
+      const sampleCell = cells[0];
       await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
         x: sampleCell.x + cellSize,
         y: sampleCell.y + cellSize,
@@ -109,8 +98,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await ml.anomaliesTable.ensureDetailsOpen(0);
+      await ml.anomaliesTable.scrollRowIntoView(0);
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot('ml-population-anomaly', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'ml-population-anomaly',
+        screenshotDirectories,
+        1500,
+        1300
+      );
     });
   });
 }

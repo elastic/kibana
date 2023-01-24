@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -32,6 +32,7 @@ export function MachineLearningCommonUIProvider({
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   return {
     async setValueWithChecks(
@@ -163,29 +164,34 @@ export function MachineLearningCommonUIProvider({
     },
 
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
-      await testSubjects.existOrFail(`${testDataSubj}-popover`);
-      await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
-      const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
+      await retry.tryForTime(60 * 1000, async () => {
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
 
-      for (const fieldType of fieldTypes) {
-        await retry.tryForTime(5000, async () => {
-          await searchBarInput.clearValueWithKeyboard();
-          await searchBarInput.type(fieldType);
-          if (!(await testSubjects.exists(`${testDataSubj}-option-${fieldType}-checked`))) {
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}`);
-            await testSubjects.click(`${testDataSubj}-option-${fieldType}`);
-            await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}-checked`);
-          }
-        });
-      }
+        await testSubjects.clickWhenNotDisabledWithoutRetry(`${testDataSubj}-button`);
+        await testSubjects.existOrFail(`${testDataSubj}-popover`);
+        await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
+        const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
+
+        for (const fieldType of fieldTypes) {
+          await retry.tryForTime(5000, async () => {
+            await searchBarInput.clearValueWithKeyboard();
+            await searchBarInput.type(fieldType);
+            if (!(await testSubjects.exists(`${testDataSubj}-option-${fieldType}-checked`))) {
+              await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}`);
+              await testSubjects.click(`${testDataSubj}-option-${fieldType}`);
+              await testSubjects.existOrFail(`${testDataSubj}-option-${fieldType}-checked`);
+            }
+          });
+        }
+      });
 
       // escape popover
       await browser.pressKeys(browser.keys.ESCAPE);
     },
 
     async removeMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`${testDataSubj}-button`);
       await testSubjects.existOrFail(`${testDataSubj}-popover`);
       await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
       const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
@@ -330,7 +336,7 @@ export function MachineLearningCommonUIProvider({
     async changeToSpace(spaceId: string) {
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
-      await PageObjects.spaceSelector.expectHomePage(spaceId);
+      await PageObjects.spaceSelector.expectSpace(spaceId);
     },
 
     async waitForDatePickerIndicatorLoaded() {
@@ -338,7 +344,87 @@ export function MachineLearningCommonUIProvider({
     },
 
     async waitForRefreshButtonEnabled() {
-      await testSubjects.waitForEnabled('~mlRefreshPageButton');
+      await testSubjects.waitForEnabled('~mlDatePickerRefreshPageButton');
+    },
+
+    async assertOneOfExists(subjectsToCheck: string[], timeout: number = 0) {
+      const singleSubjectTimeout = 500;
+      // make sure that the overall timeout is not too short
+      const overallTimeout = Math.max(timeout, subjectsToCheck.length * singleSubjectTimeout * 5);
+
+      await retry.tryForTime(overallTimeout, async () => {
+        for (const testSubj of subjectsToCheck) {
+          const subjExists = await testSubjects.exists(testSubj, { timeout: singleSubjectTimeout });
+          if (subjExists) return; // stop ckecking once we found an existing element
+        }
+        throw new Error(
+          `Expected one element of the following list to exist: ${JSON.stringify(subjectsToCheck)}`
+        );
+      });
+    },
+
+    async selectButtonGroupValue(inputTestSubj: string, value: string) {
+      await retry.tryForTime(5000, async () => {
+        // The input element can not be clicked directly.
+        // Instead, we need to click the corresponding label
+
+        const fieldSetElement = await testSubjects.find(inputTestSubj);
+
+        const labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
+        await labelElement.click();
+
+        const labelClasses = await labelElement.getAttribute('class');
+        expect(labelClasses).to.contain(
+          'euiButtonGroupButton-isSelected',
+          `Label for '${inputTestSubj}' should be selected`
+        );
+      });
+    },
+
+    async assertLastToastHeader(expectedHeader: string, timeout: number = 5000) {
+      await retry.tryForTime(timeout, async () => {
+        const resultToast = await toasts.getToastElement(1);
+        const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
+        const title: string = await titleElement.getVisibleText();
+        expect(title).to.eql(
+          expectedHeader,
+          `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
+        );
+      });
+      await toasts.dismissAllToasts();
+    },
+
+    async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    },
+
+    async invokeTableRowAction(
+      rowSelector: string,
+      actionTestSubject: string,
+      fromContextMenu: boolean = true
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (fromContextMenu) {
+          await this.ensureAllMenuPopoversClosed();
+
+          await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
+          await find.existsByCssSelector('euiContextMenuPanel');
+
+          const isEnabled = await testSubjects.isEnabled(actionTestSubject);
+
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+
+          await testSubjects.click(actionTestSubject);
+        } else {
+          const isEnabled = await testSubjects.isEnabled(`${rowSelector} > ${actionTestSubject}`);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
+        }
+      });
     },
   };
 }

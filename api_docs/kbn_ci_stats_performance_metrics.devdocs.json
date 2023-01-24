@@ -1,0 +1,78 @@
+{
+  "id": "@kbn/ci-stats-performance-metrics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ci-stats-performance-metrics",
+        "id": "def-common.reporter",
+        "type": "Function",
+        "tags": [],
+        "label": "reporter",
+        "description": [],
+        "signature": [
+          "(options: ReporterOptions) => Promise<void>"
+        ],
+        "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ci-stats-performance-metrics",
+            "id": "def-common.reporter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ReporterOptions"
+            ],
+            "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ci-stats-performance-metrics",
+        "id": "def-common.runCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-ci-stats-performance-metrics/src/cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

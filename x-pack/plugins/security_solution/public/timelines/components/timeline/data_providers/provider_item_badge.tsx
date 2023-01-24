@@ -10,18 +10,20 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 
-import { OnDataProviderEdited } from '../events';
+import type { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
-import { DataProvidersAnd, DataProviderType, QueryOperator } from './data_provider';
+import type { DataProvidersAnd, QueryOperator } from './data_provider';
+import { DataProviderType } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;
@@ -41,7 +43,8 @@ interface ProviderItemBadgeProps {
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
-  val: string | number;
+  displayValue?: string;
+  val: string | number | Array<string | number>;
   type?: DataProviderType;
   wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
@@ -65,6 +68,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
+    displayValue,
     val,
     type = DataProviderType.default,
     wrapperRef,
@@ -77,9 +81,9 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
       return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
     });
-    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-    const { isLoading } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, timelineId ?? '')
+
+    const { isLoading } = useDeepEqualSelector(
+      (state) => getTimeline(state, timelineId ?? '') ?? timelineDefaults
     );
 
     const togglePopover = useCallback(() => {
@@ -142,6 +146,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
           providerId={providerId}
           togglePopover={togglePopover}
           toggleType={onToggleTypeProvider}
+          displayValue={displayValue ?? String(val)}
           val={val}
           operator={operator}
           type={type}
@@ -150,6 +155,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       ),
       [
         deleteProvider,
+        displayValue,
         field,
         isEnabled,
         isExcluded,

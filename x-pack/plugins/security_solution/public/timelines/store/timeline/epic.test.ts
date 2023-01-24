@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { convertTimelineAsInput } from './epic';
-import { TimelineModel } from './model';
+import type { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -148,7 +149,6 @@ describe('Epic Timeline', () => {
         },
         loadingEventIds: [],
         queryFields: [],
-        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -158,10 +158,18 @@ describe('Epic Timeline', () => {
         pinnedEventsSaveObject: {},
         dateRange: { start: '2019-10-30T21:06:27.644Z', end: '2019-10-31T21:06:27.644Z' },
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
+        selectAll: false,
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: true,
-        showCheckboxes: false,
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         status: TimelineStatus.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -303,7 +311,8 @@ describe('Epic Timeline', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],

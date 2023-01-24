@@ -23,6 +23,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { CustomUrlEditor, CustomUrlList } from '../../../../components/custom_url_editor';
 import {
   getNewCustomUrlDefaults,
@@ -32,12 +34,10 @@ import {
   getTestUrl,
   CustomUrlSettings,
 } from '../../../../components/custom_url_editor/utils';
-import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { loadSavedDashboards, loadDataViewListItems } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { DataViewListItem } from '../../../../../../../../../../src/plugins/data_views/common';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
@@ -52,7 +52,7 @@ interface CustomUrlsProps {
 
 interface CustomUrlsState {
   customUrls: UrlConfig[];
-  dashboards: any[];
+  dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
   editorOpen: boolean;
@@ -142,7 +142,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         this.props.setCustomUrls(customUrls);
         this.setState({ editorOpen: false });
       })
-      .catch((error: any) => {
+      .catch((error: Error) => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', error);
         const { toasts } = this.props.kibana.services.notifications;
@@ -288,10 +288,12 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
-              defaultMessage="Add custom URL"
-            />
+            <h1>
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
+                defaultMessage="Add custom URL"
+              />
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 

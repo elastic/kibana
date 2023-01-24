@@ -6,10 +6,34 @@
  */
 
 import { produce } from 'immer';
-import { SavedObjectsType } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
+import type { SavedObjectsType } from '@kbn/core/server';
+import {
+  savedQuerySavedObjectType,
+  packSavedObjectType,
+  packAssetSavedObjectType,
+  usageMetricSavedObjectType,
+} from '../../../common/types';
+
+export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    count: {
+      type: 'long',
+    },
+    errors: {
+      type: 'long',
+    },
+  },
+};
+
+export const usageMetricType: SavedObjectsType = {
+  name: usageMetricSavedObjectType,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: usageMetricSavedObjectMappings,
+};
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     description: {
       type: 'text',
@@ -61,6 +85,18 @@ export const savedQueryType: SavedObjectsType = {
       path: `/app/osquery/saved_queries/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
+    onExport: (context, objects) =>
+      produce(objects, (draft) => {
+        draft.forEach((savedQuerySO) => {
+          // Only prebuilt saved queries should have a version
+          if (savedQuerySO.attributes.version) {
+            savedQuerySO.attributes.id += '_copy';
+            delete savedQuerySO.attributes.version;
+          }
+        });
+
+        return draft;
+      }),
   },
 };
 
@@ -87,7 +123,15 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     enabled: {
       type: 'boolean',
     },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
+    version: {
+      type: 'long',
+    },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -131,9 +175,68 @@ export const packType: SavedObjectsType = {
       produce(objects, (draft) => {
         draft.forEach((packSO) => {
           packSO.references = [];
+          // Only prebuilt packs should have a version
+          if (packSO.attributes.version) {
+            packSO.attributes.name += '_copy';
+            delete packSO.attributes.version;
+          }
         });
 
         return draft;
       }),
   },
+};
+
+export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
+  properties: {
+    description: {
+      type: 'text',
+    },
+    name: {
+      type: 'text',
+    },
+    version: {
+      type: 'long',
+    },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
+    queries: {
+      dynamic: false,
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        query: {
+          type: 'text',
+        },
+        interval: {
+          type: 'text',
+        },
+        platform: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
+        },
+      },
+    },
+  },
+};
+
+export const packAssetType: SavedObjectsType = {
+  name: packAssetSavedObjectType,
+  hidden: false,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
+  namespaceType: 'agnostic',
+  mappings: packAssetSavedObjectMappings,
 };

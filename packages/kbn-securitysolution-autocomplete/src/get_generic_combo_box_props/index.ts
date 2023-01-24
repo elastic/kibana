@@ -24,13 +24,19 @@ export const getGenericComboBoxProps = <T>({
   getLabel,
   options,
   selectedOptions,
+  disabledOptions,
 }: {
   getLabel: (value: T) => string;
   options: T[];
   selectedOptions: T[];
+  disabledOptions?: T[];
 }): GetGenericComboBoxPropsReturn => {
   const newLabels = options.map(getLabel);
-  const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
+  const disabledLabels = disabledOptions?.map(getLabel);
+  const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({
+    label,
+    disabled: disabledLabels && disabledLabels.length !== 0 && disabledLabels.includes(label),
+  }));
   const newSelectedComboOptions = selectedOptions
     .map(getLabel)
     .filter((option) => {

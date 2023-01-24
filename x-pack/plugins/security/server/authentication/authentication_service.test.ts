@@ -12,7 +12,6 @@ import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   AuthenticationHandler,
   AuthToolkit,
@@ -23,17 +22,19 @@ import type {
   Logger,
   LoggerFactory,
   OnPreResponseToolkit,
-  UnauthorizedError,
   UnauthorizedErrorHandler,
   UnauthorizedErrorHandlerToolkit,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { CspConfig } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import type { UnauthorizedError } from '@kbn/es-errors';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -48,6 +49,7 @@ import { securityMock } from '../mocks';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
+import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
 
@@ -68,7 +70,11 @@ describe('AuthenticationService', () => {
     http: jest.Mocked<HttpServiceStart>;
     clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
     featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
+    userProfileService: ReturnType<typeof userProfileServiceMock.createStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
+    applicationName: 'kibana-.kibana';
+    kibanaFeatures: [];
+    isElasticCloudDeployment: jest.Mock;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -107,6 +113,10 @@ describe('AuthenticationService', () => {
       loggers: loggingSystemMock.create(),
       featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
       session: sessionMock.create(),
+      userProfileService: userProfileServiceMock.createStart(),
+      applicationName: 'kibana-.kibana',
+      kibanaFeatures: [],
+      isElasticCloudDeployment: jest.fn().mockReturnValue(false),
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath
@@ -261,6 +271,33 @@ describe('AuthenticationService', () => {
 
         expect(authenticate).toHaveBeenCalledTimes(1);
         expect(authenticate).toHaveBeenCalledWith(mockRequest);
+      });
+
+      it('sets authenticated state correctly with user profile id', async () => {
+        const mockRequest = httpServerMock.createKibanaRequest();
+        const mockResponse = httpServerMock.createLifecycleResponseFactory();
+        const mockUser = mockAuthenticatedUser();
+        const mockAuthHeaders = { authorization: 'Basic xxx' };
+        const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+
+        authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(
+            { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+            {
+              authHeaders: mockAuthHeaders,
+              authResponseHeaders: mockAuthResponseHeaders,
+            }
+          )
+        );
+
+        await authHandler(mockRequest, mockResponse, mockAuthToolkit);
+
+        expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
+        expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
+          state: { ...mockUser, profile_uid: 'USER_PROFILE_ID' },
+          requestHeaders: mockAuthHeaders,
+          responseHeaders: mockAuthResponseHeaders,
+        });
       });
 
       it('redirects user if redirection is requested by the authenticator preserving authentication response headers if any', async () => {
@@ -739,7 +776,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -764,7 +801,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -791,7 +828,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -837,7 +874,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -862,7 +899,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -889,7 +926,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -934,7 +971,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: 'rendered-view',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
           },
         });
 
@@ -966,7 +1003,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: 'rendered-view',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
           },
         });
 
@@ -1001,7 +1038,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: 'rendered-view',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
           },
         });
 

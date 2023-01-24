@@ -7,12 +7,14 @@
  */
 
 import { Agent, IncomingMessage } from 'http';
-import * as url from 'url';
-import { pick, trimStart, trimEnd } from 'lodash';
+import { pick } from 'lodash';
 import { SemVer } from 'semver';
 
-import { KibanaRequest, RequestHandler } from 'kibana/server';
+import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
+// TODO: find a better way to get information from the request like remoteAddress and remotePort
+// for forwarding.
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { ESConfigForProxy } from '../../../../types';
 import {
   getElasticsearchProxyConfig,
@@ -21,25 +23,10 @@ import {
   setHeaders,
 } from '../../../../lib';
 
-// TODO: find a better way to get information from the request like remoteAddress and remotePort
-// for forwarding.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router';
-
-import { RouteDependencies } from '../../../';
+import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
-
-function toURL(base: string, path: string) {
-  const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
-  // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
-  // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
-  // measurement precision)
-  if (!urlResult.searchParams.get('pretty')) {
-    urlResult.searchParams.append('pretty', 'true');
-  }
-  return urlResult;
-}
+import { toURL } from '../../../../lib/utils';
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
   const normalizeHeader = function (header: string) {
@@ -56,7 +43,7 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
   return pick(originalHeaders, headersToKeepNormalized);
 }
 
-function getRequestConfig(
+export function getRequestConfig(
   headers: object,
   esConfig: ESConfigForProxy,
   uri: string,
@@ -116,7 +103,7 @@ export const createHandler =
   }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
   async (ctx, request, response) => {
     const { body, query } = request;
-    const { path, method, withProductOrigin } = query;
+    const { method, path, withProductOrigin } = query;
 
     if (kibanaVersion.major < 8) {
       // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x

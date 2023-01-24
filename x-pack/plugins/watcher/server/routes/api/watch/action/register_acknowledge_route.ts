@@ -7,9 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
-// @ts-ignore
-import { WatchStatus } from '../../../../models/watch_status/index';
+import { IScopedClusterClient } from '@kbn/core/server';
+
+import {
+  buildServerWatchStatusModel,
+  buildClientWatchStatusModel,
+} from '../../../../models/watch_status_model';
 import { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({
@@ -40,16 +43,17 @@ export function registerAcknowledgeRoute({
       const { watchId, actionId } = request.params;
 
       try {
-        const hit = await acknowledgeAction(ctx.core.elasticsearch.client, watchId, actionId);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await acknowledgeAction(esClient, watchId, actionId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,
           watchStatusJson,
         };
 
-        const watchStatus = WatchStatus.fromUpstreamJson(json);
+        const watchStatus = buildServerWatchStatusModel(json);
         return response.ok({
-          body: { watchStatus: watchStatus.downstreamJson },
+          body: { watchStatus: buildClientWatchStatusModel(watchStatus) },
         });
       } catch (e) {
         if (e?.statusCode === 404 && e.meta?.body?.error) {

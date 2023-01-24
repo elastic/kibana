@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -16,15 +17,15 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
-  EuiPopoverProps,
   EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { OnChangePage } from '../events';
+import type { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
@@ -270,7 +271,7 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
     documentType = i18n.TOTAL_COUNT_OF_EVENTS,
     loadingText = i18n.LOADING_EVENTS,

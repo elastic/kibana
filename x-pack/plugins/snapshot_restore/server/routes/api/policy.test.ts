@@ -386,6 +386,31 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
+
+    it('should not return system indices', async () => {
+      const mockEsResponse: ResolveIndexResponseFromES = {
+        indices: [
+          {
+            name: 'fooIndex',
+            attributes: ['open'],
+          },
+          {
+            name: 'kibana',
+            attributes: ['open', 'system'],
+          },
+        ],
+        aliases: [],
+        data_streams: [],
+      };
+
+      resolveIndicesFn.mockResolvedValue(mockEsResponse);
+
+      const expectedResponse = {
+        indices: ['fooIndex'],
+        dataStreams: [],
+      };
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
   });
 
   describe('updateRetentionSettingsHandler()', () => {

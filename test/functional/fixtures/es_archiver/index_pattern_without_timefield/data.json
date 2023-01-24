@@ -17,22 +17,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:with-timefield",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-        "fields": "[]",
-        "title": "with-timefield",
-        "timeFieldName": "@timestamp"
-      },
-      "type": "index-pattern"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "AU_x3-TaGFA8no6QjiSJ",
     "index": "with-timefield",
     "source": {
@@ -46,4 +30,23 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "with-different-timefield-1",
+    "index": "with-different-timefield",
+    "source": {
+      "@message" : "ole",
+      "with-different-timefield": "2019-10-22T23:50:13.253Z",
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg"
+    }
+  }
+}
+
+
 

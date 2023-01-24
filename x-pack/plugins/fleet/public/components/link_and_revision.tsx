@@ -11,16 +11,29 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 
-import type { AgentPolicy } from '../../common/types';
+import type { AgentPolicy, Agent } from '../../common/types';
 import { useLink } from '../hooks';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
 
-export const AgentPolicySummaryLine = memo<{ policy: AgentPolicy }>(({ policy }) => {
+export const AgentPolicySummaryLine = memo<{
+  policy: AgentPolicy;
+  agent?: Agent;
+  direction?: 'column' | 'row';
+}>(({ policy, agent, direction = 'row' }) => {
   const { getHref } = useLink();
-  const { name, id, revision, is_managed: isManaged } = policy;
+  const { name, id, is_managed: isManaged } = policy;
+
+  const revision = agent ? agent.policy_revision : policy.revision;
+
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="baseline" style={MIN_WIDTH} responsive={false}>
+    <EuiFlexGroup
+      direction={direction}
+      gutterSize={direction === 'column' ? 'none' : 's'}
+      alignItems="baseline"
+      style={MIN_WIDTH}
+      responsive={false}
+    >
       <EuiFlexItem grow={false} className="eui-textTruncate">
         <EuiLink
           className={`eui-textTruncate`}
@@ -44,7 +57,7 @@ export const AgentPolicySummaryLine = memo<{ policy: AgentPolicy }>(({ policy })
         />
       )}
       {revision && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={direction === 'column' ? false : true}>
           <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
             <FormattedMessage
               id="xpack.fleet.agentPolicySummaryLine.revisionNumber"

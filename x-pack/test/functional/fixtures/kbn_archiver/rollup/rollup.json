@@ -3,8 +3,7 @@
     "accessibility:disableAnimations": true,
     "buildNum": 9007199254740991,
     "dateFormat:tz": "UTC",
-    "defaultIndex": "rollup",
-    "visualization:visualize:legacyPieChartsLibrary": true
+    "defaultIndex": "rollup"
   },
   "coreMigrationVersion": "7.15.0",
   "id": "7.15.0",

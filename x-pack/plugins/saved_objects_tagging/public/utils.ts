@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from 'src/core/types';
-import { SavedObjectsFindOptionsReference } from 'src/core/public';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { Tag, tagSavedObjectTypeName } from '../common';
 
 type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
@@ -16,7 +16,10 @@ export {
   replaceTagReferences as updateTagsReferences,
 } from '../common/references';
 
-export const getObjectTags = (object: SavedObject, allTags: Tag[]) => {
+export const getObjectTags = (
+  object: { references: SavedObject['references'] },
+  allTags: Tag[]
+) => {
   return getTagsFromReferences(object.references, allTags);
 };
 

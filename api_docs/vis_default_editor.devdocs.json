@@ -28,6 +28,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -41,6 +42,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visDefaultEditor",
@@ -54,6 +56,7 @@
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -83,6 +86,7 @@
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -97,6 +101,7 @@
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -117,6 +122,7 @@
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -142,6 +148,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visDefaultEditor",
@@ -161,6 +168,7 @@
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -178,6 +186,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -206,6 +215,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/basic_options.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -226,6 +236,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/basic_options.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -244,6 +255,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -257,6 +269,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -275,6 +288,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -288,6 +302,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -310,10 +325,11 @@
             "section": "def-public.DefaultEditorSize",
             "text": "DefaultEditorSize"
           },
-          ") => 50 | 15 | 30"
+          ") => 15 | 30 | 50"
         ],
         "path": "src/plugins/vis_default_editor/public/editor_size.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -333,6 +349,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/editor_size.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -361,6 +378,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -376,6 +394,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -392,6 +411,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -408,6 +428,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -422,12 +443,46 @@
             ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
         "returnComment": [
           "An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visDefaultEditor",
+        "id": "def-public.LegendSizeSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "LegendSizeSettings",
+        "description": [],
+        "signature": [
+          "({ legendSize, onLegendSizeChange, isVerticalLegend, showAutoOption, }: LegendSizeSettingsProps) => JSX.Element"
+        ],
+        "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visDefaultEditor",
+            "id": "def-public.LegendSizeSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  legendSize,\n  onLegendSizeChange,\n  isVerticalLegend,\n  showAutoOption,\n}",
+            "description": [],
+            "signature": [
+              "LegendSizeSettingsProps"
+            ],
+            "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -444,6 +499,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/long_legend_options.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -457,6 +513,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/long_legend_options.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -477,6 +534,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -490,6 +548,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -510,6 +569,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/controls/palette_picker.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -524,6 +584,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/palette_picker.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -544,6 +605,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/percentage_mode.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -557,6 +619,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/percentage_mode.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -575,6 +638,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/range.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -588,6 +652,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/range.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -606,6 +671,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -619,6 +685,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -639,6 +706,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/required_number_input.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -652,6 +720,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/required_number_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -670,6 +739,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/select.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -683,6 +753,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/select.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -701,6 +772,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/switch.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -714,6 +786,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/switch.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -732,6 +805,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/text_input.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -745,6 +819,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/text_input.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -765,6 +840,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -778,6 +854,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -792,6 +869,7 @@
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -809,6 +887,7 @@
         "description": [],
         "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visDefaultEditor",
@@ -821,7 +900,8 @@
               "\"range\" | undefined"
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visDefaultEditor",
@@ -834,7 +914,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visDefaultEditor",
@@ -847,7 +928,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -863,6 +945,7 @@
         "description": [],
         "path": "src/plugins/vis_default_editor/public/editor_size.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -879,6 +962,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -901,6 +985,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -911,7 +996,8 @@
             "label": "paramName",
             "description": [],
             "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visDefaultEditor",
@@ -931,7 +1017,8 @@
               "[]"
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -964,6 +1051,7 @@
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -977,7 +1065,8 @@
               "T"
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visDefaultEditor",
@@ -997,7 +1086,8 @@
               "[T]"
             ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

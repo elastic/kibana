@@ -26,7 +26,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
       flex: 1;
       overflow-x: hidden;
       overflow-y: scroll;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
+      padding: ${({ theme }) => `${theme.eui.euiSizeXS} ${theme.eui.euiSizeM} 64px`};
     }
   }
 `;

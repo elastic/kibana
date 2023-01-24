@@ -7,9 +7,8 @@
 
 import { merge } from '@kbn/std';
 import { isPlainObject } from 'lodash';
-import { Ecs } from '../../../../cases/common';
+import type { Ecs } from '@kbn/cases-plugin/common';
 
-// TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
 export const buildAlertsQuery = (alertIds: string[]) => {
   if (alertIds.length === 0) {
     return {};
@@ -26,41 +25,6 @@ export const buildAlertsQuery = (alertIds: string[]) => {
     },
     size: 10000,
   };
-};
-
-export const toStringArray = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value.reduce<string[]>((acc, v) => {
-      if (v != null) {
-        switch (typeof v) {
-          case 'number':
-          case 'boolean':
-            return [...acc, v.toString()];
-          case 'object':
-            try {
-              return [...acc, JSON.stringify(v)];
-            } catch {
-              return [...acc, 'Invalid Object'];
-            }
-          case 'string':
-            return [...acc, v];
-          default:
-            return [...acc, `${v}`];
-        }
-      }
-      return acc;
-    }, []);
-  } else if (value == null) {
-    return [];
-  } else if (!Array.isArray(value) && typeof value === 'object') {
-    try {
-      return [JSON.stringify(value)];
-    } catch {
-      return ['Invalid Object'];
-    }
-  } else {
-    return [`${value}`];
-  }
 };
 
 const formatAlertItem = (item: unknown): Ecs => {

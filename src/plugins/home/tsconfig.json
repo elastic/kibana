@@ -1,20 +1,38 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../custom_integrations/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../share/tsconfig.json" },
-    { "path": "../url_forwarding/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" }
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/custom-integrations-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/url-forwarding-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/i18n",
+    "@kbn/home-sample-data-tab",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/utility-types",
+    "@kbn/guided-onboarding",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/ui-theme",
+    "@kbn/config-schema",
+    "@kbn/utility-types-jest",
+    "@kbn/es-query",
+    "@kbn/ebt-tools",
+    "@kbn/core-analytics-server",
+    "@kbn/storybook",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

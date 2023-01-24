@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import {
+import { type Subject, ReplaySubject } from 'rxjs';
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -13,23 +14,24 @@ import {
   KibanaRequest,
   CoreStart,
   IContextProvider,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import { PluginStartContract as AlertingStart } from '../../alerting/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginStart } from '../../spaces/server';
-import {
+import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
-} from '../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 
-import { RuleRegistryPluginConfig } from './config';
-import { IRuleDataService, RuleDataService } from './rule_data_plugin_service';
+import { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+import type { RuleRegistryPluginConfig } from './config';
+import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
-import { AlertsClient } from './alert_data_client/alerts_client';
-import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import type { AlertsClient } from './alert_data_client/alerts_client';
+import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
-import { ruleRegistrySearchStrategyProvider } from './search_strategy';
+import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
@@ -44,6 +46,8 @@ export interface RuleRegistryPluginStartDependencies {
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: IRuleDataService;
+  createLifecycleRuleTypeFactory: typeof createLifecycleRuleTypeFactory;
+  dataset: typeof Dataset;
 }
 
 export interface RuleRegistryPluginStartContract {
@@ -66,6 +70,7 @@ export class RuleRegistryPlugin
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: IRuleDataService | null;
   private security: SecurityPluginSetup | undefined;
+  private pluginStop$: Subject<void>;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
@@ -73,6 +78,7 @@ export class RuleRegistryPlugin
     this.kibanaVersion = initContext.env.packageInfo.version;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(
@@ -100,6 +106,7 @@ export class RuleRegistryPlugin
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
+      pluginStop$: this.pluginStop$,
     });
 
     this.ruleDataService.initializeService();
@@ -115,7 +122,7 @@ export class RuleRegistryPlugin
       );
 
       plugins.data.search.registerSearchStrategy(
-        'ruleRegistryAlertsSearchStrategy',
+        RULE_SEARCH_STRATEGY_NAME,
         ruleRegistrySearchStrategy
       );
     });
@@ -129,7 +136,11 @@ export class RuleRegistryPlugin
 
     defineRoutes(router);
 
-    return { ruleDataService: this.ruleDataService };
+    return {
+      ruleDataService: this.ruleDataService,
+      createLifecycleRuleTypeFactory,
+      dataset: Dataset,
+    };
   }
 
   public start(
@@ -171,5 +182,8 @@ export class RuleRegistryPlugin
     };
   };
 
-  public stop() {}
+  public stop() {
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
+  }
 }

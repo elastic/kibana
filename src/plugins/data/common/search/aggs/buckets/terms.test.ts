@@ -10,8 +10,7 @@ import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IndexPatternField } from '../../..';
-import { IndexPattern } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -53,9 +52,9 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
-      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       return new AggConfigs(
@@ -67,7 +66,8 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
     };
 
@@ -94,11 +94,17 @@ describe('Terms Agg', () => {
                 "enabled": Array [
                   true,
                 ],
+                "excludeIsRegex": Array [
+                  true,
+                ],
                 "field": Array [
                   "field",
                 ],
                 "id": Array [
                   "test",
+                ],
+                "includeIsRegex": Array [
+                  true,
                 ],
                 "missingBucket": Array [
                   false,
@@ -114,6 +120,9 @@ describe('Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],
@@ -193,6 +202,70 @@ describe('Terms Agg', () => {
       expect(params.exclude).toBe('exclude value');
     });
 
+    test('accepts array of strings from string field type and writes this value', () => {
+      const aggConfigs = getAggConfigs({
+        include: ['include1', 'include2'],
+        exclude: ['exclude1'],
+        includeIsRegex: false,
+        excludeIsRegex: false,
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toStrictEqual(['include1', 'include2']);
+      expect(params.exclude).toStrictEqual(['exclude1']);
+    });
+
+    test('accepts array of string with regex and returns the pattern', () => {
+      const aggConfigs = getAggConfigs({
+        include: ['include.*'],
+        exclude: ['exclude.*'],
+        includeIsRegex: true,
+        excludeIsRegex: true,
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toBe('include.*');
+      expect(params.exclude).toBe('exclude.*');
+    });
+
+    test('accepts array of empty strings and does not write a value', () => {
+      const aggConfigs = getAggConfigs({
+        include: [''],
+        exclude: [''],
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toBe(undefined);
+      expect(params.exclude).toBe(undefined);
+    });
+
     test('accepts empty array from number field type and does not write a value', () => {
       const aggConfigs = getAggConfigs({
         include: [],
@@ -255,9 +328,9 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
-      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       const aggConfigs = new AggConfigs(
@@ -283,11 +356,50 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
 
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
+    });
+
+    // 25 is the default shard size set for size:10 by Elasticsearch.
+    // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+    test('set shard_size to 25 if size is smaller or equal than 10', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        size: 5,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toEqual(25);
+    });
+
+    test('do not set shard_size if size is bigger than 10', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        size: 15,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toBeUndefined();
+    });
+
+    test('optionally supports shard_size', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        shardSize: 1000,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toEqual(1000);
     });
 
     test('should override "hasPrecisionError" for the "terms" bucket type', () => {

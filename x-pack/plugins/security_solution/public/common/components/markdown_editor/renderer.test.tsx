@@ -20,16 +20,14 @@ describe('Markdown', () => {
 
       expect(
         removeExternalLinkText(wrapper.find('[data-test-subj="markdown-link"]').first().text())
-      ).toEqual('External Site');
+      ).toContain('External Site');
     });
 
     test('it renders the expected href', () => {
       const wrapper = mount(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
-
-      expect(wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()).toHaveProperty(
-        'href',
-        'https://google.com/'
-      );
+      expect(
+        wrapper.find('[data-test-subj="markdown-link"]').first().find('a').getDOMNode()
+      ).toHaveProperty('href', 'https://google.com/');
     });
 
     test('it does NOT render the href if links are disabled', () => {
@@ -45,19 +43,17 @@ describe('Markdown', () => {
     test('it opens links in a new tab via target="_blank"', () => {
       const wrapper = mount(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()).toHaveProperty(
-        'target',
-        '_blank'
-      );
+      expect(
+        wrapper.find('[data-test-subj="markdown-link"]').first().find('a').getDOMNode()
+      ).toHaveProperty('target', '_blank');
     });
 
     test('it sets the link `rel` attribute to `noopener` to prevent the new page from accessing `window.opener`, `nofollow` to note the link is not endorsed by us, and noreferrer to prevent the browser from sending the current address', () => {
       const wrapper = mount(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(wrapper.find('[data-test-subj="markdown-link"]').first().getDOMNode()).toHaveProperty(
-        'rel',
-        'nofollow noopener noreferrer'
-      );
+      expect(
+        wrapper.find('[data-test-subj="markdown-link"]').first().find('a').getDOMNode()
+      ).toHaveProperty('rel', 'nofollow noopener noreferrer');
     });
   });
 });

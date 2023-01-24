@@ -13,17 +13,26 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 describe('DiscoverFieldSearch', () => {
   const defaultProps = {
     onChange: jest.fn(),
     value: 'test',
     types: ['any', 'string', '_source'],
+    presentFieldTypes: ['string', 'date', 'boolean', 'number'],
+    isPlainRecord: false,
   };
 
   function mountComponent(props?: Props) {
     const compProps = props || defaultProps;
-    return mountWithIntl(<DiscoverFieldSearch {...compProps} />);
+    return mountWithIntl(
+      <KibanaContextProvider
+        services={{ docLinks: { links: { discover: { fieldTypeHelp: '' } } } }}
+      >
+        <DiscoverFieldSearch {...compProps} />
+      </KibanaContextProvider>
+    );
   }
 
   function findButtonGroup(component: ReactWrapper, id: string) {
@@ -35,13 +44,14 @@ describe('DiscoverFieldSearch', () => {
     const input = findTestSubject(component, 'fieldFilterSearchInput');
     input.simulate('change', { target: { value: 'new filter' } });
     expect(defaultProps.onChange).toBeCalledTimes(1);
+    expect(defaultProps.onChange).toHaveBeenCalledWith('name', 'new filter');
   });
 
   test('change in active filters should change facet selection and call onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    const badge = btn.find('.euiNotificationBadge');
+    const badge = btn.find('.euiNotificationBadge').last();
     expect(badge.text()).toEqual('0');
     btn.simulate('click');
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
@@ -60,7 +70,7 @@ describe('DiscoverFieldSearch', () => {
     let btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     btn = findTestSubject(component, 'toggleFieldFilterButton');
-    const badge = btn.find('.euiNotificationBadge');
+    const badge = btn.find('.euiNotificationBadge').last();
     // no active filters
     expect(badge.text()).toEqual('0');
     // change value of aggregatable select
@@ -88,30 +98,17 @@ describe('DiscoverFieldSearch', () => {
     expect(badge.text()).toEqual('1');
   });
 
-  test('change in missing fields switch should not change filter count', () => {
-    const component = mountComponent();
-    const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    btn.simulate('click');
-    const badge = btn.find('.euiNotificationBadge');
-    expect(badge.text()).toEqual('0');
-    const missingSwitch = findTestSubject(component, 'missingSwitch');
-    missingSwitch.simulate('change', { target: { value: false } });
-    expect(badge.text()).toEqual('0');
-  });
-
   test('change in filters triggers onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     const aggregtableButtonGroup = findButtonGroup(component, 'aggregatable');
-    const missingSwitch = findTestSubject(component, 'missingSwitch');
     act(() => {
       // @ts-expect-error
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
-    missingSwitch.simulate('click');
-    expect(onChange).toBeCalledTimes(2);
+    expect(onChange).toBeCalledTimes(1);
   });
 
   test('change in type filters triggers onChange with appropriate value', () => {
@@ -131,9 +128,25 @@ describe('DiscoverFieldSearch', () => {
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     let popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(true);
+    expect(popover.get(0).props.isOpen).toBe(true);
     btn.simulate('click');
     popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(false);
+    expect(popover.get(0).props.isOpen).toBe(false);
+  });
+
+  test('click help button should open popover with types of field docs', () => {
+    const component = mountComponent();
+
+    const btn = findTestSubject(component, 'fieldTypesHelpButton');
+    btn.simulate('click');
+    let popover = component.find(EuiPopover);
+    expect(popover.get(1).props.isOpen).toBe(true);
+
+    const rows = component.find('.euiTableRow');
+    expect(rows.length).toBe(4);
+
+    btn.simulate('click');
+    popover = component.find(EuiPopover);
+    expect(popover.get(1).props.isOpen).toBe(false);
   });
 });

@@ -6,9 +6,14 @@
  */
 
 import React, { FC, useEffect, Fragment, useMemo } from 'react';
-import { EuiPageContentHeader, EuiPageContentHeaderSection } from '@elastic/eui';
+import {
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
+import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -17,6 +22,7 @@ import {
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -24,11 +30,11 @@ import {
   DEFAULT_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
+import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
@@ -46,7 +52,14 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
+  const timefilter = useTimefilter();
   const mlContext = useMlContext();
+  const {
+    services: { maps: mapsPlugin },
+  } = useMlKibana();
+
+  const chartInterval = useTimeBuckets();
+
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
@@ -54,12 +67,15 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         mlContext.currentSavedSearch,
         mlContext.combinedQuery
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
   );
 
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
+
   const { displayErrorToast } = useToastNotificationService();
 
-  const { from, to } = getTimeFilterRange();
+  const { from, to } = getTimeFilterRange(timefilter);
   jobCreator.setTimeRange(from, to);
 
   let firstWizardStep =
@@ -67,7 +83,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
       : WIZARD_STEPS.TIME_RANGE;
 
-  let autoSetTimeRange = false;
+  let autoSetTimeRange = mlJobService.tempJobCloningObjects.autoSetTimeRange;
+  mlJobService.tempJobCloningObjects.autoSetTimeRange = false;
 
   if (
     mlJobService.tempJobCloningObjects.job !== undefined &&
@@ -106,7 +123,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     } else {
       // if not start and end times are set and this is an advanced job,
       // auto set the time range based on the index
-      autoSetTimeRange = isAdvancedJobCreator(jobCreator);
+      autoSetTimeRange = autoSetTimeRange || isAdvancedJobCreator(jobCreator);
     }
 
     if (mlJobService.tempJobCloningObjects.calendars) {
@@ -148,7 +165,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
+  if (autoSetTimeRange) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
     jobCreator.autoSetTimeRange().catch((error) => {
@@ -174,24 +191,29 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       const rare = newJobCapsService.getAggById('rare');
       const freqRare = newJobCapsService.getAggById('freq_rare');
       jobCreator.setDefaultDetectorProperties(rare, freqRare);
+    } else if (isGeoJobCreator(jobCreator)) {
+      const geo = newJobCapsService.getAggById('lat_long');
+      jobCreator.setDefaultDetectorProperties(geo);
     }
   }
 
-  const chartInterval = getTimeBucketsFromCache();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery),
-    []
+    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
+    [mlContext.currentDataView, jobCreator.query]
   );
 
-  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
+  const mapLoader = useMemo(
+    () => new MapLoader(mlContext.currentDataView, jobCreator.query, mapsPlugin),
+    [mlContext.currentDataView, jobCreator.query, mapsPlugin]
+  );
 
   const resultsLoader = useMemo(
     () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
-    []
+    [jobCreator, chartInterval, chartLoader]
   );
 
   useEffect(() => {
@@ -215,7 +237,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
             <FormattedMessage
               id="xpack.ml.newJob.page.createJob.dataViewName"
               defaultMessage="Using data view {dataViewName}"
-              values={{ dataViewName: jobCreator.indexPatternTitle }}
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
@@ -223,6 +245,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         <Wizard
           jobCreator={jobCreator}
           chartLoader={chartLoader}
+          mapLoader={mapLoader}
           resultsLoader={resultsLoader}
           chartInterval={chartInterval}
           jobValidator={jobValidator}

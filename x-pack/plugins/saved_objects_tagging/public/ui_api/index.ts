@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OverlayStart, ThemeServiceStart } from 'src/core/public';
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../common';
 import { ITagsCache, ITagInternalClient } from '../services';
 import {
@@ -20,6 +20,7 @@ import { buildGetTableColumnDefinition } from './get_table_column_definition';
 import { buildGetSearchBarFilter } from './get_search_bar_filter';
 import { buildParseSearchQuery } from './parse_search_query';
 import { buildConvertNameToReference } from './convert_name_to_reference';
+import { buildGetTagList } from './get_tag_list';
 import { hasTagDecoration } from './has_tag_decoration';
 
 interface GetUiApiOptions {
@@ -39,10 +40,12 @@ export const getUiApi = ({
 }: GetUiApiOptions): SavedObjectsTaggingApiUi => {
   const components = getComponents({ cache, capabilities, overlays, theme, tagClient: client });
 
+  const getTagList = buildGetTagList(cache);
+
   return {
     components,
     getTableColumnDefinition: buildGetTableColumnDefinition({ components, cache }),
-    getSearchBarFilter: buildGetSearchBarFilter({ cache }),
+    getSearchBarFilter: buildGetSearchBarFilter({ getTagList }),
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
     hasTagDecoration,
@@ -50,5 +53,6 @@ export const getUiApi = ({
     getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
     updateTagsReferences,
     getTag: (tagId: string) => getTag(tagId, cache.getState()),
+    getTagList,
   };
 };

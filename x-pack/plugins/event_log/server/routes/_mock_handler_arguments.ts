@@ -6,16 +6,16 @@
  */
 
 import { identity, merge } from 'lodash';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { MethodKeysOf } from '@kbn/utility-types';
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { IEventLogClient } from '../types';
 
 export function mockHandlerArguments(
   eventLogClient: IEventLogClient,
-  req: unknown,
-  res?: Array<MethodKeysOf<KibanaResponseFactory>>
+  request: unknown,
+  response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   return [
     {
@@ -25,8 +25,8 @@ export function mockHandlerArguments(
         },
       },
     } as unknown as RequestHandlerContext,
-    req as KibanaRequest<unknown, unknown, unknown>,
-    mockResponseFactory(res),
+    request as KibanaRequest<unknown, unknown, unknown>,
+    mockResponseFactory(response),
   ];
 }
 
@@ -50,7 +50,7 @@ export function fakeEvent(overrides = {}) {
         action: 'execute',
         start: '2020-03-30T14:55:47.054Z',
         end: '2020-03-30T14:55:47.055Z',
-        duration: 1000000,
+        duration: '1000000',
       },
       kibana: {
         saved_objects: [

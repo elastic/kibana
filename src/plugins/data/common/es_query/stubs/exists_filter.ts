@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExistsFilter, FilterStateStore } from '..';
+import { ExistsFilter, FilterStateStore } from '@kbn/es-query';
 
 export const existsFilter: ExistsFilter = {
   meta: {

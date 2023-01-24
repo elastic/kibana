@@ -11,14 +11,17 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
+  const searchSessions = getService('searchSessions');
 
   describe('Search session sharing', function () {
-    this.tags('ciGroup3');
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    after(async () => {
+      await searchSessions.deleteAllSearchSessions();
     });
 
     loadTestFile(require.resolve('./lens'));

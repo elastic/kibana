@@ -21,7 +21,9 @@ import {
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
+  SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_QUERY,
+  UPDATE_LAYER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
@@ -36,7 +38,6 @@ import {
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
   SET_OPEN_TOOLTIPS,
-  SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
@@ -53,6 +54,7 @@ import {
   getLayerIndex,
   removeTrackedLayerState,
   rollbackTrackedLayerState,
+  setLayer,
   trackCurrentLayerState,
   updateLayerInList,
   updateLayerSourceDescriptorProp,
@@ -68,7 +70,6 @@ export const DEFAULT_MAP_STATE: MapState = {
   mapState: {
     zoom: undefined, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
     center: undefined, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
-    scrollZoom: true,
     extent: undefined,
     mouseCoordinates: undefined,
     timeFilters: undefined,
@@ -249,13 +250,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       const layerDescriptor = state.layerList.find(
-        (descriptor) => descriptor.id === action.layer.getId()
+        (descriptor) => descriptor.id === action.layerId
       );
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
-        const index = state.layerList.findIndex(
-          (descriptor) => descriptor.id === action.layer.getId()
-        );
+        const index = state.layerList.findIndex((descriptor) => descriptor.id === action.layerId);
         const newLayerList = state.layerList.slice();
         newLayerList[index] = newLayerDescriptor;
         return { ...state, layerList: newLayerList };
@@ -270,6 +269,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       return {
         ...state,
         layerList: [...state.layerList.filter(({ id }) => id !== action.id)],
+      };
+    case UPDATE_LAYER:
+      return {
+        ...state,
+        layerList: setLayer(state.layerList, action.layer),
       };
     case ADD_WAITING_FOR_MAP_READY_LAYER:
       return {
@@ -297,14 +301,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         ...state.layerList[index].style,
         __styleMeta: styleMeta,
       });
-    case SET_SCROLL_ZOOM:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          scrollZoom: action.scrollZoom,
-        },
-      };
     case SET_MAP_INIT_ERROR:
       return {
         ...state,
@@ -317,6 +313,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           ...layer,
           visible: !action.hiddenLayerIds.includes(layer.id),
         })),
+      };
+    case SET_EMBEDDABLE_SEARCH_CONTEXT:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          embeddableSearchContext: action.embeddableSearchContext,
+        },
       };
     default:
       return state;

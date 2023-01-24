@@ -18,6 +18,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -32,6 +33,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -56,6 +58,7 @@
       ],
       "path": "src/plugins/chart_expressions/expression_partition_vis/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -82,6 +85,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/mosaic_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -137,11 +141,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/partition_labels_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -165,6 +176,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/pie_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -188,6 +200,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/treemap_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -211,6 +224,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/waffle_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -226,6 +240,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -235,7 +250,8 @@
             "label": "accessor",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -253,10 +269,19 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<object> | undefined; }"
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -270,15 +295,17 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.Dimensions.metric",
-            "type": "CompoundType",
+            "id": "def-common.Dimensions.metrics",
+            "type": "Array",
             "tags": [],
-            "label": "metric",
+            "label": "metrics",
             "description": [],
             "signature": [
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -286,10 +313,11 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              " | undefined"
+              ")[]"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -299,6 +327,7 @@
             "label": "buckets",
             "description": [],
             "signature": [
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -306,10 +335,11 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              "[] | undefined"
+              ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -319,6 +349,7 @@
             "label": "splitRow",
             "description": [],
             "signature": [
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -326,10 +357,11 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              "[] | undefined"
+              ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -339,6 +371,7 @@
             "label": "splitColumn",
             "description": [],
             "signature": [
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -346,10 +379,11 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              "[] | undefined"
+              ")[] | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -363,6 +397,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -372,7 +407,8 @@
             "label": "show",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -391,7 +427,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -401,7 +438,8 @@
             "label": "values",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -420,7 +458,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -430,7 +469,22 @@
             "label": "percentDecimals",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.colorOverrides",
+            "type": "Object",
+            "tags": [],
+            "label": "colorOverrides",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -446,6 +500,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "visTypePie",
@@ -471,6 +526,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "visTypePie",
@@ -500,30 +556,32 @@
             "section": "def-common.MosaicVisConfig",
             "text": "MosaicVisConfig"
           },
-          " extends VisCommonConfig"
+          " extends Omit<VisCommonConfig, \"metrics\" | \"metricsToLabels\" | \"colorOverrides\">"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.MosaicVisConfig.buckets",
-            "type": "Array",
+            "id": "def-common.MosaicVisConfig.metric",
+            "type": "CompoundType",
             "tags": [],
-            "label": "buckets",
+            "label": "metric",
             "description": [],
             "signature": [
+              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
                 "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
-              },
-              "[] | undefined"
+              }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -533,7 +591,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -557,6 +616,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -575,7 +635,22 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.metricsToLabels",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsToLabels",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -594,7 +669,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -605,16 +681,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "charts",
+                "pluginId": "@kbn/coloring",
                 "scope": "common",
-                "docId": "kibChartsPluginApi",
+                "docId": "kibKbnColoringPluginApi",
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -627,7 +704,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -640,7 +718,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -653,7 +732,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -673,7 +753,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -686,7 +767,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -699,7 +781,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -712,7 +795,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -736,26 +820,21 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.PieVisConfig.buckets",
-            "type": "Array",
+            "id": "def-common.PieVisConfig.partitionByColumn",
+            "type": "CompoundType",
             "tags": [],
-            "label": "buckets",
+            "label": "partitionByColumn",
             "description": [],
             "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              "[] | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -765,7 +844,8 @@
             "label": "isDonut",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -785,7 +865,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -798,7 +879,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -811,7 +893,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -824,7 +907,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -834,7 +918,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -858,27 +943,8 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.TreemapVisConfig.buckets",
-            "type": "Array",
-            "tags": [],
-            "label": "buckets",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
-          },
           {
             "parentPluginId": "expressionPartitionVis",
             "id": "def-common.TreemapVisConfig.nestedLegend",
@@ -887,7 +953,8 @@
             "label": "nestedLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -907,10 +974,11 @@
             "section": "def-common.WaffleVisConfig",
             "text": "WaffleVisConfig"
           },
-          " extends VisCommonConfig"
+          " extends Omit<VisCommonConfig, \"buckets\">"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
@@ -920,6 +988,7 @@
             "label": "bucket",
             "description": [],
             "signature": [
+              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -930,7 +999,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionPartitionVis",
@@ -940,7 +1010,8 @@
             "label": "showValuesInLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -956,6 +1027,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -967,6 +1039,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -978,6 +1051,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -989,6 +1063,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1017,10 +1092,11 @@
             "section": "def-common.ValueFormats",
             "text": "ValueFormats"
           },
-          "; percentDecimals: number; truncate?: number | null | undefined; last_level?: boolean | undefined; }"
+          "; percentDecimals: number; colorOverrides: Record<string, string>; truncate?: number | null | undefined; last_level?: boolean | undefined; }"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1035,6 +1111,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1095,11 +1172,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1114,6 +1198,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1128,6 +1213,71 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PartitionLabelsExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "PartitionLabelsExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"partitionLabels\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | null, ",
+          "PartitionLabelsArguments",
+          ", ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.ExpressionValuePartitionLabels",
+            "text": "ExpressionValuePartitionLabels"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1142,6 +1292,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1202,11 +1353,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1221,6 +1379,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1235,6 +1394,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1249,6 +1409,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1309,11 +1470,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1328,6 +1496,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1388,11 +1557,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

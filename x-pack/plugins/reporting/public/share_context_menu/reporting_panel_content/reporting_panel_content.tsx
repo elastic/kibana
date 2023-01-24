@@ -18,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from 'src/core/public';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
@@ -311,9 +311,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Failed to create report',
+            defaultMessage: 'Unable to create report',
           }),
-          toastMessage: error.body.message,
+          toastMessage: (
+            // eslint-disable-next-line react/no-danger
+            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+          ) as unknown as string,
         });
       });
   };

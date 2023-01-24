@@ -7,10 +7,10 @@
 
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { EndpointArtifactClient } from './artifact_client';
-import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
+import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
 
 describe('artifact_client', () => {
-  describe('ArtifactClient sanity checks', () => {
+  describe('ArtifactClient checks', () => {
     let fleetArtifactClient: ReturnType<typeof createArtifactsClientMock>;
     let artifactClient: EndpointArtifactClient;
 
@@ -45,6 +45,21 @@ describe('artifact_client', () => {
           '"field":"some.parentField","type":"nested"},{"field":"some.not.nested.field","operator":"included","type":"exact_cased","value":"some value"}]},' +
           '{"type":"simple","entries":[{"field":"some.other.not.nested.field","operator":"included","type":"exact_cased","value":"some other value"}]}]}',
       });
+    });
+
+    test('can bulk create artifacts', async () => {
+      const artifact = await getInternalArtifactMock('linux', 'v1');
+      await artifactClient.bulkCreateArtifacts([artifact]);
+      expect(fleetArtifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          identifier: artifact.identifier,
+          type: 'exceptionlist',
+          content:
+            '{"entries":[{"type":"simple","entries":[{"entries":[{"field":"some.nested.field","operator":"included","type":"exact_cased","value":"some value"}],' +
+            '"field":"some.parentField","type":"nested"},{"field":"some.not.nested.field","operator":"included","type":"exact_cased","value":"some value"}]},' +
+            '{"type":"simple","entries":[{"field":"some.other.not.nested.field","operator":"included","type":"exact_cased","value":"some other value"}]}]}',
+        },
+      ]);
     });
 
     test('can delete artifact', async () => {

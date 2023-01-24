@@ -9,15 +9,15 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FilterValueLabel } from '@kbn/observability-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FilterValueLabel } from '../../../../../../observability/public';
 import { FiltersUIHook } from '../hooks/use_local_uifilters';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SelectedWildcards } from './selected_wildcards';
 import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 
 interface Props {
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   filters: FiltersUIHook['filters'];
   invertFilter: FiltersUIHook['invertFilter'];
   onChange: (name: UxLocalUIFilterName, values: string[]) => void;

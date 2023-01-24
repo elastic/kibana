@@ -8,12 +8,12 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-
-import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { securityMock } from '../../../../../../plugins/security/public/mocks';
+import type { RecursivePartial } from '@elastic/eui/src/components/common';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -32,14 +32,19 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlLocatorDefinition } from '../../../../../ml/public';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { MockUrlService } from 'src/plugins/share/common/mocks';
-import { fleetMock } from '../../../../../fleet/public/mocks';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { noCasesPermissions } from '../../../cases_test_utils';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { mockApm } from '../apm/service.mock';
+import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -60,9 +65,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  },
-  [DEFAULT_TRANSFORMS]: {
-    enabled: false,
   },
 };
 
@@ -94,21 +96,24 @@ export const createStartServicesMock = (
 ): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
+  const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const cases = mockCasesContract();
+  cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
+  const triggersActionsUi = triggersActionsUiMock.createStart();
+  const cloudExperiments = cloudExperimentsMock.createStartMock();
+  const guidedOnboarding = guidedOnboardingMock.createStart();
 
   return {
     ...core,
-    cases: {
-      getAllCases: jest.fn(),
-      getCaseView: jest.fn(),
-      getConfigureCases: jest.fn(),
-      getCreateCase: jest.fn(),
-      getRecentCases: jest.fn(),
-    },
+    apm,
+    cases,
+    unifiedSearch,
     data: {
       ...data,
       query: {
@@ -139,6 +144,13 @@ export const createStartServicesMock = (
             next: jest.fn(),
             unsubscribe: jest.fn(),
           })),
+          pipe: jest.fn().mockImplementation(() => ({
+            subscribe: jest.fn().mockImplementation(() => ({
+              error: jest.fn(),
+              next: jest.fn(),
+              unsubscribe: jest.fn(),
+            })),
+          })),
         })),
       },
     },
@@ -151,6 +163,19 @@ export const createStartServicesMock = (
     theme: {
       theme$: themeServiceMock.createTheme$(),
     },
+    timelines: {
+      getLastUpdated: jest.fn(),
+      getFieldBrowser: jest.fn(),
+      getHoverActions: jest.fn().mockReturnValue({
+        getAddToTimelineButton: jest.fn(),
+      }),
+    },
+    osquery: {
+      OsqueryResults: jest.fn().mockReturnValue(null),
+    },
+    triggersActionsUi,
+    cloudExperiments,
+    guidedOnboarding,
   } as unknown as StartServices;
 };
 

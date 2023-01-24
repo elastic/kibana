@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 import type { AgentPolicy, PackagePolicy, Settings } from '../../types';
 
 export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
-  Exclude<AgentPolicy, 'package_policies'> & {
-    package_configs: string[] | PackagePolicy[];
+  Omit<AgentPolicy, 'package_policies'> & {
+    package_configs: string[];
+    package_policies?: string[];
   },
-  AgentPolicy
+  Omit<AgentPolicy, 'package_policies'> & {
+    package_policies?: string[];
+  }
 > = (agentPolicyDoc) => {
   agentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
   // @ts-expect-error

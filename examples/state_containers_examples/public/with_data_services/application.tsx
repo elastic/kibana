@@ -8,10 +8,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '../../../../src/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { AppPluginDependencies } from './types';
 import { App } from './app';
-import { createKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/public/';
 import { ExampleLink } from '../common/example_page';
 
 export const renderApp = (

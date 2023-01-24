@@ -6,13 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { createPortalNode, OutPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 
 /**
  * A singleton portal for rendering content in the global header
  */
-const timelineEventsCountPortalNodeSingleton = createPortalNode();
-const eqlEventsCountPortalNodeSingleton = createPortalNode();
+const timelineEventsCountPortalNodeSingleton = createHtmlPortalNode();
+const eqlEventsCountPortalNodeSingleton = createHtmlPortalNode();
 
 export const useTimelineEventsCountPortal = () => {
   const [timelineEventsCountPortalNode] = useState(timelineEventsCountPortalNodeSingleton);

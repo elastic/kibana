@@ -6,27 +6,26 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
+import type { ExpandedDetailType } from '../../../../../../common/types';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { getScopedActions } from '../../../../../helpers';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import {
-  TimelineId,
-  TimelineTabs,
-  TimelineExpandedDetailType,
-} from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
@@ -36,6 +35,8 @@ interface Props {
 
 const HostNameComponent: React.FC<Props> = ({
   fieldName,
+  fieldType,
+  isAggregatable,
   Component,
   contextId,
   eventId,
@@ -59,20 +60,22 @@ const HostNameComponent: React.FC<Props> = ({
       }
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
-        const updatedExpandedDetail: TimelineExpandedDetailType = {
+        const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'hostDetail',
           params: {
             hostName,
           },
         };
-
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            timelineId: timelineID,
-            tabType,
-          })
-        );
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        }
 
         if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
@@ -103,6 +106,8 @@ const HostNameComponent: React.FC<Props> = ({
     isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
         isDraggable={isDraggable}
         tooltipContent={fieldName}

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ExpressionAstExpression } from '../ast';
 
 export interface ExpressionRenderDefinition<Config = unknown> {
@@ -15,6 +16,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
    * function that is used to create the `type: render` object.
    */
   name: string;
+  namespace?: string;
 
   /**
    * A user friendly name of the renderer as will be displayed to user in UI.
@@ -82,6 +84,7 @@ export interface IInterpreterRenderHandlers {
   update(params: IInterpreterRenderUpdateParams): void;
   event(event: IInterpreterRenderEvent): void;
   hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
+  getCompatibleCellValueActions?(data: object[]): Promise<unknown[]>;
   getRenderMode(): RenderMode;
 
   /**
@@ -90,10 +93,16 @@ export interface IInterpreterRenderHandlers {
   isInteractive(): boolean;
 
   isSyncColorsEnabled(): boolean;
+
+  isSyncCursorEnabled(): boolean;
+
+  isSyncTooltipsEnabled(): boolean;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.
    * Downstream consumers of the uiState handler will need to cast for now.
    */
   uiState?: unknown;
+
+  getExecutionContext(): KibanaExecutionContext | undefined;
 }

@@ -5,7 +5,9 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "charts",
     "expressions",
+    "fieldFormats",
     "uiActions",
     "urlForwarding",
     "navigation",
@@ -13,14 +15,18 @@
     "inspector",
     "savedObjects",
     "screenshotMode",
-    "presentationUtil"
+    "presentationUtil",
+    "dataViews",
+    "dataViewEditor",
+    "unifiedSearch",
+    "usageCollection"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "home"],
-  "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
+  "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
+  "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "charts"],
+  "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions", "common/convert_to_lens"],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Contains the shared architecture among all the legacy visualizations, e.g. the visualization type registry or the visualization embeddable."
 }

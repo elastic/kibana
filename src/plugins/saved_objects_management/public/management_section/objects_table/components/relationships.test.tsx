@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { Relationships, RelationshipsProps } from './relationships';
 
@@ -288,12 +288,13 @@ describe('Relationships', () => {
       },
       allowedTypes,
       close: jest.fn(),
+      showPlainSpinner: true,
     };
 
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingElastic').length).toBe(1);
+    expect(component.find('EuiLoadingSpinner').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

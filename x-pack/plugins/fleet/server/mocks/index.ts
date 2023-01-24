@@ -12,17 +12,19 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import type { PackagePolicyServiceInterface } from '../services/package_policy';
+} from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
-import type { FleetConfigType } from '../../common';
-import { createFleetAuthzMock } from '../../common';
+import type { FleetConfigType } from '../../common/types';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
+import { createFleetAuthzMock } from '../../common/mocks';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
@@ -60,6 +62,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -70,11 +73,12 @@ export const createAppContextStartContractMock = (
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
     telemetryEventsSender: createMockTelemetryEventsSender(),
+    bulkActionsResolver: {} as any,
   };
 };
 
 export const createFleetRequestHandlerContextMock = (): jest.Mocked<
-  FleetRequestHandlerContext['fleet']
+  Awaited<FleetRequestHandlerContext['fleet']>
 > => {
   return {
     authz: createFleetAuthzMock(),
@@ -82,10 +86,13 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: agentServiceMock.createClient(),
       asInternalUser: agentServiceMock.createClient(),
     },
-    epm: {
-      internalSoClient: savedObjectsClientMock.create(),
+    packagePolicyService: {
+      asCurrentUser: createPackagePolicyServiceMock(),
+      asInternalUser: createPackagePolicyServiceMock(),
     },
+    internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
+    limitedToPackages: undefined,
   };
 };
 
@@ -101,7 +108,7 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServiceInterface> => {
+export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClient> => {
   return {
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
@@ -112,12 +119,15 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
+    bulkUpdate: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
+    runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
+    findAllForAgentPolicy: jest.fn(),
   };
 };
 

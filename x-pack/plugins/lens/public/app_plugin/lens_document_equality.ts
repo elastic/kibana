@@ -6,7 +6,7 @@
  */
 
 import { isEqual, intersection, union } from 'lodash';
-import { FilterManager } from 'src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import { DatasourceMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';
@@ -54,9 +54,9 @@ export const isLensEqual = (
       .map((type) =>
         datasourceMap[type].isEqual(
           doc1.state.datasourceStates[type],
-          doc1.references,
+          [...doc1.references, ...(doc1.state.internalReferences || [])],
           doc2.state.datasourceStates[type],
-          doc2.references
+          [...doc2.references, ...(doc2.state.internalReferences || [])]
         )
       )
       .every((res) => res);

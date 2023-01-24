@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiText } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { BrowserFields } from '../../../../../../common/search_strategy';
-import { Ecs } from '../../../../../../common/ecs';
-import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
-import { ColumnRenderer } from './column_renderer';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { TableId } from '../../../../../../common/types';
+import type { ColumnRenderer } from './column_renderer';
 import { REASON_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
-import * as i18n from './translations';
 
 export const reasonColumnRenderer: ColumnRenderer = {
   isInstance: isEqual(REASON_FIELD_NAME),
 
   renderColumn: ({
-    browserFields,
     columnName,
     ecsData,
     eventId,
@@ -32,11 +29,10 @@ export const reasonColumnRenderer: ColumnRenderer = {
     isDraggable = true,
     linkValues,
     rowRenderers = [],
-    timelineId,
+    scopeId,
     truncate,
     values,
   }: {
-    browserFields?: BrowserFields;
     columnName: string;
     ecsData?: Ecs;
     eventId: string;
@@ -45,18 +41,17 @@ export const reasonColumnRenderer: ColumnRenderer = {
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
   }) => {
-    if (isDetails && values && ecsData && rowRenderers && browserFields) {
+    if (isDetails && values && ecsData && rowRenderers) {
       return values.map((value, i) => (
         <ReasonCell
-          browserFields={browserFields}
           ecsData={ecsData}
-          key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          key={`reason-column-renderer-value-${scopeId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
           rowRenderers={rowRenderers}
-          timelineId={timelineId}
+          scopeId={scopeId}
           value={value}
         />
       ));
@@ -68,7 +63,7 @@ export const reasonColumnRenderer: ColumnRenderer = {
         isDetails,
         isDraggable,
         linkValues,
-        timelineId,
+        scopeId,
         truncate,
         values,
       });
@@ -78,36 +73,37 @@ export const reasonColumnRenderer: ColumnRenderer = {
 
 const ReasonCell: React.FC<{
   value: string | number | undefined | null;
-  timelineId: string;
+  scopeId: string;
   ecsData: Ecs;
   rowRenderers: RowRenderer[];
-  browserFields: BrowserFields;
-}> = ({ ecsData, rowRenderers, browserFields, timelineId, value }) => {
-  const rowRenderer = useMemo(() => getRowRenderer(ecsData, rowRenderers), [ecsData, rowRenderers]);
+}> = ({ ecsData, rowRenderers, scopeId, value }) => {
+  const rowRenderer = useMemo(
+    () => getRowRenderer({ data: ecsData, rowRenderers }),
+    [ecsData, rowRenderers]
+  );
 
   const rowRender = useMemo(() => {
     return (
       rowRenderer &&
       rowRenderer.renderRow({
-        browserFields,
         data: ecsData,
         isDraggable: false,
-        timelineId,
+        scopeId,
       })
     );
-  }, [rowRenderer, browserFields, ecsData, timelineId]);
+  }, [rowRenderer, ecsData, scopeId]);
+
+  // We don't currently show enriched renders for rule preview table
+  const isPlainText = useMemo(() => scopeId === TableId.rulePreview, [scopeId]);
 
   return (
     <>
-      {rowRenderer && rowRender ? (
-        <>
-          {value}
-          <h4>{i18n.REASON_RENDERER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>
-          <EuiSpacer size="xs" />
-          <EuiPanel color="subdued" className="eui-xScroll" data-test-subj="reason-cell-renderer">
+      {rowRenderer && rowRender && !isPlainText ? (
+        <EuiPanel color="subdued" className="eui-xScroll" data-test-subj="reason-cell-renderer">
+          <EuiText size="xs">
             <div className="eui-displayInlineBlock">{rowRender}</div>
-          </EuiPanel>
-        </>
+          </EuiText>
+        </EuiPanel>
       ) : (
         value
       )}

@@ -18,22 +18,26 @@ import {
   IUiSettingsClient,
   Capabilities,
   ScopedHistory,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { LicensingPluginStart } from '../../licensing/public';
-import { checkLicense } from '../common/check_license';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 
 import './index.scss';
 import('./font_awesome');
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
-import { SpacesApi } from '../../spaces/public';
-import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
+import { checkLicense } from '../common/check_license';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -52,8 +56,9 @@ export interface GraphDependencies {
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
   addBasePath: (url: string) => string;
   getBasePath: () => string;
@@ -66,6 +71,7 @@ export interface GraphDependencies {
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
+  inspect: InspectorPublicPluginStart;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
@@ -110,7 +116,19 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  const app = <KibanaThemeProvider theme$={theme$}>{graphRouter(deps)}</KibanaThemeProvider>;
+  const app = (
+    <KibanaThemeProvider theme$={theme$}>
+      <TableListViewKibanaProvider
+        {...{
+          core,
+          toMountPoint,
+          FormattedRelative,
+        }}
+      >
+        {graphRouter(deps)}
+      </TableListViewKibanaProvider>
+    </KibanaThemeProvider>
+  );
   ReactDOM.render(app, element);
   element.setAttribute('class', 'gphAppWrapper');
 

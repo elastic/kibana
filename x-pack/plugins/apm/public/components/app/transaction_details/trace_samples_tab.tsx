@@ -10,14 +10,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TransactionDistribution } from './distribution';
-import type { TabContentProps } from './types';
+import { TabContentProps } from './transaction_details_tabs';
 
 function TraceSamplesTab({
   selectSampleFromChartSelection,
   clearChartSelection,
   sampleRangeFrom,
   sampleRangeTo,
-  traceSamples,
+  traceSamplesFetchResult,
 }: TabContentProps) {
   return (
     <TransactionDistribution
@@ -28,7 +28,7 @@ function TraceSamplesTab({
           ? [sampleRangeFrom, sampleRangeTo]
           : undefined
       }
-      traceSamples={traceSamples}
+      traceSamplesFetchResult={traceSamplesFetchResult}
     />
   );
 }

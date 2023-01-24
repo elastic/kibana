@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   'xpack.securitySolution.timeline.callOut.unauthorized.message.description',

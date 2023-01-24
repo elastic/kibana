@@ -8,7 +8,9 @@
     "licensing",
     "data",
     "navigation",
-    "savedObjects"
+    "savedObjects",
+    "unifiedSearch",
+    "inspector"
   ],
   "optionalPlugins": [
     "home",
@@ -20,9 +22,9 @@
     "graph"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "kibanaUtils",
-    "kibanaReact",
-    "home"
+    "kibanaReact"
   ],
   "owner": {
     "name": "Data Discovery",

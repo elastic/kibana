@@ -61,7 +61,7 @@ jest.mock('./utils', () => ({
       })
   ),
 }));
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },
@@ -140,10 +140,10 @@ describe('NewCalendar', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
     const importButton = wrapper.find('[data-test-subj="mlCalendarNewEventButton"]');
-    const button = importButton.find('EuiButton');
+    const button = importButton.find('EuiButton button');
     button.simulate('click');
 
-    expect(button.prop('isDisabled')).toBe(true);
+    expect(button.prop('disabled')).toBe(true);
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', () => {

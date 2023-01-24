@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { getOverlays, getTheme } from '../util/dependency_cache';
 
 let expiredLicenseBannerId: string;

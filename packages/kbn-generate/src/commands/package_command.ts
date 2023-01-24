@@ -11,45 +11,65 @@ import Path from 'path';
 
 import normalizePath from 'normalize-path';
 import globby from 'globby';
+import { ESLint } from 'eslint';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { discoverBazelPackages, generatePackagesBuildBazelFile } from '@kbn/bazel-packages';
-import { createFailError, createFlagError, isFailError, sortPackageJson } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
+import { sortPackageJson } from '@kbn/sort-package-json';
 
+import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
+import { ask } from '../lib/ask';
+
+const validPkgId = (id: unknown): id is string =>
+  typeof id === 'string' && id.startsWith('@kbn/') && !id.includes(' ');
 
 export const PackageCommand: GenerateCommand = {
   name: 'package',
   description: 'Generate a basic package',
-  usage: 'node scripts/generate package [name]',
+  usage: 'node scripts/generate package [pkgId]',
   flags: {
     boolean: ['web', 'force', 'dev'],
-    string: ['dir'],
+    string: ['dir', 'owner'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
       --web          Build webpack-compatible version of sources for this package. If your package is intended to be
                       used in the browser and Node.js then you need to opt-into these sources being created.
-      --dir          Directory where this package will live, defaults to [./packages]
-      --force        If the packageDir already exists, delete it before generation
+      --dir          Specify where this package will be written.
+                      defaults to [./packages/{kebab-case-version-of-name}]
+      --force        If the --dir already exists, delete it before generation
+      --owner        Github username of the owner for this package, if this is not specified then you will be asked for
+                      this value interactively.
     `,
   },
   async run({ log, flags, render }) {
-    const [name] = flags._;
-    if (!name) {
-      throw createFlagError(`missing package name`);
-    }
-    if (!name.startsWith('@kbn/')) {
-      throw createFlagError(`package name must start with @kbn/`);
+    const pkgId =
+      flags._[0] ||
+      (await ask({
+        question: `What should the package id be? (Must start with @kbn/ and have no spaces)`,
+        async validate(input) {
+          if (validPkgId(input)) {
+            return input;
+          }
+
+          return {
+            err: `"${input}" must start with @kbn/ and have no spaces`,
+          };
+        },
+      }));
+
+    if (!validPkgId(pkgId)) {
+      throw createFlagError(`package id must start with @kbn/ and have no spaces`);
     }
 
-    const typePkgName = `@types/${name.slice(1).replace('/', '__')}`;
     const web = !!flags.web;
     const dev = !!flags.dev;
 
-    const containingDir = flags.dir ? Path.resolve(`${flags.dir}`) : ROOT_PKG_DIR;
-    const packageDir = Path.resolve(containingDir, name.slice(1).replace('/', '-'));
-    const repoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
+    const packageDir = flags.dir
+      ? Path.resolve(`${flags.dir}`)
+      : Path.resolve(ROOT_PKG_DIR, pkgId.slice(1).replace('/', '-'));
+    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
 
     try {
       await Fsp.readdir(packageDir);
@@ -67,13 +87,29 @@ export const PackageCommand: GenerateCommand = {
       }
     }
 
+    const owner =
+      flags.owner ||
+      (await ask({
+        question: 'Which Elastic team should own this package? (Must start with "@elastic/")',
+        async validate(input) {
+          try {
+            return await validateElasticTeam(input);
+          } catch (error) {
+            log.error(`failed to validate team: ${error.message}`);
+            return input;
+          }
+        },
+      }));
+    if (typeof owner !== 'string' || !owner.startsWith('@')) {
+      throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
+    }
+
     const templateFiles = await globby('**/*', {
       cwd: PKG_TEMPLATE_DIR,
       absolute: false,
       dot: true,
       onlyFiles: true,
     });
-
     if (!templateFiles.length) {
       throw new Error('unable to find package template files');
     }
@@ -104,16 +140,26 @@ export const PackageCommand: GenerateCommand = {
 
       await render.toFile(src, dest, {
         pkg: {
-          name,
+          id: pkgId,
           web,
           dev,
-          directoryName: Path.basename(repoRelativeDir),
-          repoRelativeDir,
+          owner,
+          directoryName: Path.basename(normalizedRepoRelativeDir),
+          normalizedRepoRelativeDir,
         },
       });
     }
 
     log.info('Wrote plugin files to', packageDir);
+
+    log.info('Linting files');
+    const eslint = new ESLint({
+      cache: false,
+      cwd: REPO_ROOT,
+      fix: true,
+      extensions: ['.js', '.mjs', '.ts', '.tsx'],
+    });
+    await ESLint.outputFixes(await eslint.lintFiles([packageDir]));
 
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));
@@ -122,20 +168,12 @@ export const PackageCommand: GenerateCommand = {
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
-    addDeps[name] = `link:bazel-bin/${repoRelativeDir}`;
-    addDeps[typePkgName] = `link:bazel-bin/${repoRelativeDir}/npm_module_types`;
-    delete removeDeps[name];
-    delete removeDeps[typePkgName];
+    addDeps[pkgId] = `link:${normalizedRepoRelativeDir}`;
+    delete removeDeps[pkgId];
 
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');
 
-    await Fsp.writeFile(
-      Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
-      generatePackagesBuildBazelFile(await discoverBazelPackages())
-    );
-    log.info('Updated packages/BUILD.bazel');
-
-    log.success(`Generated ${name}! Please bootstrap to make sure it works.`);
+    log.success(`Generated ${pkgId}! Please bootstrap to make sure it works.`);
   },
 };

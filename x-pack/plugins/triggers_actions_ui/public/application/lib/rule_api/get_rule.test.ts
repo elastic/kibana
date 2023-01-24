@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRule } from './get_rule';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
 describe('loadRule', () => {
   test('should call get API with base parameters', async () => {
-    const ruleId = `${uuid.v4()}/`;
+    const ruleId = `${uuidv4()}/`;
     const ruleIdEncoded = encodeURIComponent(ruleId);
     const resolvedValue = {
       id: '1/',

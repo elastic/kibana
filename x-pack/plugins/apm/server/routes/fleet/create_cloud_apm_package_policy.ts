@@ -9,8 +9,9 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
-} from 'kibana/server';
-import { PackagePolicy } from '../../../../fleet/common';
+  KibanaRequest,
+} from '@kbn/core/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
@@ -20,8 +21,9 @@ import {
   APMPluginStartDependencies,
 } from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
-import { Setup } from '../../lib/helpers/setup_request';
-import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
+import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
+import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
+import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function createCloudApmPackgePolicy({
   cloudPluginSetup,
@@ -29,16 +31,16 @@ export async function createCloudApmPackgePolicy({
   savedObjectsClient,
   esClient,
   logger,
-  setup,
-  kibanaVersion,
+  internalESClient,
+  request,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
-  setup: Setup;
-  kibanaVersion: string;
+  internalESClient: APMInternalESClient;
+  request: KibanaRequest;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -52,19 +54,20 @@ export async function createCloudApmPackgePolicy({
     apmServerSchema,
     cloudPluginSetup,
     fleetPluginStart,
-    kibanaVersion,
+    request,
   });
-  const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
-    setup,
-    packagePolicy: apmPackagePolicyDefinition,
-    fleetPluginStart,
-  });
+  const mergedAPMPackagePolicy =
+    await decoratePackagePolicyWithAgentConfigAndSourceMap({
+      internalESClient,
+      packagePolicy: apmPackagePolicyDefinition,
+      fleetPluginStart,
+    });
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
     savedObjectsClient,
     esClient,
     mergedAPMPackagePolicy,
-    { force: true, bumpRevision: true }
+    { id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID, force: true, bumpRevision: true }
   );
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create end`);
   return apmPackagePolicy;

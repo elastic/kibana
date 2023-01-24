@@ -6,14 +6,21 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ArtifactEntryCardProps } from './artifact_entry_card';
+import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
-import { AnyArtifact } from './types';
+import type { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
-import { TrustedApp } from '../../../../common/endpoint/types';
+import type { TrustedApp } from '../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+
+jest.mock('../../../common/components/user_privileges');
+const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -41,6 +48,12 @@ describe.each([
       );
       return renderResult;
     };
+
+    mockUserPrivileges.mockReturnValue({ endpointPrivileges: getEndpointAuthzInitialStateMock() });
+  });
+
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
   });
 
   it('should display title and who has created and updated it last', async () => {
@@ -203,21 +216,42 @@ describe.each([
       ).not.toBeNull();
     });
 
-    it('should show popup menu with list of associated policies when clicked', async () => {
-      render({ policies });
-      await act(async () => {
-        await fireEvent.click(
-          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+    describe('when clicked', () => {
+      it('should show popup menu with list of associated policies, with `View details` button when has Policy privilege', async () => {
+        render({ policies });
+        await act(async () => {
+          await fireEvent.click(
+            renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+          );
+        });
+
+        expect(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+        ).not.toBeNull();
+
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
+          'Policy oneView details'
         );
       });
 
-      expect(
-        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
-      ).not.toBeNull();
+      it('should show popup menu with list of associated policies, without `View details` button when does NOT have Policy privilege', async () => {
+        mockUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
+        });
 
-      expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
-        'Policy oneView details'
-      );
+        render({ policies });
+        await act(async () => {
+          await fireEvent.click(
+            renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
+          );
+        });
+
+        expect(
+          renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
+        ).not.toBeNull();
+
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+      });
     });
 
     it('should display policy ID if no policy menu item found in `policies` prop', async () => {

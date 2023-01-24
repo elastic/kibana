@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValuesType } from 'utility-types';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { ValuesType } from 'utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const synthtraceClient = getService('synthtraceEsClient');
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
+  const es = getService('es');
 
   const start = '2021-01-01T12:00:00.000Z';
   const end = '2021-08-01T12:00:00.000Z';
@@ -50,108 +51,104 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   type ServiceListItem = ValuesType<Awaited<ReturnType<typeof getSortedAndFilteredServices>>>;
 
-  registry.when(
-    'Sorted and filtered services',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
+  registry.when('Sorted and filtered services', { config: 'trial', archives: [] }, () => {
+    before(async () => {
+      const serviceA = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'a', environment: 'production', agentName: 'java' })
+        .instance('a');
+
+      const serviceB = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'b', environment: 'development', agentName: 'go' })
+        .instance('b');
+
+      const serviceC = apm
+        .service({ name: SERVICE_NAME_PREFIX + 'c', environment: 'development', agentName: 'go' })
+        .instance('c');
+
+      const spikeStart = new Date('2021-01-07T12:00:00.000Z').getTime();
+      const spikeEnd = new Date('2021-01-07T14:00:00.000Z').getTime();
+
+      const eventsWithinTimerange = timerange(new Date(start).getTime(), new Date(end).getTime())
+        .interval('15m')
+        .rate(1)
+        .generator((timestamp) => {
+          const isInSpike = spikeStart <= timestamp && spikeEnd >= timestamp;
+          return [
+            serviceA
+              .transaction({ transactionName: 'GET /api' })
+              .duration(isInSpike ? 1000 : 1100)
+              .timestamp(timestamp),
+            serviceB
+              .transaction({ transactionName: 'GET /api' })
+              .duration(isInSpike ? 1000 : 4000)
+              .timestamp(timestamp),
+          ];
+        });
+
+      const eventsOutsideOfTimerange = timerange(
+        new Date('2021-01-01T00:00:00.000Z').getTime(),
+        new Date(start).getTime() - 1
+      )
+        .interval('15m')
+        .rate(1)
+        .generator((timestamp) => {
+          return serviceC
+            .transaction({ transactionName: 'GET /api', transactionType: 'custom' })
+            .duration(1000)
+            .timestamp(timestamp);
+        });
+
+      await synthtraceClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
+
+      await createAndRunApmMlJobs({ es, ml, environments: ['production', 'development'] });
+    });
+
+    after(() => {
+      return Promise.all([synthtraceClient.clean(), ml.cleanMlIndices()]);
+    });
+
+    describe('with no kuery or environment are set', () => {
+      let items: ServiceListItem[];
+
       before(async () => {
-        const serviceA = apm.service(SERVICE_NAME_PREFIX + 'a', 'production', 'java').instance('a');
-
-        const serviceB = apm.service(SERVICE_NAME_PREFIX + 'b', 'development', 'go').instance('b');
-
-        const serviceC = apm.service(SERVICE_NAME_PREFIX + 'c', 'development', 'go').instance('c');
-
-        const spikeStart = new Date('2021-01-07T12:00:00.000Z').getTime();
-        const spikeEnd = new Date('2021-01-07T14:00:00.000Z').getTime();
-
-        const eventsWithinTimerange = timerange(new Date(start).getTime(), new Date(end).getTime())
-          .interval('15m')
-          .rate(1)
-          .spans((timestamp) => {
-            const isInSpike = spikeStart <= timestamp && spikeEnd >= timestamp;
-            return [
-              ...serviceA
-                .transaction('GET /api')
-                .duration(isInSpike ? 1000 : 1100)
-                .timestamp(timestamp)
-                .serialize(),
-              ...serviceB
-                .transaction('GET /api')
-                .duration(isInSpike ? 1000 : 4000)
-                .timestamp(timestamp)
-                .serialize(),
-            ];
-          });
-
-        const eventsOutsideOfTimerange = timerange(
-          new Date('2021-01-01T00:00:00.000Z').getTime(),
-          new Date(start).getTime() - 1
-        )
-          .interval('15m')
-          .rate(1)
-          .spans((timestamp) => {
-            return serviceC
-              .transaction('GET /api', 'custom')
-              .duration(1000)
-              .timestamp(timestamp)
-              .serialize();
-          });
-
-        await synthtraceClient.index(eventsWithinTimerange.concat(eventsOutsideOfTimerange));
-
-        await Promise.all([
-          createAndRunApmMlJob({ environment: 'production', ml }),
-          createAndRunApmMlJob({ environment: 'development', ml }),
-        ]);
+        items = await getSortedAndFilteredServices();
       });
 
-      after(() => {
-        return Promise.all([synthtraceClient.clean(), ml.cleanMlIndices()]);
+      it('returns services based on the terms enum API and ML data', () => {
+        const serviceNames = items.map((item) => item.serviceName);
+
+        expect(serviceNames.sort()).to.eql(['a', 'b', 'c']);
       });
+    });
 
-      describe('with no kuery or environment are set', () => {
-        let items: ServiceListItem[];
+    describe('with kuery set', () => {
+      let items: ServiceListItem[];
 
-        before(async () => {
-          items = await getSortedAndFilteredServices();
-        });
-
-        it('returns services based on the terms enum API and ML data', () => {
-          const serviceNames = items.map((item) => item.serviceName);
-
-          expect(serviceNames.sort()).to.eql(['a', 'b', 'c']);
+      before(async () => {
+        items = await getSortedAndFilteredServices({
+          kuery: 'service.name:*',
         });
       });
 
-      describe('with kuery set', () => {
-        let items: ServiceListItem[];
+      it('does not return any services', () => {
+        expect(items.length).to.be(0);
+      });
+    });
 
-        before(async () => {
-          items = await getSortedAndFilteredServices({
-            kuery: 'service.name:*',
-          });
-        });
+    describe('with environment set to production', () => {
+      let items: ServiceListItem[];
 
-        it('does not return any services', () => {
-          expect(items.length).to.be(0);
+      before(async () => {
+        items = await getSortedAndFilteredServices({
+          environment: 'production',
         });
       });
 
-      describe('with environment set to production', () => {
-        let items: ServiceListItem[];
+      it('returns services for production only', () => {
+        const serviceNames = items.map((item) => item.serviceName);
 
-        before(async () => {
-          items = await getSortedAndFilteredServices({
-            environment: 'production',
-          });
-        });
-
-        it('returns services for production only', () => {
-          const serviceNames = items.map((item) => item.serviceName);
-
-          expect(serviceNames.sort()).to.eql(['a']);
-        });
+        expect(serviceNames.sort()).to.eql(['a']);
       });
-    }
-  );
+    });
+  });
 }

@@ -6,8 +6,9 @@
  */
 
 import { flatten, orderBy, last } from 'lodash';
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asPercent } from '../../../../common/utils/formatters';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -15,18 +16,19 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
+import { APMConfig } from '../../..';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionBreakdown({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   transactionName,
   transactionType,
@@ -35,15 +37,14 @@ export async function getTransactionBreakdown({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionName?: string;
   transactionType: string;
   start: number;
   end: number;
 }) {
-  const { apmEventClient, config } = setup;
-
   const subAggs = {
     sum_all_self_times: {
       sum: {
@@ -98,6 +99,7 @@ export async function getTransactionBreakdown({
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

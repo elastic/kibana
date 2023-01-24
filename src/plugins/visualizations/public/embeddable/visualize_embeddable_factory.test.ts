@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { VisualizeEmbeddableFactory, VisualizeInput } from '.';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 

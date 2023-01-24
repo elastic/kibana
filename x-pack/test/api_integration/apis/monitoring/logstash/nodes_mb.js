@@ -6,36 +6,40 @@
  */
 
 import expect from '@kbn/expect';
-import nodesFixture from './fixtures/nodes';
+import nodesFixture from './fixtures/nodes.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('node listing mb', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash_pipelines_mb';
-    const timeRange = {
-      min: '2018-01-22T09:33:13.000Z',
-      max: '2018-01-22T09:41:04.000Z',
-    };
+  describe('node listing - metricbeat and package', () => {
+    ['mb', 'package'].forEach((source) => {
+      describe(`node listing ${source}`, () => {
+        const archive = `x-pack/test/functional/es_archives/monitoring/logstash_pipelines_${source}`;
+        const timeRange = {
+          min: '2018-01-22T09:33:13.000Z',
+          max: '2018-01-22T09:41:04.000Z',
+        };
 
-    before('load archive', () => {
-      return setup(archive);
-    });
+        before('load archive', () => {
+          return setup(archive);
+        });
 
-    after('unload archive', () => {
-      return tearDown();
-    });
+        after('unload archive', () => {
+          return tearDown(archive);
+        });
 
-    it('should summarize the Logstash nodes with stats', async () => {
-      const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/nodes')
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
-        .expect(200);
+        it('should summarize the Logstash nodes with stats', async () => {
+          const { body } = await supertest
+            .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/nodes')
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange })
+            .expect(200);
 
-      expect(body).to.eql(nodesFixture);
+          expect(body).to.eql(nodesFixture);
+        });
+      });
     });
   });
 }

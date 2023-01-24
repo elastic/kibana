@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`OverviewPageFooter render 1`] = `
-<footer
+<_EuiPageSection
   className="kbnOverviewPageFooter"
+  component="footer"
 >
   <EuiFlexGroup
     justifyContent="spaceBetween"
@@ -27,5 +28,5 @@ exports[`OverviewPageFooter render 1`] = `
       </div>
     </EuiFlexItem>
   </EuiFlexGroup>
-</footer>
+</_EuiPageSection>
 `;

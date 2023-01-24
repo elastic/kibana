@@ -6,22 +6,18 @@
  */
 
 import expect from '@kbn/expect';
+import { TimelineResult, TimelineType } from '@kbn/security-solution-plugin/common/types/timeline';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-import {
-  TimelineResult,
-  TimelineType,
-} from '../../../../../plugins/security_solution/common/types/timeline';
 
 import { createBasicTimeline } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('Timeline - Saved Objects', () => {
-    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
-    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
+    beforeEach(() => kibanaServer.savedObjects.cleanStandardList());
+    afterEach(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('Persist a timeline', () => {
       it('Create a timeline just with a title', async () => {

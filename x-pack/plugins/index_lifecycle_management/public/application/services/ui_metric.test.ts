@@ -10,7 +10,7 @@ import {
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
   defaultIndexPriority,
-} from '../constants/';
+} from '../constants';
 
 import { getUiMetricsForPhases } from './ui_metric';
 

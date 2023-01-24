@@ -10,17 +10,17 @@ import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
-import { isPopulatedObject } from '../../../common';
 import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 import { BetaBadge } from '../beta_badge';
-import { isDefined } from '../../../common/types/guards';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
@@ -54,6 +54,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       (update: MlAnomalyDetectionJobsHealthRuleParams[T]) => {
         setRuleParams(param, update);
       },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -119,6 +120,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <JobSelectorControl
         jobsAndGroupIds={includeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('includeJobs'), [])}
         errors={Array.isArray(errors.includeJobs) ? errors.includeJobs : []}
         multiSelect
@@ -143,6 +145,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           } else {
             callback(null);
           }
+          // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])}
         errors={Array.isArray(errors.excludeJobs) ? errors.excludeJobs : []}
         multiSelect
@@ -159,6 +162,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
       <TestsSelectionControl
         config={ruleParams.testsConfig}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('testsConfig'), [])}
         errors={Array.isArray(errors.testsConfig) ? errors.testsConfig : []}
       />

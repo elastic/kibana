@@ -11,8 +11,8 @@ import {
   serializeSavedObjectId,
   deleteHistogramSavedObjects,
 } from './saved_objects';
-import { savedObjectsRepositoryMock, metricsServiceMock } from '../../../../../core/server/mocks';
-import type { SavedObjectsFindResponse } from '../../../../../core/server/';
+import { savedObjectsRepositoryMock, metricsServiceMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('serializeSavedObjectId', () => {
   it('returns serialized id', () => {
@@ -24,7 +24,7 @@ describe('serializeSavedObjectId', () => {
 describe('storeHistogram', () => {
   const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
-  jest.useFakeTimers('modern');
+  jest.useFakeTimers();
   const mockNow = jest.getRealSystemTime();
   jest.setSystemTime(mockNow);
 

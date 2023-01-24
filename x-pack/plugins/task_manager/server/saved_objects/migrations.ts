@@ -12,7 +12,7 @@ import {
   SavedObjectMigrationMap,
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 
@@ -42,6 +42,7 @@ export function getMigrations(): SavedObjectMigrationMap {
       pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule, resetUnrecognizedStatus),
       '8.2.0'
     ),
+    '8.5.0': executeMigrationWithErrorHandling(pipeMigrations(addEnabledField), '8.5.0'),
   };
 }
 
@@ -192,4 +193,21 @@ function resetAttemptsAndStatusForTheTasksWithoutSchedule(
   }
 
   return doc;
+}
+
+function addEnabledField(doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) {
+  if (
+    doc.attributes.status === TaskStatus.Failed ||
+    doc.attributes.status === TaskStatus.Unrecognized
+  ) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      enabled: true,
+    },
+  };
 }

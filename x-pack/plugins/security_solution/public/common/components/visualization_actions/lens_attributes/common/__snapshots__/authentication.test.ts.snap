@@ -1,0 +1,270 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`authenticationLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-3fd0c5d5-f762-4a27-8c56-14eee0223e13",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-bef502be-e5ff-442f-9e3e-229f86ca2afa",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "6f4dbdc7-35b6-4e20-ac53-1272167e3919",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "3fd0c5d5-f762-4a27-8c56-14eee0223e13": Object {
+            "columnOrder": Array [
+              "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
+              "5417777d-d9d9-4268-9cdc-eb29b873bd65",
+            ],
+            "columns": Object {
+              "5417777d-d9d9-4268-9cdc-eb29b873bd65": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "event.outcome : \\"success\\"",
+                },
+                "isBucketed": false,
+                "label": "Success",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "b41a2958-650b-470a-84c4-c6fd8f0c6d37": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+          "bef502be-e5ff-442f-9e3e-229f86ca2afa": Object {
+            "columnOrder": Array [
+              "cded27f7-8ef8-458c-8d9b-70db48ae340d",
+              "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
+            ],
+            "columns": Object {
+              "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "event.outcome : \\"failure\\"",
+                },
+                "isBucketed": false,
+                "label": "Failure",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "cded27f7-8ef8-458c-8d9b-70db48ae340d": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "index": "6f4dbdc7-35b6-4e20-ac53-1272167e3919",
+          "key": "query",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"must\\":[{\\"term\\":{\\"event.category\\":\\"authentication\\"}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "must": Array [
+              Object {
+                "term": Object {
+                  "event.category": "authentication",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "mockHost",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "mockHost",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "host.name",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "5417777d-d9d9-4268-9cdc-eb29b873bd65",
+          ],
+          "layerId": "3fd0c5d5-f762-4a27-8c56-14eee0223e13",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "xAccessor": "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
+          "yConfig": Array [
+            Object {
+              "color": "#54b399",
+              "forAccessor": "5417777d-d9d9-4268-9cdc-eb29b873bd65",
+            },
+          ],
+        },
+        Object {
+          "accessors": Array [
+            "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
+          ],
+          "layerId": "bef502be-e5ff-442f-9e3e-229f86ca2afa",
+          "layerType": "data",
+          "seriesType": "bar_stacked",
+          "xAccessor": "cded27f7-8ef8-458c-8d9b-70db48ae340d",
+          "yConfig": Array [
+            Object {
+              "color": "#da8b45",
+              "forAccessor": "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
+            },
+          ],
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "right",
+      },
+      "preferredSeriesType": "bar_stacked",
+      "title": "Empty XY chart",
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "Authentication",
+  "visualizationType": "lnsXY",
+}
+`;

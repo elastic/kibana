@@ -20,29 +20,34 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
 
   return {
     async assertIndexPatternManagementButtonExists() {
-      await testSubjects.existOrFail('dataVisualizerIndexPatternManagementButton');
+      await testSubjects.existOrFail('dataVisualizerDataViewanagementButton');
     },
+
     async assertIndexPatternManagementMenuExists() {
-      await testSubjects.existOrFail('dataVisualizerIndexPatternManagementMenu');
+      await testSubjects.existOrFail('dataVisualizerDataViewManagementMenu');
     },
+
     async assertIndexPatternFieldEditorExists() {
-      await testSubjects.existOrFail('indexPatternFieldEditorForm');
+      await testSubjects.existOrFail('indexPatternFieldEditorForm', { timeout: 5000 });
     },
 
     async assertIndexPatternFieldEditorNotExist() {
-      await testSubjects.missingOrFail('indexPatternFieldEditorForm');
+      await testSubjects.missingOrFail('indexPatternFieldEditorForm', { timeout: 5000 });
     },
 
     async clickIndexPatternManagementButton() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('dataVisualizerIndexPatternManagementButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
+          'dataVisualizerDataViewManagementButton'
+        );
         await this.assertIndexPatternManagementMenuExists();
       });
     },
+
     async clickAddIndexPatternFieldAction() {
       await retry.tryForTime(5000, async () => {
         await this.assertIndexPatternManagementMenuExists();
-        await testSubjects.clickWhenNotDisabled('dataVisualizerAddIndexPatternFieldAction');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerAddDataViewFieldAction');
         await this.assertIndexPatternFieldEditorExists();
       });
     },
@@ -50,7 +55,7 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
     async clickManageIndexPatternAction() {
       await retry.tryForTime(5000, async () => {
         await this.assertIndexPatternManagementMenuExists();
-        await testSubjects.clickWhenNotDisabled('dataVisualizerManageIndexPatternAction');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerManageDataViewAction');
         await testSubjects.existOrFail('editIndexPattern');
       });
     },
@@ -74,7 +79,7 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
     },
 
     async addRuntimeField(name: string, script: string, fieldType: string) {
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(15 * 1000, async () => {
         await this.clickIndexPatternManagementButton();
         await this.clickAddIndexPatternFieldAction();
 

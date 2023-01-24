@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import {
-  ActionTypes,
+import type {
   CommentUserAction,
   ConnectorUserAction,
   CreateCaseUserAction,
@@ -17,7 +16,8 @@ import {
   TitleUserAction,
   UserActionTypes,
 } from '../api';
-import { SnakeToCamelCase } from '../types';
+import { ActionTypes } from '../api';
+import type { SnakeToCamelCase } from '../types';
 
 type SnakeCaseOrCamelCaseUserAction<
   T extends 'snakeCase' | 'camelCase',

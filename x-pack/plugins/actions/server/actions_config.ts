@@ -15,14 +15,20 @@ import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } f
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, SSLSettings } from './types';
-import { getSSLSettingsFromConfig } from './builtin_action_types/lib/get_node_ssl_options';
-
+import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
+import {
+  ValidateEmailAddressesOptions,
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
+} from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
   URL = 'url',
   hostname = 'hostname',
 }
+
+export const DEFAULT_MAX_ATTEMPTS: number = 3;
 
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
@@ -36,6 +42,17 @@ export interface ActionsConfigurationUtilities {
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
   getMicrosoftGraphApiUrl: () => undefined | string;
+  getMaxAttempts: ({
+    actionTypeMaxAttempts,
+    actionTypeId,
+  }: {
+    actionTypeMaxAttempts?: number;
+    actionTypeId: string;
+  }) => number;
+  validateEmailAddresses(
+    addresses: string[],
+    options?: ValidateEmailAddressesOptions
+  ): string | undefined;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -68,7 +85,7 @@ function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): bo
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => url.parse(uri)),
+    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
     map((parsedUrl) => parsedUrl.hostname),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)
@@ -139,12 +156,26 @@ function getCustomHostSettings(
   return customHostSettings.find((settings) => settings.url === canonicalUrl);
 }
 
+function validateEmails(
+  config: ActionsConfig,
+  addresses: string[],
+  options: ValidateEmailAddressesOptions
+): string | undefined {
+  if (config.email == null) {
+    return;
+  }
+
+  const validated = validateEmailAddresses(config.email.domain_allowlist, addresses, options);
+  return invalidEmailsAsMessage(validated);
+}
+
 export function getActionsConfigurationUtilities(
   config: ActionsConfig
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
+  const validatedEmailCurried = curry(validateEmails)(config);
   return {
     isHostnameAllowed,
     isUriAllowed,
@@ -170,5 +201,19 @@ export function getActionsConfigurationUtilities(
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
+    validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
+      validatedEmailCurried(addresses, options),
+    getMaxAttempts: ({ actionTypeMaxAttempts, actionTypeId }) => {
+      const connectorTypeConfig = config.run?.connectorTypeOverrides?.find(
+        (connectorType) => actionTypeId === connectorType.id
+      );
+
+      return (
+        connectorTypeConfig?.maxAttempts ||
+        config.run?.maxAttempts ||
+        actionTypeMaxAttempts ||
+        DEFAULT_MAX_ATTEMPTS
+      );
+    },
   };
 }

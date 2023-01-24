@@ -9,19 +9,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableContext,
-  ViewMode,
-} from '../../../../../../../../src/plugins/embeddable/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CONTEXT_MENU_TRIGGER, EmbeddableContext, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,
   embeddableEnhancedDrilldownGrouping,
-} from '../../../../../../embeddable_enhanced/public';
+} from '@kbn/embeddable-enhanced-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { StartDependencies } from '../../../../plugin';
-import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { ensureNestedTriggers, createDrilldownTemplatesFromSiblings } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
@@ -92,6 +88,10 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
       closed$.next(true);
       handle.close();
     };
+    const closeFlyout = () => {
+      close();
+    };
+
     const triggers = [
       ...ensureNestedTriggers(embeddable.supportedTriggers()),
       CONTEXT_MENU_TRIGGER,
@@ -106,7 +106,8 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
           placeContext={{ embeddable }}
           templates={templates}
           onClose={close}
-        />
+        />,
+        { theme$: core.theme.theme$ }
       ),
       {
         ownFocus: true,
@@ -115,11 +116,11 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     );
 
     // Close flyout on application change.
-    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
-      close();
-    });
+    core.application.currentAppId$
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(closeFlyout);
 
-    // Close flyout on dashboard switch to "view" mode.
+    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
     embeddable
       .getInput$()
       .pipe(
@@ -129,8 +130,6 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
         filter((mode) => mode !== ViewMode.EDIT),
         take(1)
       )
-      .subscribe(() => {
-        close();
-      });
+      .subscribe({ next: closeFlyout, complete: closeFlyout });
   }
 }

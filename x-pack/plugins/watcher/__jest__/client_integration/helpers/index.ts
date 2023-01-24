@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { setup as watchListSetup } from './watch_list.helpers';
-import { setup as watchStatusSetup } from './watch_status.helpers';
-import { setup as watchCreateJsonSetup } from './watch_create_json.helpers';
-import { setup as watchCreateThresholdSetup } from './watch_create_threshold.helpers';
-import { setup as watchEditSetup } from './watch_edit.helpers';
+import { setup as watchListPageSetup } from './watch_list_page.helpers';
+import { setup as watchStatusPageSetup } from './watch_status_page.helpers';
+import { setup as watchCreateJsonPageSetup } from './watch_create_json_page.helpers';
+import { setup as watchCreateThresholdPageSetup } from './watch_create_threshold_page.helpers';
+import { setup as watchEditPageSetup } from './watch_edit_page.helpers';
 
 export type { TestBed } from '@kbn/test-jest-helpers';
 export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
-export { wrapBodyResponse, unwrapBodyResponse } from './body_response';
 export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
-  watchList: { setup: watchListSetup },
-  watchStatus: { setup: watchStatusSetup },
-  watchCreateJson: { setup: watchCreateJsonSetup },
-  watchCreateThreshold: { setup: watchCreateThresholdSetup },
-  watchEdit: { setup: watchEditSetup },
+  watchListPage: { setup: watchListPageSetup },
+  watchStatusPage: { setup: watchStatusPageSetup },
+  watchCreateJsonPage: { setup: watchCreateJsonPageSetup },
+  watchCreateThresholdPage: { setup: watchCreateThresholdPageSetup },
+  watchEditPage: { setup: watchEditPageSetup },
 };

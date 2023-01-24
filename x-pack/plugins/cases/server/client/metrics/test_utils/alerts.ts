@@ -6,13 +6,17 @@
  */
 
 import { createAlertServiceMock } from '../../../services/mocks';
-import { AggregationBuilder } from '../types';
+import type { AggregationBuilder } from '../types';
 import { AlertHosts, AlertUsers } from '../alerts/aggregations';
 
 export function mockAlertsService() {
   const alertsService = createAlertServiceMock();
   alertsService.executeAggregations.mockImplementation(
-    async ({ aggregationBuilders }: { aggregationBuilders: AggregationBuilder[] }) => {
+    async ({
+      aggregationBuilders,
+    }: {
+      aggregationBuilders: Array<AggregationBuilder<unknown>>;
+    }) => {
       let result = {};
       for (const builder of aggregationBuilders) {
         switch (builder.constructor) {

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
-import {
-  ActivityLog,
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
+import type {
   HostInfo,
   Immutable,
   HostMetadata,
@@ -16,12 +15,11 @@ import {
   AppLocation,
   PolicyData,
   HostStatus,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import { GetPackagesResponse } from '../../../../../fleet/common';
-import { AsyncResourceState } from '../../state';
+import type { ServerApiError } from '../../../common/types';
+import type { AsyncResourceState } from '../../state';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 
 export interface EndpointState {
@@ -38,22 +36,6 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    activityLog: {
-      paging: {
-        disabled?: boolean;
-        page: number;
-        pageSize: number;
-        startDate: string;
-        endDate: string;
-        isInvalidDateRange: boolean;
-        autoRefreshOptions: {
-          enabled: boolean;
-          duration: number;
-        };
-        recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
-      };
-      logData: AsyncResourceState<ActivityLog>;
-    };
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
@@ -78,7 +60,7 @@ export interface EndpointState {
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
   /** Endpoint package info */
-  endpointPackageInfo: AsyncResourceState<GetPackagesResponse['items'][0]>;
+  endpointPackageInfo: AsyncResourceState<GetInfoResponse['item']>;
   /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
@@ -106,7 +88,7 @@ export interface EndpointState {
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
   /** Host isolation request state for a single endpoint */
-  isolationRequestState: AsyncResourceState<HostIsolationResponse>;
+  isolationRequestState: AsyncResourceState<ResponseActionApiResponse>;
   /**
    * Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view
    * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async

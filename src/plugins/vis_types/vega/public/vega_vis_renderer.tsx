@@ -8,15 +8,31 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { VisualizationContainer } from '../../../visualizations/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { VegaVisualizationDependencies } from './plugin';
+import { getUsageCollectionStart } from './services';
 import { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
+
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
 
 export const getVegaVisRenderer: (
   deps: VegaVisualizationDependencies
@@ -27,13 +43,32 @@ export const getVegaVisRenderer: (
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+
+    const renderComplete = () => {
+      const usageCollection = getUsageCollectionStart();
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'vega';
+
+      if (usageCollection && containerType) {
+        const counterEvents = [
+          `render_${visualizationType}`,
+          visData.useMap ? `render_${visualizationType}_map` : undefined,
+          `render_${visualizationType}_${visData.isVegaLite ? 'lite' : 'normal'}`,
+        ].filter(Boolean) as string[];
+
+        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
+      }
+
+      handlers.done();
+    };
+
     render(
       <KibanaThemeProvider theme$={deps.core.theme.theme$}>
         <VisualizationContainer handlers={handlers}>
           <LazyVegaVisComponent
             deps={deps}
             fireEvent={handlers.event}
-            renderComplete={handlers.done}
+            renderComplete={renderComplete}
             renderMode={handlers.getRenderMode()}
             visData={visData}
           />

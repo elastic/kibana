@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export interface AttributesMap {
   [key: string]: string | null;
@@ -36,48 +35,55 @@ export interface ElementsPositionAndAttribute {
 
 export const getElementPositionAndAttributes = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   layout: Layout
 ): Promise<ElementsPositionAndAttribute[] | null> => {
-  const span = apm.startSpan('get_element_position_data', 'read');
+  const { kbnLogger } = eventLogger;
+
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'get element position data',
+    Actions.GET_ELEMENT_POSITION_DATA,
+    'read'
+  );
+
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
+  const screenshotAttributes = { title: 'data-title', description: 'data-description' };
+
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
-    elementsPositionAndAttributes = await browser.evaluate(
+    elementsPositionAndAttributes = await browser.evaluate<
+      [typeof screenshotSelector, typeof screenshotAttributes],
+      ElementsPositionAndAttribute[] | null
+    >(
       {
         fn: (selector, attributes) => {
           const elements = Array.from(document.querySelectorAll<Element>(selector));
           const results: ElementsPositionAndAttribute[] = [];
-
           for (const element of elements) {
             const boundingClientRect = element.getBoundingClientRect() as DOMRect;
             results.push({
               position: {
                 boundingClientRect: {
-                  // modern browsers support x/y, but older ones don't
-                  top: boundingClientRect.y || boundingClientRect.top,
-                  left: boundingClientRect.x || boundingClientRect.left,
+                  top: boundingClientRect.y,
+                  left: boundingClientRect.x,
                   width: boundingClientRect.width,
                   height: boundingClientRect.height,
                 },
-                scroll: {
-                  x: window.scrollX,
-                  y: window.scrollY,
-                },
+                scroll: { x: window.scrollX, y: window.scrollY },
               },
-              attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
-                const attribute = attributes[key];
+              attributes: Object.keys(attributes).reduce<AttributesMap>((result, key) => {
+                const attribute = attributes[key as keyof typeof attributes];
                 result[key] = element.getAttribute(attribute);
                 return result;
-              }, {} as AttributesMap),
+              }, {}),
             });
           }
           return results;
         },
-        args: [screenshotSelector, { title: 'data-title', description: 'data-description' }],
+        args: [screenshotSelector, screenshotAttributes],
       },
       { context: CONTEXT_ELEMENTATTRIBUTES },
-      logger
+      kbnLogger
     );
 
     if (!elementsPositionAndAttributes?.length) {
@@ -86,10 +92,13 @@ export const getElementPositionAndAttributes = async (
       );
     }
   } catch (err) {
+    kbnLogger.error(err);
+    eventLogger.error(err, Actions.GET_ELEMENT_POSITION_DATA);
     elementsPositionAndAttributes = null;
+    // no throw
   }
 
-  span?.end();
+  spanEnd({ element_positions: elementsPositionAndAttributes?.length });
 
   return elementsPositionAndAttributes;
 };

@@ -8,21 +8,19 @@
 import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GeoJsonProperties } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { FeatureProperties } from './feature_properties';
 import { RawValue } from '../../../../../common/constants';
 import { Footer } from './footer';
 import { Header } from './header';
-import { GEOMETRY_FILTER_ACTION, TooltipFeature } from '../../../../../common/descriptor_types';
+import { TooltipFeature } from '../../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const PROPERTIES_VIEW = 'PROPERTIES_VIEW';
 const FILTER_ACTIONS_VIEW = 'FILTER_ACTIONS_VIEW';
-
-type VIEWS = typeof PROPERTIES_VIEW | typeof FILTER_ACTIONS_VIEW | typeof GEOMETRY_FILTER_ACTION;
 
 interface Props {
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
@@ -47,7 +45,7 @@ interface State {
   currentFeature: TooltipFeature | null;
   filterView: ReactNode | null;
   prevFeatures: TooltipFeature[];
-  view: VIEWS;
+  view: string;
 }
 
 export class FeaturesTooltip extends Component<Props, State> {
@@ -108,7 +106,11 @@ export class FeaturesTooltip extends Component<Props, State> {
         <EuiLink
           className="mapFeatureTooltip_actionLinks"
           onClick={() => {
-            this.setState({ view: action.id });
+            if (action.onClick) {
+              action.onClick();
+            } else if (action.form) {
+              this.setState({ view: action.id });
+            }
           }}
           key={action.id}
         >
@@ -143,7 +145,7 @@ export class FeaturesTooltip extends Component<Props, State> {
       return id === this.state.view;
     });
 
-    if (action) {
+    if (action && action.form) {
       return (
         <Fragment>
           {this._renderBackButton(action.label)}

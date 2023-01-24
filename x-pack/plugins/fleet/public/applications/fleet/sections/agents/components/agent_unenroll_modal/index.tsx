@@ -85,6 +85,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="agentUnenrollModal"
       title={
         isSingleAgent ? (
           <FormattedMessage

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
-import {
-  getIconPalette,
-  getMakiSymbolAnchor,
-  // @ts-expect-error
-} from '../symbol_utils';
+import { IVectorStyle } from '../vector_style';
+import { getIconPalette, getMakiSymbolAnchor } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
-import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
+import { OTHER_CATEGORY_LABEL, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 
@@ -48,10 +44,11 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (this._options.useCustomIconMap && this._options.customIconStops) {
       const stops = [];
       for (let i = 1; i < this._options.customIconStops.length; i++) {
-        const { stop, icon } = this._options.customIconStops[i];
+        const { stop, icon, iconSource } = this._options.customIconStops[i];
         stops.push({
           stop,
           style: icon,
+          iconSource,
         });
       }
 
@@ -115,21 +112,26 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
     const breaks = [];
+    const layerStyle = this._layer.getCurrentStyle() as IVectorStyle;
     stops.forEach(({ stop, style }) => {
       if (stop) {
+        const svg = layerStyle.getIconSvg(style);
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
           symbolId: style,
+          svg,
         });
       }
     });
 
     if (fallbackSymbolId) {
+      const svg = layerStyle.getIconSvg(fallbackSymbolId);
       breaks.push({
         color: 'grey',
-        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
+        label: <EuiTextColor color="success">{OTHER_CATEGORY_LABEL}</EuiTextColor>,
         symbolId: fallbackSymbolId,
+        svg,
       });
     }
 

@@ -7,10 +7,13 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiCallOut,
+  EuiText,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -18,23 +21,27 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { Attribution } from '../../../../common/descriptor_types';
-import { MAX_ZOOM } from '../../../../common/constants';
+import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
-import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
 import { ILayer } from '../../../classes/layers/layer';
+import { isVectorLayer, IVectorLayer } from '../../../classes/layers/vector_layer';
 import { AttributionFormRow } from './attribution_form_row';
+import { isLayerGroup } from '../../../classes/layers/layer_group';
 
 export interface Props {
   layer: ILayer;
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
   updateLabel: (layerId: string, label: string) => void;
+  updateLocale: (layerId: string, locale: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
   updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
   updateIncludeInFitToBounds: (layerId: string, includeInFitToBounds: boolean) => void;
+  updateDisableTooltips: (layerId: string, disableTooltips: boolean) => void;
   supportsFitToBounds: boolean;
 }
 
@@ -46,6 +53,11 @@ export function LayerSettings(props: Props) {
   const onLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     const label = event.target.value;
     props.updateLabel(layerId, label);
+  };
+
+  const onLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    if (value) props.updateLocale(layerId, value);
   };
 
   const onZoomChange = (value: [string, string]) => {
@@ -61,6 +73,10 @@ export function LayerSettings(props: Props) {
     props.updateLabelsOnTop(layerId, event.target.checked);
   };
 
+  const onShowTooltipsChange = (event: EuiSwitchEvent) => {
+    props.updateDisableTooltips(layerId, !event.target.checked);
+  };
+
   const includeInFitToBoundsChange = (event: EuiSwitchEvent) => {
     props.updateIncludeInFitToBounds(layerId, event.target.checked);
   };
@@ -74,7 +90,7 @@ export function LayerSettings(props: Props) {
   };
 
   const renderIncludeInFitToBounds = () => {
-    if (!props.supportsFitToBounds) {
+    if (!props.supportsFitToBounds || isLayerGroup(props.layer)) {
       return null;
     }
     return (
@@ -100,7 +116,7 @@ export function LayerSettings(props: Props) {
   };
 
   const renderZoomSliders = () => {
-    return (
+    return isLayerGroup(props.layer) ? null : (
       <ValidatedDualRange
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
           defaultMessage: 'Visibility',
@@ -155,8 +171,117 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderDisableTooltips = () => {
+    if (!isVectorLayer(props.layer)) {
+      return null;
+    } else {
+      const layer = props.layer as unknown as IVectorLayer;
+      return (
+        <EuiFormRow display="columnCompressedSwitch">
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
+              defaultMessage: `Show tooltips`,
+            })}
+            disabled={!layer.canShowTooltip()}
+            checked={!layer.areTooltipsDisabled()}
+            onChange={onShowTooltipsChange}
+            compressed
+          />
+        </EuiFormRow>
+      );
+    }
+  };
+
+  const renderShowLocaleSelector = () => {
+    if (!props.layer.supportsLabelLocales()) {
+      return null;
+    }
+
+    const options = [
+      {
+        text: i18n.translate(
+          'xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselectDropDown',
+          {
+            defaultMessage: 'Autoselect based on Kibana locale',
+          }
+        ),
+        value: AUTOSELECT_EMS_LOCALE,
+      },
+      { value: 'ar', text: 'العربية' },
+      { value: 'de', text: 'Deutsch' },
+      { value: 'en', text: 'English' },
+      { value: 'es', text: 'Español' },
+      { value: 'fr-fr', text: 'Français' },
+      { value: 'hi-in', text: 'हिन्दी' },
+      { value: 'it', text: 'Italiano' },
+      { value: 'ja-jp', text: '日本語' },
+      { value: 'ko', text: '한국어' },
+      { value: 'pt-pt', text: 'Português' },
+      { value: 'ru-ru', text: 'русский' },
+      { value: 'zh-cn', text: '简体中文' },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageNoneDropDown', {
+          defaultMessage: 'None',
+        }),
+        value: NO_EMS_LOCALE,
+      },
+    ];
+
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageLabel', {
+          defaultMessage: 'Label language',
+        })}
+      >
+        <EuiSelect
+          options={options}
+          value={props.layer.getLocale() ?? NO_EMS_LOCALE}
+          onChange={onLocaleChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  };
+
+  const renderLayerGroupInstructions = () => {
+    return isLayerGroup(props.layer) ? (
+      <>
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
+            defaultMessage: 'Drag layers in and out of the group',
+          })}
+          iconType="layers"
+        >
+          <EuiText>
+            <ul>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToFront', {
+                  defaultMessage: 'To add your first layer, drag it onto the group name.',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupAddToPosition', {
+                  defaultMessage:
+                    'To add another layer, drag it anywhere above the last layer in the group.',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupRemove', {
+                  defaultMessage: 'To remove a layer, drag it above or below the group.',
+                })}
+              </li>
+            </ul>
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    ) : null;
+  };
+
   return (
     <Fragment>
+      {renderLayerGroupInstructions()}
       <EuiPanel>
         <EuiTitle size="xs">
           <h5>
@@ -170,10 +295,16 @@ export function LayerSettings(props: Props) {
         <EuiSpacer size="m" />
         {renderLabel()}
         {renderZoomSliders()}
-        <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
+        {isLayerGroup(props.layer) ? null : (
+          <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
+        )}
         {renderShowLabelsOnTop()}
-        <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        {renderShowLocaleSelector()}
+        {isLayerGroup(props.layer) ? null : (
+          <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
+        )}
         {renderIncludeInFitToBounds()}
+        {renderDisableTooltips()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

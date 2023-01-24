@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '../../../cloud/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
   const cloud: CloudSetup = {
     isCloudEnabled,
     baseUrl: 'https://base.url',
-    cloudId: 'cloud-id',
+    cloudId: isCloudEnabled ? 'cloud-id' : undefined,
     cname: 'found.io',
-    deploymentUrl: 'https://deployment.url',
+    deploymentUrl: isCloudEnabled ? 'https://deployment.url' : undefined,
     organizationUrl: 'https://organization.url',
     profileUrl: 'https://profile.url',
     snapshotsUrl: 'https://snapshots.url',
+    registerCloudService: () => {},
   };
 
   return cloud;

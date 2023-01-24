@@ -10,8 +10,8 @@ import Fs from 'fs';
 import Path from 'path';
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
 
 import {

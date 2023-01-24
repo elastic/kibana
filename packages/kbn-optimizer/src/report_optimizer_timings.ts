@@ -7,7 +7,8 @@
  */
 
 import { concatMap } from 'rxjs/operators';
-import { CiStatsReporter, ToolingLog } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';

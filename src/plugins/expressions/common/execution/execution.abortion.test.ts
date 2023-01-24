@@ -7,12 +7,13 @@
  */
 
 import { waitFor } from '@testing-library/react';
+import { lastValueFrom } from 'rxjs';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '../expression_functions';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 beforeEach(() => {
   jest.clearAllTimers();
@@ -75,13 +76,13 @@ describe('Execution abortion tests', () => {
 
     execution.start();
 
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     execution.cancel();
 
     expect(result).toBe(null);
 
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('nested expressions are aborted when parent aborted', async () => {
@@ -135,7 +136,7 @@ describe('Execution abortion tests', () => {
     await waitFor(() => expect(started).toHaveBeenCalledTimes(1));
 
     execution.cancel();
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
     expect(result).toMatchObject({
       type: 'error',
       error: {
@@ -150,6 +151,6 @@ describe('Execution abortion tests', () => {
     expect(aborted).toHaveBeenCalledTimes(1);
     expect(completed).toHaveBeenCalledTimes(0);
 
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 });

@@ -30,15 +30,15 @@ export default ({ getService }: FtrProviderContext) => {
     analyticsIds?: string[],
     allSpaces?: boolean
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/jobs_exist`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
       .set(COMMON_REQUEST_HEADERS)
-      .send(allSpaces ? { analyticsIds, allSpaces } : { analyticsIds })
-      .expect(expectedStatusCode);
+      .send(allSpaces ? { analyticsIds, allSpaces } : { analyticsIds });
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

@@ -46,6 +46,7 @@ export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [stopAnalytics]
   );
 
@@ -61,6 +62,7 @@ export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
       onClick: clickHandler,
       'data-test-subj': 'mlAnalyticsJobStopButton',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [clickHandler]
   );
 

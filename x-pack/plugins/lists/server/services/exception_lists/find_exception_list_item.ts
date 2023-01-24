@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   FilterOrUndefined,
   FoundExceptionListItemSchema,
@@ -15,6 +15,7 @@ import type {
   PerPageOrUndefined,
   PitOrUndefined,
   SearchAfterOrUndefined,
+  SearchOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -29,6 +30,7 @@ interface FindExceptionListItemOptions {
   page: PageOrUndefined;
   perPage: PerPageOrUndefined;
   pit: PitOrUndefined;
+  search: SearchOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
   searchAfter: SearchAfterOrUndefined;
@@ -42,6 +44,7 @@ export const findExceptionListItem = async ({
   page,
   perPage,
   pit,
+  search,
   searchAfter,
   sortField,
   sortOrder,
@@ -54,6 +57,7 @@ export const findExceptionListItem = async ({
     perPage,
     pit,
     savedObjectsClient,
+    search,
     searchAfter,
     sortField,
     sortOrder,

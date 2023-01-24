@@ -6,15 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { hasUserDataViewMock } from './overview.test.mocks';
+import React from 'react';
 import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { Overview } from './overview';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FeatureCatalogueCategory } from 'src/plugins/home/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { AnalyticsNoDataPageKibanaProvider } from '@kbn/shared-ux-page-analytics-no-data';
+import { hasESData, hasUserDataView } from './overview.test.mocks';
+import { Overview } from './overview';
+
+jest.mock('@kbn/shared-ux-page-kibana-template', () => {
+  const MockedComponent: string = 'MockedKibanaPageTemplate';
+  const mockedModule = {
+    ...jest.requireActual('@kbn/shared-ux-page-kibana-template'),
+    KibanaPageTemplate: () => {
+      return <MockedComponent />;
+    },
+  };
+  return mockedModule;
+});
+
+jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
+  const MockedComponent: string = 'MockedAnalyticsNoDataPage';
+  return {
+    ...jest.requireActual('@kbn/shared-ux-page-analytics-no-data'),
+    AnalyticsNoDataPageKibanaProvider: () => {
+      return <MockedComponent />;
+    },
+  };
+});
 
 const mockNewsFetchResult = {
   error: null,
@@ -103,7 +127,7 @@ const mockFeatures = [
     icon: 'dashboardApp',
     path: 'dashboard_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
   {
     id: 'discover',
@@ -112,7 +136,7 @@ const mockFeatures = [
     icon: 'discoverApp',
     path: 'discover_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
   {
     id: 'canvas',
@@ -121,7 +145,7 @@ const mockFeatures = [
     icon: 'canvasApp',
     path: 'canvas_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
 ];
 
@@ -136,13 +160,13 @@ const updateComponent = async (component: ReactWrapper) => {
 
 describe('Overview', () => {
   beforeEach(() => {
-    hasUserDataViewMock.mockClear();
-    hasUserDataViewMock.mockResolvedValue(true);
+    hasESData.mockResolvedValue(true);
+    hasUserDataView.mockResolvedValue(true);
   });
 
   afterAll(() => jest.clearAllMocks());
 
-  test('render', async () => {
+  test('renders correctly', async () => {
     const component = mountWithIntl(
       <Overview
         newsFetchResult={mockNewsFetchResult}
@@ -154,9 +178,10 @@ describe('Overview', () => {
     await updateComponent(component);
 
     expect(component).toMatchSnapshot();
+    expect(component.find(KibanaPageTemplate).length).toBe(1);
   });
 
-  test('without solutions', async () => {
+  test('renders correctly without solutions', async () => {
     const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
     );
@@ -166,7 +191,7 @@ describe('Overview', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('without features', async () => {
+  test('renders correctly without features', async () => {
     const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
     );
@@ -176,8 +201,9 @@ describe('Overview', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('when there is no user data view', async () => {
-    hasUserDataViewMock.mockResolvedValue(false);
+  test('renders correctly when there is no user data view', async () => {
+    hasESData.mockResolvedValue(true);
+    hasUserDataView.mockResolvedValue(false);
 
     const component = mountWithIntl(
       <Overview
@@ -190,10 +216,14 @@ describe('Overview', () => {
     await updateComponent(component);
 
     expect(component).toMatchSnapshot();
+    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(1);
+    expect(component.find(KibanaPageTemplate).length).toBe(0);
+    expect(component.find(EuiLoadingSpinner).length).toBe(0);
   });
 
-  test('during loading', async () => {
-    hasUserDataViewMock.mockImplementation(() => new Promise(() => {}));
+  test('show loading spinner during loading', async () => {
+    hasESData.mockImplementation(() => new Promise(() => {}));
+    hasUserDataView.mockImplementation(() => new Promise(() => {}));
 
     const component = mountWithIntl(
       <Overview
@@ -205,6 +235,9 @@ describe('Overview', () => {
 
     await updateComponent(component);
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
+    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(0);
+    expect(component.find(KibanaPageTemplate).length).toBe(0);
+    expect(component.find(EuiLoadingSpinner).length).toBe(1);
   });
 });

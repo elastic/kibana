@@ -12,8 +12,8 @@ import { ThemeProvider } from 'styled-components';
 
 import '../../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
-import { OpenTimelineResult, OpenTimelineProps } from '../types';
-import { TimelinesTableProps } from '../timelines_table';
+import type { OpenTimelineResult, OpenTimelineProps } from '../types';
+import type { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
@@ -29,6 +29,7 @@ describe('OpenTimelineModal', () => {
       euiBreakpoints: {
         s: '500px',
       },
+      euiSizeM: '16px',
     },
   });
   const title = 'All Timelines / Open Timelines';

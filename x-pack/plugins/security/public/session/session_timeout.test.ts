@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { BroadcastChannel } from 'broadcast-channel';
-
-import type { ToastInputFields } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
+import type { ToastInputFields } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import {
+  clearBroadcastChannelInstances,
+  getBroadcastChannelInstances,
+  stubBroadcastChannel,
+} from '@kbn/test-jest-helpers';
+stubBroadcastChannel();
 
 import {
   SESSION_CHECK_MS,
@@ -19,12 +23,9 @@ import {
 } from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
 import { createSessionExpiredMock } from './session_expired.mock';
-import type { SessionState } from './session_timeout';
 import { SessionTimeout, startTimer } from './session_timeout';
 
-jest.mock('broadcast-channel');
-
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 jest.spyOn(window, 'addEventListener');
 jest.spyOn(window, 'removeEventListener');
@@ -56,6 +57,7 @@ describe('SessionTimeout', () => {
   afterEach(async () => {
     jest.clearAllMocks();
     jest.clearAllTimers();
+    clearBroadcastChannelInstances();
   });
 
   test(`does not initialize when starting an anonymous path`, async () => {
@@ -242,14 +244,17 @@ describe('SessionTimeout', () => {
 
     jest.advanceTimersByTime(30 * 1000);
 
-    const [broadcastChannelMock] = jest.requireMock('broadcast-channel').BroadcastChannel.mock
-      .instances as [BroadcastChannel<SessionState>];
+    const [broadcastChannelMock] = getBroadcastChannelInstances();
 
-    broadcastChannelMock.onmessage!({
-      lastExtensionTime: Date.now(),
-      expiresInMs: 60 * 1000,
-      canBeExtended: true,
-    });
+    broadcastChannelMock.onmessage!(
+      new MessageEvent('name', {
+        data: {
+          lastExtensionTime: Date.now(),
+          expiresInMs: 60 * 1000,
+          canBeExtended: true,
+        },
+      })
+    );
 
     jest.advanceTimersByTime(30 * 1000);
 

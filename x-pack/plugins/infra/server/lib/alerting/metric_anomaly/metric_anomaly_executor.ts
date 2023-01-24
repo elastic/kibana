@@ -6,18 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { first } from 'lodash';
 import moment from 'moment';
 import {
   ActionGroup,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-} from '../../../../../alerting/common';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
-import { MlPluginSetup } from '../../../../../ml/server';
+} from '@kbn/alerting-plugin/common';
+import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { MappedAnomalyHit } from '../../infra_ml';
 import { InfraBackendLibs } from '../../infra_types';
 import { stateToAlertMessage } from '../common/messages';
@@ -41,7 +41,7 @@ export const createMetricAnomalyExecutor =
     MetricAnomalyAllowedActionGroups
   >) => {
     if (!ml) {
-      return;
+      return { state: {} };
     }
     const request = {} as KibanaRequest;
     const mlSystem = ml.mlSystemProvider(request, services.savedObjectsClient);
@@ -96,6 +96,8 @@ export const createMetricAnomalyExecutor =
         influencers: influencers.join(', '),
       });
     }
+
+    return { state: {} };
   };
 
 export const FIRED_ACTIONS_ID = 'metrics.anomaly.fired';

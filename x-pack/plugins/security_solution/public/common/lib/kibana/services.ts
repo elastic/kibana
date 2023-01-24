@@ -5,25 +5,37 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../../../../src/core/public';
-import { StartPlugins } from '../../../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { StartPlugins } from '../../../types';
 
-type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings' | 'notifications'> &
-  Pick<StartPlugins, 'data'>;
+type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
+  Pick<StartPlugins, 'data' | 'unifiedSearch'>;
 
 export class KibanaServices {
+  private static kibanaBranch?: string;
   private static kibanaVersion?: string;
+  private static prebuiltRulesPackageVersion?: string;
   private static services?: GlobalServices;
 
   public static init({
     http,
+    application,
     data,
+    unifiedSearch,
+    kibanaBranch,
     kibanaVersion,
+    prebuiltRulesPackageVersion,
     uiSettings,
     notifications,
-  }: GlobalServices & { kibanaVersion: string }) {
-    this.services = { data, http, uiSettings, notifications };
+  }: GlobalServices & {
+    kibanaBranch: string;
+    kibanaVersion: string;
+    prebuiltRulesPackageVersion?: string;
+  }) {
+    this.services = { application, data, http, uiSettings, unifiedSearch, notifications };
+    this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
+    this.prebuiltRulesPackageVersion = prebuiltRulesPackageVersion;
   }
 
   public static get(): GlobalServices {
@@ -34,12 +46,24 @@ export class KibanaServices {
     return this.services;
   }
 
+  public static getKibanaBranch(): string {
+    if (!this.kibanaBranch) {
+      this.throwUninitializedError();
+    }
+
+    return this.kibanaBranch;
+  }
+
   public static getKibanaVersion(): string {
     if (!this.kibanaVersion) {
       this.throwUninitializedError();
     }
 
     return this.kibanaVersion;
+  }
+
+  public static getPrebuiltRulesPackageVersion(): string | undefined {
+    return this.prebuiltRulesPackageVersion;
   }
 
   private static throwUninitializedError(): never {

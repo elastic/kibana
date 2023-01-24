@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FetchedIndexPattern } from '../../../../common/types';
 import {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
@@ -29,7 +30,10 @@ describe('DefaultSearchStrategy', () => {
   beforeEach(() => {
     req = {
       body: {
-        panels: [],
+        panels: [{}],
+        timerange: {
+          timezone: 'Europe/Berlin',
+        },
       },
     } as unknown as VisTypeTimeseriesVisDataRequest;
     defaultSearchStrategy = new DefaultSearchStrategy();
@@ -42,14 +46,38 @@ describe('DefaultSearchStrategy', () => {
   });
 
   test('should check a strategy for viability', async () => {
-    const value = await defaultSearchStrategy.checkForViability(requestContext, req);
+    const value = await defaultSearchStrategy.checkForViability(requestContext, req, {
+      indexPattern: { getFieldByName: () => undefined },
+    } as unknown as FetchedIndexPattern);
 
     expect(value.isViable).toBe(true);
     expect(value.capabilities).toMatchInlineSnapshot(`
       DefaultSearchCapabilities {
+        "forceFixedInterval": false,
         "maxBucketsLimit": undefined,
-        "panel": undefined,
-        "timezone": undefined,
+        "panel": Object {},
+        "timezone": "Europe/Berlin",
+      }
+    `);
+  });
+
+  test('should check a strategy for viability with timeseries rollup index', async () => {
+    const value = await defaultSearchStrategy.checkForViability(requestContext, req, {
+      indexPattern: {
+        getFieldByName: () => ({
+          timeZone: ['UTC'],
+          fixedInterval: ['1h'],
+        }),
+      },
+    } as unknown as FetchedIndexPattern);
+
+    expect(value.isViable).toBe(true);
+    expect(value.capabilities).toMatchInlineSnapshot(`
+      DefaultSearchCapabilities {
+        "forceFixedInterval": true,
+        "maxBucketsLimit": undefined,
+        "panel": Object {},
+        "timezone": "UTC",
       }
     `);
   });

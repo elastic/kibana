@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import { AppClientFactory } from './factory';
 import { AppClient } from './client';

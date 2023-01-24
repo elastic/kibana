@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { DocLinksStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import type { DocLinksStart } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { ConfigType } from '../config';
 import { SecurityCheckupService } from './security_checkup_service';

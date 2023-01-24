@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
-
 import type { Filter } from '@kbn/es-query';
-import { TestProviders } from '../../../../common/mock';
-import { SecurityPageName } from '../../../../app/types';
 
-import { AlertsHistogramPanel } from './index';
+import { SecurityPageName } from '../../../../app/types';
+import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
+import { DEFAULT_WIDTH } from '../../../../common/components/charts/draggable_legend';
+import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { TestProviders } from '../../../../common/mock';
 import * as helpers from './helpers';
+import { mockAlertSearchResponse } from './mock_data';
+import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
+import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
+
+jest.mock('../../../../common/containers/query_toggle');
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -51,6 +59,7 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
             addWarning: jest.fn(),
             addError: jest.fn(),
             addSuccess: jest.fn(),
+            remove: jest.fn(),
           },
         },
       },
@@ -69,18 +78,21 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 jest.mock('../../../../common/components/navigation/use_get_url_search');
 
+const defaultUseQueryAlertsReturn = {
+  loading: true,
+  setQuery: () => undefined,
+  data: null,
+  response: '',
+  request: '',
+  refetch: null,
+};
+const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
+
 jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
   const original = jest.requireActual('../../../containers/detection_engine/alerts/use_query');
   return {
     ...original,
-    useQueryAlerts: jest.fn().mockReturnValue({
-      loading: true,
-      setQuery: () => undefined,
-      data: null,
-      response: '',
-      request: '',
-      refetch: null,
-    }),
+    useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
 
@@ -90,6 +102,12 @@ describe('AlertsHistogramPanel', () => {
     setQuery: jest.fn(),
     updateDateRange: jest.fn(),
   };
+
+  const mockSetToggle = jest.fn();
+  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  beforeEach(() => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -104,6 +122,311 @@ describe('AlertsHistogramPanel', () => {
     );
     expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBeTruthy();
     wrapper.unmount();
+  });
+
+  describe('legend counts', () => {
+    beforeEach(() => {
+      mockUseQueryAlerts.mockReturnValue({
+        loading: false,
+        data: mockAlertSearchResponse,
+        setQuery: () => {},
+        response: '',
+        request: '',
+        refetch: () => {},
+      });
+    });
+
+    test('it does NOT render counts in the legend by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="legendItemCount"]').exists()).toBe(false);
+    });
+
+    test('it renders counts in the legend when `showCountsInLegend` is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} showCountsInLegend={true} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="legendItemCount"]').exists()).toBe(true);
+    });
+  });
+
+  test('it renders the header with the specified `alignHeader` alignment', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AlertsHistogramPanel {...defaultProps} alignHeader="flexEnd" />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexEnd');
+  });
+
+  describe('inspect button', () => {
+    test('it renders the inspect button by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
+    });
+
+    test('it does NOT render the inspect button when a `chartOptionsContextMenu` is provided', async () => {
+      const chartOptionsContextMenu = (queryId: string) => (
+        <ChartContextMenu
+          defaultStackByField={DEFAULT_STACK_BY_FIELD}
+          defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+          queryId={queryId}
+          setStackBy={jest.fn()}
+          setStackByField1={jest.fn()}
+        />
+      );
+
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel
+            {...defaultProps}
+            chartOptionsContextMenu={chartOptionsContextMenu}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
+    });
+  });
+
+  test('it aligns the panel flex group at flex start to ensure the context menu is displayed at the top of the panel', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AlertsHistogramPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="panelFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexStart');
+  });
+
+  test('it invokes onFieldSelected when a field is selected', async () => {
+    const onFieldSelected = jest.fn();
+    const optionToSelect = 'agent.hostname';
+
+    mockUseQueryAlerts.mockReturnValue({
+      loading: false,
+      data: mockAlertSearchResponse,
+      setQuery: () => {},
+      response: '',
+      request: '',
+      refetch: () => {},
+    });
+
+    render(
+      <TestProviders>
+        <AlertsHistogramPanel {...defaultProps} onFieldSelected={onFieldSelected} />
+      </TestProviders>
+    );
+
+    const comboBox = screen.getByTestId('comboBoxSearchInput');
+    comboBox.focus(); // display the combo box options
+
+    const option = await screen.findByText(optionToSelect);
+    fireEvent.click(option);
+
+    expect(onFieldSelected).toBeCalledWith(optionToSelect);
+  });
+
+  describe('stackByLabel', () => {
+    test('it renders the default stack by label when `stackByLabel` is NOT provided', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('label.euiFormControlLayout__prepend').first().text()).toEqual(
+        'Stack by'
+      );
+    });
+
+    test('it prepends a custom stack by label when `stackByLabel` is provided', () => {
+      const stackByLabel = 'Group by';
+
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} stackByLabel={stackByLabel} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('label.euiFormControlLayout__prepend').first().text()).toEqual(
+        stackByLabel
+      );
+    });
+  });
+
+  describe('stackByWidth', () => {
+    test('it renders the first StackByComboBox with the specified `stackByWidth`', () => {
+      const stackByWidth = 1234;
+
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} stackByWidth={stackByWidth} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="stackByComboBox"]').first()).toHaveStyleRule(
+        'width',
+        `${stackByWidth}px`
+      );
+    });
+
+    test('it renders the placeholder StackByComboBox with the specified `stackByWidth`', () => {
+      const stackByWidth = 1234;
+
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel
+            {...defaultProps}
+            showGroupByPlaceholder={true}
+            stackByWidth={stackByWidth}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="stackByPlaceholder"]').first()).toHaveStyleRule(
+        'width',
+        `${stackByWidth}px`
+      );
+    });
+  });
+
+  describe('placeholder spacer', () => {
+    test('it does NOT render the group by placeholder spacer by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="placeholderSpacer"]').exists()).toBe(false);
+    });
+
+    test('it renders the placeholder spacer when `showGroupByPlaceholder` is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} showGroupByPlaceholder={true} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="placeholderSpacer"]').exists()).toBe(true);
+    });
+  });
+
+  describe('placeholder tooltip', () => {
+    test('it does NOT render the placeholder tooltip by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="placeholderTooltip"]').exists()).toBe(false);
+    });
+
+    test('it renders the placeholder tooltip when `showGroupByPlaceholder` is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} showGroupByPlaceholder={true} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="placeholderTooltip"]').exists()).toBe(true);
+    });
+  });
+
+  describe('placeholder', () => {
+    test('it does NOT render the group by placeholder by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="stackByPlaceholder"]').exists()).toBe(false);
+    });
+
+    test('it renders the placeholder when `showGroupByPlaceholder` is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} showGroupByPlaceholder={true} />
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="stackByPlaceholder"]').exists()).toBe(true);
+    });
+  });
+
+  test('it renders the chart options context menu when a `chartOptionsContextMenu` is provided', async () => {
+    const chartOptionsContextMenu = (queryId: string) => (
+      <ChartContextMenu
+        defaultStackByField={DEFAULT_STACK_BY_FIELD}
+        defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+        queryId={queryId}
+        setStackBy={jest.fn()}
+        setStackByField1={jest.fn()}
+      />
+    );
+
+    render(
+      <TestProviders>
+        <AlertsHistogramPanel {...defaultProps} chartOptionsContextMenu={chartOptionsContextMenu} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL })
+    ).toBeInTheDocument();
+  });
+
+  describe('legend width', () => {
+    beforeEach(() => {
+      mockUseQueryAlerts.mockReturnValue({
+        loading: false,
+        data: mockAlertSearchResponse,
+        setQuery: () => {},
+        response: '',
+        request: '',
+        refetch: () => {},
+      });
+    });
+
+    test('it renders the legend with the expected default min-width', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
+        'min-width',
+        `${DEFAULT_WIDTH}px`
+      );
+    });
+
+    test('it renders the legend with the expected min-width when `showCountsInLegend` is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} showCountsInLegend={true} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
+        'min-width',
+        `${LEGEND_WITH_COUNTS_WIDTH}px`
+      );
+    });
   });
 
   describe('Button view alerts', () => {
@@ -337,6 +660,42 @@ describe('AlertsHistogramPanel', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('toggleQuery', () => {
+    it('toggles', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
+        expect(mockSetToggle).toBeCalledWith(false);
+      });
+    });
+    it('toggleStatus=true, render', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+      });
+    });
+    it('toggleStatus=false, hide', async () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+      });
     });
   });
 });

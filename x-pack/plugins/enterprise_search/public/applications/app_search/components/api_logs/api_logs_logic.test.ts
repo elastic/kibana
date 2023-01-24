@@ -19,7 +19,7 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { ApiLogsLogic } from './';
+import { ApiLogsLogic } from '.';
 
 describe('ApiLogsLogic', () => {
   const { mount, unmount } = new LogicMounter(ApiLogsLogic);
@@ -119,7 +119,7 @@ describe('ApiLogsLogic', () => {
 
   describe('listeners', () => {
     describe('pollForApiLogs', () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       const setIntervalSpy = jest.spyOn(global, 'setInterval');
 
       it('starts a poll that calls fetchApiLogs at set intervals', () => {

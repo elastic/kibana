@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import {
   PieVisConfig,
   EmptySizeRatios,
@@ -14,10 +14,11 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#pieVis', () => {
   const fn = functionWrapper(pieVisFunction());
@@ -29,8 +30,10 @@ describe('interpreter/functions#pieVis', () => {
 
   const visConfig: PieVisConfig = {
     addTooltip: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: LegendSize.SMALL,
     isDonut: true,
     emptySizeRatio: EmptySizeRatios.SMALL,
     nestedLegend: true,
@@ -50,15 +53,18 @@ describe('interpreter/functions#pieVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
-    metric: {
-      type: 'vis_dimension',
-      accessor: 0,
-      format: {
-        id: 'number',
-        params: {},
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: 0,
+        format: {
+          id: 'number',
+          params: {},
+        },
       },
-    },
+    ],
     buckets: [
       {
         type: 'vis_dimension',
@@ -128,9 +134,12 @@ describe('interpreter/functions#pieVis', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
-    };
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
     await fn(context, visConfig, handlers as any);
 
     expect(loggedTable!).toMatchSnapshot();

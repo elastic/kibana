@@ -8,7 +8,8 @@
 import type { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { ILicense, LicenseType } from '../../../licensing/common/types';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+
 import type { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
@@ -85,6 +86,7 @@ export class SecurityLicenseService {
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
+        allowUserProfileCollaboration: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -104,9 +106,11 @@ export class SecurityLicenseService {
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
+        allowUserProfileCollaboration: false,
       };
     }
 
+    const isLicenseStandardOrBetter = rawLicense.hasAtLeast('standard');
     const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
@@ -121,6 +125,7 @@ export class SecurityLicenseService {
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
       allowRbac: true,
+      allowUserProfileCollaboration: isLicenseStandardOrBetter,
     };
   }
 }

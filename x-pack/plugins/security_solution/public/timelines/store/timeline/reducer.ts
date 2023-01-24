@@ -8,7 +8,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addHistory,
   addNote,
   addNoteToEvent,
   addProvider,
@@ -31,29 +30,42 @@ import {
   updateAutoSaveMsg,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
-  updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateEventType,
   updateDataView,
   updateIsFavorite,
-  updateIsLive,
   updateKqlMode,
-  updatePageIndex,
   updateProviders,
   updateRange,
   updateTimeline,
-  updateTimelineGraphEventId,
+  updateGraphEventId,
   updateTitleAndDescription,
+  updateSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
   setTimelineUpdatedAt,
+  toggleDetailPanel,
+  setEventsLoading,
+  removeColumn,
+  upsertColumn,
+  updateColumns,
+  updateIsLoading,
+  updateSort,
+  clearSelected,
+  setSelected,
+  setEventsDeleted,
+  initializeTimelineSettings,
+  updateItemsPerPage,
+  updateItemsPerPageOptions,
+  applyDeltaToColumnWidth,
+  clearEventsDeleted,
+  clearEventsLoading,
 } from './actions';
+
 import {
   addNewTimeline,
-  addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
-  addTimelineProvider,
+  addTimelineProviders,
   addTimelineToStore,
   applyKqlFilterQueryDraft,
   pinTimelineEvent,
@@ -61,25 +73,35 @@ import {
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
   updateTimelineIsFavorite,
-  updateTimelineIsLive,
   updateTimelineKqlMode,
-  updateTimelinePageIndex,
   updateTimelineProviderEnabled,
   updateTimelineProviderExcluded,
   updateTimelineProviderProperties,
-  updateTimelineProviderKqlQuery,
   updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineTitleAndDescription,
   updateSavedQuery,
-  updateGraphEventId,
+  updateTimelineGraphEventId,
   updateFilters,
-  updateTimelineEventType,
+  updateTimelineSessionViewConfig,
+  updateTimelineDetailsPanel,
+  setLoadingTableEvents,
+  removeTableColumn,
+  upsertTableColumn,
+  updateTableColumns,
+  updateTableSort,
+  setSelectedTableEvents,
+  setDeletedTableEvents,
+  setInitializeTimelineSettings,
+  applyDeltaToTableColumnWidth,
+  updateTimelinePerPageOptions,
+  updateTimelineItemsPerPage,
 } from './helpers';
 
-import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import type { TimelineState } from './types';
+import { EMPTY_TIMELINE_BY_ID } from './types';
 import { TimelineType } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
@@ -114,10 +136,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       }),
     };
   })
-  .case(addHistory, (state, { id, historyId }) => ({
-    ...state,
-    timelineById: addTimelineHistory({ id, historyId, timelineById: state.timelineById }),
-  }))
   .case(addNote, (state, { id, noteId }) => ({
     ...state,
     timelineById: addTimelineNote({ id, noteId, timelineById: state.timelineById }),
@@ -126,9 +144,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(addProvider, (state, { id, provider }) => ({
+  .case(addProvider, (state, { id, providers }) => ({
     ...state,
-    timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
+    timelineById: addTimelineProviders({ id, providers, timelineById: state.timelineById }),
   }))
   .case(applyKqlFilterQuery, (state, { id, filterQuery }) => ({
     ...state,
@@ -142,9 +160,21 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
-  .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
+  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
-    timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
+    timelineById: updateTimelineGraphEventId({
+      id,
+      graphEventId,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateSessionViewConfig, (state, { id, sessionViewConfig }) => ({
+    ...state,
+    timelineById: updateTimelineSessionViewConfig({
+      id,
+      sessionViewConfig,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,
@@ -198,17 +228,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: unPinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
   }))
-  .case(updateEventType, (state, { id, eventType }) => ({
-    ...state,
-    timelineById: updateTimelineEventType({ id, eventType, timelineById: state.timelineById }),
-  }))
   .case(updateIsFavorite, (state, { id, isFavorite }) => ({
     ...state,
     timelineById: updateTimelineIsFavorite({ id, isFavorite, timelineById: state.timelineById }),
-  }))
-  .case(updateIsLive, (state, { id, isLive }) => ({
-    ...state,
-    timelineById: updateTimelineIsLive({ id, isLive, timelineById: state.timelineById }),
   }))
   .case(updateKqlMode, (state, { id, kqlMode }) => ({
     ...state,
@@ -276,23 +298,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       providerId,
       timelineById: state.timelineById,
       andProviderId,
-    }),
-  }))
-  .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({
-    ...state,
-    timelineById: updateTimelineProviderKqlQuery({
-      id,
-      kqlQuery,
-      providerId,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(updatePageIndex, (state, { id, activePage }) => ({
-    ...state,
-    timelineById: updateTimelinePageIndex({
-      id,
-      activePage,
-      timelineById: state.timelineById,
     }),
   }))
   .case(updateAutoSaveMsg, (state, { timelineId, newTimelineModel }) => ({
@@ -376,14 +381,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(setInsertTimeline, (state, insertTimeline) => ({
-    ...state,
-    insertTimeline,
-  }))
-  .case(showTimeline, (state, { id, show }) => ({
-    ...state,
-    timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
-  }))
   .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
     ...state,
     timelineById: {
@@ -391,6 +388,145 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         updated,
+      },
+    },
+  }))
+  .case(toggleDetailPanel, (state, action) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [action.id]: {
+        ...state.timelineById[action.id],
+        expandedDetail: {
+          ...state.timelineById[action.id].expandedDetail,
+          ...updateTimelineDetailsPanel(action),
+        },
+      },
+    },
+  }))
+  .case(setEventsLoading, (state, { id, eventIds, isLoading }) => ({
+    ...state,
+    timelineById: setLoadingTableEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isLoading,
+    }),
+  }))
+  .case(removeColumn, (state, { id, columnId }) => ({
+    ...state,
+    timelineById: removeTableColumn({
+      id,
+      columnId,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(upsertColumn, (state, { column, id, index }) => ({
+    ...state,
+    timelineById: upsertTableColumn({ column, id, index, timelineById: state.timelineById }),
+  }))
+  .case(updateColumns, (state, { id, columns }) => ({
+    ...state,
+    timelineById: updateTableColumns({
+      id,
+      columns,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateIsLoading, (state, { id, isLoading }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isLoading,
+      },
+    },
+  }))
+  .case(updateSort, (state, { id, sort }) => ({
+    ...state,
+    timelineById: updateTableSort({ id, sort, timelineById: state.timelineById }),
+  }))
+  .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
+    ...state,
+    timelineById: setSelectedTableEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isSelected,
+      isSelectAllChecked,
+    }),
+  }))
+  .case(clearSelected, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        selectedEventIds: {},
+        isSelectAllChecked: false,
+      },
+    },
+  }))
+  .case(setEventsDeleted, (state, { id, eventIds, isDeleted }) => ({
+    ...state,
+    timelineById: setDeletedTableEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isDeleted,
+    }),
+  }))
+  .case(initializeTimelineSettings, (state, { id, ...timelineSettingsProps }) => ({
+    ...state,
+    timelineById: setInitializeTimelineSettings({
+      id,
+      timelineById: state.timelineById,
+      timelineSettingsProps,
+    }),
+  }))
+  .case(updateItemsPerPage, (state, { id, itemsPerPage }) => ({
+    ...state,
+    timelineById: updateTimelineItemsPerPage({
+      id,
+      itemsPerPage,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateItemsPerPageOptions, (state, { id, itemsPerPageOptions }) => ({
+    ...state,
+    timelineById: updateTimelinePerPageOptions({
+      id,
+      itemsPerPageOptions,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
+    ...state,
+    timelineById: applyDeltaToTableColumnWidth({
+      id,
+      columnId,
+      delta,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(clearEventsDeleted, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        deletedEventIds: [],
+      },
+    },
+  }))
+  .case(clearEventsLoading, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        loadingEventIds: [],
       },
     },
   }))

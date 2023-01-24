@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
+import {
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '@kbn/ml-plugin/common/util/analytics_utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
-import {
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-} from '../../../../plugins/ml/common/util/analytics_utils';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,
@@ -49,6 +49,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const jobTypeAttribute = `mlAnalyticsCreation-${jobType}-option`;
       await testSubjects.click(jobTypeAttribute);
       await this.assertJobTypeSelection(jobTypeAttribute);
+      await headerPage.waitUntilLoadingHasFinished();
     },
 
     async assertAdvancedEditorSwitchExists() {
@@ -127,29 +128,41 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
     },
 
-    async enableSourceDataPreviewHistogramCharts(expectedDefaultButtonState: boolean) {
-      await this.assertSourceDataPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
-      if (expectedDefaultButtonState === false) {
+    async enableSourceDataPreviewHistogramCharts(shouldBeEnabled: boolean) {
+      const isEnabled = await this.getSourceDataPreviewHistogramChartButtonCheckState();
+      if (isEnabled !== shouldBeEnabled) {
         await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
-        await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+        await this.assertSourceDataPreviewHistogramChartEnabled(shouldBeEnabled);
       }
     },
 
-    async assertSourceDataPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
-      const actualCheckState =
+    async assertSourceDataPreviewHistogramChartEnabled(shouldBeEnabled: boolean) {
+      const isEnabled = await this.getSourceDataPreviewHistogramChartButtonCheckState();
+      expect(isEnabled).to.eql(
+        shouldBeEnabled,
+        `Source data preview histogram charts should be '${
+          shouldBeEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
+    async getSourceDataPreviewHistogramChartButtonCheckState(): Promise<boolean> {
+      return (
         (await testSubjects.getAttribute(
           'mlAnalyticsCreationDataGridHistogramButton',
           'aria-pressed'
-        )) === 'true';
-      expect(actualCheckState).to.eql(
-        expectedCheckState,
-        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        )) === 'true'
       );
+    },
+
+    async scrollSourceDataPreviewIntoView() {
+      await testSubjects.scrollIntoView('mlAnalyticsCreationDataGrid loaded');
     },
 
     async assertSourceDataPreviewHistogramCharts(
       expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
     ) {
+      await this.scrollSourceDataPreviewIntoView();
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(10000, async () => {
@@ -175,6 +188,17 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
             `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
           );
         }
+      });
+    },
+
+    async enableAndAssertSourceDataPreviewHistogramCharts(
+      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+    ) {
+      await retry.tryForTime(20 * 1000, async () => {
+        // turn histogram charts off and on before checking
+        await this.enableSourceDataPreviewHistogramCharts(false);
+        await this.enableSourceDataPreviewHistogramCharts(true);
+        await this.assertSourceDataPreviewHistogramCharts(expectedHistogramCharts);
       });
     },
 
@@ -263,7 +287,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsEditorSwitch';
       if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
         });
       }
@@ -292,7 +316,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async applyRuntimeMappings() {
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
-      await testSubjects.clickWhenNotDisabled(subj);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
       const isEnabled = await testSubjects.isEnabled(subj);
       expect(isEnabled).to.eql(
         false,
@@ -442,7 +466,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToAdditionalOptionsStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertAdditionalOptionsStepActive();
@@ -451,7 +475,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToDetailsStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardAdvancedStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertDetailsStepActive();
@@ -460,7 +484,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToValidationStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardDetailsStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertValidationStepActive();
@@ -480,7 +504,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToCreateStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardValidationStepWrapper active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertCreateStepActive();

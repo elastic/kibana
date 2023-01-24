@@ -8,11 +8,8 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import {
-  useTimelineTypes,
-  UseTimelineTypesArgs,
-  UseTimelineTypesResult,
-} from './use_timeline_types';
+import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
+import { useTimelineTypes } from './use_timeline_types';
 
 jest.mock('react-router-dom', () => {
   return {
@@ -31,8 +28,8 @@ jest.mock('../../../common/components/link_to', () => {
   };
 });
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
-  const originalModule = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
   const useKibana = jest.fn().mockImplementation(() => ({
     services: {
       application: {

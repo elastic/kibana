@@ -7,6 +7,7 @@
 
 import { registerLayerWizardInternal } from './layer_wizard_registry';
 import { uploadLayerWizardConfig } from './file_upload_wizard';
+import { layerGroupWizardConfig } from './layer_group_wizard';
 import {
   esDocumentsLayerWizardConfig,
   esTopHitsLayerWizardConfig,
@@ -29,12 +30,14 @@ import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
 
 let registered = false;
+
 export function registerLayerWizards() {
   if (registered) {
     return;
   }
 
   registerLayerWizardInternal(uploadLayerWizardConfig);
+  registerLayerWizardInternal(layerGroupWizardConfig);
   registerLayerWizardInternal(esDocumentsLayerWizardConfig);
   registerLayerWizardInternal(choroplethLayerWizardConfig);
   registerLayerWizardInternal(clustersLayerWizardConfig);

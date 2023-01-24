@@ -7,13 +7,14 @@
  */
 
 import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
+} from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import {
   EXPRESSION_GAUGE_NAME,
   GAUGE_FUNCTION_RENDERER_NAME,
@@ -23,8 +24,6 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
 } from '../constants';
-import { CustomPaletteParams } from '.';
-
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;
 export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
@@ -47,6 +46,8 @@ export interface GaugeState {
   shape: GaugeShape;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   percentageMode?: boolean;
+  respectRanges?: boolean;
+  commonLabel?: string;
 }
 
 export type GaugeArguments = GaugeState & {
@@ -61,6 +62,7 @@ export type GaugeInput = Datatable;
 export interface GaugeExpressionProps {
   data: Datatable;
   args: GaugeArguments;
+  canNavigateToLens: boolean;
 }
 
 export interface GaugeRender {

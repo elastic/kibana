@@ -6,10 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseResponse } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  postCommentAlertReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   createCase,
   createComment,
@@ -17,7 +22,6 @@ import {
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
-import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -56,7 +60,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
 
       expect(caseIDsWithAlert.length).to.eql(3);
-      validateCasesFromAlertIDResponse(caseIDsWithAlert, [case1, case2, case3]);
+      validateCasesFromAlertIDResponse(caseIDsWithAlert, [
+        { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
+        { caseInfo: case2, totals: { alerts: 1, userComments: 0 } },
+        { caseInfo: case3, totals: { alerts: 1, userComments: 0 } },
+      ]);
     });
 
     it('should return all cases with the same alert ID when more than 100 cases', async () => {
@@ -83,7 +91,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(numCases);
 
-      validateCasesFromAlertIDResponse(caseIDsWithAlert, cases);
+      const testResults = cases.map((caseInfo) => ({
+        caseInfo,
+        totals: {
+          alerts: 1,
+          userComments: 0,
+        },
+      }));
+
+      validateCasesFromAlertIDResponse(caseIDsWithAlert, testResults);
     });
 
     it('should return no cases when the alert ID is not found', async () => {
@@ -129,6 +145,55 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return a 302 when passing an empty alertID', async () => {
       // kibana returns a 302 instead of a 400 when a url param is missing
       await supertest.get(`${CASES_URL}/alerts/`).expect(302);
+    });
+
+    describe('attachment stats', () => {
+      it('should only count unique alert ids in the alert totals', async () => {
+        const [case1, case2] = await Promise.all([
+          createCase(supertest, getPostCaseRequest({ title: 'a' })),
+          createCase(supertest, getPostCaseRequest({ title: 'b' })),
+        ]);
+
+        await Promise.all([
+          createComment({ supertest, caseId: case1.id, params: postCommentAlertReq }),
+          createComment({ supertest, caseId: case2.id, params: postCommentAlertReq }),
+        ]);
+
+        // two alerts with same alert id attached to case1
+        await createComment({ supertest, caseId: case1.id, params: postCommentAlertReq });
+
+        const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
+
+        expect(caseIDsWithAlert.length).to.eql(2);
+        validateCasesFromAlertIDResponse(caseIDsWithAlert, [
+          { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
+          { caseInfo: case2, totals: { alerts: 1, userComments: 0 } },
+        ]);
+      });
+
+      it('should get the total number of user comments attached to a case', async () => {
+        const [case1, case2] = await Promise.all([
+          createCase(supertest, getPostCaseRequest({ title: 'a' })),
+          createCase(supertest, getPostCaseRequest({ title: 'b' })),
+        ]);
+
+        await Promise.all([
+          createComment({ supertest, caseId: case1.id, params: postCommentAlertReq }),
+          createComment({ supertest, caseId: case2.id, params: postCommentAlertReq }),
+        ]);
+
+        // two user comments attached to case2
+        await createComment({ supertest, caseId: case2.id, params: postCommentUserReq });
+        await createComment({ supertest, caseId: case2.id, params: postCommentUserReq });
+
+        const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
+
+        expect(caseIDsWithAlert.length).to.eql(2);
+        validateCasesFromAlertIDResponse(caseIDsWithAlert, [
+          { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
+          { caseInfo: case2, totals: { alerts: 1, userComments: 2 } },
+        ]);
+      });
     });
 
     describe('rbac', () => {
@@ -197,7 +262,15 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(res.length).to.eql(scenario.cases.length);
 
-          validateCasesFromAlertIDResponse(res, scenario.cases);
+          const testResults = scenario.cases.map((caseInfo) => ({
+            caseInfo,
+            totals: {
+              alerts: 1,
+              userComments: 0,
+            },
+          }));
+
+          validateCasesFromAlertIDResponse(res, testResults);
         }
       });
 
@@ -263,7 +336,19 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: 'securitySolutionFixture' },
         });
 
-        expect(res).to.eql([{ id: case1.id, title: case1.title }]);
+        expect(res).to.eql([
+          {
+            id: case1.id,
+            title: case1.title,
+            description: case1.description,
+            status: case1.status,
+            createdAt: case1.created_at,
+            totals: {
+              userComments: 0,
+              alerts: 1,
+            },
+          },
+        ]);
       });
 
       it('should return the correct cases info when the owner query parameter contains unprivileged values', async () => {
@@ -301,7 +386,19 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
         });
 
-        expect(res).to.eql([{ id: case1.id, title: case1.title }]);
+        expect(res).to.eql([
+          {
+            id: case1.id,
+            title: case1.title,
+            description: case1.description,
+            status: case1.status,
+            createdAt: case1.created_at,
+            totals: {
+              userComments: 0,
+              alerts: 1,
+            },
+          },
+        ]);
       });
     });
   });

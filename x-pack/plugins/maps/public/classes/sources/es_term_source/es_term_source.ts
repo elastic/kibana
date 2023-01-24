@@ -7,7 +7,9 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -27,7 +29,6 @@ import {
   ESTermSourceDescriptor,
   VectorJoinSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITermJoinSource } from '../term_join_source';
@@ -62,9 +63,6 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
     return {
       ...normalizedDescriptor,
-      indexPatternTitle: descriptor.indexPatternTitle
-        ? descriptor.indexPatternTitle
-        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
@@ -73,9 +71,9 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: ESTermSourceDescriptor) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
     this._termField = new ESDocField({
       fieldName: this._descriptor.term,
@@ -108,11 +106,18 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
+  async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
+    let indexPatternLabel: string | undefined;
+    try {
+      const indexPattern = await this.getIndexPattern();
+      indexPatternLabel = indexPattern.getName();
+    } catch (error) {
+      indexPatternLabel = this._descriptor.indexPatternId;
+    }
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
-          defaultMessage: `Count of {indexPatternTitle}`,
-          values: { indexPatternTitle: this._descriptor.indexPatternTitle },
+          defaultMessage: `Count of {indexPatternLabel}`,
+          values: { indexPatternLabel },
         })
       : super.getAggLabel(aggType, fieldLabel);
   }
@@ -121,7 +126,8 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     searchFilters: VectorJoinSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ): Promise<PropertiesMap> {
     if (!this.hasCompleteConfig()) {
       return new Map<string, BucketProperties>();
@@ -143,18 +149,19 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
     const rawEsData = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`,
+      requestName: `${indexPattern.getName()}.${this._termField.getName()}`,
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
         defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
         values: {
           leftSource: `${leftSourceName}:${leftFieldName}`,
-          rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
+          rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
         },
       }),
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_term_source:terms'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);

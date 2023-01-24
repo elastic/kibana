@@ -11,6 +11,7 @@
 import React, { useCallback, useMemo, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import type { EuiRangeProps } from '@elastic/eui';
 import {
   EuiRange,
   EuiPanel,
@@ -21,13 +22,12 @@ import {
   EuiIconTip,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiRangeProps,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
-import { Vector2 } from '../types';
+import type { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import { ResolverAction } from '../store/actions';
+import type { ResolverAction } from '../store/actions';
 import { useColors } from './use_colors';
 import { StyledDescriptionList } from './panels/styles';
 import { CubeForProcess } from './panels/cube_for_process';
@@ -144,8 +144,8 @@ export const GraphControls = React.memo(
 
     const closePopover = useCallback(() => setPopover(null), []);
 
-    const handleZoomAmountChange = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
+    const handleZoomAmountChange: EuiRangeProps['onChange'] = useCallback(
+      (event) => {
         const valueAsNumber = parseFloat(
           (event as React.ChangeEvent<HTMLInputElement>).target.value
         );
@@ -370,7 +370,7 @@ const SchemaInformation = ({
       </EuiPopoverTitle>
       <div
         // Limit the width based on UX design
-        style={{ maxWidth: '256px' }}
+        style={{ maxWidth: '268px' }}
       >
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:schema-info"

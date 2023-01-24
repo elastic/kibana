@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
-import { CsmSharedContextProvider } from './csm_shared_context';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { UxEnvironmentFilter } from './environment_filter';
-import { RumOverview } from './index';
+import { RumOverview } from '.';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
   defaultMessage: 'Dashboard',
@@ -29,49 +28,44 @@ export function RumHome() {
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { data: rumHasData, status } = useHasRumData();
+  const { hasData, loading: isLoading } = useHasRumData();
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
-    !rumHasData?.hasData
-      ? {
-          solution: i18n.translate('xpack.ux.overview.solutionName', {
-            defaultMessage: 'Observability',
-          }),
-          actions: {
-            elasticAgent: {
-              title: i18n.translate('xpack.ux.overview.beatsCard.title', {
-                defaultMessage: 'Add RUM data',
-              }),
-              description: i18n.translate(
-                'xpack.ux.overview.beatsCard.description',
-                {
-                  defaultMessage:
-                    'Enable RUM with the APM agent to collect user experience data.',
-                }
-              ),
-              href: http.basePath.prepend(`/app/home#/tutorial/apm`),
-            },
+  const noDataConfig: NoDataConfig | undefined = !hasData
+    ? {
+        solution: i18n.translate('xpack.ux.overview.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        action: {
+          elasticAgent: {
+            title: i18n.translate('xpack.ux.overview.beatsCard.title', {
+              defaultMessage: 'Add RUM data',
+            }),
+            description: i18n.translate(
+              'xpack.ux.overview.beatsCard.description',
+              {
+                defaultMessage:
+                  'Enable RUM with the APM agent to collect user experience data.',
+              }
+            ),
+            href: http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
-          docsLink: docLinks.links.observability.guide,
-        }
-      : undefined;
-
-  const isLoading = status === 'loading';
+        },
+        docsLink: docLinks.links.observability.guide,
+      }
+    : undefined;
 
   return (
-    <Fragment>
-      <CsmSharedContextProvider>
-        <PageTemplateComponent
-          noDataConfig={isLoading ? undefined : noDataConfig}
-          pageHeader={{ children: <PageHeader /> }}
-        >
-          {isLoading && <EmptyStateLoading />}
-          <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-            <RumOverview />
-          </div>
-        </PageTemplateComponent>
-      </CsmSharedContextProvider>
-    </Fragment>
+    <PageTemplateComponent
+      noDataConfig={isLoading ? undefined : noDataConfig}
+      pageHeader={{ children: <PageHeader /> }}
+      isPageDataLoaded={isLoading === false}
+      isEmptyState={isLoading}
+    >
+      {isLoading && <EmptyStateLoading />}
+      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+        <RumOverview />
+      </div>
+    </PageTemplateComponent>
   );
 }
 

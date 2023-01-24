@@ -2,7 +2,7 @@
 id: kibStyleGuide
 slug: /kibana-dev-docs/contributing/styleguide
 title: Style Guide
-summary: JavaScript/TypeScript styleguide.
+description: JavaScript/TypeScript styleguide.
 date: 2021-05-06
 tags: ['kibana', 'onboarding', 'dev', 'styleguide', 'typescript', 'javascript']
 ---
@@ -38,18 +38,18 @@ and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code
 can run `node scripts/eslint --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
-Whenever possible we are trying to use Prettier and linting over written style guide rules.
+Whenever possible we are trying to use Prettier and linting, instead of maintaining a set of written style guide rules.
 Consider every linting rule and every Prettier rule to be also part of our style guide
 and disable them only in exceptional cases and ideally leave a comment why they are
 disabled at that specific place.
 
 ## HTML
 
-This part contains style guide rules around general (framework agnostic) HTML usage.
+This part contains style guide rules around general (framework-agnostic) HTML usage.
 
 ### Camel case `id` and `data-test-subj`
 
-Use camel case for the values of attributes such as `id` and `data-test-subj` selectors.
+Use camel case for the values of attributes such as `id` and `data-test-subj` selectors:
 
 ```html
 <button id="veryImportantButton" data-test-subj="clickMeButton">Click me</button>
@@ -73,8 +73,8 @@ buttons.map(btn => (
 
 It's important that when you write CSS/SASS selectors using classes, IDs, and attributes
 (keeping in mind that we should _never_ use IDs and attributes in our selectors), that the
-capitalization in the CSS matches that used in the HTML. HTML and CSS follow different case sensitivity rules, and we can avoid subtle gotchas by ensuring we use the
-same capitalization in both of them.
+capitalization in the CSS matches that used in the HTML. HTML and CSS follow different case sensitivity rules,
+and we can avoid subtle gotchas by ensuring we use the same capitalization in both of them.
 
 ### How to generate ids?
 
@@ -143,7 +143,8 @@ API routes must start with the `/api/` path segment, and should be followed by t
 
 ### snake_case
 
-Kibana uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters, values, and bodies should be `snake_case` formatted.
+Kibana uses `snake_case` for the entire API, just like Elasticsearch. All urls, paths, query string parameters,
+values, and bodies should be `snake_case` formatted:
 
 _Right:_
 
@@ -202,7 +203,7 @@ function addBar(foos, foo) {
 
 Since TypeScript 3.0 and the introduction of the
 [`unknown` type](https://mariusschulz.com/blog/the-unknown-type-in-typescript) there are rarely any
-reasons to use `any` as a type. Nearly all places of former `any` usage can be replace by either a
+reasons to use `any` as a type. Nearly all places of former `any` usage can be replaced by either a
 generic or `unknown` (in cases the type is really not known).
 
 You should always prefer using those mechanisms over using `any`, since they are stricter typed and
@@ -215,16 +216,16 @@ linting rule for your plugin via the [`.eslintrc.js`](https://github.com/elastic
 ### Avoid non-null assertions
 
 You should try avoiding non-null assertions (`!.`) wherever possible. By using them you tell
-TypeScript, that something is not null even though by it’s type it could be. Usage of non-null
-assertions is most often a side-effect of you actually checked that the variable is not `null`
-but TypeScript doesn’t correctly carry on that information till the usage of the variable.
+TypeScript that something is not `null`, even though by its type it could be. Usage of non-null
+assertions is most often a side effect of you actually checked that the variable is not `null`
+but TypeScript doesn't correctly carry on that information till the usage of the variable.
 
 In most cases it’s possible to replace the non-null assertion by structuring your code/checks slightly different
 or using [user defined type guards](https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards)
 to properly tell TypeScript what type a variable has.
 
 Using non-null assertion increases the risk for future bugs. In case the condition under which we assumed that the
-variable can’t be null has changed (potentially even due to changes in compeltely different files), the non-null
+variable can’t be `null` has changed (potentially even due to changes in completely different files), the non-null
 assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
@@ -266,7 +267,7 @@ function doStuff(val) {
 
 ### Use object destructuring
 
-This helps avoid temporary references and helps prevent typo-related bugs.
+This helps avoid temporary references and helps prevent typo-related bugs:
 
 ```js
 // best
@@ -307,8 +308,8 @@ const second = arr[1];
 ### Magic numbers/strings
 
 These are numbers (or other values) simply used in line in your code. _Do not
-use these_, give them a variable name so they can be understood and changed
-easily.
+use these_, give them a variable name, so they can be understood and changed
+easily:
 
 ```js
 // good
@@ -378,7 +379,9 @@ import inSibling from '../foo/child';
 
 #### Avoid export \* in top level index.ts files
 
-The exports in `common/index.ts`, `public/index.ts` and `server/index.ts` dictate a plugin's public API. The public API should be carefully controlled, and using `export *` makes it very easy for a developer working on internal changes to export a new public API unintentionally.
+The exports in `common/index.ts`, `public/index.ts` and `server/index.ts` dictate a plugin's public API.
+The public API should be carefully controlled, and using `export *` makes it very easy for a developer
+working on internal changes to export a new public API unintentionally:
 
 ```js
 // good
@@ -399,7 +402,7 @@ by other modules. Even things as simple as a single value should be a module.
 
 And _never_ use multiple ternaries together, because they make it more
 difficult to reason about how different values flow through the conditions
-involved. Instead, structure the logic for maximum readability.
+involved. Instead, structure the logic for maximum readability:
 
 ```js
 // good, a situation where only 1 ternary is needed
@@ -466,7 +469,7 @@ perfect vision and limit yourself to ~15 lines of code per function.
 
 ### Use "rest" syntax rather than built-in `arguments`
 
-For expressiveness sake, and so you can be mix dynamic and explicit arguments.
+For the sake of expressiveness, and so you can be mix dynamic and explicit arguments:
 
 ```js
 // good
@@ -483,7 +486,7 @@ function something(foo) {
 
 ### Default argument syntax
 
-Always use the default argument syntax for optional arguments.
+Always use the default argument syntax for optional arguments:
 
 ```js
 // good
@@ -500,7 +503,7 @@ function foo(options) {
 }
 ```
 
-And put your optional arguments at the end.
+And put your optional arguments at the end:
 
 ```js
 // good
@@ -518,7 +521,7 @@ function foo(options = {}, bar) {
 
 For trivial examples (like the one that follows), thunks will seem like
 overkill, but they encourage isolating the implementation details of a closure
-from the business logic of the calling code.
+from the business logic of the calling code:
 
 ```js
 // good
@@ -621,9 +624,13 @@ by your code until the circular dependencies on these have been solved.
 
 ## SASS files
 
-When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
+When writing a new component, create a sibling SASS file of the same name and import
+directly into the **top** of the JS/TS component file.
+Doing so ensures the styles are never separated or lost on import and allows
+for better modularization (smaller individual plugin asset footprint).
 
-All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/core_app/styles/_globals_v8light.scss).
+All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass)
+& Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/core/public/styles/core_app/_globals_v8light.scss).
 
 While the styles for this component will only be loaded if the component exists on the page,
 the styles **will** be global and so it is recommended to use a three letter prefix on your
@@ -656,11 +663,12 @@ The following style guide rules are specific for working with the React framewor
 
 ### Prefer reactDirective over react-component
 
-When using `ngReact` to embed your react components inside Angular HTML, prefer the
+When using `ngReact` to embed your React components inside Angular HTML, prefer the
 `reactDirective` service over the `react-component` directive.
 You can read more about these two ngReact methods [here](https://github.com/ngReact/ngReact#features).
 
-Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
+Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated,
+and is also a more succinct syntax:
 
 **Good:**
 

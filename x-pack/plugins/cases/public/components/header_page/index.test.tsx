@@ -6,21 +6,27 @@
  */
 
 import { euiDarkVars } from '@kbn/ui-theme';
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { HeaderPage } from './index';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
+  let appMock: AppMockRenderer;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMock = createAppMockRenderer();
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
+    const result = appMock.render(
       <TestProviders>
         <HeaderPage border subtitle="Test subtitle" subtitle2="Test subtitle 2" title="Test title">
           <p>{'Test supplement'}</p>
@@ -28,7 +34,10 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(result.getByText('Test subtitle')).toBeInTheDocument();
+    expect(result.getByText('Test subtitle 2')).toBeInTheDocument();
+    expect(result.getByText('Test title')).toBeInTheDocument();
+    expect(result.getByText('Test supplement')).toBeInTheDocument();
   });
 
   test('it renders the back link when provided', () => {
@@ -124,7 +133,7 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -136,16 +145,10 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   describe('Badges', () => {
-    let appMock: AppMockRenderer;
-
-    beforeEach(() => {
-      appMock = createAppMockRenderer();
-    });
-
     it('does not render the badge if the release is ga', () => {
       const renderResult = appMock.render(<HeaderPage title="Test title" />);
 

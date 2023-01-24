@@ -6,8 +6,8 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import { useKibanaContextForPlugin } from '../hooks/use_kibana';
-import type { Space } from '../../../spaces/public';
+import type { Space } from '@kbn/spaces-plugin/public';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export type ActiveSpace =
   | { isLoading: true; error: undefined; space: undefined }

@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import {
-  Plugin,
-  CoreSetup,
-  AppMountParameters,
-  AppNavLinkStatus,
-} from '../../../../src/core/public';
-import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../plugins/triggers_actions_ui/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
 import { registerNavigation } from './alert_types';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 
 export type Setup = void;
 export type Start = void;

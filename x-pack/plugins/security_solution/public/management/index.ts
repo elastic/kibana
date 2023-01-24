@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { Reducer, CombinedState } from 'redux';
+import type { CoreStart } from '@kbn/core/public';
+import type { Reducer, CombinedState } from 'redux';
 import { routes } from './routes';
-import { StartPlugins } from '../types';
-import { SecuritySubPluginWithStore } from '../app/types';
+import type { StartPlugins } from '../types';
+import type { SecuritySubPluginWithStore } from '../app/types';
 import { managementReducer } from './store/reducer';
-import { AppAction } from '../common/store/actions';
+import type { AppAction } from '../common/store/actions';
 import { managementMiddlewareFactory } from './store/middleware';
-import { ManagementState } from './types';
+import type { ManagementState } from './types';
 
 /**
  * Internally, our state is sometimes immutable, ignore that in our external

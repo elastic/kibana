@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 
 export function getNoDataConfig({
   docsLink,
@@ -22,7 +22,7 @@ export function getNoDataConfig({
   basePath?: string;
   hasApmData?: boolean;
   hasApmIntegrations?: boolean;
-}): KibanaPageTemplateProps['noDataConfig'] {
+}): NoDataConfig | undefined {
   // don't show "no data screen" when there is APM data or it should be bypassed
   if (hasApmData || shouldBypassNoDataScreen || loading) {
     return;
@@ -48,7 +48,7 @@ export function getNoDataConfig({
     solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
       defaultMessage: 'Observability',
     }),
-    actions: {
+    action: {
       elasticAgent: {
         title: noDataConfigDetails.title,
         description: i18n.translate('xpack.apm.ux.overview.agent.description', {

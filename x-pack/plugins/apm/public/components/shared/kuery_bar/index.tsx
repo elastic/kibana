@@ -10,18 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import {
-  esKuery,
-  QuerySuggestion,
-} from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
+import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
-// @ts-expect-error
 import { Typeahead } from './typeahead';
 import { useProcessorEvent } from './use_processor_event';
 
@@ -31,8 +28,8 @@ interface State {
 }
 
 function convertKueryToEsQuery(kuery: string, dataView: DataView) {
-  const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast, dataView);
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, dataView);
 }
 
 export function KueryBar(props: {
@@ -42,6 +39,7 @@ export function KueryBar(props: {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   value?: string;
+  suggestionFilter?: (querySuggestion: QuerySuggestion) => boolean;
 }) {
   const { path, query } = useApmParams('/*');
 
@@ -58,7 +56,7 @@ export function KueryBar(props: {
   });
   const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
-  const { data } = useApmPluginContext().plugins;
+  const { unifiedSearch } = useApmPluginContext().plugins;
 
   let currentRequestCheck;
 
@@ -73,8 +71,7 @@ export function KueryBar(props: {
   };
 
   const example = examples[processorEvent || 'defaults'];
-
-  const { dataView } = useDynamicDataViewFetcher();
+  const { dataView } = useApmDataView();
 
   const placeholder =
     props.placeholder ??
@@ -105,8 +102,8 @@ export function KueryBar(props: {
     currentRequestCheck = currentRequest;
 
     try {
-      const suggestions = (
-        (await data.autocomplete.getQuerySuggestions({
+      const suggestions =
+        (await unifiedSearch.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [dataView],
           boolFilter:
@@ -123,14 +120,21 @@ export function KueryBar(props: {
           selectionEnd: selectionStart,
           useTimeRange: true,
           method: 'terms_agg',
-        })) || []
-      ).slice(0, 15);
+        })) || [];
+
+      const filteredSuggestions = props.suggestionFilter
+        ? suggestions.filter(props.suggestionFilter)
+        : suggestions;
 
       if (currentRequest !== currentRequestCheck) {
         return;
       }
 
-      setState({ ...state, suggestions, isLoadingSuggestions: false });
+      setState({
+        ...state,
+        suggestions: filteredSuggestions.slice(0, 15),
+        isLoadingSuggestions: false,
+      });
     } catch (e) {
       console.error('Error while fetching suggestions', e);
     }

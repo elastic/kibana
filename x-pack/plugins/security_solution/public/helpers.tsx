@@ -5,31 +5,38 @@
  * 2.0.
  */
 
-import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { has, get, isEmpty } from 'lodash/fp';
+import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
-import { matchPath, RouteProps, Redirect } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom';
+import { matchPath, Redirect } from 'react-router-dom';
 
-import { Capabilities, CoreStart } from '../../../../src/core/public';
+import type { Capabilities, CoreStart } from '@kbn/core/public';
+import type { DocLinks } from '@kbn/doc-links';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   ALERTS_PATH,
   APP_UI_ID,
+  CASES_FEATURE_ID,
+  CASES_PATH,
   EXCEPTIONS_PATH,
+  LANDING_PATH,
   RULES_PATH,
   SERVER_APP_ID,
-  CASES_FEATURE_ID,
-  OVERVIEW_PATH,
-  CASES_PATH,
+  THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
-import { Ecs } from '../common/ecs';
-import {
+import type {
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
-import { TimelineEqlResponse } from '../common/search_strategy/timeline';
-import { NoPrivilegesPage } from './app/no_privileges';
+import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
+import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
-import { CASES_SUB_PLUGIN_KEY, InspectResponse, StartedSubPlugins } from './types';
+import type { InspectResponse, StartedSubPlugins } from './types';
+import { CASES_SUB_PLUGIN_KEY } from './types';
+import { timelineActions } from './timelines/store/timeline';
+import { dataTableActions } from './common/store/data_table';
+import { TableId, TimelineId } from '../common/types';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -138,7 +145,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       break;
     default:
       application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.overview,
+        deepLinkId: SecurityPageName.landing,
         replace: true,
         path,
       });
@@ -147,7 +154,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 };
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T> | TimelineEqlResponse,
+  response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
@@ -162,6 +169,29 @@ export const isDetectionsPath = (pathname: string): boolean => {
   });
 };
 
+const isAlertsPath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `${ALERTS_PATH}`,
+    strict: false,
+  });
+};
+
+const isCaseDetailsPath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `${CASES_PATH}/:detailName`,
+    strict: false,
+  });
+};
+export const isTourPath = (pathname: string): boolean =>
+  isAlertsPath(pathname) || isCaseDetailsPath(pathname);
+
+export const isThreatIntelligencePath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `(${THREAT_INTELLIGENCE_PATH})`,
+    strict: false,
+  });
+};
+
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
   capabilities: Capabilities
@@ -171,11 +201,13 @@ export const getSubPluginRoutesByCapabilities = (
       if (isSubPluginAvailable(key, capabilities)) {
         return [...acc, ...value.routes];
       }
+      const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;
+
       return [
         ...acc,
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
-          component: () => <NoPrivilegesPage subPluginKey={key} />,
+          component: () => <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />,
         })),
       ];
     }, []),
@@ -197,12 +229,12 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   const overviewAvailable = isSubPluginAvailable('overview', capabilities);
   const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
   if (overviewAvailable) {
-    return <Redirect to={OVERVIEW_PATH} />;
+    return <Redirect to={LANDING_PATH} />;
   }
   if (casesAvailable) {
     return <Redirect to={CASES_PATH} />;
   }
-  return <Redirect to={OVERVIEW_PATH} />;
+  return <Redirect to={LANDING_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
 
@@ -263,3 +295,26 @@ export const getField = (ecsData: Ecs, field: string) => {
 
   return value;
 };
+
+export const isTimelineScope = (scopeId: string) =>
+  Object.values(TimelineId).includes(scopeId as unknown as TimelineId);
+export const isInTableScope = (scopeId: string) =>
+  Object.values(TableId).includes(scopeId as unknown as TableId);
+
+export const getScopedActions = (scopeId: string) => {
+  if (isTimelineScope(scopeId)) {
+    return timelineActions;
+  } else if (isInTableScope(scopeId)) {
+    return dataTableActions;
+  }
+};
+
+export const getScopedSelectors = (scopeId: string) => {
+  if (isTimelineScope(scopeId)) {
+    return timelineActions;
+  } else if (isInTableScope(scopeId)) {
+    return dataTableActions;
+  }
+};
+
+export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;

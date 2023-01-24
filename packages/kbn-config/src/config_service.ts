@@ -9,11 +9,12 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '@kbn/logging';
+import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
-import { Config, ConfigPath, Env } from '.';
+import { Config, ConfigPath, Env } from '..';
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
@@ -42,6 +43,7 @@ export interface ConfigValidateParameters {
 export class ConfigService {
   private readonly log: Logger;
   private readonly deprecationLog: Logger;
+  private readonly docLinks: DocLinks;
 
   private validated = false;
   private readonly config$: Observable<Config>;
@@ -67,6 +69,7 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
     this.deprecationLog = logger.get('config', 'deprecation');
+    this.docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
 
     this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
@@ -104,7 +107,7 @@ export class ConfigService {
       ...provider(configDeprecationFactory).map((deprecation) => ({
         deprecation,
         path: flatPath,
-        context: createDeprecationContext(this.env),
+        context: this.createDeprecationContext(),
       })),
     ]);
   }
@@ -170,7 +173,7 @@ export class ConfigService {
     const namespace = pathToString(path);
     const hasSchema = this.schemas.has(namespace);
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (!hasSchema && config.has(path)) {
       // Throw if there is no schema, but a config exists at the path.
       throw new Error(`No validation schema has been defined for [${namespace}]`);
@@ -195,13 +198,13 @@ export class ConfigService {
   }
 
   public async getUnusedPaths() {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     const handledPaths = [...this.handledPaths.values()].map(pathToString);
     return config.getFlattenedPaths().filter((path) => !isPathHandled(path, handledPaths));
   }
 
   public async getUsedPaths() {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     const handledPaths = [...this.handledPaths.values()].map(pathToString);
     return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
   }
@@ -211,8 +214,8 @@ export class ConfigService {
   }
 
   private async logDeprecation() {
-    const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
-    const deprecations = await this.deprecations.pipe(take(1)).toPromise();
+    const rawConfig = await firstValueFrom(this.rawConfigProvider.getConfig$());
+    const deprecations = await firstValueFrom(this.deprecations);
     const deprecationMessages: string[] = [];
     const createAddDeprecation = (domainId: string) => (context: DeprecatedConfigDetails) => {
       if (!context.silent) {
@@ -262,6 +265,14 @@ export class ConfigService {
     handledDeprecatedConfig.push(config);
     this.handledDeprecatedConfigs.set(domainId, handledDeprecatedConfig);
   }
+
+  private createDeprecationContext(): ConfigDeprecationContext {
+    return {
+      branch: this.env.packageInfo.branch,
+      version: this.env.packageInfo.version,
+      docLinks: this.docLinks,
+    };
+  }
 }
 
 const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.') : path);
@@ -272,10 +283,3 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some((handledPath) => hasConfigPathIntersection(path, handledPath));
-
-const createDeprecationContext = (env: Env): ConfigDeprecationContext => {
-  return {
-    branch: env.packageInfo.branch,
-    version: env.packageInfo.version,
-  };
-};

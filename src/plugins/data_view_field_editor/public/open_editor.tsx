@@ -6,33 +6,48 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { CoreStart, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-
-import {
-  createKibanaReactContext,
-  toMountPoint,
-  DataViewField,
+import React from 'react';
+import { FieldEditorLoader } from './components/field_editor_loader';
+import { euiFlyoutClassname } from './constants';
+import type { ApiService } from './lib/api';
+import type {
   DataPublicPluginStart,
   DataView,
   UsageCollectionStart,
+  RuntimeType,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
-  RuntimeType,
+  DataViewField,
 } from './shared_imports';
+import { createKibanaReactContext, toMountPoint } from './shared_imports';
+import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
-import type { PluginStart, InternalFieldType, CloseEditor } from './types';
-import type { ApiService } from './lib/api';
-import { euiFlyoutClassname } from './constants';
-import { FieldEditorLoader } from './components/field_editor_loader';
-
+/**
+ * Options for opening the field editor
+ * @public
+ */
 export interface OpenFieldEditorOptions {
+  /**
+   * context containing the data view the field belongs to
+   */
   ctx: {
     dataView: DataView;
   };
-  onSave?: (field: DataViewField) => void;
+  /**
+   * action to take after field is saved
+   * @param field - the fields that were saved
+   */
+  onSave?: (field: DataViewField[]) => void;
+  /**
+   * field to edit, for existing field
+   */
   fieldName?: string;
+  /**
+   * pre-selectable options for new field creation
+   */
+  fieldToCreate?: Field;
 }
 
 interface Dependencies {
@@ -75,7 +90,8 @@ export const getFieldEditorOpener =
 
     const openEditor = ({
       onSave,
-      fieldName,
+      fieldName: fieldNameToEdit,
+      fieldToCreate,
       ctx: { dataView },
     }: OpenFieldEditorOptions): CloseEditor => {
       const closeEditor = () => {
@@ -85,7 +101,7 @@ export const getFieldEditorOpener =
         }
       };
 
-      const onSaveField = (updatedField: DataViewField) => {
+      const onSaveField = (updatedField: DataViewField[]) => {
         closeEditor();
 
         if (onSave) {
@@ -93,27 +109,74 @@ export const getFieldEditorOpener =
         }
       };
 
-      const field = fieldName ? dataView.getFieldByName(fieldName) : undefined;
+      const getRuntimeField = (name: string) => {
+        const fld = dataView.getAllRuntimeFields()[name];
+        return {
+          name,
+          runtimeField: fld,
+          isMapped: false,
+          esTypes: [],
+          type: undefined,
+          customLabel: undefined,
+          count: undefined,
+          spec: {
+            parentName: undefined,
+          },
+        };
+      };
 
-      if (fieldName && !field) {
+      const dataViewField = fieldNameToEdit
+        ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
+        : undefined;
+
+      if (fieldNameToEdit && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
           defaultMessage: "Field named '{fieldName}' not found on index pattern",
-          values: { fieldName },
+          values: { fieldName: fieldNameToEdit },
         });
         notifications.toasts.addDanger(err);
         return closeEditor;
       }
 
-      const isNewRuntimeField = !fieldName;
+      const isNewRuntimeField = !fieldNameToEdit;
       const isExistingRuntimeField =
-        field &&
-        field.runtimeField &&
-        !field.isMapped &&
-        // treat composite field instances as mapped fields for field editing purposes
-        field.runtimeField.type !== ('composite' as RuntimeType);
+        dataViewField &&
+        dataViewField.runtimeField &&
+        !dataViewField.isMapped &&
+        // treat composite subfield instances as mapped fields for field editing purposes
+        (dataViewField.runtimeField.type !== ('composite' as RuntimeType) || !dataViewField.type);
+
       const fieldTypeToProcess: InternalFieldType =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
+      let field: Field | undefined;
+      if (dataViewField) {
+        if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
+          // Composite runtime subfield
+          const [compositeName] = fieldNameToEdit!.split('.');
+          field = {
+            name: compositeName,
+            ...dataView.getRuntimeField(compositeName)!,
+          };
+        } else if (isExistingRuntimeField) {
+          // Runtime field
+          field = {
+            name: fieldNameToEdit!,
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            ...dataView.getRuntimeField(fieldNameToEdit!)!,
+          };
+        } else {
+          // Concrete field
+          field = {
+            name: fieldNameToEdit!,
+            type: (dataViewField?.esTypes ? dataViewField.esTypes[0] : 'keyword') as RuntimeType,
+            customLabel: dataViewField.customLabel,
+            popularity: dataViewField.count,
+            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            parentName: dataViewField.spec.parentName,
+          };
+        }
+      }
       overlayRef = overlays.openFlyout(
         toMountPoint(
           <KibanaReactContextProvider>
@@ -122,7 +185,8 @@ export const getFieldEditorOpener =
               onCancel={closeEditor}
               onMounted={onMounted}
               docLinks={docLinks}
-              field={field}
+              fieldToEdit={field}
+              fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
               dataView={dataView}
               search={search}
@@ -150,7 +214,7 @@ export const getFieldEditorOpener =
             : i18n.translate('indexPatternFieldEditor.editField.flyoutAriaLabel', {
                 defaultMessage: 'Edit {fieldName} field',
                 values: {
-                  fieldName,
+                  fieldName: fieldNameToEdit,
                 },
               }),
           onClose: (flyout) => {

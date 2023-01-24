@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -19,11 +20,13 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
+import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ActionTypeConnector, ConnectorTypes } from '../../../common/api';
+import type { ActionTypeConnector } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -41,7 +44,7 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  selectedConnector: { id: string; type: string };
+  selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({
@@ -55,6 +58,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   selectedConnector,
   updateConnectorDisabled,
 }) => {
+  const { actions } = useApplicationCapabilities();
   const connector = useMemo(
     () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
@@ -63,7 +67,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   const connectorsName = connector?.name ?? 'none';
 
   const actionTypeName = useMemo(
-    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? 'Unknown',
+    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? i18n.UNKNOWN,
     [actionTypes, selectedConnector.type]
   );
 
@@ -101,15 +105,21 @@ const ConnectorsComponent: React.FC<Props> = ({
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <ConnectorsDropdown
-                connectors={connectors}
-                disabled={disabled}
-                selectedConnector={selectedConnector.id}
-                isLoading={isLoading}
-                onChange={onChangeConnector}
-                data-test-subj="case-connectors-dropdown"
-                appendAddConnectorButton={true}
-              />
+              {actions.read ? (
+                <ConnectorsDropdown
+                  connectors={connectors}
+                  disabled={disabled}
+                  selectedConnector={selectedConnector.id}
+                  isLoading={isLoading}
+                  onChange={onChangeConnector}
+                  data-test-subj="case-connectors-dropdown"
+                  appendAddConnectorButton={true}
+                />
+              ) : (
+                <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
+                  <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+                </EuiText>
+              )}
             </EuiFlexItem>
             {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
               <EuiFlexItem grow={false}>
@@ -120,6 +130,7 @@ const ConnectorsComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <Mapping
                   actionTypeName={actionTypeName}
+                  connectorType={selectedConnector.type}
                   isLoading={isLoading}
                   mappings={mappings}
                 />

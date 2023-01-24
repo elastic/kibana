@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisGroups, VisTypeDefinition } from '../../visualizations/public';
+import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { getControlsTab, OptionsTabLazy } from './components/editor';
 import { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -21,14 +21,15 @@ export function createInputControlVisTypeDefinition(
   return {
     name: 'input_control_vis',
     title: i18n.translate('inputControl.register.controlsTitle', {
-      defaultMessage: 'Controls',
+      defaultMessage: 'Input controls',
     }),
     icon: 'controlsHorizontal',
     group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
-      defaultMessage: 'Add dropdown menus and range sliders to your dashboard.',
+      defaultMessage: 'Input controls are deprecated and will be removed in a future version.',
     }),
     stage: 'experimental',
+    isDeprecated: true,
     visConfig: {
       defaults: {
         controls: [],

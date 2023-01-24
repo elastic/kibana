@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { deprecationsServiceMock } from 'src/core/public/mocks';
+import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
@@ -14,21 +14,15 @@ import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecation details flyout', () => {
   let testBed: KibanaTestBed;
-  const { server } = setupEnvironment();
   const {
     defaultMockedResponses: { mockedKibanaDeprecations },
   } = kibanaDeprecationsServiceHelpers;
   const deprecationService = deprecationsServiceMock.createStartContract();
-
-  afterAll(() => {
-    server.restore();
-  });
-
   beforeEach(async () => {
     await act(async () => {
       kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
-      testBed = await setupKibanaPage({
+      testBed = await setupKibanaPage(setupEnvironment().httpSetup, {
         services: {
           core: {
             deprecations: deprecationService,

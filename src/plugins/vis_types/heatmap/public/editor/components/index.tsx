@@ -7,19 +7,18 @@
  */
 
 import React, { lazy } from 'react';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps } from '../../types';
 
 const HeatmapOptionsLazy = lazy(() => import('./heatmap'));
 
 export const getHeatmapOptions =
-  ({ showElasticChartsOptions, palettes, trackUiMetric }: HeatmapTypeProps) =>
+  ({ showElasticChartsOptions, palettes }: HeatmapTypeProps) =>
   (props: VisEditorOptionsProps<HeatmapVisParams>) =>
     (
       <HeatmapOptionsLazy
         {...props}
         palettes={palettes}
         showElasticChartsOptions={showElasticChartsOptions}
-        trackUiMetric={trackUiMetric}
       />
     );

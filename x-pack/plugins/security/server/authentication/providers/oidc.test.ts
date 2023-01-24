@@ -8,8 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -201,6 +201,7 @@ describe('OIDCAuthenticationProvider', () => {
           })
         ).resolves.toEqual(
           AuthenticationResult.redirectTo('/base-path/some-path', {
+            userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
             state: {
               accessToken: 'some-token',
               refreshToken: 'some-refresh-token',

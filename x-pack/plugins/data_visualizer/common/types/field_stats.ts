@@ -7,9 +7,28 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Query } from '@kbn/es-query';
-import { isPopulatedObject } from '../utils/object_utils';
-import { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { TimeBucketsInterval } from '../services/time_buckets';
+
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
 export interface FieldData {
   fieldName: string;
@@ -30,11 +49,6 @@ export interface Field {
 
 export function isValidField(arg: unknown): arg is Field {
   return isPopulatedObject(arg, ['fieldName', 'type']) && typeof arg.fieldName === 'string';
-}
-
-export interface HistogramField {
-  fieldName: string;
-  type: string;
 }
 
 export interface Distribution {
@@ -59,7 +73,7 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
 
 export interface NumericFieldStats {
   fieldName: string;
-  count: number;
+  count?: number;
   min: number;
   max: number;
   avg: number;
@@ -91,27 +105,25 @@ export interface BooleanFieldStats {
   count: number;
   trueCount: number;
   falseCount: number;
-  [key: string]: number | string;
+  topValues: Bucket[];
+  topValuesSampleSize: number;
 }
 
 export interface DocumentCountStats {
-  interval: number;
-  buckets: { [key: string]: number };
-  timeRangeEarliest: number;
-  timeRangeLatest: number;
+  interval?: number;
+  buckets?: { [key: string]: number };
+  timeRangeEarliest?: number;
+  timeRangeLatest?: number;
+  totalCount: number;
+  probability?: number | null;
+  took?: number;
+  randomlySampled?: boolean;
 }
 
 export interface FieldExamples {
   fieldName: string;
   examples: unknown[];
 }
-
-export interface NumericColumnStats {
-  interval: number;
-  min: number;
-  max: number;
-}
-export type NumericColumnStatsMap = Record<string, NumericColumnStats>;
 
 export interface AggHistogram {
   histogram: estypes.AggregationsHistogramAggregation;
@@ -194,6 +206,9 @@ export interface FieldStatsCommonRequestParams {
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
   maxExamples?: number;
+  samplingProbability: number | null;
+  browserSessionSeed: number;
+  samplingOption: SamplingOption;
 }
 
 export interface OverallStatsSearchStrategyParams {
@@ -210,6 +225,8 @@ export interface OverallStatsSearchStrategyParams {
   aggregatableFields: string[];
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
+  browserSessionSeed: number;
+  samplingOption: SamplingOption;
 }
 
 export interface FieldStatsSearchStrategyReturnBase {
@@ -245,4 +262,21 @@ export interface Field {
 
 export interface Aggs {
   [key: string]: estypes.AggregationsAggregationContainer;
+}
+
+export const EMBEDDABLE_SAMPLER_OPTION = {
+  RANDOM: 'random_sampling',
+  NORMAL: 'normal_sampling',
+};
+export type FieldStatsEmbeddableSamplerOption =
+  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+
+export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
+  return arg.mode === 'random_sampling';
+}
+export function isNormalSamplingOption(arg: SamplingOption): arg is NormalSamplingOption {
+  return arg.mode === 'normal_sampling';
+}
+export function isNoSamplingOption(arg: SamplingOption): arg is NoSamplingOption {
+  return arg.mode === 'no_sampling' || (arg.mode === 'random_sampling' && arg.probability === 1);
 }

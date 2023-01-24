@@ -22,12 +22,12 @@ import {
 import _ from 'lodash';
 import React, { Component } from 'react';
 
+import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role } from '../../../../common/model';
 import {
   getExtendedRoleDeprecationNotice,
@@ -46,6 +46,7 @@ interface Props {
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   history: ScopedHistory;
+  readOnly?: boolean;
 }
 
 interface State {
@@ -63,6 +64,10 @@ const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
 };
 
 export class RolesGridPage extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   private tableRef: React.RefObject<EuiInMemoryTable<Role>>;
   constructor(props: Props) {
     super(props);
@@ -106,19 +111,23 @@ export class RolesGridPage extends Component<Props, State> {
               defaultMessage="Apply roles to groups of users and manage permissions across the stack."
             />
           }
-          rightSideItems={[
-            <EuiButton
-              data-test-subj="createRoleButton"
-              {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
-              fill
-              iconType="plusInCircleFilled"
-            >
-              <FormattedMessage
-                id="xpack.security.management.roles.createRoleButtonLabel"
-                defaultMessage="Create role"
-              />
-            </EuiButton>,
-          ]}
+          rightSideItems={
+            this.props.readOnly
+              ? undefined
+              : [
+                  <EuiButton
+                    data-test-subj="createRoleButton"
+                    {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
+                    fill
+                    iconType="plusInCircleFilled"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.roles.createRoleButtonLabel"
+                      defaultMessage="Create role"
+                    />
+                  </EuiButton>,
+                ]
+          }
         />
 
         <EuiSpacer size="l" />
@@ -139,11 +148,16 @@ export class RolesGridPage extends Component<Props, State> {
             responsive={false}
             columns={this.getColumnConfig()}
             hasActions={true}
-            selection={{
-              selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-              selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
-              onSelectionChange: (selection: Role[]) => this.setState({ selection }),
-            }}
+            selection={
+              this.props.readOnly
+                ? undefined
+                : {
+                    selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
+                    selectableMessage: (selectable: boolean) =>
+                      !selectable ? 'Role is reserved' : '',
+                    onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+                  }
+            }
             pagination={{
               initialPageSize: 20,
               pageSizeOptions: [10, 20, 30, 50, 100],
@@ -188,14 +202,13 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getColumnConfig = () => {
-    return [
+    const config: Array<EuiBasicTableColumn<Role>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.security.management.roles.nameColumnName', {
           defaultMessage: 'Role',
         }),
         sortable: true,
-        truncateText: true,
         render: (name: string, record: Role) => {
           return (
             <EuiText color="subdued" size="s">
@@ -219,7 +232,10 @@ export class RolesGridPage extends Component<Props, State> {
           return this.getRoleStatusBadges(record);
         },
       },
-      {
+    ];
+
+    if (!this.props.readOnly) {
+      config.push({
         name: i18n.translate('xpack.security.management.roles.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
@@ -290,7 +306,7 @@ export class RolesGridPage extends Component<Props, State> {
           },
           {
             available: (role: Role) => !isRoleReadOnly(role),
-            enable: () => this.state.selection.length === 0,
+            enabled: () => this.state.selection.length === 0,
             isPrimary: true,
             render: (role: Role) => {
               const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
@@ -322,8 +338,10 @@ export class RolesGridPage extends Component<Props, State> {
             },
           },
         ],
-      },
-    ] as Array<EuiBasicTableColumn<Role>>;
+      });
+    }
+
+    return config;
   };
 
   private getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {

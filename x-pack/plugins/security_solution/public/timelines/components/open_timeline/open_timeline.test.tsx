@@ -13,13 +13,14 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
-import { OpenTimelineResult, OpenTimelineProps } from './types';
-import { TimelinesTableProps } from './timelines_table';
+import type { OpenTimelineResult, OpenTimelineProps } from './types';
+import type { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -35,14 +36,15 @@ jest.mock('react-router-dom', () => {
 const mockTheme = getMockTheme({
   eui: {
     euiSizeL: '10px',
-    paddingSizes: {
-      s: '10px',
-    },
+    euiSizeS: '10px',
     euiBreakpoints: {
       l: '1200px',
     },
   },
 });
+
+jest.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('OpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
@@ -104,6 +106,9 @@ describe('OpenTimeline', () => {
   });
 
   test('it shows the delete action columns when onDeleteSelected and deleteTimelines are specified', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -165,6 +170,29 @@ describe('OpenTimeline', () => {
       onDeleteSelected: undefined,
       deleteTimelines: undefined,
     };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={mockTheme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    const props = wrapper
+      .find('[data-test-subj="timelines-table"]')
+      .first()
+      .props() as TimelinesTableProps;
+
+    expect(props.actionTimelineToShow).not.toContain('delete');
+  });
+
+  test('it does NOT show the delete action when user has read only access', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      onDeleteSelected: undefined,
+      deleteTimelines: undefined,
+    };
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+    });
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
         <OpenTimeline {...defaultProps} />
@@ -313,7 +341,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
@@ -322,6 +354,9 @@ describe('OpenTimeline', () => {
   });
 
   test('it should disable delete timeline if no timeline is selected', async () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
       timelineStatus: null,
@@ -333,7 +368,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
@@ -353,7 +392,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
@@ -362,6 +405,9 @@ describe('OpenTimeline', () => {
   });
 
   test('it should enable delete timeline if a timeline is selected', async () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
       timelineStatus: null,
@@ -373,7 +419,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
@@ -382,6 +432,9 @@ describe('OpenTimeline', () => {
   });
 
   test("it should render a selectable timeline table if timelineStatus is active (selecting custom templates' tab)", () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
       timelineStatus: TimelineStatus.active,
@@ -395,6 +448,44 @@ describe('OpenTimeline', () => {
     expect(
       wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
     ).toEqual(['createFrom', 'duplicate', 'export', 'selectable', 'delete']);
+  });
+
+  test('it should include createRule in timeline actions if onCreateRule is passed', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.active,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={mockTheme}>
+        <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['createFrom', 'duplicate', 'createRule', 'export', 'selectable', 'delete']);
+  });
+
+  test('it should NOT include createFrom, duplicate, createRule, delete in timeline actions when user has read only access', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.active,
+    };
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+    });
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={mockTheme}>
+        <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['export', 'selectable']);
   });
 
   test("it should render selected count if timelineStatus is active (selecting custom templates' tab)", () => {
@@ -426,6 +517,9 @@ describe('OpenTimeline', () => {
   });
 
   test("it should not render a selectable timeline table if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
       timelineStatus: TimelineStatus.immutable,
@@ -470,6 +564,9 @@ describe('OpenTimeline', () => {
   });
 
   test("it should render a selectable timeline table if timelineStatus is null (no template timelines' tab selected)", () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
       timelineStatus: null,
@@ -483,6 +580,25 @@ describe('OpenTimeline', () => {
     expect(
       wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
     ).toEqual(['createFrom', 'duplicate', 'export', 'selectable', 'delete']);
+  });
+
+  test("it should render a selectable timeline table if timelineStatus is null (no template timelines' tab selected) and user has read only access", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+    };
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+    });
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={mockTheme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['export', 'selectable']);
   });
 
   test("it should render selected count if timelineStatus is null (no template timelines' tab selected)", () => {

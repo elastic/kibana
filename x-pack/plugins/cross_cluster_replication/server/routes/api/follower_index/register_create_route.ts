@@ -44,7 +44,7 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name, ...rest } = request.body;
       const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
 

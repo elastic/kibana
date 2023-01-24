@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { Field, NewJobCapsResponse } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 import { ml } from '../ml_api_service';
 
@@ -46,11 +46,11 @@ class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
   public async initializeFromDataVIew(dataView: DataView) {
     try {
       const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
-        dataView.title,
+        dataView.getIndexPattern(),
         dataView.type === 'rollup'
       );
 
-      const allFields = removeNestedFieldChildren(resp, dataView.title);
+      const allFields = removeNestedFieldChildren(resp, dataView.getIndexPattern());
 
       const { fieldsPreferringKeyword } = processTextAndKeywordFields(allFields);
 

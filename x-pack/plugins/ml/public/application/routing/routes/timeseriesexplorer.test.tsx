@@ -8,10 +8,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MlContext } from '../../contexts/ml';
+import { kibanaContextValueMock } from '../../contexts/ml/__mocks__/kibana_context_value';
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 
 jest.mock('../../services/toast_notification_service');
 
@@ -41,7 +44,51 @@ const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jes
   typeof TimeseriesexplorerNoJobsFound
 >;
 
-jest.mock('../../util/url_state');
+const getMockedTimefilter = () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { of } = require('rxjs');
+  return {
+    timefilter: {
+      disableTimeRangeSelector: jest.fn(),
+      disableAutoRefreshSelector: jest.fn(),
+      enableTimeRangeSelector: jest.fn(),
+      enableAutoRefreshSelector: jest.fn(),
+      getRefreshInterval: jest.fn(),
+      setRefreshInterval: jest.fn(),
+      getTime: jest.fn(),
+      isAutoRefreshSelectorEnabled: jest.fn(),
+      isTimeRangeSelectorEnabled: jest.fn(),
+      getRefreshIntervalUpdate$: jest.fn(),
+      getTimeUpdate$: jest.fn(() => {
+        return of();
+      }),
+      getEnabledUpdated$: jest.fn(),
+    },
+    history: { get: jest.fn() },
+  };
+};
+
+const getMockedDatePickeDependencies = () => {
+  return {
+    data: {
+      query: {
+        timefilter: getMockedTimefilter(),
+      },
+    },
+    notifications: {},
+  } as unknown as DatePickerDependencies;
+};
+
+jest.mock('@kbn/ml-url-state', () => {
+  return {
+    usePageUrlState: jest.fn(() => {
+      return [{}, jest.fn(), {}];
+    }),
+    useUrlState: jest.fn(() => {
+      return [{ refreshInterval: { value: 0, pause: true } }, jest.fn()];
+    }),
+  };
+});
 
 jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
@@ -50,8 +97,6 @@ jest.mock('../../components/help_menu', () => ({
 }));
 
 jest.mock('../../contexts/kibana/kibana_context', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { of } = require('rxjs');
   return {
     useMlKibana: () => {
       return {
@@ -64,25 +109,7 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
           uiSettings: { get: jest.fn() },
           data: {
             query: {
-              timefilter: {
-                timefilter: {
-                  disableTimeRangeSelector: jest.fn(),
-                  disableAutoRefreshSelector: jest.fn(),
-                  enableTimeRangeSelector: jest.fn(),
-                  enableAutoRefreshSelector: jest.fn(),
-                  getRefreshInterval: jest.fn(),
-                  setRefreshInterval: jest.fn(),
-                  getTime: jest.fn(),
-                  isAutoRefreshSelectorEnabled: jest.fn(),
-                  isTimeRangeSelectorEnabled: jest.fn(),
-                  getRefreshIntervalUpdate$: jest.fn(),
-                  getTimeUpdate$: jest.fn(() => {
-                    return of();
-                  }),
-                  getEnabledUpdated$: jest.fn(),
-                },
-                history: { get: jest.fn() },
-              },
+              timefilter: getMockedTimefilter(),
             },
           },
           notifications: {
@@ -109,9 +136,13 @@ describe('TimeSeriesExplorerUrlStateManager', () => {
     };
 
     render(
-      <I18nProvider>
-        <TimeSeriesExplorerUrlStateManager {...props} />
-      </I18nProvider>
+      <MlContext.Provider value={kibanaContextValueMock}>
+        <I18nProvider>
+          <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
+            <TimeSeriesExplorerUrlStateManager {...props} />
+          </DatePickerContextProvider>
+        </I18nProvider>
+      </MlContext.Provider>
     );
 
     // assert

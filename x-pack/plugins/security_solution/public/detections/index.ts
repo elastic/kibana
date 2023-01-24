@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TableIdLiteral } from '../../common/types';
+import { TableId } from '../../common/types';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
-import { SecuritySubPlugin } from '../app/types';
+import type { SecuritySubPlugin } from '../app/types';
 
-export const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
-  TimelineId.detectionsRulesDetailsPage,
-  TimelineId.detectionsPage,
+export const DETECTIONS_TABLE_IDS: TableIdLiteral[] = [
+  TableId.alertsOnRuleDetailsPage,
+  TableId.alertsOnAlertsPage,
 ];
 
 export class Detections {
@@ -21,8 +22,8 @@ export class Detections {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
+      storageDataTables: {
+        tableById: getDataTablesInStorageByIds(storage, DETECTIONS_TABLE_IDS),
       },
       routes,
     };

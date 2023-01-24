@@ -6,8 +6,7 @@
  */
 
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
-import { MapSettings } from '../../reducers/map';
+import { Goto, MapCenterAndZoom, MapSettings } from '../../../common/descriptor_types';
 
 export async function getInitialView(
   goto: Goto | null | undefined,

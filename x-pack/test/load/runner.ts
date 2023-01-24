@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import Fs from 'fs';
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { FtrProviderContext } from './../functional/ftr_provider_context';
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 const baseSimulationPath = 'src/test/scala/org/kibanaLoadTest/simulation';
 const simulationPackage = 'org.kibanaLoadTest.simulation';

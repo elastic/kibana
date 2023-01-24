@@ -7,17 +7,20 @@
 
 import React from 'react';
 import { get, isEmpty } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
-import { CommentType, CommentResponseAlertsType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { CommentResponseAlertsType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionUsernameWithAvatar } from '../avatar_username';
-import { AlertCommentEvent } from './alert_event';
-import { UserActionCopyLink } from '../copy_link';
+import type { SnakeToCamelCase } from '../../../../common/types';
+import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 import { UserActionShowAlert } from './show_alert';
+import { ShowAlertTableLink } from './show_alert_table_link';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { UserActionContentToolbar } from '../content_toolbar';
+import { AlertPropertyActions } from '../property_actions/alert_property_actions';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -27,72 +30,140 @@ type BuilderArgs = Pick<
   | 'onRuleDetailsClick'
   | 'loadingAlertData'
   | 'onShowAlertDetails'
+  | 'userProfiles'
+  | 'handleDeleteComment'
+  | 'loadingCommentIds'
 > & { comment: SnakeToCamelCase<CommentResponseAlertsType> };
 
-export const createAlertAttachmentUserActionBuilder = ({
+const getSingleAlertUserAction = ({
   userAction,
+  userProfiles,
   comment,
   alertData,
-  getRuleDetailsHref,
   loadingAlertData,
+  loadingCommentIds,
+  getRuleDetailsHref,
   onRuleDetailsClick,
   onShowAlertDetails,
-}: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  build: () => {
-    const alertId = getNonEmptyField(comment.alertId);
-    const alertIndex = getNonEmptyField(comment.index);
+  handleDeleteComment,
+}: BuilderArgs): EuiCommentProps[] => {
+  const alertId = getNonEmptyField(comment.alertId);
+  const alertIndex = getNonEmptyField(comment.index);
 
-    if (!alertId || !alertIndex) {
-      return [];
+  if (!alertId || !alertIndex) {
+    return [];
+  }
+
+  const alertField: unknown | undefined = alertData[alertId];
+  const ruleId = getRuleId(comment, alertField);
+  const ruleName = getRuleName(comment, alertField);
+
+  return [
+    {
+      username: (
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
+      ),
+      className: 'comment-alert',
+      event: (
+        <SingleAlertCommentEvent
+          actionId={userAction.actionId}
+          getRuleDetailsHref={getRuleDetailsHref}
+          loadingAlertData={loadingAlertData}
+          onRuleDetailsClick={onRuleDetailsClick}
+          ruleId={ruleId}
+          ruleName={ruleName}
+        />
+      ),
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+      timelineAvatar: 'bell',
+      actions: (
+        <UserActionContentToolbar id={comment.id}>
+          <EuiFlexItem grow={false}>
+            <UserActionShowAlert
+              id={userAction.actionId}
+              alertId={alertId}
+              index={alertIndex}
+              onShowAlertDetails={onShowAlertDetails}
+            />
+          </EuiFlexItem>
+          <AlertPropertyActions
+            onDelete={() => handleDeleteComment(comment.id)}
+            isLoading={loadingCommentIds.includes(comment.id)}
+            totalAlerts={1}
+          />
+        </UserActionContentToolbar>
+      ),
+    },
+  ];
+};
+
+const getMultipleAlertsUserAction = ({
+  userAction,
+  userProfiles,
+  comment,
+  alertData,
+  loadingAlertData,
+  loadingCommentIds,
+  getRuleDetailsHref,
+  onRuleDetailsClick,
+  handleDeleteComment,
+}: BuilderArgs): EuiCommentProps[] => {
+  if (!Array.isArray(comment.alertId)) {
+    return [];
+  }
+
+  const totalAlerts = comment.alertId.length;
+  const { ruleId, ruleName } = getRuleInfo(comment, alertData);
+
+  return [
+    {
+      username: (
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
+      ),
+      className: 'comment-alert',
+      event: (
+        <MultipleAlertsCommentEvent
+          actionId={userAction.actionId}
+          loadingAlertData={loadingAlertData}
+          totalAlerts={totalAlerts}
+          ruleId={ruleId}
+          ruleName={ruleName}
+          getRuleDetailsHref={getRuleDetailsHref}
+          onRuleDetailsClick={onRuleDetailsClick}
+        />
+      ),
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+      timelineAvatar: 'bell',
+      actions: (
+        <UserActionContentToolbar id={comment.id}>
+          <EuiFlexItem grow={false}>
+            <ShowAlertTableLink />
+          </EuiFlexItem>
+          <AlertPropertyActions
+            onDelete={() => handleDeleteComment(comment.id)}
+            isLoading={loadingCommentIds.includes(comment.id)}
+            totalAlerts={totalAlerts}
+          />
+        </UserActionContentToolbar>
+      ),
+    },
+  ];
+};
+
+export const createAlertAttachmentUserActionBuilder = (
+  params: BuilderArgs
+): ReturnType<UserActionBuilder> => ({
+  build: () => {
+    const { comment } = params;
+    const alertId = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+
+    if (alertId.length === 1) {
+      return getSingleAlertUserAction(params);
     }
 
-    const alertField: unknown | undefined = alertData[alertId];
-    const ruleId = getRuleId(comment, alertField);
-    const ruleName = getRuleName(comment, alertField);
-
-    return [
-      {
-        username: (
-          <UserActionUsernameWithAvatar
-            username={userAction.createdBy.username}
-            fullName={userAction.createdBy.fullName}
-          />
-        ),
-        className: 'comment-alert',
-        type: 'update',
-        event: (
-          <AlertCommentEvent
-            alertId={alertId}
-            getRuleDetailsHref={getRuleDetailsHref}
-            loadingAlertData={loadingAlertData}
-            onRuleDetailsClick={onRuleDetailsClick}
-            ruleId={ruleId}
-            ruleName={ruleName}
-            commentType={CommentType.alert}
-          />
-        ),
-        'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
-        timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: 'bell',
-        actions: (
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <UserActionCopyLink id={userAction.actionId} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <UserActionShowAlert
-                id={userAction.actionId}
-                alertId={alertId}
-                index={alertIndex}
-                onShowAlertDetails={onShowAlertDetails}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      },
-    ];
+    return getMultipleAlertsUserAction(params);
   },
 });
 
@@ -142,4 +213,18 @@ function getNonEmptyField(field: string | string[] | undefined | null): string |
   }
 
   return firstItem;
+}
+
+export function getRuleInfo(comment: BuilderArgs['comment'], alertData: BuilderArgs['alertData']) {
+  const alertId = getNonEmptyField(comment.alertId);
+
+  if (!alertId) {
+    return { ruleId: null, ruleName: null };
+  }
+
+  const alertField: unknown | undefined = alertData[alertId];
+  const ruleId = getRuleId(comment, alertField);
+  const ruleName = getRuleName(comment, alertField);
+
+  return { ruleId, ruleName };
 }

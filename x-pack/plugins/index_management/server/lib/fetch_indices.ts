@@ -6,9 +6,9 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { IndexDataEnricher } from '../services';
-import { Index } from '../index';
+import { Index } from '..';
 
 async function fetchIndicesCall(
   client: IScopedClusterClient,
@@ -31,7 +31,6 @@ async function fetchIndicesCall(
       '*.data_stream',
     ],
     // for better performance only compute aliases and settings of indices but not mappings
-    // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
   });
 
@@ -57,11 +56,10 @@ async function fetchIndicesCall(
       uuid: indexStats?.uuid,
       primary: indexData.settings?.index?.number_of_shards,
       replica: indexData.settings?.index?.number_of_replicas,
-      documents: indexStats?.total?.docs?.count ?? 0,
-      documents_deleted: indexStats?.total?.docs?.deleted ?? 0,
+      documents: indexStats?.primaries?.docs?.count ?? 0,
+      documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
       primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
-      // @ts-expect-error
       isFrozen: indexData.settings?.index?.frozen === 'true',
       aliases: aliases.length ? aliases : 'none',
       hidden: indexData.settings?.index?.hidden === 'true',

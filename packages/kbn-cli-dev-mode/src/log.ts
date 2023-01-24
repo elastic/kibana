@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 
 import Chalk from 'chalk';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export interface Log {
   toolingLog: ToolingLog;

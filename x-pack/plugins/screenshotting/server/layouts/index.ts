@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { LayoutSelectorDictionary, Size } from '../../common/layout';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { BaseLayout } from './base_layout';

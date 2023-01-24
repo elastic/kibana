@@ -6,18 +6,13 @@ exports[`Should render callout when joins are disabled 1`] = `
     size="xs"
   >
     <h5>
-      <EuiToolTip
-        content="Use term joins to augment this layer with properties for data driven styling."
-        delay="regular"
-        display="inlineBlock"
-        position="top"
-      >
-        <FormattedMessage
-          defaultMessage="Term joins"
-          id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-          values={Object {}}
-        />
-      </EuiToolTip>
+      <FormattedMessage
+        defaultMessage="Term joins"
+        id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
+        values={Object {}}
+      />
+       
+      <JoinDocumentationPopover />
     </h5>
   </EuiTitle>
   <EuiCallOut
@@ -34,18 +29,13 @@ exports[`Should render join editor 1`] = `
     size="xs"
   >
     <h5>
-      <EuiToolTip
-        content="Use term joins to augment this layer with properties for data driven styling."
-        delay="regular"
-        display="inlineBlock"
-        position="top"
-      >
-        <FormattedMessage
-          defaultMessage="Term joins"
-          id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-          values={Object {}}
-        />
-      </EuiToolTip>
+      <FormattedMessage
+        defaultMessage="Term joins"
+        id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
+        values={Object {}}
+      />
+       
+      <JoinDocumentationPopover />
     </h5>
   </EuiTitle>
   <EuiSpacer
@@ -58,7 +48,6 @@ exports[`Should render join editor 1`] = `
         "right": Object {
           "id": "673ff994-fc75-4c67-909b-69fcb0e1060e",
           "indexPatternId": "abcde",
-          "indexPatternTitle": "kibana_sample_data_logs",
           "metrics": Array [
             Object {
               "label": "web logs count",
@@ -85,18 +74,11 @@ exports[`Should render join editor 1`] = `
   <EuiTextAlign
     textAlign="center"
   >
-    <EuiButtonEmpty
-      aria-label="Add join"
-      iconType="plusInCircleFilled"
-      onClick={[Function]}
-      size="xs"
-    >
-      <FormattedMessage
-        defaultMessage="Add join"
-        id="xpack.maps.layerPanel.joinEditor.addJoinButtonLabel"
-        values={Object {}}
-      />
-    </EuiButtonEmpty>
+    <AddJoinButton
+      addJoin={[Function]}
+      isLayerSourceMvt={false}
+      numJoins={1}
+    />
   </EuiTextAlign>
 </div>
 `;

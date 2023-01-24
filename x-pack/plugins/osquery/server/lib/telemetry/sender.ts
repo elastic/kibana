@@ -5,40 +5,30 @@
  * 2.0.
  */
 
-import axios from 'axios';
-import { URL } from 'url';
-import { transformDataToNdjson } from '@kbn/securitysolution-utils';
-
-import { Logger } from 'src/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import {
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
+} from '@kbn/task-manager-plugin/server';
+import type { TelemetryReceiver } from './receiver';
 import { createTelemetryTaskConfigs } from './tasks';
-import { createUsageCounterLabel } from './helpers';
-import type { TelemetryEvent } from './types';
-import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
-import { OsqueryTelemetryTask, OsqueryTelemetryTaskConfig } from './task';
+import {
+  TELEMETRY_EBT_LIVE_QUERY_EVENT,
+  TELEMETRY_EBT_SAVED_QUERY_EVENT,
+  TELEMETRY_EBT_CONFIG_EVENT,
+  TELEMETRY_EBT_PACK_EVENT,
+} from './constants';
 
-const usageLabelPrefix: string[] = ['osquery_telemetry', 'sender'];
+import type { OsqueryTelemetryTaskConfig } from './task';
+import { OsqueryTelemetryTask } from './task';
 
 export class TelemetryEventsSender {
-  private readonly initialCheckDelayMs = 10 * 1000;
-  private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
-  private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
-  private telemetryStart?: TelemetryPluginStart;
-  private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
-  private isSending = false;
+  // @ts-expect-error used as part of this
   private receiver: TelemetryReceiver | undefined;
-  private queue: TelemetryEvent[] = [];
-  private isOptedIn?: boolean = true; // Assume true until the first check
+  public analyticsReportEvent: AnalyticsServiceSetup['reportEvent'] | undefined;
 
-  private telemetryUsageCounter?: UsageCounter;
   private telemetryTasks?: OsqueryTelemetryTask[];
 
   constructor(logger: Logger) {
@@ -47,46 +37,34 @@ export class TelemetryEventsSender {
 
   public setup(
     telemetryReceiver: TelemetryReceiver,
-    telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter
+    analytics?: AnalyticsServiceSetup
   ) {
-    this.telemetrySetup = telemetrySetup;
-    this.telemetryUsageCounter = telemetryUsageCounter;
+    if (analytics) {
+      this.analyticsReportEvent = analytics.reportEvent;
 
-    if (taskManager) {
-      this.telemetryTasks = createTelemetryTaskConfigs().map(
-        (config: OsqueryTelemetryTaskConfig) => {
-          const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
-          task.register(taskManager);
-          return task;
-        }
-      );
+      this.registerEvents(analytics.registerEventType);
+
+      if (taskManager) {
+        this.telemetryTasks = createTelemetryTaskConfigs().map(
+          (config: OsqueryTelemetryTaskConfig) => {
+            const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
+            task.register(taskManager);
+
+            return task;
+          }
+        );
+      }
     }
   }
 
-  public getClusterID(): string | undefined {
-    return this.receiver?.getClusterInfo()?.cluster_uuid;
-  }
-
-  public start(
-    telemetryStart?: TelemetryPluginStart,
-    taskManager?: TaskManagerStartContract,
-    receiver?: TelemetryReceiver
-  ) {
-    this.telemetryStart = telemetryStart;
+  public start(taskManager?: TaskManagerStartContract, receiver?: TelemetryReceiver) {
     this.receiver = receiver;
 
     if (taskManager && this.telemetryTasks) {
       this.logger.debug(`Starting osquery telemetry tasks`);
       this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
-
-    this.logger.debug(`Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
   }
 
   public stop() {
@@ -95,201 +73,160 @@ export class TelemetryEventsSender {
     }
   }
 
-  public queueTelemetryEvents(events: TelemetryEvent[]) {
-    const qlength = this.queue.length;
-
-    if (events.length === 0) {
-      return;
-    }
-
-    this.logger.debug(`Queue events`);
-
-    if (qlength >= this.maxQueueSize) {
-      // we're full already
-      return;
-    }
-
-    if (events.length > this.maxQueueSize - qlength) {
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
-        counterType: 'docs_lost',
-        incrementBy: events.length,
-      });
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
-        counterType: 'num_capacity_exceeded',
-        incrementBy: 1,
-      });
-      this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
-    } else {
-      this.queue.push(...this.processEvents(events));
+  public reportEvent(
+    ...args: Parameters<AnalyticsServiceSetup['reportEvent']>
+  ): ReturnType<AnalyticsServiceSetup['reportEvent']> {
+    if (this.analyticsReportEvent) {
+      this.analyticsReportEvent(...args);
     }
   }
 
-  public async isTelemetryOptedIn() {
-    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
-    return this.isOptedIn === true;
-  }
+  public registerEvents(registerEventType: AnalyticsServiceSetup['registerEventType']) {
+    registerEventType({
+      eventType: TELEMETRY_EBT_LIVE_QUERY_EVENT,
+      schema: {
+        action_id: { type: 'keyword', _meta: { description: '' } },
+        '@timestamp': { type: 'date', _meta: { description: '' } },
+        expiration: { type: 'date', _meta: { description: '' } },
+        agent_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
+        agent_all: { type: 'boolean', _meta: { description: '', optional: true } },
+        agent_platforms: { type: 'pass_through', _meta: { description: '', optional: true } },
+        agent_policy_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
+        agents: { type: 'long', _meta: { description: '' } },
+        metadata: { type: 'pass_through', _meta: { description: '', optional: true } },
+        queries: { type: 'pass_through', _meta: { description: '' } },
+        alert_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
+        event_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
+        case_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
+        pack_id: { type: 'keyword', _meta: { description: '', optional: true } },
+        pack_name: { type: 'keyword', _meta: { description: '', optional: true } },
+        pack_prebuilt: { type: 'boolean', _meta: { description: '', optional: true } },
+      },
+    });
 
-  private async sendIfDue() {
-    if (this.isSending) {
-      return;
-    }
-
-    if (this.queue.length === 0) {
-      return;
-    }
-
-    try {
-      this.isSending = true;
-
-      this.isOptedIn = await this.isTelemetryOptedIn();
-      if (!this.isOptedIn) {
-        this.logger.debug(`Telemetry is not opted-in.`);
-        this.queue = [];
-        this.isSending = false;
-        return;
-      }
-
-      const clusterInfo = this.receiver?.getClusterInfo();
-
-      const [telemetryUrl, licenseInfo] = await Promise.all([
-        this.fetchTelemetryUrl('alerts-endpoint'),
-        this.receiver?.fetchLicenseInfo(),
-      ]);
-
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
-        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
-      );
-
-      const toSend: TelemetryEvent[] = this.queue.slice().map((event) => ({
-        ...event,
-        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
-        cluster_uuid: clusterInfo?.cluster_uuid,
-        cluster_name: clusterInfo?.cluster_name,
-      }));
-      this.queue = [];
-
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        'alerts-endpoint',
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.cluster_name,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
-      );
-    } catch (err) {
-      this.queue = [];
-    }
-    this.isSending = false;
-  }
-
-  public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
-    return events;
-  }
-
-  /**
-   * This function sends events to the elastic telemetry channel. Caution is required
-   * because it does no allowlist filtering at send time. The function call site is
-   * responsible for ensuring sure no sensitive material is in telemetry events.
-   *
-   * @param channel the elastic telemetry channel
-   * @param toSend telemetry events
-   */
-  public async sendOnDemand(channel: string, toSend: unknown[]) {
-    const clusterInfo = this.receiver?.getClusterInfo();
-    try {
-      const [telemetryUrl, licenseInfo] = await Promise.all([
-        this.fetchTelemetryUrl(channel),
-        this.receiver?.fetchLicenseInfo(),
-      ]);
-
-      this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
-      this.logger.debug(
-        `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
-      );
-
-      await this.sendEvents(
-        toSend,
-        telemetryUrl,
-        channel,
-        clusterInfo?.cluster_uuid,
-        clusterInfo?.cluster_name,
-        clusterInfo?.version?.number,
-        licenseInfo?.uid
-      );
-      // eslint-disable-next-line no-empty
-    } catch (err) {}
-  }
-
-  private async fetchTelemetryUrl(channel: string): Promise<string> {
-    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
-    if (!telemetryUrl) {
-      throw Error("Couldn't get telemetry URL");
-    }
-    return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
-  }
-
-  // Forms URLs like:
-  // https://telemetry.elastic.co/v3/send/my-channel-name or
-  // https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
-  public getV3UrlFromV2(v2url: string, channel: string): string {
-    const url = new URL(v2url);
-    if (!url.hostname.includes('staging')) {
-      url.pathname = `/v3/send/${channel}`;
-    } else {
-      url.pathname = `/v3-dev/send/${channel}`;
-    }
-    return url.toString();
-  }
-
-  private async sendEvents(
-    events: unknown[],
-    telemetryUrl: string,
-    channel: string,
-    clusterUuid: string | undefined,
-    clusterName: string | undefined,
-    clusterVersionNumber: string | undefined,
-    licenseId: string | undefined
-  ) {
-    const ndjson = transformDataToNdjson(events);
-
-    try {
-      this.logger.debug(`Sending ${events.length} telemetry events to ${channel}`);
-      const resp = await axios.post(telemetryUrl, ndjson, {
-        headers: {
-          'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Cluster-Name': clusterName,
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
-          ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
+    registerEventType({
+      eventType: TELEMETRY_EBT_PACK_EVENT,
+      schema: {
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+          },
         },
-      });
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
-        counterType: resp.status.toString(),
-        incrementBy: 1,
-      });
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
-        counterType: 'docs_sent',
-        incrementBy: events.length,
-      });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
-    } catch (err) {
-      this.logger.debug(`Error sending events: ${err}`);
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
-        counterType: 'docs_lost',
-        incrementBy: events.length,
-      });
-      this.telemetryUsageCounter?.incrementCounter({
-        counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
-        counterType: 'num_exceptions',
-        incrementBy: 1,
-      });
-    }
+        queries: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Pack queries',
+          },
+        },
+        policies: {
+          type: 'short',
+          _meta: {
+            description: 'Number of agent policies assigned to the pack',
+          },
+        },
+        prebuilt: {
+          type: 'boolean',
+          _meta: {
+            description: 'Elastic prebuilt pack',
+          },
+        },
+        enabled: {
+          type: 'boolean',
+          _meta: {
+            description: 'Pack enabled',
+          },
+        },
+      },
+    });
+
+    registerEventType({
+      eventType: TELEMETRY_EBT_CONFIG_EVENT,
+      schema: {
+        id: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+          },
+        },
+        version: {
+          type: 'keyword',
+          _meta: {
+            description: 'osquery_manger integration version',
+          },
+        },
+        enabled: {
+          type: 'boolean',
+          _meta: {
+            description: '',
+          },
+        },
+        config: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Osquery package policy config',
+          },
+        },
+      },
+    });
+
+    registerEventType({
+      eventType: TELEMETRY_EBT_SAVED_QUERY_EVENT,
+      schema: {
+        id: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+          },
+        },
+        query: {
+          type: 'text',
+          _meta: {
+            description: '',
+          },
+        },
+        platform: {
+          type: 'keyword',
+          _meta: {
+            description: '',
+            optional: true,
+          },
+        },
+        interval: {
+          type: 'short',
+          _meta: {
+            description: '',
+            optional: true,
+          },
+        },
+        snapshot: {
+          type: 'boolean',
+          _meta: {
+            description: '',
+          },
+        },
+        removed: {
+          type: 'boolean',
+          _meta: {
+            description: '',
+            optional: true,
+          },
+        },
+        prebuilt: {
+          type: 'boolean',
+          _meta: {
+            description: '',
+            optional: true,
+          },
+        },
+        ecs_mapping: {
+          type: 'pass_through',
+          _meta: {
+            description: '',
+            optional: true,
+          },
+        },
+      },
+    });
   }
 }

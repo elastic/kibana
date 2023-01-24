@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IClusterClient, PluginInitializerContext } from 'src/core/server';
+import { IClusterClient, PluginInitializerContext } from '@kbn/core/server';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';

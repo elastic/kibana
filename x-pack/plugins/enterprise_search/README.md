@@ -6,13 +6,13 @@ This plugin provides Kibana user interfaces for managing the Enterprise Search s
 
 ### App Search
 
-<img src="./public/applications/enterprise_search/assets/app_search.png" width="400" height="255">
+<img src="./public/applications/enterprise_search_overview/assets/app_search.png" width="400" height="255">
 
 Add rich, relevant search to your apps and websites. https://www.elastic.co/app-search/
 
 ### Workplace Search
 
-<img src="./public/applications/enterprise_search/assets/workplace_search.png" width="400" height="255">
+<img src="./public/applications/enterprise_search_overview/assets/workplace_search.png" width="400" height="255">
 
 Unify all your team's content into a personalized search experience. https://www.elastic.co/workplace-search/
 
@@ -25,17 +25,23 @@ Problems? If you're an Elastic Enterprise Search engineer, please reach out to @
 
 Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
+### Server development
+
+Kibana runs both a frontend and a backend/middleware server. For server development guidelines, see [SERVER.md](SERVER.md).
+
 ### Kea
 
-Enterprise Search uses [Kea.js](https://github.com/keajs/kea) to manage our React/Redux state for us. Kea state is handled in our `*Logic` files and exposes [values](https://kea.js.org/docs/guide/concepts#values) and [actions](https://kea.js.org/docs/guide/concepts#actions) for our components to get and set state with.
+Enterprise Search uses [Kea.js](https://github.com/keajs/kea) to manage our React/Redux state for us. Kea state is handled in our `*Logic` files and exposes [values](https://v2.keajs.org/docs/guide/concepts#values) and [actions](https://v2.keajs.org/docs/guide/concepts#actions) for our components to get and set state with.
+
+For extended guidelines, please check [KEA.md](KEA.md)
 
 #### Advanced Kea usage
 
-For the most part, we stick to the functionality described in Kea's [core concepts](https://kea.js.org/docs/guide/concepts). However, in some files, we also take advantage of [props](https://kea.js.org/docs/guide/additional#props) and [events](https://kea.js.org/docs/guide/additional#events), as well as [manually mounting](https://kea.js.org/docs/guide/advanced#mounting-and-unmounting) some shared logic files on plugin init outside of React.
+For the most part, we stick to the functionality described in Kea's [core concepts](https://v2.keajs.org/docs/guide/concepts). However, in some files, we also take advantage of [props](https://v2.keajs.org/docs/guide/additional#props) and [events](https://v2.keajs.org/docs/guide/additional#events), as well as [manually mounting](https://v2.keajs.org/docs/guide/advanced#mounting-and-unmounting) some shared logic files on plugin init outside of React.
 
 #### Debugging Kea
 
-To debug Kea state in-browser, Kea recommends [Redux Devtools](https://kea.js.org/docs/guide/debugging). To facilitate debugging, we use the [path](https://kea.js.org/docs/guide/debugging/#setting-the-path-manually) key with `snake_case`d paths. The path key should always end with the logic filename (e.g. `['enterprise_search', 'some_logic']`) to make it easy for devs to quickly find/jump to files via IDE tooling.
+To debug Kea state in-browser, Kea recommends [Redux Devtools](https://v2.keajs.org/docs/guide/debugging). To facilitate debugging, we use the [path](https://v2.keajs.org/docs/guide/debugging/#setting-the-path-manually) key with `snake_case`d paths. The path key should always end with the logic filename (e.g. `['enterprise_search', 'some_logic']`) to make it easy for devs to quickly find/jump to files via IDE tooling.
 
 ## Testing
 
@@ -43,11 +49,14 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://kea.js.or
 
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-Jest tests can be run directly from the `x-pack/plugins/enterprise_search` folder. This also works for any subfolders or subcomponents.
+Jest tests can be run from the root kibana directory, however, since the tests take so long to run you will likely want to apply the appropriate Jest configuration file to test only your changes. For example:
+- `x-pack/plugins/enterprise_search/common/jest.config.js`
+- `x-pack/plugins/enterprise_search/public/jest.config.js`
+- `x-pack/plugins/enterprise_search/server/jest.config.js`
 
 ```bash
-yarn test:jest
-yarn test:jest --watch
+yarn test:jest --config {YOUR_JEST_CONFIG_FILE}
+yarn test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
 ```
 
 Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific file or folder and only get coverage numbers for that file or folder:

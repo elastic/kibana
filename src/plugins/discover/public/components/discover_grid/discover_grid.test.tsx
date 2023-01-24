@@ -11,19 +11,23 @@ import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { getDocId } from './discover_grid_document_selection';
-import { ElasticSearchHit } from '../../types';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { getDocId } from '../../utils/get_doc_id';
+import { EsHitRecord } from '../../types';
 
 function getProps() {
+  const services = discoverServiceMock;
+  services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
+
   return {
     ariaLabelledBy: '',
     columns: [],
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     isLoading: false,
     expandedDoc: undefined,
     onAddColumn: jest.fn(),
@@ -32,7 +36,7 @@ function getProps() {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHits,
+    rows: esHits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
@@ -41,17 +45,18 @@ function getProps() {
     showTimeCol: true,
     sort: [],
     useNewFieldsApi: true,
+    services,
   };
 }
 
-function getComponent() {
-  const Proxy = (props: DiscoverGridProps) => (
+function getComponent(props: DiscoverGridProps = getProps()) {
+  const Proxy = (innerProps: DiscoverGridProps) => (
     <KibanaContextProvider services={discoverServiceMock}>
-      <DiscoverGrid {...props} />
+      <DiscoverGrid {...innerProps} />
     </KibanaContextProvider>
   );
 
-  return mountWithIntl(<Proxy {...getProps()} />);
+  return mountWithIntl(<Proxy {...props} />);
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
@@ -74,7 +79,7 @@ function getDisplayedDocNr(component: ReactWrapper<DiscoverGridProps>) {
 
 async function toggleDocSelection(
   component: ReactWrapper<DiscoverGridProps>,
-  document: ElasticSearchHit
+  document: EsHitRecord
 ) {
   act(() => {
     const docId = getDocId(document);
@@ -146,7 +151,7 @@ describe('DiscoverGrid', () => {
               bytes: 50,
             },
           },
-        ],
+        ].map((row) => buildDataTableRecord(row, dataViewMock)),
       });
       expect(getDisplayedDocNr(component)).toBe(1);
       expect(getSelectedDocNr(component)).toBe(0);
@@ -169,6 +174,39 @@ describe('DiscoverGrid', () => {
       expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
         `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
       );
+    });
+  });
+
+  describe('edit field button', () => {
+    it('should render the edit field button if onFieldEdited is provided', () => {
+      const component = getComponent({
+        ...getProps(),
+        columns: ['message'],
+        onFieldEdited: jest.fn(),
+      });
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        false
+      );
+      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        true
+      );
+      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
+    });
+
+    it('should not render the edit field button if onFieldEdited is not provided', () => {
+      const component = getComponent({
+        ...getProps(),
+        columns: ['message'],
+      });
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        false
+      );
+      findTestSubject(component, 'dataGridHeaderCell-message').find('button').simulate('click');
+      expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
+        true
+      );
+      expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
     });
   });
 });

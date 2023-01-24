@@ -5,40 +5,69 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { FleetProxy } from '../../../types';
 
-import { useStartServices } from '../../../hooks';
-import type { EnrollmentAPIKey } from '../../../types';
+function getfleetServerHostsEnrollArgs(
+  apiKey: string,
+  fleetServerHosts: string[],
+  fleetProxy?: FleetProxy
+) {
+  const proxyHeadersArgs = fleetProxy?.proxy_headers
+    ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
+        acc += ` --proxy-header ${proxyKey}=${proyVal}`;
 
-import { PlatformSelector } from './platform_selector';
-
-interface Props {
-  fleetServerHosts: string[];
-  apiKey: EnrollmentAPIKey;
+        return acc;
+      }, '')
+    : '';
+  const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}${proxyArgs}`;
 }
 
-function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
-  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
-}
-
-export const ManualInstructions: React.FunctionComponent<Props> = ({
+export const ManualInstructions = ({
   apiKey,
   fleetServerHosts,
+  fleetProxy,
+  kibanaVersion,
+}: {
+  apiKey: string;
+  fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
+  kibanaVersion: string;
 }) => {
-  const { docLinks } = useStartServices();
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
 
-  const linuxMacCommand = `sudo ./elastic-agent install ${enrollArgs}`;
+  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
 
-  const windowsCommand = `.\\elastic-agent.exe install ${enrollArgs}`;
+  const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-linux-x86_64
+sudo ./elastic-agent install ${enrollArgs}`;
 
-  return (
-    <PlatformSelector
-      linuxMacCommand={linuxMacCommand}
-      windowsCommand={windowsCommand}
-      installAgentLink={docLinks.links.fleet.installElasticAgent}
-      troubleshootLink={docLinks.links.fleet.troubleshooting}
-      isK8s={false}
-    />
-  );
+  const macCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-darwin-x86_64
+sudo ./elastic-agent install ${enrollArgs}`;
+
+  const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
+cd elastic-agent-${kibanaVersion}-windows-x86_64
+.\\elastic-agent.exe install ${enrollArgs}`;
+
+  const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
+sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb
+sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+  const linuxRpmCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+  return {
+    linux: linuxCommand,
+    mac: macCommand,
+    windows: windowsCommand,
+    deb: linuxDebCommand,
+    rpm: linuxRpmCommand,
+    kubernetes: k8sCommand,
+  };
 };

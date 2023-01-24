@@ -9,8 +9,8 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { TimefilterContract, DataPublicPluginStart } from 'src/plugins/data/public';
-import { DataViewField } from '../../../data_views/public';
+import { TimefilterContract, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';

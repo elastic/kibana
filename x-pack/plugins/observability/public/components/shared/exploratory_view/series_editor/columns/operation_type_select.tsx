@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
 
+import { OperationType } from '@kbn/lens-plugin/public';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { OperationType } from '../../../../../../../lens/public';
 import { SeriesUrl } from '../../types';
 
 export function OperationTypeSelect({
@@ -47,6 +47,18 @@ export function OperationTypeComponent({
 }) {
   const options = [
     {
+      value: 'min' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.min', {
+        defaultMessage: 'Min',
+      }),
+    },
+    {
+      value: 'max' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.max', {
+        defaultMessage: 'Max',
+      }),
+    },
+    {
       value: 'average' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.average', {
         defaultMessage: 'Average',
@@ -68,6 +80,18 @@ export function OperationTypeComponent({
       value: 'last_value' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.lastValue', {
         defaultMessage: 'Last value',
+      }),
+    },
+    {
+      value: 'unique_count' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.uniqueCount', {
+        defaultMessage: 'Unique count',
+      }),
+    },
+    {
+      value: '25th' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.25thPercentile', {
+        defaultMessage: '25th Percentile',
       }),
     },
     {

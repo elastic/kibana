@@ -8,9 +8,10 @@
 
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
-import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
-import { SharePluginSetup } from '../../share/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 const mockShare = {} as SharePluginSetup;
@@ -24,14 +25,11 @@ describe('HomePublicPlugin', () => {
   });
 
   describe('setup', () => {
-    test('registers tutorial directory to feature catalogue', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
-        coreMock.createSetup() as any,
-        {
-          share: mockShare,
-          urlForwarding: urlForwardingPluginMock.createSetupContract(),
-        }
-      );
+    test('registers tutorial directory to feature catalogue', () => {
+      const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
+        share: mockShare,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue.register).toHaveBeenCalledTimes(1);
       expect(setup.featureCatalogue.register).toHaveBeenCalledWith(
@@ -44,53 +42,73 @@ describe('HomePublicPlugin', () => {
       );
     });
 
-    test('wires up and returns registry', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
-        coreMock.createSetup() as any,
-        {
-          share: mockShare,
-          urlForwarding: urlForwardingPluginMock.createSetupContract(),
-        }
-      );
+    test('wires up and returns registry', () => {
+      const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
+        share: mockShare,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue).toHaveProperty('register');
     });
 
-    test('wires up and returns environment service', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
-        coreMock.createSetup() as any,
-        {
-          share: {} as SharePluginSetup,
-          urlForwarding: urlForwardingPluginMock.createSetupContract(),
-        }
-      );
+    test('wires up and returns environment service', () => {
+      const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
+        share: {} as SharePluginSetup,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
       expect(setup).toHaveProperty('environment');
       expect(setup.environment).toHaveProperty('update');
     });
 
-    test('wires up and returns tutorial service', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
-        coreMock.createSetup() as any,
-        {
-          share: mockShare,
-          urlForwarding: urlForwardingPluginMock.createSetupContract(),
-        }
-      );
+    test('wires up and returns tutorial service', () => {
+      const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
+        share: mockShare,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
     });
 
-    test('wires up and returns welcome service', async () => {
-      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
-        coreMock.createSetup() as any,
-        {
-          share: mockShare,
-          urlForwarding: urlForwardingPluginMock.createSetupContract(),
-        }
-      );
+    test('wires up and returns welcome service', () => {
+      const setup = new HomePublicPlugin(mockInitializerContext).setup(coreMock.createSetup(), {
+        share: mockShare,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
       expect(setup).toHaveProperty('welcomeScreen');
       expect(setup.welcomeScreen).toHaveProperty('registerOnRendered');
       expect(setup.welcomeScreen).toHaveProperty('registerTelemetryNoticeRenderer');
+    });
+
+    test('sets the cloud environment variable when the cloud plugin is present but isCloudEnabled: false', () => {
+      const cloud = { ...cloudMock.createSetup(), isCloudEnabled: false };
+      const plugin = new HomePublicPlugin(mockInitializerContext);
+      const setup = plugin.setup(coreMock.createSetup(), {
+        cloud,
+        share: mockShare,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
+      expect(setup.environment.update).toHaveBeenCalledTimes(1);
+      expect(setup.environment.update).toHaveBeenCalledWith({ cloud: false });
+      expect(setup.tutorials.setVariable).toHaveBeenCalledTimes(0);
+    });
+
+    test('when cloud is enabled, it sets the cloud environment and the tutorials variable "cloud"', () => {
+      const cloud = { ...cloudMock.createSetup(), isCloudEnabled: true };
+      const plugin = new HomePublicPlugin(mockInitializerContext);
+      const setup = plugin.setup(coreMock.createSetup(), {
+        cloud,
+        share: mockShare,
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
+      expect(setup.environment.update).toHaveBeenCalledTimes(1);
+      expect(setup.environment.update).toHaveBeenCalledWith({ cloud: true });
+      expect(setup.tutorials.setVariable).toHaveBeenCalledTimes(1);
+      expect(setup.tutorials.setVariable).toHaveBeenCalledWith('cloud', {
+        id: 'mock-cloud-id',
+        baseUrl: 'base-url',
+        deploymentUrl: 'deployment-url',
+        profileUrl: 'profile-url',
+      });
     });
   });
 });

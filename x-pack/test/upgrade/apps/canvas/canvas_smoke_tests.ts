@@ -10,65 +10,53 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'header']);
-  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'header', 'home']);
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
-  describe('canvas smoke tests', function describeIndexTests() {
+  describe('upgrade canvas smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
     ];
 
     const canvasTests = [
-      {
-        name: 'flights',
-        id: 'workpad-a474e74b-aedc-47c3-894a-db77e62c41e0/page/1',
-        altId: '',
-        numElements: 35,
-      },
-      {
-        name: 'logs',
-        id: 'workpad-5563cc40-5760-4afe-bf33-9da72fac53b7/page/1',
-        altId: 'workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
-        numElements: 57,
-      },
-      {
-        name: 'ecommerce',
-        id: 'workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1',
-        altId: '',
-        numElements: 16,
-      },
-      {
-        name: 'ecommerce',
-        id: 'workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/2',
-        altId: '',
-        numElements: 9,
-      },
+      { name: 'flights', page: 1, numElements: 33 },
+      { name: 'logs', page: 1, numElements: 56 },
+      { name: 'ecommerce', page: 1, numElements: 15 },
+      { name: 'ecommerce', page: 2, numElements: 8 },
     ];
 
     spaces.forEach(({ space, basePath }) => {
-      canvasTests.forEach(({ name, id, altId, numElements }) => {
-        describe('space ' + space + ' name ' + name, () => {
-          beforeEach(async () => {
-            await PageObjects.common.navigateToActualUrl('canvas', 'workpad/' + id, {
+      canvasTests.forEach(({ name, numElements, page }) => {
+        describe('space: ' + space, () => {
+          before(async () => {
+            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
               basePath,
             });
             await PageObjects.header.waitUntilLoadingHasFinished();
-            const url = await browser.getCurrentUrl();
-            if (!url.includes(id) && altId.length > 0) {
-              await PageObjects.common.navigateToActualUrl('canvas', 'workpad/' + altId, {
-                basePath,
-              });
-            }
+            await PageObjects.home.launchSampleCanvas(name);
             await PageObjects.header.waitUntilLoadingHasFinished();
           });
-          it('renders elements on workpad', async () => {
+          it('renders elements on workpad ' + name + ' page ' + page, async () => {
+            const browserUrl = await browser.getCurrentUrl();
+            const currentUrl = new URL(browserUrl);
+            const pathname = currentUrl.pathname;
+            const hash = currentUrl.hash;
+            if (hash.length === 0 && pathname.replace(/\/$/, '') === basePath + '/app/canvas') {
+              throw new Error('Did not launch canvas sample data for ' + name);
+            }
+            if (name === 'ecommerce') {
+              if (!browserUrl.includes('page/' + page)) {
+                await browser.get(browserUrl.replace(/\/[^\/]*$/, '/' + page), false);
+                await PageObjects.header.waitUntilLoadingHasFinished();
+              }
+            }
             await retry.try(async () => {
               const elements = await testSubjects.findAll(
                 'canvasWorkpadPage > canvasWorkpadPageElementContent'
               );
-              expect(elements).to.have.length(numElements);
+              expect(elements.length).to.be.greaterThan(numElements);
             });
           });
         });

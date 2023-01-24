@@ -13,55 +13,45 @@ exports[`Storyshots arguments/ContainerStyle simple 1`] = `
   <div
     style={
       Object {
-        "background": "#fff",
-        "padding": "16px",
-        "width": "323px",
+        "fontSize": 0,
       }
     }
   >
     <div
-      style={
-        Object {
-          "fontSize": 0,
-        }
-      }
+      className="euiPopover emotion-euiPopover"
+      id="color-picker-popover"
     >
       <div
-        className="euiPopover euiPopover--anchorLeftCenter"
-        id="color-picker-popover"
+        className="euiPopover__anchor css-16vtueo-render"
       >
-        <div
-          className="euiPopover__anchor"
-        >
-          <button
-            aria-label="Container style white"
-            className="euiLink euiLink--primary"
-            disabled={false}
-            onClick={[Function]}
-            style={
-              Object {
-                "fontSize": 0,
-              }
+        <button
+          aria-label="Container style white"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          style={
+            Object {
+              "fontSize": 0,
             }
-            type="button"
+          }
+          type="button"
+        >
+          <div
+            className="canvasColorDot"
           >
             <div
-              className="canvasColorDot"
-            >
-              <div
-                className="canvasColorDot__background canvasCheckered"
-              />
-              <div
-                className="canvasColorDot__foreground"
-                style={
-                  Object {
-                    "background": "#fff",
-                  }
+              className="canvasColorDot__background canvasCheckered"
+            />
+            <div
+              className="canvasColorDot__foreground"
+              style={
+                Object {
+                  "background": "#fff",
                 }
-              />
-            </div>
-          </button>
-        </div>
+              }
+            />
+          </div>
+        </button>
       </div>
     </div>
   </div>
@@ -81,55 +71,45 @@ exports[`Storyshots arguments/ContainerStyle/components simple template 1`] = `
   <div
     style={
       Object {
-        "background": "#fff",
-        "padding": "16px",
-        "width": "323px",
+        "fontSize": 0,
       }
     }
   >
     <div
-      style={
-        Object {
-          "fontSize": 0,
-        }
-      }
+      className="euiPopover emotion-euiPopover"
+      id="color-picker-popover"
     >
       <div
-        className="euiPopover euiPopover--anchorLeftCenter"
-        id="color-picker-popover"
+        className="euiPopover__anchor css-16vtueo-render"
       >
-        <div
-          className="euiPopover__anchor"
-        >
-          <button
-            aria-label="Container style white"
-            className="euiLink euiLink--primary"
-            disabled={false}
-            onClick={[Function]}
-            style={
-              Object {
-                "fontSize": 0,
-              }
+        <button
+          aria-label="Container style white"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          style={
+            Object {
+              "fontSize": 0,
             }
-            type="button"
+          }
+          type="button"
+        >
+          <div
+            className="canvasColorDot"
           >
             <div
-              className="canvasColorDot"
-            >
-              <div
-                className="canvasColorDot__background canvasCheckered"
-              />
-              <div
-                className="canvasColorDot__foreground"
-                style={
-                  Object {
-                    "background": "#fff",
-                  }
+              className="canvasColorDot__background canvasCheckered"
+            />
+            <div
+              className="canvasColorDot__foreground"
+              style={
+                Object {
+                  "background": "#fff",
                 }
-              />
-            </div>
-          </button>
-        </div>
+              }
+            />
+          </div>
+        </button>
       </div>
     </div>
   </div>

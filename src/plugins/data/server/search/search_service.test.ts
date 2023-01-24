@@ -6,31 +6,41 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart, SavedObject } from '../../../../core/server';
-import { coreMock } from '../../../../core/server/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { createFieldFormatsStartMock } from '../../../field_formats/server/mocks';
+import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '../../../bfetch/server/mocks';
-import { of } from 'rxjs';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
+import { lastValueFrom, of } from 'rxjs';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
   IScopedSearchClient,
   IScopedSearchSessionsClient,
-  ISearchSessionService,
   ISearchStart,
   ISearchStrategy,
 } from '.';
 import { NoSearchIdInSessionError } from '.';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { expressionsPluginMock } from '../../../expressions/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
+
+let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
+jest.mock('./session', () => {
+  class SearchSessionService {
+    setup() {}
+    start() {}
+    asScopedProvider = () => (request: any) => mockSessionClient;
+  }
+  return {
+    SearchSessionService,
+  };
+});
 
 describe('Search service', () => {
   let plugin: SearchService;
@@ -88,8 +98,7 @@ describe('Search service', () => {
     let searchPluginStart: ISearchStart<IEsSearchRequest, IEsSearchResponse<any>>;
     let mockStrategy: any;
     let mockStrategyNoCancel: jest.Mocked<ISearchStrategy>;
-    let mockSessionService: ISearchSessionService<any>;
-    let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
+
     const sessionId = '1234';
 
     beforeEach(() => {
@@ -104,9 +113,6 @@ describe('Search service', () => {
       };
 
       mockSessionClient = createSearchSessionsClientMock();
-      mockSessionService = {
-        asScopedProvider: () => (request: any) => mockSessionClient,
-      };
 
       const pluginSetup = plugin.setup(mockCoreSetup, {
         bfetch: bfetchPluginMock.createSetupContract(),
@@ -114,9 +120,6 @@ describe('Search service', () => {
       });
       pluginSetup.registerSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY, mockStrategy);
       pluginSetup.registerSearchStrategy('nocancel', mockStrategyNoCancel);
-      pluginSetup.__enhance({
-        sessionService: mockSessionService,
-      });
 
       searchPluginStart = plugin.start(mockCoreStart, {
         fieldFormats: createFieldFormatsStartMock(),
@@ -182,7 +185,7 @@ describe('Search service', () => {
           throw new NoSearchIdInSessionError();
         });
 
-        const res = await mockScopedClient.search(searchRequest, options).toPromise();
+        const res = await lastValueFrom(mockScopedClient.search(searchRequest, options));
 
         const [request, callOptions] = mockStrategy.search.mock.calls[0];
         expect(callOptions).toBe(options);
@@ -192,8 +195,26 @@ describe('Search service', () => {
 
       it('does not fail if `trackId` throws', async () => {
         const searchRequest = { params: {} };
-        const options = { sessionId, isStored: false, isRestore: false };
+        const options = { sessionId, isStored: true, isRestore: false };
         mockSessionClient.trackId = jest.fn().mockRejectedValue(undefined);
+
+        mockStrategy.search.mockReturnValue(
+          of({
+            id: 'my_id',
+            rawResponse: {} as any,
+          })
+        );
+
+        const result = await mockScopedClient.search(searchRequest, options).toPromise();
+
+        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+        expect(result?.isStored).toBeUndefined();
+      });
+
+      it("doesn't call trackId if session is not stored", async () => {
+        const searchRequest = { params: {} };
+        const options = { sessionId };
+        mockSessionClient.trackId = jest.fn();
 
         mockStrategy.search.mockReturnValue(
           of({
@@ -204,12 +225,12 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+        expect(mockSessionClient.trackId).toBeCalledTimes(0);
       });
 
-      it('calls `trackId` for every response, if the response contains an `id` and not restoring', async () => {
+      it('calls `trackId` once, if the response contains an `id`, session is stored and not restoring', async () => {
         const searchRequest = { params: {} };
-        const options = { sessionId, isStored: false, isRestore: false };
+        const options = { sessionId, isStored: true, isRestore: false };
         mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
 
         mockStrategy.search.mockReturnValue(
@@ -227,10 +248,20 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(2);
+        expect(mockSessionClient.trackId).toBeCalledTimes(1);
 
         expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
-        expect(mockSessionClient.trackId.mock.calls[1]).toEqual([searchRequest, 'my_id', options]);
+      });
+
+      it('does not call `trackId` if search is already tracked', async () => {
+        const searchRequest = { params: {} };
+        const options = { sessionId, isStored: true, isRestore: false, isSearchStored: true };
+        mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
+        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
+
+        await mockScopedClient.search(searchRequest, options).toPromise();
+
+        expect(mockSessionClient.trackId).not.toBeCalled();
       });
 
       it('does not call `trackId` if restoring', async () => {

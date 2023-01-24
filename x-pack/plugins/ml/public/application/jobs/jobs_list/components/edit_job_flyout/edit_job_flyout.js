@@ -31,11 +31,13 @@ import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
-import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { collapseLiteralStrings } from '../../../../../../shared_imports';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+
+const { collapseLiteralStrings } = XJson;
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -473,26 +475,19 @@ export class EditJobFlyoutUI extends Component {
     if (this.state.isConfirmationModalVisible) {
       confirmationModal = (
         <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle"
-              defaultMessage="Save changes before leaving?"
-            />
-          }
+          title={i18n.translate('xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle', {
+            defaultMessage: 'Save changes before leaving?',
+          })}
           onCancel={() => this.closeFlyout(true)}
           onConfirm={() => this.save()}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel"
-              defaultMessage="Leave anyway"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel"
-              defaultMessage="Save changes"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel',
+            { defaultMessage: 'Leave anyway' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.jobsList.editJobFlyout.saveChangesButtonLabel',
+            { defaultMessage: 'Save changes' }
+          )}
           defaultFocusedButton="confirm"
         >
           <p>

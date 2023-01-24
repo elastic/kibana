@@ -26,15 +26,15 @@ export const MlJobCompatibilityCalloutBody = () => (
         <p>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody.summary"
-            defaultMessage="Machine learning rules specify ML jobs that in
-            turn have dependencies on data fields populated by the Elastic
-            beats and agent integrations that were current when the ML job
-            was created. New ML jobs, prefixed with V2, have been updated to
-            operate on now-current ECS fields. If you are using multiple
-            versions of beats and agents, you need to create new machine
-            learning rules that specify the new ML (V2) jobs, and enable them
-            to run alongside your existing machine learning rules, in order
-            to ensure continued rule coverage."
+            defaultMessage="Machine learning rules use ML jobs that in
+            turn have dependencies on data fields populated by the Beats
+            and Elastic Agent integrations that were current when the ML
+            job was created. New ML jobs, prefixed with V3, have been released
+            to operate on now-current ECS fields. If you're using multiple
+            versions of Beats or Elastic Agent, you may need to duplicate
+            or create new machine learning rules that specify the new ML
+            (V3) jobs and enable them to run alongside your existing rules,
+            to ensure continued rule coverage using V1/V2 jobs."
           />
         </p>
       ),

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
+import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
 import { Role, User, UserInfo } from './types';
-import { users } from './users';
+import { obsOnly, secOnly, secOnlyNoDelete, secOnlyRead, users } from './users';
 import { roles } from './roles';
 import { spaces } from './spaces';
+import { loginUsers } from '../user_profiles';
 
 export const getUserInfo = (user: User): UserInfo => ({
   username: user.username,
@@ -102,4 +103,13 @@ export const createSpacesAndUsers = async (getService: CommonFtrProviderContext[
 export const deleteSpacesAndUsers = async (getService: CommonFtrProviderContext['getService']) => {
   await deleteSpaces(getService);
   await deleteUsersAndRoles(getService);
+};
+
+export const activateUserProfiles = async (getService: CommonFtrProviderContext['getService']) => {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
+  await loginUsers({
+    supertest: supertestWithoutAuth,
+    users: [secOnly, secOnlyNoDelete, secOnlyRead, obsOnly],
+  });
 };

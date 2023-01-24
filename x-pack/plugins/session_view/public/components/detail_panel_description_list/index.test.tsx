@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelDescriptionList } from './index';
+import { DetailPanelDescriptionList } from '.';
 
 const TEST_FIRST_TITLE = 'item title';
 const TEST_FIRST_DESCRIPTION = 'item description';

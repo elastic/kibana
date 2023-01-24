@@ -6,19 +6,21 @@
  */
 
 // Mock the mlJobService that is used for testing custom URLs.
-import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 
 import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
-import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: UrlConfig) => void) {
+function prepareTest(
+  customUrl: CustomUrlSettings,
+  setEditCustomUrlFn: (url: CustomUrlSettings) => void
+) {
   const savedCustomUrls = [
     {
       url_name: 'Show data',

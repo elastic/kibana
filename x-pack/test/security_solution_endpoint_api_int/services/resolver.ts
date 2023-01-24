@@ -10,8 +10,8 @@ import {
   Tree,
   EndpointDocGenerator,
   Event,
-} from '../../../plugins/security_solution/common/endpoint/generate_data';
-import { firstNonNullValue } from '../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';

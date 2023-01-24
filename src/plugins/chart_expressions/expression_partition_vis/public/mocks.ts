@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '../../../expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import {
   BucketColumns,
   PartitionVisParams,
@@ -282,6 +282,7 @@ export const createMockPartitionVisParams = (): PartitionVisParams => {
       values: true,
       valuesFormat: ValueFormats.PERCENT,
       percentDecimals: 2,
+      colorOverrides: {},
     },
     legendPosition: 'right',
     nestedLegend: false,
@@ -292,17 +293,20 @@ export const createMockPartitionVisParams = (): PartitionVisParams => {
       name: 'default',
       type: 'palette',
     },
+    metricsToLabels: {},
     dimensions: {
-      metric: {
-        type: 'vis_dimension',
-        accessor: 1,
-        format: {
-          id: 'number',
-          params: {
+      metrics: [
+        {
+          type: 'vis_dimension',
+          accessor: 1,
+          format: {
             id: 'number',
+            params: {
+              id: 'number',
+            },
           },
         },
-      },
+      ],
       buckets: [
         {
           type: 'vis_dimension',

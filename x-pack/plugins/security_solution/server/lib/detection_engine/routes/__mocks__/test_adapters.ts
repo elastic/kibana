@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { responseMock } from './response_factory';
+import type { responseMock } from './response_factory';
 
 type ResponseMock = ReturnType<typeof responseMock.create>;
 type Method = keyof ResponseMock;
@@ -33,7 +33,10 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
     case 'custom':
       return calls.map(([call]) => ({
         status: call.statusCode,
-        body: JSON.parse(call.body),
+        body:
+          Buffer.isBuffer(call.body) || typeof call.body === 'string'
+            ? JSON.parse(call.body)
+            : call.body,
       }));
     case 'customError':
       return calls.map(([call]) => ({

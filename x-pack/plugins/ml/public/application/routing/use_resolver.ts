@@ -6,8 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   getDataViewById,
   getDataViewAndSavedSearch,
@@ -19,7 +20,6 @@ import { MlContextValue } from '../contexts/ml';
 import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
-import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 /**
  * Hook to resolve route specific requirements
@@ -108,6 +108,7 @@ export const useResolver = (
         await redirectToJobsManagementPage();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { context, results };

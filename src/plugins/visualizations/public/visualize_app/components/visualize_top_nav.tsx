@@ -7,21 +7,20 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-
-import { AppMountParameters, OverlayRef } from 'kibana/public';
+import { EventEmitter } from 'events';
+import { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useKibana } from '../../../../kibana_react/public';
-import {
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig } from '../utils';
-import type { IndexPattern } from '../../../../data/public';
-import type { NavigateToLensContext } from '../../../../visualizations/public';
+import { getTopNavConfig, isFallbackDataView } from '../utils';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -40,6 +39,7 @@ interface VisualizeTopNavProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
+  eventEmitter?: EventEmitter;
 }
 
 const TopNav = ({
@@ -57,14 +57,15 @@ const TopNav = ({
   visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
+  eventEmitter,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
-  const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
   const [navigateToLens, setNavigateToLens] = useState(false);
+  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -97,16 +98,18 @@ const TopNav = ({
   );
 
   useEffect(() => {
-    const asyncGetTriggerContext = async () => {
-      if (vis.type.navigateToLens) {
-        const triggerConfig = await vis.type.navigateToLens(vis.params);
-        setEditInLensConfig(triggerConfig);
-      }
+    const subscription = embeddableHandler
+      .getExpressionVariables$()
+      .subscribe((expressionVariables) => {
+        setDisplayEditInLensItem(
+          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
+        );
+      });
+    return () => {
+      subscription.unsubscribe();
     };
-    asyncGetTriggerContext();
-  }, [vis.params, vis.type]);
+  }, [embeddableHandler, vis]);
 
-  const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
@@ -123,11 +126,11 @@ const TopNav = ({
           visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
-          editInLensConfig,
           displayEditInLensItem,
           hideLensBadge,
           setNavigateToLens,
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
+          eventEmitter,
         },
         services
       );
@@ -146,14 +149,12 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     hideTryInLensBadge,
+    eventEmitter,
   ]);
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
-    vis.data.indexPattern ? [vis.data.indexPattern] : []
-  );
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
@@ -161,7 +162,7 @@ const TopNav = ({
     return vis.type.options.showTimePicker && hasTimeField;
   };
   const showFilterBar = vis.type.options.showFilterBar;
-  const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryBar;
+  const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryInput;
 
   useEffect(() => {
     return () => {
@@ -210,13 +211,15 @@ const TopNav = ({
 
   useEffect(() => {
     const asyncSetIndexPattern = async () => {
-      let indexes: IndexPattern[] | undefined;
+      let indexes: DataView[] | undefined;
 
-      if (vis.type.getUsedIndexPattern) {
+      if (vis.data.indexPattern) {
+        indexes = [vis.data.indexPattern];
+      } else if (vis.type.getUsedIndexPattern) {
         indexes = await vis.type.getUsedIndexPattern(vis.params);
       }
       if (!indexes || !indexes.length) {
-        const defaultIndex = await services.data.indexPatterns.getDefault();
+        const defaultIndex = await services.dataViews.getDefault();
         if (defaultIndex) {
           indexes = [defaultIndex];
         }
@@ -226,10 +229,28 @@ const TopNav = ({
       }
     };
 
-    if (!vis.data.indexPattern) {
-      asyncSetIndexPattern();
-    }
-  }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
+    asyncSetIndexPattern();
+  }, [services.dataViews, vis.data.indexPattern, vis.params, vis.type]);
+
+  /** Synchronizing dataView with state **/
+  useEffect(() => {
+    const stateContainerSubscription = stateContainer.state$.subscribe(async ({ dataView }) => {
+      if (
+        dataView &&
+        visInstance.vis.data.indexPattern &&
+        dataView !== visInstance.vis.data.indexPattern.id
+      ) {
+        const dataViewFromState = await services.dataViews.get(dataView);
+
+        if (dataViewFromState) {
+          setIndexPatterns([dataViewFromState]);
+        }
+      }
+    });
+    return () => {
+      stateContainerSubscription.unsubscribe();
+    };
+  }, [services.dataViews, stateContainer.state$, visInstance.vis.data.indexPattern]);
 
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter
@@ -246,6 +267,24 @@ const TopNav = ({
     };
   }, [services.data.query.timefilter.timefilter, doReload]);
 
+  const shouldShowDataViewPicker = Boolean(
+    vis.type.editorConfig?.enableDataViewChange &&
+      ((vis.data.indexPattern && !vis.data.savedSearchId) ||
+        isFallbackDataView(vis.data.indexPattern)) &&
+      indexPatterns.length
+  );
+
+  const onChangeDataView = useCallback(
+    async (selectedDataViewId: string) => {
+      if (selectedDataViewId) {
+        stateContainer.transitions.updateDataView(selectedDataViewId);
+      }
+    },
+    [stateContainer.transitions]
+  );
+
+  const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
+
   return isChromeVisible ? (
     /**
      * Most visualizations have all search bar components enabled.
@@ -254,6 +293,7 @@ const TopNav = ({
      * All visualizations also have the timepicker\autorefresh component,
      * it is enabled by default in the TopNavMenu component.
      */
+
     <TopNavMenu
       appName={VISUALIZE_APP_NAME}
       config={config}
@@ -268,6 +308,31 @@ const TopNav = ({
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
+      dataViewPickerComponentProps={
+        shouldShowDataViewPicker && vis.data.indexPattern
+          ? {
+              currentDataViewId: vis.data.indexPattern.id,
+              trigger: {
+                label: isMissingCurrentDataView
+                  ? i18n.translate('visualizations.fallbackDataView.label', {
+                      defaultMessage: '{type} not found',
+                      values: {
+                        type: vis.data.savedSearchId
+                          ? i18n.translate('visualizations.search.label', {
+                              defaultMessage: 'Search',
+                            })
+                          : i18n.translate('visualizations.dataView.label', {
+                              defaultMessage: 'Data view',
+                            }),
+                      },
+                    })
+                  : vis.data.indexPattern.getName(),
+              },
+              isMissingCurrent: isMissingCurrentDataView,
+              onChangeDataView,
+            }
+          : undefined
+      }
       showSearchBar
       useDefaultBehaviors
     />

@@ -7,10 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Meta } from '../../../../../../../common/types';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
-
 import { CrawlerLogic, CrawlRequestOverrides } from '../../crawler_logic';
 import { DomainConfig, DomainConfigFromServer } from '../../types';
 import { domainConfigServerToClient } from '../../utils';
@@ -198,12 +198,29 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
+      let domainConfigs: DomainConfig[] = [];
+      let nextPage: number = 1;
+      let totalPages: number = 1;
+      let pageSize: number = 100;
       try {
-        const { results } = await http.get<{
-          results: DomainConfigFromServer[];
-        }>(`/internal/app_search/engines/${engineName}/crawler/domain_configs`);
+        while (nextPage <= totalPages) {
+          const {
+            results,
+            meta: { page },
+          } = await http.get<{
+            meta: Meta;
+            results: DomainConfigFromServer[];
+          }>(`/internal/app_search/engines/${engineName}/crawler/domain_configs`, {
+            query: { 'page[current]': nextPage, 'page[size]': pageSize },
+          });
 
-        const domainConfigs = results.map(domainConfigServerToClient);
+          domainConfigs = [...domainConfigs, ...results.map(domainConfigServerToClient)];
+
+          nextPage = page.current + 1;
+          totalPages = page.total_pages;
+          pageSize = page.size;
+        }
+
         actions.onRecieveDomainConfigData(domainConfigs);
       } catch (e) {
         flashAPIErrors(e);

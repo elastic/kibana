@@ -7,7 +7,7 @@
  */
 
 import getopts from 'getopts';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
 import { BuildOptions } from './build_distributables';
 
@@ -20,8 +20,11 @@ export function readCliArgs(argv: string[]) {
       'skip-generic-folders',
       'skip-platform-folders',
       'skip-os-packages',
+      'skip-canvas-shareable-runtime',
       'rpm',
       'deb',
+      'docker-context-use-local-artifact',
+      'docker-cross-compile',
       'docker-images',
       'docker-push',
       'skip-docker-contexts',
@@ -41,7 +44,7 @@ export function readCliArgs(argv: string[]) {
       'debug',
       'help',
     ],
-    string: ['epr-registry'],
+    string: ['docker-namespace', 'epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
@@ -52,8 +55,12 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-context-use-local-artifact': null,
+      'docker-cross-compile': false,
       'docker-push': false,
+      'docker-tag': null,
       'docker-tag-qualifier': null,
+      'docker-namespace': null,
       'version-qualifier': '',
       'epr-registry': 'snapshot',
     },
@@ -112,7 +119,11 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerContextUseLocalArtifact: flags['docker-context-use-local-artifact'],
+    dockerCrossCompile: Boolean(flags['docker-cross-compile']),
+    dockerNamespace: flags['docker-namespace'],
     dockerPush: Boolean(flags['docker-push']),
+    dockerTag: flags['docker-tag'],
     dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
@@ -120,7 +131,7 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
-    createExamplePlugins: Boolean(flags['example-plugins']),
+    buildExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
@@ -130,6 +141,7 @@ export function readCliArgs(argv: string[]) {
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
+    buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
   };
 
   return {

@@ -6,20 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useState } from 'react';
-import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { DocumentTitle } from '../../../components/document_title';
+import React, { useState } from 'react';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { Source } from '../../../containers/metrics_source';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { useLinkProps } from '../../../../../observability/public';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 
@@ -38,7 +37,7 @@ export const MetricDetail = withMetricPageProviders(
     const nodeId = match.params.node;
     const nodeType = match.params.type as InventoryItemType;
     const inventoryModel = findInventoryModel(nodeType);
-    const { sourceId, metricIndicesExist } = useContext(Source.Context);
+    const { sourceId, metricIndicesExist } = useSourceContext();
 
     const {
       timeRange,
@@ -100,14 +99,6 @@ export const MetricDetail = withMetricPageProviders(
 
     return (
       <>
-        <DocumentTitle
-          title={i18n.translate('xpack.infra.metricDetailPage.documentTitle', {
-            defaultMessage: 'Infrastructure | Metrics | {name}',
-            values: {
-              name,
-            },
-          })}
-        />
         {metadata ? (
           <NodeDetailsPage
             name={name}

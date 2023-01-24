@@ -11,9 +11,6 @@ import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases spaces only enabled: trial', function () {
-    // Fastest ciGroup for the moment.
-    this.tags('ciGroup5');
-
     before(async () => {
       await createSpaces(getService);
     });

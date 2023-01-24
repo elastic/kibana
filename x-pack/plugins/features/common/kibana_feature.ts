@@ -6,8 +6,8 @@
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { AppCategory } from 'src/core/types';
-import { LicenseType } from '../../licensing/common/types';
+import { AppCategory } from '@kbn/core/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
@@ -31,6 +31,11 @@ export interface KibanaFeatureConfig {
    * This will be displayed to end-users, so a translatable string is advised for i18n.
    */
   name: string;
+
+  /**
+   * An optional description that will appear as subtext underneath the feature name
+   */
+  description?: string;
 
   /**
    * The category for this feature.
@@ -154,6 +159,10 @@ export class KibanaFeature {
 
   public get name() {
     return this.config.name;
+  }
+
+  public get description() {
+    return this.config.description;
   }
 
   public get order() {

@@ -5,200 +5,86 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import moment from 'moment';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
-  EuiBadge,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiHorizontalRule,
-  EuiAutoRefreshButton,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import type { RulesListVisibleColumns } from '@kbn/triggers-actions-ui-plugin/public';
+
+import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
+import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
 
-import { useKibana } from '../../utils/kibana_react';
+const RULES_LIST_COLUMNS_KEY = 'observability_rulesListColumns';
+const RULES_LIST_COLUMNS: RulesListVisibleColumns[] = [
+  'ruleName',
+  'ruleExecutionStatusLastDate',
+  'ruleSnoozeNotify',
+  'ruleExecutionStatus',
+  'ruleExecutionState',
+];
 
-const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
-
-interface RuleState {
-  data: [];
-  totalItemsCount: number;
-}
-
-interface Pagination {
-  index: number;
-  size: number;
-}
-
-export function RulesPage() {
-  const { core, ObservabilityPageTemplate } = usePluginContext();
-  const { docLinks } = useKibana().services;
+function RulesPage() {
+  const { ObservabilityPageTemplate } = usePluginContext();
   const {
     http,
-    notifications: { toasts },
-  } = core;
-  const [rules, setRules] = useState<RuleState>({ data: [], totalItemsCount: 0 });
-  const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    docLinks,
+    triggersActionsUi: { getAddAlertFlyout: AddAlertFlyout, getRulesList: RuleList },
+  } = useKibana().services;
 
-  async function loadObservabilityRules() {
-    const { loadRules } = await import('../../../../triggers_actions_ui/public');
-    try {
-      const response = await loadRules({
-        http,
-        page: { index: 0, size: DEFAULT_SEARCH_PAGE_SIZE },
-        typesFilter: [
-          'xpack.uptime.alerts.monitorStatus',
-          'xpack.uptime.alerts.tls',
-          'xpack.uptime.alerts.tlsCertificate',
-          'xpack.uptime.alerts.durationAnomaly',
-          'apm.error_rate',
-          'apm.transaction_error_rate',
-          'apm.transaction_duration',
-          'apm.transaction_duration_anomaly',
-          'metrics.alert.inventory.threshold',
-          'metrics.alert.threshold',
-          'logs.alert.document.count',
-        ],
-      });
-      setRules({
-        data: response.data as any,
-        totalItemsCount: response.total,
-      });
-    } catch (_e) {
-      toasts.addDanger({
-        title: i18n.translate('xpack.observability.rules.loadError', {
-          defaultMessage: 'Unable to load rules',
-        }),
-      });
-    }
-  }
+  const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
 
-  enum RuleStatus {
-    enabled = 'enabled',
-    disabled = 'disabled',
-  }
+  const filteredRuleTypes = useGetFilteredRuleTypes();
+  const { ruleTypes } = useLoadRuleTypes({
+    filteredRuleTypes,
+  });
 
-  const statuses = Object.values(RuleStatus);
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-  const popOverButton = (
-    <EuiBadge
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={togglePopover}
-      onClickAriaLabel="Change status"
-    >
-      Enabled
-    </EuiBadge>
+  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
+  const [refresh, setRefresh] = useState(new Date());
+
+  const authorizedRuleTypes = [...ruleTypes.values()];
+
+  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
+    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
-
-  const panelItems = statuses.map((status) => (
-    <EuiContextMenuItem>
-      <EuiBadge>{status}</EuiBadge>
-    </EuiContextMenuItem>
-  ));
-
-  useEffect(() => {
-    loadObservabilityRules();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useBreadcrumbs([
     {
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
       }),
+      href: http.basePath.prepend('/app/observability/alerts'),
+    },
+    {
+      text: RULES_BREADCRUMB_TEXT,
     },
   ]);
 
-  const rulesTableColumns = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.observability.rules.rulesTable.columns.nameTitle', {
-        defaultMessage: 'Rule Name',
-      }),
-    },
-    {
-      field: 'executionStatus.lastExecutionDate',
-      name: i18n.translate('xpack.observability.rules.rulesTable.columns.lastRunTitle', {
-        defaultMessage: 'Last run',
-      }),
-      render: (date: Date) => {
-        if (date) {
-          return (
-            <>
-              <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs">
-                    {moment(date).fromNow()}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          );
-        }
-      },
-    },
-    {
-      field: 'executionStatus.status',
-      name: i18n.translate('xpack.observability.rules.rulesTable.columns.lastResponseTitle', {
-        defaultMessage: 'Last response',
-      }),
-    },
-    {
-      field: 'enabled',
-      name: i18n.translate('xpack.observability.rules.rulesTable.columns.statusTitle', {
-        defaultMessage: 'Status',
-      }),
-      render: (_enabled: boolean) => {
-        return (
-          <EuiPopover
-            button={popOverButton}
-            anchorPosition="downLeft"
-            isOpen={isPopoverOpen}
-            panelPaddingSize="none"
-          >
-            <EuiContextMenuPanel items={panelItems} />
-          </EuiPopover>
-        );
-      },
-    },
-    {
-      field: '*',
-      name: i18n.translate('xpack.observability.rules.rulesTable.columns.actionsTitle', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        {
-          name: 'Edit',
-          isPrimary: true,
-          description: 'Edit this rule',
-          icon: 'pencil',
-          type: 'icon',
-          onClick: () => {},
-          'data-test-subj': 'action-edit',
-        },
-      ],
-    },
-  ];
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <>{i18n.translate('xpack.observability.rulesTitle', { defaultMessage: 'Rules' })} </>
-        ),
+        pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
+          <EuiButton
+            fill
+            key="create-alert"
+            iconType="plusInCircle"
+            data-test-subj="createRuleButton"
+            disabled={!authorizedToCreateAnyRules}
+            onClick={() => setAddRuleFlyoutVisibility(true)}
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.addRuleButtonLabel"
+              defaultMessage="Create rule"
+            />
+          </EuiButton>,
           <EuiButtonEmpty
-            href={docLinks.links.alerting.guide}
+            href={docLinks.links.observability.createAlerts}
             target="_blank"
             iconType="help"
             data-test-subj="documentationLink"
@@ -210,52 +96,49 @@ export function RulesPage() {
           </EuiButtonEmpty>,
         ],
       }}
+      data-test-subj="rulesPage"
     >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
-            <FormattedMessage
-              id="xpack.observability.rules.totalItemsCountDescription"
-              defaultMessage="Showing: {pageSize} of {totalItemCount} Rules"
-              values={{
-                totalItemCount: rules.totalItemsCount,
-                pageSize: rules.data.length,
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiAutoRefreshButton
-            isPaused={false}
-            refreshInterval={3000}
-            onRefreshChange={() => {}}
-            shortHand
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiBasicTable
-            items={rules.data}
-            hasActions={true}
-            columns={rulesTableColumns}
-            isSelectable={true}
-            pagination={{
-              pageIndex: page.index,
-              pageSize: page.size,
-              totalItemCount: rules.totalItemsCount,
-            }}
-            onChange={({ page: changedPage }: { page: Pagination }) => {
-              setPage(changedPage);
-            }}
-            selection={{
-              selectable: () => true,
-              onSelectionChange: (selectedItems) => {},
-            }}
+          <RuleList
+            filteredRuleTypes={filteredRuleTypes}
+            showActionFilter={false}
+            showCreateRuleButton={false}
+            ruleDetailsRoute="alerts/rules/:ruleId"
+            statusFilter={status}
+            onStatusFilterChange={setStatus}
+            lastResponseFilter={lastResponse}
+            onLastResponseFilterChange={setLastResponse}
+            refresh={refresh}
+            rulesListKey={RULES_LIST_COLUMNS_KEY}
+            visibleColumns={RULES_LIST_COLUMNS}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {addRuleFlyoutVisibility && (
+        <AddAlertFlyout
+          consumer={ALERTS_FEATURE_ID}
+          filteredRuleTypes={filteredRuleTypes}
+          onClose={() => {
+            setAddRuleFlyoutVisibility(false);
+          }}
+          onSave={() => {
+            setRefresh(new Date());
+            return Promise.resolve();
+          }}
+        />
+      )}
     </ObservabilityPageTemplate>
   );
 }
+
+function WrappedRulesPage() {
+  return (
+    <Provider value={rulesPageStateContainer}>
+      <RulesPage />
+    </Provider>
+  );
+}
+
+export { WrappedRulesPage as RulesPage };

@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
-import {
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
+  SavedObject,
+} from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { CaseAssignees } from '../../../common/api/cases/assignee';
+import type {
   CasePostRequest,
   CaseSettings,
+  CaseSeverity,
   CaseStatuses,
+  CaseUserActionInjectedAttributesWithoutActionId,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
@@ -17,6 +27,7 @@ import {
   UserAction,
   UserActionTypes,
 } from '../../../common/api';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export interface BuilderParameters {
   title: {
@@ -28,8 +39,14 @@ export interface BuilderParameters {
   status: {
     parameters: { payload: { status: CaseStatuses } };
   };
+  severity: {
+    parameters: { payload: { severity: CaseSeverity } };
+  };
   tags: {
     parameters: { payload: { tags: string[] } };
+  };
+  assignees: {
+    parameters: { payload: { assignees: CaseAssignees } };
   };
   pushed: {
     parameters: {
@@ -89,9 +106,22 @@ export interface Attributes {
   payload: Record<string, unknown>;
 }
 
-export interface BuilderReturnValue {
+export interface SavedObjectParameters {
   attributes: Attributes;
   references: SavedObjectReference[];
+}
+
+export interface EventDetails {
+  getMessage: (storedUserActionId?: string) => string;
+  action: UserAction;
+  descriptiveAction: string;
+  savedObjectId: string;
+  savedObjectType: string;
+}
+
+export interface UserActionEvent {
+  parameters: SavedObjectParameters;
+  eventDetails: EventDetails;
 }
 
 export type CommonBuilderArguments = CommonArguments & {
@@ -100,3 +130,31 @@ export type CommonBuilderArguments = CommonArguments & {
   value: unknown;
   valueKey: string;
 };
+
+export interface BuilderDeps {
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+export interface ServiceContext {
+  log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  auditLogger: AuditLogger;
+}
+
+export interface CaseConnectorActivity {
+  connectorId: string;
+  fields: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  push?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+}
+
+export type CaseConnectorFields = Map<
+  string,
+  SavedObject<CaseUserActionInjectedAttributesWithoutActionId>
+>;
+
+export interface PushInfo {
+  date: Date;
+  connectorId: string;
+}

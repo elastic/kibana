@@ -7,23 +7,23 @@
 
 import expect from '@kbn/expect';
 
+import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 
-const NUMBER_OF_CAPABILITIES = 36;
+const NUMBER_OF_CAPABILITIES = 38;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
   async function runRequest(user: USER): Promise<MlCapabilitiesResponse> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/ml_capabilities`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(200);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(200, status, body);
 
     return body;
   }
@@ -76,7 +76,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: false,
           canCreateMlAlerts: false,
           canUseMlAlerts: true,
-          canAccessML: true,
+          canGetFieldInfo: true,
+          canGetMlInfo: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -87,6 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
@@ -119,7 +121,8 @@ export default ({ getService }: FtrProviderContext) => {
           canStartStopDataFrameAnalytics: true,
           canCreateMlAlerts: true,
           canUseMlAlerts: true,
-          canAccessML: true,
+          canGetFieldInfo: true,
+          canGetMlInfo: true,
           canGetJobs: true,
           canGetDatafeeds: true,
           canGetCalendars: true,
@@ -130,6 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: true,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,

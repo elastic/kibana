@@ -14,7 +14,11 @@ describe('unpackProcessorEvents', () => {
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
-      body: { query: { bool: { filter: [{ terms: { foo: 'bar' } }] } } },
+      body: {
+        track_total_hits: false,
+        size: 0,
+        query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
+      },
     } as APMEventESSearchRequest;
 
     const indices = {
@@ -23,7 +27,6 @@ describe('unpackProcessorEvents', () => {
       error: 'my-apm-*-error-*',
       span: 'my-apm-*-span-*',
       onboarding: 'my-apm-*-onboarding-*',
-      sourcemap: 'my-apm-*-sourcemap-*',
     } as ApmIndicesConfig;
 
     res = unpackProcessorEvents(request, indices);

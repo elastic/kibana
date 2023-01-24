@@ -15,14 +15,15 @@ import {
   ALERT_REASON,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { CellValueElementProps, TimelineNonEcsData } from '../../../../../../timelines/common';
+import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { isEmpty } from 'lodash';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { SeverityBadge } from '../severity_badge';
-import { TopAlert } from '../../';
+import { TopAlert } from '../..';
 import { parseAlert } from '../parse_alert';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -38,6 +39,20 @@ export const getMappedNonEcsValue = ({
   return undefined;
 };
 
+const getRenderValue = (mappedNonEcsValue: any) => {
+  // can be updated when working on https://github.com/elastic/kibana/issues/140819
+  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue.join() : mappedNonEcsValue;
+
+  if (!isEmpty(value)) {
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return value;
+  }
+
+  return '—';
+};
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
@@ -46,15 +61,19 @@ export const getMappedNonEcsValue = ({
 
 export const getRenderCellValue = ({
   setFlyoutAlert,
+  observabilityRuleTypeRegistry,
 }: {
   setFlyoutAlert: (data: TopAlert) => void;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
-    const { observabilityRuleTypeRegistry } = usePluginContext();
-    const value = getMappedNonEcsValue({
+    if (!data) return null;
+    const mappedNonEcsValue = getMappedNonEcsValue({
       data,
       fieldName: columnId,
-    })?.reduce((x) => x[0]);
+    });
+
+    const value = getRenderValue(mappedNonEcsValue);
 
     switch (columnId) {
       case ALERT_STATUS:

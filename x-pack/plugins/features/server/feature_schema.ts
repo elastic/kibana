@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/server';
+import { Capabilities as UICapabilities } from '@kbn/core/server';
 import { KibanaFeatureConfig } from '../common';
 import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
@@ -39,6 +39,7 @@ const validLicenseSchema = schema.oneOf([
 const validSubFeaturePrivilegeLicensesSchema = schema.oneOf([
   schema.literal('platinum'),
   schema.literal('enterprise'),
+  schema.literal('gold'),
   schema.literal('trial'),
 ]);
 
@@ -73,6 +74,17 @@ const appCategorySchema = schema.object({
   order: schema.maybe(schema.number()),
 });
 
+const casesSchemaObject = schema.maybe(
+  schema.object({
+    all: schema.maybe(casesSchema),
+    create: schema.maybe(casesSchema),
+    read: schema.maybe(casesSchema),
+    update: schema.maybe(casesSchema),
+    delete: schema.maybe(casesSchema),
+    push: schema.maybe(casesSchema),
+  })
+);
+
 const kibanaPrivilegeSchema = schema.object({
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   requireAllSpaces: schema.maybe(schema.boolean()),
@@ -97,12 +109,7 @@ const kibanaPrivilegeSchema = schema.object({
       ),
     })
   ),
-  cases: schema.maybe(
-    schema.object({
-      all: schema.maybe(casesSchema),
-      read: schema.maybe(casesSchema),
-    })
-  ),
+  cases: casesSchemaObject,
   savedObject: schema.object({
     all: schema.arrayOf(schema.string()),
     read: schema.arrayOf(schema.string()),
@@ -139,12 +146,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
       ),
     })
   ),
-  cases: schema.maybe(
-    schema.object({
-      all: schema.maybe(casesSchema),
-      read: schema.maybe(casesSchema),
-    })
-  ),
+  cases: casesSchemaObject,
   api: schema.maybe(schema.arrayOf(schema.string())),
   app: schema.maybe(schema.arrayOf(schema.string())),
   savedObject: schema.object({
@@ -161,6 +163,9 @@ const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
 
 const kibanaSubFeatureSchema = schema.object({
   name: schema.string(),
+  requireAllSpaces: schema.maybe(schema.boolean()),
+  privilegesTooltip: schema.maybe(schema.string()),
+  description: schema.maybe(schema.string()),
   privilegeGroups: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -194,6 +199,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
+  description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   minimumLicense: schema.maybe(validLicenseSchema),

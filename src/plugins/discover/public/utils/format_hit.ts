@@ -8,9 +8,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { FieldFormatsStart } from '../../../field_formats/public';
-import { DataView, flattenHit } from '../../../data/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
+import { type ShouldShowFieldInTableHandler } from './get_should_show_field_handler';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
@@ -22,23 +24,23 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  * it's formatted using field formatters.
  * @param hit The hit to format
  * @param dataView The corresponding data view
- * @param fieldsToShow A list of fields that should be included in the document summary.
+ * @param shouldShowFieldHandler A function to check a field.
  */
 export function formatHit(
-  hit: estypes.SearchHit,
+  hit: DataTableRecord,
   dataView: DataView,
-  fieldsToShow: string[],
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
-  const cached = formattedHitCache.get(hit);
+  const cached = formattedHitCache.get(hit.raw);
   if (cached) {
     return cached;
   }
 
-  const highlights = hit.highlight ?? {};
+  const highlights = hit.raw.highlight ?? {};
   // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
-  const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
+  const flattened = hit.flattened;
 
   const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
   const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];
@@ -53,7 +55,7 @@ export function formatHit(
     // Format the raw value using the regular field formatters for that field
     const formattedValue = formatFieldValue(
       val,
-      hit,
+      hit.raw,
       fieldFormats,
       dataView,
       dataView.fields.getByName(key)
@@ -61,7 +63,7 @@ export function formatHit(
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
-      if (fieldsToShow.includes(key)) {
+      if (shouldShowFieldHandler(key)) {
         pairs.push([displayKey, formattedValue]);
       }
     } else {
@@ -84,6 +86,6 @@ export function formatHit(
             '',
           ] as const,
         ];
-  formattedHitCache.set(hit, formatted);
+  formattedHitCache.set(hit.raw, formatted);
   return formatted;
 }

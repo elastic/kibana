@@ -15,10 +15,12 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   useUiSetting$,
-} from '../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '../../../../src/plugins/kibana_react/common';
-import { RenderAppProps } from './types';
+} from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
+import type { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
+import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -31,15 +33,25 @@ export const renderApp = (deps: RenderAppProps) => {
   };
 };
 
-const CasesAppWithContext = () => {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+interface CasesAppWithContextProps {
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
 
-  return (
-    <StyledComponentsThemeProvider darkMode={darkMode}>
-      <CasesApp />
-    </StyledComponentsThemeProvider>
-  );
-};
+const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
+  ({ externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry }) => {
+    const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
+    return (
+      <StyledComponentsThemeProvider darkMode={darkMode}>
+        <CasesApp
+          externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+          persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+        />
+      </StyledComponentsThemeProvider>
+    );
+  }
+);
 
 CasesAppWithContext.displayName = 'CasesAppWithContext';
 
@@ -60,7 +72,12 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             }}
           >
             <Router history={history}>
-              <CasesAppWithContext />
+              <CasesAppWithContext
+                externalReferenceAttachmentTypeRegistry={
+                  deps.externalReferenceAttachmentTypeRegistry
+                }
+                persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
+              />
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>

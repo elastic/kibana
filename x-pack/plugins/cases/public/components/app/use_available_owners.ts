@@ -5,27 +5,46 @@
  * 2.0.
  */
 
+import { APP_ID, FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
+import type { CasesPermissions } from '../../containers/types';
+import { allCasePermissions } from '../../utils/permissions';
+
+type Capability = Exclude<keyof CasesPermissions, 'all'>;
 
 /**
  *
- * @param level : 'crud' | 'read' (default: 'crud')
- *
- * `securitySolution` owner uses cases capability feature id: 'securitySolutionCases'; //owner
- * `observability` owner uses cases capability feature id: 'observabilityCases';
- * both solutions use `crud_cases` and `read_cases` capability names
+ * @param capabilities : specifies the requirements for a valid owner, an owner will be included if it has the specified
+ *  capabilities
  **/
 
-export const useAvailableCasesOwners = (level: 'crud' | 'read' = 'crud'): string[] => {
-  const { capabilities } = useKibana().services.application;
-  const capabilityName = `${level}_cases`;
-  return Object.entries(capabilities).reduce(
-    (availableOwners: string[], [featureId, capability]) => {
-      if (featureId.endsWith('Cases') && !!capability[capabilityName]) {
-        availableOwners.push(featureId.replace('Cases', ''));
+export const useAvailableCasesOwners = (
+  capabilities: Capability[] = allCasePermissions
+): string[] => {
+  const { capabilities: kibanaCapabilities } = useKibana().services.application;
+
+  return Object.entries(kibanaCapabilities).reduce(
+    (availableOwners: string[], [featureId, kibanaCapability]) => {
+      if (!featureId.endsWith('Cases')) {
+        return availableOwners;
       }
+      for (const cap of capabilities) {
+        const hasCapability = !!kibanaCapability[`${cap}_cases`];
+        if (!hasCapability) {
+          return availableOwners;
+        }
+      }
+      availableOwners.push(getOwnerFromFeatureID(featureId));
       return availableOwners;
     },
     []
   );
+};
+
+const getOwnerFromFeatureID = (featureID: string) => {
+  if (featureID === FEATURE_ID) {
+    return APP_ID;
+  }
+
+  return featureID.replace('Cases', '');
 };

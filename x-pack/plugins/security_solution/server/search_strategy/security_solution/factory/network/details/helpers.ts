@@ -6,65 +6,39 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { GeoEcs } from '../../../../../../common/ecs/geo';
-import { HostEcs } from '../../../../../../common/ecs/host';
+import type { GeoEcs } from '@kbn/securitysolution-ecs';
 import {
+  unflattenObject,
+  transformLocationFields,
+} from '../../../../helpers/format_response_object_values';
+import type {
   AutonomousSystem,
-  NetworkDetailsHostHit,
   NetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
-  const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);
-  const lastSeen = getOr(null, `lastSeen.value_as_string`, networkHit);
-  const autonomousSystem: AutonomousSystem | null = getOr(
-    null,
-    `as.results.hits.hits[0]._source.${type}.as`,
-    networkHit
+  const autonomousSystem: AutonomousSystem | {} = getOr(
+    {},
+    `${type}.as`,
+    unflattenObject(getOr({}, 'as.results.hits.hits[0].fields', networkHit))
   );
-  const geoFields: GeoEcs | null = getOr(
-    null,
-    `geo.results.hits.hits[0]._source.${type}.geo`,
-    networkHit
+
+  const geoFields: GeoEcs | {} = getOr(
+    {},
+    `${type}.geo`,
+    unflattenObject(
+      transformLocationFields(getOr({}, 'geo.results.hits.hits[0].fields', networkHit))
+    )
   );
 
   return {
     [type]: {
-      firstSeen,
-      lastSeen,
       autonomousSystem: {
         ...autonomousSystem,
       },
       geo: {
         ...geoFields,
       },
-    },
-  };
-};
-
-const formatHostEcs = (data: Record<string, unknown> | null): HostEcs | null => {
-  if (data == null) {
-    return null;
-  }
-  return Object.entries(data).reduce<HostEcs>((acc, [key, value]) => {
-    if (typeof value === 'object' && value != null && !Array.isArray(value)) {
-      return { ...acc, [key]: formatHostEcs(value as Record<string, unknown>) };
-    }
-    return {
-      ...acc,
-      [key]: toObjectArrayOfStrings(value).map(({ str }) => str),
-    };
-  }, {});
-};
-
-export const getNetworkDetailsHostAgg = (hostDetailsHit: NetworkDetailsHostHit | {}) => {
-  const hostFields: HostEcs | null = formatHostEcs(
-    getOr(null, `results.hits.hits[0]._source.host`, hostDetailsHit)
-  );
-  return {
-    host: {
-      ...hostFields,
     },
   };
 };

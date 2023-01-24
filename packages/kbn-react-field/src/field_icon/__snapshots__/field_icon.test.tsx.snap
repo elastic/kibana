@@ -55,6 +55,16 @@ exports[`FieldIcon renders known field types conflict is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types counter is rendered 1`] = `
+<EuiToken
+  aria-label="counter"
+  className="kbnFieldIcon"
+  iconType="tokenMetricCounter"
+  size="s"
+  title="counter"
+/>
+`;
+
 exports[`FieldIcon renders known field types date is rendered 1`] = `
 <EuiToken
   aria-label="date"
@@ -72,6 +82,16 @@ exports[`FieldIcon renders known field types date_range is rendered 1`] = `
   iconType="tokenDate"
   size="s"
   title="date_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types gauge is rendered 1`] = `
+<EuiToken
+  aria-label="gauge"
+  className="kbnFieldIcon"
+  iconType="tokenMetricGauge"
+  size="s"
+  title="gauge"
 />
 `;
 
@@ -135,11 +155,21 @@ exports[`FieldIcon renders known field types keyword is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types match_only_text is rendered 1`] = `
+<EuiToken
+  aria-label="match_only_text"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="match_only_text"
+/>
+`;
+
 exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
   className="kbnFieldIcon"
-  iconType="tokenFile"
+  iconType="tokenSearchType"
   size="s"
   title="murmur3"
 />

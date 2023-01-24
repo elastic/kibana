@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
+<div>
+  <p
+    aria-live="polite"
+    class="emotion-euiScreenReaderOnly"
+  >
+    In full screen mode, press ESC to exit.
+  </p>
+  <button
+    class="exitFullScreenButton"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    data-test-subj="exitFullScreenModeButton"
+  >
+    <span
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+    >
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+        data-test-subj="exitFullScreenModeText"
+      >
+        Exit full screen
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="fullScreenExit"
+        />
+      </span>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
+<div>
+  <p
+    aria-live="polite"
+    class="emotion-euiScreenReaderOnly"
+  >
+    In full screen mode, press ESC to exit.
+  </p>
+  <button
+    class="exitFullScreenButton"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    data-test-subj="exitFullScreenModeButton"
+  >
+    <span
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+    >
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+        data-test-subj="exitFullScreenModeText"
+      >
+        Exit full screen
+      </span>
+      <span
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          data-euiicon-type="fullScreenExit"
+        />
+      </span>
+    </span>
+  </button>
+</div>
+`;

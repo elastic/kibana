@@ -8,24 +8,21 @@
 
 import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../../../../expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
 import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
 import { getShapeContentElement } from '../reusable/shape_factory';
-import { withSuspense } from '../../../../presentation_util/public';
 import { getTextAttributes, getViewBox } from './utils';
 import { getId } from '../../../common/lib';
 import { getDefaultShapeData } from '../reusable';
-import { LazyProgressDrawer } from '../..';
-
-const ProgressDrawer = withSuspense(LazyProgressDrawer);
+import { ProgressDrawerComponent } from './progress_drawer';
 
 interface ProgressComponentProps extends ProgressRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
   parentNode: HTMLElement;
 }
 
-function ProgressComponent({
+export function ProgressComponent({
   onLoaded,
   parentNode,
   shape: shapeType,
@@ -113,7 +110,7 @@ function ProgressComponent({
 
   return (
     <div className="shapeAligner">
-      <ProgressDrawer
+      <ProgressDrawerComponent
         shapeType={shapeType}
         shapeContentAttributes={{ ...shapeContentAttributes, ref: progressRef }}
         shapeAttributes={shapeAttributes}
@@ -121,11 +118,7 @@ function ProgressComponent({
         ref={shapeRef}
       >
         {BarProgress && <BarProgress {...barProgressAttributes} />}
-      </ProgressDrawer>
+      </ProgressDrawerComponent>
     </div>
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { ProgressComponent as default };

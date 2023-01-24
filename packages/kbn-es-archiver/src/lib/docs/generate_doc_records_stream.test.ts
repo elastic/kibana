@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import {
   createListStream,
@@ -36,14 +36,27 @@ interface SearchResponses {
   }>;
 }
 
-function createMockClient(responses: SearchResponses) {
+function createMockClient(responses: SearchResponses, hasDataStreams = false) {
   // TODO: replace with proper mocked client
   const client: any = {
     helpers: {
       scrollSearch: jest.fn(function* ({ index }) {
+        if (hasDataStreams) {
+          index = `.ds-${index}`;
+        }
+
         while (responses[index] && responses[index].length) {
           yield responses[index].shift()!;
         }
+      }),
+    },
+    indices: {
+      get: jest.fn(async ({ index }) => {
+        return { [index]: { data_stream: hasDataStreams && index.substring(4) } };
+      }),
+      getDataStream: jest.fn(async ({ name }) => {
+        if (!hasDataStreams) return { data_streams: [] };
+        return { data_streams: [{ name }] };
       }),
     },
   };
@@ -215,6 +228,35 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       },
     }
   `);
+  });
+
+  it('supports data streams', async () => {
+    const hits = [
+      { _index: '.ds-foo-datastream', _id: '0', _source: {} },
+      { _index: '.ds-foo-datastream', _id: '1', _source: {} },
+    ];
+    const responses = {
+      '.ds-foo-datastream': [{ body: { hits: { hits, total: hits.length } } }],
+    };
+    const client = createMockClient(responses, true);
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    const results = await createPromiseFromStreams([
+      createListStream(['foo-datastream']),
+      createGenerateDocRecordsStream({
+        client,
+        stats,
+        progress,
+      }),
+      createMapStream((record: any) => {
+        return `${record.value.data_stream}:${record.value.id}`;
+      }),
+      createConcatStream([]),
+    ]);
+
+    expect(results).toEqual(['foo-datastream:0', 'foo-datastream:1']);
   });
 
   describe('keepIndexNames', () => {

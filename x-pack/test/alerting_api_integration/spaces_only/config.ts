@@ -7,6 +7,8 @@
 
 import { createTestConfig } from '../common/config';
 
+export const EmailDomainsAllowed = ['example.org', 'test.com'];
+
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
@@ -15,4 +17,6 @@ export default createTestConfig('spaces_only', {
   verificationMode: 'none',
   customizeLocalHostSsl: true,
   preconfiguredAlertHistoryEsIndex: true,
+  emailDomainsAllowed: EmailDomainsAllowed,
+  useDedicatedTaskRunner: true,
 });

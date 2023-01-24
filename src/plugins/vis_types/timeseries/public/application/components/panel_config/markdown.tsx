@@ -24,20 +24,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-// @ts-expect-error not typed yet
+import { CodeEditor, CssLang } from '@kbn/kibana-react-plugin/public';
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
-// @ts-expect-error not typed yet
 import { MarkdownEditor } from '../markdown_editor';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
-import { CodeEditor, CssLang } from '../../../../../../kibana_react/public';
 
 export class MarkdownPanelConfig extends Component<
   PanelConfigProps,

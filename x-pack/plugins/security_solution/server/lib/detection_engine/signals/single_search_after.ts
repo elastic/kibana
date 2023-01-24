@@ -6,18 +6,17 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { performance } from 'perf_hooks';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { Logger } from '../../../../../../../src/core/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
 import type { SignalSearchResponse, SignalSource } from './types';
-import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { TimestampOverride } from '../../../../common/detection_engine/rule_schema';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -25,33 +24,39 @@ interface SingleSearchAfterParams {
   index: string[];
   from: string;
   to: string;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   pageSize: number;
   sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
-  timestampOverride: TimestampOverrideOrUndefined;
-  buildRuleMessage: BuildRuleMessage;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverride | undefined;
   trackTotalHits?: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 // utilize search_after for paging results into bulk.
-export const singleSearchAfter = async ({
+export const singleSearchAfter = async <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   aggregations,
   searchAfterSortIds,
   index,
+  runtimeMappings,
   from,
   to,
   services,
   filter,
-  logger,
+  ruleExecutionLogger,
   pageSize,
   sortOrder,
-  timestampOverride,
-  buildRuleMessage,
+  primaryTimestamp,
+  secondaryTimestamp,
   trackTotalHits,
+  additionalFilters,
 }: SingleSearchAfterParams): Promise<{
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
   searchErrors: string[];
 }> => {
@@ -62,17 +67,20 @@ export const singleSearchAfter = async ({
         index,
         from,
         to,
+        runtimeMappings,
         filter,
         size: pageSize,
         sortOrder,
         searchAfterSortIds,
-        timestampOverride,
+        primaryTimestamp,
+        secondaryTimestamp,
         trackTotalHits,
+        additionalFilters,
       });
 
       const start = performance.now();
       const { body: nextSearchAfterResult } =
-        await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+        await services.scopedClusterClient.asCurrentUser.search<SignalSource, TAggregations>(
           searchAfterQuery as estypes.SearchRequest,
           { meta: true }
         );
@@ -88,14 +96,15 @@ export const singleSearchAfter = async ({
         searchErrors,
       };
     } catch (exc) {
-      logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
+      ruleExecutionLogger.error(`[-] nextSearchAfter threw an error ${exc}`);
       if (
-        exc.message.includes('No mapping found for [@timestamp] in order to sort on') ||
-        exc.message.includes(`No mapping found for [${timestampOverride}] in order to sort on`)
+        exc.message.includes(`No mapping found for [${primaryTimestamp}] in order to sort on`) ||
+        (secondaryTimestamp &&
+          exc.message.includes(`No mapping found for [${secondaryTimestamp}] in order to sort on`))
       ) {
-        logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
+        ruleExecutionLogger.error(`[-] failure reason: ${exc.message}`);
 
-        const searchRes: SignalSearchResponse = {
+        const searchRes: SignalSearchResponse<TAggregations> = {
           took: 0,
           timed_out: false,
           _shards: {

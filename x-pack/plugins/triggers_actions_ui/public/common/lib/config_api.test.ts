@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiConfig } from './config_api';
 
 describe('triggersActionsUiConfig', () => {
@@ -17,7 +17,7 @@ describe('triggersActionsUiConfig', () => {
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/triggers_actions_ui/_config",
+          "/internal/triggers_actions_ui/_config",
         ],
       ]
     `);

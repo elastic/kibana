@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import { SecuritySubPlugin } from '../app/types';
-import { DETECTIONS_TIMELINE_IDS } from '../detections';
-import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import type { SecuritySubPlugin } from '../app/types';
+import { DETECTIONS_TABLE_IDS } from '../detections';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
 
 export class Rules {
@@ -16,8 +16,8 @@ export class Rules {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
+      storageDataTables: {
+        tableById: getDataTablesInStorageByIds(storage, DETECTIONS_TABLE_IDS),
       },
       routes,
     };

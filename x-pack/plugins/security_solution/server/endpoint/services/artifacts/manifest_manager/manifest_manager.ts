@@ -7,24 +7,23 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import LRU from 'lru-cache';
-import { isEqual, isEmpty } from 'lodash';
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import type LRU from 'lru-cache';
+import { isEqual, isEmpty, keyBy } from 'lodash';
+import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ListResult } from '../../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { ExceptionListClient } from '../../../../../../lists/server';
-import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import {
-  manifestDispatchSchema,
-  ManifestSchema,
-} from '../../../../../common/endpoint/schema/manifest';
+import type { ListResult } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
+import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
+import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
 
+import type { ArtifactListId } from '../../../lib/artifacts';
 import {
   ArtifactConstants,
   buildArtifact,
@@ -32,13 +31,11 @@ import {
   getEndpointExceptionList,
   Manifest,
 } from '../../../lib/artifacts';
-import {
-  InternalArtifactCompleteSchema,
-  internalArtifactCompleteSchema,
-} from '../../../schemas/artifacts';
-import { EndpointArtifactClientInterface } from '../artifact_client';
+import type { InternalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
@@ -46,6 +43,11 @@ import { EndpointError } from '../../../../../common/endpoint/errors';
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
   policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]>;
+}
+
+interface BuildArtifactsForOsOptions {
+  listId: ArtifactListId;
+  name: string;
 }
 
 const iterateArtifactsBuildResult = async (
@@ -86,7 +88,7 @@ export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
-  packagePolicyService: PackagePolicyServiceInterface;
+  packagePolicyService: PackagePolicyClient;
   logger: Logger;
   cache: LRU<string, Buffer>;
   experimentalFeatures: ExperimentalFeatures;
@@ -103,7 +105,7 @@ const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
 export class ManifestManager {
   protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
-  protected packagePolicyService: PackagePolicyServiceInterface;
+  protected packagePolicyService: PackagePolicyClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
@@ -174,20 +176,29 @@ export class ManifestManager {
 
   /**
    * Builds an artifact (one per supported OS) based on the current state of the
-   * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
+   * artifacts list (Trusted Apps, Host Iso. Exceptions, Event Filters, Blocklists)
+   * (which uses the `exception-list-agnostic` SO type)
    */
-  protected async buildTrustedAppsArtifact(os: string, policyId?: string) {
+  protected async buildArtifactsForOs({
+    listId,
+    name,
+    os,
+    policyId,
+  }: {
+    os: string;
+    policyId?: string;
+  } & BuildArtifactsForOsOptions): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
       await getEndpointExceptionList({
         elClient: this.exceptionListClient,
         schemaVersion: this.schemaVersion,
         os,
         policyId,
-        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        listId,
       }),
       this.schemaVersion,
       os,
-      ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
+      name
     );
   }
 
@@ -198,9 +209,13 @@ export class ManifestManager {
   protected async buildTrustedAppsArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME,
+    };
 
     for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildTrustedAppsArtifact(os));
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
     await iterateAllListItems(
@@ -208,7 +223,9 @@ export class ManifestManager {
       async (policyId) => {
         for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
           policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(await this.buildTrustedAppsArtifact(os, policyId));
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
+          );
         }
       }
     );
@@ -224,9 +241,13 @@ export class ManifestManager {
   protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME,
+    };
 
     for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildEventFiltersForOs(os));
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
     await iterateAllListItems(
@@ -234,27 +255,14 @@ export class ManifestManager {
       async (policyId) => {
         for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
           policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(await this.buildEventFiltersForOs(os, policyId));
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
+          );
         }
       }
     );
 
     return { defaultArtifacts, policySpecificArtifacts };
-  }
-
-  protected async buildEventFiltersForOs(os: string, policyId?: string) {
-    return buildArtifact(
-      await getEndpointExceptionList({
-        elClient: this.exceptionListClient,
-        schemaVersion: this.schemaVersion,
-        os,
-        policyId,
-        listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-      }),
-      this.schemaVersion,
-      os,
-      ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
-    );
   }
 
   /**
@@ -265,9 +273,13 @@ export class ManifestManager {
   protected async buildBlocklistArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_BLOCKLISTS_NAME,
+    };
 
     for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildBlocklistForOs(os));
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
     await iterateAllListItems(
@@ -275,27 +287,14 @@ export class ManifestManager {
       async (policyId) => {
         for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
           policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(await this.buildBlocklistForOs(os, policyId));
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
+          );
         }
       }
     );
 
     return { defaultArtifacts, policySpecificArtifacts };
-  }
-
-  protected async buildBlocklistForOs(os: string, policyId?: string) {
-    return buildArtifact(
-      await getEndpointExceptionList({
-        elClient: this.exceptionListClient,
-        schemaVersion: this.schemaVersion,
-        os,
-        policyId,
-        listId: ENDPOINT_BLOCKLISTS_LIST_ID,
-      }),
-      this.schemaVersion,
-      os,
-      ArtifactConstants.GLOBAL_BLOCKLISTS_NAME
-    );
   }
 
   /**
@@ -307,9 +306,13 @@ export class ManifestManager {
   protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME,
+    };
 
     for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildHostIsolationExceptionForOs(os));
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
     await iterateAllListItems(
@@ -318,59 +321,13 @@ export class ManifestManager {
         for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
           policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
           policySpecificArtifacts[policyId].push(
-            await this.buildHostIsolationExceptionForOs(os, policyId)
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
           );
         }
       }
     );
 
     return { defaultArtifacts, policySpecificArtifacts };
-  }
-
-  protected async buildHostIsolationExceptionForOs(
-    os: string,
-    policyId?: string
-  ): Promise<InternalArtifactCompleteSchema> {
-    return buildArtifact(
-      await getEndpointExceptionList({
-        elClient: this.exceptionListClient,
-        schemaVersion: this.schemaVersion,
-        os,
-        policyId,
-        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-      }),
-      this.schemaVersion,
-      os,
-      ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
-    );
-  }
-
-  /**
-   * Writes new artifact SO.
-   *
-   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
-   */
-  protected async pushArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
-    const artifactId = getArtifactId(artifact);
-    let fleetArtifact;
-    try {
-      // Write the artifact SO
-      fleetArtifact = await this.artifactClient.createArtifact(artifact);
-
-      // Cache the compressed body of the artifact
-      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
-    } catch (err) {
-      if (this.savedObjectsClient.errors.isConflictError(err)) {
-        this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
-      } else {
-        return [err, undefined];
-      }
-    }
-
-    return [null, fleetArtifact];
   }
 
   /**
@@ -385,18 +342,40 @@ export class ManifestManager {
     newManifest: Manifest
   ): Promise<Error[]> {
     const errors: Error[] = [];
+
+    const artifactsToCreate: InternalArtifactCompleteSchema[] = [];
+
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const [err, fleetArtifact] = await this.pushArtifact(artifact);
-        if (err) {
-          errors.push(err);
-        } else if (fleetArtifact) {
-          newManifest.replaceArtifact(fleetArtifact);
-        }
+        artifactsToCreate.push(artifact);
       } else {
         errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
+
+    if (artifactsToCreate.length === 0) {
+      return errors;
+    }
+
+    const { artifacts: fleetArtifacts, errors: createErrors } =
+      await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+
+    if (createErrors) {
+      errors.push(...createErrors);
+    }
+
+    if (fleetArtifacts) {
+      const fleetArtfactsByIdentifier = keyBy(fleetArtifacts, 'identifier');
+      artifactsToCreate.forEach((artifact) => {
+        const fleetArtifact = fleetArtfactsByIdentifier[artifact.identifier];
+        if (!fleetArtifact) return;
+        const artifactId = getArtifactId(artifact);
+        // Cache the compressed body of the artifact
+        this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+        newManifest.replaceArtifact(fleetArtifact);
+      });
+    }
+
     return errors;
   }
 

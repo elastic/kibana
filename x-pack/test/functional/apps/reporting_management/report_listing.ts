@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { REPORT_TABLE_ID } from '../../../../plugins/reporting/common/constants';
+import { REPORT_TABLE_ID } from '@kbn/reporting-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
-
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
@@ -24,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'kibana_admin', // to access stack management
         'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
       ]);
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(async () => {
@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
     });
 

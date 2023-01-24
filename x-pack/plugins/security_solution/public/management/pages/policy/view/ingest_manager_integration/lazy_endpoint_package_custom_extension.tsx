@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
 import { lazy } from 'react';
-import { StartPlugins } from '../../../../../types';
-import { PackageCustomExtensionComponent } from '../../../../../../../fleet/public';
+import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
+import type { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPackageCustomExtension = (
   coreStart: CoreStart,
@@ -16,7 +16,7 @@ export const getLazyEndpointPackageCustomExtension = (
 ) => {
   return lazy<PackageCustomExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPackageCustomExtension }] = await Promise.all([
-      import('./with_security_context'),
+      import('./components/with_security_context/with_security_context'),
       import('./endpoint_package_custom_extension'),
     ]);
     return {

@@ -6,8 +6,9 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { SavedObjectReference } from 'kibana/server';
-import { FilterManager } from 'src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SavedObjectReference } from '@kbn/core/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -17,14 +18,26 @@ export const selectQuery = (state: LensState) => state.lens.query;
 export const selectSearchSessionId = (state: LensState) => state.lens.searchSessionId;
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+export const selectAdHocDataViews = (state: LensState) =>
+  Object.fromEntries(
+    Object.values(state.lens.dataViews.indexPatterns)
+      .filter((indexPattern) => !indexPattern.isPersisted)
+      .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
+  );
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
+export const selectStagedActiveData = (state: LensState) =>
+  state.lens.stagedPreview?.activeData || state.lens.activeData;
+export const selectStagedRequestWarnings = (state: LensState) =>
+  state.lens.stagedPreview?.requestWarnings || state.lens.requestWarnings;
 export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
+export const selectVisualizationState = (state: LensState) => state.lens.visualization;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
+export const selectDataViews = (state: LensState) => state.lens.dataViews;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 
@@ -51,6 +64,7 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
     to: res.dateRange.toDate,
   },
   filters: res.filters,
+  disableShardWarnings: true,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;
@@ -66,6 +80,7 @@ export const selectSavedObjectFormat = createSelector(
     selectQuery,
     selectFilters,
     selectActiveDatasourceId,
+    selectAdHocDataViews,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<{
       datasourceMap: DatasourceMap;
       visualizationMap: VisualizationMap;
@@ -79,10 +94,13 @@ export const selectSavedObjectFormat = createSelector(
     query,
     filters,
     activeDatasourceId,
+    adHocDataViews,
     { datasourceMap, visualizationMap, extractFilterReferences }
   ) => {
     const activeVisualization =
-      visualization.state && visualization.activeId && visualizationMap[visualization.activeId];
+      visualization.state && visualization.activeId
+        ? visualizationMap[visualization.activeId]
+        : null;
     const activeDatasource =
       datasourceStates && activeDatasourceId && !datasourceStates[activeDatasourceId].isLoading
         ? datasourceMap[activeDatasourceId]
@@ -102,16 +120,54 @@ export const selectSavedObjectFormat = createSelector(
 
     const persistibleDatasourceStates: Record<string, unknown> = {};
     const references: SavedObjectReference[] = [];
+    const internalReferences: SavedObjectReference[] = [];
     Object.entries(activeDatasources).forEach(([id, datasource]) => {
       const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
         datasourceStates[id].state
       );
       persistibleDatasourceStates[id] = persistableState;
-      references.push(...savedObjectReferences);
+      savedObjectReferences.forEach((r) => {
+        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
+          internalReferences.push(r);
+        } else {
+          references.push(r);
+        }
+      });
     });
 
+    let persistibleVisualizationState = visualization.state;
+    if (activeVisualization.getPersistableState) {
+      const { state: persistableState, savedObjectReferences } =
+        activeVisualization.getPersistableState(visualization.state);
+      persistibleVisualizationState = persistableState;
+      savedObjectReferences.forEach((r) => {
+        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
+          internalReferences.push(r);
+        } else {
+          references.push(r);
+        }
+      });
+    }
+
+    const persistableAdHocDataViews = Object.fromEntries(
+      Object.entries(adHocDataViews).map(([id, dataView]) => {
+        const { references: dataViewReferences, state } =
+          DataViewPersistableStateService.extract(dataView);
+        references.push(...dataViewReferences);
+        return [id, state];
+      })
+    );
+
+    const adHocFilters = filters
+      .filter((f) => !references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index))
+      .map((f) => ({ ...f, meta: { ...f.meta, value: undefined } }));
+
+    const referencedFilters = filters.filter((f) =>
+      references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index)
+    );
+
     const { state: persistableFilters, references: filterReferences } =
-      extractFilterReferences(filters);
+      extractFilterReferences(referencedFilters);
 
     references.push(...filterReferences);
 
@@ -123,10 +179,12 @@ export const selectSavedObjectFormat = createSelector(
       type: 'lens',
       references,
       state: {
-        visualization: visualization.state,
+        visualization: persistibleVisualizationState,
         query,
-        filters: persistableFilters,
+        filters: [...persistableFilters, ...adHocFilters],
         datasourceStates: persistibleDatasourceStates,
+        internalReferences,
+        adHocDataViews: persistableAdHocDataViews,
       },
     };
   }
@@ -153,20 +211,35 @@ export const selectDatasourceLayers = createSelector(
   [
     selectDatasourceStates,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+    selectDataViews,
   ],
-  (datasourceStates, datasourceMap) => getDatasourceLayers(datasourceStates, datasourceMap)
+  (datasourceStates, datasourceMap, dataViews) =>
+    getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
 );
 
 export const selectFramePublicAPI = createSelector(
   [
-    selectDatasourceStates,
+    selectCurrentDatasourceStates,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+    selectResolvedDateRange,
+    selectDataViews,
   ],
-  (datasourceStates, activeData, datasourceMap) => {
+  (datasourceStates, activeData, datasourceMap, dateRange, dataViews) => {
     return {
-      datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
+      datasourceLayers: getDatasourceLayers(
+        datasourceStates,
+        datasourceMap,
+        dataViews.indexPatterns
+      ),
       activeData,
+      dateRange,
+      dataViews,
     };
   }
+);
+
+export const selectFrameDatasourceAPI = createSelector(
+  [selectFramePublicAPI, selectExecutionContext],
+  (framePublicAPI, context) => ({ ...context, ...framePublicAPI })
 );

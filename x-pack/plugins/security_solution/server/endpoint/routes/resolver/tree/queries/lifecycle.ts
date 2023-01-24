@@ -5,36 +5,27 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject, JsonValue } from '@kbn/utility-types';
-import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
-
-interface LifecycleParams {
-  schema: ResolverSchema;
-  indexPatterns: string | string[];
-  timeRange: TimeRange;
-}
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type { FieldsObject } from '../../../../../../common/endpoint/types';
+import type { NodeID } from '../utils';
+import { validIDs } from '../utils';
+import type { ResolverQueryParams } from './base';
+import { BaseResolverQuery } from './base';
 
 /**
  * Builds a query for retrieving descendants of a node.
  */
-export class LifecycleQuery {
-  private readonly schema: ResolverSchema;
-  private readonly indexPatterns: string | string[];
-  private readonly timeRange: TimeRange;
-  private readonly docValueFields: JsonValue[];
-  constructor({ schema, indexPatterns, timeRange }: LifecycleParams) {
-    this.docValueFields = docValueFields(schema);
-    this.schema = schema;
-    this.indexPatterns = indexPatterns;
-    this.timeRange = timeRange;
+export class LifecycleQuery extends BaseResolverQuery {
+  declare readonly resolverFields: JsonValue[];
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
+    super({ schema, indexPatterns, timeRange, isInternalRequest });
   }
 
   private query(nodes: NodeID[]): JsonObject {
     return {
       _source: false,
-      docvalue_fields: this.docValueFields,
+      fields: this.resolverFields,
       size: nodes.length,
       collapse: {
         field: this.schema.id,
@@ -43,15 +34,7 @@ export class LifecycleQuery {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },
@@ -91,7 +74,9 @@ export class LifecycleQuery {
       return [];
     }
 
-    const body = await client.asCurrentUser.search({
+    const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+
+    const body = await esClient.search({
       body: this.query(validNodes),
       index: this.indexPatterns,
     });

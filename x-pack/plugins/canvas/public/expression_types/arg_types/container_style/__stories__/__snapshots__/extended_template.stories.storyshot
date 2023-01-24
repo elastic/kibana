@@ -12,15 +12,15 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
 >
   <div>
     <h6
-      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Appearance
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -30,7 +30,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -71,7 +71,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -95,7 +95,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -145,7 +145,9 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -157,7 +159,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -181,7 +183,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -211,7 +213,9 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -221,18 +225,18 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--m"
+      className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
     />
     <h6
-      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Border
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -241,7 +245,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -282,7 +286,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -300,7 +304,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+              className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
               onMouseUp={[Function]}
@@ -308,8 +312,73 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
               onTouchStart={[Function]}
             >
               <div
-                className="euiPopover__anchor"
-              />
+                className="euiPopover__anchor css-zih94u-render"
+              >
+                <div>
+                  <input
+                    id="generated-id"
+                    type="hidden"
+                    value="solid"
+                  />
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <span
+                        className="emotion-euiScreenReaderOnly"
+                        id="euiSuperSelect__generated-id__screenreaderLabelId"
+                      >
+                        Select an option: 
+                        <div
+                          style={
+                            Object {
+                              "border": "4px solid",
+                              "height": 16,
+                            }
+                          }
+                        />
+                        , is selected
+                      </span>
+                      <button
+                        aria-haspopup="listbox"
+                        className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        type="button"
+                      >
+                        <div
+                          style={
+                            Object {
+                              "border": "4px solid",
+                              "height": 16,
+                            }
+                          }
+                        />
+                      </button>
+                      <div
+                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                            size="s"
+                          >
+                            
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -318,7 +387,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -359,7 +428,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
           style={
             Object {
@@ -382,15 +451,15 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorUpCenter"
+              className="euiPopover emotion-euiPopover"
               id="color-picker-popover"
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-16vtueo-render"
               >
                 <button
                   aria-label="Border white"
-                  className="euiLink euiLink--primary"
+                  className="euiLink emotion-euiLink-primary"
                   disabled={false}
                   onClick={[Function]}
                   style={
@@ -444,7 +513,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -485,7 +554,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -509,7 +578,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect euiSelect--compressed"
+                className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -559,7 +628,9 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
@@ -571,7 +642,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -595,7 +666,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect euiSelect--compressed"
+                className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -625,7 +696,9 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
@@ -654,7 +727,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -695,7 +768,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -713,7 +786,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -721,8 +794,73 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
-            />
+              className="euiPopover__anchor css-zih94u-render"
+            >
+              <div>
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="dotted"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="emotion-euiScreenReaderOnly"
+                      id="euiSuperSelect__generated-id__screenreaderLabelId"
+                    >
+                      Select an option: 
+                      <div
+                        style={
+                          Object {
+                            "border": "4px dotted",
+                            "height": 16,
+                          }
+                        }
+                      />
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="listbox"
+                      className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      type="button"
+                    >
+                      <div
+                        style={
+                          Object {
+                            "border": "4px dotted",
+                            "height": 16,
+                          }
+                        }
+                      />
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiFormControlLayoutCustomIcon__icon"
+                          data-euiicon-type="arrowDown"
+                          size="s"
+                        >
+                          
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -731,7 +869,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -772,7 +910,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow1"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
         style={
           Object {
@@ -795,15 +933,15 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorUpCenter"
+            className="euiPopover emotion-euiPopover"
             id="color-picker-popover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Border black"
-                className="euiLink euiLink--primary"
+                className="euiLink emotion-euiLink-primary"
                 disabled={false}
                 onClick={[Function]}
                 style={
@@ -850,15 +988,15 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
 >
   <div>
     <h6
-      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Appearance
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -868,7 +1006,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -909,7 +1047,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -933,7 +1071,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -983,7 +1121,9 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -995,7 +1135,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1019,7 +1159,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1049,7 +1189,9 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -1059,18 +1201,18 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--m"
+      className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
     />
     <h6
-      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Border
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1079,7 +1221,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1120,7 +1262,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1138,7 +1280,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+              className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
               onKeyDown={[Function]}
               onMouseDown={[Function]}
               onMouseUp={[Function]}
@@ -1146,8 +1288,73 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
               onTouchStart={[Function]}
             >
               <div
-                className="euiPopover__anchor"
-              />
+                className="euiPopover__anchor css-zih94u-render"
+              >
+                <div>
+                  <input
+                    id="generated-id"
+                    type="hidden"
+                    value="solid"
+                  />
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--compressed"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <span
+                        className="emotion-euiScreenReaderOnly"
+                        id="euiSuperSelect__generated-id__screenreaderLabelId"
+                      >
+                        Select an option: 
+                        <div
+                          style={
+                            Object {
+                              "border": "4px solid",
+                              "height": 16,
+                            }
+                          }
+                        />
+                        , is selected
+                      </span>
+                      <button
+                        aria-haspopup="listbox"
+                        className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        type="button"
+                      >
+                        <div
+                          style={
+                            Object {
+                              "border": "4px solid",
+                              "height": 16,
+                            }
+                          }
+                        />
+                      </button>
+                      <div
+                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                            size="s"
+                          >
+                            
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1156,7 +1363,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1197,7 +1404,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
           style={
             Object {
@@ -1220,15 +1427,15 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiPopover euiPopover--anchorUpCenter"
+              className="euiPopover emotion-euiPopover"
               id="color-picker-popover"
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-16vtueo-render"
               >
                 <button
                   aria-label="Border white"
-                  className="euiLink euiLink--primary"
+                  className="euiLink emotion-euiLink-primary"
                   disabled={false}
                   onClick={[Function]}
                   style={

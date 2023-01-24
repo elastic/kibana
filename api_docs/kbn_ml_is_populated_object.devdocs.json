@@ -1,0 +1,78 @@
+{
+  "id": "@kbn/ml-is-populated-object",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-is-populated-object",
+        "id": "def-common.isPopulatedObject",
+        "type": "Function",
+        "tags": [],
+        "label": "isPopulatedObject",
+        "description": [
+          "\nA type guard to check record like object structures.\n\nExamples:\n- `isPopulatedObject({...})`\n     Limits type to Record<string, unknown>\n\n- `isPopulatedObject({...}, ['attribute'])`\n     Limits type to Record<'attribute', unknown>\n\n- `isPopulatedObject<keyof MyInterface>({...})`\n     Limits type to a record with keys of the given interface.\n     Note that you might want to add keys from the interface to the\n     array of requiredAttributes to satisfy runtime requirements.\n     Otherwise you'd just satisfy TS requirements but might still\n     run into runtime issues."
+        ],
+        "signature": [
+          "<U extends string = string, T extends unknown = unknown>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, T>"
+        ],
+        "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-is-populated-object",
+            "id": "def-common.isPopulatedObject.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-is-populated-object",
+            "id": "def-common.isPopulatedObject.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "requiredAttributes",
+            "description": [],
+            "signature": [
+              "U[]"
+            ],
+            "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

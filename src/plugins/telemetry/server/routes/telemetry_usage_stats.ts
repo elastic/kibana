@@ -7,12 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
-import {
+import type { IRouter } from '@kbn/core/server';
+import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
-import type { SecurityPluginStart } from '../../../../../x-pack/plugins/security/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export type SecurityGetter = () => SecurityPluginStart | undefined;
 
@@ -34,6 +34,15 @@ export function registerTelemetryUsageStatsRoutes(
     },
     async (context, req, res) => {
       const { unencrypted, refreshCache } = req.body;
+
+      if (!(await telemetryCollectionManager.shouldGetTelemetry())) {
+        // We probably won't reach here because there is a license check in the auth phase of the HTTP requests.
+        // But let's keep it here should that changes at any point.
+        return res.customError({
+          statusCode: 503,
+          body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
+        });
+      }
 
       const security = getSecurity();
       if (security && unencrypted) {

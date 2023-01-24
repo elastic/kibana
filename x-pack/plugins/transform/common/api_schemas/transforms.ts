@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import type { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
@@ -66,9 +66,12 @@ export const retentionPolicySchema = schema.object({
 });
 
 export const settingsSchema = schema.object({
-  max_page_search_size: schema.maybe(schema.number()),
+  // null can be used to reset to default value.
+  max_page_search_size: schema.maybe(schema.nullable(schema.number())),
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
+  // Optional value that takes precedence over cluster's setting.
+  num_failure_retries: schema.maybe(schema.nullable(schema.number())),
 });
 
 export const sourceSchema = schema.object({

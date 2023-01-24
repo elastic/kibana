@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ColorSchemas, getHeatmapColors } from '../../../../charts/common';
-import { Range } from '../../../../expressions';
+import { ColorSchemas, getHeatmapColors } from '@kbn/charts-plugin/common';
+import { Range } from '@kbn/expressions-plugin/common';
 
 export interface PaletteConfig {
   color: Array<string | undefined>;
@@ -27,13 +27,20 @@ const getColor = (
 export const getStopsWithColorsFromColorsNumber = (
   colorsNumber: number | '',
   colorSchema: ColorSchemas,
-  invertColors: boolean = false
+  invertColors: boolean = false,
+  includeZeroElement: boolean = false
 ) => {
   const colors = [];
   const stops = [];
   if (!colorsNumber) {
     return { color: [] };
   }
+
+  if (includeZeroElement) {
+    colors.push(TRANSPARENT);
+    stops.push(0);
+  }
+
   const step = 100 / colorsNumber;
   for (let i = 0; i < colorsNumber; i++) {
     colors.push(getColor(i, colorsNumber, colorSchema, invertColors));

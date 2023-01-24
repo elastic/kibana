@@ -10,7 +10,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveRedirect } from './use_resolve_redirect';
-import * as urlHelpers from '../components/url_state/helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -22,7 +21,7 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
-jest.mock('../../timelines/store/timeline/', () => ({
+jest.mock('../../timelines/store/timeline', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => jest.fn(),
   },
@@ -88,20 +87,19 @@ describe('useResolveRedirect', () => {
         resolveTimelineConfig: {
           outcome: 'aliasMatch',
           alias_target_id: 'new-id',
+          alias_purpose: 'savedObjectConversion',
         },
       }));
       renderHook(() => useResolveRedirect());
-      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-        'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
-        'timeline'
-      );
+      expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+        path: 'my/cool/path?timeline=%28activeTab%3Aquery%2CgraphEventId%3A%27%27%2Cid%3Anew-id%2CisOpen%3A%21t%29',
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'timeline',
+      });
     });
 
     describe('rison is unable to be decoded', () => {
       it('should use timeline values from redux to create the redirect path', async () => {
-        jest.spyOn(urlHelpers, 'decodeRisonUrlState').mockImplementation(() => {
-          throw new Error('Unable to decode');
-        });
         (useLocation as jest.Mock).mockReturnValue({
           pathname: 'my/cool/path',
           search: '?foo=bar',
@@ -110,6 +108,7 @@ describe('useResolveRedirect', () => {
           resolveTimelineConfig: {
             outcome: 'aliasMatch',
             alias_target_id: 'new-id',
+            alias_purpose: 'savedObjectConversion',
           },
           savedObjectId: 'current-saved-object-id',
           activeTab: 'some-tab',
@@ -117,10 +116,11 @@ describe('useResolveRedirect', () => {
           show: false,
         }));
         renderHook(() => useResolveRedirect());
-        expect(mockRedirectLegacyUrl).toHaveBeenCalledWith(
-          'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
-          'timeline'
-        );
+        expect(mockRedirectLegacyUrl).toHaveBeenCalledWith({
+          path: 'my/cool/path?foo=bar&timeline=%28activeTab%3Asome-tab%2CgraphEventId%3Acurrent-graph-event-id%2Cid%3Anew-id%2CisOpen%3A%21f%29',
+          aliasPurpose: 'savedObjectConversion',
+          objectNoun: 'timeline',
+        });
       });
     });
   });

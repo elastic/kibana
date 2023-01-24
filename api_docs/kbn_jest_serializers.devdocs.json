@@ -1,0 +1,237 @@
+{
+  "id": "@kbn/jest-serializers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/jest-serializers",
+        "id": "def-common.createAbsolutePathSerializer",
+        "type": "Function",
+        "tags": [],
+        "label": "createAbsolutePathSerializer",
+        "description": [],
+        "signature": [
+          "(rootPath: string, replacement: string) => { test: (value: any) => boolean; serialize: (value: string) => string; }"
+        ],
+        "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createAbsolutePathSerializer.$1",
+            "type": "string",
+            "tags": [],
+            "label": "rootPath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createAbsolutePathSerializer.$2",
+            "type": "string",
+            "tags": [],
+            "label": "replacement",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/jest-serializers",
+        "id": "def-common.createAnyInstanceSerializer",
+        "type": "Function",
+        "tags": [],
+        "label": "createAnyInstanceSerializer",
+        "description": [],
+        "signature": [
+          "(Class: Function, name: string | ((instance: any) => string) | undefined) => { test: (v: any) => boolean; serialize: (v: any) => string; }"
+        ],
+        "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createAnyInstanceSerializer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "Class",
+            "description": [],
+            "signature": [
+              "Function"
+            ],
+            "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createAnyInstanceSerializer.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | ((instance: any) => string) | undefined"
+            ],
+            "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/jest-serializers",
+        "id": "def-common.createRecursiveSerializer",
+        "type": "Function",
+        "tags": [],
+        "label": "createRecursiveSerializer",
+        "description": [],
+        "signature": [
+          "(test: (v: any) => boolean, print: (v: any, printRaw: (v: string) => RawPrint) => string | RawPrint) => { test: (v: any) => boolean; serialize: (v: any, ...rest: any[]) => any; }"
+        ],
+        "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createRecursiveSerializer.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "test",
+            "description": [],
+            "signature": [
+              "(v: any) => boolean"
+            ],
+            "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createRecursiveSerializer.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "print",
+            "description": [],
+            "signature": [
+              "(v: any, printRaw: (v: string) => RawPrint) => string | RawPrint"
+            ],
+            "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/jest-serializers",
+        "id": "def-common.createReplaceSerializer",
+        "type": "Function",
+        "tags": [],
+        "label": "createReplaceSerializer",
+        "description": [],
+        "signature": [
+          "(toReplace: string | RegExp, replaceWith: string | Replacer) => { test: (v: any) => boolean; serialize: (v: any, ...rest: any[]) => any; }"
+        ],
+        "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createReplaceSerializer.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "toReplace",
+            "description": [],
+            "signature": [
+              "string | RegExp"
+            ],
+            "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/jest-serializers",
+            "id": "def-common.createReplaceSerializer.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "replaceWith",
+            "description": [],
+            "signature": [
+              "string | Replacer"
+            ],
+            "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/jest-serializers",
+        "id": "def-common.createStripAnsiSerializer",
+        "type": "Function",
+        "tags": [],
+        "label": "createStripAnsiSerializer",
+        "description": [],
+        "signature": [
+          "() => { test: (v: any) => boolean; serialize: (v: any, ...rest: any[]) => any; }"
+        ],
+        "path": "packages/kbn-jest-serializers/src/strip_ansi_serializer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

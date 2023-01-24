@@ -10,24 +10,25 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsUtils } from '../../../../../../src/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
+import type { CaseResponse, CasePostRequest } from '../../../common/api';
 import {
   throwErrors,
-  excess,
   CaseResponseRt,
-  CaseResponse,
-  CasePostRequest,
   ActionTypes,
   CasePostRequestRt,
+  excess,
+  CaseSeverity,
 } from '../../../common/api';
-import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag } from '../../../common/utils/validators';
+import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
+import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
  * Creates a new case.
@@ -39,9 +40,7 @@ export const create = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
+    services: { caseService, userActionService, licensingService, notificationService },
     user,
     logger,
     authorization: auth,
@@ -72,28 +71,65 @@ export const create = async (
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
 
+    /**
+     * Assign users to a case is only available to Platinum+
+     */
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
+
+    if (areTotalAssigneesInvalid(query.assignees)) {
+      throw Boom.badRequest(
+        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
+      );
+    }
+
     const newCase = await caseService.postNewCase({
       attributes: transformNewCase({
         user,
         newCase: query,
       }),
       id: savedObjectID,
+      refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.create_case,
-      unsecuredSavedObjectsClient,
       caseId: newCase.id,
       user,
-      payload: query,
+      payload: {
+        ...query,
+        severity: query.severity ?? CaseSeverity.LOW,
+        assignees: query.assignees ?? [],
+      },
       owner: newCase.attributes.owner,
     });
 
-    return CaseResponseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: newCase,
-      })
-    );
+    const flattenedCase = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    if (query.assignees && query.assignees.length !== 0) {
+      const assigneesWithoutCurrentUser = query.assignees.filter(
+        (assignee) => assignee.uid !== user.profile_uid
+      );
+
+      await notificationService.notifyAssignees({
+        assignees: assigneesWithoutCurrentUser,
+        theCase: newCase,
+      });
+    }
+
+    return CaseResponseRt.encode(flattenedCase);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

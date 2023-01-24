@@ -6,9 +6,8 @@
  */
 
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type { CellValueElementProps } from '../../../../../../timelines/common';
+import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import * as PluginHook from '../../../../hooks/use_plugin_context';
 import { render } from '../../../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
 
@@ -18,15 +17,10 @@ interface AlertsTableRow {
 
 describe('getRenderCellValue', () => {
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
-  jest.spyOn(PluginHook, 'usePluginContext').mockImplementation(
-    () =>
-      ({
-        observabilityRuleTypeRegistry: observabilityRuleTypeRegistryMock,
-      } as any)
-  );
 
   const renderCellValue = getRenderCellValue({
     setFlyoutAlert: jest.fn(),
+    observabilityRuleTypeRegistry: observabilityRuleTypeRegistryMock,
   });
 
   describe('when column is alert status', () => {
@@ -81,5 +75,5 @@ const requiredProperties: CellValueElementProps = {
   },
   isDraggable: false,
   linkValues: [],
-  timelineId: '',
+  scopeId: '',
 };

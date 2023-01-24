@@ -12,7 +12,7 @@ import {
   EuiButton,
   EuiPage,
   EuiPageBody,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -20,6 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -46,14 +47,14 @@ const DEFAULT_STATE = {
   readStatus: IMPORT_STATUS.INCOMPLETE,
   parseJSONStatus: IMPORT_STATUS.INCOMPLETE,
   indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
-  indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
+  dataViewCreatedStatus: IMPORT_STATUS.INCOMPLETE,
   ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
   permissionCheckStatus: IMPORT_STATUS.INCOMPLETE,
   uploadProgress: 0,
   uploadStatus: IMPORT_STATUS.INCOMPLETE,
-  createIndexPattern: true,
-  indexPattern: '',
-  indexPatternId: '',
+  createDataView: true,
+  dataView: '',
+  dataViewId: '',
   ingestPipelineId: '',
   errors: [],
   importFailures: [],
@@ -63,9 +64,9 @@ const DEFAULT_STATE = {
   mappingsString: '',
   pipelineString: '',
   indexNames: [],
-  indexPatternNames: [],
+  dataViewNames: [],
   indexNameError: '',
-  indexPatternNameError: '',
+  dataViewNameError: '',
   timeFieldName: undefined,
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
@@ -77,17 +78,17 @@ export class ImportView extends Component {
     super(props);
 
     this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
-    this.savedObjectsClient = props.savedObjectsClient;
+    this.dataViewsContract = props.dataViewsContract;
   }
 
   componentDidMount() {
-    this.loadIndexPatternNames();
+    this.loadDataViewNames();
   }
 
   clickReset = () => {
     const state = getDefaultState(this.state, this.props.results, this.props.capabilities);
     this.setState(state, () => {
-      this.loadIndexPatternNames();
+      this.loadDataViewNames();
     });
   };
 
@@ -97,18 +98,12 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { data, results, indexPatterns, showBottomBar, fileUpload } = this.props;
+    const { data, results, dataViewsContract, showBottomBar, fileUpload } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
-    const {
-      index,
-      indexPattern,
-      createIndexPattern,
-      indexSettingsString,
-      mappingsString,
-      pipelineString,
-    } = this.state;
+    const { index, dataView, createDataView, indexSettingsString, mappingsString, pipelineString } =
+      this.state;
 
     const errors = [];
 
@@ -122,7 +117,7 @@ export class ImportView extends Component {
           // check to see if the user has permission to create and ingest data into the specified index
           if (
             (await fileUpload.hasImportPermission({
-              checkCreateIndexPattern: createIndexPattern,
+              checkCreateDataView: createDataView,
               checkHasManagePipeline: true,
               indexName: index,
             })) === false
@@ -212,7 +207,7 @@ export class ImportView extends Component {
                 // mappings, use this field as the time field.
                 // This relies on the field being populated by
                 // the ingest pipeline on ingest
-                if (mappings.properties[DEFAULT_TIME_FIELD] !== undefined) {
+                if (isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])) {
                   timeFieldName = DEFAULT_TIME_FIELD;
                   this.setState({ timeFieldName });
                 }
@@ -286,22 +281,22 @@ export class ImportView extends Component {
                         });
 
                         if (success) {
-                          if (createIndexPattern) {
-                            const indexPatternName = indexPattern === '' ? index : indexPattern;
-                            const indexPatternResp = await createKibanaIndexPattern(
-                              indexPatternName,
-                              indexPatterns,
+                          if (createDataView) {
+                            const dataViewName = dataView === '' ? index : dataView;
+                            const dataViewResp = await createKibanaDataView(
+                              dataViewName,
+                              dataViewsContract,
                               timeFieldName
                             );
-                            success = indexPatternResp.success;
+                            success = dataViewResp.success;
                             this.setState({
-                              indexPatternCreatedStatus: indexPatternResp.success
+                              dataViewCreatedStatus: dataViewResp.success
                                 ? IMPORT_STATUS.COMPLETE
                                 : IMPORT_STATUS.FAILED,
-                              indexPatternId: indexPatternResp.id,
+                              dataViewId: dataViewResp.id,
                             });
-                            if (indexPatternResp.success === false) {
-                              errors.push(indexPatternResp.error);
+                            if (dataViewResp.success === false) {
+                              errors.push(dataViewResp.error);
                             }
                           }
                         } else {
@@ -362,18 +357,18 @@ export class ImportView extends Component {
     this.setState({ checkingValidIndex: false, indexNameError });
   }, 500);
 
-  onIndexPatternChange = (e) => {
+  onDataViewChange = (e) => {
     const name = e.target.value;
-    const { indexPatternNames, index } = this.state;
+    const { dataViewNames, index } = this.state;
     this.setState({
-      indexPattern: name,
-      indexPatternNameError: isIndexPatternNameValid(name, indexPatternNames, index),
+      dataView: name,
+      dataViewNameError: isDataViewNameValid(name, dataViewNames, index),
     });
   };
 
-  onCreateIndexPatternChange = (e) => {
+  onCreateDataViewChange = (e) => {
     this.setState({
-      createIndexPattern: e.target.checked,
+      createDataView: e.target.checked,
     });
   };
 
@@ -421,17 +416,10 @@ export class ImportView extends Component {
     this.props.showBottomBar();
   };
 
-  async loadIndexPatternNames() {
+  async loadDataViewNames() {
     try {
-      const indexPatternNames = (
-        await this.savedObjectsClient.find({
-          type: 'index-pattern',
-          fields: ['title'],
-          perPage: 10000,
-        })
-      ).savedObjects.map(({ attributes }) => attributes && attributes.title);
-
-      this.setState({ indexPatternNames });
+      const dataViewNames = await this.dataViewsContract.getTitles();
+      this.setState({ dataViewNames });
     } catch (error) {
       console.error('failed to load data views', error);
     }
@@ -440,8 +428,8 @@ export class ImportView extends Component {
   render() {
     const {
       index,
-      indexPattern,
-      indexPatternId,
+      dataView,
+      dataViewId,
       ingestPipelineId,
       importing,
       imported,
@@ -451,11 +439,11 @@ export class ImportView extends Component {
       parseJSONStatus,
       indexCreatedStatus,
       ingestPipelineCreatedStatus,
-      indexPatternCreatedStatus,
+      dataViewCreatedStatus,
       permissionCheckStatus,
       uploadProgress,
       uploadStatus,
-      createIndexPattern,
+      createDataView,
       errors,
       docCount,
       importFailures,
@@ -463,7 +451,7 @@ export class ImportView extends Component {
       mappingsString,
       pipelineString,
       indexNameError,
-      indexPatternNameError,
+      dataViewNameError,
       timeFieldName,
       isFilebeatFlyoutVisible,
       checkingValidIndex,
@@ -478,18 +466,18 @@ export class ImportView extends Component {
       parseJSONStatus,
       indexCreatedStatus,
       ingestPipelineCreatedStatus,
-      indexPatternCreatedStatus,
+      dataViewCreatedStatus,
       permissionCheckStatus,
       uploadProgress,
       uploadStatus,
-      createIndexPattern,
+      createDataView,
       createPipeline,
     };
 
     const disableImport =
       index === '' ||
       indexNameError !== '' ||
-      (createIndexPattern === true && indexPatternNameError !== '') ||
+      (createDataView === true && dataViewNameError !== '') ||
       initialized === true ||
       checkingValidIndex === true;
 
@@ -514,12 +502,12 @@ export class ImportView extends Component {
 
             <ImportSettings
               index={index}
-              indexPattern={indexPattern}
+              dataView={dataView}
               initialized={initialized}
               onIndexChange={this.onIndexChange}
-              createIndexPattern={createIndexPattern}
-              onCreateIndexPatternChange={this.onCreateIndexPatternChange}
-              onIndexPatternChange={this.onIndexPatternChange}
+              createDataView={createDataView}
+              onCreateDataViewChange={this.onCreateDataViewChange}
+              onDataViewChange={this.onDataViewChange}
               indexSettingsString={indexSettingsString}
               mappingsString={mappingsString}
               pipelineString={pipelineString}
@@ -527,7 +515,7 @@ export class ImportView extends Component {
               onMappingsStringChange={this.onMappingsStringChange}
               onPipelineStringChange={this.onPipelineStringChange}
               indexNameError={indexNameError}
-              indexPatternNameError={indexPatternNameError}
+              dataViewNameError={dataViewNameError}
               combinedFields={combinedFields}
               onCombinedFieldsChange={this.onCombinedFieldsChange}
               results={this.props.results}
@@ -574,11 +562,11 @@ export class ImportView extends Component {
 
                     <ImportSummary
                       index={index}
-                      indexPattern={indexPattern === '' ? index : indexPattern}
+                      dataView={dataView === '' ? index : dataView}
                       ingestPipelineId={ingestPipelineId}
                       docCount={docCount}
                       importFailures={importFailures}
-                      createIndexPattern={createIndexPattern}
+                      createDataView={createDataView}
                       createPipeline={createPipeline}
                     />
 
@@ -587,18 +575,17 @@ export class ImportView extends Component {
                     <ResultsLinks
                       fieldStats={this.props.results?.field_stats}
                       index={index}
-                      indexPatternId={indexPatternId}
+                      dataViewId={dataViewId}
                       timeFieldName={timeFieldName}
-                      createIndexPattern={createIndexPattern}
+                      createDataView={createDataView}
                       showFilebeatFlyout={this.showFilebeatFlyout}
-                      additionalLinks={this.props.resultsLinks ?? []}
+                      getAdditionalLinks={this.props.getAdditionalLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (
                       <FilebeatConfigFlyout
                         index={index}
                         results={this.props.results}
-                        indexPatternId={indexPatternId}
                         ingestPipelineId={ingestPipelineId}
                         closeFlyout={this.closeFilebeatFlyout}
                       />
@@ -621,10 +608,10 @@ export class ImportView extends Component {
   }
 }
 
-async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName) {
+async function createKibanaDataView(dataViewName, dataViewsContract, timeFieldName) {
   try {
-    const emptyPattern = await indexPatterns.createAndSave({
-      title: indexPatternName,
+    const emptyPattern = await dataViewsContract.createAndSave({
+      title: dataViewName,
       timeFieldName,
     });
 
@@ -666,10 +653,10 @@ function getDefaultState(state, results, capabilities) {
 
   const timeFieldName = results.timestamp_field;
 
-  const createIndexPattern =
+  const createDataView =
     capabilities.savedObjectsManagement.edit === false && capabilities.indexPatterns.save === false
       ? false
-      : state.createIndexPattern;
+      : state.createDataView;
 
   return {
     ...DEFAULT_STATE,
@@ -678,7 +665,7 @@ function getDefaultState(state, results, capabilities) {
     pipelineString,
     timeFieldName,
     combinedFields,
-    createIndexPattern,
+    createDataView,
   };
 }
 
@@ -701,13 +688,13 @@ function isIndexNameValid(name) {
   return '';
 }
 
-function isIndexPatternNameValid(name, indexPatternNames, index) {
+function isDataViewNameValid(name, dataViewNames, index) {
   // if a blank name is entered, the index name will be used so avoid validation
   if (name === '') {
     return '';
   }
 
-  if (indexPatternNames.find((i) => i === name)) {
+  if (dataViewNames.find((i) => i === name)) {
     return (
       <FormattedMessage
         id="xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage"

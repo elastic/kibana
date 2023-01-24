@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { apmSchema } from '../server/lib/apm_telemetry/schema';
 
 function schemaToMapping(schemaLeaf: any): any {

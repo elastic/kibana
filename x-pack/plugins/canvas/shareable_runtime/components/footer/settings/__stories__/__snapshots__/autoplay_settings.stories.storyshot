@@ -48,12 +48,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -66,7 +70,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -78,7 +82,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -103,6 +107,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -133,7 +138,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               className="euiFormRow__fieldWrapper"
             >
               <button
-                className="euiButton euiButton--primary euiButton--small"
+                className="euiButton emotion-euiButtonDisplay-s-s-base-primary"
                 disabled={false}
                 id="generated-id"
                 onBlur={[Function]}
@@ -146,10 +151,10 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 type="submit"
               >
                 <span
-                  className="euiButtonContent euiButton__content"
+                  className="emotion-euiButtonDisplayContent"
                 >
                   <span
-                    className="euiButton__text"
+                    className="eui-textTruncate"
                   >
                     Set
                   </span>
@@ -212,12 +217,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -230,7 +239,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -242,7 +251,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -267,6 +276,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -297,7 +307,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               className="euiFormRow__fieldWrapper"
             >
               <button
-                className="euiButton euiButton--primary euiButton--small"
+                className="euiButton emotion-euiButtonDisplay-s-s-base-primary"
                 disabled={false}
                 id="generated-id"
                 onBlur={[Function]}
@@ -310,10 +320,10 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 type="submit"
               >
                 <span
-                  className="euiButtonContent euiButton__content"
+                  className="emotion-euiButtonDisplayContent"
                 >
                   <span
-                    className="euiButton__text"
+                    className="eui-textTruncate"
                   >
                     Set
                   </span>
@@ -376,12 +386,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -394,7 +408,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -406,7 +420,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -431,6 +445,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -461,7 +476,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               className="euiFormRow__fieldWrapper"
             >
               <button
-                className="euiButton euiButton--primary euiButton--small"
+                className="euiButton emotion-euiButtonDisplay-s-s-base-primary"
                 disabled={false}
                 id="generated-id"
                 onBlur={[Function]}
@@ -474,10 +489,10 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 type="submit"
               >
                 <span
-                  className="euiButtonContent euiButton__content"
+                  className="emotion-euiButtonDisplayContent"
                 >
                   <span
-                    className="euiButton__text"
+                    className="eui-textTruncate"
                   >
                     Set
                   </span>

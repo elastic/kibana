@@ -1,0 +1,15 @@
+{
+  "id": "unifiedFieldList",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
+  },
+  "description": "Contains functionality for the field list which can be integrated into apps",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["dataViews", "data", "fieldFormats", "charts", "uiActions"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

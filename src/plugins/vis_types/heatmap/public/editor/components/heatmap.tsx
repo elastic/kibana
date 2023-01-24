@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -22,9 +23,10 @@ import {
   NumberInputOption,
   PercentageModeOption,
   LongLegendOptions,
-} from '../../../../../vis_default_editor/public';
-import { colorSchemas } from '../../../../../charts/public';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
+  LegendSizeSettings,
+} from '@kbn/vis-default-editor-plugin/public';
+import { colorSchemas } from '@kbn/charts-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
@@ -39,6 +41,9 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
+
+  const legendSize = stateParams.legendSize;
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>
@@ -64,6 +69,8 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
     }
   }, [stateParams]);
 
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -79,12 +86,23 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
 
         <BasicOptions {...props} legendPositions={legendPositions} />
         {showElasticChartsOptions && (
-          <LongLegendOptions
-            data-test-subj="heatmapLongLegendsOptions"
-            truncateLegend={stateParams.truncateLegend ?? true}
-            maxLegendLines={stateParams.maxLegendLines ?? 1}
-            setValue={setValue}
-          />
+          <>
+            <LongLegendOptions
+              data-test-subj="heatmapLongLegendsOptions"
+              truncateLegend={stateParams.truncateLegend ?? true}
+              maxLegendLines={stateParams.maxLegendLines ?? 1}
+              setValue={setValue}
+            />
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={handleLegendSizeChange}
+              isVerticalLegend={
+                stateParams.legendPosition === Position.Left ||
+                stateParams.legendPosition === Position.Right
+              }
+              showAutoOption={hadAutoLegendSize}
+            />
+          </>
         )}
 
         <SwitchOption

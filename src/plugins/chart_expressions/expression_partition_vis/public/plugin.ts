@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStart } from '../../../field_formats/public';
-import { CoreSetup, CoreStart, ThemeServiceStart } from '../../../../core/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { createStartServicesGetter, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   partitionLabelsFunction,
   pieVisFunction,
@@ -27,23 +25,12 @@ import {
 
 /** @internal */
 export interface VisTypePieDependencies {
-  theme: ChartsPluginSetup['theme'];
-  palettes: ChartsPluginSetup['palettes'];
-  getStartDeps: () => Promise<{
-    data: DataPublicPluginStart;
-    fieldFormats: FieldFormatsStart;
-    kibanaTheme: ThemeServiceStart;
-  }>;
-}
-
-export interface VisTypePiePluginStartDependencies {
-  data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
+  getStartDeps: StartServicesGetter<StartDeps>;
 }
 
 export class ExpressionPartitionVisPlugin {
   public setup(
-    core: CoreSetup<VisTypePiePluginStartDependencies>,
+    core: CoreSetup<StartDeps, void>,
     { expressions, charts }: SetupDeps
   ): ExpressionPartitionVisPluginSetup {
     expressions.registerFunction(partitionLabelsFunction);
@@ -52,16 +39,9 @@ export class ExpressionPartitionVisPlugin {
     expressions.registerFunction(mosaicVisFunction);
     expressions.registerFunction(waffleVisFunction);
 
-    const getStartDeps = async () => {
-      const [coreStart, deps] = await core.getStartServices();
-      const { data, fieldFormats } = deps;
-      const { theme: kibanaTheme } = coreStart;
-      return { data, fieldFormats, kibanaTheme };
-    };
+    const getStartDeps = createStartServicesGetter<StartDeps, void>(core.getStartServices);
 
-    expressions.registerRenderer(
-      getPartitionVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
-    );
+    expressions.registerRenderer(getPartitionVisRenderer({ getStartDeps }));
   }
 
   public start(core: CoreStart, deps: StartDeps): ExpressionPartitionVisPluginStart {}

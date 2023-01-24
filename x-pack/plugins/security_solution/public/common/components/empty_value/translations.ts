@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const EMPTY_STRING = i18n.translate(
   'xpack.securitySolution.emptyString.emptyStringDescription',
   {
-    defaultMessage: 'Empty String',
+    defaultMessage: 'Empty string',
   }
 );

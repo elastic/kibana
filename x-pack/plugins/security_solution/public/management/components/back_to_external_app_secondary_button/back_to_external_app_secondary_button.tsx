@@ -7,9 +7,10 @@
 import React, { memo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CommonProps, EuiButtonEmpty } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
-import { ListPageRouteState } from '../../../../common/endpoint/types';
+import type { ListPageRouteState } from '../../../../common/endpoint/types';
 
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 

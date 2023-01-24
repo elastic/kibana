@@ -96,7 +96,6 @@ The `OF` expression now appears.
 
 . Search for `system.process.cpu.total.norm.pct` and select it from the list.
 
-
 . Select the `IS ABOVE` expression and change the value to `.25` to trigger
 an alert whenever the CPU is above 25%.
 +
@@ -136,9 +135,9 @@ the watch history and status.
 [float]
 ==== Delete the alert
 
-In this example, you set the threshold to 25% so you can see the watch fire. In
-a  real-world scenario, this threshold is likely too low because the alerts are
-so frequent. Once you are done experimenting, you should delete the alert.
+In this example, you set the threshold to 25% so you can see the watch execute its actions.
+In a real-world scenario, this threshold is likely too low because the alerts will
+be too frequent. Once you are done experimenting, you should delete the alert.
 Find the alert on the Watcher overview page and click the trash icon in the *Actions* column.
 
 [float]
@@ -151,13 +150,14 @@ in the *Actions* column.
 [float]
 [[watcher-getting-started]]
 === View watch history and status
-The Watcher overview page lists your watches and includes details such as state,
-last fired, and last triggered.  A watch has one of four states:
+The Watcher overview page lists your watches, including the state of each watch,
+when its condition was last met, when the condition was last checked, and
+whether any of its actions have been acknowledged,
+throttled, or failed to execute. Each watch can be in one of three states:
 
-* *Firing.* The watch is triggered and actively performing the associated actions.
+* *Active.* The watch is working properly.
+* *Inactive.* The watch is working properly, but is deliberately disabled, so it won't execute any actions.
 * *Error.* The watch is not working properly.
-* *OK.* The watch is not actively firing but working properly.
-* *Disabled.* The watch will not fire under any circumstances.
 
 From this page you can drill down into a watch to investigate its history
 and status.
@@ -175,8 +175,8 @@ image:management/watcher-ui/images/execution-history.png["Execution history tab"
 ==== Acknowledge action status
 
 The *Action statuses* tab lists all actions associated with the watch and
-the state of each action. If the action is firing, you can acknowledge the
-watch to prevent too many executions of the same action for the same watch.
+the state of each action. Some actions can be acknowledged, which will
+prevent too many executions of that action for the relevant watch.
 See {ref}/actions.html#actions-ack-throttle[Acknowledgement and throttling] for details.
 
 [role="screenshot"]
@@ -224,6 +224,10 @@ simulation. Be aware of these implementation details on overrides:
 * Input overrides accepts a JSON blob.
 * Condition overrides indicates if you want to force the condition to always be `true`.
 * Action overrides support {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[multiple options].
+
+Some watches, such as those using basic auth credentials, contain passwords. For security
+reasons, these passwords will be stripped from any watches that are loaded by the
+Watcher UI. You will need to manually re-enter these passwords to simulate the watch.
 
 After starting the simulation, you’ll see a results screen. For more information
 on the fields in the response, see the {ref}/watcher-api-execute-watch.html[Execute watch API].

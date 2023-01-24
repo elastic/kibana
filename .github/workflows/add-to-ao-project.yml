@@ -1,0 +1,23 @@
+name: Add issues to Actionable Observability project
+on:
+  issues:
+    types: [labeled]
+jobs:
+  sync_issues_with_table:
+    runs-on: ubuntu-latest
+    name: Add issues to project
+    if: |
+      github.event.label.name == 'Team: Actionable Observability'
+    steps:
+      - name: Add
+        uses: richkuz/projectnext-label-assigner@1.0.2
+        id: add_to_projects
+        with:
+          config: |
+            [
+              {"label": "Team: Actionable Observability", "projectNumber": 669}
+            ]
+        env:
+          GRAPHQL_API_BASE: 'https://api.github.com'
+          PAT_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

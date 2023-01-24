@@ -5,17 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ProcRunner } from '@kbn/dev-utils';
-import { resolve, relative } from 'path';
-import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
+
+import Path from 'path';
+import Os from 'os';
+
+import { v4 as uuidv4 } from 'uuid';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+
 import type { Config } from '../../functional_test_runner';
+import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
+import { parseRawFlags, getArgValue } from './kibana_cli_args';
 
 function extendNodeOptions(installDir?: string) {
   if (!installDir) {
     return {};
   }
 
-  const testOnlyRegisterPath = relative(
+  const testOnlyRegisterPath = Path.relative(
     installDir,
     require.resolve('./babel_register_for_test_plugins')
   );
@@ -27,121 +34,103 @@ function extendNodeOptions(installDir?: string) {
   };
 }
 
-export async function runKibanaServer({
-  procs,
-  config,
-  options,
-}: {
+export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
-  options: { installDir?: string; extraKbnOpts?: string[] };
+  installDir?: string;
+  extraKbnOpts?: string[];
+  logsDir?: string;
+  onEarlyExit?: (msg: string) => void;
 }) {
-  const { installDir } = options;
-  const runOptions = config.get('kbnTestServer.runOptions');
-  const env = config.get('kbnTestServer.env');
+  const { config, procs } = options;
+  const runOptions = options.config.get('kbnTestServer.runOptions');
+  const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
+  const devMode = !installDir;
+  const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
 
-  await procs.run('kibana', {
-    cmd: getKibanaCmd(installDir),
-    args: filterCliArgs(collectCliArgs(config, options)),
+  const procRunnerOpts = {
+    cwd: installDir || REPO_ROOT,
+    cmd: installDir
+      ? process.platform.startsWith('win')
+        ? Path.resolve(installDir, 'bin/kibana.bat')
+        : Path.resolve(installDir, 'bin/kibana')
+      : process.execPath,
     env: {
       FORCE_COLOR: 1,
       ...process.env,
-      ...env,
+      ...options.config.get('kbnTestServer.env'),
       ...extendNodeOptions(installDir),
     },
-    cwd: installDir || KIBANA_ROOT,
     wait: runOptions.wait,
-  });
-}
+    onEarlyExit: options.onEarlyExit,
+  };
 
-function getKibanaCmd(installDir?: string) {
-  if (installDir) {
-    return process.platform.startsWith('win')
-      ? resolve(installDir, 'bin/kibana.bat')
-      : resolve(installDir, 'bin/kibana');
-  }
+  const prefixArgs = devMode
+    ? [Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana'))]
+    : [];
 
-  return KIBANA_EXEC;
-}
-
-/**
- * When installDir is passed, we run from a built version of Kibana,
- * which uses different command line arguments. If installDir is not
- * passed, we run from source code. We also allow passing in extra
- * Kibana server options, so we tack those on here.
- */
-function collectCliArgs(
-  config: Config,
-  { installDir, extraKbnOpts }: { installDir?: string; extraKbnOpts?: string[] }
-) {
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
 
-  return pipe(
-    serverArgs,
-    (args) => (installDir ? args.filter((a: string) => a !== '--oss') : args),
-    (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
-    (args) => args.concat(extraKbnOpts || [])
-  );
-}
+  const kbnFlags = parseRawFlags([
+    // When installDir is passed, we run from a built version of Kibana which uses different command line
+    // arguments. If installDir is not passed, we run from source code.
+    ...(installDir ? [...buildArgs, ...serverArgs] : [...sourceArgs, ...serverArgs]),
 
-/**
- * Filter the cli args to remove duplications and
- * overridden options
- */
-function filterCliArgs(args: string[]) {
-  return args.reduce((acc, val, ind) => {
-    // If original argv has a later basepath setting, skip this val.
-    if (isBasePathSettingOverridden(args, val, ind)) {
-      return acc;
-    }
+    // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
+    ...(options.extraKbnOpts ?? []),
+  ]);
 
-    // Check if original argv has a later setting that overrides
-    // the current val. If so, skip this val.
-    if (
-      !allowsDuplicate(val) &&
-      findIndexFrom(args, ++ind, (opt) => opt.split('=')[0] === val.split('=')[0]) > -1
-    ) {
-      return acc;
-    }
+  const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
+  const promises = [
+    // main process
+    procs.run(mainName, {
+      ...procRunnerOpts,
+      writeLogsToPath: options.logsDir
+        ? Path.resolve(options.logsDir, `${mainName}.log`)
+        : undefined,
+      args: [
+        ...prefixArgs,
+        ...parseRawFlags([
+          ...kbnFlags,
+          ...(!useTaskRunner
+            ? []
+            : [
+                '--node.roles=["ui"]',
+                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
+              ]),
+        ]),
+      ],
+    }),
+  ];
 
-    return [...acc, val];
-  }, [] as string[]);
-}
+  if (useTaskRunner) {
+    const mainUuid = getArgValue(kbnFlags, 'server.uuid');
 
-/**
- * Apply each function in fns to the result of the
- * previous function. The first function's input
- * is the arr array.
- */
-function pipe(arr: any[], ...fns: Array<(...args: any[]) => any>) {
-  return fns.reduce((acc, fn) => {
-    return fn(acc);
-  }, arr);
-}
-
-/**
- * Checks whether a specific parameter is allowed to appear multiple
- * times in the Kibana parameters.
- */
-function allowsDuplicate(val: string) {
-  return ['--plugin-path'].includes(val.split('=')[0]);
-}
-
-function isBasePathSettingOverridden(args: string[], val: string, index: number) {
-  const key = val.split('=')[0];
-  const basePathKeys = ['--no-base-path', '--server.basePath'];
-
-  if (basePathKeys.includes(key)) {
-    if (findIndexFrom(args, ++index, (opt) => basePathKeys.includes(opt.split('=')[0])) > -1) {
-      return true;
-    }
+    // dedicated task runner
+    promises.push(
+      procs.run('kbn-tasks', {
+        ...procRunnerOpts,
+        writeLogsToPath: options.logsDir
+          ? Path.resolve(options.logsDir, 'kbn-tasks.log')
+          : undefined,
+        args: [
+          ...prefixArgs,
+          ...parseRawFlags([
+            ...kbnFlags,
+            `--server.port=${DedicatedTaskRunner.getPort(config.get('servers.kibana.port'))}`,
+            '--node.roles=["background_tasks"]',
+            `--path.data=${Path.resolve(Os.tmpdir(), `ftr-task-runner-${uuidv4()}`)}`,
+            ...(typeof mainUuid === 'string' && mainUuid
+              ? [`--server.uuid=${DedicatedTaskRunner.getUuid(mainUuid)}`]
+              : []),
+            ...(devMode ? ['--no-optimizer'] : []),
+          ]),
+        ],
+      })
+    );
   }
 
-  return false;
-}
-
-function findIndexFrom(array: string[], index: number, predicate: (element: string) => boolean) {
-  return [...array].slice(index).findIndex(predicate);
+  await Promise.all(promises);
 }

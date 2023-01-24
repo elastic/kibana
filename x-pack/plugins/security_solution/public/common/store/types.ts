@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { Dispatch, Action, Middleware, CombinedState } from 'redux';
+import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
 
-import { CoreStart } from '../../../../../../src/core/public';
-import { StartPlugins } from '../../types';
-import { AppAction } from './actions';
-import { Immutable } from '../../../common/endpoint/types';
-import { AppState } from './app/reducer';
-import { InputsState } from './inputs/reducer';
-import { SourcererState } from './sourcerer/reducer';
-import { HostsPluginState } from '../../hosts/store';
-import { DragAndDropState } from './drag_and_drop/reducer';
-import { TimelinePluginState } from '../../timelines/store/timeline';
-import { NetworkPluginState } from '../../network/store';
-import { ManagementPluginState } from '../../management';
-import { UsersPluginState } from '../../users/store';
+import type { CoreStart } from '@kbn/core/public';
+import type { StartPlugins } from '../../types';
+import type { AppAction } from './actions';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { AppState } from './app/reducer';
+import type { InputsState } from './inputs/reducer';
+import type { SourcererState } from './sourcerer/reducer';
+import type { HostsPluginState } from '../../explore/hosts/store';
+import type { DragAndDropState } from './drag_and_drop/reducer';
+import type { TimelinePluginState } from '../../timelines/store/timeline';
+import type { NetworkPluginState } from '../../explore/network/store';
+import type { ManagementPluginState } from '../../management';
+import type { UsersPluginState } from '../../explore/users/store';
+import type { GlobalUrlParam } from './global_url_param';
+import type { DataTableState } from './data_table/types';
 
-export type StoreState = HostsPluginState &
+export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
   UsersPluginState &
@@ -31,14 +33,13 @@ export type StoreState = HostsPluginState &
     dragAndDrop: DragAndDropState;
     inputs: InputsState;
     sourcerer: SourcererState;
-  };
+    globalUrlParam: GlobalUrlParam;
+  } & DataTableState;
+
 /**
- * The redux `State` type for the Security App.
- * We use `CombinedState` to wrap our shape because we create our reducer using `combineReducers`.
- * `combineReducers` returns a type wrapped in `CombinedState`.
- * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
+ * The Redux store type for the Security app.
  */
-export type State = CombinedState<StoreState>;
+export type SecurityAppStore = Store<State, Action>;
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of

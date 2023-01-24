@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { routes } from '../../../routes';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SidebarProps {}
 
 export const Sidebar: React.FC<SidebarProps> = () => {

@@ -1,0 +1,37 @@
+{
+  "configPath": ["xpack", "uptime"],
+  "id": "synthetics",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "telemetry"],
+  "requiredPlugins": [
+    "actions",
+    "alerting",
+    "cases",
+    "embeddable",
+    "discover",
+    "dataViews",
+    "encryptedSavedObjects",
+    "features",
+    "inspector",
+    "licensing",
+    "observability",
+    "ruleRegistry",
+    "security",
+    "share",
+    "taskManager",
+    "triggersActionsUi",
+    "usageCollection",
+    "unifiedSearch",
+    "spaces",
+    "bfetch"
+  ],
+  "server": true,
+  "ui": true,
+  "version": "8.0.0",
+  "requiredBundles": ["data","unifiedSearch", "fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "indexLifecycleManagement"],
+  "owner": {
+    "name": "Uptime",
+    "githubTeam": "uptime"
+  },
+  "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions."
+}

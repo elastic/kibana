@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IValidatedEvent } from '../../../../plugins/event_log/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { getUrlPrefix } from '.';
 import { FtrProviderContext } from '../ftr_provider_context';
 

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, type Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'kibana/server';
-import {
+import type { IRouter, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
-} from 'src/plugins/telemetry_collection_manager/server';
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
-import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
-
 import {
-  TelemetrySavedObjectAttributes,
-  updateTelemetrySavedObject,
   getTelemetrySavedObject,
-} from '../telemetry_repository';
+  TELEMETRY_SAVED_OBJECT_TYPE,
+  type TelemetrySavedObject,
+  updateTelemetrySavedObject,
+} from '../saved_objects';
+
 import { TelemetryConfigType } from '../config';
+import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
 
 interface RegisterOptInRoutesParams {
   currentKibanaVersion: string;
@@ -49,23 +49,29 @@ export function registerTelemetryOptInRoutes({
     },
     async (context, req, res) => {
       const newOptInStatus = req.body.enabled;
-      const attributes: TelemetrySavedObjectAttributes = {
+      const soClient = (await context.core).savedObjects.getClient({
+        includedHiddenTypes: [TELEMETRY_SAVED_OBJECT_TYPE],
+      });
+      const attributes: TelemetrySavedObject = {
         enabled: newOptInStatus,
         lastVersionChecked: currentKibanaVersion,
       };
-      const config = await config$.pipe(take(1)).toPromise();
-      const telemetrySavedObject = await getTelemetrySavedObject(context.core.savedObjects.client);
+      const config = await firstValueFrom(config$);
 
-      if (telemetrySavedObject === false) {
-        // If we get false, we couldn't get the saved object due to lack of permissions
-        // so we can assume the user won't be able to update it either
-        return res.forbidden();
+      let telemetrySavedObject: TelemetrySavedObject | undefined;
+      try {
+        telemetrySavedObject = await getTelemetrySavedObject(soClient);
+      } catch (err) {
+        if (SavedObjectsErrorHelpers.isForbiddenError(err)) {
+          // If we couldn't get the saved object due to lack of permissions,
+          // we can assume the user won't be able to update it either
+          return res.forbidden();
+        }
       }
 
-      const configTelemetryAllowChangingOptInStatus = config.allowChangingOptInStatus;
       const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
+        configTelemetryAllowChangingOptInStatus: config.allowChangingOptInStatus,
         telemetrySavedObject,
-        configTelemetryAllowChangingOptInStatus,
       });
       if (!allowChangingOptInStatus) {
         return res.badRequest({
@@ -97,7 +103,7 @@ export function registerTelemetryOptInRoutes({
       }
 
       try {
-        await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
+        await updateTelemetrySavedObject(soClient, attributes);
       } catch (e) {
         if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
           return res.forbidden();

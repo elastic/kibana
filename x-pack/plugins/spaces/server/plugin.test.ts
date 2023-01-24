@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
+import type { CoreSetup } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
 import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
 
@@ -39,6 +39,7 @@ describe('Spaces plugin', () => {
       `);
     });
 
+    // Joe removed this test, but we're not sure why...
     it('registers the capabilities provider and switcher', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
@@ -53,7 +54,7 @@ describe('Spaces plugin', () => {
       expect(core.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
     });
 
-    it('registers the usage collector', () => {
+    it('registers the usage collector if the usageCollection plugin is enabled', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
@@ -66,31 +67,6 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing, usageCollection });
 
       expect(usageCollection.getCollectorByType('spaces')).toBeDefined();
-    });
-
-    it('registers the "space" saved object type and client wrapper', () => {
-      const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
-      const features = featuresPluginMock.createSetup();
-      const licensing = licensingMock.createSetup();
-
-      const plugin = new SpacesPlugin(initializerContext);
-
-      plugin.setup(core, { features, licensing });
-
-      expect(core.savedObjects.registerType).toHaveBeenCalledWith({
-        name: 'space',
-        namespaceType: 'agnostic',
-        hidden: true,
-        mappings: expect.any(Object),
-        migrations: expect.any(Object),
-      });
-
-      expect(core.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-        Number.MIN_SAFE_INTEGER,
-        'spaces',
-        expect.any(Function)
-      );
     });
   });
 

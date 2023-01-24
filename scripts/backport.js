@@ -8,9 +8,8 @@
 
 require('../src/setup_node_env/node_version_validator');
 var process = require('process');
-
-// forward command line args to backport
-var args = process.argv.slice(2);
-
 var backport = require('backport');
-backport.backportRun({}, args);
+
+backport.backportRun({
+  processArgs: process.argv.slice(2), // forward command line args to backport
+});

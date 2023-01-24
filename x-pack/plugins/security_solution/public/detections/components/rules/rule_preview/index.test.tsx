@@ -8,10 +8,21 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
+import type { DataViewBase } from '@kbn/es-query';
+import { fields } from '@kbn/data-plugin/common/mocks';
+
 import { TestProviders } from '../../../../common/mock';
-import { RulePreview, RulePreviewProps } from './';
+import type { RulePreviewProps } from '.';
+import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { usePreviewHistogram } from './use_preview_histogram';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+import {
+  getStepScheduleDefaultValue,
+  stepAboutDefaultValue,
+  stepDefineDefaultValue,
+} from '../../../pages/detection_engine/rules/utils';
+import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -24,37 +35,55 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
+jest.mock('./use_preview_invocation_count');
+
+const getMockIndexPattern = (): DataViewBase => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
 
 const defaultProps: RulePreviewProps = {
-  ruleType: 'threat_match',
-  index: ['test-*'],
-  threatIndex: ['threat-*'],
-  threatMapping: [
-    {
-      entries: [
-        { field: 'file.hash.md5', value: 'threat.indicator.file.hash.md5', type: 'mapping' },
-      ],
+  defineRuleData: {
+    ...stepDefineDefaultValue,
+    ruleType: 'threat_match',
+    index: ['test-*'],
+    indexPattern: getMockIndexPattern(),
+    dataSourceType: DataSourceType.IndexPatterns,
+    threatIndex: ['threat-*'],
+    threatMapping: [
+      {
+        entries: [
+          { field: 'file.hash.md5', value: 'threat.indicator.file.hash.md5', type: 'mapping' },
+        ],
+      },
+    ],
+    queryBar: {
+      filters: [],
+      query: { query: 'file.hash.md5:*', language: 'kuery' },
+      saved_id: null,
     },
-  ],
-  isDisabled: false,
-  query: {
-    filters: [],
-    query: { query: 'file.hash.md5:*', language: 'kuery' },
-  },
-  threatQuery: {
-    filters: [],
-    query: { query: 'threat.indicator.file.hash.md5:*', language: 'kuery' },
-  },
-  threshold: {
-    field: ['agent.hostname'],
-    value: '200',
-    cardinality: {
-      field: ['user.name'],
-      value: '2',
+    threatQueryBar: {
+      filters: [],
+      query: { query: 'threat.indicator.file.hash.md5:*', language: 'kuery' },
+      saved_id: null,
     },
+    threshold: {
+      field: ['agent.hostname'],
+      value: '200',
+      cardinality: {
+        field: ['user.name'],
+        value: '2',
+      },
+    },
+    anomalyThreshold: 50,
+    machineLearningJobId: ['test-ml-job-id'],
+    eqlOptions: {},
+    newTermsFields: ['host.ip'],
+    historyWindowSize: '7d',
   },
-  anomalyThreshold: 50,
-  machineLearningJobId: ['test-ml-job-id'],
+  aboutRuleData: stepAboutDefaultValue,
+  scheduleRuleData: getStepScheduleDefaultValue('threat_match'),
 };
 
 describe('PreviewQuery', () => {
@@ -79,50 +108,46 @@ describe('PreviewQuery', () => {
       isPreviewRequestInProgress: false,
       previewId: undefined,
     });
+
+    (usePreviewInvocationCount as jest.Mock).mockReturnValue({ invocationCount: 500 });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('it renders timeframe select and preview button on render', () => {
+  test('it renders timeframe select and preview button on render', async () => {
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.findByTestId('rule-preview')).toBeTruthy();
-    expect(wrapper.findByTestId('preview-time-frame')).toBeTruthy();
+    expect(await wrapper.findByTestId('rule-preview')).toBeTruthy();
+    expect(await wrapper.findByTestId('preview-time-frame')).toBeTruthy();
   });
 
-  test('it renders preview button disabled if "isDisabled" is true', () => {
-    const wrapper = render(
-      <TestProviders>
-        <RulePreview {...defaultProps} isDisabled={true} />
-      </TestProviders>
-    );
-
-    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).toBeDisabled();
-  });
-
-  test('it renders preview button enabled if "isDisabled" is false', () => {
+  test('does not render histogram when there is no previewId', async () => {
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).not.toBeDisabled();
+    expect(await wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
   });
 
-  test('does not render histogram when there is no previewId', () => {
+  test('it renders invocation count warning when invocation count is bigger then "REASONABLE_INVOCATION_COUNT"', async () => {
+    (usePreviewInvocationCount as jest.Mock).mockReturnValue({
+      invocationCount: REASONABLE_INVOCATION_COUNT + 1,
+    });
+
     const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
+    expect(await wrapper.findByTestId('previewInvocationCountWarning')).toBeTruthy();
   });
 });

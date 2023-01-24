@@ -5,35 +5,22 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
-import { SecuritySolutionTemplateWrapper } from './';
+import { SecuritySolutionTemplateWrapper } from '.';
+
+const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
+jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
+  ...jest.requireActual('../../../common/utils/timeline/use_show_timeline'),
+  useShowTimeline: () => mockUseShowTimeline(),
+}));
 
 jest.mock('./bottom_bar', () => ({
   ...jest.requireActual('./bottom_bar'),
   SecuritySolutionBottomBar: () => <div>{'Bottom Bar'}</div>,
 }));
-
-const mockSiemUserCanCrud = jest.fn();
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      services: {
-        ...original.useKibana().services,
-        application: {
-          capabilities: {
-            siem: mockSiemUserCanCrud(),
-          },
-        },
-      },
-    }),
-  };
-});
 
 jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
   return {
@@ -65,7 +52,7 @@ jest.mock('../../../common/components/navigation/use_security_solution_navigatio
 const renderComponent = () => {
   return render(
     <TestProviders>
-      <SecuritySolutionTemplateWrapper onAppLeave={() => null}>
+      <SecuritySolutionTemplateWrapper>
         <div>{'child of wrapper'}</div>
       </SecuritySolutionTemplateWrapper>
     </TestProviders>
@@ -75,20 +62,26 @@ const renderComponent = () => {
 describe('SecuritySolutionTemplateWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSiemUserCanCrud.mockReturnValue({ show: true });
   });
 
-  it('Should render to the page with bottom bar if user has SIEM show', async () => {
+  it('Should render with bottom bar when user allowed', async () => {
+    mockUseShowTimeline.mockReturnValue([true]);
     const { getByText } = renderComponent();
-    expect(getByText('child of wrapper')).toBeInTheDocument();
-    expect(getByText('Bottom Bar')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByText('child of wrapper')).toBeInTheDocument();
+      expect(getByText('Bottom Bar')).toBeInTheDocument();
+    });
   });
 
-  it('Should not show bottom bar if user does not have SIEM show', async () => {
-    mockSiemUserCanCrud.mockReturnValue({ show: false });
+  it('Should not show bottom bar when user not allowed', async () => {
+    mockUseShowTimeline.mockReturnValue([false]);
 
-    const { getByText } = renderComponent();
-    expect(getByText('child of wrapper')).toBeInTheDocument();
-    expect(() => getByText('Bottom Bar')).toThrow();
+    const { getByText, queryByText } = renderComponent();
+
+    await waitFor(() => {
+      expect(getByText('child of wrapper')).toBeInTheDocument();
+      expect(queryByText('Bottom Bar')).not.toBeInTheDocument();
+    });
   });
 });

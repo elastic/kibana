@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/**
- * The below import is required to avoid a console error warn from brace package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import { stubWebWorker } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import { act } from 'react-dom/test-utils';
 
 import { getFollowerIndexMock } from './fixtures/follower_index';
@@ -21,17 +14,15 @@ import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 const { setup } = pageHelpers.followerIndexList;
 
 describe('<FollowerIndicesList />', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    jest.useFakeTimers();
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    jest.useFakeTimers({ legacyFakeTimers: true });
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(() => {
@@ -318,7 +309,8 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    describe('detail panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/142774
+    describe.skip('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
 

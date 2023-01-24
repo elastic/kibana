@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
@@ -13,10 +13,10 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { PackagePolicy } from '../../../../../../fleet/common/types/models';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
-import {
+import type {
   InternalArtifactCompleteSchema,
   InternalArtifactSchema,
   InternalManifestSchema,
@@ -39,7 +39,7 @@ import {
 } from './manifest_manager.mock';
 
 import { ManifestManager } from './manifest_manager';
-import { EndpointArtifactClientInterface } from '../artifact_client';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 
@@ -629,13 +629,14 @@ describe('ManifestManager', () => {
         )
       ).resolves.toStrictEqual([]);
 
-      expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
-      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(1, {
-        ...ARTIFACT_EXCEPTIONS_MACOS,
-      });
-      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(2, {
-        ...ARTIFACT_EXCEPTIONS_WINDOWS,
-      });
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_EXCEPTIONS_MACOS,
+        },
+        {
+          ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
       expect(
         JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
@@ -652,13 +653,9 @@ describe('ManifestManager', () => {
       const error = new Error();
       const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
 
-      artifactClient.createArtifact.mockImplementation(
-        async (artifact: InternalArtifactCompleteSchema) => {
-          if (getArtifactId(artifact) === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
-            throw error;
-          } else {
-            return artifact;
-          }
+      artifactClient.bulkCreateArtifacts.mockImplementation(
+        async (artifacts: InternalArtifactCompleteSchema[]) => {
+          return { artifacts: [artifacts[0]], errors: [error] };
         }
       );
 
@@ -672,17 +669,21 @@ describe('ManifestManager', () => {
           newManifest
         )
       ).resolves.toStrictEqual([
-        error,
         new EndpointError(
           `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`,
           ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_APPS_MACOS]
         ),
+        error,
       ]);
 
-      expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
-      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(1, {
-        ...ARTIFACT_EXCEPTIONS_MACOS,
-      });
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_EXCEPTIONS_MACOS,
+        },
+        {
+          ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
       expect(
         JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
       ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));

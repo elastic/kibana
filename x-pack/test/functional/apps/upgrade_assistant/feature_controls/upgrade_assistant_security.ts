@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe.skip('security', function () {
+  describe('security', function () {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('[SkipCloud] global dashboard read with global_upgrade_assistant_role', function () {
         this.tags('skipCloud');
-        it('should render the "Stack" section with Upgrde Assistant', async function () {
+        it('should render the "Stack" section with Upgrade Assistant', async function () {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
           expect(sections).to.have.length(3);

@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/ecs"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

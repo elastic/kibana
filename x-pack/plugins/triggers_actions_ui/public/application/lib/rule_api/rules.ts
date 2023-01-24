@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { Rule, Pagination, Sorting } from '../../../types';
-import { AsApiContract } from '../../../../../actions/common';
-import { mapFiltersToKql } from './map_filters_to_kql';
-import { transformRule } from './common_transformations';
 
-const rewriteResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {
-  return results.map((item) => transformRule(item));
-};
+import { AsApiContract } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { Rule } from '../../../types';
+import { mapFiltersToKql } from './map_filters_to_kql';
+import { LoadRulesProps, rewriteRulesResponseRes } from './rules_helpers';
 
 export async function loadRules({
   http,
@@ -21,23 +17,23 @@ export async function loadRules({
   searchText,
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
+  tagsFilter,
   sort = { field: 'name', direction: 'asc' },
-}: {
-  http: HttpSetup;
-  page: Pagination;
-  searchText?: string;
-  typesFilter?: string[];
-  actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
-  sort?: Sorting;
-}): Promise<{
+}: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
   total: number;
   data: Rule[];
 }> {
-  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, ruleStatusesFilter });
+  const filters = mapFiltersToKql({
+    typesFilter,
+    actionTypesFilter,
+    tagsFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+  });
   const res = await http.get<
     AsApiContract<{
       page: number;
@@ -61,6 +57,6 @@ export async function loadRules({
     page: res.page,
     perPage: res.per_page,
     total: res.total,
-    data: rewriteResponseRes(res.data),
+    data: rewriteRulesResponseRes(res.data),
   };
 }

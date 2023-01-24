@@ -1,0 +1,86 @@
+{
+  "id": "@kbn/core-capabilities-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-capabilities-browser-mocks",
+        "id": "def-common.capabilitiesServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "capabilitiesServiceMock",
+        "description": [],
+        "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-browser-mocks",
+            "id": "def-common.capabilitiesServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "CapabilitiesService",
+              ">>"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-browser-mocks",
+            "id": "def-common.capabilitiesServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "CapabilitiesStart",
+              ">"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "__jest__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../typings/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/guided-onboarding",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

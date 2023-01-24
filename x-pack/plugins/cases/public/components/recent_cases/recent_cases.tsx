@@ -6,84 +6,109 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { isEqual } from 'lodash/fp';
-import styled from 'styled-components';
+import React from 'react';
+import styled, { css } from 'styled-components';
+import { FormattedRelative } from '@kbn/i18n-react';
 
+import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
-import { useGetCases } from '../../containers/use_get_cases';
 import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import { MarkdownRenderer } from '../markdown_editor';
-import { FilterOptions } from '../../containers/types';
+import type { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
+import { MarkdownRenderer } from '../markdown_editor';
+import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
+import type { FilterMode as RecentCasesFilterMode } from './types';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MarkdownContainer = styled.div`
-  max-height: 150px;
-  overflow-y: auto;
-  width: 300px;
+  ${({ theme }) => css`
+    max-height: 150px;
+    overflow-y: auto;
+    color: ${theme.eui.euiTextSubduedColor};
+  `}
+`;
+
+const TruncateComp = styled.div`
+  & .euiMarkdownFormat {
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
 `;
 
 export interface RecentCasesProps {
   filterOptions: Partial<FilterOptions>;
   maxCasesToShow: number;
+  recentCasesFilterBy: RecentCasesFilterMode;
 }
 
-const usePrevious = (value: Partial<FilterOptions>) => {
-  const ref = useRef();
-  useEffect(() => {
-    (ref.current as unknown) = value;
-  });
-  return ref.current;
-};
+export const RecentCasesComp = React.memo<RecentCasesProps>(
+  ({ filterOptions, maxCasesToShow, recentCasesFilterBy }) => {
+    const { owner } = useCasesContext();
+    const availableSolutions = useAvailableCasesOwners(['read']);
+    const hasOwner = !!owner.length;
 
-export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
-  const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({
-    initialQueryParams: { perPage: maxCasesToShow },
-  });
+    const { data = initialGetCasesData, isLoading: isLoadingCases } = useGetCases({
+      queryParams: { perPage: maxCasesToShow },
+      filterOptions: { ...filterOptions, owner: hasOwner ? owner : availableSolutions },
+    });
 
-  useEffect(() => {
-    if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {
-      setFilters(filterOptions);
-    }
-  }, [previousFilterOptions, filterOptions, setFilters]);
-
-  const isLoadingCases = useMemo(
-    () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
-    [loading]
-  );
-
-  return isLoadingCases ? (
-    <LoadingPlaceholders lines={2} placeholders={3} />
-  ) : !isLoadingCases && data.cases.length === 0 ? (
-    <NoCases />
-  ) : (
-    <>
-      {data.cases.map((c, i) => (
-        <EuiFlexGroup key={c.id} gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <CaseDetailsLink detailName={c.id} title={c.title}>
-                <TruncatedText text={c.title} />
-              </CaseDetailsLink>
-            </EuiText>
-
-            <IconWithCount count={c.totalComment} icon={'editorComment'} tooltip={i18n.COMMENTS} />
-            {c.description && c.description.length && (
-              <MarkdownContainer>
-                <EuiText color="subdued" size="xs">
-                  <MarkdownRenderer disableLinks={true}>{c.description}</MarkdownRenderer>
-                </EuiText>
-              </MarkdownContainer>
-            )}
-            {i !== data.cases.length - 1 && <EuiSpacer size="l" />}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-    </>
-  );
-};
+    return isLoadingCases ? (
+      <LoadingPlaceholders lines={2} placeholders={3} />
+    ) : !isLoadingCases && data.cases.length === 0 ? (
+      <NoCases recentCasesFilterBy={recentCasesFilterBy} />
+    ) : (
+      <>
+        {data.cases.map((c, i) => (
+          <EuiFlexGroup key={c.id} gutterSize="none">
+            <EuiFlexItem>
+              <EuiText size="s">
+                <CaseDetailsLink detailName={c.id} title={c.title}>
+                  <TruncatedText text={c.title} />
+                </CaseDetailsLink>
+              </EuiText>
+              <EuiSpacer size="xs" />
+              {c.description && c.description.length && (
+                <MarkdownContainer>
+                  <TruncateComp>
+                    <MarkdownRenderer disableLinks={true} textSize="relative">
+                      {c.description}
+                    </MarkdownRenderer>
+                  </TruncateComp>
+                </MarkdownContainer>
+              )}
+              <EuiSpacer size="xs" />
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="xs"
+                    color="default"
+                    data-test-subj="recent-cases-creation-relative-time"
+                  >
+                    <LocalizedDateTooltip date={new Date(c.createdAt)}>
+                      <FormattedRelative value={c.createdAt} />
+                    </LocalizedDateTooltip>
+                  </EuiText>
+                </EuiFlexItem>
+                <IconWithCount
+                  count={c.totalComment}
+                  icon={'editorComment'}
+                  tooltip={i18n.COMMENTS}
+                />
+              </EuiFlexGroup>
+              {i !== data.cases.length - 1 && <EuiSpacer size="l" />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ))}
+      </>
+    );
+  }
+);
 RecentCasesComp.displayName = 'RecentCasesComp';

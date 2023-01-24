@@ -12,13 +12,8 @@ import { useDispatch, useSelector } from 'react-redux';
 /* eslint-disable react/display-name */
 
 import React, { memo, useMemo, useCallback, useContext } from 'react';
-import {
-  EuiBasicTableColumn,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from '../side_effect_context';
 import { StyledPanel } from '../styles';
@@ -33,10 +28,10 @@ import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { LimitWarning } from '../limit_warnings';
-import { ResolverState } from '../../types';
+import type { ResolverState } from '../../types';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
-import { ResolverAction } from '../../store/actions';
+import type { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
 import { CopyablePanelField } from './copyable_panel_field';
 

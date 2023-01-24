@@ -5,29 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
-import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
+import React from 'react';
+import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
+import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
+import { Waterfall } from './waterfall';
 import {
   IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
-import { Waterfall } from './waterfall';
 import { WaterfallLegends } from './waterfall_legends';
-import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 
 interface Props {
-  urlParams: ApmUrlParams;
+  waterfallItemId?: string;
+  serviceName?: string;
   waterfall: IWaterfall;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
-export function WaterfallContainer({ urlParams, waterfall }: Props) {
-  const { serviceName } = useApmServiceContext();
+export function WaterfallContainer({
+  serviceName,
+  waterfallItemId,
+  waterfall,
+  showCriticalPath,
+  onShowCriticalPathChange,
+}: Props) {
+  const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 
   if (!waterfall) {
     return null;
   }
-
   const { legends, items } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
@@ -73,12 +83,40 @@ export function WaterfallContainer({ urlParams, waterfall }: Props) {
   });
 
   return (
-    <div>
-      <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-      <Waterfall
-        waterfallItemId={urlParams.waterfallItemId}
-        waterfall={waterfall}
-      />
-    </div>
+    <EuiFlexGroup direction="column">
+      {isCriticalPathFeatureEnabled ? (
+        <EuiFlexItem>
+          <EuiSwitch
+            id="showCriticalPath"
+            label={
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+                    defaultMessage: 'Show critical path',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge icon="beaker" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            checked={showCriticalPath}
+            onChange={(event) => {
+              onShowCriticalPathChange(event.target.checked);
+            }}
+          />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem>
+        <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <Waterfall
+          showCriticalPath={showCriticalPath}
+          waterfallItemId={waterfallItemId}
+          waterfall={waterfall}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

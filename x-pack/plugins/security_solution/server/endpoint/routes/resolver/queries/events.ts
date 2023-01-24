@@ -5,36 +5,28 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from 'kibana/server';
-import { JsonObject } from '@kbn/utility-types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
-import { SafeResolverEvent } from '../../../../../common/endpoint/types';
-import { PaginationBuilder } from '../utils/pagination';
-
-interface TimeRange {
-  from: string;
-  to: string;
-}
+import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
+import type { PaginationBuilder } from '../utils/pagination';
+import { BaseResolverQuery } from '../tree/queries/base';
+import type { ResolverQueryParams } from '../tree/queries/base';
 
 /**
  * Builds a query for retrieving events.
  */
-export class EventsQuery {
-  private readonly pagination: PaginationBuilder;
-  private readonly indexPatterns: string | string[];
-  private readonly timeRange: TimeRange;
+export class EventsQuery extends BaseResolverQuery {
+  readonly pagination: PaginationBuilder;
   constructor({
-    pagination,
     indexPatterns,
     timeRange,
-  }: {
-    pagination: PaginationBuilder;
-    indexPatterns: string | string[];
-    timeRange: TimeRange;
-  }) {
+    isInternalRequest,
+    pagination,
+  }: ResolverQueryParams & { pagination: PaginationBuilder }) {
+    super({ indexPatterns, timeRange, isInternalRequest });
     this.pagination = pagination;
-    this.indexPatterns = indexPatterns;
-    this.timeRange = timeRange;
   }
 
   private query(filters: JsonObject[]): JsonObject {
@@ -43,21 +35,49 @@ export class EventsQuery {
         bool: {
           filter: [
             ...filters,
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
             {
               term: { 'event.kind': 'event' },
             },
           ],
         },
       },
+      ...this.pagination.buildQueryFields('event.id', 'desc'),
+    };
+  }
+
+  private alertDetailQuery(id?: JsonValue): { query: object; index: string } {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { 'event.id': id },
+            },
+            ...this.getRangeFilter(),
+          ],
+        },
+      },
+      index:
+        typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(','),
+      ...this.pagination.buildQueryFields('event.id', 'desc'),
+    };
+  }
+
+  private alertsForProcessQuery(id?: JsonValue): { query: object; index: string } {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { 'process.entity_id': id },
+            },
+            ...this.getRangeFilter(),
+          ],
+        },
+      },
+      index:
+        typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(','),
       ...this.pagination.buildQueryFields('event.id', 'desc'),
     };
   }
@@ -78,20 +98,34 @@ export class EventsQuery {
   }
 
   /**
-   * Searches ES for the specified events and format the response.
+   * Will search ES using a filter for normal events associated with a process, or an entity type and event id for alert events.
    *
    * @param client a client for searching ES
    * @param filter an optional string representation of a raw Elasticsearch clause for filtering the results
    */
   async search(
     client: IScopedClusterClient,
-    filter: string | undefined
+    body: { filter?: string; eventID?: string; entityType?: string },
+    alertsClient: AlertsClient
   ): Promise<SafeResolverEvent[]> {
-    const parsedFilters = EventsQuery.buildFilters(filter);
-    const response = await client.asCurrentUser.search<SafeResolverEvent>(
-      this.buildSearch(parsedFilters)
-    );
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.hits.hits.map((hit) => hit._source);
+    if (body.filter) {
+      const parsedFilters = EventsQuery.buildFilters(body.filter);
+      const response = await client.asCurrentUser.search<SafeResolverEvent>(
+        this.buildSearch(parsedFilters)
+      );
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      return response.hits.hits.map((hit) => hit._source);
+    } else {
+      const { eventID, entityType } = body;
+      if (entityType === 'alertDetail') {
+        const response = await alertsClient.find(this.alertDetailQuery(eventID));
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        return response.hits.hits.map((hit) => hit._source);
+      } else {
+        const response = await alertsClient.find(this.alertsForProcessQuery(eventID));
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        return response.hits.hits.map((hit) => hit._source);
+      }
+    }
   }
 }

@@ -6,10 +6,9 @@
  */
 
 import { SemVer } from 'semver';
-import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { MAJOR_VERSION } from '../../common/constants';
+import { IScopedClusterClient, kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getMockVersionInfo } from './__fixtures__/version';
 
 import {
@@ -96,7 +95,7 @@ describe('verifyAllMatchKibanaVersion', () => {
 
 describe('EsVersionPrecheck', () => {
   beforeEach(() => {
-    versionService.setup(MAJOR_VERSION);
+    versionService.setup('8.0.0');
   });
 
   it('returns a 403 when callCluster fails with a 403', async () => {
@@ -104,7 +103,10 @@ describe('EsVersionPrecheck', () => {
 
     ctx.core.elasticsearch.client.asInternalUser.nodes.info.mockRejectedValue({ statusCode: 403 });
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 403);
   });
 
@@ -120,7 +122,10 @@ describe('EsVersionPrecheck', () => {
       },
     });
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', false);
   });
@@ -137,7 +142,10 @@ describe('EsVersionPrecheck', () => {
       },
     });
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', true);
   });
@@ -154,6 +162,8 @@ describe('EsVersionPrecheck', () => {
       },
     });
 
-    await expect(esVersionCheck(ctx, kibanaResponseFactory)).resolves.toBe(undefined);
+    await expect(
+      esVersionCheck(coreMock.createCustomRequestHandlerContext(ctx), kibanaResponseFactory)
+    ).resolves.toBe(undefined);
   });
 });

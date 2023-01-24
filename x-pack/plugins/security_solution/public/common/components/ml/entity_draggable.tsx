@@ -7,10 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { DraggableWrapper, DragEffects } from '../drag_and_drop/draggable_wrapper';
-import {
-  IS_OPERATOR,
-  QueryOperator,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+import type { QueryOperator } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 
@@ -56,7 +54,15 @@ export const EntityDraggableComponent: React.FC<Props> = ({
     [entityName, entityValue]
   );
 
-  return <DraggableWrapper key={id} dataProvider={dataProviderProp} render={render} />;
+  return (
+    <DraggableWrapper
+      key={id}
+      dataProvider={dataProviderProp}
+      render={render}
+      isAggregatable={true}
+      fieldType={'keyword'}
+    />
+  );
 };
 
 EntityDraggableComponent.displayName = 'EntityDraggableComponent';

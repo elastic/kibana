@@ -7,8 +7,8 @@
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
-import { OpenTimelineResult } from '../types';
-import { TimelinesTableProps } from '.';
+import type { OpenTimelineResult } from '../types';
+import type { TimelinesTableProps } from '.';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 export const getMockTimelinesTableProps = (

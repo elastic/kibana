@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchNodesFromClusterStats } from './fetch_nodes_from_cluster_stats';
 
 jest.mock('../../static_globals', () => ({
@@ -160,7 +159,7 @@ describe('fetchNodesFromClusterStats', () => {
     await fetchNodesFromClusterStats(esClient, clusters);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: ['aggregations.clusters.buckets'],
       body: {
         size: 0,
@@ -173,7 +172,11 @@ describe('fetchNodesFromClusterStats', () => {
                   should: [
                     { term: { type: 'cluster_stats' } },
                     { term: { 'metricset.name': 'cluster_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                    {
+                      term: {
+                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
+                      },
+                    },
                   ],
                   minimum_should_match: 1,
                 },
@@ -211,6 +214,8 @@ describe('fetchNodesFromClusterStats', () => {
     });
     await fetchNodesFromClusterStats(esClient, clusters);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

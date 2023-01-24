@@ -4,8 +4,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
 <span>
   <RowRendererContainer>
     <SystemGenericFileDetails
-      browserFields={Object {}}
-      contextId="user_login-test"
+      contextId="user_login-timeline-test"
       data={
         Object {
           "_id": "29",
@@ -58,7 +57,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
       }
       isDraggable={true}
       text="some text"
-      timelineId="test"
+      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>
@@ -68,8 +67,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
 <span>
   <RowRendererContainer>
     <SystemGenericDetails
-      browserFields={Object {}}
-      contextId="process_started-test"
+      contextId="process_started-timeline-test"
       data={
         Object {
           "_id": "30",
@@ -122,7 +120,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
       }
       isDraggable={true}
       text="some text"
-      timelineId="test"
+      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>

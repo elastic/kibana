@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
+import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
-import { useKibana } from '../../lib/kibana';
-import {
+import type {
   BrowserField,
   BrowserFields,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../../../timelines/common';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+} from '@kbn/timelines-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { getDataViewStateFromIndexFields } from './use_data_view';
 
-export type { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields };
 
-export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
-  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
-    (acc, namespace) => [
-      ...acc,
-      ...Object.values(namespace.fields != null ? namespace.fields : {}),
-    ],
-    []
-  );
+export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
+  const result: Array<Partial<BrowserField>> = [];
+  for (const namespace of Object.values(browserFields)) {
+    if (namespace.fields) {
+      result.push(...Object.values(namespace.fields));
+    }
+  }
+  return result;
+}
 
 export const getAllFieldsByName = (
   browserFields: BrowserFields
@@ -81,35 +83,10 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const indicesExistOrDataTemporarilyUnavailable = (
-  indicesExist: boolean | null | undefined
-) => indicesExist || isUndefined(indicesExist);
-
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
-
 interface FetchIndexReturn {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
@@ -121,7 +98,8 @@ interface FetchIndexReturn {
  */
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false
+  onlyCheckIfIndicesExist: boolean = false,
+  strategy: string = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -131,7 +109,6 @@ export const useFetchIndex = (
 
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
@@ -148,25 +125,32 @@ export const useFetchIndex = (
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
+              strategy,
             }
           )
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                const stringifyIndices = response.indicesExist.sort().join();
+                Promise.resolve().then(() => {
+                  ReactDOM.unstable_batchedUpdates(() => {
+                    const stringifyIndices = response.indicesExist.sort().join();
 
-                previousIndexesName.current = response.indicesExist;
-                setLoading(false);
-                setState({
-                  browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                  indexes: response.indicesExist,
-                  indexExists: response.indicesExist.length > 0,
-                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                    previousIndexesName.current = response.indicesExist;
+                    const { browserFields } = getDataViewStateFromIndexFields(
+                      stringifyIndices,
+                      response.indexFields
+                    );
+                    setLoading(false);
+                    setState({
+                      browserFields,
+                      indexes: response.indicesExist,
+                      indexExists: response.indicesExist.length > 0,
+                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                    });
+
+                    searchSubscription$.current.unsubscribe();
+                  });
                 });
-
-                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_BEAT_FIELDS);
@@ -186,7 +170,7 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
+    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState, strategy]
   );
 
   useEffect(() => {

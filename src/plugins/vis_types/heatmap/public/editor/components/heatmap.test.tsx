@@ -9,7 +9,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import type { PersistedState } from '../../../../../visualizations/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import HeatmapOptions, { HeatmapOptionsProps } from './heatmap';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
@@ -36,6 +36,7 @@ describe('PalettePicker', function () {
       vis: {
         type: {
           editorConfig: {
+            enableDataViewChange: true,
             collections: {
               legendPositions: [
                 {

@@ -8,16 +8,13 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { LocationDescriptorObject } from 'history';
-import { httpServiceMock, scopedHistoryMock } from '../../../../src/core/public/mocks';
+import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-// @ts-ignore
 import { uploadLicense } from '../public/application/store/actions/upload_license';
 
-// @ts-ignore
 import { licenseManagementStore } from '../public/application/store/store';
 
-// @ts-ignore
 import { UploadLicense } from '../public/application/sections/upload_license';
 import { AppContextProvider } from '../public/application/app_context';
 
@@ -27,7 +24,6 @@ import {
   UPLOAD_LICENSE_SUCCESS,
   UPLOAD_LICENSE_TLS_NOT_ENABLED,
   UPLOAD_LICENSE_INVALID,
-  // @ts-ignore
 } from './api_responses';
 
 let store: any = null;
@@ -89,7 +85,7 @@ describe('UploadLicense', () => {
     const rendered = mountWithIntl(component);
     store.dispatch(uploadLicense('INVALID', 'trial'));
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should display an error when ES says license is invalid', async () => {
@@ -98,7 +94,7 @@ describe('UploadLicense', () => {
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(invalidLicense)(store.dispatch, null, thunkServices);
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should display an error when ES says license is expired', async () => {
@@ -107,7 +103,7 @@ describe('UploadLicense', () => {
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(invalidLicense)(store.dispatch, null, thunkServices);
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should display a modal when license requires acknowledgement', async () => {
@@ -117,7 +113,7 @@ describe('UploadLicense', () => {
     });
     await uploadLicense(unacknowledgedLicense, 'trial')(store.dispatch, null, thunkServices);
     const rendered = mountWithIntl(component);
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   it('should refresh xpack info and navigate to BASE_PATH when ES accepts new license', async () => {
@@ -134,6 +130,6 @@ describe('UploadLicense', () => {
     const license = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(license)(store.dispatch, null, thunkServices);
     rendered.update();
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });

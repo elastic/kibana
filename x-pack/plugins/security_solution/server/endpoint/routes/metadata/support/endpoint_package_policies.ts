@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { PackagePolicy } from '../../../../../../fleet/common/types/models';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 
 export const getAllEndpointPackagePolicies = async (
-  packagePolicyService: PackagePolicyServiceInterface,
+  packagePolicyService: PackagePolicyClient,
   soClient: SavedObjectsClientContract
 ): Promise<PackagePolicy[]> => {
   const result: PackagePolicy[] = [];

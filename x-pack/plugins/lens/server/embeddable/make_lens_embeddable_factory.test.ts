@@ -9,15 +9,22 @@ import semverGte from 'semver/functions/gte';
 import { makeLensEmbeddableFactory } from './make_lens_embeddable_factory';
 import { getAllMigrations } from '../migrations/saved_object_migrations';
 import { Filter } from '@kbn/es-query';
-import { GetMigrationFunctionObjectFn } from 'src/plugins/kibana_utils/common';
+import { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 describe('embeddable migrations', () => {
   test('should have all saved object migrations versions (>7.13.0)', () => {
-    const savedObjectMigrationVersions = Object.keys(getAllMigrations({}, {})).filter((version) => {
-      return semverGte(version, '7.13.1');
-    });
+    const savedObjectMigrationVersions = Object.keys(getAllMigrations({}, {}, {})).filter(
+      (version) => {
+        return semverGte(version, '7.13.1');
+      }
+    );
     const embeddableMigrationVersions = (
-      makeLensEmbeddableFactory(() => ({}), {})()?.migrations as GetMigrationFunctionObjectFn
+      makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      )()?.migrations as GetMigrationFunctionObjectFn
     )();
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
@@ -56,6 +63,7 @@ describe('embeddable migrations', () => {
             }));
           },
         }),
+        () => ({}),
         {}
       )()?.migrations as GetMigrationFunctionObjectFn
     )();
@@ -80,6 +88,60 @@ describe('embeddable migrations', () => {
     });
   });
 
+  test('should properly apply a data view migration within a lens visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'A name',
+            },
+          },
+        },
+      },
+    };
+
+    const migrations = (
+      makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({
+          [migrationVersion]: (dataView: DataViewSpec) => {
+            return {
+              ...dataView,
+              name: dataView.id,
+            };
+          },
+        }),
+        {}
+      )()?.migrations as GetMigrationFunctionObjectFn
+    )();
+
+    const migratedLensDoc = migrations[migrationVersion](lensVisualizationDoc);
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        state: {
+          adHocDataViews: {
+            abc: {
+              id: 'abc',
+              name: 'abc',
+            },
+            def: {
+              id: 'def',
+              name: 'def',
+            },
+          },
+        },
+      },
+    });
+  });
+
   test('should properly apply a custom visualization migration', () => {
     const migrationVersion = 'some-version';
 
@@ -97,11 +159,15 @@ describe('embeddable migrations', () => {
     }));
 
     const embeddableMigrationVersions = (
-      makeLensEmbeddableFactory(() => ({}), {
-        abc: () => ({
-          [migrationVersion]: migrationFn,
-        }),
-      })()?.migrations as GetMigrationFunctionObjectFn
+      makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {
+          abc: () => ({
+            [migrationVersion]: migrationFn,
+          }),
+        }
+      )()?.migrations as GetMigrationFunctionObjectFn
     )();
 
     const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);

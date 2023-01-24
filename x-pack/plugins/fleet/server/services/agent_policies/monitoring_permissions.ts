@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getPackageInfo, getInstallation } from '../epm/packages';
-import { getDataStreamPrivileges } from '../package_policies_to_agent_permissions';
 import {
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
   AGENT_POLICY_DEFAULT_MONITORING_DATASETS,
 } from '../../constants';
-import type { FullAgentPolicyOutputPermissions } from '../../../common';
+import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common';
-import { dataTypes } from '../../../common';
+import { dataTypes } from '../../../common/constants';
+
+import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 
 function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: string) {
   let names: string[] = [];

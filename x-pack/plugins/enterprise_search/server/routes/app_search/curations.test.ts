@@ -195,13 +195,13 @@ describe('curations routes', () => {
     });
   });
 
-  describe('GET /internal/app_search/engines/{engineName}/curations/find_or_create', () => {
+  describe('POST /internal/app_search/engines/{engineName}/curations/find_or_create', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
-        method: 'get',
+        method: 'post',
         path: '/internal/app_search/engines/{engineName}/curations/find_or_create',
       });
 
@@ -219,12 +219,12 @@ describe('curations routes', () => {
 
     describe('validates', () => {
       it('required query param', () => {
-        const request = { query: { query: 'some query' } };
+        const request = { body: { query: 'some query' } };
         mockRouter.shouldValidate(request);
       });
 
       it('missing query', () => {
-        const request = { query: {} };
+        const request = { body: {} };
         mockRouter.shouldThrow(request);
       });
     });

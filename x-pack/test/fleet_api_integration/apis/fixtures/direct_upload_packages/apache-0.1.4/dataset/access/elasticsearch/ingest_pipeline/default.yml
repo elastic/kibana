@@ -1,0 +1,101 @@
+---
+description: "Pipeline for parsing Apache HTTP Server access logs. Requires the geoip and user_agent plugins."
+
+processors:
+- grok:
+    field: message
+    patterns:
+    - '%{IPORHOST:destination.domain} %{IPORHOST:source.ip} - %{DATA:user.name} \[%{HTTPDATE:apache.access.time}\]
+      "(?:%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}|-)?"
+      %{NUMBER:http.response.status_code:long} (?:%{NUMBER:http.response.body.bytes:long}|-)(
+      "%{DATA:http.request.referrer}")?( "%{DATA:user_agent.original}")?'
+    - '%{IPORHOST:source.address} - %{DATA:user.name} \[%{HTTPDATE:apache.access.time}\]
+      "(?:%{WORD:http.request.method} %{DATA:url.original} HTTP/%{NUMBER:http.version}|-)?"
+      %{NUMBER:http.response.status_code:long} (?:%{NUMBER:http.response.body.bytes:long}|-)(
+      "%{DATA:http.request.referrer}")?( "%{DATA:user_agent.original}")?'
+    - '%{IPORHOST:source.address} - %{DATA:user.name} \[%{HTTPDATE:apache.access.time}\]
+      "-" %{NUMBER:http.response.status_code:long} -'
+    - \[%{HTTPDATE:apache.access.time}\] %{IPORHOST:source.address} %{DATA:apache.access.ssl.protocol}
+      %{DATA:apache.access.ssl.cipher} "%{WORD:http.request.method} %{DATA:url.original}
+      HTTP/%{NUMBER:http.version}" (-|%{NUMBER:http.response.body.bytes:long})
+    ignore_missing: true
+- remove:
+    field: message
+- set:
+    field: event.kind
+    value: event
+- set:
+    field: event.category
+    value: web
+- set:
+    field: event.outcome
+    value: success
+    if: "ctx?.http?.response?.status_code != null && ctx.http.response.status_code < 400"
+- set:
+    field: event.outcome
+    value: failure
+    if: "ctx?.http?.response?.status_code != null && ctx.http.response.status_code > 399"
+- grok:
+    field: source.address
+    ignore_missing: true
+    patterns:
+    - ^(%{IP:source.ip}|%{HOSTNAME:source.domain})$
+- rename:
+    field: '@timestamp'
+    target_field: event.created
+- date:
+    field: apache.access.time
+    target_field: '@timestamp'
+    formats:
+    - dd/MMM/yyyy:H:m:s Z
+    ignore_failure: true
+- remove:
+    field: apache.access.time
+    ignore_failure: true
+- user_agent:
+    field: user_agent.original
+    ignore_failure: true
+- geoip:
+    field: source.ip
+    target_field: source.geo
+    ignore_missing: true
+- geoip:
+    database_file: GeoLite2-ASN.mmdb
+    field: source.ip
+    target_field: source.as
+    properties:
+    - asn
+    - organization_name
+    ignore_missing: true
+- rename:
+    field: source.as.asn
+    target_field: source.as.number
+    ignore_missing: true
+- rename:
+    field: source.as.organization_name
+    target_field: source.as.organization.name
+    ignore_missing: true
+- set:
+    field: tls.cipher
+    value: '{{apache.access.ssl.cipher}}'
+    if: ctx?.apache?.access?.ssl?.cipher != null
+
+- script:
+    lang: painless
+    if: ctx?.apache?.access?.ssl?.protocol != null
+    source: >-
+      def parts = ctx.apache.access.ssl.protocol.toLowerCase().splitOnToken("v");
+      if (parts.length != 2) {
+        return;
+      }
+      if (parts[1].contains(".")) {
+        ctx.tls.version = parts[1];
+      } else {
+        ctx.tls.version = parts[1] + ".0";
+      }
+      ctx.tls.version_protocol = parts[0];
+
+on_failure:
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'

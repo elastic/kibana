@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getting started should render getting started component 1`] = `
+<_KibanaPageTemplate
+  grow={true}
+  panelled={false}
+>
+  <_EuiPageSection
+    alignment="center"
+    css={
+      Object {
+        "map": undefined,
+        "name": "hdi05h",
+        "next": undefined,
+        "styles": "
+    padding: calc(16px*3) calc(16px*4);
+  ",
+        "toString": [Function],
+      }
+    }
+    data-test-subj="onboarding--landing-page"
+  >
+    <EuiTitle
+      className="eui-textCenter"
+      size="l"
+    >
+      <h1>
+        What would you like to do first?
+      </h1>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      size="m"
+      textAlign="center"
+    >
+      <p>
+        Select a guide to help you make the most of your data.
+      </p>
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiSpacer
+      size="xxl"
+    />
+    <EuiFlexGrid
+      columns={4}
+      gutterSize="l"
+    >
+      <EuiFlexItem
+        key="guideCard-search"
+      >
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
+          useCase="search"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="guideCard-kubernetes"
+      >
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
+          useCase="kubernetes"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="linkCard-infrastructure"
+      >
+        <InfrastructureLinkCard
+          addBasePath={[Function]}
+          isDarkTheme={false}
+          navigateToApp={[MockFunction]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="guideCard-siem"
+      >
+        <GuideCard
+          activateGuide={[Function]}
+          addBasePath={[Function]}
+          guides={Array []}
+          isDarkTheme={false}
+          useCase="siem"
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+    <EuiSpacer />
+    <EuiHorizontalRule />
+    <EuiSpacer />
+    <div
+      className="eui-textCenter"
+    >
+      <EuiLink
+        data-test-subj="onboarding--skipGuideLink"
+        onClick={[Function]}
+      >
+        I’d like to do something else (skip)
+      </EuiLink>
+    </div>
+  </_EuiPageSection>
+</_KibanaPageTemplate>
+`;

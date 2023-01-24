@@ -10,10 +10,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -23,7 +23,7 @@ import {
 import * as useFetcherModule from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 
-import { getFormattedSelection, TransactionDistribution } from './index';
+import { TransactionDistribution } from '.';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   const KibanaReactContext = createKibanaReactContext({
@@ -75,22 +75,10 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('transaction_details/distribution', () => {
-  describe('getFormattedSelection', () => {
-    it('displays only one unit if from and to share the same unit', () => {
-      expect(getFormattedSelection([10000, 100000])).toEqual('10 - 100 ms');
-    });
-
-    it('displays two units when from and to have different units', () => {
-      expect(getFormattedSelection([100000, 1000000000])).toEqual(
-        '100 ms - 17 min'
-      );
-    });
-  });
-
   describe('TransactionDistribution', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
       jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
-        data: {},
+        data: undefined,
         refetch: () => {},
         status: useFetcherModule.FETCH_STATUS.LOADING,
       }));
@@ -99,7 +87,11 @@ describe('transaction_details/distribution', () => {
         <TransactionDistribution
           onChartSelection={jest.fn()}
           onClearSelection={jest.fn()}
-          traceSamples={[]}
+          traceSamplesFetchResult={{
+            data: { traceSamples: [] },
+            status: useFetcherModule.FETCH_STATUS.LOADING,
+            error: undefined,
+          }}
         />,
 
         { wrapper: Wrapper }
@@ -112,18 +104,32 @@ describe('transaction_details/distribution', () => {
     });
 
     it("doesn't show loading indicator when the service isn't running", async () => {
-      jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
-        data: { percentileThresholdValue: 1234, overallHistogram: [] },
-        refetch: () => {},
-        status: useFetcherModule.FETCH_STATUS.SUCCESS,
-      }));
+      jest
+        .spyOn(useFetcherModule, 'useFetcher')
+        .mockImplementationOnce(() => ({
+          data: {
+            traceItems: {},
+            entryTransaction: {},
+          },
+          refetch: () => {},
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        }))
+        .mockImplementationOnce(() => ({
+          data: { percentileThresholdValue: 1234, overallHistogram: [] },
+          refetch: () => {},
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        }));
 
       render(
         <Wrapper>
           <TransactionDistribution
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
-            traceSamples={[]}
+            traceSamplesFetchResult={{
+              data: { traceSamples: [] },
+              status: useFetcherModule.FETCH_STATUS.LOADING,
+              error: undefined,
+            }}
           />
         </Wrapper>
       );

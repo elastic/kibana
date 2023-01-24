@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -44,6 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           query: {
             ...commonQuery,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
+            probability: 1,
           },
         },
       }),
@@ -115,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
@@ -123,32 +124,30 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_DEV_DURATION = 500;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
         const serviceGoDevInstance = apm
-          .service(serviceName, 'development', 'go')
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
         await synthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .duration(GO_PROD_DURATION)
                 .timestamp(timestamp)
-                .serialize()
             ),
           timerange(start, end)
             .interval('1m')
             .rate(GO_DEV_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoDevInstance
-                .transaction('GET /api/product/:id')
+                .transaction({ transactionName: 'GET /api/product/:id' })
                 .duration(GO_DEV_DURATION)
                 .timestamp(timestamp)
-                .serialize()
             ),
         ]);
       });

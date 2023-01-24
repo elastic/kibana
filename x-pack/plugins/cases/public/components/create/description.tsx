@@ -6,18 +6,23 @@
  */
 
 import React, { memo, useEffect, useRef } from 'react';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MarkdownEditorForm } from '../markdown_editor';
-import { UseField, useFormContext, useFormData } from '../../common/shared_imports';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 
 interface Props {
   isLoading: boolean;
+  draftStorageKey: string;
 }
 
 export const fieldName = 'description';
 
-const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
+const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
   const { draftComment, hasIncomingLensState, openLensModal, clearDraftComment } =
     useLensDraftComment();
   const { setFieldValue } = useFormContext();
@@ -58,6 +63,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
         caseTitle: title,
         caseTags: tags,
         disabledUiPlugins,
+        draftStorageKey,
       }}
     />
   );

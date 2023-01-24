@@ -10,3 +10,4 @@ The `search` plugin includes:
 - ES_SEARCH_STRATEGY - hitting regular es `_search` endpoint using query DSL
 - (default) ESE_SEARCH_STRATEGY (Enhanced ES) - hitting `_async_search` endpoint and works with search sessions
 - EQL_SEARCH_STRATEGY
+- SQL_SEARCH_STRATEGY

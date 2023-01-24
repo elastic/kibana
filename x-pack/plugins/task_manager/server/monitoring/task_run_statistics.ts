@@ -9,6 +9,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
+import { Logger } from '@kbn/core/server';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
@@ -38,7 +39,6 @@ import {
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];
@@ -434,14 +434,12 @@ function getHealthStatus(
   if (resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold) {
     if (resultFrequencySummary.Failed > executionErrorThreshold.error_threshold) {
       logger.debug(
-        `setting HealthStatus.Error because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > error_threshold (${executionErrorThreshold.error_threshold})`
+        `Health Status error threshold has been exceeded, resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) is greater than error_threshold (${executionErrorThreshold.error_threshold})`
       );
-      return HealthStatus.Error;
     } else {
       logger.debug(
-        `setting HealthStatus.Warning because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > warn_threshold (${executionErrorThreshold.warn_threshold})`
+        `Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) is greater than warn_threshold (${executionErrorThreshold.warn_threshold})`
       );
-      return HealthStatus.Warning;
     }
   }
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { FieldFormat } from './field_format';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
@@ -17,7 +18,8 @@ export type FieldFormatsContentType = 'html' | 'text';
  */
 export interface HtmlContextTypeOptions {
   field?: { name: string };
-  hit?: { highlight: Record<string, string[]> };
+  hit?: { highlight?: Record<string, string[]> };
+  skipFormattingInStringifiedJSON?: boolean;
 }
 
 /**
@@ -29,9 +31,11 @@ export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptio
 /**
  * Plain text converter options
  * @remark
- * no options for now
  */
-export type TextContextTypeOptions = object;
+export interface TextContextTypeOptions {
+  skipFormattingInStringifiedJSON?: boolean;
+  timezone?: string;
+}
 
 /**
  * To plain text converter function
@@ -57,6 +61,7 @@ export enum FIELD_FORMAT_IDS {
   BOOLEAN = 'boolean',
   BYTES = 'bytes',
   COLOR = 'color',
+  CURRENCY = 'currency',
   CUSTOM = 'custom',
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
@@ -74,11 +79,12 @@ export enum FIELD_FORMAT_IDS {
 }
 
 /** @public */
-export interface FieldFormatConfig {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FieldFormatConfig = {
   id: FieldFormatId;
   params: FieldFormatParams;
   es?: boolean;
-}
+};
 
 /**
  * If a service is being shared on both the client and the server, and
@@ -92,7 +98,10 @@ export interface FieldFormatConfig {
  *
  @public
  */
-export type FieldFormatsGetConfigFn<T = unknown> = (key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn<T extends Serializable = Serializable> = (
+  key: string,
+  defaultOverride?: T
+) => T;
 
 export type IFieldFormat = FieldFormat;
 
@@ -123,9 +132,7 @@ export type FieldFormatInstanceType = (new (
  * TODO: support strict typing for params depending on format type
  * https://github.com/elastic/kibana/issues/108158
  */
-export interface FieldFormatParams {
-  [param: string]: any;
-}
+export type FieldFormatParams<P = {}> = SerializableRecord & P;
 
 /**
  * Params provided by the registry to every field formatter
@@ -149,9 +156,13 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
  *
  * @public
  */
-export interface SerializedFieldFormat<TParams = FieldFormatParams> {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedFieldFormat<
+  P = {},
+  TParams extends FieldFormatParams<P> = FieldFormatParams<P>
+> = {
   id?: string;
   params?: TParams;
-}
+};
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
+export type FormatFactory = <P = {}>(mapping?: SerializedFieldFormat<P>) => IFieldFormat;

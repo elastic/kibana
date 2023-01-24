@@ -10,11 +10,11 @@ import { errors } from '@elastic/elasticsearch';
 import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
 
+import { pollEsNodesVersion } from '@kbn/core/server';
+import type { NodesVersionCompatibility } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { pollEsNodesVersion } from '../../../../src/core/server';
-import type { NodesVersionCompatibility } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import { ConfigSchema } from './config';
 import type { ElasticsearchServiceSetup } from './elasticsearch_service';
@@ -22,7 +22,7 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
 
 jest.mock('tls');
-jest.mock('../../../../src/core/server', () => ({
+jest.mock('@kbn/core/server', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
@@ -86,7 +86,7 @@ describe('ElasticsearchService', () => {
     });
 
     describe('#connectionStatus$', () => {
-      beforeEach(() => jest.useFakeTimers());
+      beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterEach(() => jest.useRealTimers());
 
       it('does not repeat ping request if have multiple subscriptions', async () => {

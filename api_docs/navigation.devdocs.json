@@ -19,10 +19,10 @@
           },
           " implements ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -45,6 +45,7 @@
         ],
         "path": "src/plugins/navigation/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "navigation",
@@ -58,6 +59,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "navigation",
@@ -68,16 +70,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -93,10 +96,10 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => ",
@@ -110,6 +113,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "navigation",
@@ -120,16 +124,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -143,15 +148,15 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ i18n }: ",
+              "(core: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { data }: ",
+              ", { unifiedSearch }: ",
               "NavigationPluginStartDependencies",
               ") => ",
               {
@@ -164,25 +169,27 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "navigation",
                 "id": "def-public.NavigationPublicPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ i18n }",
+                "label": "core",
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -190,13 +197,14 @@
                 "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ data }",
+                "label": "{ unifiedSearch }",
                 "description": [],
                 "signature": [
                   "NavigationPluginStartDependencies"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -214,6 +222,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -238,10 +247,11 @@
             "section": "def-public.TopNavMenuProps",
             "text": "TopNavMenuProps"
           },
-          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+          "<QT>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "navigation",
@@ -257,10 +267,12 @@
                 "docId": "kibNavigationPluginApi",
                 "section": "def-public.TopNavMenuProps",
                 "text": "TopNavMenuProps"
-              }
+              },
+              "<QT>"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -278,6 +290,7 @@
         "description": [],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "navigation",
@@ -290,7 +303,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -300,7 +314,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -314,6 +329,7 @@
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -327,7 +343,8 @@
                   "HTMLElement"
                 ],
                 "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -342,7 +359,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -355,7 +373,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -368,7 +387,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -381,7 +401,8 @@
               "boolean | (() => boolean) | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -394,7 +415,8 @@
               "string | (() => string | undefined) | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -410,15 +432,15 @@
               "DisambiguateSet",
               "<(",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">), WithSpanProps> & WithSpanProps & { iconType?: ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">), WithSpanProps> & WithSpanProps & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -426,15 +448,15 @@
               "DisambiguateSet",
               "<(",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">), WithSpanProps> & WithSpanProps & { iconType?: ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">), WithSpanProps> & WithSpanProps & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -444,17 +466,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">)> & ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\"> & { iconType?: ",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -462,17 +484,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">)> & ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\"> & { iconType?: ",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -482,17 +504,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">)> & ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\"> & { iconType?: ",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -502,17 +524,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">)> & ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\"> & { iconType?: ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -520,17 +542,17 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">)> & ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\"> & { iconType?: ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -540,24 +562,25 @@
               "DisambiguateSet",
               "<WithSpanProps, (",
               "DisambiguateSet",
-              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"onClick\" | \"color\" | \"href\">) | (",
+              "<WithButtonProps, WithAnchorProps> & { href: string; target?: string | undefined; rel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLAnchorElement>, \"color\" | \"onClick\" | \"href\">) | (",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\">)> & ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\">)> & ",
               "DisambiguateSet",
-              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"onClick\" | \"color\"> & { iconType?: ",
+              "<WithAnchorProps, WithButtonProps> & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; onClickAriaLabel?: string | undefined; } & Omit<React.HTMLAttributes<HTMLButtonElement>, \"color\" | \"onClick\"> & { iconType?: ",
               "IconType",
               " | undefined; label: React.ReactNode; tooltipContent?: React.ReactNode; tooltipPosition?: ",
               "ToolTipPositions",
-              " | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: ",
-              "BetaBadgeSize",
-              " | undefined; } & ",
+              " | undefined; anchorProps?: (",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
               "<{ tooltipContent: React.ReactNode; title?: string | undefined; }, { title: string; tooltipContent?: React.ReactNode; }> & { title: string; tooltipContent?: React.ReactNode; } & { label: React.ReactNode; }) | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -570,7 +593,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -583,7 +607,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -596,7 +621,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -606,11 +632,39 @@
             "label": "iconSide",
             "description": [],
             "signature": [
-              "ButtonContentIconSide",
-              " | undefined"
+              "\"left\" | \"right\" | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.target",
+            "type": "string",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -627,15 +681,23 @@
         "description": [],
         "signature": [
           "SearchBarOwnProps",
-          " & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; } & Omit<",
+          "<QT> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]) => void) | undefined; } & Omit<",
+          {
+            "pluginId": "unifiedSearch",
             "scope": "public",
-            "docId": "kibDataUiPluginApi",
+            "docId": "kibUnifiedSearchPluginApi",
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"intl\" | \"kibana\" | \"timeHistory\"> & { config?: ",
+          "<QT>, \"kibana\" | \"intl\" | \"timeHistory\"> & { config?: ",
           {
             "pluginId": "navigation",
             "scope": "public",
@@ -645,26 +707,27 @@
           },
           "[] | undefined; badges?: (",
           "EuiBadgeProps",
-          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; data?: ",
+          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
-            "pluginId": "data",
+            "pluginId": "unifiedSearch",
             "scope": "public",
-            "docId": "kibDataPluginApi",
-            "section": "def-public.DataPublicPluginStart",
-            "text": "DataPublicPluginStart"
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.UnifiedSearchPublicPluginStart",
+            "text": "UnifiedSearchPublicPluginStart"
           },
-          " | undefined; className?: string | undefined; setMenuMountPoint?: ((menuMount: ",
+          " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.MountPoint",
             "text": "MountPoint"
           },
           "<HTMLElement> | undefined) => void) | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -678,6 +741,7 @@
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "navigation",
@@ -693,6 +757,7 @@
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -706,7 +771,8 @@
                 "RegisteredTopNavMenuData"
               ],
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -723,6 +789,7 @@
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "navigation",
@@ -732,7 +799,7 @@
           "label": "ui",
           "description": [],
           "signature": [
-            "{ TopNavMenu: React.ComponentType<",
+            "{ TopNavMenu: (props: ",
             {
               "pluginId": "navigation",
               "scope": "public",
@@ -740,10 +807,35 @@
               "section": "def-public.TopNavMenuProps",
               "text": "TopNavMenuProps"
             },
-            ">; }"
+            "<",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.Query",
+              "text": "Query"
+            },
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; AggregateQueryTopNavMenu: (props: ",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.TopNavMenuProps",
+              "text": "TopNavMenuProps"
+            },
+            "<",
+            {
+              "pluginId": "@kbn/es-query",
+              "scope": "common",
+              "docId": "kibKbnEsQueryPluginApi",
+              "section": "def-common.AggregateQuery",
+              "text": "AggregateQuery"
+            },
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

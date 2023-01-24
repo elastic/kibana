@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import {
   AGENT_POLICY_INDEX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     describe('POST /api/fleet/agent_policies', () => {
-      it('should create an enrollment key and an agent action `POLICY_CHANGE` for the policy', async () => {
+      it('should create an enrollment key for the policy', async () => {
         const name = `test-${Date.now()}`;
 
         const res = await supertest
@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /api/fleet/agent_policies/copy', () => {
       const TEST_POLICY_ID = `policy1`;
 
-      it('should create an enrollment key and an agent action `POLICY_CHANGE` for the policy', async () => {
+      it('should create an enrollment key for the policy', async () => {
         const name = `test-${Date.now()}`;
 
         const res = await supertest

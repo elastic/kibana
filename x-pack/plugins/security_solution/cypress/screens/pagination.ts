@@ -6,4 +6,5 @@
  */
 
 export const FIRST_PAGE_SELECTOR = '[data-test-subj="pagination-button-0"]';
-export const THIRD_PAGE_SELECTOR = '[data-test-subj="pagination-button-2"]';
+export const SECOND_PAGE_SELECTOR = '[data-test-subj="pagination-button-1"]';
+export const SORT_BTN = '[data-test-subj="tableHeaderSortButton"]';

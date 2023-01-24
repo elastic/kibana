@@ -7,8 +7,8 @@
  */
 
 import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { PLUGIN_NAME } from '../../common';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export class MetricsTracking {
   private trackingDisabled = false;

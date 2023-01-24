@@ -5,26 +5,88 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { CoreSetup } from 'kibana/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import type { FleetConfigType } from '..';
 
 import { getIsAgentsEnabled } from './config_collectors';
-import { getAgentUsage } from './agent_collectors';
+import { getAgentUsage, getAgentData } from './agent_collectors';
 import type { AgentUsage } from './agent_collectors';
 import { getInternalClients } from './helpers';
 import { getPackageUsage } from './package_collectors';
 import type { PackageUsage } from './package_collectors';
-import { getFleetServerUsage } from './fleet_server_collector';
+import { getFleetServerUsage, getFleetServerConfig } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
+import { getAgentPoliciesUsage } from './agent_policies';
 
-interface Usage {
+export interface Usage {
   agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];
   fleet_server: FleetServerUsage;
 }
+
+export interface FleetUsage extends Usage {
+  fleet_server_config: { policies: Array<{ input_config: any }> };
+  agent_policies: { count: number; output_types: string[] };
+  agents_per_version: Array<{
+    version: string;
+    count: number;
+  }>;
+  agent_checkin_status: {
+    error: number;
+    degraded: number;
+  };
+  agents_per_policy: number[];
+  agent_logs_top_errors?: string[];
+  fleet_server_logs_top_errors?: string[];
+}
+
+export const fetchFleetUsage = async (
+  core: CoreSetup,
+  config: FleetConfigType,
+  abortController: AbortController
+) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  if (!soClient || !esClient) {
+    return;
+  }
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+    packages: await getPackageUsage(soClient),
+    ...(await getAgentData(esClient, abortController)),
+    fleet_server_config: await getFleetServerConfig(soClient),
+    agent_policies: await getAgentPoliciesUsage(esClient, abortController),
+    // TODO removed top errors telemetry as it causes this issue: https://github.com/elastic/kibana/issues/148976
+    // ...(await getAgentLogsTopErrors(esClient)),
+  };
+  return usage;
+};
+
+// used by kibana daily collector
+const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+    packages: await getPackageUsage(soClient),
+  };
+  return usage;
+};
+
+export const fetchAgentsUsage = async (core: CoreSetup, config: FleetConfigType) => {
+  const [soClient, esClient] = await getInternalClients(core);
+  const usage = {
+    agents_enabled: getIsAgentsEnabled(config),
+    agents: await getAgentUsage(soClient, esClient),
+    fleet_server: await getFleetServerUsage(soClient, esClient),
+  };
+  return usage;
+};
 
 export function registerFleetUsageCollector(
   core: CoreSetup,
@@ -41,15 +103,7 @@ export function registerFleetUsageCollector(
   const fleetCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'fleet',
     isReady: () => true,
-    fetch: async () => {
-      const [soClient, esClient] = await getInternalClients(core);
-      return {
-        agents_enabled: getIsAgentsEnabled(config),
-        agents: await getAgentUsage(config, soClient, esClient),
-        fleet_server: await getFleetServerUsage(soClient, esClient),
-        packages: await getPackageUsage(soClient),
-      };
-    },
+    fetch: async () => fetchUsage(core, config),
     schema: {
       agents_enabled: { type: 'boolean' },
       agents: {
@@ -81,6 +135,18 @@ export function registerFleetUsageCollector(
           type: 'long',
           _meta: {
             description: 'The total number of enrolled agents currently offline',
+          },
+        },
+        inactive: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of of enrolled agents currently inactive',
+          },
+        },
+        unenrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents currently unenrolled',
           },
         },
         total_all_statuses: {

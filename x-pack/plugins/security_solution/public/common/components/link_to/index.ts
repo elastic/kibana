@@ -7,15 +7,15 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
-import { useGetUrlSearch } from '../navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { useGetUrlSearch, useGetUrlStateQueryString } from '../navigation/use_get_url_search';
 import { useAppUrl } from '../../lib/kibana/hooks';
-import { SecurityNavKey } from '../navigation/types';
-import { SecurityPageName } from '../../../app/types';
+import type { SecurityPageName } from '../../../app/types';
+import { needsUrlState } from '../../links';
 
+export { getAlertDetailsUrl, getAlertDetailsTabUrl } from './redirect_to_alerts';
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
-export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
+export { getKubernetesUrl, getKubernetesDetailsUrl } from './redirect_to_kubernetes';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
 export { getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
 export {
@@ -33,23 +33,21 @@ interface FormatUrlOptions {
 
 export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
 
+/**
+ * @deprecated `useFormatUrl` is deprecated. Alternatives:
+ * - `SecuritySolutionLinkAnchor` -> Component with built-in Security link anchor
+ * - `SecuritySolutionLinkButton` -> Component with built-in Security link button
+ * - `withSecuritySolutionLink` -> HOC to create a custom Security link component.
+ * - `useGetSecuritySolutionLinkProps` -> Hook to get `href` and `onClick` Security link props.
+ * - `useGetSecuritySolutionUrl` -> Hook to get a Security formatted url.
+ */
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getAppUrl } = useAppUrl();
-  const tab = page in navTabs ? navTabs[page as SecurityNavKey] : undefined;
-  const search = useGetUrlSearch(tab);
+  const search = useGetUrlSearch(page);
 
   const formatUrl = useCallback<FormatUrl>(
     (path: string, { absolute = false, skipSearch = false } = {}) => {
-      const pathArr = path.split('?');
-      const formattedPath = `${pathArr[0]}${
-        !skipSearch
-          ? isEmpty(pathArr[1])
-            ? search
-            : `?${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`
-          : isEmpty(pathArr[1])
-          ? ''
-          : `?${pathArr[1]}`
-      }`;
+      const formattedPath = formatPath(path, search, skipSearch);
       return getAppUrl({ deepLinkId: page, path: formattedPath, absolute });
     },
     [getAppUrl, page, search]
@@ -57,3 +55,41 @@ export const useFormatUrl = (page: SecurityPageName) => {
 
   return { formatUrl, search };
 };
+
+export type GetSecuritySolutionUrl = (param: {
+  deepLinkId: SecurityPageName;
+  path?: string;
+  absolute?: boolean;
+  skipSearch?: boolean;
+}) => string;
+
+export const useGetSecuritySolutionUrl = () => {
+  const { getAppUrl } = useAppUrl();
+  const getUrlStateQueryString = useGetUrlStateQueryString();
+
+  const getSecuritySolutionUrl = useCallback<GetSecuritySolutionUrl>(
+    ({ deepLinkId, path = '', absolute = false, skipSearch = false }) => {
+      const search = needsUrlState(deepLinkId) ? getUrlStateQueryString() : '';
+      const formattedPath = formatPath(path, search, skipSearch);
+
+      return getAppUrl({ deepLinkId, path: formattedPath, absolute });
+    },
+    [getAppUrl, getUrlStateQueryString]
+  );
+
+  return getSecuritySolutionUrl;
+};
+
+function formatPath(path: string, search: string, skipSearch?: boolean) {
+  const [urlPath, parameterPath] = path.split('?');
+  const formattedPath = `${urlPath}${
+    !skipSearch
+      ? isEmpty(parameterPath)
+        ? search
+        : `?${parameterPath}${isEmpty(search) ? '' : `&${search}`}`
+      : isEmpty(parameterPath)
+      ? ''
+      : `?${parameterPath}`
+  }`;
+  return formattedPath;
+}

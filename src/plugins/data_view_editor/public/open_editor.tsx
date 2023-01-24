@@ -7,16 +7,12 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
-import {
-  createKibanaReactContext,
-  toMountPoint,
-  IndexPattern,
-  DataPublicPluginStart,
-} from './shared_imports';
+import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
 
 import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
@@ -24,7 +20,7 @@ import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 interface Dependencies {
   core: CoreStart;
   searchClient: DataPublicPluginStart['search']['search'];
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export const getEditorOpener =
@@ -39,6 +35,7 @@ export const getEditorOpener =
         notifications,
         application,
         dataViews,
+        overlays,
         searchClient,
       });
 
@@ -49,6 +46,8 @@ export const getEditorOpener =
       onCancel = () => {},
       defaultTypeIsRollup = false,
       requireTimestampField = false,
+      allowAdHocDataView = false,
+      editData,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -57,7 +56,7 @@ export const getEditorOpener =
         }
       };
 
-      const onSaveIndexPattern = (indexPattern: IndexPattern) => {
+      const onSaveIndexPattern = (indexPattern: DataView) => {
         closeEditor();
 
         if (onSave) {
@@ -75,8 +74,11 @@ export const getEditorOpener =
                   closeEditor();
                   onCancel();
                 }}
+                editData={editData}
                 defaultTypeIsRollup={defaultTypeIsRollup}
                 requireTimestampField={requireTimestampField}
+                allowAdHocDataView={allowAdHocDataView}
+                showManagementLink={Boolean(editData && editData.isPersisted())}
               />
             </I18nProvider>
           </KibanaReactContextProvider>,

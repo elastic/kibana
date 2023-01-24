@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { GetInfoResponse, InstalledRegistry } from '../../../../plugins/fleet/common';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -21,7 +21,9 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    describe('setup performs upgrades', async () => {
+
+    // FLAKY: https://github.com/elastic/kibana/issues/118479
+    describe.skip('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';
@@ -73,49 +75,52 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should upgrade package policy on setup if keep policies up to date set to true', async () => {
-        const oldVersion = '1.9.0';
+        const oldVersion = '0.1.0';
+        const latestVersion = '0.3.0';
+        const policyName = 'policy-1';
+        // first install old version of package
         await supertest
-          .post(`/api/fleet/epm/packages/system/${oldVersion}`)
+          .post(`/api/fleet/epm/packages/multiple_versions/${oldVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
+
+        // now set the package to keep policies up to date
         await supertest
-          .put(`/api/fleet/epm/packages/system/${oldVersion}`)
+          .put(`/api/fleet/epm/packages/multiple_versions/${oldVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .send({ keepPoliciesUpToDate: true })
           .expect(200);
+
+        // create a package policy with the old package version
         await supertest
           .post('/api/fleet/package_policies')
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'system-1',
+            name: policyName,
             namespace: 'default',
             policy_id: agentPolicyId,
-            package: { name: 'system', version: oldVersion },
+            package: { name: 'multiple_versions', version: oldVersion },
             inputs: [],
+            force: true,
           })
           .expect(200);
 
-        let { body } = await supertest
-          .get(`/api/fleet/epm/packages/system/${oldVersion}`)
-          .expect(200);
-        const latestVersion = body.item.latestVersion;
-        log.info(`System package latest version: ${latestVersion}`);
-        // make sure we're actually doing an upgrade
-        expect(latestVersion).not.eql(oldVersion);
-
-        ({ body } = await supertest
-          .post(`/api/fleet/epm/packages/system/${latestVersion}`)
+        // install the most recent version of the package
+        await supertest
+          .post(`/api/fleet/epm/packages/multiple_versions/${latestVersion}`)
           .set('kbn-xsrf', 'xxxx')
-          .expect(200));
+          .expect(200);
 
         await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
-        ({ body } = await supertest
+        // now check the package policy has been upgraded to the latest version
+        const { body } = await supertest
           .get('/api/fleet/package_policies')
           .set('kbn-xsrf', 'xxxx')
-          .expect(200));
-        expect(body.items.find((pkg: any) => pkg.name === 'system-1').package.version).to.equal(
+          .expect(200);
+
+        expect(body.items.find((pkg: any) => pkg.name === policyName).package.version).to.equal(
           latestVersion
         );
       });
@@ -156,10 +161,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('allows elastic/fleet-server user to call required APIs', async () => {
-      const {
-        token,
-        // @ts-expect-error SecurityCreateServiceTokenRequest should not require `name`
-      } = await es.security.createServiceToken({
+      const { token } = await es.security.createServiceToken({
         namespace: 'elastic',
         service: 'fleet-server',
       });

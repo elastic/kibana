@@ -8,11 +8,14 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { DataView, SortDirection } from 'src/plugins/data/common';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { DataPublicPluginStart, Query } from '../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { DataTableRecord } from '../../../types';
+import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -32,15 +35,18 @@ describe('context successors', function () {
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
-  ) => Promise<EsHitRecordList>;
+  ) => Promise<DataTableRecord[]>;
   let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  const indexPattern = {
-    id: 'INDEX_PATTERN_ID',
+  const dataView = {
+    id: 'DATA_VIEW_ID',
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
+    fields: {
+      getByName: jest.fn(),
+    },
   } as unknown as DataView;
 
   describe('function fetchSuccessors', function () {
@@ -56,17 +62,23 @@ describe('context successors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
+        const anchor = buildDataTableRecord(
+          {
+            _index: 't',
+            _id: '1',
+            _source: {
+              [dataView.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
           },
-          sort: [timeValNr, tieBreakerValue],
-        };
+          dataView,
+          true
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
-          indexPattern,
-          anchor as EsHitRecord,
+          dataView,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
@@ -87,8 +99,10 @@ describe('context successors', function () {
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+          );
         }
       );
     });
@@ -118,8 +132,9 @@ describe('context successors', function () {
           // should have ended with a half-open interval
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'lte']);
           expect(intervals.length).toBeGreaterThan(1);
-
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+          );
         }
       );
     });
@@ -147,8 +162,9 @@ describe('context successors', function () {
           // should have stopped before reaching MS_PER_DAY * 2200
           expect(moment(last(intervals)?.gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
           expect(intervals.length).toBeGreaterThan(1);
-
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 4));
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 4), dataView)
+          );
         }
       );
     });
@@ -192,17 +208,23 @@ describe('context successors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
+        const anchor = buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _source: {
+              [dataView.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
           },
-          sort: [timeValNr, tieBreakerValue],
-        };
+          dataView,
+          true
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
-          indexPattern,
-          anchor as EsHitRecord,
+          dataView,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
@@ -224,8 +246,10 @@ describe('context successors', function () {
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+          );
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(removeFieldsSpy.calledOnce).toBe(true);

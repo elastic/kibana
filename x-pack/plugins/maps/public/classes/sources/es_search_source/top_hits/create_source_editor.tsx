@@ -8,18 +8,21 @@
 import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { getGeoFields, getTermsFields, getSortFields } from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
-import { SortDirection } from '../../../../../../../../src/plugins/data/public';
 import { TopHitsForm } from './top_hits_form';
 import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;
+  onSourceConfigChange: (
+    sourceConfig: Partial<ESSearchSourceDescriptor> | null,
+    isPointsOnly: boolean
+  ) => void;
 }
 
 interface State {
@@ -88,6 +91,8 @@ export class CreateSourceEditor extends Component<Props, State> {
       tooltipProperties.push(indexPattern.timeFieldName);
     }
 
+    const field = geoFieldName && indexPattern?.getFieldByName(geoFieldName);
+
     const sourceConfig =
       indexPattern && geoFieldName && sortField && topHitsSplitField
         ? {
@@ -101,7 +106,8 @@ export class CreateSourceEditor extends Component<Props, State> {
             topHitsSize,
           }
         : null;
-    this.props.onSourceConfigChange(sourceConfig);
+    const isPointsOnly = field ? field.type === 'geo_point' : false;
+    this.props.onSourceConfigChange(sourceConfig, isPointsOnly);
   };
 
   _renderGeoSelect() {

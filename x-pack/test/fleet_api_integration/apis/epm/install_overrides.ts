@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
@@ -39,7 +40,11 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const templateName = body.items[0].id;
+      const templateName = body.items.filter((item: any) => item.type === 'index_template')?.[0].id;
+
+      if (!templateName) {
+        throw new Error('index template not found in package assets');
+      }
 
       const { body: indexTemplateResponse } = await es.transport.request<any>(
         {
@@ -52,34 +57,26 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
-        `${templateName}@mappings`,
-        `${templateName}@settings`,
+        `${templateName}@package`,
         `${templateName}@custom`,
-        '.fleet_component_template-1',
+        '.fleet_globals-1',
+        '.fleet_agent_id_verification-1',
       ]);
 
       ({ body } = await es.transport.request(
         {
           method: 'GET',
-          path: `/_component_template/${templateName}@mappings`,
+          path: `/_component_template/${templateName}@package`,
         },
         {
           meta: true,
         }
       ));
 
-      // The mappings override provided in the package is set in the mappings component template
+      // The mappings override provided in the package is set in the package component template
       expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(false);
 
-      ({ body } = await es.transport.request(
-        {
-          method: 'GET',
-          path: `/_component_template/${templateName}@settings`,
-        },
-        { meta: true }
-      ));
-
-      // The settings override provided in the package is set in the settings component template
+      // The settings override provided in the package is set in the package component template
       expect(
         body.component_templates[0].component_template.template.settings.index.lifecycle.name
       ).to.be('reference');
@@ -121,15 +118,12 @@ export default function (providerContext: FtrProviderContext) {
           // body: indexTemplate, // I *think* this should work, but it doesn't
           body: {
             index_patterns: [`${templateName}-*`],
-            composed_of: [
-              `${templateName}@mappings`,
-              `${templateName}@settings`,
-              `${templateName}@custom`,
-            ],
+            composed_of: [`${templateName}@package`, `${templateName}@custom`],
           },
         },
         { meta: true }
       ));
+
       // omit routings
       delete body.template.settings.index.routing;
 
@@ -138,6 +132,7 @@ export default function (providerContext: FtrProviderContext) {
           settings: {
             index: {
               codec: 'best_compression',
+              default_pipeline: 'logs-overrides.test-0.1.0',
               lifecycle: {
                 name: 'overridden by user',
               },
@@ -151,6 +146,24 @@ export default function (providerContext: FtrProviderContext) {
           },
           mappings: {
             dynamic: 'false',
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              data_stream: {
+                properties: {
+                  dataset: {
+                    type: 'constant_keyword',
+                  },
+                  namespace: {
+                    type: 'constant_keyword',
+                  },
+                  type: {
+                    type: 'constant_keyword',
+                  },
+                },
+              },
+            },
           },
           aliases: {},
         },

@@ -2,103 +2,49 @@
 
 exports[`LoginForm login selector properly switches to login form -> login help and back: Login Help 1`] = `
 <ReactMarkdown
-  astPlugins={Array []}
-  escapeHtml={true}
-  parserOptions={Object {}}
-  plugins={Array []}
-  rawSourcePos={false}
-  renderers={Object {}}
-  skipHtml={false}
-  sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <Root
-    key="root-1-1-0"
+  <p
+    key="p-1-1-0"
   >
-    <p
-      key="paragraph-1-1-0"
+    <strong
+      key="strong-1-1-0"
     >
-      <strong
-        key="strong-1-1-0"
-      >
-        <TextRenderer
-          key="text-1-3-0"
-          nodeKey="text-1-3-0"
-          value="some help"
-        >
-          some help
-        </TextRenderer>
-      </strong>
-    </p>
-  </Root>
+      some help
+    </strong>
+  </p>
 </ReactMarkdown>
 `;
 
 exports[`LoginForm login selector properly switches to login help: Login Help 1`] = `
 <ReactMarkdown
-  astPlugins={Array []}
-  escapeHtml={true}
-  parserOptions={Object {}}
-  plugins={Array []}
-  rawSourcePos={false}
-  renderers={Object {}}
-  skipHtml={false}
-  sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <Root
-    key="root-1-1-0"
+  <p
+    key="p-1-1-0"
   >
-    <p
-      key="paragraph-1-1-0"
+    <strong
+      key="strong-1-1-0"
     >
-      <strong
-        key="strong-1-1-0"
-      >
-        <TextRenderer
-          key="text-1-3-0"
-          nodeKey="text-1-3-0"
-          value="some help"
-        >
-          some help
-        </TextRenderer>
-      </strong>
-    </p>
-  </Root>
+      some help
+    </strong>
+  </p>
 </ReactMarkdown>
 `;
 
 exports[`LoginForm properly switches to login help: Login Help 1`] = `
 <ReactMarkdown
-  astPlugins={Array []}
-  escapeHtml={true}
-  parserOptions={Object {}}
-  plugins={Array []}
-  rawSourcePos={false}
-  renderers={Object {}}
-  skipHtml={false}
-  sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <Root
-    key="root-1-1-0"
+  <p
+    key="p-1-1-0"
   >
-    <p
-      key="paragraph-1-1-0"
+    <strong
+      key="strong-1-1-0"
     >
-      <strong
-        key="strong-1-1-0"
-      >
-        <TextRenderer
-          key="text-1-3-0"
-          nodeKey="text-1-3-0"
-          value="some help"
-        >
-          some help
-        </TextRenderer>
-      </strong>
-    </p>
-  </Root>
+      some help
+    </strong>
+  </p>
 </ReactMarkdown>
 `;
 
@@ -113,7 +59,6 @@ exports[`LoginForm renders as expected 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         isInvalid={false}
@@ -142,7 +87,6 @@ exports[`LoginForm renders as expected 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         isInvalid={false}
@@ -161,7 +105,6 @@ exports[`LoginForm renders as expected 1`] = `
           compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
-          fullWidth={false}
           id="password"
           isInvalid={false}
           isLoading={false}
@@ -187,6 +130,7 @@ exports[`LoginForm renders as expected 1`] = `
             isDisabled={false}
             isLoading={false}
             onClick={[Function]}
+            size="m"
             type="submit"
           >
             <FormattedMessage

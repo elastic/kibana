@@ -5,24 +5,39 @@
  * 2.0.
  */
 
-// / <reference types="cypress" />
-// ***********************************************************
-// This example plugins/index.js can be used to load plugins
-//
-// You can change the location of this file or turn off loading
-// the plugins file with the 'pluginsFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/plugins-guide
-// ***********************************************************
+import { createEsClientForTesting } from '@kbn/test';
 
-// This function is called when a project is opened or re-opened (e.g. due to
-// the project's config changing)
+const plugin: Cypress.PluginConfig = (on, config) => {
+  const client = createEsClientForTesting({
+    esUrl: config.env.ELASTICSEARCH_URL,
+  });
+  on('task', {
+    async insertDoc({ index, doc, id }: { index: string; doc: any; id: string }) {
+      return client.create({ id, document: doc, index, refresh: 'wait_for' });
+    },
+    async insertDocs({ index, docs }: { index: string; docs: any[] }) {
+      const operations = docs.flatMap((doc) => [{ index: { _index: index } }, doc]);
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (_on: any, _config: any) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
+      return client.bulk({ operations, refresh: 'wait_for' });
+    },
+    async deleteDocsByQuery({
+      index,
+      query,
+      ignoreUnavailable = false,
+    }: {
+      index: string;
+      query: any;
+      ignoreUnavailable?: boolean;
+    }) {
+      return client.deleteByQuery({
+        index,
+        query,
+        ignore_unavailable: ignoreUnavailable,
+        refresh: true,
+        conflicts: 'proceed',
+      });
+    },
+  });
 };
+
+module.exports = plugin;

@@ -7,3 +7,10 @@
 
 export { paths } from './paths';
 export { translations } from './translations';
+export { observabilityAlertFeatureIds } from './alert_feature_ids';
+
+export enum AlertingPages {
+  alerts = 'alerts',
+  cases = 'cases',
+  rules = 'rules',
+}

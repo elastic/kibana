@@ -13,9 +13,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
@@ -54,23 +55,29 @@ const Culprit = euiStyled.div`
 type ErrorGroupItem =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'][0];
 type ErrorGroupDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 interface Props {
   mainStatistics: ErrorGroupItem[];
   serviceName: string;
+  detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
+  initialSortField: string;
+  initialSortDirection: 'asc' | 'desc';
   comparisonEnabled?: boolean;
 }
 
 function ErrorGroupList({
   mainStatistics,
   serviceName,
+  detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
+  initialSortField,
+  initialSortDirection,
 }: Props) {
   const { query } = useApmParams('/services/{serviceName}/errors');
-
+  const { offset } = query;
   const columns = useMemo(() => {
     return [
       {
@@ -205,11 +212,13 @@ function ErrorGroupList({
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
           const { currentPeriodColor, previousPeriodColor } =
-            getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+            getTimeSeriesColor(ChartType.ERROR_OCCURRENCES);
 
           return (
             <SparkPlot
+              type="bar"
               color={currentPeriodColor}
+              isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -221,7 +230,9 @@ function ErrorGroupList({
                 }
               )}
               comparisonSeries={
-                comparisonEnabled ? previousPeriodTimeseries : undefined
+                comparisonEnabled && isTimeComparison(offset)
+                  ? previousPeriodTimeseries
+                  : undefined
               }
               comparisonSeriesColor={previousPeriodColor}
             />
@@ -229,7 +240,14 @@ function ErrorGroupList({
         },
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, query, detailedStatistics, comparisonEnabled]);
+  }, [
+    serviceName,
+    query,
+    detailedStatistics,
+    comparisonEnabled,
+    detailedStatisticsLoading,
+    offset,
+  ]);
 
   return (
     <ManagedTable
@@ -238,9 +256,10 @@ function ErrorGroupList({
       })}
       items={mainStatistics}
       columns={columns}
-      initialSortField="occurrences"
-      initialSortDirection="desc"
+      initialSortField={initialSortField}
+      initialSortDirection={initialSortDirection}
       sortItems={false}
+      initialPageSize={25}
     />
   );
 }

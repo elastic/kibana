@@ -2,7 +2,7 @@
 id: kibStandards
 slug: /kibana-dev-docs/standards
 title: Standards and guidelines
-summary: Standards and guidelines we expect every Kibana developer to abide by
+description: Standards and guidelines we expect every Kibana developer to abide by
 date: 2021-09-28
 tags: ['contributor', 'dev', 'github', 'getting started', 'onboarding', 'kibana']
 ---
@@ -14,6 +14,49 @@ We expect all developers to read and abide by our overarching <DocLink id="kibDe
 ## Style guide
 
 Please read and abide by our <DocLink id="kibStyleGuide" text="Style guide" />. The majority of these items are linted against but some are not.
+
+## Adding dependencies
+
+Looking for a dependency that isn't already available in Kibana? There are a few things to keep in mind before adding a new dependency.
+
+First, be sure you have read and are familiar with our <DocLink id="kibDevPrinciples" />. In particular, **Be wary of dependencies**
+and **Prefer one way to do things** provide an overview of how we approach this question.
+
+In general, we have a bias toward **not** adding new dependencies unless there is a compelling reason to do so, as we want to
+minimize Kibana's overall complexity.
+
+Should you find yourself evaluating a new dependency, here are some specific things to ask yourself:
+
+1. **Is there already another dependency that offers similar functionality?** If so, adding a new dependency may not be necessary.
+Prefer one way to do things and use what's already there, unless there is an important reason not to do so.
+2. **Does this dependency appear to be well-maintained?** A dependency that hasn't been updated in years is usually more of a
+liability than an asset. Make sure the depedency has recent activity, that bugs and security vulnerabilities appear to be addressed
+in a timely manner, and that there is active participation from the maintainers and community.
+3. **How large is the dependency?** For client-side plugins, heavy dependencies can have a real impact on user experience,
+especially if they are included in the initial page bundle and not loaded asynchronously. In some cases it might make more sense
+to roll your own rather than include a bloated depedency, especially if you are only using a single piece of functionality.
+4. **Does this dependency have a license that's compatible with Kibana's?** Most common open source licenses such as BSD, MIT,
+and Apache 2.0/1.1 are okay to use with Kibana. Others may not be, or may require special attribution.
+5. **Will this dependency need to be prebuilt?** Due to our build process, native module dependencies should include at least a prebuild
+step so at install time it simply downloads instead of building from source. This allows us to optimize bootstrap times.
+6. **Am I committed to maintaining this dependency?** Once you add a dependency to the `package.json`, someone else isn't going to
+keep it updated for you. That means you will be responsible for updating it regularly, keeping an eye out for security vulnerabilities,
+and dealing with any breaking changes that may arise during an upgrade. We recommend relying on the renovate bot to help keep the
+dependency updated; be sure to mark your ownership of the package in the
+[`renovate.json`](https://github.com/elastic/kibana/blob/main/renovate.json`) file.
+
+If you have any questions about whether adding a dependency is appropriate, feel free to reach out to one of the following teams
+on Github:
+
+- **@elastic/kibana-tech-leads**
+- **@elastic/kibana-core**
+- **@elastic/kibana-operations**
+- **@elastic/kibana-security**
+
+<DocCallOut title="Internal only">
+  If you are unsure of which licenses are okay to use, refer to the
+  [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
+</DocCallOut>
 
 ## RESTful HTTP APIs
 
@@ -69,7 +112,7 @@ Every team should be collecting telemetry metrics on it’s public API usage. Th
 
 ### APM
 
-Kibana server and client are instrumented with APM node and APM RUM clients respectively, tracking serveral types of transactions by default, such as `page-load`, `request`, etc.
+Kibana server and client are instrumented with APM node and APM RUM clients respectively, tracking several types of transactions by default, such as `page-load`, `request`, etc.
 You may introduce custom transactions. Please refer to the [APM documentation](https://www.elastic.co/guide/en/apm/get-started/current/index.html) and follow these guidelines when doing so:
 
 - Use dashed syntax for transaction types and names: `my-transaction-type` and `my-transaction-name`

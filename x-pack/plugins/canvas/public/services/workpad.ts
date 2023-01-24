@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsResolveResponse } from 'src/core/public';
+import { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
-import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
 export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
 export type FoundWorkpad = FoundWorkpads[number];
@@ -22,8 +22,9 @@ export interface TemplateFindResponse {
 
 export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
-  outcome: SavedObjectsResolveResponse['outcome'];
-  aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  outcome: ResolvedSimpleSavedObject['outcome'];
+  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
 export interface CanvasWorkpadService {

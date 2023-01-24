@@ -8,8 +8,8 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
-import { FieldDescriptor } from 'src/plugins/data/server';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { FieldDescriptor } from '@kbn/data-plugin/server';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
@@ -19,7 +19,7 @@ export interface IRuleDataClient {
   kibanaVersion: string;
   isWriteEnabled(): boolean;
   getReader(options?: { namespace?: string }): IRuleDataReader;
-  getWriter(options?: { namespace?: string }): IRuleDataWriter;
+  getWriter(options?: { namespace?: string }): Promise<IRuleDataWriter>;
 }
 
 export interface IRuleDataReader {

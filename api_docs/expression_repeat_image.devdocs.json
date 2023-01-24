@@ -15,10 +15,10 @@
           "Observable",
           "<",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
             "text": "CoreTheme"
           },
           ">) => () => ",
@@ -41,6 +41,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -53,16 +54,17 @@
               "Observable",
               "<",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
             ],
             "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -79,10 +81,10 @@
         "signature": [
           "(core: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -105,6 +107,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -115,16 +118,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -148,6 +152,7 @@
       ],
       "path": "src/plugins/expression_repeat_image/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -171,6 +176,7 @@
       ],
       "path": "src/plugins/expression_repeat_image/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -186,10 +192,11 @@
         "label": "repeatImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
+          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: any; args: { emptyImage: { types: (\"null\" | \"string\")[]; help: any; default: null; }; image: { types: (\"null\" | \"string\")[]; help: any; default: null; }; max: { types: (\"number\" | \"null\")[]; help: any; default: number; }; size: { types: \"number\"[]; default: number; help: any; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -205,6 +212,7 @@
         "description": [],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -214,7 +222,8 @@
             "label": "width",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -224,7 +233,8 @@
             "label": "height",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -238,6 +248,7 @@
         "description": [],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -247,7 +258,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -257,7 +269,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -267,7 +280,8 @@
             "label": "emptyImage",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -277,7 +291,8 @@
             "label": "image",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -287,7 +302,8 @@
             "label": "size",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -301,6 +317,7 @@
         "description": [],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionRepeatImage",
@@ -310,7 +327,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -320,7 +338,8 @@
             "label": "image",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -330,7 +349,8 @@
             "label": "size",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -340,7 +360,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionRepeatImage",
@@ -353,7 +374,8 @@
               "string | null"
             ],
             "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -373,6 +395,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -387,6 +410,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -430,11 +454,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -458,6 +489,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -472,6 +504,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -486,6 +519,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -500,6 +534,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -514,6 +549,7 @@
         ],
         "path": "src/plugins/expression_repeat_image/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

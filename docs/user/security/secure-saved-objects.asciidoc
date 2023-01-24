@@ -16,7 +16,12 @@ xpack.encryptedSavedObjects:
 
 [IMPORTANT]
 ============================================================================
-If you don't specify an encryption key, {kib} automatically generates a random key at startup. Every time you restart {kib}, it uses a new ephemeral encryption key and is unable to decrypt saved objects encrypted with another key. To prevent data loss, {kib} might disable features that rely on this encryption until you explicitly set an encryption key.
+If you don't specify an encryption key, {kib} might disable features that rely on encrypted saved objects.
+============================================================================
+
+[TIP]
+============================================================================
+For help generating the encryption key, refer to the <<kibana-encryption-keys, `kibana-encryption-keys`>> script.
 ============================================================================
 
 [[encryption-key-rotation]]
@@ -45,3 +50,17 @@ You might also leverage this functionality if multiple {kib} instances connected
 ============================================================================
 
 At some point, you might want to dispose of old encryption keys completely. Make sure there are no saved objects that {kib} encrypted with these encryption keys. You can use the <<saved-objects-api-rotate-encryption-key, rotate encryption key API>> to determine which existing saved objects require decryption-only keys and re-encrypt them with the primary key.
+
+[[encryption-key-docker-configuration]]
+==== Docker configuration
+
+It's also possible to configure the encryption keys using <<environment-variable-config,Docker environment variables>>.
+
+Docker environment variable examples:
+
+[source,sh]
+--------------------------------------------------------------------------------
+XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY="min-32-byte-long-NEW-encryption-key"
+XPACK_ENCRYPTEDSAVEDOBJECTS_KEYROTATION_DECRYPTIONONLYKEYS[0]="min-32-byte-long-OLD#1-encryption-key"
+XPACK_ENCRYPTEDSAVEDOBJECTS_KEYROTATION_DECRYPTIONONLYKEYS[1]="min-32-byte-long-OLD#2-encryption-key"
+--------------------------------------------------------------------------------

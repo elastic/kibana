@@ -6,33 +6,38 @@
  */
 
 import React, { memo } from 'react';
-import type { AppMountParameters } from 'kibana/public';
-import { EuiErrorBoundary } from '@elastic/eui';
+import type { AppMountParameters } from '@kbn/core/public';
+import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
-import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-import { Chat } from '../../../../cloud/public';
+  ConfigContext,
+  FleetStatusProvider,
+  KibanaVersionContext,
+  useFleetStatus,
+} from '../../hooks';
 
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { FleetServerFlyout } from '../fleet/components';
 
-import { AgentPolicyContextProvider } from './hooks';
+import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { PackageInstallProvider, UIExtensionsContext } from './hooks';
+import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
+import { AgentEnrollmentFlyout } from './components';
 
 const EmptyContext = () => <></>;
 
@@ -84,9 +89,11 @@ export const IntegrationsAppContext: React.FC<{
                                     notifications={startServices.notifications}
                                     theme$={theme$}
                                   >
-                                    <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                    {children}
-                                    <Chat />
+                                    <FlyoutContextProvider>
+                                      <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                      {children}
+                                      <Chat />
+                                    </FlyoutContextProvider>
                                   </PackageInstallProvider>
                                 </AgentPolicyContextProvider>
                               </Router>
@@ -107,6 +114,9 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
+  const flyoutContext = useFlyoutContext();
+  const fleetStatus = useFleetStatus();
+
   return (
     <>
       <Switch>
@@ -134,6 +144,26 @@ export const AppRoutes = memo(() => {
           }}
         />
       </Switch>
+
+      {flyoutContext.isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode={
+              fleetStatus.isReady && fleetStatus.missingRequirements?.includes('fleet_server')
+                ? 'managed'
+                : 'standalone'
+            }
+            isIntegrationFlow={true}
+            onClose={() => flyoutContext.closeEnrollmentFlyout()}
+          />
+        </EuiPortal>
+      )}
+
+      {flyoutContext.isFleetServerFlyoutOpen && (
+        <EuiPortal>
+          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+        </EuiPortal>
+      )}
     </>
   );
 });

@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import type { GetStepsData } from './helpers';
 import {
-  GetStepsData,
   getDefineStepsData,
   getScheduleStepsData,
   getStepsData,
@@ -15,17 +15,19 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
-  getPrePackagedRuleStatus,
-  getPrePackagedTimelineStatus,
+  getPrePackagedRuleInstallationStatus,
+  getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
-  userHasPermissions,
   fillEmptySeverityMappings,
 } from './helpers';
-import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
+import {
+  mockRuleWithEverything,
+  mockRule,
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
 
-import { Rule } from '../../../containers/detection_engine/rules';
-import {
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
@@ -35,8 +37,6 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
-  // https://github.com/elastic/kibana/issues/120236
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {
@@ -52,8 +52,11 @@ describe('rule helpers', () => {
       const defineRuleStepData = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
+        shouldLoadQueryDynamically: true,
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -83,6 +86,8 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: ['host.name'],
           value: '50',
@@ -99,12 +104,20 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        groupByFields: ['host.name'],
+        newTermsFields: ['host.name'],
+        historyWindowSize: '7d',
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -123,16 +136,19 @@ describe('rule helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
+        timestampOverrideFallbackDisabled: false,
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
         enabled: true,
         throttle: 'no_actions',
         actions: [],
+        responseActions: undefined,
       };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -206,6 +222,8 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
@@ -216,6 +234,8 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -228,12 +248,21 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        groupByFields: [],
+        newTermsFields: [],
+        historyWindowSize: '7d',
+        shouldLoadQueryDynamically: true,
       };
 
       expect(result).toEqual(expected);
@@ -248,6 +277,8 @@ describe('rule helpers', () => {
       const expected = {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
+        dataSourceType: 'indexPatterns',
+        dataViewId: undefined,
         machineLearningJobId: [],
         index: ['auditbeat-*'],
         queryBar: {
@@ -256,8 +287,10 @@ describe('rule helpers', () => {
             language: 'kuery',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
+        relatedIntegrations: [],
+        requiredFields: [],
         threshold: {
           field: [],
           value: '100',
@@ -270,12 +303,21 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
+        groupByFields: [],
+        newTermsFields: [],
+        historyWindowSize: '7d',
+        shouldLoadQueryDynamically: false,
       };
 
       expect(result).toEqual(expected);
@@ -374,6 +416,7 @@ describe('rule helpers', () => {
             actionTypeId: 'action_type_id',
           },
         ],
+        responseActions: undefined,
         enabled: mockedRule.enabled,
         throttle: 'no_actions',
       };
@@ -390,6 +433,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
+        setup: '',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -399,32 +443,13 @@ describe('rule helpers', () => {
       const { note, ...mockRuleWithoutNote } = { ...mockRuleWithEverything('test-id') };
       const result: AboutStepRuleDetails = getModifiedAboutDetailsData(mockRuleWithoutNote);
 
-      const aboutRuleDetailsData = { note: '', description: mockRuleWithoutNote.description };
+      const aboutRuleDetailsData = {
+        note: '',
+        description: mockRuleWithoutNote.description,
+        setup: '',
+      };
 
       expect(result).toEqual(aboutRuleDetailsData);
-    });
-  });
-
-  describe('userHasPermissions', () => {
-    test("returns true when user's CRUD operations are null", () => {
-      const result: boolean = userHasPermissions(null);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns false when user cannot CRUD', () => {
-      const result: boolean = userHasPermissions(false);
-      const userHasPermissionsExpectedResult = false;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns true when user can CRUD', () => {
-      const result: boolean = userHasPermissions(true);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
   });
 
@@ -433,7 +458,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 0;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -446,7 +471,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -459,7 +484,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -472,7 +497,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 1;
-      const result: string = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -482,10 +507,10 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const rulesInstalled = null;
-      const rulesNotInstalled = null;
-      const rulesNotUpdated = null;
-      const result: string = getPrePackagedRuleStatus(
+      const rulesInstalled = undefined;
+      const rulesNotInstalled = undefined;
+      const rulesNotUpdated = undefined;
+      const result: string = getPrePackagedRuleInstallationStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -500,7 +525,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 0;
       const timelinesNotInstalled = 1;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -513,7 +538,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 0;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -526,7 +551,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 1;
       const timelinesNotUpdated = 0;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -539,7 +564,7 @@ describe('rule helpers', () => {
       const timelinesInstalled = 1;
       const timelinesNotInstalled = 0;
       const timelinesNotUpdated = 1;
-      const result: string = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated
@@ -549,10 +574,10 @@ describe('rule helpers', () => {
     });
 
     test('unknown', () => {
-      const timelinesInstalled = null;
-      const timelinesNotInstalled = null;
-      const timelinesNotUpdated = null;
-      const result: string = getPrePackagedTimelineStatus(
+      const timelinesInstalled = undefined;
+      const timelinesNotInstalled = undefined;
+      const timelinesNotUpdated = undefined;
+      const result: string = getPrePackagedTimelineInstallationStatus(
         timelinesInstalled,
         timelinesNotInstalled,
         timelinesNotUpdated

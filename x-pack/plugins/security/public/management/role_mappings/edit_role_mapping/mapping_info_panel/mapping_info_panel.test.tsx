@@ -7,9 +7,9 @@
 
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { Role, RoleMapping } from '../../../../../common/model';
 import type { RolesAPIClient } from '../../../roles';
@@ -46,7 +46,7 @@ describe('MappingInfoPanel', () => {
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
 
     // Name input validation
-    const { value: nameInputValue, readOnly: nameInputReadOnly } = findTestSubject(
+    const { value: nameInputValue, disabled: nameInputDisabled } = findTestSubject(
       wrapper,
       'roleMappingFormNameInput'
     )
@@ -54,7 +54,7 @@ describe('MappingInfoPanel', () => {
       .props();
 
     expect(nameInputValue).toEqual(props.roleMapping.name);
-    expect(nameInputReadOnly).toEqual(false);
+    expect(nameInputDisabled).toEqual(false);
 
     // Enabled switch validation
     const { checked: enabledInputValue } = wrapper
@@ -226,7 +226,7 @@ describe('MappingInfoPanel', () => {
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
 
     // Name input validation
-    const { value: nameInputValue, readOnly: nameInputReadOnly } = findTestSubject(
+    const { value: nameInputValue, disabled: nameInputDisabled } = findTestSubject(
       wrapper,
       'roleMappingFormNameInput'
     )
@@ -234,6 +234,104 @@ describe('MappingInfoPanel', () => {
       .props();
 
     expect(nameInputValue).toEqual(props.roleMapping.name);
-    expect(nameInputReadOnly).toEqual(true);
+    expect(nameInputDisabled).toEqual(true);
+  });
+
+  describe('can render a readonly view', () => {
+    it('with the "roles" view', async () => {
+      const props = {
+        roleMapping: {
+          name: 'my role mapping',
+          enabled: true,
+          roles: [],
+          role_templates: [],
+          rules: {},
+          metadata: {},
+        } as RoleMapping,
+        mode: 'view',
+        docLinks: coreMock.createStart().docLinks,
+        rolesAPIClient: rolesAPI,
+      } as MappingInfoPanel['props'];
+
+      const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
+
+      // Name is disabled
+      const { value: nameInputValue, disabled: nameInputDisabled } = findTestSubject(
+        wrapper,
+        'roleMappingFormNameInput'
+      )
+        .find('input')
+        .props();
+      expect(nameInputValue).toEqual(props.roleMapping.name);
+      expect(nameInputDisabled).toEqual(true);
+
+      // Enable switch is disabled
+      const { checked: enabledInputValue, disabled: enableSwitchDisabled } = wrapper
+        .find('EuiSwitch[data-test-subj="roleMappingsEnabledSwitch"]')
+        .props();
+      expect(enabledInputValue).toEqual(props.roleMapping.enabled);
+      expect(enableSwitchDisabled).toEqual(true);
+
+      // No switch to template link
+      const templateLinks = wrapper.find('EuiLink[data-test-subj="switchToRoleTemplatesButton"]');
+      expect(templateLinks).toHaveLength(0);
+
+      // Role selector is disabled
+      const { readOnly: roleSelectorReadOnly } = wrapper
+        .find('RoleSelector[data-test-subj="roleMappingFormRoleSelector"]')
+        .props();
+      expect(roleSelectorReadOnly).toEqual(true);
+    });
+
+    it('with the "role templates" view', async () => {
+      const props = {
+        roleMapping: {
+          name: 'my role mapping',
+          enabled: true,
+          roles: [],
+          role_templates: [
+            {
+              template: {
+                source: '',
+              },
+            },
+          ],
+          rules: {},
+          metadata: {},
+        } as RoleMapping,
+        mode: 'view',
+        docLinks: coreMock.createStart().docLinks,
+        rolesAPIClient: rolesAPI,
+      } as MappingInfoPanel['props'];
+
+      const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
+
+      // Name is disabled
+      const { value: nameInputValue, disabled: nameInputDisabled } = findTestSubject(
+        wrapper,
+        'roleMappingFormNameInput'
+      )
+        .find('input')
+        .props();
+      expect(nameInputValue).toEqual(props.roleMapping.name);
+      expect(nameInputDisabled).toEqual(true);
+
+      // Enable switch is disabled
+      const { checked: enabledInputValue, disabled: enableSwitchDisabled } = wrapper
+        .find('EuiSwitch[data-test-subj="roleMappingsEnabledSwitch"]')
+        .props();
+      expect(enabledInputValue).toEqual(props.roleMapping.enabled);
+      expect(enableSwitchDisabled).toEqual(true);
+
+      // No switch to roles link
+      const rolesLinks = wrapper.find('EuiLink[data-test-subj="switchToRolesButton"]');
+      expect(rolesLinks).toHaveLength(0);
+
+      // Template selector is disabled
+      const { readOnly: roleSelectorReadOnly } = wrapper
+        .find('RoleSelector[data-test-subj="roleMappingFormTemplateSelector"]')
+        .props();
+      expect(roleSelectorReadOnly).toEqual(true);
+    });
   });
 });

@@ -5,22 +5,22 @@
  * 2.0.
  */
 import { sortBy, take } from 'lodash';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { getNodeName } from '../../../common/connections';
-import { kqlQuery } from '../../../../observability/server';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServiceDependenciesBreakdown({
-  setup,
+  apmEventClient,
   start,
   end,
   serviceName,
   environment,
   kuery,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   serviceName: string;
@@ -28,7 +28,7 @@ export async function getServiceDependenciesBreakdown({
   kuery: string;
 }) {
   const items = await getConnectionStats({
-    setup,
+    apmEventClient,
     start,
     end,
     numBuckets: 100,

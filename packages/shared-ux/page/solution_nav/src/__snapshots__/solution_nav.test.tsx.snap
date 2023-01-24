@@ -1,0 +1,1013 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SolutionNav accepts EuiSideNavProps 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+    initialIsOpen={false}
+    isCollapsible={true}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="SolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    >
+      <EuiSideNav
+        aria-hidden={true}
+        aria-labelledby="SolutionNav_generated-id_heading"
+        data-test-subj="DTS"
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "items": Array [
+                Object {
+                  "id": "1.1",
+                  "items": undefined,
+                  "name": "Ingest Node Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.2",
+                  "items": undefined,
+                  "name": "Logstash Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.3",
+                  "items": undefined,
+                  "name": "Beats Central Management",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Ingest",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2",
+              "items": Array [
+                Object {
+                  "id": "2.1",
+                  "items": undefined,
+                  "name": "Index Management",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.2",
+                  "items": undefined,
+                  "name": "Index Lifecycle Policies",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.3",
+                  "items": undefined,
+                  "name": "Snapshot and Restore",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Data",
+              "tabIndex": -1,
+            },
+          ]
+        }
+        mobileBreakpoints={Array []}
+      />
+    </EuiPanel>
+  </EuiCollapsibleNavGroup>
+  <div
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+  >
+    <EuiTitle
+      id="SolutionNav_generated-id_heading"
+      size="xs"
+    >
+      <h2>
+        <strong>
+          <FormattedMessage
+            defaultMessage="{solutionName} {menuText}"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "menuText": "menu",
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </strong>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiSideNav
+      aria-hidden={true}
+      aria-labelledby="SolutionNav_generated-id_heading"
+      data-test-subj="DTS"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "items": undefined,
+                "name": "Ingest Node Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.2",
+                "items": undefined,
+                "name": "Logstash Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.3",
+                "items": undefined,
+                "name": "Beats Central Management",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Ingest",
+            "tabIndex": -1,
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "items": undefined,
+                "name": "Index Management",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.2",
+                "items": undefined,
+                "name": "Index Lifecycle Policies",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.3",
+                "items": undefined,
+                "name": "Snapshot and Restore",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Data",
+            "tabIndex": -1,
+          },
+        ]
+      }
+      mobileBreakpoints={Array []}
+    />
+  </div>
+  <SolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;
+
+exports[`SolutionNav accepts canBeCollapsed prop 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+    initialIsOpen={false}
+    isCollapsible={true}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="SolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    >
+      <EuiSideNav
+        aria-hidden={true}
+        aria-labelledby="SolutionNav_generated-id_heading"
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "items": Array [
+                Object {
+                  "id": "1.1",
+                  "items": undefined,
+                  "name": "Ingest Node Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.2",
+                  "items": undefined,
+                  "name": "Logstash Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.3",
+                  "items": undefined,
+                  "name": "Beats Central Management",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Ingest",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2",
+              "items": Array [
+                Object {
+                  "id": "2.1",
+                  "items": undefined,
+                  "name": "Index Management",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.2",
+                  "items": undefined,
+                  "name": "Index Lifecycle Policies",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.3",
+                  "items": undefined,
+                  "name": "Snapshot and Restore",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Data",
+              "tabIndex": -1,
+            },
+          ]
+        }
+        mobileBreakpoints={Array []}
+      />
+    </EuiPanel>
+  </EuiCollapsibleNavGroup>
+  <div
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+  >
+    <EuiTitle
+      id="SolutionNav_generated-id_heading"
+      size="xs"
+    >
+      <h2>
+        <strong>
+          <FormattedMessage
+            defaultMessage="{solutionName} {menuText}"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "menuText": "menu",
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </strong>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiSideNav
+      aria-hidden={true}
+      aria-labelledby="SolutionNav_generated-id_heading"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "items": undefined,
+                "name": "Ingest Node Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.2",
+                "items": undefined,
+                "name": "Logstash Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.3",
+                "items": undefined,
+                "name": "Beats Central Management",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Ingest",
+            "tabIndex": -1,
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "items": undefined,
+                "name": "Index Management",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.2",
+                "items": undefined,
+                "name": "Index Lifecycle Policies",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.3",
+                "items": undefined,
+                "name": "Snapshot and Restore",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Data",
+            "tabIndex": -1,
+          },
+        ]
+      }
+      mobileBreakpoints={Array []}
+    />
+  </div>
+  <SolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;
+
+exports[`SolutionNav accepts canBeCollapsed prop 2`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav"
+    initialIsOpen={false}
+    isCollapsible={false}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="SolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    >
+      <EuiSideNav
+        aria-hidden={false}
+        aria-labelledby="SolutionNav_generated-id_heading"
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "items": Array [
+                Object {
+                  "id": "1.1",
+                  "items": undefined,
+                  "name": "Ingest Node Pipelines",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "1.2",
+                  "items": undefined,
+                  "name": "Logstash Pipelines",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "1.3",
+                  "items": undefined,
+                  "name": "Beats Central Management",
+                  "tabIndex": undefined,
+                },
+              ],
+              "name": "Ingest",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2",
+              "items": Array [
+                Object {
+                  "id": "2.1",
+                  "items": undefined,
+                  "name": "Index Management",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "2.2",
+                  "items": undefined,
+                  "name": "Index Lifecycle Policies",
+                  "tabIndex": undefined,
+                },
+                Object {
+                  "id": "2.3",
+                  "items": undefined,
+                  "name": "Snapshot and Restore",
+                  "tabIndex": undefined,
+                },
+              ],
+              "name": "Data",
+              "tabIndex": undefined,
+            },
+          ]
+        }
+        mobileBreakpoints={Array []}
+      />
+    </EuiPanel>
+  </EuiCollapsibleNavGroup>
+  <div
+    className="kbnSolutionNav"
+  >
+    <EuiTitle
+      id="SolutionNav_generated-id_heading"
+      size="xs"
+    >
+      <h2>
+        <strong>
+          <FormattedMessage
+            defaultMessage="{solutionName} {menuText}"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "menuText": "menu",
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </strong>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiSideNav
+      aria-hidden={false}
+      aria-labelledby="SolutionNav_generated-id_heading"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "items": undefined,
+                "name": "Ingest Node Pipelines",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "1.2",
+                "items": undefined,
+                "name": "Logstash Pipelines",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "1.3",
+                "items": undefined,
+                "name": "Beats Central Management",
+                "tabIndex": undefined,
+              },
+            ],
+            "name": "Ingest",
+            "tabIndex": undefined,
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "items": undefined,
+                "name": "Index Management",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2.2",
+                "items": undefined,
+                "name": "Index Lifecycle Policies",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2.3",
+                "items": undefined,
+                "name": "Snapshot and Restore",
+                "tabIndex": undefined,
+              },
+            ],
+            "name": "Data",
+            "tabIndex": undefined,
+          },
+        ]
+      }
+      mobileBreakpoints={Array []}
+    />
+  </div>
+</Fragment>
+`;
+
+exports[`SolutionNav heading accepts more headingProps 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+    initialIsOpen={false}
+    isCollapsible={true}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="testID"
+        size="xs"
+      >
+        <h3>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h3>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    />
+  </EuiCollapsibleNavGroup>
+  <div
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+  >
+    <EuiTitle
+      id="testID"
+      size="xs"
+    >
+      <h3>
+        <strong>
+          <FormattedMessage
+            defaultMessage="{solutionName} {menuText}"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "menuText": "menu",
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </strong>
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+  </div>
+  <SolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;
+
+exports[`SolutionNav renders 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+    initialIsOpen={false}
+    isCollapsible={true}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="SolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    >
+      <EuiSideNav
+        aria-hidden={true}
+        aria-labelledby="SolutionNav_generated-id_heading"
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "items": Array [
+                Object {
+                  "id": "1.1",
+                  "items": undefined,
+                  "name": "Ingest Node Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.2",
+                  "items": undefined,
+                  "name": "Logstash Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.3",
+                  "items": undefined,
+                  "name": "Beats Central Management",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Ingest",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2",
+              "items": Array [
+                Object {
+                  "id": "2.1",
+                  "items": undefined,
+                  "name": "Index Management",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.2",
+                  "items": undefined,
+                  "name": "Index Lifecycle Policies",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.3",
+                  "items": undefined,
+                  "name": "Snapshot and Restore",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Data",
+              "tabIndex": -1,
+            },
+          ]
+        }
+        mobileBreakpoints={Array []}
+      />
+    </EuiPanel>
+  </EuiCollapsibleNavGroup>
+  <div
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+  >
+    <EuiTitle
+      id="SolutionNav_generated-id_heading"
+      size="xs"
+    >
+      <h2>
+        <strong>
+          <FormattedMessage
+            defaultMessage="{solutionName} {menuText}"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "menuText": "menu",
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </strong>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiSideNav
+      aria-hidden={true}
+      aria-labelledby="SolutionNav_generated-id_heading"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "items": undefined,
+                "name": "Ingest Node Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.2",
+                "items": undefined,
+                "name": "Logstash Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.3",
+                "items": undefined,
+                "name": "Beats Central Management",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Ingest",
+            "tabIndex": -1,
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "items": undefined,
+                "name": "Index Management",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.2",
+                "items": undefined,
+                "name": "Index Lifecycle Policies",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.3",
+                "items": undefined,
+                "name": "Snapshot and Restore",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Data",
+            "tabIndex": -1,
+          },
+        ]
+      }
+      mobileBreakpoints={Array []}
+    />
+  </div>
+  <SolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;
+
+exports[`SolutionNav renders with icon 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+    initialIsOpen={false}
+    isCollapsible={true}
+    paddingSize="none"
+    title={
+      <EuiTitle
+        id="SolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <KibanaSolutionAvatar
+            className="kbnSolutionNav__avatar"
+            iconType="logoElastic"
+            name="Solution"
+          />
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXPackages.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiPanel
+      color="transparent"
+      paddingSize="s"
+    >
+      <EuiSideNav
+        aria-hidden={true}
+        aria-labelledby="SolutionNav_generated-id_heading"
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "items": Array [
+                Object {
+                  "id": "1.1",
+                  "items": undefined,
+                  "name": "Ingest Node Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.2",
+                  "items": undefined,
+                  "name": "Logstash Pipelines",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "1.3",
+                  "items": undefined,
+                  "name": "Beats Central Management",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Ingest",
+              "tabIndex": -1,
+            },
+            Object {
+              "id": "2",
+              "items": Array [
+                Object {
+                  "id": "2.1",
+                  "items": undefined,
+                  "name": "Index Management",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.2",
+                  "items": undefined,
+                  "name": "Index Lifecycle Policies",
+                  "tabIndex": -1,
+                },
+                Object {
+                  "id": "2.3",
+                  "items": undefined,
+                  "name": "Snapshot and Restore",
+                  "tabIndex": -1,
+                },
+              ],
+              "name": "Data",
+              "tabIndex": -1,
+            },
+          ]
+        }
+        mobileBreakpoints={Array []}
+      />
+    </EuiPanel>
+  </EuiCollapsibleNavGroup>
+  <div
+    className="kbnSolutionNav kbnSolutionNav--hidden"
+  >
+    <EuiTitle
+      id="SolutionNav_generated-id_heading"
+      size="xs"
+    >
+      <h2>
+        <KibanaSolutionAvatar
+          className="kbnSolutionNav__avatar"
+          iconType="logoElastic"
+          name="Solution"
+        />
+        <strong>
+          <FormattedMessage
+            defaultMessage="{solutionName} {menuText}"
+            id="sharedUXPackages.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "menuText": "menu",
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </strong>
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiSideNav
+      aria-hidden={true}
+      aria-labelledby="SolutionNav_generated-id_heading"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "items": undefined,
+                "name": "Ingest Node Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.2",
+                "items": undefined,
+                "name": "Logstash Pipelines",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "1.3",
+                "items": undefined,
+                "name": "Beats Central Management",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Ingest",
+            "tabIndex": -1,
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "items": undefined,
+                "name": "Index Management",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.2",
+                "items": undefined,
+                "name": "Index Lifecycle Policies",
+                "tabIndex": -1,
+              },
+              Object {
+                "id": "2.3",
+                "items": undefined,
+                "name": "Snapshot and Restore",
+                "tabIndex": -1,
+              },
+            ],
+            "name": "Data",
+            "tabIndex": -1,
+          },
+        ]
+      }
+      mobileBreakpoints={Array []}
+    />
+  </div>
+  <SolutionNavCollapseButton
+    isCollapsed={true}
+  />
+</Fragment>
+`;

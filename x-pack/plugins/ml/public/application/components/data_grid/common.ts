@@ -7,17 +7,17 @@
 
 import moment from 'moment-timezone';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-
-import type { DataView, DataViewField } from '../../../../../../../src/plugins/data_views/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getNestedProperty } from '@kbn/ml-nested-property';
 
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';
@@ -39,7 +39,6 @@ import {
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
@@ -205,6 +204,7 @@ export const getDataGridSchemaFromESFieldType = (
       break;
     // keep schema undefined for text based columns
     case ES_FIELD_TYPES.KEYWORD:
+    case ES_FIELD_TYPES.VERSION:
     case ES_FIELD_TYPES.TEXT:
       break;
   }
@@ -238,7 +238,11 @@ export const getDataGridSchemaFromKibanaFieldType = (
       break;
   }
 
-  if (schema === undefined && field?.aggregatable === false) {
+  if (
+    (schema === undefined && field?.aggregatable === false) ||
+    (schema === 'numeric' &&
+      field?.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE))
+  ) {
     return NON_AGGREGATABLE;
   }
 
@@ -372,16 +376,9 @@ export const useRenderCellValue = (
 
       const cellValue = getCellValue(columnId);
 
-      // React by default doesn't allow us to use a hook in a callback.
-      // However, this one will be passed on to EuiDataGrid and its docs
-      // recommend wrapping `setCellProps` in a `useEffect()` hook
-      // so we're ignoring the linting rule here.
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useEffect(() => {
-        if (typeof cellPropsCallback === 'function') {
-          cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
-        }
-      }, [columnId, cellValue]);
+      if (typeof cellPropsCallback === 'function') {
+        cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
+      }
 
       if (typeof cellValue === 'object' && cellValue !== null) {
         return JSON.stringify(cellValue);
@@ -410,6 +407,7 @@ export const useRenderCellValue = (
 
       return cellValue;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern?.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
   return renderCellValue;
 };

@@ -9,9 +9,9 @@ import { EuiBasicTable, EuiIcon } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { DisabledBadge, ReservedBadge } from '../../badges';
 import { rolesAPIClientMock } from '../index.mock';
@@ -125,7 +125,7 @@ describe('<RolesGridPage />', () => {
     await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
-    expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
+    expect(wrapper.find(PermissionDenied).render()).toMatchSnapshot();
   });
 
   it('renders role actions as appropriate, escaping when necessary', async () => {
@@ -233,5 +233,23 @@ describe('<RolesGridPage />', () => {
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
     ]);
+  });
+
+  it('hides controls when `readOnly` is enabled', async () => {
+    const wrapper = mountWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={coreMock.createStart().notifications}
+        readOnly
+      />
+    );
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, (updatedWrapper) => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(findTestSubject(wrapper, 'createRoleButton')).toHaveLength(0);
   });
 });

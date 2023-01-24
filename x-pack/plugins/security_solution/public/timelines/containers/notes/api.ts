@@ -6,7 +6,7 @@
  */
 
 import { NOTE_URL } from '../../../../common/constants';
-import { NoteSavedObject, SavedNote } from '../../../../common/types/timeline/note';
+import type { NoteSavedObject, SavedNote } from '../../../../common/types/timeline/note';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({

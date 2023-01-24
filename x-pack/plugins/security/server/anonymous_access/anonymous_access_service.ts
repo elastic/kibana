@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Request } from '@hapi/hapi';
-
 import type {
   Capabilities,
   CapabilitiesStart,
+  FakeRawRequest,
   IBasePath,
   IClusterClient,
+  KibanaRequest,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { KibanaRequest } from '../../../../../src/core/server';
-import { addSpaceIdToPath } from '../../../spaces/common';
-import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { HTTPAuthorizationHeader } from '../authentication';
 import { AnonymousAuthenticationProvider } from '../authentication';
@@ -165,7 +165,7 @@ export class AnonymousAccessService {
    * anonymous service account credentials.
    */
   private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
-    return KibanaRequest.from({
+    const fakeRawRequest: FakeRawRequest = {
       headers:
         authenticateRequest && this.httpAuthorizationHeader
           ? { authorization: this.httpAuthorizationHeader.toString() }
@@ -174,9 +174,7 @@ export class AnonymousAccessService {
       // it should perform a privileges check or automatically disable all capabilities.
       auth: { isAuthenticated: authenticateRequest },
       path: '/',
-      route: { settings: {} },
-      url: { href: '/' },
-      raw: { req: { url: '/' } },
-    } as unknown as Request);
+    };
+    return CoreKibanaRequest.from(fakeRawRequest);
   }
 }

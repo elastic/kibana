@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '../../../common/constants';
 import { injectReferences } from '../../../common/migrations/references';
 import {
@@ -15,7 +16,7 @@ import {
   ESSearchSourceDescriptor,
   LayerDescriptor,
 } from '../../../common/descriptor_types';
-import { MapSavedObject } from '../../../common/map_saved_object_type';
+import type { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 import { IndexPatternStats } from './types';
 
 /*
@@ -29,7 +30,7 @@ export class IndexPatternStatsCollector {
     this._indexPatternsService = indexPatternService;
   }
 
-  async push(savedObject: MapSavedObject) {
+  async push(savedObject: SavedObject<MapSavedObjectAttributes>) {
     let layerList: LayerDescriptor[] = [];
     try {
       const { attributes } = injectReferences(savedObject);

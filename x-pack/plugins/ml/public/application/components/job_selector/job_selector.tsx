@@ -16,20 +16,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
+import { useStorage } from '@kbn/ml-local-storage';
 import { Dictionary } from '../../../../common/types/common';
-import { useUrlState } from '../../util/url_state';
-// @ts-ignore
-import { IdBadges } from './id_badges/index';
+import { IdBadges } from './id_badges';
 import {
   BADGE_LIMIT,
   JobSelectorFlyoutContent,
   JobSelectorFlyoutProps,
 } from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { useStorage } from '../../contexts/ml/use_storage';
-import { ApplyTimeRangeConfig, ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
+import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 interface GroupObj {
   groupId: string;
@@ -76,7 +75,7 @@ export function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
   return map;
 }
 
-interface JobSelectorProps {
+export interface JobSelectorProps {
   dateFormatTz: string;
   singleSelection: boolean;
   timeseriesOnly: boolean;
@@ -89,7 +88,7 @@ export interface JobSelectionMaps {
 
 export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage<ApplyTimeRangeConfig>(
+  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
     ML_APPLY_TIME_RANGE_CONFIG,
     true
   );
@@ -110,6 +109,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
     setSelectedIds(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([selectedJobIds, selectedGroups])]);
 
   function closeFlyout() {

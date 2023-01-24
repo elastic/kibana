@@ -11,9 +11,6 @@ import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('rule registry spaces only: trial', function () {
-    // Fastest ciGroup for the moment.
-    this.tags('ciGroup5');
-
     before(async () => {
       await createSpaces(getService);
     });
@@ -27,5 +24,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./update_alert'));
     loadTestFile(require.resolve('./create_rule'));
     loadTestFile(require.resolve('./lifecycle_executor'));
+    loadTestFile(require.resolve('./get_summarized_alerts'));
   });
 };

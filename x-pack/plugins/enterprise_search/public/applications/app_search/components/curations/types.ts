@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { SearchResult } from '@elastic/search-ui';
+
 import { Meta } from '../../../../../common/types';
-import { Result, ResultMeta } from '../result/types';
+import { ResultMeta, SimpleFieldValue } from '../result/types';
 
 export interface CurationSuggestion {
   query: string;
@@ -32,7 +34,7 @@ export interface Curation {
   queries: string[];
   promoted: CurationResult[];
   hidden: CurationResult[];
-  organic?: Result[]; // this field is missing if there are 0 results
+  organic?: SearchResult[]; // this field is missing if there are 0 results
   suggestion?: CurationSuggestion;
 }
 
@@ -45,5 +47,9 @@ export interface CurationResult {
   // TODO: Consider updating our internal API to return more standard Result data in the future
   id: string;
   _meta?: ResultMeta;
-  [key: string]: string | string[] | ResultMeta | undefined;
+  [key: string]: SimpleFieldValue | ResultMeta | CurationResultNestedFieldValue | undefined;
 }
+
+type CurationResultNestedFieldValue =
+  | { [key: string]: SimpleFieldValue | CurationResultNestedFieldValue }
+  | CurationResultNestedFieldValue[];

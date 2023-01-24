@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 export function registerFeature(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({
@@ -24,7 +24,7 @@ export function registerFeature(home: HomePublicPluginSetup) {
     icon: 'discoverApp',
     path: '/app/discover#/',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data',
     solutionId: 'kibana',
     order: 200,
   });

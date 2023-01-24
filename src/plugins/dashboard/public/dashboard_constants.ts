@@ -6,40 +6,82 @@
  * Side Public License, v 1.
  */
 
-import type { ControlStyle } from '../../controls/public';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { DashboardContainerByValueInput } from '../common';
 
+// ------------------------------------------------------------------
+// URL Constants
+// ------------------------------------------------------------------
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
+export const LANDING_PAGE_PATH = '/list';
+export const CREATE_NEW_DASHBOARD_URL = '/create';
+export const VIEW_DASHBOARD_URL = '/view';
+export const PRINT_DASHBOARD_URL = '/print';
 
-export const DashboardConstants = {
-  LANDING_PAGE_PATH: '/list',
-  CREATE_NEW_DASHBOARD_URL: '/create',
-  VIEW_DASHBOARD_URL: '/view',
-  PRINT_DASHBOARD_URL: '/print',
-  ADD_EMBEDDABLE_ID: 'addEmbeddableId',
-  ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
-  DASHBOARDS_ID: 'dashboards',
-  DASHBOARD_ID: 'dashboard',
-  SEARCH_SESSION_ID: 'searchSessionId',
-  CHANGE_CHECK_DEBOUNCE: 100,
-  CHANGE_APPLY_DEBOUNCE: 50,
+export const getFullPath = (aliasId?: string, id?: string) =>
+  `/app/dashboards#${createDashboardEditUrl(aliasId || id)}`;
+
+export const getFullEditPath = (id?: string, editMode?: boolean) => {
+  return `/app/dashboards#${createDashboardEditUrl(id, editMode)}`;
 };
-
-export const getDefaultDashboardControlGroupInput = () => ({
-  controlStyle: 'oneLine' as ControlStyle,
-  panels: {},
-});
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {
   if (!id) {
-    return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+    return `${CREATE_NEW_DASHBOARD_URL}`;
   }
   const edit = editMode ? `?${DASHBOARD_STATE_STORAGE_KEY}=(viewMode:edit)` : '';
-  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
+  return `${VIEW_DASHBOARD_URL}/${id}${edit}`;
 }
 
 export function createDashboardListingFilterUrl(filter: string | undefined) {
-  return filter
-    ? `${DashboardConstants.LANDING_PAGE_PATH}?filter="${filter}"`
-    : DashboardConstants.LANDING_PAGE_PATH;
+  return filter ? `${LANDING_PAGE_PATH}?filter="${filter}"` : LANDING_PAGE_PATH;
 }
+
+// ------------------------------------------------------------------
+// Telemetry & Events
+// ------------------------------------------------------------------
+export const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
+export const SAVED_OBJECT_LOADED_TIME = 'saved_object_loaded_time';
+export const SAVED_OBJECT_DELETE_TIME = 'saved_object_delete_time';
+export const SAVED_OBJECT_POST_TIME = 'saved_object_post_time';
+export const DASHBOARD_UI_METRIC_ID = 'dashboard';
+
+// ------------------------------------------------------------------
+// IDs
+// ------------------------------------------------------------------
+export const DASHBOARD_APP_ID = 'dashboards';
+export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
+export const SEARCH_SESSION_ID = 'searchSessionId';
+export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+
+// ------------------------------------------------------------------
+// Grid
+// ------------------------------------------------------------------
+export const DEFAULT_PANEL_HEIGHT = 15;
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+
+export const CHANGE_CHECK_DEBOUNCE = 100;
+
+// ------------------------------------------------------------------
+// Default State
+// ------------------------------------------------------------------
+export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'> = {
+  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+  timeRestore: false,
+  query: { query: '', language: 'kuery' },
+  description: '',
+  filters: [],
+  panels: {},
+  title: '',
+  tags: [],
+
+  // options
+  useMargins: true,
+  syncColors: false,
+  syncCursor: true,
+  syncTooltips: false,
+  hidePanelTitles: false,
+};

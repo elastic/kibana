@@ -8,7 +8,6 @@ oneOf:
       type:
         type: string
         enum:
-          - POLICY_CHANGE
           - UNENROLL
           - UPGRADE
           - POLICY_REASSIGN

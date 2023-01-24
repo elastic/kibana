@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ApiKey } from '@kbn/security-plugin/common/model';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { ApiKey } from '../../../../security/common/model';
 
 export async function getAgentKeys({
   context,
@@ -17,17 +17,17 @@ export async function getAgentKeys({
     query: {
       bool: {
         filter: [
-          {
-            term: {
-              'metadata.application': 'apm',
-            },
-          },
+          // only retrieve APM keys
+          { term: { 'metadata.application': 'apm' } },
+
+          // exclude system keys
+          { bool: { must_not: { term: { 'metadata.system': true } } } },
         ],
       },
     },
   };
 
-  const esClient = context.core.elasticsearch.client;
+  const esClient = (await context.core).elasticsearch.client;
   const apiResponse = await esClient.asCurrentUser.transport.request<{
     api_keys: ApiKey[];
   }>({

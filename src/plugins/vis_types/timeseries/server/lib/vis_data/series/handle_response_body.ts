@@ -8,16 +8,15 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { Panel } from '../../../../common/types';
 import { _legacyBuildProcessorFunction } from '../build_processor_function';
-// @ts-expect-error
 import { processors } from '../response_processors/series';
 import {
   createFieldsFetcher,
   FieldsFetcherServices,
 } from '../../search_strategies/lib/fields_fetcher';
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
-import type { FieldFormatsRegistry } from '../../../../../../field_formats/common';
 
 export function handleResponseBody(
   panel: Panel,

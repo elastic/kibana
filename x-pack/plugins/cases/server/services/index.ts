@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { ConnectorTypes } from '../../common/api';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ConnectorTypes } from '../../common/api';
 
 export { CasesService } from './cases';
 export { CaseConfigureService } from './configure';
@@ -14,6 +14,7 @@ export { CaseUserActionService } from './user_actions';
 export { ConnectorMappingsService } from './connector_mappings';
 export { AlertService } from './alerts';
 export { AttachmentService } from './attachments';
+export { UserProfileService } from './user_profiles';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

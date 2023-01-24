@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 export const PLUGIN_ID = 'customIntegrations';
 export const PLUGIN_NAME = 'customIntegrations';
 
@@ -23,7 +22,8 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   custom: 'Custom',
   datastore: 'Datastore',
   elastic_stack: 'Elastic Stack',
-  google_cloud: 'Google cloud',
+  google_cloud: 'Google Cloud',
+  infrastructure: 'Infrastructure',
   kubernetes: 'Kubernetes',
   languages: 'Languages',
   message_queue: 'Message queue',
@@ -36,6 +36,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   security: 'Security',
   sample_data: 'Sample data',
   support: 'Support',
+  threat_intel: 'Threat intelligence',
   ticketing: 'Ticketing',
   version_control: 'Version control',
   web: 'Web',
@@ -48,6 +49,13 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   upload_file: 'Upload a file',
   website_search: 'Website search',
   geo: 'Geo',
+};
+
+// featured integrations will be brought to the top of the search results for
+// a given category. Integrations are displayed in the order of the array.
+export const FEATURED_INTEGRATIONS_BY_CATEGORY = {
+  security: ['endpoint', 'cloud_security_posture', 'network_traffic'],
+  '': ['apm', 'endpoint', 'web_crawler'], // no category selected
 };
 
 /**
@@ -82,6 +90,7 @@ export const SHIPPER_DISPLAY = {
   sample_data: 'Sample data',
   tests: 'Tests',
   tutorial: 'Tutorials',
+  placeholders: 'Extra Integrations',
 };
 
 /**
@@ -113,6 +122,7 @@ export interface CustomIntegration {
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
+  uiExternalLink?: string;
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];

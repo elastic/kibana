@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
 import { Field } from '../../../../common/types/fields';
 import {
@@ -15,7 +16,6 @@ import {
   isOutlierAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
@@ -96,7 +96,7 @@ export const sortExplorationResultsFields = (
 
   if (isClassificationAnalysis(jobConfig.analysis) || isRegressionAnalysis(jobConfig.analysis)) {
     const dependentVariable = getDependentVar(jobConfig.analysis);
-    const predictedField = getPredictedFieldName(resultsField, jobConfig.analysis, true);
+    const predictedField = getPredictedFieldName(resultsField!, jobConfig.analysis, true);
 
     if (a === `${resultsField}.is_training`) {
       return -1;

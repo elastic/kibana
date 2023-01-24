@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { rollDailyData } from './daily';
 export { rollTotals } from './total';
 export { serializeKey } from './utils';

@@ -8,12 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { truncate } from '../../utils/style';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
+import { isMobileAgentName } from '../../../common/agent_name';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -30,10 +31,14 @@ export function ServiceLink({
 }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
+  const serviceLink = isMobileAgentName(agentName)
+    ? '/mobile-services/{serviceName}/overview'
+    : '/services/{serviceName}/overview';
+
   return (
     <StyledLink
       data-test-subj={`serviceLink_${agentName}`}
-      href={link('/services/{serviceName}/overview', {
+      href={link(serviceLink, {
         path: { serviceName },
         query,
       })}
@@ -42,7 +47,9 @@ export function ServiceLink({
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName} />
         </EuiFlexItem>
-        <EuiFlexItem>{serviceName}</EuiFlexItem>
+        <EuiFlexItem className="eui-textTruncate">
+          <span className="eui-textTruncate">{serviceName}</span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );

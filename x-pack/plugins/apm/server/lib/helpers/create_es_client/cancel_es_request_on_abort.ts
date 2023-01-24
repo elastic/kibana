@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
   request: KibanaRequest,
   controller: AbortController
-) {
+): T {
   const subscription = request.events.aborted$.subscribe(() => {
     controller.abort();
   });
 
-  return promise.finally(() => subscription.unsubscribe());
+  return promise.finally(() => subscription.unsubscribe()) as T;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler, Logger } from 'kibana/server';
+import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { EndpointAuthzKeyList } from '../../../common/endpoint/types/authz';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import { EndpointAuthorizationError } from '../errors';
@@ -51,7 +51,7 @@ export const withEndpointAuthz = <T>(
     SecuritySolutionRequestHandlerContext
   > = async (context, request, response) => {
     if (enforceAuthz) {
-      const endpointAuthz = context.securitySolution.endpointAuthz;
+      const endpointAuthz = await (await context.securitySolution).getEndpointAuthz();
       const permissionChecker = (permission: EndpointAuthzKeyList[0]) => endpointAuthz[permission];
 
       // has `all`?

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RulesClient } from './rules_client';
+import { RulesClientApi } from './types';
 
-type Schema = PublicMethodsOf<RulesClient>;
+type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;
 
 const createRulesClientMock = () => {
   const mocked: RulesClientMock = {
-    aggregate: jest.fn(),
+    aggregate: jest.fn().mockReturnValue({ alertExecutionStatus: {}, ruleLastRunOutcome: {} }),
     create: jest.fn(),
     get: jest.fn(),
     resolve: jest.fn(),
@@ -30,7 +29,23 @@ const createRulesClientMock = () => {
     unmuteInstance: jest.fn(),
     listAlertTypes: jest.fn(),
     getAlertSummary: jest.fn(),
+    getExecutionLogForRule: jest.fn(),
+    getRuleExecutionKPI: jest.fn(),
+    getGlobalExecutionKpiWithAuth: jest.fn(),
+    getGlobalExecutionLogWithAuth: jest.fn(),
+    getActionErrorLog: jest.fn(),
+    getActionErrorLogWithAuth: jest.fn(),
     getSpaceId: jest.fn(),
+    bulkEdit: jest.fn(),
+    bulkDeleteRules: jest.fn(),
+    bulkEnableRules: jest.fn(),
+    bulkDisableRules: jest.fn(),
+    snooze: jest.fn(),
+    unsnooze: jest.fn(),
+    clearExpiredSnoozes: jest.fn(),
+    runSoon: jest.fn(),
+    clone: jest.fn(),
+    getAlertFromRaw: jest.fn(),
   };
   return mocked;
 };

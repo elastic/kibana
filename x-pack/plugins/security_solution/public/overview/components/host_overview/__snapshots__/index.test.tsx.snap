@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Host Summary Component rendering it renders the default Host Summary 1`] = `
+exports[`Host Summary Component it renders the default Host Summary 1`] = `
 <HostOverview
   anomaliesData={
     Object {
@@ -192,20 +192,20 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
       },
     }
   }
-  docValueFields={Array []}
   endDate="2019-06-18T06:00:00.000Z"
   hostName="testHostName"
   id="hostOverview"
   indexNames={Array []}
   isInDetailsSidePanel={false}
   isLoadingAnomaliesData={false}
+  jobNameById={Object {}}
   loading={false}
   narrowDateRange={[MockFunction]}
   startDate="2019-06-15T06:00:00.000Z"
 />
 `;
 
-exports[`Host Summary Component rendering it renders the panel view Host Summary 1`] = `
+exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
 <HostOverview
   anomaliesData={
     Object {
@@ -397,13 +397,13 @@ exports[`Host Summary Component rendering it renders the panel view Host Summary
       },
     }
   }
-  docValueFields={Array []}
   endDate="2019-06-18T06:00:00.000Z"
   hostName="testHostName"
   id="hostOverview"
   indexNames={Array []}
   isInDetailsSidePanel={true}
   isLoadingAnomaliesData={false}
+  jobNameById={Object {}}
   loading={false}
   narrowDateRange={[MockFunction]}
   startDate="2019-06-15T06:00:00.000Z"

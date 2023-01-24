@@ -8,16 +8,14 @@
 
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
-import { ToolingLog } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
-  LifecyclePhase,
-  TestMetadata,
-  readConfigFile,
   ProviderCollection,
+  Providers,
   readProviderSpec,
   setupMocha,
   runTests,
@@ -25,27 +23,17 @@ import {
   Config,
   SuiteTracker,
   EsVersion,
+  DedicatedTaskRunner,
 } from './lib';
 import { createEsClientForFtrConfig } from '../es';
 
 export class FunctionalTestRunner {
-  public readonly lifecycle = new Lifecycle();
-  public readonly testMetadata = new TestMetadata(this.lifecycle);
-  private closed = false;
-
   private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
-    private readonly configFile: string,
-    private readonly configOverrides: any,
+    private readonly config: Config,
     esVersion?: string | EsVersion
   ) {
-    for (const [key, value] of Object.entries(this.lifecycle)) {
-      if (value instanceof LifecyclePhase) {
-        value.before$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
-        value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
-      }
-    }
     this.esVersion =
       esVersion === undefined
         ? EsVersion.getDefault()
@@ -54,22 +42,31 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run() {
-    return await this._run(async (config, coreProviders) => {
-      SuiteTracker.startTracking(this.lifecycle, this.configFile);
+  async run(abortSignal?: AbortSignal) {
+    const testStats = await this.getTestStats();
 
-      const providers = new ProviderCollection(this.log, [
-        ...coreProviders,
-        ...readProviderSpec('Service', config.get('services')),
-        ...readProviderSpec('PageObject', config.get('pageObjects')),
-      ]);
+    return await this.runHarness(async (lifecycle, coreProviders) => {
+      SuiteTracker.startTracking(lifecycle, this.config.path);
 
-      if (providers.hasService('es')) {
-        await this.validateEsVersion(config);
+      const realServices =
+        !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
+
+      const providers = realServices
+        ? new ProviderCollection(this.log, [
+            ...coreProviders,
+            ...readProviderSpec('Service', this.config.get('services')),
+            ...readProviderSpec('PageObject', this.config.get('pageObjects')),
+          ])
+        : this.getStubProviderCollection(coreProviders);
+
+      if (realServices) {
+        if (providers.hasService('es')) {
+          await this.validateEsVersion();
+        }
+        await providers.loadAll();
       }
-      await providers.loadAll();
 
-      const customTestRunner = config.get('testRunner');
+      const customTestRunner = this.config.get('testRunner');
       if (customTestRunner) {
         this.log.warning(
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
@@ -79,7 +76,7 @@ export class FunctionalTestRunner {
 
       let reporter;
       let reporterOptions;
-      if (config.get('mochaOpts.dryRun')) {
+      if (this.config.get('mochaOpts.dryRun')) {
         // override default reporter for dryRun results
         const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
         reporter = 'json';
@@ -89,34 +86,43 @@ export class FunctionalTestRunner {
         this.log.info(`Dry run results will be stored in ${targetFile}`);
       }
 
-      const mocha = await setupMocha(
-        this.lifecycle,
-        this.log,
-        config,
+      const mocha = await setupMocha({
+        lifecycle,
+        log: this.log,
+        config: this.config,
         providers,
-        this.esVersion,
+        esVersion: this.esVersion,
         reporter,
-        reporterOptions
-      );
+        reporterOptions,
+      });
 
       // there's a bug in mocha's dry run, see https://github.com/mochajs/mocha/issues/4838
       // until we can update to a mocha version where this is fixed, we won't actually
       // execute the mocha dry run but simulate it by reading the suites and tests of
       // the mocha object and writing a report file with similar structure to the json report
       // (just leave out some execution details like timing, retry and erros)
-      if (config.get('mochaOpts.dryRun')) {
+      if (this.config.get('mochaOpts.dryRun')) {
         return this.simulateMochaDryRun(mocha);
       }
 
-      await this.lifecycle.beforeTests.trigger(mocha.suite);
-      this.log.info('Starting tests');
+      if (abortSignal?.aborted) {
+        this.log.warning('run aborted');
+        return;
+      }
 
-      return await runTests(this.lifecycle, mocha);
+      await lifecycle.beforeTests.trigger(mocha.suite);
+      if (abortSignal?.aborted) {
+        this.log.warning('run aborted');
+        return;
+      }
+
+      this.log.info('Starting tests');
+      return await runTests(lifecycle, mocha, abortSignal);
     });
   }
 
-  private async validateEsVersion(config: Config) {
-    const es = createEsClientForFtrConfig(config);
+  private async validateEsVersion() {
+    const es = createEsClientForFtrConfig(this.config);
 
     let esInfo;
     try {
@@ -143,100 +149,112 @@ export class FunctionalTestRunner {
   }
 
   async getTestStats() {
-    return await this._run(async (config, coreProviders) => {
-      if (config.get('testRunner')) {
-        throw new Error('Unable to get test stats for config that uses a custom test runner');
+    return await this.runHarness(async (lifecycle, coreProviders) => {
+      if (this.config.get('testRunner')) {
+        return;
       }
 
-      // replace the function of custom service providers so that they return
-      // promise-like objects which never resolve, essentially disabling them
-      // allowing us to load the test files and populate the mocha suites
-      const readStubbedProviderSpec = (type: string, providers: any, skip: string[]) =>
-        readProviderSpec(type, providers).map((p) => ({
-          ...p,
-          fn: skip.includes(p.name)
-            ? (ctx: any) => {
-                const result = ProviderCollection.callProviderFn(p.fn, ctx);
+      const providers = this.getStubProviderCollection(coreProviders);
+      const mocha = await setupMocha({
+        lifecycle,
+        log: this.log,
+        config: this.config,
+        providers,
+        esVersion: this.esVersion,
+      });
 
-                if ('then' in result) {
-                  throw new Error(
-                    `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
-                  );
-                }
-
-                return result;
-              }
-            : () => ({
-                then: () => {},
-              }),
-        }));
-
-      const providers = new ProviderCollection(this.log, [
-        ...coreProviders,
-        ...readStubbedProviderSpec(
-          'Service',
-          config.get('services'),
-          config.get('servicesRequiredForTestAnalysis')
-        ),
-        ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
-      ]);
-
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
-
-      const countTests = (suite: Suite): number =>
-        suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
+      const queue = new Set([mocha.suite]);
+      const allTests: Test[] = [];
+      for (const suite of queue) {
+        for (const test of suite.tests) {
+          allTests.push(test);
+        }
+        for (const childSuite of suite.suites) {
+          queue.add(childSuite);
+        }
+      }
 
       return {
-        testCount: countTests(mocha.suite),
+        testCount: allTests.length,
+        nonSkippedTestCount: allTests.filter((t) => !t.pending).length,
         testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
     });
   }
 
-  async _run<T = any>(
-    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
+  private getStubProviderCollection(coreProviders: Providers) {
+    // when we want to load the tests but not actually run anything we can
+    // use stubbed providers which allow mocha to do it's thing without taking
+    // too much time
+    const readStubbedProviderSpec = (type: string, providers: any, skip: string[]) =>
+      readProviderSpec(type, providers).map((p) => ({
+        ...p,
+        fn: skip.includes(p.name)
+          ? (ctx: any) => {
+              const result = ProviderCollection.callProviderFn(p.fn, ctx);
+
+              if ('then' in result) {
+                throw new Error(
+                  `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
+                );
+              }
+
+              return result;
+            }
+          : () => ({
+              then: () => {},
+            }),
+      }));
+
+    return new ProviderCollection(this.log, [
+      ...coreProviders,
+      ...readStubbedProviderSpec(
+        'Service',
+        this.config.get('services'),
+        this.config.get('servicesRequiredForTestAnalysis')
+      ),
+      ...readStubbedProviderSpec('PageObject', this.config.get('pageObjects'), []),
+    ]);
+  }
+
+  private async runHarness<T = any>(
+    handler: (lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
+    const lifecycle = new Lifecycle(this.log);
 
     try {
-      const config = await readConfigFile(
-        this.log,
-        this.esVersion,
-        this.configFile,
-        this.configOverrides
-      );
-      this.log.info('Config loaded');
-
       if (
-        (!config.get('testFiles') || config.get('testFiles').length === 0) &&
-        !config.get('testRunner')
+        this.config.module.type !== 'journey' &&
+        (!this.config.get('testFiles') || this.config.get('testFiles').length === 0) &&
+        !this.config.get('testRunner')
       ) {
         throw new Error('No tests defined.');
       }
 
       const dockerServers = new DockerServersService(
-        config.get('dockerServers'),
+        this.config.get('dockerServers'),
         this.log,
-        this.lifecycle
+        lifecycle
       );
 
       // base level services that functional_test_runner exposes
       const coreProviders = readProviderSpec('Service', {
-        lifecycle: () => this.lifecycle,
+        lifecycle: () => lifecycle,
         log: () => this.log,
-        testMetadata: () => this.testMetadata,
-        config: () => config,
+        config: () => this.config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,
+        dedicatedTaskRunner: () => new DedicatedTaskRunner(this.config, this.log),
       });
 
-      return await handler(config, coreProviders);
+      return await handler(lifecycle, coreProviders);
     } catch (runError) {
       runErrorOccurred = true;
       throw runError;
     } finally {
       try {
-        await this.close();
+        await lifecycle.cleanup.trigger();
       } catch (closeError) {
         if (runErrorOccurred) {
           this.log.error('failed to close functional_test_runner');
@@ -247,13 +265,6 @@ export class FunctionalTestRunner {
         }
       }
     }
-  }
-
-  async close() {
-    if (this.closed) return;
-
-    this.closed = true;
-    await this.lifecycle.cleanup.trigger();
   }
 
   simulateMochaDryRun(mocha: any) {

@@ -20,10 +20,10 @@ import {
 import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'src/core/public';
 
 import type { RoleMapping } from '../../../../../common/model';
 import type { RolesAPIClient } from '../../../roles';
@@ -37,7 +37,7 @@ import {
 interface Props {
   roleMapping: RoleMapping;
   onChange: (roleMapping: RoleMapping) => void;
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'view';
   validateForm: boolean;
   canUseInlineScripts: boolean;
   canUseStoredScripts: boolean;
@@ -112,7 +112,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             value={this.props.roleMapping.name || ''}
             onChange={this.onNameChange}
             data-test-subj={'roleMappingFormNameInput'}
-            readOnly={this.props.mode === 'edit'}
+            disabled={this.props.mode === 'edit' || this.props.mode === 'view'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -152,36 +152,47 @@ export class MappingInfoPanel extends Component<Props, State> {
               />
             </span>
             <EuiSpacer size="m" />
-            <EuiLink
-              data-test-subj="switchToRoleTemplatesButton"
-              onClick={() => {
-                this.onRolesModeChange('templates');
-              }}
-            >
-              <Fragment>
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.switchToRoleTemplates"
-                  defaultMessage="Switch to role templates"
-                />{' '}
-                <EuiIcon size="s" type="inputOutput" />
-              </Fragment>
-            </EuiLink>
+            {this.getSwitchToRoleTemplateButton()}
           </EuiText>
         }
         fullWidth
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
+            data-test-subj={'roleMappingFormRoleSelector'}
             rolesAPIClient={this.props.rolesAPIClient}
             roleMapping={this.props.roleMapping}
             mode={this.state.rolesMode}
             canUseInlineScripts={this.props.canUseInlineScripts}
             canUseStoredScripts={this.props.canUseStoredScripts}
             onChange={(roleMapping) => this.props.onChange(roleMapping)}
+            readOnly={this.props.mode === 'view'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
+  };
+
+  private getSwitchToRoleTemplateButton = () => {
+    if (this.props.mode !== 'view') {
+      return (
+        <EuiLink
+          data-test-subj="switchToRoleTemplatesButton"
+          onClick={() => {
+            this.onRolesModeChange('templates');
+          }}
+        >
+          <Fragment>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.switchToRoleTemplates"
+              defaultMessage="Switch to role templates"
+            />{' '}
+            <EuiIcon size="s" type="inputOutput" />
+          </Fragment>
+        </EuiLink>
+      );
+    }
+    return null;
   };
 
   private getRoleTemplatesSelector = () => {
@@ -220,36 +231,47 @@ export class MappingInfoPanel extends Component<Props, State> {
               </EuiLink>
             </span>
             <EuiSpacer size="m" />
-            <EuiLink
-              onClick={() => {
-                this.onRolesModeChange('roles');
-              }}
-              data-test-subj="switchToRolesButton"
-            >
-              <Fragment>
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.switchToRoles"
-                  defaultMessage="Switch to roles"
-                />{' '}
-                <EuiIcon size="s" type="inputOutput" />
-              </Fragment>
-            </EuiLink>
+            {this.getSwitchToRolesButton()}
           </EuiText>
         }
         fullWidth
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
+            data-test-subj={'roleMappingFormTemplateSelector'}
             rolesAPIClient={this.props.rolesAPIClient}
             roleMapping={this.props.roleMapping}
             mode={this.state.rolesMode}
             canUseInlineScripts={this.props.canUseInlineScripts}
             canUseStoredScripts={this.props.canUseStoredScripts}
             onChange={(roleMapping) => this.props.onChange(roleMapping)}
+            readOnly={this.props.mode === 'view'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
+  };
+
+  private getSwitchToRolesButton = () => {
+    if (this.props.mode !== 'view') {
+      return (
+        <EuiLink
+          onClick={() => {
+            this.onRolesModeChange('roles');
+          }}
+          data-test-subj="switchToRolesButton"
+        >
+          <Fragment>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.switchToRoles"
+              defaultMessage="Switch to roles"
+            />{' '}
+            <EuiIcon size="s" type="inputOutput" />
+          </Fragment>
+        </EuiLink>
+      );
+    }
+    return null;
   };
 
   private getEnabledSwitch = () => {
@@ -297,6 +319,7 @@ export class MappingInfoPanel extends Component<Props, State> {
                 enabled: e.target.checked,
               });
             }}
+            disabled={this.props.mode === 'view'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

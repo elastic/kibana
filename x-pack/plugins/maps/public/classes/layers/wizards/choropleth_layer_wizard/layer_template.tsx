@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataViewField, DataView } from 'src/plugins/data/common';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
@@ -66,7 +66,6 @@ interface State {
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string | null;
   rightTermsFields: DataViewField[];
   rightJoinField: string | null;
 }
@@ -85,7 +84,6 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftEmsJoinField: null,
     leftElasticsearchJoinField: null,
     rightIndexPatternId: '',
-    rightIndexPatternTitle: null,
     rightTermsFields: [],
     rightJoinField: null,
   };
@@ -99,7 +97,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   }
 
   _loadRightFields = async (indexPatternId: string) => {
-    this.setState({ rightTermsFields: [], rightIndexPatternTitle: null });
+    this.setState({ rightTermsFields: [] });
 
     let indexPattern;
     try {
@@ -116,15 +114,19 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
     this.setState({
       rightTermsFields: getTermsFields(indexPattern.fields),
-      rightIndexPatternTitle: indexPattern.title,
     });
   };
 
   _loadEmsFileFields = async () => {
-    const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
-      return fileLayer.getId() === this.state.leftEmsFileId;
-    });
+    let emsFileLayer: FileLayer | undefined;
+    try {
+      const emsFileLayers = await getEmsFileLayers();
+      emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
+        return fileLayer.getId() === this.state.leftEmsFileId;
+      });
+    } catch (error) {
+      // ignore error, lack of EMS file layers will be surfaced in EMS file select
+    }
 
     if (!this._isMounted || !emsFileLayer) {
       return;
@@ -260,14 +262,12 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             leftGeoField: this.state.leftGeoField!,
             leftJoinField: this.state.leftElasticsearchJoinField!,
             rightIndexPatternId: this.state.rightIndexPatternId,
-            rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           })
         : createEmsChoroplethLayerDescriptor({
             leftEmsFileId: this.state.leftEmsFileId!,
             leftEmsField: this.state.leftEmsJoinField!,
             rightIndexPatternId: this.state.rightIndexPatternId,
-            rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           });
 

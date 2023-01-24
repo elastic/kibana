@@ -7,17 +7,17 @@
  */
 
 import Fs from 'fs';
-import { basename, join } from 'path';
-import { promisify } from 'util';
+import Fsp from 'fs/promises';
+import * as Rx from 'rxjs';
 
-// @ts-ignore
 import { assertAbsolute, mkdirp } from './fs';
+import { type DirRecord, type FileRecord, type Record, SomePath } from './fs_records';
 
-const statAsync = promisify(Fs.stat);
-const mkdirAsync = promisify(Fs.mkdir);
-const utimesAsync = promisify(Fs.utimes);
-const copyFileAsync = promisify(Fs.copyFile);
-const readdirAsync = promisify(Fs.readdir);
+const fsReadDir$ = Rx.bindNodeCallback(
+  (path: string, cb: (err: Error | null, ents: Fs.Dirent[]) => void) => {
+    Fs.readdir(path, { withFileTypes: true }, cb);
+  }
+);
 
 interface Options {
   /**
@@ -31,20 +31,19 @@ interface Options {
   /**
    * function that is called with each Record
    */
-  filter?: (record: Record) => boolean;
+  filter?: (record: Readonly<Record>) => boolean;
+  /**
+   * define permissions for reach item copied
+   */
+  permissions?: (record: Readonly<Record>) => number | undefined;
   /**
    * Date to use for atime/mtime
    */
   time?: Date;
-}
-
-class Record {
-  constructor(
-    public isDirectory: boolean,
-    public name: string,
-    public absolute: string,
-    public absoluteDest: string
-  ) {}
+  /**
+   *
+   */
+  map?: (record: Readonly<FileRecord>) => Promise<undefined | FileRecord>;
 }
 
 /**
@@ -52,48 +51,76 @@ class Record {
  * function or modifying mtime/atime for each file.
  */
 export async function scanCopy(options: Options) {
-  const { source, destination, filter, time } = options;
+  const { source, destination, filter, time, permissions, map } = options;
 
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  // get filtered Records for files/directories within a directory
-  const getChildRecords = async (parent: Record) => {
-    const names = await readdirAsync(parent.absolute);
-    const records = await Promise.all(
-      names.map(async (name) => {
-        const absolute = join(parent.absolute, name);
-        const stat = await statAsync(absolute);
-        return new Record(stat.isDirectory(), name, absolute, join(parent.absoluteDest, name));
+  /**
+   * recursively fetch all the file records within a directory, starting with the
+   * files in the passed directory, then the files in all the child directories in
+   * no particular order
+   */
+  const readDir$ = (dir: DirRecord): Rx.Observable<Record> =>
+    fsReadDir$(dir.source.abs).pipe(
+      Rx.mergeAll(),
+      Rx.mergeMap((ent) => {
+        const rec: Record = {
+          type: ent.isDirectory() ? 'dir' : 'file',
+          source: dir.source.child(ent.name),
+          dest: dir.dest.child(ent.name),
+        };
+
+        if (filter && !filter(rec)) {
+          return Rx.EMPTY;
+        }
+
+        return Rx.of(rec);
       })
     );
 
-    return records.filter((record) => (filter ? filter(record) : true));
-  };
-
-  // create or copy each child of a directory
-  const copyChildren = async (record: Record) => {
-    const children = await getChildRecords(record);
-    await Promise.all(children.map(async (child) => await copy(child)));
-  };
-
-  // create or copy a record and recurse into directories
-  const copy = async (record: Record) => {
-    if (record.isDirectory) {
-      await mkdirAsync(record.absoluteDest);
-    } else {
-      await copyFileAsync(record.absolute, record.absoluteDest, Fs.constants.COPYFILE_EXCL);
+  const handleGenericRec = async (rec: Record) => {
+    if (permissions) {
+      const perm = permissions(rec);
+      if (perm !== undefined) {
+        await Fsp.chmod(rec.dest.abs, perm);
+      }
     }
 
     if (time) {
-      await utimesAsync(record.absoluteDest, time, time);
-    }
-
-    if (record.isDirectory) {
-      await copyChildren(record);
+      await Fsp.utimes(rec.dest.abs, time, time);
     }
   };
 
-  await mkdirp(destination);
-  await copyChildren(new Record(true, basename(source), source, destination));
+  const handleDir$ = (rec: DirRecord): Rx.Observable<unknown> =>
+    Rx.defer(async () => {
+      await mkdirp(rec.dest.abs);
+      await handleGenericRec(rec);
+    }).pipe(
+      Rx.mergeMap(() => readDir$(rec)),
+      Rx.mergeMap((ent) => (ent.type === 'dir' ? handleDir$(ent) : handleFile$(ent)))
+    );
+
+  const handleFile$ = (srcRec: FileRecord): Rx.Observable<unknown> =>
+    Rx.defer(async () => {
+      const rec = (map && (await map(srcRec))) ?? srcRec;
+
+      if (rec.content) {
+        await Fsp.writeFile(rec.dest.abs, rec.content, {
+          flag: 'wx',
+        });
+      } else {
+        await Fsp.copyFile(rec.source.abs, rec.dest.abs, Fs.constants.COPYFILE_EXCL);
+      }
+
+      await handleGenericRec(rec);
+    });
+
+  await Rx.lastValueFrom(
+    handleDir$({
+      type: 'dir',
+      source: SomePath.fromAbs(source),
+      dest: SomePath.fromAbs(destination),
+    })
+  );
 }

@@ -15,7 +15,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DashboardSavedObject } from '../../../../../../../src/plugins/dashboard/public';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import type { Query } from '@kbn/es-query';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { getDefaultSwimlanePanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { SWIMLANE_TYPE, SwimlaneType } from '../explorer_constants';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -28,14 +30,14 @@ export interface DashboardItem {
   id: string;
   title: string;
   description: string | undefined;
-  attributes: DashboardSavedObject;
+  attributes: DashboardAttributes;
 }
 
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
 
-function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
+function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
-    title: getDefaultSwimlanePanelTitle(jobIds),
+    title: getDefaultSwimlanePanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
     id: htmlIdGenerator()(),
   };
 }
@@ -44,6 +46,7 @@ interface AddToDashboardControlProps {
   jobIds: JobId[];
   viewBy: string;
   onClose: (callback?: () => Promise<void>) => void;
+  queryString?: string;
 }
 
 /**
@@ -53,20 +56,25 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
   viewBy,
+  queryString,
 }) => {
   const { dashboardItems, isLoading, search } = useDashboardTable();
 
   const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType>(SWIMLANE_TYPE.OVERALL);
 
   const getEmbeddableInput = useCallback(() => {
-    const config = getDefaultEmbeddablePanelConfig(jobIds);
+    const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
 
     return {
       ...config,
       jobIds,
       swimlaneType: selectedSwimlane,
       ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY ? { viewBy } : {}),
+      ...(queryString !== undefined
+        ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
+        : {}),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSwimlane]);
 
   const { addToDashboardAndEditCallback } = useAddToDashboardActions(

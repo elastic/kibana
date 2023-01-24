@@ -1,36 +1,53 @@
 [[get-all-connectors-api]]
-=== Get all connectors API
+== Get all connectors API
 ++++
 <titleabbrev>Get all connectors</titleabbrev>
 ++++
 
 Retrieves all connectors.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
+[discrete]
 [[get-all-connectors-api-request]]
-==== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connectors`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connectors`
 
+[discrete]
+=== {api-prereq-title}
+
+You must have `read` privileges for the *{connectors-feature}* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[discrete]
 [[get-all-connectors-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[discrete]
 [[get-all-connectors-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
+[discrete]
 [[get-all-connectors-api-example]]
-==== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/actions/connectors
+GET api/actions/connectors
 --------------------------------------------------
 // KIBANA
 
@@ -44,6 +61,7 @@ The API returns the following:
     "connector_type_id": ".email",
     "name": "email: preconfigured-mail-connector",
     "is_preconfigured": true,
+    "is_deprecated": false,
     "referenced_by_count": 0 <1>
   },
   {
@@ -56,10 +74,11 @@ The API returns the following:
       "executionTimeField": null
     },
     "is_preconfigured": false,
+    "is_deprecated": false,
     "is_missing_secrets": false,
     "referenced_by_count": 3
   }
 ]
 --------------------------------------------------
 
-<1> `referenced_by_count` - The number of saved-objects referencing this connector. This value is not calculated if `is_preconfigured: true`.
+<1> `referenced_by_count` indicates the number of saved objects that reference the connector. This value is not calculated if `is_preconfigured` is `true`.

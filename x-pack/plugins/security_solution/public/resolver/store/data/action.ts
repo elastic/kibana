@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   NewResolverTree,
   SafeEndpointEvent,
   SafeResolverEvent,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
-import { TreeFetcherParameters, PanelViewAndParameters } from '../../types';
+import type { TreeFetcherParameters, PanelViewAndParameters, TimeFilters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -32,6 +32,12 @@ interface ServerReturnedResolverData {
      * The database parameters that was used to fetch the resolver tree
      */
     parameters: TreeFetcherParameters;
+
+    /**
+     * If the user supplied date range results in 0 process events,
+     *  an unbounded request is made, and the time range of the result set displayed to the user through this value.
+     */
+    detectedBounds?: TimeFilters;
   };
 }
 

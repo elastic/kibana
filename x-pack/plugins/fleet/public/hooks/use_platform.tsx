@@ -8,19 +8,26 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export type PLATFORM_TYPE = 'linux-mac' | 'windows' | 'rpm-deb';
+export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes';
 
-export const PLATFORM_OPTIONS: Array<{
+export const REDUCED_PLATFORM_OPTIONS: Array<{
   label: string;
   id: PLATFORM_TYPE;
   'data-test-subj'?: string;
 }> = [
   {
-    id: 'linux-mac',
+    id: 'linux',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux', {
-      defaultMessage: 'Linux / macOS',
+      defaultMessage: 'Linux Tar',
     }),
     'data-test-subj': 'platformTypeLinux',
+  },
+  {
+    id: 'mac',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.mac', {
+      defaultMessage: 'Mac',
+    }),
+    'data-test-subj': 'platformTypeMac',
   },
   {
     id: 'windows',
@@ -30,16 +37,34 @@ export const PLATFORM_OPTIONS: Array<{
     'data-test-subj': 'platformTypeWindows',
   },
   {
-    id: 'rpm-deb',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.rpm', {
-      defaultMessage: 'RPM / DEB',
+    id: 'rpm',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
+      defaultMessage: 'RPM',
     }),
-    'data-test-subj': 'platformTypeRpm',
+    'data-test-subj': 'platformTypeLinuxRpm',
+  },
+  {
+    id: 'deb',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.deb', {
+      defaultMessage: 'DEB',
+    }),
+    'data-test-subj': 'platformTypeLinuxDeb',
+  },
+];
+
+export const PLATFORM_OPTIONS = [
+  ...REDUCED_PLATFORM_OPTIONS,
+  {
+    id: 'kubernetes',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.kubernetes', {
+      defaultMessage: 'Kubernetes',
+    }),
+    'data-test-subj': 'platformTypeKubernetes',
   },
 ];
 
 export function usePlatform() {
-  const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux-mac');
+  const [platform, setPlatform] = useState<PLATFORM_TYPE>('linux');
 
   return {
     platform,

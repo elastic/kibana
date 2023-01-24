@@ -6,20 +6,15 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
-import { createTimeFilter } from '../create_query';
-// @ts-ignore
-import { detectReason } from './detect_reason';
-// @ts-ignore
+import { createTimeFilter, TimerangeFilter } from '../create_query';
+import { detectReason, LogsIndexCheckOpts } from './detect_reason';
+import { elasticsearchLogsFilter } from './logs_filter';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
-// @ts-ignore
 import { getTimezone } from '../get_timezone';
-// @ts-ignore
 import { detectReasonFromException } from './detect_reason_from_exception';
 import { LegacyRequest } from '../../types';
-import { FilebeatResponse } from '../../../common/types/filebeat';
+import { LogsResponse } from '../../../common/types/logs';
 import { MonitoringConfig } from '../../config';
 
 interface Log {
@@ -33,10 +28,10 @@ interface Log {
 }
 
 async function handleResponse(
-  response: FilebeatResponse,
+  response: LogsResponse,
   req: LegacyRequest,
-  filebeatIndexPattern: string,
-  opts: { clusterUuid: string; nodeUuid: string; indexUuid: string; start: number; end: number }
+  logsIndexPattern: string,
+  opts: LogsIndexCheckOpts
 ) {
   const result: { enabled: boolean; logs: Log[]; reason?: any } = {
     enabled: false,
@@ -63,7 +58,7 @@ async function handleResponse(
       };
     });
   } else {
-    result.reason = await detectReason(req, filebeatIndexPattern, opts);
+    result.reason = await detectReason(req, logsIndexPattern, opts);
   }
 
   return result;
@@ -72,22 +67,17 @@ async function handleResponse(
 export async function getLogs(
   config: MonitoringConfig,
   req: LegacyRequest,
-  filebeatIndexPattern: string,
-  {
-    clusterUuid,
-    nodeUuid,
-    indexUuid,
-    start,
-    end,
-  }: { clusterUuid: string; nodeUuid: string; indexUuid: string; start: number; end: number }
+  logsIndexPattern: string,
+  { clusterUuid, nodeUuid, indexUuid, start, end }: LogsIndexCheckOpts
 ) {
-  checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
+  checkParam(logsIndexPattern, 'logsIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
-  const filter: any[] = [
-    { term: { 'service.type': 'elasticsearch' } },
+
+  const filter: Array<{ term: { [x: string]: string } } | TimerangeFilter | null> = [
     createTimeFilter({ start, end, metric }),
   ];
+
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
   }
@@ -99,7 +89,7 @@ export async function getLogs(
   }
 
   const params = {
-    index: filebeatIndexPattern,
+    index: logsIndexPattern,
     size: Math.min(50, config.ui.elasticsearch.logFetchCount),
     filter_path: [
       'hits.hits._source.message',
@@ -115,7 +105,7 @@ export async function getLogs(
       sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
-          filter,
+          filter: [elasticsearchLogsFilter, ...filter],
         },
       },
     },
@@ -128,8 +118,8 @@ export async function getLogs(
     logs: [],
   };
   try {
-    const response: FilebeatResponse = await callWithRequest(req, 'search', params);
-    result = await handleResponse(response, req, filebeatIndexPattern, {
+    const response: LogsResponse = await callWithRequest(req, 'search', params);
+    result = await handleResponse(response, req, logsIndexPattern, {
       clusterUuid,
       nodeUuid,
       indexUuid,

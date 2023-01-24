@@ -12,12 +12,12 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
   const onCompleteSetup = async ({ shouldReloadConfig }: { shouldReloadConfig: boolean }) => {

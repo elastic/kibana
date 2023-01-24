@@ -5,29 +5,42 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../fleet/common';
+import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getEndpointListPath, getPolicyDetailPath } from '../../../common/routing';
-import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/service';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import {
+  createAppRootMockRenderer,
+  resetReactDomCreatePortalMock,
+} from '../../../../common/mock/endpoint';
+import {
+  getEndpointListPath,
+  getPoliciesPath,
+  getPolicyBlocklistsPath,
+  getPolicyDetailPath,
+  getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
+  getPolicyTrustedAppsPath,
+} from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-jest.mock('./policy_forms/components/policy_form_layout');
+jest.mock('./policy_forms/components/policy_form_layout', () => ({
+  PolicyFormLayout: () => <></>,
+}));
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../host_isolation_exceptions/service');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const useIsExperimentalFeatureMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
-  const endpointListPath = getEndpointListPath({ name: 'endpointList' });
+  const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
@@ -37,6 +50,8 @@ describe('Policy Details', () => {
   let render: () => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
   let policyView: ReturnType<typeof render>;
+
+  beforeAll(() => resetReactDomCreatePortalMock());
 
   beforeEach(() => {
     const appContextMockRenderer = createAppRootMockRenderer();
@@ -51,6 +66,9 @@ describe('Policy Details', () => {
     let releaseApiFailure: () => void;
 
     beforeEach(() => {
+      useIsExperimentalFeatureMock.mockReturnValue({
+        policyListEnabled: true,
+      });
       http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
@@ -125,14 +143,14 @@ describe('Policy Details', () => {
       expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
 
-    it('should display back to list button and policy title', async () => {
+    it('should display back to policy list button and policy title', async () => {
       policyView = render();
       await asyncActions;
       policyView.update();
 
       const backToListLink = policyView.find('BackToExternalAppButton');
-      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${endpointListPath}`);
-      expect(backToListLink.text()).toBe('View all endpoints');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${policyListPath}`);
+      expect(backToListLink.text()).toBe('Back to policy list');
 
       const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');
       expect(pageTitle).toHaveLength(1);
@@ -147,7 +165,31 @@ describe('Policy Details', () => {
       const backToListLink = policyView.find('a[data-test-subj="policyDetailsBackLink"]');
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListLink.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(endpointListPath);
+      expect(history.location.pathname).toEqual(policyListPath);
+    });
+
+    it('should display and navigate to custom back button if non-default backLink state is present', async () => {
+      const customBackLinkState = {
+        backLink: {
+          navigateTo: [
+            APP_UI_ID,
+            {
+              path: getEndpointListPath({ name: 'endpointList' }),
+            },
+          ],
+          label: 'View all endpoints',
+          href: '/app/security/administration/endpoints',
+        },
+      };
+
+      history.push({ pathname: policyDetailsPathUrl, state: customBackLinkState });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+
+      const backToListLink = policyView.find('BackToExternalAppButton');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security/administration/endpoints`);
+      expect(backToListLink.text()).toBe('View all endpoints');
     });
 
     it('should display agent stats', async () => {
@@ -179,49 +221,53 @@ describe('Policy Details', () => {
       expect(tab.text()).toBe('Host isolation exceptions');
     });
 
-    describe('without canIsolateHost permissions', () => {
-      beforeEach(() => {
+    describe('without required permissions', () => {
+      const renderWithPrivilege = async (privilege: string) => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: {
             loading: false,
-            canIsolateHost: false,
+            [privilege]: false,
           },
         });
-      });
-
-      it('should not display the host isolation exceptions tab with no privileges and no assigned exceptions', async () => {
-        getHostIsolationExceptionItemsMock.mockReturnValue({ total: 0, data: [] });
         policyView = render();
         await asyncActions;
         policyView.update();
-        await waitFor(() => {
-          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
-        });
-        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
-      });
+      };
 
-      it('should not display the host isolation exceptions tab with no privileges and no data', async () => {
-        getHostIsolationExceptionItemsMock.mockReturnValue({ total: 0 });
-        policyView = render();
-        await asyncActions;
-        policyView.update();
-        await waitFor(() => {
-          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
-        });
-        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
-      });
+      it.each([
+        ['trusted apps', 'canReadTrustedApplications', 'trustedApps'],
+        ['event filters', 'canReadEventFilters', 'eventFilters'],
+        ['host isolation exeptions', 'canReadHostIsolationExceptions', 'hostIsolationExceptions'],
+        ['blocklist', 'canReadBlocklist', 'blocklists'],
+      ])(
+        'should not display the %s tab with no privileges',
+        async (_: string, privilege: string, selector: string) => {
+          await renderWithPrivilege(privilege);
+          expect(policyView.find(`button#${selector}`)).toHaveLength(0);
+        }
+      );
 
-      it('should display the host isolation exceptions tab with no privileges if there are assigned exceptions', async () => {
-        // simulate existing assigned policies
-        getHostIsolationExceptionItemsMock.mockReturnValue(getFoundExceptionListItemSchemaMock(1));
-        policyView = render();
-        await asyncActions;
-        policyView.update();
-        await waitFor(() => {
-          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
-        });
-        expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(1);
-      });
+      it.each([
+        ['trusted apps', 'canReadTrustedApplications', getPolicyTrustedAppsPath('1')],
+        ['event filters', 'canReadEventFilters', getPolicyEventFiltersPath('1')],
+        [
+          'host isolation exeptions',
+          'canReadHostIsolationExceptions',
+          getPolicyHostIsolationExceptionsPath('1'),
+        ],
+        ['blocklist', 'canReadBlocklist', getPolicyBlocklistsPath('1')],
+      ])(
+        'should redirect to policy details when no %s required privileges',
+        async (_: string, privilege: string, path: string) => {
+          history.push(path);
+          await renderWithPrivilege(privilege);
+          expect(history.location.pathname).toBe(policyDetailsPathUrl);
+          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+          expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+            'You do not have the required Kibana permissions to use the given artifact.'
+          );
+        }
+      );
     });
   });
 });

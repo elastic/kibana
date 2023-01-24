@@ -9,12 +9,12 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { useDiscoverServices } from '../../../../../utils/use_discover_services';
-import { flattenHit } from '../../../../../../../data/common';
+import { getTypeForFieldIcon } from '../../../../../utils/get_type_for_field_icon';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
-import { getFieldsToShow } from '../../../../../utils/get_fields_to_show';
+import { getShouldShowFieldHandler } from '../../../../../utils/get_should_show_field_handler';
 import { getIgnoredReason } from '../../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../../application/main/utils/nested_fields';
@@ -22,7 +22,7 @@ import { isNestedFieldParent } from '../../../../../application/main/utils/neste
 export const DocViewerLegacyTable = ({
   columns,
   hit,
-  indexPattern: dataView,
+  dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
@@ -56,13 +56,13 @@ export const DocViewerLegacyTable = ({
     };
   }, []);
 
-  const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
+  const shouldShowFieldHandler = useMemo(
+    () => getShouldShowFieldHandler(Object.keys(hit.flattened), dataView, showMultiFields),
+    [hit.flattened, dataView, showMultiFields]
+  );
 
-  const items: FieldRecordLegacy[] = Object.keys(flattened)
-    .filter((fieldName) => {
-      return fieldsToShow.includes(fieldName);
-    })
+  const items: FieldRecordLegacy[] = Object.keys(hit.flattened)
+    .filter(shouldShowFieldHandler)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
@@ -73,14 +73,18 @@ export const DocViewerLegacyTable = ({
     .map((field) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
+      const fieldType = isNestedFieldParent(field, dataView)
+        ? 'nested'
+        : fieldMapping
+        ? getTypeForFieldIcon(fieldMapping)
+        : undefined;
+      const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
       return {
         action: {
           onToggleColumn,
           onFilter: filter,
           isActive: !!columns?.includes(field),
-          flattenedField: flattened[field],
+          flattenedField: hit.flattened[field],
         },
         field: {
           field,
@@ -91,8 +95,8 @@ export const DocViewerLegacyTable = ({
         },
         value: {
           formattedValue: formatFieldValue(
-            flattened[field],
-            hit,
+            hit.flattened[field],
+            hit.raw,
             fieldFormats,
             dataView,
             fieldMapping

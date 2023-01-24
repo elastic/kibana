@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -15,9 +16,11 @@ import {
   BasicOptions,
   SwitchOption,
   LongLegendOptions,
-} from '../../../../../../../vis_default_editor/public';
-import { BUCKET_TYPES } from '../../../../../../../data/public';
+  LegendSizeSettings,
+} from '@kbn/vis-default-editor-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
@@ -34,10 +37,16 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
     () =>
       stateParams.seriesParams.some(
         ({ type, data: { id: paramId } }) =>
-          type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
+          type === ChartType.Histogram && aggs?.aggs.find(({ id }) => id === paramId)?.enabled
       ),
-    [stateParams.seriesParams, aggs.aggs]
+    [stateParams.seriesParams, aggs?.aggs]
   );
+
+  const legendSize = stateParams.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
 
   return (
     <>
@@ -59,8 +68,17 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
           maxLegendLines={stateParams.maxLegendLines ?? 1}
           setValue={setValue}
         />
+        <LegendSizeSettings
+          legendSize={legendSize}
+          onLegendSizeChange={handleLegendSizeChange}
+          isVerticalLegend={
+            stateParams.legendPosition === Position.Left ||
+            stateParams.legendPosition === Position.Right
+          }
+          showAutoOption={hadAutoLegendSize}
+        />
 
-        {vis.data.aggs!.aggs.some(
+        {vis.data?.aggs?.aggs.some(
           (agg) => agg.schema === 'segment' && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM
         ) ? (
           <SwitchOption

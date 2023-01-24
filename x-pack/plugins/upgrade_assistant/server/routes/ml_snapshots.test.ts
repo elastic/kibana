@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
@@ -25,13 +25,20 @@ describe('ML snapshots APIs', () => {
   let mockRouter: MockRouter;
   let routeDependencies: any;
 
-  beforeEach(() => {
+  function registerMockRouter({ mlSnapshots } = { mlSnapshots: true }) {
     mockRouter = createMockRouter();
     routeDependencies = {
+      config: {
+        featureSet: { mlSnapshots, migrateSystemIndices: true, reindexCorrectiveActions: true },
+      },
       router: mockRouter,
       lib: { handleEsError },
     };
     registerMlSnapshotRoutes(routeDependencies);
+  }
+
+  beforeEach(() => {
+    registerMockRouter();
   });
 
   afterEach(() => {
@@ -186,6 +193,26 @@ describe('ML snapshots APIs', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         mlUpgradeModeEnabled: true,
+      });
+    });
+
+    it('returns false if featureSet.mlSnapshots is set to false even if upgrade_mode is true', async () => {
+      registerMockRouter({ mlSnapshots: false });
+
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.info as jest.Mock
+      ).mockResolvedValue({
+        upgrade_mode: true,
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_upgrade_mode',
+      })(routeHandlerContextMock, createRequestMock({}), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        mlUpgradeModeEnabled: false,
       });
     });
   });

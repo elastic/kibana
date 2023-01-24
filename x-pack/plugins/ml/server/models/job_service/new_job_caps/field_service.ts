@@ -7,10 +7,10 @@
 
 import { cloneDeep } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
@@ -32,6 +32,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.GEO_POINT,
   ES_FIELD_TYPES.GEO_SHAPE,
   ES_FIELD_TYPES.BOOLEAN,
+  ES_FIELD_TYPES.VERSION,
 ];
 
 export function fieldServiceProvider(
@@ -62,10 +63,13 @@ class FieldsService {
   }
 
   private async loadFieldCaps(): Promise<any> {
-    return await this._mlClusterClient.asCurrentUser.fieldCaps({
-      index: this._indexPattern,
-      fields: '*',
-    });
+    return await this._mlClusterClient.asCurrentUser.fieldCaps(
+      {
+        index: this._indexPattern,
+        fields: '*',
+      },
+      { maxRetries: 0 }
+    );
   }
 
   // create field object from the results from _field_caps

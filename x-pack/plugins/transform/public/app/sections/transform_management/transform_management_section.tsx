@@ -16,8 +16,8 @@ import {
   EuiFlexItem,
   EuiLoadingContent,
   EuiModal,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiCallOut,
@@ -192,7 +192,7 @@ export const TransformManagement: FC = () => {
                                 state: TRANSFORM_STATE.FAILED,
                               })),
                               deleteDestIndex: false,
-                              deleteDestIndexPattern: false,
+                              deleteDestDataView: false,
                               forceDelete: true,
                             }
                           );

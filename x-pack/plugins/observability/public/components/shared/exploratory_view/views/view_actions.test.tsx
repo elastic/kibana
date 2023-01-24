@@ -10,7 +10,8 @@ import { screen, waitFor, fireEvent } from '@testing-library/dom';
 import { render } from '../rtl_helpers';
 import * as hooks from '../hooks/use_series_storage';
 import { ViewActions } from './view_actions';
-import { AllSeries } from '../hooks/use_series_storage';
+import { AllSeries, reportTypeKey } from '../hooks/use_series_storage';
+import { ReportTypes } from '../../../..';
 
 describe('ViewActions', () => {
   const applyChanges = jest.fn();
@@ -21,7 +22,15 @@ describe('ViewActions', () => {
       ...jest.requireActual('../hooks/use_series_storage'),
       allSeries,
       applyChanges,
-      storage: { get: jest.fn().mockReturnValue(urlAllSeries) } as any,
+      storage: {
+        get: (key: string) => {
+          if (key === reportTypeKey) {
+            return ReportTypes.KPI;
+          }
+          return urlAllSeries;
+        },
+      } as any,
+      reportType: ReportTypes.KPI,
     });
   };
 
@@ -56,7 +65,7 @@ describe('ViewActions', () => {
 
     const btnComponent = screen.getByTestId('seriesChangesApplyButton');
 
-    expect(btnComponent.classList).toContain('euiButton-isDisabled');
+    expect(btnComponent.classList[1]).toContain('disabled');
 
     fireEvent.click(applyBtn);
 
@@ -131,7 +140,7 @@ describe('ViewActions', () => {
 
     const btnComponent = screen.getByTestId('seriesChangesApplyButton');
 
-    expect(btnComponent.classList).toContain('euiButton-isDisabled');
+    expect(btnComponent.classList[1]).toContain('disabled');
 
     fireEvent.click(applyBtn);
 

@@ -2,18 +2,29 @@
 
 set -euo pipefail
 
-if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
-  echo '--- Downloading Distribution and Plugin artifacts'
+source "$(dirname "$0")/common/util.sh"
 
-  cd "$WORKSPACE"
+if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
+  if [[ ! -d "$KIBANA_BUILD_LOCATION/bin" ]]; then
+    echo '--- Downloading Distribution and Plugin artifacts'
 
-  buildkite-agent artifact download kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  buildkite-agent artifact download kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+    cd "$WORKSPACE"
 
-  mkdir -p "$KIBANA_BUILD_LOCATION"
-  tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
+    download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+    download_artifact kibana-default-plugins.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
-  cd "$KIBANA_DIR"
+    mkdir -p "$KIBANA_BUILD_LOCATION"
+    tar -xzf kibana-default.tar.gz -C "$KIBANA_BUILD_LOCATION" --strip=1
 
-  tar -xzf ../kibana-default-plugins.tar.gz
+    if is_pr_with_label "ci:build-example-plugins"; then
+      # Testing against an example plugin distribution is not supported,
+      # mostly due to snapshot failures when testing UI element lists
+      rm -rf "$KIBANA_BUILD_LOCATION/plugins"
+      mkdir "$KIBANA_BUILD_LOCATION/plugins"
+    fi
+
+    cd "$KIBANA_DIR"
+
+    tar -xzf ../kibana-default-plugins.tar.gz
+  fi
 fi

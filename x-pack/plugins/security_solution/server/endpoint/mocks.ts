@@ -5,48 +5,65 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
-import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { listMock } from '../../../lists/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerting/server/mocks';
-import { xpackMocks } from '../fixtures';
-import { FleetStartContract, ExternalCallback } from '../../../fleet/server';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+  savedObjectsServiceMock,
+} from '@kbn/core/server/mocks';
+import type {
+  KibanaRequest,
+  RouteConfig,
+  SavedObjectsClientContract,
+  RequestHandler,
+  IRouter,
+} from '@kbn/core/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
-  createArtifactsClientMock,
   createMockPackageService,
-} from '../../../fleet/server/mocks';
-import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
-import {
-  EndpointAppContextService,
-  EndpointAppContextServiceSetupContract,
-  EndpointAppContextServiceStartContract,
-} from './endpoint_app_context_services';
-import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
-import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
-import { EndpointAppContext } from './types';
-import { MetadataRequestContext } from './routes/metadata/handlers';
-import { SecuritySolutionRequestHandlerContext } from '../types';
-import { parseExperimentalConfigValue } from '../../common/experimental_features';
+} from '@kbn/fleet-plugin/server/mocks';
 // A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
 // plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
 // file and not bundled with the application, adding a eslint disable below and using import from
 // a restricted path.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createCasesClientMock } from '../../../cases/server/client/mocks';
+import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
+import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
+import { xpackMocks } from '../fixtures';
+import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import type {
+  EndpointAppContextService,
+  EndpointAppContextServiceSetupContract,
+  EndpointAppContextServiceStartContract,
+} from './endpoint_app_context_services';
+import type { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
+import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
+import type { EndpointAppContext } from './types';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
+import { parseExperimentalConfigValue } from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
-import { createFleetAuthzMock } from '../../../fleet/common';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
 
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
 import { createLicenseServiceMock } from '../../common/license/mocks';
-import { createFeatureUsageServiceMock } from './services/feature_usage';
+import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -73,11 +90,10 @@ export const createMockEndpointAppContextService = (
     start: jest.fn(),
     stop: jest.fn(),
     getExperimentalFeatures: jest.fn(),
-    getAgentService: jest.fn(),
-    getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
+    getEndpointAuthz: jest.fn(getEndpointAuthzInitialStateMock),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -136,14 +152,14 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
+    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+      jest.fn(() => ({ privileges: { kibana: [] } }))
+    );
+
     return {
-      agentService,
-      agentPolicyService,
       endpointMetadataService,
       endpointFleetServicesFactory,
-      packagePolicyService,
       logger,
-      packageService,
       fleetAuthzService: createFleetAuthzServiceMock(),
       manifestManager: getManifestManagerMock(),
       security,
@@ -159,6 +175,7 @@ export const createMockEndpointAppContextServiceStartContract =
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
       featureUsageService: createFeatureUsageServiceMock(),
+      experimentalFeatures: createMockConfig().experimentalFeatures,
     };
   };
 
@@ -168,47 +185,97 @@ export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['a
   };
 };
 
-/**
- * Creates the Fleet Start contract mock return by the Fleet Plugin
- *
- * @param indexPattern a string index pattern to return when called by a test
- * @returns the same value as `indexPattern` parameter
- */
-export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
-  return {
-    authz: createFleetAuthzServiceMock(),
-    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
-    esIndexPatternService: {
-      getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
-    },
-    agentService: createMockAgentService(),
-    packageService: createMockPackageService(),
-    agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packagePolicyService: createPackagePolicyServiceMock(),
-    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
-  };
-};
-
-export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestContext> => {
+export const createMockMetadataRequestContext = () => {
   return {
     endpointAppContextService: createMockEndpointAppContextService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext:
-      xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>,
+    requestHandlerContext: xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<
+      AwaitedProperties<SecuritySolutionRequestHandlerContext>
+    >,
   };
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<IScopedClusterClient>,
+  dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ) {
-  const context = requestContextMock.create(
-    createMockClients(),
-    overrides
-  ) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  const context = requestContextMock.create(createMockClients(), overrides);
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
 }
+
+export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
+  routerMock: ReturnType<typeof httpServiceMock.createRouter>;
+  scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  savedObjectClientMock: ReturnType<typeof savedObjectsClientMock.create>;
+  endpointAppContextMock: EndpointAppContext;
+  httpResponseMock: ReturnType<typeof httpServerMock.createResponseFactory>;
+  httpHandlerContextMock: ReturnType<typeof requestContextMock.convertContext>;
+  getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
+  createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => KibanaRequest<P, Q, B>;
+  /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
+  getRegisteredRouteHandler: (
+    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
+    path: string
+  ) => RequestHandler;
+}
+
+/**
+ * Returns all of the setup needed to test an HTTP api handler
+ */
+export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApiTestSetupMock<
+  P,
+  Q,
+  B
+> => {
+  const routerMock = httpServiceMock.createRouter();
+  const endpointAppContextMock = createMockEndpointAppContext();
+  const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const savedObjectClientMock = savedObjectsClientMock.create();
+  const httpHandlerContextMock = requestContextMock.convertContext(
+    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock)
+  );
+  const httpResponseMock = httpServerMock.createResponseFactory();
+  const getRegisteredRouteHandler: HttpApiTestSetupMock['getRegisteredRouteHandler'] = (
+    method,
+    path
+  ): RequestHandler => {
+    const methodCalls = routerMock[method].mock.calls as Array<
+      [route: RouteConfig<unknown, unknown, unknown, 'get'>, handler: RequestHandler]
+    >;
+    const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
+
+    if (!handler) {
+      throw new Error(`Handler for [${method}][${path}] not found`);
+    }
+
+    return handler[1];
+  };
+
+  return {
+    routerMock,
+
+    endpointAppContextMock,
+    scopedEsClusterClientMock,
+    savedObjectClientMock,
+
+    httpHandlerContextMock,
+    httpResponseMock,
+
+    createRequestMock: (options: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> => {
+      return httpServerMock.createKibanaRequest<P, Q, B>(options);
+    },
+
+    getEsClientMock: (
+      type: 'internalUser' | 'currentUser' = 'internalUser'
+    ): ElasticsearchClientMock => {
+      return type === 'currentUser'
+        ? scopedEsClusterClientMock.asCurrentUser
+        : scopedEsClusterClientMock.asInternalUser;
+    },
+
+    getRegisteredRouteHandler,
+  };
+};

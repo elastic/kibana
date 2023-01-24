@@ -10,8 +10,9 @@ import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './utils';
 import { TableVisConfig } from './types';
 
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../expressions/common/expression_types/specs';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 jest.mock('./utils', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({
@@ -55,34 +56,38 @@ describe('interpreter/functions#table', () => {
     ],
     buckets: [],
   } as unknown as TableVisConfig;
+  const handlers = {
+    variables: {},
+  } as ExecutionContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(context, visConfig, undefined);
+    const actual = await fn(context, visConfig, handlers);
     expect(actual).toMatchSnapshot();
   });
 
   it('calls response handler with correct values', async () => {
-    await fn(context, visConfig, undefined);
+    await fn(context, visConfig, handlers);
     expect(tableVisResponseHandler).toHaveBeenCalledTimes(1);
     expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig);
   });
 
   it('logs correct datatable to inspector', async () => {
     let loggedTable: Datatable;
-    const handlers = {
+    await fn(context, visConfig, {
+      ...handlers,
       inspectorAdapters: {
         tables: {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
-    };
-    await fn(context, visConfig, handlers as any);
+    });
 
     expect(loggedTable!).toMatchSnapshot();
   });

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
@@ -21,16 +21,21 @@ jest.mock('./install');
 jest.mock('./get');
 
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installKibanaAssets } from '../kibana/assets/install';
+import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
+
+import { installIndexTemplatesAndPipelines } from './install';
 
 import { _installPackage } from './_install_package';
 
+const mockedInstallIndexTemplatesAndPipelines =
+  installIndexTemplatesAndPipelines as jest.MockedFunction<
+    typeof installIndexTemplatesAndPipelines
+  >;
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as jest.MockedFunction<
   typeof updateCurrentWriteIndices
 >;
-const mockedGetKibanaAssets = installKibanaAssets as jest.MockedFunction<
-  typeof installKibanaAssets
->;
+const mockedInstallKibanaAssetsAndReferences =
+  installKibanaAssetsAndReferences as jest.MockedFunction<typeof installKibanaAssetsAndReferences>;
 
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
@@ -50,7 +55,7 @@ describe('_installPackage', () => {
   });
   it('handles errors from  installKibanaAssets', async () => {
     // force errors from this function
-    mockedGetKibanaAssets.mockImplementation(async () => {
+    mockedInstallKibanaAssetsAndReferences.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
     });
 
@@ -58,7 +63,10 @@ describe('_installPackage', () => {
     // and force it to take long enough for the errors to occur
     // @ts-expect-error about call signature
     mockedUpdateCurrentWriteIndices.mockImplementation(async () => await sleep(1000));
-
+    mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+      installedTemplates: [],
+      esReferences: [],
+    });
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
       // @ts-ignore

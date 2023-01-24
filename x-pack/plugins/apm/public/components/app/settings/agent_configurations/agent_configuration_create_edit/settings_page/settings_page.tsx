@@ -6,24 +6,20 @@
  */
 
 import {
-  EuiBottomBar,
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiHealth,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiStat,
-  EuiText,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiTracker } from '../../../../../../../../observability/public';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
@@ -34,6 +30,7 @@ import {
 import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
+import { BottomBarActions } from '../../../bottom_bar_actions';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
 
@@ -190,53 +187,16 @@ export function SettingsPage({
 
       {/* Bottom bar with save button */}
       {unsavedChangesCount > 0 && (
-        <EuiBottomBar paddingSize="s">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem
-              grow={false}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <EuiHealth color="warning" />
-              <EuiText color="ghost">
-                {i18n.translate('xpack.apm.unsavedChanges', {
-                  defaultMessage:
-                    '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
-                  values: { unsavedChangesCount },
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="ghost" onClick={resetSettings}>
-                    {i18n.translate(
-                      'xpack.apm.agentConfig.settingsPage.discardChangesButton',
-                      { defaultMessage: 'Discard changes' }
-                    )}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={handleSubmitEvent}
-                    fill
-                    isLoading={isSaving}
-                    isDisabled={!isFormValid}
-                    color="success"
-                    iconType="check"
-                  >
-                    {i18n.translate(
-                      'xpack.apm.agentConfig.settingsPage.saveButton',
-                      { defaultMessage: 'Save configuration' }
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBottomBar>
+        <BottomBarActions
+          isLoading={isSaving}
+          onDiscardChanges={resetSettings}
+          onSave={handleSubmitEvent}
+          saveLabel={i18n.translate(
+            'xpack.apm.agentConfig.settingsPage.saveButton',
+            { defaultMessage: 'Save configuration' }
+          )}
+          unsavedChangesCount={unsavedChangesCount}
+        />
       )}
     </>
   );

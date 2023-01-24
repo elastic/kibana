@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -93,6 +93,11 @@ export default ({ getService }: FtrProviderContext): void => {
           action_type: 'overwrite',
           source: 'description',
           target: 'description',
+        },
+        {
+          action_type: 'overwrite',
+          source: 'tags',
+          target: 'labels',
         },
         {
           action_type: 'append',

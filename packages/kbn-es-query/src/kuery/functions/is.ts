@@ -12,14 +12,14 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../../..';
+import type { KqlContext } from '../types';
 
 import * as ast from '../ast';
-
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
 
-export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean = false) {
+export function buildNodeParams(fieldName: string, value: any) {
   if (isUndefined(fieldName)) {
     throw new Error('fieldName is a required argument');
   }
@@ -32,9 +32,8 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
       : literal.buildNode(fieldName);
   const valueNode =
     typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
-  const isPhraseNode = literal.buildNode(isPhrase);
   return {
-    arguments: [fieldNode, valueNode, isPhraseNode],
+    arguments: [fieldNode, valueNode],
   };
 }
 
@@ -42,15 +41,14 @@ export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): estypes.QueryDslQueryContainer {
   const {
-    arguments: [fieldNameArg, valueArg, isPhraseArg],
+    arguments: [fieldNameArg, valueArg],
   } = node;
 
-  const isExistsQuery = valueArg.type === 'wildcard' && valueArg.value === wildcard.wildcardSymbol;
-  const isAllFieldsQuery =
-    fieldNameArg.type === 'wildcard' && fieldNameArg.value === wildcard.wildcardSymbol;
+  const isExistsQuery = wildcard.isNode(valueArg) && wildcard.isLoneWildcard(valueArg);
+  const isAllFieldsQuery = wildcard.isNode(fieldNameArg) && wildcard.isLoneWildcard(fieldNameArg);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
@@ -63,9 +61,9 @@ export function toElasticsearchQuery(
     context?.nested ? context.nested.path : undefined
   );
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
-  const type = isPhraseArg.value ? 'phrase' : 'best_fields';
+  const type = valueArg.isQuoted ? 'phrase' : 'best_fields';
   if (fullFieldNameArg.value === null) {
-    if (valueArg.type === 'wildcard') {
+    if (wildcard.isNode(valueArg)) {
       return {
         query_string: {
           query: wildcard.toQueryStringQuery(valueArg),
@@ -102,11 +100,12 @@ export function toElasticsearchQuery(
   }
 
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
+    const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       const subTypeNested = getDataViewFieldSubtypeNested(field);
-      if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context?.nested) {
+      if (!wildcard.isNode(fullFieldNameArg) || !subTypeNested?.nested || context?.nested) {
         return query;
       } else {
         return {
@@ -114,6 +113,9 @@ export function toElasticsearchQuery(
             path: subTypeNested.nested.path,
             query,
             score_mode: 'none',
+            ...(typeof config.nestedIgnoreUnmapped === 'boolean' && {
+              ignore_unmapped: config.nestedIgnoreUnmapped,
+            }),
           },
         };
       }
@@ -140,16 +142,26 @@ export function toElasticsearchQuery(
           },
         }),
       ];
-    } else if (valueArg.type === 'wildcard') {
-      return [
-        ...accumulator,
-        wrapWithNestedQuery({
-          query_string: {
-            fields: [field.name],
-            query: wildcard.toQueryStringQuery(valueArg),
-          },
-        }),
-      ];
+    } else if (wildcard.isNode(valueArg)) {
+      const query = isKeywordField
+        ? {
+            wildcard: {
+              [field.name]: {
+                value,
+                ...(typeof config.caseInsensitive === 'boolean' && {
+                  case_insensitive: config.caseInsensitive,
+                }),
+              },
+            },
+          }
+        : {
+            query_string: {
+              fields: [field.name],
+              query: wildcard.toQueryStringQuery(valueArg),
+            },
+          };
+
+      return [...accumulator, wrapWithNestedQuery(query)];
     } else if (field.type === 'date') {
       /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
@@ -166,6 +178,20 @@ export function toElasticsearchQuery(
               gte: value,
               lte: value,
               ...timeZoneParam,
+            },
+          },
+        }),
+      ];
+    } else if (isKeywordField) {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          term: {
+            [field.name]: {
+              value,
+              ...(typeof config.caseInsensitive === 'boolean' && {
+                case_insensitive: config.caseInsensitive,
+              }),
             },
           },
         }),

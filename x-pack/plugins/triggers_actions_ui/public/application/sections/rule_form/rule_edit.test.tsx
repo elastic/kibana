@@ -8,19 +8,14 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import {
-  ValidationResult,
-  Rule,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../types';
+import { ValidationResult, Rule, GenericValidationResult } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -36,7 +31,10 @@ jest.mock('../../lib/rule_api', () => ({
 }));
 
 jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+  triggersActionsUiConfig: jest.fn().mockResolvedValue({
+    isUsingSecurity: true,
+    minimumScheduleInterval: { value: '1m', enforce: false },
+  }),
 }));
 
 jest.mock('./rule_errors', () => ({
@@ -127,9 +125,6 @@ describe('rule_edit', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);
@@ -217,7 +212,7 @@ describe('rule_edit', () => {
     await setup({ name: undefined });
 
     await act(async () => {
-      wrapper.find('[data-test-subj="saveEditedRuleButton"]').first().simulate('click');
+      wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
       'Fail message'
@@ -229,6 +224,28 @@ describe('rule_edit', () => {
     await setup();
     const lastCall = getRuleErrors.mock.calls[getRuleErrors.mock.calls.length - 1];
     expect(lastCall[2]).toBeDefined();
-    expect(lastCall[2]).toEqual({ minimumScheduleInterval: '1m' });
+    expect(lastCall[2]).toEqual({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+  });
+
+  it('should render an alert icon next to save button stating the potential change in permissions', async () => {
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers({ legacyFakeTimers: true });
+    await setup();
+
+    expect(wrapper.find('[data-test-subj="changeInPrivilegesTip"]').exists()).toBeTruthy();
+    await act(async () => {
+      wrapper.find('[data-test-subj="changeInPrivilegesTip"]').first().simulate('mouseover');
+    });
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runOnlyPendingTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').last().text()).toBe(
+      'Saving this rule will change its privileges and might change its behavior.'
+    );
   });
 });

@@ -5,30 +5,29 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../../lib/helpers/setup_request';
-import { MAX_NUMBER_OF_SERVICES_IN_GROUP } from '../../../common/service_groups';
+} from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function lookupServices({
-  setup,
+  apmEventClient,
   kuery,
   start,
   end,
+  maxNumberOfServices,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   kuery: string;
   start: number;
   end: number;
+  maxNumberOfServices: number;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('lookup_services', {
     apm: {
       events: [
@@ -39,6 +38,7 @@ export async function lookupServices({
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -49,7 +49,7 @@ export async function lookupServices({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: MAX_NUMBER_OF_SERVICES_IN_GROUP,
+            size: maxNumberOfServices,
           },
           aggs: {
             environments: {

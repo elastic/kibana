@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { BaseHandler } from './base_handler';
-import { AggregationBuilder, BaseHandlerCommonOptions } from './types';
+import type { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from './types';
 
-export abstract class AggregationHandler extends BaseHandler {
-  protected aggregationBuilders: AggregationBuilder[] = [];
+export abstract class AggregationHandler<R> extends BaseHandler<R> {
+  protected aggregationBuilders: Array<AggregationBuilder<R>> = [];
 
   constructor(
     options: BaseHandlerCommonOptions,
-    private readonly aggregations: Map<string, AggregationBuilder>
+    protected readonly aggregations: Map<string, AggregationBuilder<R>>
   ) {
     super(options);
   }
@@ -27,5 +28,12 @@ export abstract class AggregationHandler extends BaseHandler {
     if (aggregation) {
       this.aggregationBuilders.push(aggregation);
     }
+  }
+
+  public formatResponse<F>(aggregationsResponse?: AggregationResponse): F {
+    return this.aggregationBuilders.reduce(
+      (acc, feature) => merge(acc, feature.formatResponse(aggregationsResponse)),
+      {} as F
+    );
   }
 }

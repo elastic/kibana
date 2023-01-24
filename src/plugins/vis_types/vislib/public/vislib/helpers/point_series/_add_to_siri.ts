@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getAggId } from '../../../../../xy/public';
-import type { Dimension } from '../../../../../xy/public';
+import type { Dimension } from '@kbn/vis-type-xy-plugin/public';
 
 import { Point } from './_get_point';
+
+const getAggId = (accessor: string) => (accessor ?? '').split('-').pop() ?? '';
 
 export interface Serie {
   id: string;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { Logger } from 'src/core/server';
 
-import type { KibanaFeature } from '../../../features/common';
 import type { SecurityLicense } from '../../common/licensing';
 import type {
   PrivilegeDeprecationsRolesByFeatureIdRequest,
@@ -51,7 +51,8 @@ export const getPrivilegeDeprecationsService = ({
           // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
           elasticsearchRole,
           roleName,
-          authz.applicationName
+          authz.applicationName,
+          logger
         )
       );
     } catch (e) {

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
+    "outDir": "target/types",
   },
   "include": [
     "index.ts",
@@ -10,11 +10,13 @@
     "server/**/*.ts",
     "../../typings/**/*",
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
-    { "path": "../../src/plugins/bfetch/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/bfetch-plugin",
+    "@kbn/kibana-react-plugin",
   ]
 }

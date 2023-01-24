@@ -127,3 +127,20 @@ export const transformFrequencyValidator = (value: string): boolean => {
 export function transformSettingsMaxPageSearchSizeValidator(value: number): boolean {
   return value >= 10 && value <= 10000;
 }
+
+/**
+ * Validates whether string input can be parsed as a valid JSON
+ * @param value User input value.
+ */
+export function jsonStringValidator(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+
+  try {
+    return !!JSON.parse(value);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`JSON is invalid.\n${e}`);
+    return false;
+  }
+  return true;
+}

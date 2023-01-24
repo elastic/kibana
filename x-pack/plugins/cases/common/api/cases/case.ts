@@ -12,32 +12,41 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
+import { CaseAssigneesRt } from './assignee';
 
-const BucketsAggs = rt.array(
-  rt.type({
-    key: rt.string,
-  })
-);
-
-export const GetCaseIdsByAlertIdAggsRt = rt.type({
-  references: rt.type({
-    doc_count: rt.number,
-    caseIds: rt.type({
-      buckets: BucketsAggs,
-    }),
-  }),
+export const AttachmentTotalsRt = rt.type({
+  alerts: rt.number,
+  userComments: rt.number,
 });
 
-export const CasesByAlertIdRt = rt.array(
-  rt.type({
-    id: rt.string,
-    title: rt.string,
-  })
-);
+export const RelatedCaseInfoRt = rt.type({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  createdAt: rt.string,
+  totals: AttachmentTotalsRt,
+});
+
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
+
+export enum CaseSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export const CaseSeverityRt = rt.union([
+  rt.literal(CaseSeverity.LOW),
+  rt.literal(CaseSeverity.MEDIUM),
+  rt.literal(CaseSeverity.HIGH),
+  rt.literal(CaseSeverity.CRITICAL),
+]);
 
 const CaseBasicRt = rt.type({
   /**
@@ -68,6 +77,14 @@ const CaseBasicRt = rt.type({
    * The plugin owner of the case
    */
   owner: rt.string,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
+  /**
+   * The users assigned to this case
+   */
+  assignees: CaseAssigneesRt,
 });
 
 /**
@@ -95,6 +112,7 @@ export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, r
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
+    duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
@@ -105,33 +123,46 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CasePostRequestRt = rt.type({
-  /**
-   * Description of the case
-   */
-  description: rt.string,
-  /**
-   * Identifiers for the case.
-   */
-  tags: rt.array(rt.string),
-  /**
-   * Title of the case
-   */
-  title: rt.string,
-  /**
-   * The external configuration for the case
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Sync settings for alerts
-   */
-  settings: SettingsRt,
-  /**
-   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
-   * creating this case must also be granted access to that plugin's feature.
-   */
-  owner: rt.string,
-});
+export const CasePostRequestRt = rt.intersection([
+  rt.type({
+    /**
+     * Description of the case
+     */
+    description: rt.string,
+    /**
+     * Identifiers for the case.
+     */
+    tags: rt.array(rt.string),
+    /**
+     * Title of the case
+     */
+    title: rt.string,
+    /**
+     * The external configuration for the case
+     */
+    connector: CaseConnectorRt,
+    /**
+     * Sync settings for alerts
+     */
+    settings: SettingsRt,
+    /**
+     * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+     * creating this case must also be granted access to that plugin's feature.
+     */
+    owner: rt.string,
+  }),
+  rt.partial({
+    /**
+     * The users assigned to the case
+     */
+    assignees: CaseAssigneesRt,
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
+    severity: CaseSeverityRt,
+  }),
+]);
 
 export const CasesFindRequestRt = rt.partial({
   /**
@@ -143,6 +174,14 @@ export const CasesFindRequestRt = rt.partial({
    */
   status: CaseStatusRt,
   /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
+  /**
+   * The uids of the user profiles to filter by
+   */
+  assignees: rt.union([rt.array(rt.string), rt.string]),
+  /**
    * The reporters to filter by
    */
   reporters: rt.union([rt.array(rt.string), rt.string]),
@@ -153,7 +192,11 @@ export const CasesFindRequestRt = rt.partial({
   /**
    * The fields in the entity to return in the response
    */
-  fields: rt.array(rt.string),
+  fields: rt.union([rt.array(rt.string), rt.string]),
+  /**
+   * A KQL date. If used all cases created after (gte) the from date will be returned
+   */
+  from: rt.string,
   /**
    * The page of objects to return
    */
@@ -180,11 +223,17 @@ export const CasesFindRequestRt = rt.partial({
    * The order to sort by
    */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+
+  /**
+   * A KQL date. If used all cases created before (lte) the to date will be returned.
+   */
+  to: rt.string,
   /**
    * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
    * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
    * that the user has access to.
    */
+
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 
@@ -216,6 +265,7 @@ export const CaseResolveResponseRt = rt.intersection([
   }),
   rt.partial({
     alias_target_id: rt.string,
+    alias_purpose: rt.union([rt.literal('savedObjectConversion'), rt.literal('savedObjectImport')]),
   }),
 ]);
 
@@ -275,6 +325,27 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const CasesBulkGetRequestRt = rt.intersection([
+  rt.type({
+    ids: rt.array(rt.string),
+  }),
+  rt.partial({
+    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
+  }),
+]);
+
+export const CasesBulkGetResponseRt = rt.type({
+  cases: CasesResponseRt,
+  errors: rt.array(
+    rt.type({
+      error: rt.string,
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      caseId: rt.string,
+    })
+  ),
+});
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
@@ -294,5 +365,19 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
-export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
+export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
+
+export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
+export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
+export type CasesBulkGetRequestCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetRequest, 'fields'> & {
+  fields?: Field[];
+};
+export type CasesBulkGetResponseCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetResponse, 'cases'> & {
+  cases: Array<Pick<CaseResponse, Field | 'id' | 'version' | 'owner'>>;
+};

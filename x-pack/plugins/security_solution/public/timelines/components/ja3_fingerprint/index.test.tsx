@@ -6,21 +6,18 @@
  */
 
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Ja3Fingerprint } from '.';
 
 jest.mock('../../../common/lib/kibana');
 
 describe('Ja3Fingerprint', () => {
-  const mount = useMountAppended();
-
   test('renders the expected label', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Ja3Fingerprint
           eventId="KzNOvGkBqd-n62SwSPa4"
@@ -31,11 +28,11 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="ja3-fingerprint-label"]').first().text()).toEqual('ja3');
+    expect(screen.getByText('ja3')).toBeInTheDocument();
   });
 
   test('renders the fingerprint as text', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Ja3Fingerprint
           eventId="KzNOvGkBqd-n62SwSPa4"
@@ -46,13 +43,11 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(
-      removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
-    ).toEqual('fff799d91b7c01ae3fe6787cfc895552');
+    expect(screen.getByText('fff799d91b7c01ae3fe6787cfc895552')).toBeInTheDocument();
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Ja3Fingerprint
           eventId="KzNOvGkBqd-n62SwSPa4"
@@ -63,7 +58,8 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().props().href).toEqual(
+    expect(screen.getByText('fff799d91b7c01ae3fe6787cfc895552')).toHaveAttribute(
+      'href',
       'https://sslbl.abuse.ch/ja3-fingerprints/fff799d91b7c01ae3fe6787cfc895552'
     );
   });

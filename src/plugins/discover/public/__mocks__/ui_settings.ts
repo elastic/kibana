@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
   SHOW_MULTIFIELDS,
   SEARCH_FIELDS_FROM_SOURCE,
   ROW_HEIGHT_OPTION,
@@ -21,6 +22,8 @@ export const uiSettingsMock = {
   get: (key: string) => {
     if (key === SAMPLE_SIZE_SETTING) {
       return 10;
+    } else if (key === SAMPLE_ROWS_PER_PAGE_SETTING) {
+      return 100;
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
     } else if (key === DOC_TABLE_LEGACY) {

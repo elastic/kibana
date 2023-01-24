@@ -17,6 +17,7 @@ import type {
   GetInfoResponse,
   GetPackagePoliciesResponse,
   GetStatsResponse,
+  GetSettingsResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type {
   DetailViewPanelName,
@@ -32,7 +33,11 @@ import {
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
-import { Detail } from './index';
+import { ExperimentalFeaturesService } from '../../../../services';
+
+// @ts-ignore this saves us having to define all experimental features
+ExperimentalFeaturesService.init({});
+import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
@@ -40,12 +45,15 @@ describe('when on integration detail', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
-  const render = () =>
-    (renderResult = testRenderer.render(
-      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
-        <Detail />
-      </Route>
-    ));
+  const render = async () => {
+    await act(async () => {
+      renderResult = testRenderer.render(
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
+          <Detail />
+        </Route>
+      );
+    });
+  };
 
   beforeEach(async () => {
     testRenderer = createIntegrationsTestRendererMock();
@@ -58,7 +66,7 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(() => render());
+    beforeEach(async () => render());
 
     it('should display agent policy usage count', async () => {
       await act(() => mockedApi.waitForApi());
@@ -72,12 +80,24 @@ describe('when on integration detail', () => {
     });
   });
 
-  describe('and the package is not installed', () => {
-    beforeEach(() => {
-      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
-      unInstalledPackage.item.status = 'not_installed';
-      mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
-      render();
+  function mockGAAndPrereleaseVersions(pkgVersion: string) {
+    const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
+    unInstalledPackage.item.status = 'not_installed';
+    unInstalledPackage.item.version = pkgVersion;
+    mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
+      if (query?.prerelease === false) {
+        const gaPackage = { item: { ...unInstalledPackage.item } };
+        gaPackage.item.version = '1.0.0';
+        return gaPackage;
+      }
+      return unInstalledPackage;
+    });
+  }
+
+  describe('and the package is not installed and prerelease enabled', () => {
+    beforeEach(async () => {
+      mockGAAndPrereleaseVersions('1.0.0-beta');
+      await render();
     });
 
     it('should NOT display agent policy usage count', async () => {
@@ -89,10 +109,45 @@ describe('when on integration detail', () => {
       await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
+
+    it('should display version select if prerelease setting enabled and prererelase version available', async () => {
+      await mockedApi.waitForApi();
+      const versionSelect = renderResult.queryByTestId('versionSelect');
+      expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
+      expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
+    });
+
+    it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
+      await mockedApi.waitForApi();
+      const calloutTitle = renderResult.getByTestId('prereleaseCallout');
+      expect(calloutTitle).toBeInTheDocument();
+      const calloutGABtn = renderResult.getByTestId('switchToGABtn');
+      expect((calloutGABtn as any)?.href).toEqual(
+        'http://localhost/mock/app/integrations/detail/nginx-1.0.0/overview'
+      );
+    });
+  });
+
+  describe('and the package is not installed and prerelease disabled', () => {
+    beforeEach(async () => {
+      mockGAAndPrereleaseVersions('1.0.0');
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+      });
+      await render();
+    });
+
+    it('should display version text and no callout if prerelease setting disabled', async () => {
+      await mockedApi.waitForApi();
+      expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
+      expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
+    });
   });
 
   describe('and a custom UI extension is NOT registered', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should show overview and settings tabs', () => {
       const tabs: DetailViewPanelName[] = ['overview', 'settings'];
@@ -120,7 +175,7 @@ describe('when on integration detail', () => {
     // that is `resolved` once the lazy components actually renders.
     let lazyComponentWasRendered: Promise<void>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       let setWasRendered: () => void;
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
@@ -141,7 +196,7 @@ describe('when on integration detail', () => {
         Component: CustomComponent,
       });
 
-      render();
+      await render();
     });
 
     afterEach(() => {
@@ -167,7 +222,7 @@ describe('when on integration detail', () => {
   describe('and a custom assets UI extension is registered', () => {
     let lazyComponentWasRendered: Promise<void>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       let setWasRendered: () => void;
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
@@ -188,7 +243,7 @@ describe('when on integration detail', () => {
         Component: CustomComponent,
       });
 
-      render();
+      await render();
     });
 
     afterEach(() => {
@@ -212,7 +267,9 @@ describe('when on integration detail', () => {
   });
 
   describe('and the Add integration button is clicked', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
@@ -224,9 +281,9 @@ describe('when on integration detail', () => {
 
   describe('and on the Policies Tab', () => {
     const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
-    beforeEach(() => {
+    beforeEach(async () => {
       testRenderer.mountHistory.push(policiesTabURLPath);
-      render();
+      await render();
     });
 
     it('should display policies list', () => {
@@ -256,13 +313,16 @@ interface MockedApi<
 }
 
 interface EpmPackageDetailsResponseProvidersMock {
-  epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
+  epmGetInfo: jest.MockedFunction<
+    (pkgName: string, pkgVersion?: string, options?: { prerelease?: boolean }) => GetInfoResponse
+  >;
   epmGetFile: jest.MockedFunction<() => string>;
   epmGetStats: jest.MockedFunction<() => GetStatsResponse>;
   fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
   appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
+  getSettings: jest.MockedFunction<() => GetSettingsResponse>;
 }
 
 const mockApiCalls = (
@@ -509,7 +569,6 @@ const mockApiCalls = (
       ],
       owner: { github: 'elastic/integrations-services' },
       latestVersion: '0.3.7',
-      removable: true,
       status: 'installed',
     },
   } as GetInfoResponse;
@@ -527,7 +586,11 @@ The logs were tested with version 1.10.
 On Windows, the module was tested with Nginx installed from the Chocolatey repository.
 `;
 
-  const agentsSetupResponse: GetFleetStatusResponse = { isReady: true, missing_requirements: [] };
+  const agentsSetupResponse: GetFleetStatusResponse = {
+    isReady: true,
+    missing_requirements: [],
+    missing_optional_features: [],
+  };
 
   const packagePoliciesResponse: GetPackagePoliciesResponse = {
     items: [
@@ -539,7 +602,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         policy_id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'logfile',
@@ -618,7 +680,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         policy_id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'logfile',
@@ -703,11 +764,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         description: 'Default agent policy created by Kibana',
         status: 'active',
-        package_policies: [
-          '4d09bd78-b0ad-4238-9fa3-d87d3c887c73',
-          '2babac18-eb8e-4ce4-b53b-4b7c5f507019',
-          'e8a37031-2907-44f6-89d2-98bd493f60dc',
-        ],
+        package_policies: [],
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 6,
@@ -721,7 +778,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         description: 'Protect EU from COVID',
         status: 'active',
-        package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
+        package_policies: [],
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 2,
@@ -745,6 +802,8 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     success: true,
   };
 
+  const getSettingsResponse = { item: { prerelease_integrations_enabled: true } };
+
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
       return new Promise((resolve) => {
@@ -763,14 +822,19 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
       appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
+      getSettings: jest.fn().mockReturnValue(getSettingsResponse),
     },
   };
 
-  http.get.mockImplementation(async (path: any) => {
+  http.get.mockImplementation((async (path: any, options: any) => {
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
-        return mockedApiInterface.responseProvider.epmGetInfo();
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx');
+      }
+      if (path === epmRouteService.getInfoPath(`nginx`)) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx', undefined, options.query);
       }
 
       if (path === epmRouteService.getFilePath('/package/nginx/0.3.7/docs/README.md')) {
@@ -803,12 +867,25 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         return mockedApiInterface.responseProvider.appCheckPermissions();
       }
 
+      if (path === '/api/fleet/epm/categories') {
+        return Promise.resolve();
+      }
+      if (path === '/api/fleet/epm/packages') {
+        return Promise.resolve();
+      }
+      if (path === '/api/fleet/agents') {
+        return Promise.resolve();
+      }
+      if (path === '/api/fleet/settings') {
+        return mockedApiInterface.responseProvider.getSettings();
+      }
+
       const err = new Error(`API [GET ${path}] is not MOCKED!`);
       // eslint-disable-next-line no-console
       console.error(err);
       throw err;
     }
-  });
+  }) as any);
 
   return mockedApiInterface;
 };

@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import { IRouter } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
-import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
-  AlertTypeParams,
+  RewriteRequestCase,
+  RewriteResponseCase,
+  verifyAccessAndContext,
+  rewriteRule,
+} from './lib';
+import {
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -62,7 +66,7 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
   perPage,
   data,
   ...restOfResult
@@ -70,46 +74,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
   return {
     ...restOfResult,
     per_page: perPage,
-    data: data.map(
-      ({
-        alertTypeId,
-        createdBy,
-        updatedBy,
-        createdAt,
-        updatedAt,
-        apiKeyOwner,
-        notifyWhen,
-        muteAll,
-        mutedInstanceIds,
-        executionStatus,
-        actions,
-        scheduledTaskId,
-        ...rest
-      }) => ({
-        ...rest,
-        rule_type_id: alertTypeId,
-        created_by: createdBy,
-        updated_by: updatedBy,
-        created_at: createdAt,
-        updated_at: updatedAt,
-        api_key_owner: apiKeyOwner,
-        notify_when: notifyWhen,
-        mute_all: muteAll,
-        muted_alert_ids: mutedInstanceIds,
-        scheduled_task_id: scheduledTaskId,
-        execution_status: executionStatus && {
-          ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
-          last_execution_date: executionStatus.lastExecutionDate,
-          last_duration: executionStatus.lastDuration,
-        },
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-        })),
-      })
-    ),
+    data: data.map(rewriteRule),
   };
 };
 
@@ -137,7 +102,7 @@ const buildFindRulesRoute = ({
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
 
         trackLegacyTerminology(
           [req.query.search, req.query.search_fields, req.query.sort_field].filter(
@@ -160,13 +125,62 @@ const buildFindRulesRoute = ({
           });
         }
 
-        const findResult = await rulesClient.find({ options, excludeFromPublicApi });
+        const findResult = await rulesClient.find({
+          options,
+          excludeFromPublicApi,
+          includeSnoozeData: true,
+        });
         return res.ok({
           body: rewriteBodyRes(findResult),
         });
       })
     )
   );
+  if (path === `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`) {
+    router.post(
+      {
+        path,
+        validate: {
+          body: querySchema,
+        },
+      },
+      router.handleLegacyErrors(
+        verifyAccessAndContext(licenseState, async function (context, req, res) {
+          const rulesClient = (await context.alerting).getRulesClient();
+
+          trackLegacyTerminology(
+            [req.body.search, req.body.search_fields, req.body.sort_field].filter(
+              Boolean
+            ) as string[],
+            usageCounter
+          );
+
+          const options = rewriteQueryReq({
+            ...req.body,
+            has_reference: req.body.has_reference || undefined,
+            search_fields: searchFieldsAsArray(req.body.search_fields),
+          });
+
+          if (req.body.fields) {
+            usageCounter?.incrementCounter({
+              counterName: `alertingFieldsUsage`,
+              counterType: 'alertingFieldsUsage',
+              incrementBy: 1,
+            });
+          }
+
+          const findResult = await rulesClient.find({
+            options,
+            excludeFromPublicApi,
+            includeSnoozeData: true,
+          });
+          return res.ok({
+            body: rewriteBodyRes(findResult),
+          });
+        })
+      )
+    );
+  }
 };
 
 export const findRulesRoute = (

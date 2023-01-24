@@ -10,10 +10,15 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const dataGrid = getService('dataGrid');
   const a11y = getService('a11y');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
+  const toasts = getService('toasts');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -93,11 +98,108 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on saved queries list panel', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('test');
       await PageObjects.discover.clickSavedQueriesPopOver();
-      await testSubjects.moveMouseTo(
-        'saved-query-list-item load-saved-query-test-button saved-query-list-item-selected saved-query-list-item-selected'
-      );
-      await testSubjects.find('delete-saved-query-test-button');
+      await testSubjects.click('saved-query-management-load-button');
+      await savedQueryManagementComponent.deleteSavedQuery('test');
+      await a11y.testAppSnapshot();
+    });
+
+    // adding a11y tests for the new data grid
+    it('a11y test on single document view', async () => {
+      await testSubjects.click('docTableExpandToggleColumn');
+      await PageObjects.discover.clickDocViewerTab(0);
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on JSON view of the document', async () => {
+      await PageObjects.discover.clickDocViewerTab(1);
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for actions on a field', async () => {
+      await PageObjects.discover.clickDocViewerTab(0);
+      if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
+        await testSubjects.click('openFieldActionsButton-Cancelled');
+      } else {
+        await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
+      }
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data-grid table with columns', async () => {
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Cancelled', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Carrier', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+        await toasts.dismissAllToasts();
+      });
+
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data-grid actions on columns', async () => {
+      await testSubjects.click('dataGridHeaderCellActionButton-Carrier');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for chart options panel', async () => {
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data grid with hidden chart', async () => {
+      await testSubjects.click('unifiedHistogramChartToggle');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
+    });
+
+    it('a11y test for time interval panel', async () => {
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramTimeIntervalPanel');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('contextMenuPanelTitleButton');
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+    });
+
+    it('a11y test for data grid sort panel', async () => {
+      await testSubjects.click('dataGridColumnSortingButton');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for setting row height for display panel', async () => {
+      await testSubjects.click('dataGridDisplaySelectorPopover');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for data grid in full screen', async () => {
+      await testSubjects.click('dataGridFullScreenButton');
+      await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
+    });
+
+    it('a11y test for field statistics data grid view', async () => {
+      await PageObjects.discover.clickViewModeFieldStatsButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test for data grid with collapsed side bar', async () => {
+      await PageObjects.discover.closeSidebar();
+      await a11y.testAppSnapshot();
+      await PageObjects.discover.toggleSidebarCollapse();
+    });
+
+    it('a11y test for adding a field from side bar', async () => {
+      await testSubjects.click('dataView-add-field_btn');
       await a11y.testAppSnapshot();
     });
   });

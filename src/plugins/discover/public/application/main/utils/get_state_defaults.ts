@@ -7,64 +7,71 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AppState } from '../services/discover_app_state_container';
+import { DiscoverServices } from '../../../build_services';
+import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
   DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-import { SavedSearch } from '../../../services/saved_searches';
-import { DataPublicPluginStart } from '../../../../../data/public';
 
-import { AppState } from '../services/discover_state';
-import { getDefaultSort, getSortArray } from '../../../components/doc_table';
-import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import { Storage } from '../../../../../kibana_utils/public';
+import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
 
-function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
+function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
   }
-  if (config.get(SEARCH_FIELDS_FROM_SOURCE) && isEqual(config.get(DEFAULT_COLUMNS_SETTING), [])) {
+  if (
+    uiSettings.get(SEARCH_FIELDS_FROM_SOURCE) &&
+    isEqual(uiSettings.get(DEFAULT_COLUMNS_SETTING), [])
+  ) {
     return ['_source'];
   }
-  return [...config.get(DEFAULT_COLUMNS_SETTING)];
+  return [...uiSettings.get(DEFAULT_COLUMNS_SETTING)];
 }
 
 export function getStateDefaults({
-  config,
-  data,
   savedSearch,
-  storage,
+  services,
 }: {
-  config: IUiSettingsClient;
-  data: DataPublicPluginStart;
   savedSearch: SavedSearch;
-  storage: Storage;
+  services: DiscoverServices;
 }) {
   const { searchSource } = savedSearch;
-  const indexPattern = searchSource.getField('index');
+  const { data, uiSettings, storage } = services;
+  const dataView = searchSource.getField('index');
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-  const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
-  const columns = getDefaultColumns(savedSearch, config);
+  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
+  const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
 
-  const defaultState = {
+  const defaultState: AppState = {
     query,
     sort: !sort.length
-      ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
+      ? getDefaultSort(
+          dataView,
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
+        )
       : sort,
     columns,
-    index: indexPattern?.id,
+    index: dataView?.id,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')),
+    filters: cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
-  } as AppState;
+    rowsPerPage: undefined,
+    grid: undefined,
+    breakdownField: undefined,
+  };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
@@ -77,9 +84,15 @@ export function getStateDefaults({
   if (savedSearch.viewMode) {
     defaultState.viewMode = savedSearch.viewMode;
   }
-
   if (savedSearch.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
+  }
+  if (savedSearch.rowsPerPage) {
+    defaultState.rowsPerPage = savedSearch.rowsPerPage;
+  }
+
+  if (savedSearch.breakdownField) {
+    defaultState.breakdownField = savedSearch.breakdownField;
   }
 
   return defaultState;

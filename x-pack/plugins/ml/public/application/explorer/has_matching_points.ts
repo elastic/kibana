@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ExplorerState } from './reducers';
 import { OverallSwimlaneData, SwimlaneData } from './explorer_utils';
+import type { FilterSettings } from './anomaly_explorer_common_state';
 
 interface HasMatchingPointsParams {
-  filteredFields?: ExplorerState['filteredFields'];
+  filteredFields?: FilterSettings['filteredFields'];
   swimlaneData: SwimlaneData | OverallSwimlaneData;
 }
 
@@ -18,9 +18,11 @@ export const hasMatchingPoints = ({
   swimlaneData,
 }: HasMatchingPointsParams): boolean => {
   // If filtered fields includes a wildcard search maskAll only if there are no points matching the pattern
-  const wildCardField = filteredFields.find((field) => /\@kuery-wildcard\@$/.test(field));
+  const wildCardField = filteredFields.find((field) => /\@kuery-wildcard\@$/.test(field as string));
   const substring =
-    wildCardField !== undefined ? wildCardField.replace(/\@kuery-wildcard\@$/, '') : null;
+    wildCardField !== undefined
+      ? (wildCardField as string).replace(/\@kuery-wildcard\@$/, '')
+      : null;
 
   return (
     substring !== null &&

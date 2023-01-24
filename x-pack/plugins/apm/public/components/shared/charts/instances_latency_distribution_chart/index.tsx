@@ -22,8 +22,9 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../../observability/public';
-import { SERVICE_NODE_NAME } from '../../../../../common/elasticsearch_fieldnames';
+import { useChartTheme } from '@kbn/observability-plugin/public';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import {
   asTransactionRate,
   getDurationFormatter,
@@ -104,6 +105,7 @@ export function InstancesLatencyDistributionChart({
     min: 0,
     max: Math.max(maxThroughput, maxComparisonThroughput),
   };
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   return (
     <EuiPanel hasBorder={true}>
@@ -152,10 +154,7 @@ export function InstancesLatencyDistributionChart({
           {!!comparisonItems.length && (
             <BubbleSeries
               data={comparisonItems}
-              id={i18n.translate(
-                'xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod',
-                { defaultMessage: 'Previous period' }
-              )}
+              id={previousPeriodLabel}
               xAccessor={(item) => item.throughput}
               xScaleType={ScaleType.Linear}
               yAccessors={[(item) => item.latency]}

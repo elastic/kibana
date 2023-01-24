@@ -6,20 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from 'src/plugins/data/public';
-import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type {
+  FieldFormatInstanceType,
+  FieldFormatParams,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { DataView } from 'src/plugins/data_views/public';
-import { FormatEditor } from './format_editor';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { PureComponent } from 'react';
 import { FormatEditorServiceStart } from '../../service';
-import { FieldFormatConfig } from '../../types';
+import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
   esTypes: ES_FIELD_TYPES[];
@@ -27,9 +29,9 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change?: FieldFormatConfig) => void;
+  onChange: (change?: SerializedFieldFormat) => void;
   onError: (error?: string) => void;
-  value?: FieldFormatConfig;
+  value?: SerializedFieldFormat;
 }
 
 interface FieldTypeFormat {
@@ -40,7 +42,6 @@ interface FieldTypeFormat {
 export interface FormatSelectEditorState {
   fieldTypeFormats: FieldTypeFormat[];
   fieldFormatId?: string;
-  fieldFormatParams?: { [key: string]: unknown };
   kbnType: KBN_FIELD_TYPES;
 }
 
@@ -88,7 +89,7 @@ export class FormatSelectEditor extends PureComponent<
       kbnType,
     };
   }
-  onFormatChange = (formatId: string, params?: any) =>
+  onFormatChange = (formatId: string, params?: FieldFormatParams) =>
     this.props.onChange(
       formatId
         ? {
@@ -98,7 +99,7 @@ export class FormatSelectEditor extends PureComponent<
         : undefined
     );
 
-  onFormatParamsChange = (newParams: { [key: string]: any }) => {
+  onFormatParamsChange = (newParams: FieldFormatParams) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };

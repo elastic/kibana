@@ -6,25 +6,22 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EventDetailsPanel } from './';
+import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { Ecs } from '../../../../../common/ecs';
-import { mockAlertDetailsData } from '../../../../common/components/event_details/__mocks__';
-import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   KibanaServices,
   useKibana,
   useGetUserCasesPermissions,
 } from '../../../../common/lib/kibana';
-import {
-  mockBrowserFields,
-  mockDocValueFields,
-  mockRuntimeMappings,
-} from '../../../../common/containers/source/mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
+import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { allCasesPermissions } from '../../../../cases_test_utils';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -40,18 +37,15 @@ const ecsData: Ecs = {
   },
 };
 
-const mockAlertDetailsDataWithIsObject = mockAlertDetailsData.map((detail) => {
-  return {
-    ...detail,
-    isObjectArray: false,
-  };
-}) as TimelineEventsDetailsItem[];
-
 jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
   return {
     isIsolationSupported: jest.fn().mockReturnValue(true),
   };
 });
+
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('testSpace'),
+}));
 
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
@@ -100,39 +94,41 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-const mockSearchStrategy = jest.fn();
+jest.mock('../../../../explore/containers/risk_score', () => {
+  return {
+    useRiskScore: jest.fn().mockReturnValue({
+      loading: true,
+      data: undefined,
+      isModuleEnabled: false,
+    }),
+  };
+});
 
 const defaultProps = {
-  timelineId: TimelineId.test,
-  loadingEventDetails: false,
-  detailsEcsData: ecsData,
+  scopeId: TimelineId.test,
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),
   expandedEvent: { eventId: ecsData._id, indexName: '' },
-  detailsData: mockAlertDetailsDataWithIsObject,
   tabType: TimelineTabs.query,
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   runtimeMappings: mockRuntimeMappings,
 };
 
-describe('event details footer component', () => {
+jest.mock('../../../containers/details', () => {
+  const actual = jest.requireActual('../../../containers/details');
+  return {
+    ...actual,
+    useTimelineEventsDetails: jest.fn().mockImplementation(() => []),
+  };
+});
+
+describe('event details panel component', () => {
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
-          search: {
-            searchStrategyClient: jest.fn(),
-            search: mockSearchStrategy.mockReturnValue({
-              unsubscribe: jest.fn(),
-              subscribe: jest.fn(),
-            }),
-          },
-          query: jest.fn(),
-        },
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
@@ -141,12 +137,17 @@ describe('event details footer component', () => {
             getCasesContext: () => mockCasesContext,
           },
         },
+        timelines: {
+          getHoverActions: jest.fn().mockReturnValue({
+            getAddToTimelineButton: jest.fn(),
+          }),
+        },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
+        },
       },
     });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
-      read: true,
-    });
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -166,5 +167,86 @@ describe('event details footer component', () => {
       </TestProviders>
     );
     expect(wrapper.getByTestId('side-panel-flyout-footer')).toBeTruthy();
+  });
+  test("it doesn't render the take action dropdown when readOnly prop is passed", () => {
+    const wrapper = render(
+      <TestProviders>
+        <EventDetailsPanel {...{ ...defaultProps, isReadOnly: true }} isFlyoutView={true} />
+      </TestProviders>
+    );
+    const element = wrapper.queryByTestId('side-panel-flyout-footer');
+    expect(element).toBeNull();
+  });
+
+  describe('Alerts', () => {
+    const propsWithAlertIndex = {
+      ...defaultProps,
+      expandedEvent: {
+        eventId: ecsData._id,
+        indexName: `.internal${DEFAULT_ALERTS_INDEX}-testSpace`,
+      },
+    };
+    test('it uses the alias alerts index', () => {
+      render(
+        <TestProviders>
+          <EventDetailsPanel {...{ ...propsWithAlertIndex }} />
+        </TestProviders>
+      );
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith({
+        entityType: 'events',
+        indexName: `${DEFAULT_ALERTS_INDEX}-testSpace`,
+        eventId: propsWithAlertIndex.expandedEvent.eventId ?? '',
+        runtimeMappings: mockRuntimeMappings,
+        skip: false,
+      });
+    });
+
+    test('it uses the alias alerts preview index', () => {
+      const alertPreviewProps = {
+        ...propsWithAlertIndex,
+        expandedEvent: {
+          ...propsWithAlertIndex.expandedEvent,
+          indexName: `.internal${DEFAULT_PREVIEW_INDEX}-testSpace`,
+        },
+      };
+      render(
+        <TestProviders>
+          <EventDetailsPanel {...{ ...alertPreviewProps }} />
+        </TestProviders>
+      );
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith({
+        entityType: 'events',
+        indexName: `${DEFAULT_PREVIEW_INDEX}-testSpace`,
+        eventId: propsWithAlertIndex.expandedEvent.eventId,
+        runtimeMappings: mockRuntimeMappings,
+        skip: false,
+      });
+    });
+
+    test(`it does NOT use the alerts alias when regular events happen to include a trailing '${DEFAULT_ALERTS_INDEX}' in the index name`, () => {
+      const indexName = `.ds-logs-endpoint.alerts-default-2022.08.09-000001${DEFAULT_ALERTS_INDEX}`; // a regular event, that happens to include a trailing `.alerts-security.alerts`
+      const propsWithEventIndex = {
+        ...defaultProps,
+        expandedEvent: {
+          eventId: ecsData._id,
+          indexName,
+        },
+      };
+
+      render(
+        <TestProviders>
+          <EventDetailsPanel {...{ ...propsWithEventIndex }} />
+        </TestProviders>
+      );
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith({
+        entityType: 'events',
+        indexName, // <-- use the original index name, not the alerts alias
+        eventId: propsWithEventIndex.expandedEvent.eventId,
+        runtimeMappings: mockRuntimeMappings,
+        skip: false,
+      });
+    });
   });
 });

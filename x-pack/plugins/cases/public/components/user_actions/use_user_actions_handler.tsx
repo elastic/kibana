@@ -7,18 +7,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCaseViewParams } from '../../common/navigation';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { AddCommentRefObject } from '../add_comment';
-import { UserActionMarkdownRefObject } from './markdown_form';
-import { UserActionBuilderArgs, UserActionTreeProps } from './types';
+import type { AddCommentRefObject } from '../add_comment';
+import type { UserActionMarkdownRefObject } from './markdown_form';
+import type { UserActionBuilderArgs } from './types';
 import { NEW_COMMENT_ID } from './constants';
-
-export type UseUserActionsHandlerArgs = Pick<
-  UserActionTreeProps,
-  'fetchUserActions' | 'updateCase'
->;
+import { useDeleteComment } from '../../containers/use_delete_comment';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 export type UseUserActionsHandler = Pick<
   UserActionBuilderArgs,
@@ -30,6 +27,7 @@ export type UseUserActionsHandler = Pick<
   | 'handleOutlineComment'
   | 'handleSaveComment'
   | 'handleManageQuote'
+  | 'handleDeleteComment'
 > & { handleUpdate: (updatedCase: Case) => void };
 
 const isAddCommentRef = (
@@ -39,17 +37,16 @@ const isAddCommentRef = (
   return commentRef?.addQuote != null;
 };
 
-export const useUserActionsHandler = ({
-  fetchUserActions,
-  updateCase,
-}: UseUserActionsHandlerArgs): UseUserActionsHandler => {
+export const useUserActionsHandler = (): UseUserActionsHandler => {
   const { detailName: caseId } = useCaseViewParams();
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
   const { isLoadingIds, patchComment } = useUpdateComment();
+  const { mutate: deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
   const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
+  const refreshCaseViewPage = useRefreshCaseViewPage();
   const commentRefs = useRef<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | undefined | null>
   >({});
@@ -72,12 +69,17 @@ export const useUserActionsHandler = ({
         caseId,
         commentId: id,
         commentUpdate: content,
-        fetchUserActions,
         version,
-        updateCase,
       });
     },
-    [caseId, fetchUserActions, patchComment, updateCase]
+    [caseId, patchComment]
+  );
+
+  const handleDeleteComment = useCallback(
+    (id: string) => {
+      deleteComment({ caseId, commentId: id });
+    },
+    [caseId, deleteComment]
   );
 
   const handleOutlineComment = useCallback(
@@ -119,14 +121,6 @@ export const useUserActionsHandler = ({
     [handleOutlineComment]
   );
 
-  const handleUpdate = useCallback(
-    (newCase: Case) => {
-      updateCase(newCase);
-      fetchUserActions();
-    },
-    [fetchUserActions, updateCase]
-  );
-
   useEffect(() => {
     if (draftComment?.commentId) {
       setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
@@ -160,7 +154,8 @@ export const useUserActionsHandler = ({
     handleManageMarkdownEditId,
     handleOutlineComment,
     handleSaveComment,
+    handleDeleteComment,
     handleManageQuote,
-    handleUpdate,
+    handleUpdate: refreshCaseViewPage,
   };
 };

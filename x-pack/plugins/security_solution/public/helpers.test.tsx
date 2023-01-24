@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Capabilities } from '../../../../src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -17,7 +17,12 @@ import {
   RedirectRoute,
   getField,
 } from './helpers';
-import { StartedSubPlugins } from './types';
+import type { StartedSubPlugins } from './types';
+import {
+  allCasesCapabilities,
+  noCasesCapabilities,
+  readCasesCapabilities,
+} from './cases_test_utils';
 
 describe('public helpers parseRoute', () => {
   it('should properly parse hash route', () => {
@@ -76,14 +81,15 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   it('cases routes should return NoPrivilegesPage component when cases plugin is NOT available ', () => {
     const routes = getSubPluginRoutesByCapabilities(mockSubPlugins, {
       [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+      [CASES_FEATURE_ID]: noCasesCapabilities(),
     } as unknown as Capabilities);
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CasesView = (casesRoute?.component ?? mockRender) as React.ComponentType<any>;
     expect(shallow(<CasesView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="cases"
+        docLinkSelector={[Function]}
+        pageName="cases"
       />
     `);
   });
@@ -91,14 +97,15 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   it('alerts should return NoPrivilegesPage component when siem plugin is NOT available ', () => {
     const routes = getSubPluginRoutesByCapabilities(mockSubPlugins, {
       [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [CASES_FEATURE_ID]: readCasesCapabilities(),
     } as unknown as Capabilities);
     const alertsRoute = routes.find((r) => r.path === 'alerts');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AlertsView = (alertsRoute?.component ?? mockRender) as React.ComponentType<any>;
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="alerts"
+        docLinkSelector={[Function]}
+        pageName="alerts"
       />
     `);
   });
@@ -106,7 +113,7 @@ describe('#getSubPluginRoutesByCapabilities', () => {
   it('should return NoPrivilegesPage for each route when both plugins are NOT available ', () => {
     const routes = getSubPluginRoutesByCapabilities(mockSubPlugins, {
       [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+      [CASES_FEATURE_ID]: noCasesCapabilities(),
     } as unknown as Capabilities);
     const casesRoute = routes.find((r) => r.path === 'cases');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,12 +125,14 @@ describe('#getSubPluginRoutesByCapabilities', () => {
 
     expect(shallow(<AlertsView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="alerts"
+        docLinkSelector={[Function]}
+        pageName="alerts"
       />
     `);
     expect(shallow(<CasesView />)).toMatchInlineSnapshot(`
       <NoPrivilegePage
-        subPluginKey="cases"
+        docLinkSelector={[Function]}
+        pageName="cases"
       />
     `);
   });
@@ -134,7 +143,7 @@ describe('#isSubPluginAvailable', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
         [SERVER_APP_ID]: { show: true, crud: true },
-        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
   });
@@ -143,7 +152,7 @@ describe('#isSubPluginAvailable', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
         [SERVER_APP_ID]: { show: true, crud: false },
-        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
   });
@@ -152,7 +161,7 @@ describe('#isSubPluginAvailable', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
         [SERVER_APP_ID]: { show: false, crud: false },
-        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeFalsy();
   });
@@ -161,7 +170,7 @@ describe('#isSubPluginAvailable', () => {
     expect(
       isSubPluginAvailable('cases', {
         [SERVER_APP_ID]: { show: false, crud: false },
-        [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+        [CASES_FEATURE_ID]: allCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
   });
@@ -170,7 +179,7 @@ describe('#isSubPluginAvailable', () => {
     expect(
       isSubPluginAvailable('cases', {
         [SERVER_APP_ID]: { show: false, crud: false },
-        [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+        [CASES_FEATURE_ID]: readCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeTruthy();
   });
@@ -179,7 +188,7 @@ describe('#isSubPluginAvailable', () => {
     expect(
       isSubPluginAvailable('pluginKey', {
         [SERVER_APP_ID]: { show: false, crud: false },
-        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeFalsy();
   });
@@ -189,11 +198,11 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to overview page when siem and case privileges are all', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: true, crud: true },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [CASES_FEATURE_ID]: allCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -201,11 +210,11 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to overview page when siem and case privileges are read', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [CASES_FEATURE_ID]: readCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -213,11 +222,11 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to overview page when siem and case privileges are off', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+      [CASES_FEATURE_ID]: noCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -225,11 +234,11 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is all', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [CASES_FEATURE_ID]: allCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -237,11 +246,11 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is read', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [CASES_FEATURE_ID]: allCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -249,7 +258,7 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is read', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [CASES_FEATURE_ID]: readCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
@@ -261,7 +270,7 @@ describe('RedirectRoute', () => {
   it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is all', () => {
     const mockCapabilitities = {
       [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [CASES_FEATURE_ID]: allCasesCapabilities(),
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect

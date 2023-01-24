@@ -7,31 +7,26 @@
 
 import { isEmpty, pickBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiCheckboxGroup,
-  EuiCheckboxGroupOption,
-} from '@elastic/eui';
+import type { EuiCheckboxGroupOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiCheckboxGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
+import { useController } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
+import type { FormFieldProps } from '../../form/types';
 import { PlatformIcon } from './platforms/platform_icon';
 
-interface Props {
-  field: FieldHook<string>;
-  euiFieldProps?: Record<string, unknown>;
-  idAria?: string;
-  [key: string]: unknown;
-}
+type Props = Omit<FormFieldProps<string[]>, 'name' | 'label'>;
 
-export const PlatformCheckBoxGroupField = ({
-  field,
-  euiFieldProps = {},
-  idAria,
-  ...rest
-}: Props) => {
+export const PlatformCheckBoxGroupField = (props: Props) => {
+  const { euiFieldProps = {}, idAria, helpText, ...rest } = props;
+  const {
+    field: { onChange, value },
+    fieldState: { error },
+  } = useController({
+    name: 'platform',
+    defaultValue: [],
+  });
   const options = useMemo(
     () => [
       {
@@ -86,16 +81,16 @@ export const PlatformCheckBoxGroupField = ({
     []
   );
 
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     () =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
-        acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+
         return acc;
       }, {} as Record<string, boolean>)
   );
 
-  const onChange = useCallback(
+  const handleChange = useCallback(
     (optionId: string) => {
       const newCheckboxIdToSelectedMap = {
         ...checkboxIdToSelectedMap,
@@ -103,11 +98,13 @@ export const PlatformCheckBoxGroupField = ({
       };
       setCheckboxIdToSelectedMap(newCheckboxIdToSelectedMap);
 
-      field.setValue(() =>
-        Object.keys(pickBy(newCheckboxIdToSelectedMap, (value) => value === true)).join(',')
+      onChange(
+        Object.keys(
+          pickBy(newCheckboxIdToSelectedMap, (checkboxValue) => checkboxValue === true)
+        ).join(',')
       );
     },
-    [checkboxIdToSelectedMap, field]
+    [checkboxIdToSelectedMap, onChange]
   );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
@@ -115,18 +112,23 @@ export const PlatformCheckBoxGroupField = ({
   useEffect(() => {
     setCheckboxIdToSelectedMap(() =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
-        acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+
         return acc;
       }, {} as Record<string, boolean>)
     );
-  }, [field.value, options]);
+  }, [value, options]);
+
+  const hasError = useMemo(() => !!error?.message, [error?.message]);
 
   return (
     <EuiFormRow
-      label={field.label}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.platformFieldLabel', {
+        defaultMessage: 'Platform',
+      })}
+      helpText={typeof helpText === 'function' ? helpText() : helpText}
+      error={error?.message}
+      isInvalid={hasError}
       fullWidth
       describedByIds={describedByIds}
       {...rest}
@@ -134,7 +136,7 @@ export const PlatformCheckBoxGroupField = ({
       <EuiCheckboxGroup
         idToSelectedMap={checkboxIdToSelectedMap}
         options={options}
-        onChange={onChange}
+        onChange={handleChange}
         data-test-subj="input"
         {...euiFieldProps}
       />

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 // Careful of exporting anything from this file as any file(s) you export here will cause your functions to be exposed as public.
 // If you're using functions/types/etc... internally or within integration tests it's best to import directly from their paths
 // than expose the functions/types/etc... here. You should _only_ expose functions/types/etc... that need to be shared with other plugins here.

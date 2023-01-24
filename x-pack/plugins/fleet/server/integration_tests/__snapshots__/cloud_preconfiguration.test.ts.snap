@@ -1,8 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Fleet preconfiguration reset Preconfigred cloud policy Create correct .fleet-policies 1`] = `
+exports[`Fleet preconfiguration reset Preconfigured cloud policy With a full preconfigured cloud policy Create correct .fleet-policies 1`] = `
 Object {
   "agent": Object {
+    "download": Object {
+      "sourceURI": "https://artifacts.elastic.co/downloads/",
+    },
     "monitoring": Object {
       "enabled": false,
       "logs": false,
@@ -19,10 +22,10 @@ Object {
       "meta": Object {
         "package": Object {
           "name": "fleet_server",
-          "version": "1.1.1",
         },
       },
       "name": "Fleet Server",
+      "package_policy_id": "elastic-cloud-fleet-server",
       "revision": 1,
       "server": Object {
         "host": "0.0.0.0",
@@ -69,6 +72,7 @@ Object {
         "max_connections": 0,
         "max_event_size": 307200,
         "max_header_size": 1048576,
+        "pprof.enabled": false,
         "read_timeout": "3600s",
         "response_headers": null,
         "rum": Object {
@@ -90,6 +94,7 @@ Object {
                 "sample_rate": 0.1,
               },
             ],
+            "storage_limit": "3GB",
           },
         },
         "shutdown_timeout": "30s",
@@ -101,9 +106,9 @@ Object {
           "key": "/app/config/certs/node.key",
           "key_passphrase": null,
           "supported_protocols": Array [
-            "TLSv1.0",
             "TLSv1.1",
             "TLSv1.2",
+            "TLSv1.3",
           ],
         },
         "write_timeout": "30s",
@@ -111,14 +116,14 @@ Object {
       "data_stream": Object {
         "namespace": "default",
       },
-      "id": "apm-apmserver-elastic-cloud-apm",
+      "id": "elastic-cloud-apm",
       "meta": Object {
         "package": Object {
           "name": "apm",
-          "version": "8.2.0-dev4",
         },
       },
       "name": "Elastic APM",
+      "package_policy_id": "elastic-cloud-apm",
       "revision": 1,
       "type": "apm",
       "use_output": "es-containerhost",
@@ -126,7 +131,15 @@ Object {
   ],
   "output_permissions": Object {
     "es-containerhost": Object {
-      "Elastic APM": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [],
+      },
+      "elastic-cloud-apm": Object {
         "cluster": Array [
           "cluster:monitor/main",
         ],
@@ -207,14 +220,6 @@ Object {
             ],
           },
         ],
-      },
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [],
       },
     },
   },

@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import type { Page, DynamicPagePathValues } from '../constants';
 import { FLEET_BASE_PATH, INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
-import { useStartServices } from './';
+import { useStartServices } from '.';
 
 interface AdditionalBreadcrumbOptions {
   useIntegrationsBasePath: boolean;

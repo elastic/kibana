@@ -20,12 +20,13 @@ const buildOrCondition = (values: string[]) => {
   return `(${values.join(' or ')})`;
 };
 
-function addSlashes(str: string) {
+function addSlashes(str: string | number) {
   return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
 }
 
 export const urlFiltersToKueryString = (urlFilters: UrlFilter[]): string => {
   let kueryString = '';
+
   urlFilters.forEach(({ field, values, notValues, wildcards, notWildcards }) => {
     const valuesT = values?.map((val) => `"${addSlashes(val)}"`);
     const notValuesT = notValues?.map((val) => `"${addSlashes(val)}"`);

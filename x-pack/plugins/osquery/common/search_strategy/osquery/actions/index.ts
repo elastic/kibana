@@ -6,26 +6,50 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, PageInfoPaginated } from '../../common';
-import { RequestOptions, RequestOptionsPaginated } from '../..';
+import type { Inspect, Maybe } from '../../common';
+import type { RequestOptions, RequestOptionsPaginated } from '../..';
 
 export type ActionEdges = estypes.SearchResponse<object>['hits']['hits'];
 
 export type ActionResultEdges = estypes.SearchResponse<object>['hits']['hits'];
 export interface ActionsStrategyResponse extends IEsSearchResponse {
   edges: ActionEdges;
-  totalCount: number;
-  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
+}
+
+export interface ActionDetails {
+  action_id: string;
+  expiration: string;
+  '@timestamp': string;
+  agent_all: boolean;
+  agent_ids: string[];
+  agent_platforoms: string[];
+  agent_policy_ids: string[];
+  agents: string[];
+  user_id?: string;
+  pack_id?: string;
+  pack_name?: string;
+  pack_prebuilt?: boolean;
+  status?: string;
+  queries?: Array<{
+    action_id: string;
+    id: string;
+    query: string;
+    agents: string[];
+    ecs_mapping?: unknown;
+    version?: string;
+    platform?: string;
+    saved_query_id?: string;
+    expiration?: string;
+  }>;
 }
 
 export type ActionsRequestOptions = RequestOptionsPaginated;
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  actionDetails: Record<string, any>;
+  actionDetails: estypes.SearchHit<ActionDetails>;
   inspect?: Maybe<Inspect>;
 }
 
@@ -33,10 +57,26 @@ export interface ActionDetailsRequestOptions extends RequestOptions {
   actionId: string;
 }
 
-export interface ActionResultsStrategyResponse extends IEsSearchResponse {
+export interface ActionResultsStrategyResponse
+  extends IKibanaSearchResponse<
+    estypes.SearchResponse<
+      object,
+      {
+        aggs: {
+          responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
+            rows_count: estypes.AggregationsSumAggregate;
+            responses: {
+              buckets: Array<{
+                key: string;
+                doc_count: number;
+              }>;
+            };
+          };
+        };
+      }
+    >
+  > {
   edges: ActionResultEdges;
-  totalCount: number;
-  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 

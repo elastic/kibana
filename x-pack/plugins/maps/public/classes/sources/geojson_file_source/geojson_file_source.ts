@@ -16,7 +16,6 @@ import {
 import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { InlineField } from '../../fields/inline_field';
 
 function getFeatureCollection(
@@ -55,9 +54,9 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     };
   }
 
-  constructor(descriptor: Partial<GeojsonFileSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<GeojsonFileSourceDescriptor>) {
     const normalizedDescriptor = GeoJsonFileSource.createDescriptor(descriptor);
-    super(normalizedDescriptor, inspectorAdapters);
+    super(normalizedDescriptor);
   }
 
   _getFields(): InlineFieldDescriptor[] {

@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { camelCase, isArray, isObject, transform, snakeCase } from 'lodash';
+import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ToastInputFields } from 'kibana/public';
-import {
-  CasesFindResponse,
-  CasesFindResponseRt,
+import type { ToastInputFields } from '@kbn/core/public';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import type {
   CaseResponse,
-  CaseResponseRt,
   CasesResponse,
-  CasesResponseRt,
-  CasesStatusResponseRt,
-  CasesStatusResponse,
-  throwErrors,
   CasesConfigurationsResponse,
-  CaseConfigurationsResponseRt,
   CasesConfigureResponse,
-  CaseConfigureResponseRt,
   CaseUserActionsResponse,
-  CaseUserActionsResponseRt,
-  CommentType,
   CasePatchRequest,
   CaseResolveResponse,
-  CaseResolveResponseRt,
-  CaseMetricsResponse,
-  CaseMetricsResponseRt,
+  SingleCaseMetricsResponse,
+  User,
 } from '../../common/api';
-import { AllCases, Case, UpdateByKey } from './types';
+import {
+  CaseResponseRt,
+  CasesResponseRt,
+  throwErrors,
+  CaseConfigurationsResponseRt,
+  CaseConfigureResponseRt,
+  CaseUserActionsResponseRt,
+  CommentType,
+  CaseResolveResponseRt,
+  SingleCaseMetricsResponseRt,
+} from '../../common/api';
+import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -45,45 +44,6 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
     const camelKey = Array.isArray(target) ? key : snakeCase(key);
     acc[camelKey] = isObject(value) ? covertToSnakeCase(value as Record<string, unknown>) : value;
   });
-
-export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
-  arrayOfSnakes.reduce((acc: unknown[], value) => {
-    if (isArray(value)) {
-      return [...acc, convertArrayToCamelCase(value)];
-    } else if (isObject(value)) {
-      return [...acc, convertToCamelCase(value)];
-    } else {
-      return [...acc, value];
-    }
-  }, []);
-
-export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
-  Object.entries(obj).reduce((acc, [key, value]) => {
-    if (isArray(value)) {
-      set(acc, camelCase(key), convertArrayToCamelCase(value));
-    } else if (isObject(value)) {
-      set(acc, camelCase(key), convertToCamelCase(value));
-    } else {
-      set(acc, camelCase(key), value);
-    }
-    return acc;
-  }, {} as U);
-
-export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
-  cases: snakeCases.cases.map((theCase) => convertToCamelCase<CaseResponse, Case>(theCase)),
-  countOpenCases: snakeCases.count_open_cases,
-  countInProgressCases: snakeCases.count_in_progress_cases,
-  countClosedCases: snakeCases.count_closed_cases,
-  page: snakeCases.page,
-  perPage: snakeCases.per_page,
-  total: snakeCases.total,
-});
-
-export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
-  pipe(
-    CasesStatusResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
@@ -96,17 +56,14 @@ export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCaseMetricsResponse = (respCase?: CaseMetricsResponse) =>
+export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResponse) =>
   pipe(
-    CaseMetricsResponseRt.decode(respCase),
+    SingleCaseMetricsResponseRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
 export const decodeCasesResponse = (respCase?: CasesResponse) =>
   pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
-  pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
   return pipe(
@@ -175,4 +132,32 @@ export const createUpdateSuccessToaster = (
   }
 
   return toast;
+};
+
+export const constructAssigneesFilter = (
+  assignees: FilterOptions['assignees']
+): { assignees?: string | string[] } =>
+  assignees === null || assignees.length > 0
+    ? {
+        assignees:
+          assignees?.map((assignee) =>
+            assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+          ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+      }
+    : {};
+
+export const constructReportersFilter = (reporters: User[]) => {
+  return reporters.length > 0
+    ? {
+        reporters: reporters
+          .map((reporter) => {
+            if (reporter.profile_uid != null) {
+              return reporter.profile_uid;
+            }
+
+            return reporter.username ?? '';
+          })
+          .filter((reporterID) => !isEmpty(reporterID)),
+      }
+    : {};
 };

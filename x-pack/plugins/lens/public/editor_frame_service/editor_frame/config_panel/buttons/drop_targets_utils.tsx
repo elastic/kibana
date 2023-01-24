@@ -9,7 +9,15 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DropType } from '../../../../types';
+import { DragDropIdentifier } from '../../../../drag_drop';
+import {
+  DropType,
+  FramePublicAPI,
+  isOperation,
+  Visualization,
+  DragDropOperation,
+  VisualizationDimensionGroupConfig,
+} from '../../../../types';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
   switch (type) {
@@ -129,3 +137,46 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
     return 'lnsDragDrop-notCompatible';
   }
 };
+
+export interface OnVisDropProps<T> {
+  prevState: T;
+  target: DragDropOperation;
+  source: DragDropIdentifier;
+  frame: FramePublicAPI;
+  dropType: DropType;
+  group?: VisualizationDimensionGroupConfig;
+}
+
+export function shouldRemoveSource(source: DragDropIdentifier, dropType: DropType) {
+  return (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  );
+}
+
+export function onDropForVisualization<T, P = unknown>(
+  props: OnVisDropProps<T>,
+  activeVisualization: Visualization<T, P>
+) {
+  const { prevState, target, frame, source, group } = props;
+  const { layerId, columnId, groupId } = target;
+
+  const previousColumn =
+    isOperation(source) && group?.requiresPreviousColumnOnDuplicate ? source.columnId : undefined;
+
+  const newVisState = activeVisualization.setDimension({
+    columnId,
+    groupId,
+    layerId,
+    prevState,
+    previousColumn,
+    frame,
+  });
+
+  return newVisState;
+}

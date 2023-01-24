@@ -22,7 +22,7 @@ exports[`OpenSearchPanel render 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <SavedObjectFinderUi
+    <SavedObjectFinder
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
@@ -40,8 +40,15 @@ exports[`OpenSearchPanel render 1`] = `
           },
         ]
       }
-      savedObjects={Object {}}
-      uiSettings={Object {}}
+      services={
+        Object {
+          "savedObjects": undefined,
+          "savedObjectsManagement": undefined,
+          "savedObjectsTagging": undefined,
+          "uiSettings": undefined,
+        }
+      }
+      showFilter={true}
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -52,10 +59,12 @@ exports[`OpenSearchPanel render 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="manageSearchesBtn"
           fill={true}
           href="/app/management/kibana/objects?_a=(tab:search)"
           onClick={[MockFunction]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Manage searches"

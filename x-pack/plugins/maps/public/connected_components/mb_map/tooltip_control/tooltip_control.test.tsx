@@ -15,12 +15,13 @@ import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { Feature } from 'geojson';
-import type { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapMouseEvent, MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { IVectorSource } from '../../../classes/sources/vector_source';
 
 // mutable map state
-let featuresAtLocation: MapboxGeoJSONFeature[] = [];
+let featuresAtLocation: MapGeoJSONFeature[] = [];
 
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
@@ -36,6 +37,9 @@ const mockLayer = {
   },
   canShowTooltip: () => {
     return true;
+  },
+  areTooltipsDisabled: () => {
+    return false;
   },
   getMbTooltipLayerIds: () => {
     return ['foo', 'bar'];
@@ -59,6 +63,13 @@ const mockLayer = {
       },
     };
   },
+  getSource: () => {
+    return {
+      getFeatureActions: () => {
+        return [];
+      },
+    } as unknown as IVectorSource;
+  },
 } as unknown as IVectorLayer;
 
 const mockMbMapHandlers: { [key: string]: (event?: MapMouseEvent) => void } = {};
@@ -81,6 +92,7 @@ const defaultProps = {
   openOnClickTooltip: () => {},
   closeOnHoverTooltip: () => {},
   openOnHoverTooltip: () => {},
+  updateOpenTooltips: () => {},
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: async () => {},
@@ -154,7 +166,7 @@ describe('TooltipControl', () => {
     test('should un-register all map callbacks on unmount', () => {
       const component = mount(<TooltipControl {...defaultProps} />);
 
-      expect(Object.keys(mockMbMapHandlers).length).toBe(3);
+      expect(Object.keys(mockMbMapHandlers).length).toBe(5);
 
       component.unmount();
       expect(Object.keys(mockMbMapHandlers).length).toBe(0);
@@ -254,7 +266,7 @@ describe('TooltipControl', () => {
         properties: {
           __kbn__feature_id__: 1,
         },
-      } as unknown as MapboxGeoJSONFeature;
+      } as unknown as MapGeoJSONFeature;
       featuresAtLocation = [feature, feature];
       mount(
         <TooltipControl

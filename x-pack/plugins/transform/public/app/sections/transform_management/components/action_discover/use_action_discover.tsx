@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
-
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { TransformListAction, TransformListRow } from '../../../../common';
 
 import { useSearchItems } from '../../../../hooks/use_search_items';
@@ -20,68 +19,68 @@ import {
   DiscoverActionName,
 } from './discover_action_name';
 
-const getIndexPatternTitleFromTargetIndex = (item: TransformListRow) =>
+const getDataViewTitleFromTargetIndex = (item: TransformListRow) =>
   Array.isArray(item.config.dest.index) ? item.config.dest.index.join(',') : item.config.dest.index;
 
 export type DiscoverAction = ReturnType<typeof useDiscoverAction>;
 export const useDiscoverAction = (forceDisable: boolean) => {
-  const appDeps = useAppDependencies();
-  const { share } = appDeps;
-  const savedObjectsClient = appDeps.savedObjects.client;
-  const indexPatterns = appDeps.data.indexPatterns;
-  const isDiscoverAvailable = !!appDeps.application.capabilities.discover?.show;
+  const {
+    share,
+    data: { dataViews: dataViewsContract },
+    application: { capabilities },
+  } = useAppDependencies();
+  const isDiscoverAvailable = !!capabilities.discover?.show;
 
-  const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
+  const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
 
-  const [indexPatternsLoaded, setIndexPatternsLoaded] = useState(false);
+  const [dataViewsLoaded, setDataViewsLoaded] = useState(false);
 
   useEffect(() => {
-    async function checkIndexPatternAvailability() {
-      await loadIndexPatterns(savedObjectsClient, indexPatterns);
-      setIndexPatternsLoaded(true);
+    async function checkDataViewAvailability() {
+      await loadDataViews(dataViewsContract);
+      setDataViewsLoaded(true);
     }
 
-    checkIndexPatternAvailability();
-  }, [indexPatterns, loadIndexPatterns, savedObjectsClient]);
+    checkDataViewAvailability();
+  }, [loadDataViews, dataViewsContract]);
 
   const clickHandler = useCallback(
     (item: TransformListRow) => {
       const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
       if (!locator) return;
-      const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
-      const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+      const dataViewTitle = getDataViewTitleFromTargetIndex(item);
+      const dataViewId = getDataViewIdByTitle(dataViewTitle);
       locator.navigateSync({
-        indexPatternId,
+        indexPatternId: dataViewId,
       });
     },
-    [getIndexPatternIdByTitle, share]
+    [getDataViewIdByTitle, share]
   );
 
-  const indexPatternExists = useCallback(
+  const dataViewExists = useCallback(
     (item: TransformListRow) => {
-      const indexPatternTitle = getIndexPatternTitleFromTargetIndex(item);
-      const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
-      return indexPatternId !== undefined;
+      const dataViewTitle = getDataViewTitleFromTargetIndex(item);
+      const dataViewId = getDataViewIdByTitle(dataViewTitle);
+      return dataViewId !== undefined;
     },
-    [getIndexPatternIdByTitle]
+    [getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => {
-        return <DiscoverActionName items={[item]} indexPatternExists={indexPatternExists(item)} />;
+        return <DiscoverActionName items={[item]} dataViewExists={dataViewExists(item)} />;
       },
       available: () => isDiscoverAvailable,
       enabled: (item: TransformListRow) =>
-        indexPatternsLoaded &&
-        !isDiscoverActionDisabled([item], forceDisable, indexPatternExists(item)),
+        dataViewsLoaded && !isDiscoverActionDisabled([item], forceDisable, dataViewExists(item)),
       description: discoverActionNameText,
       icon: 'visTable',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionDiscover',
     }),
-    [forceDisable, indexPatternExists, indexPatternsLoaded, isDiscoverAvailable, clickHandler]
+    [forceDisable, dataViewExists, dataViewsLoaded, isDiscoverAvailable, clickHandler]
   );
 
   return { action };

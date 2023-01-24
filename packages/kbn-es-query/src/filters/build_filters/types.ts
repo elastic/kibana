@@ -37,6 +37,7 @@ export enum FILTERS {
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
   SPATIAL_FILTER = 'spatial_filter',
+  COMBINED = 'combined',
 }
 
 /**
@@ -49,7 +50,7 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FilterMeta = {
   alias?: string | null;
   disabled?: boolean;
@@ -67,7 +68,7 @@ export type FilterMeta = {
   value?: string;
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Filter = {
   $state?: {
     store: FilterStateStore;
@@ -76,11 +77,13 @@ export type Filter = {
   query?: Record<string, any>;
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
 };
+
+export type AggregateQuery = { sql: string } | { esql: string };
 
 /**
  * An interface for a latitude-longitude pair

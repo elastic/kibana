@@ -1,0 +1,108 @@
+{
+  "id": "@kbn/stdio-dev-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/stdio-dev-helpers",
+        "id": "def-common.observeLines",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "observeLines",
+        "description": [
+          "\n Creates an Observable from a Readable Stream that:\n  - splits data from `readable` into lines\n  - completes when `readable` emits \"end\"\n  - fails if `readable` emits \"errors\"\n"
+        ],
+        "signature": [
+          "(readable: ",
+          "Readable",
+          ") => ",
+          "Observable",
+          "<string>"
+        ],
+        "path": "packages/kbn-stdio-dev-helpers/src/observe_lines.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/stdio-dev-helpers",
+            "id": "def-common.observeLines.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "readable",
+            "description": [],
+            "signature": [
+              "Readable"
+            ],
+            "path": "packages/kbn-stdio-dev-helpers/src/observe_lines.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/stdio-dev-helpers",
+        "id": "def-common.observeReadable",
+        "type": "Function",
+        "tags": [],
+        "label": "observeReadable",
+        "description": [
+          "\n Produces an Observable from a ReadableSteam that:\n  - completes on the first \"end\" event\n  - fails on the first \"error\" event"
+        ],
+        "signature": [
+          "(readable: ",
+          "Readable",
+          ") => ",
+          "Observable",
+          "<never>"
+        ],
+        "path": "packages/kbn-stdio-dev-helpers/src/observe_readable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/stdio-dev-helpers",
+            "id": "def-common.observeReadable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "readable",
+            "description": [],
+            "signature": [
+              "Readable"
+            ],
+            "path": "packages/kbn-stdio-dev-helpers/src/observe_readable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

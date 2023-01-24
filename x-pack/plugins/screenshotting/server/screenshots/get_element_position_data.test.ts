@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
+import { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 
 describe('getElementPositionAndAttributes', () => {
-  const logger = {} as jest.Mocked<Logger>;
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let layout: ReturnType<typeof createMockLayout>;
+  let eventLogger: EventLogger;
+  let config = {} as ConfigType;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     layout = createMockLayout();
-
+    config = { capture: { zoom: 2 } } as ConfigType;
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
 
     // @see https://github.com/jsdom/jsdom/issues/653
@@ -28,11 +32,12 @@ describe('getElementPositionAndAttributes', () => {
 
       elements.forEach((element) =>
         Object.assign(element, {
+          scrollIntoView: () => {},
           getBoundingClientRect: () => ({
             width: parseFloat(element.style.width),
             height: parseFloat(element.style.height),
-            top: parseFloat(element.style.top),
-            left: parseFloat(element.style.left),
+            y: parseFloat(element.style.top),
+            x: parseFloat(element.style.left),
           }),
         })
       );
@@ -59,7 +64,7 @@ describe('getElementPositionAndAttributes', () => {
       />
     `;
 
-    await expect(getElementPositionAndAttributes(browser, logger, layout)).resolves
+    await expect(getElementPositionAndAttributes(browser, eventLogger, layout)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -103,6 +108,6 @@ describe('getElementPositionAndAttributes', () => {
   });
 
   it('should return null when there are no elements matching', async () => {
-    await expect(getElementPositionAndAttributes(browser, logger, layout)).resolves.toBeNull();
+    await expect(getElementPositionAndAttributes(browser, eventLogger, layout)).resolves.toBeNull();
   });
 });

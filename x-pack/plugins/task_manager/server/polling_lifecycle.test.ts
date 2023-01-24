@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
 import { Observable, of, Subject } from 'rxjs';
 
@@ -20,7 +19,7 @@ import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming'
 import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
-import { executionContextServiceMock } from '../../../../src/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -49,6 +48,7 @@ describe('TaskPollingLifecycle', () => {
       monitored_aggregated_stats_refresh_rate: 5000,
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug' as const,
         warn_delayed_task_start_in_seconds: 60,
       },
       monitored_stats_required_freshness: 5000,
@@ -66,6 +66,10 @@ describe('TaskPollingLifecycle', () => {
       },
       unsafe: {
         exclude_task_types: [],
+      },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
       },
     },
     taskStore: mockTaskStore,
@@ -203,9 +207,7 @@ describe('TaskPollingLifecycle', () => {
         )
       );
 
-      expect(
-        isOk(await getFirstAsPromise(claimAvailableTasks([], taskClaiming, logger)))
-      ).toBeTruthy();
+      expect(isOk(await getFirstAsPromise(claimAvailableTasks(taskClaiming, logger)))).toBeTruthy();
 
       expect(taskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
     });
@@ -263,7 +265,7 @@ describe('TaskPollingLifecycle', () => {
           })
       );
 
-      const err = await getFirstAsPromise(claimAvailableTasks([], taskClaiming, logger));
+      const err = await getFirstAsPromise(claimAvailableTasks(taskClaiming, logger));
 
       expect(isErr(err)).toBeTruthy();
       expect((err as Err<FillPoolResult>).error).toEqual(FillPoolResult.Failed);

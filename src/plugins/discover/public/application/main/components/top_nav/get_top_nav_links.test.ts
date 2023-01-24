@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource } from 'src/plugins/data/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 
 const services = {
   capabilities: {
@@ -24,11 +24,11 @@ const services = {
   },
 } as unknown as DiscoverServices;
 
-const state = {} as unknown as GetStateReturn;
+const state = {} as unknown as DiscoverStateContainer;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,
@@ -36,6 +36,11 @@ test('getTopNavLinks result', () => {
     state,
     searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
+    isPlainRecord: false,
+    persistDataView: jest.fn(),
+    updateDataViewList: jest.fn(),
+    adHocDataViews: [],
+    updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
@@ -66,6 +71,65 @@ test('getTopNavLinks result', () => {
         "label": "Share",
         "run": [Function],
         "testId": "shareTopNavButton",
+      },
+      Object {
+        "description": "Open Inspector for search",
+        "id": "inspect",
+        "label": "Inspect",
+        "run": [Function],
+        "testId": "openInspectorButton",
+      },
+      Object {
+        "description": "Save Search",
+        "emphasize": true,
+        "iconType": "save",
+        "id": "save",
+        "label": "Save",
+        "run": [Function],
+        "testId": "discoverSaveButton",
+      },
+    ]
+  `);
+});
+
+test('getTopNavLinks result for sql mode', () => {
+  const topNavLinks = getTopNavLinks({
+    dataView: dataViewMock,
+    navigateTo: jest.fn(),
+    onOpenInspector: jest.fn(),
+    savedSearch: savedSearchMock,
+    services,
+    state,
+    searchSource: {} as ISearchSource,
+    onOpenSavedSearch: () => {},
+    isPlainRecord: true,
+    persistDataView: jest.fn(),
+    updateDataViewList: jest.fn(),
+    adHocDataViews: [],
+    updateAdHocDataViewId: jest.fn(),
+  });
+  expect(topNavLinks).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "description": "Options",
+        "id": "options",
+        "label": "Options",
+        "run": [Function],
+        "testId": "discoverOptionsButton",
+      },
+      Object {
+        "description": "New Search",
+        "id": "new",
+        "label": "New",
+        "run": [Function],
+        "testId": "discoverNewButton",
+      },
+      Object {
+        "description": "Open Saved Search",
+        "id": "open",
+        "label": "Open",
+        "run": [Function],
+        "testId": "discoverOpenButton",
       },
       Object {
         "description": "Open Inspector for search",

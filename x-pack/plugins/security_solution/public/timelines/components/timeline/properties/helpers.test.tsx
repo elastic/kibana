@@ -7,12 +7,14 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
-import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
+import type { NewTimelineProps } from './helpers';
+import { AddToFavoritesButton, NewTimeline } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
-import { timelineActions } from '../../../../timelines/store/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { timelineActions } from '../../../store/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,
   mockGlobalState,
@@ -38,7 +40,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 describe('NewTimeline', () => {
-  const mockGetButton = jest.fn();
+  const mockGetButton = jest.fn().mockReturnValue('<></>');
 
   const props: NewTimelineProps = {
     closeGearMenu: jest.fn(),
@@ -97,7 +99,7 @@ describe('Favorite Button', () => {
     test('should render favorite button', () => {
       const wrapper = mount(
         <TestProviders>
-          <AddToFavoritesButton timelineId="test" />
+          <AddToFavoritesButton timelineId={TimelineId.test} />
         </TestProviders>
       );
 
@@ -107,7 +109,7 @@ describe('Favorite Button', () => {
     test('Favorite button should be enabled ', () => {
       const wrapper = mount(
         <TestProviders>
-          <AddToFavoritesButton timelineId="test" />
+          <AddToFavoritesButton timelineId={TimelineId.test} />
         </TestProviders>
       );
 
@@ -120,13 +122,14 @@ describe('Favorite Button', () => {
       const spy = jest.spyOn(timelineActions, 'updateIsFavorite');
       const wrapper = mount(
         <TestProviders>
-          <AddToFavoritesButton timelineId="test" />
+          <AddToFavoritesButton timelineId={TimelineId.test} />
         </TestProviders>
       );
 
-      wrapper.simulate('click');
-
-      expect(spy).toHaveBeenCalled();
+      waitFor(() => {
+        wrapper.simulate('click');
+        expect(spy).toHaveBeenCalled();
+      });
     });
 
     test('should disable favorite button with filled star', () => {
@@ -138,8 +141,8 @@ describe('Favorite Button', () => {
           timeline: {
             ...mockGlobalState.timeline,
             timelineById: {
-              test: {
-                ...mockGlobalState.timeline.timelineById.test,
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
                 isFavorite: true,
               },
             },
@@ -151,7 +154,7 @@ describe('Favorite Button', () => {
       );
       const wrapper = mount(
         <TestProviders store={store}>
-          <AddToFavoritesButton timelineId="test" />
+          <AddToFavoritesButton timelineId={TimelineId.test} />
         </TestProviders>
       );
 
@@ -171,8 +174,8 @@ describe('Favorite Button', () => {
           timeline: {
             ...mockGlobalState.timeline,
             timelineById: {
-              test: {
-                ...mockGlobalState.timeline.timelineById.test,
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
                 status: TimelineStatus.immutable,
                 timelineType: TimelineType.template,
                 templateTimelineId: 'mock-template-timeline-id',
@@ -187,7 +190,7 @@ describe('Favorite Button', () => {
       );
       const wrapper = mount(
         <TestProviders store={store}>
-          <AddToFavoritesButton timelineId="test" />
+          <AddToFavoritesButton timelineId={TimelineId.test} />
         </TestProviders>
       );
       expect(
@@ -206,8 +209,8 @@ describe('Favorite Button', () => {
           timeline: {
             ...mockGlobalState.timeline,
             timelineById: {
-              test: {
-                ...mockGlobalState.timeline.timelineById.test,
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
                 status: TimelineStatus.active,
                 timelineType: TimelineType.template,
                 templateTimelineId: 'mock-template-timeline-id',

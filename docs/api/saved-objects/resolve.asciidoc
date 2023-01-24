@@ -64,13 +64,24 @@ The API returns the following:
 }
 --------------------------------------------------
 
-The `outcome` field may be any of the following:
+[NOTE]
+====
+In addition to `saved_object`, several fields can be returned:
 
-* `"exactMatch"` -- One document exactly matched the given ID.
-* `"aliasMatch"` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different than the given ID.
-* `"conflict"` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+* `outcome` (required string) -- One of the following values:
+   - `"exactMatch"` -- One document exactly matched the given ID.
+   - `"aliasMatch"` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different than
+     the given ID.
+   - `"conflict"` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the
+     `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+* `alias_target_id` (optional string) -- If the `outcome` is `"aliasMatch"` or `"conflict"`, the response will also include the
+  `alias_target_id` field. This means that an alias was found for another object, and it describes that other object's ID.
+* `alias_purpose` (optional string) -- If the `outcome` is `"aliasMatch"` or `"conflict"`, the response will also include the
+  `alias_purpose` field. This indicates why the alias was created, and it can be used to change the client behavior accordingly. One of the
+  following values: `"savedObjectConversion"`, `"savedObjectImport"`
 
-If the outcome is `"aliasMatch"` or `"conflict"`, the response will also include an `alias_target_id` field. This means that an alias was found for another object, and it describes that other object's ID.
+Client-side code uses these fields to behave differently depending on the `outcome` -- <<sharing-saved-objects-step-3,learn more>>.
+====
 
 Retrieve a dashboard object in the `testspace` by ID:
 

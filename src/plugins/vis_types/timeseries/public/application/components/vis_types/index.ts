@@ -8,31 +8,26 @@
 
 import React, { lazy } from 'react';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from 'src/core/public';
-import { PersistedState } from 'src/plugins/visualizations/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-
+import { IUiSettingsClient } from '@kbn/core/public';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
-import type { FieldFormatMap } from '../../../../../../data/common';
 import { FetchedIndexPattern } from '../../../../common/types';
+
+import './_vis_types.scss';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
  * Disable typescript errors since the components are not typed yet.
  */
 
-// @ts-expect-error
 const timeseries = lazy(() => import('./timeseries/vis'));
-// @ts-expect-error
 const metric = lazy(() => import('./metric/vis'));
-// @ts-expect-error
 const topN = lazy(() => import('./top_n/vis'));
-// @ts-expect-error
 const table = lazy(() => import('./table/vis'));
-// @ts-expect-error
 const gauge = lazy(() => import('./gauge/vis'));
-// @ts-expect-error
 const markdown = lazy(() => import('./markdown/vis'));
 
 export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVisProps>> = {
@@ -62,8 +57,11 @@ export interface TimeseriesVisProps {
   visData: TimeseriesVisData;
   getConfig: IUiSettingsClient['get'];
   syncColors: boolean;
+  syncTooltips: boolean;
+  syncCursor: boolean;
   palettesService: PaletteRegistry;
   indexPattern?: FetchedIndexPattern['indexPattern'];
   /** @deprecated please use indexPattern.fieldFormatMap instead **/
   fieldFormatMap?: FieldFormatMap;
+  initialRender: () => void | undefined;
 }

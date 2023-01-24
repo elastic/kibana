@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import clusters from './__fixtures__/clusters';
+import clusters from './__fixtures__/clusters.json';
 import { getClustersSummary } from './get_clusters_summary';
 
 const mockLog = jest.fn();

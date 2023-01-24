@@ -8,9 +8,9 @@
 import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 
+import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Space } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
@@ -79,6 +79,10 @@ describe('PrivilegeSpaceForm', () => {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
+        "with_require_all_spaces_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
         "with_sub_features": Object {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
@@ -128,6 +132,12 @@ describe('PrivilegeSpaceForm', () => {
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "all",
           "subFeaturePrivileges": Array [],
+        },
+        "with_require_all_spaces_sub_features": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "cool_toggle_1",
+          ],
         },
         "with_sub_features": Object {
           "primaryFeaturePrivilege": "all",
@@ -182,6 +192,10 @@ describe('PrivilegeSpaceForm', () => {
           "subFeaturePrivileges": Array [],
         },
         "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_require_all_spaces_sub_features": Object {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
@@ -286,6 +300,10 @@ describe('PrivilegeSpaceForm', () => {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
+        "with_require_all_spaces_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
         "with_sub_features": Object {
           "primaryFeaturePrivilege": "read",
           "subFeaturePrivileges": Array [
@@ -346,6 +364,7 @@ describe('PrivilegeSpaceForm', () => {
             with_excluded_sub_features: ['read'],
             no_sub_features: ['read'],
             with_sub_features: ['read'],
+            with_require_all_spaces_sub_features: ['read'],
           },
           spaces: ['foo'],
         },
@@ -451,6 +470,7 @@ describe('PrivilegeSpaceForm', () => {
               with_excluded_sub_features: ['read'],
               no_sub_features: ['read'],
               with_sub_features: ['read'],
+              with_require_all_spaces_sub_features: ['read'],
             },
             spaces: ['foo'],
           },
@@ -493,6 +513,7 @@ describe('PrivilegeSpaceForm', () => {
               no_sub_features: ['all'],
               no_sub_features_disabled_read: ['all'],
               with_sub_features: ['all'],
+              with_require_all_spaces_sub_features: ['all'],
             },
             spaces: ['foo'],
           },
@@ -569,6 +590,7 @@ describe('PrivilegeSpaceForm', () => {
               no_sub_features: ['read'],
               no_sub_features_require_all_space: ['read'],
               with_sub_features: ['read'],
+              with_require_all_spaces_sub_features: ['read'],
             },
             spaces: ['foo'],
           },
@@ -613,6 +635,7 @@ describe('PrivilegeSpaceForm', () => {
               with_excluded_sub_features: ['all'],
               no_sub_features: ['all'],
               with_sub_features: ['all'],
+              with_require_all_spaces_sub_features: ['all'],
             },
             spaces: ['foo'],
           },
@@ -671,6 +694,7 @@ describe('PrivilegeSpaceForm', () => {
               no_sub_features: ['all'],
               no_sub_features_require_all_space: ['all'],
               with_sub_features: ['all'],
+              with_require_all_spaces_sub_features: ['all'],
             },
             spaces: ['*'],
           },

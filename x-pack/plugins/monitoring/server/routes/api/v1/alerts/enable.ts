@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { handleError } from '../../../../lib/errors';
-import { AlertsFactory } from '../../../../alerts';
-import { LegacyServer, RouteDependencies } from '../../../../types';
+import { ActionResult } from '@kbn/actions-plugin/server';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
-import { ActionResult } from '../../../../../../actions/common';
+import { AlertsFactory } from '../../../../alerts';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
-import { AlertTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore, RouteDependencies } from '../../../../types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
-export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependencies) {
+export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
@@ -24,6 +23,10 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
     },
     async (context, request, response) => {
       try {
+        const alertingContext = await context.alerting;
+        const infraContext = await context.infra;
+        const actionContext = await context.actions;
+
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
@@ -33,7 +36,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
             server.log.info(
-              `Skipping rule creation for "${context.infra.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
+              `Skipping rule creation for "${infraContext.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
             );
             return response.ok({
               body: {
@@ -44,9 +47,9 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
           }
         }
 
-        const rulesClient = context.alerting?.getRulesClient();
-        const actionsClient = context.actions?.getActionsClient();
-        const types = context.actions?.listTypes();
+        const rulesClient = alertingContext?.getRulesClient();
+        const actionsClient = actionContext?.getActionsClient();
+        const types = actionContext?.listTypes();
         if (!rulesClient || !actionsClient || !types) {
           return response.ok({ body: undefined });
         }
@@ -79,7 +82,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
           },
         ];
 
-        let createdAlerts: Array<SanitizedAlert<AlertTypeParams>> = [];
+        let createdAlerts: Array<SanitizedRule<RuleTypeParams>> = [];
         const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
           npRoute.cluster.asScoped(request).asCurrentUser,
           npRoute.logger
@@ -92,7 +95,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
         }
 
         server.log.info(
-          `Created ${createdAlerts.length} alerts for "${context.infra.spaceId}" space`
+          `Created ${createdAlerts.length} alerts for "${infraContext.spaceId}" space`
         );
 
         return response.ok({ body: { createdAlerts, disabledWatcherClusterAlerts } });

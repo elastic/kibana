@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import deepEqual from 'fast-deep-equal';
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
+
+import { useDispatch } from 'react-redux';
+import type { ControlColumnProps, HeaderActionProps } from '../../../../../../common/types';
+import { removeColumn, upsertColumn } from '../../../../store/timeline/actions';
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
-import { BrowserFields } from '../../../../../common/containers/source';
+import type { BrowserFields } from '../../../../../common/containers/source';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import {
-  ColumnHeaderOptions,
-  ControlColumnProps,
-  HeaderActionProps,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../../../common/types/timeline';
-import { OnSelectAll } from '../../events';
+import type { ColumnHeaderOptions, TimelineTabs } from '../../../../../../common/types/timeline';
+import type { OnSelectAll } from '../../events';
 import {
   EventsTh,
   EventsThead,
@@ -30,11 +28,12 @@ import {
   EventsTrHeader,
   EventsThGroupActions,
 } from '../../styles';
-import { Sort } from '../sort';
+import type { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useFieldBrowserOptions, CreateFieldEditorActions } from '../../../fields_browser';
+import type { FieldEditorActions } from '../../../fields_browser';
+import { useFieldBrowserOptions } from '../../../fields_browser';
 
 export interface ColumnHeadersComponentProps {
   actionsColumnWidth: number;
@@ -75,15 +74,14 @@ DraggableContainer.displayName = 'DraggableContainer';
 
 export const isFullScreen = ({
   globalFullScreen,
-  timelineId,
+  isActiveTimelines,
   timelineFullScreen,
 }: {
   globalFullScreen: boolean;
-  timelineId: string;
+  isActiveTimelines: boolean;
   timelineFullScreen: boolean;
 }) =>
-  (timelineId === TimelineId.active && timelineFullScreen) ||
-  (timelineId !== TimelineId.active && globalFullScreen);
+  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);
 
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
@@ -102,8 +100,10 @@ export const ColumnHeadersComponent = ({
   leadingControlColumns,
   trailingControlColumns,
 }: ColumnHeadersComponentProps) => {
+  const dispatch = useDispatch();
+
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const fieldEditorActionsRef = useRef<CreateFieldEditorActions>(null);
+  const fieldEditorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
     return () => {
@@ -192,8 +192,9 @@ export const ColumnHeadersComponent = ({
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: SourcererScopeName.timeline,
-    timelineId: timelineId as TimelineId,
     editorActionsRef: fieldEditorActionsRef,
+    upsertColumn: (column, index) => dispatch(upsertColumn({ column, id: timelineId, index })),
+    removeColumn: (columnId) => dispatch(removeColumn({ columnId, id: timelineId })),
   });
 
   const LeadingHeaderActions = useMemo(() => {
@@ -312,19 +313,4 @@ export const ColumnHeadersComponent = ({
   );
 };
 
-export const ColumnHeaders = React.memo(
-  ColumnHeadersComponent,
-  (prevProps, nextProps) =>
-    prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
-    prevProps.isEventViewer === nextProps.isEventViewer &&
-    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.onSelectAll === nextProps.onSelectAll &&
-    prevProps.show === nextProps.show &&
-    prevProps.showEventsSelect === nextProps.showEventsSelect &&
-    prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
-    deepEqual(prevProps.sort, nextProps.sort) &&
-    prevProps.timelineId === nextProps.timelineId &&
-    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
-    prevProps.tabType === nextProps.tabType &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields)
-);
+export const ColumnHeaders = React.memo(ColumnHeadersComponent);

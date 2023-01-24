@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getESClusterUuid } from '.';
 
 describe('getESClusterUuid', () => {

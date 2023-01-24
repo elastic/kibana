@@ -19,7 +19,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -29,15 +29,15 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should get a comment in space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
       const comment = await getComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         commentId: patchedCase.comments![0].id,
         auth: authSpace1,
@@ -47,15 +47,15 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not get a comment in space2 when it was created in space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCase = await createComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         params: postCommentUserReq,
         auth: authSpace1,
       });
       await getComment({
-        supertest,
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
         commentId: patchedCase.comments![0].id,
         auth: getAuthWithSuperUser('space2'),

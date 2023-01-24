@@ -5,149 +5,165 @@
  * 2.0.
  */
 
-import { APMPlugin, APMRouteHandlerResources } from '../..';
+import { Logger, CoreStart } from '@kbn/core/server';
 import {
+  FleetStartContract,
   PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
+import { get } from 'lodash';
+import { APMPlugin, APMRouteHandlerResources } from '../..';
+import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
+import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 import {
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../../../../fleet/common';
-import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
-import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
-import { APMPluginStartDependencies } from '../../types';
-import { setupRequest } from '../../lib/helpers/setup_request';
-import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
+  AGENT_CONFIG_API_KEY_PATH,
+  SOURCE_MAP_API_KEY_PATH,
+} from './get_package_policy_decorators';
 
 export async function registerFleetPolicyCallbacks({
-  plugins,
-  ruleDataClient,
-  config,
   logger,
-  kibanaVersion,
+  coreStartPromise,
+  plugins,
+  config,
 }: {
+  logger: Logger;
+  coreStartPromise: Promise<CoreStart>;
   plugins: APMRouteHandlerResources['plugins'];
-  ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
   config: NonNullable<APMPlugin['currentConfig']>;
-  logger: NonNullable<APMPlugin['logger']>;
-  kibanaVersion: string;
 }) {
   if (!plugins.fleet) {
     return;
   }
+
   const fleetPluginStart = await plugins.fleet.start();
+  const coreStart = await coreStartPromise;
 
-  // Registers a callback invoked when a policy is created to populate the APM
-  // integration policy with pre-existing agent configurations
-  registerPackagePolicyExternalCallback({
-    fleetPluginStart,
-    callbackName: 'packagePolicyCreate',
-    plugins,
-    ruleDataClient,
-    config,
-    logger,
-    kibanaVersion,
-  });
+  fleetPluginStart.registerExternalCallback(
+    'packagePolicyUpdate',
+    onPackagePolicyCreateOrUpdate({ fleetPluginStart, config })
+  );
 
-  // Registers a callback invoked when a policy is updated to populate the APM
-  // integration policy with existing agent configurations
-  registerPackagePolicyExternalCallback({
-    fleetPluginStart,
-    callbackName: 'packagePolicyUpdate',
-    plugins,
-    ruleDataClient,
-    config,
-    logger,
-    kibanaVersion,
-  });
+  fleetPluginStart.registerExternalCallback(
+    'packagePolicyCreate',
+    onPackagePolicyCreateOrUpdate({ fleetPluginStart, config })
+  );
+
+  fleetPluginStart.registerExternalCallback(
+    'packagePolicyDelete',
+    onPackagePolicyDelete({ coreStart, logger })
+  );
+
+  fleetPluginStart.registerExternalCallback(
+    'packagePolicyPostCreate',
+    onPackagePolicyPostCreate({
+      fleet: fleetPluginStart,
+      coreStart,
+      logger,
+    })
+  );
 }
 
-type ExternalCallbackParams =
-  | Parameters<PostPackagePolicyCreateCallback>
-  | Parameters<PutPackagePolicyUpdateCallback>;
-export type PackagePolicy = NewPackagePolicy | UpdatePackagePolicy;
-type Context = ExternalCallbackParams[1];
-type Request = ExternalCallbackParams[2];
-
-function registerPackagePolicyExternalCallback({
-  fleetPluginStart,
-  callbackName,
-  plugins,
-  ruleDataClient,
-  config,
+function onPackagePolicyDelete({
+  coreStart,
   logger,
-  kibanaVersion,
 }: {
-  fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
-  callbackName: 'packagePolicyCreate' | 'packagePolicyUpdate';
-  plugins: APMRouteHandlerResources['plugins'];
-  ruleDataClient: APMRouteHandlerResources['ruleDataClient'];
-  config: NonNullable<APMPlugin['currentConfig']>;
-  logger: NonNullable<APMPlugin['logger']>;
-  kibanaVersion: string;
-}) {
-  const callbackFn:
-    | PostPackagePolicyCreateCallback
-    | PutPackagePolicyUpdateCallback = async (
-    packagePolicy: PackagePolicy,
-    context: Context,
-    request: Request
-  ) => {
+  coreStart: CoreStart;
+  logger: Logger;
+}): PostPackagePolicyDeleteCallback {
+  return async (packagePolicies) => {
+    // console.log(`packagePolicyDelete:`, packagePolicies);
+    const promises = packagePolicies.map(async (packagePolicy) => {
+      if (packagePolicy.package?.name !== 'apm') {
+        return packagePolicy;
+      }
+
+      const internalESClient = coreStart.elasticsearch.client.asInternalUser;
+
+      const [agentConfigApiKeyId] = get(
+        packagePolicy,
+        AGENT_CONFIG_API_KEY_PATH
+      ).split(':');
+
+      const [sourceMapApiKeyId] = get(
+        packagePolicy,
+        SOURCE_MAP_API_KEY_PATH
+      ).split(':');
+
+      logger.debug(
+        `Deleting API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`
+      );
+
+      try {
+        await internalESClient.security.invalidateApiKey({
+          body: { ids: [agentConfigApiKeyId, sourceMapApiKeyId], owner: true },
+        });
+      } catch (e) {
+        logger.error(
+          `Failed to delete API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`
+        );
+      }
+    });
+
+    await Promise.all(promises);
+  };
+}
+
+function onPackagePolicyPostCreate({
+  fleet,
+  coreStart,
+  logger,
+}: {
+  fleet: FleetStartContract;
+  coreStart: CoreStart;
+  logger: Logger;
+}): PostPackagePolicyPostCreateCallback {
+  return async (packagePolicy) => {
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
-    const setup = await setupRequest({
+
+    // add api key to new package policy
+    await addApiKeysToPackagePolicyIfMissing({
+      policy: packagePolicy,
+      coreStart,
+      fleet,
+      logger,
+    });
+
+    return packagePolicy;
+  };
+}
+
+/*
+ * This is called when a new package policy is created.
+ * It will add an API key to the package policy.
+ */
+function onPackagePolicyCreateOrUpdate({
+  fleetPluginStart,
+  config,
+}: {
+  fleetPluginStart: FleetStartContract;
+  config: NonNullable<APMPlugin['currentConfig']>;
+}): PutPackagePolicyUpdateCallback & PostPackagePolicyCreateCallback {
+  return async (packagePolicy, context, request) => {
+    if (packagePolicy.package?.name !== 'apm') {
+      return packagePolicy;
+    }
+
+    const internalESClient = await createInternalESClient({
       context: context as any,
-      params: { query: { _inspect: false } },
-      core: null as any,
-      plugins,
+      debug: false,
       request,
       config,
-      logger,
-      ruleDataClient,
-      kibanaVersion,
     });
-    return await mergePackagePolicyWithApm({
-      setup,
+
+    return await decoratePackagePolicyWithAgentConfigAndSourceMap({
+      internalESClient,
       fleetPluginStart,
       packagePolicy,
     });
-  };
-
-  fleetPluginStart.registerExternalCallback(callbackName, callbackFn);
-}
-
-export const APM_SERVER = 'apm-server';
-
-// Immutable function applies the given package policy with a set of agent configurations
-export function getPackagePolicyWithAgentConfigurations(
-  packagePolicy: PackagePolicy,
-  agentConfigurations: AgentConfiguration[]
-) {
-  const [firstInput, ...restInputs] = packagePolicy.inputs;
-  const apmServerValue = firstInput?.config?.[APM_SERVER].value;
-  return {
-    ...packagePolicy,
-    inputs: [
-      {
-        ...firstInput,
-        config: {
-          ...firstInput.config,
-          [APM_SERVER]: {
-            value: {
-              ...apmServerValue,
-              agent_config: agentConfigurations.map((configuration) => ({
-                service: configuration.service,
-                config: configuration.settings,
-                etag: configuration.etag,
-                [AGENT_NAME]: configuration.agent_name,
-              })),
-            },
-          },
-        },
-      },
-      ...restInputs,
-    ],
   };
 }

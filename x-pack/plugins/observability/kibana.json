@@ -22,24 +22,32 @@
   "requiredPlugins": [
     "alerting",
     "cases",
+    "charts",
     "data",
     "dataViews",
     "features",
     "inspector",
     "ruleRegistry",
-    "timelines",
     "triggersActionsUi",
-    "inspector"
+    "inspector",
+    "unifiedSearch",
+    "security",
+    "guidedOnboarding",
+    "share",
+    "spaces"
   ],
   "ui": true,
   "server": true,
   "requiredBundles": [
+    "unifiedSearch",
     "data",
     "dataViews",
     "embeddable",
     "kibanaReact",
     "kibanaUtils",
-    "lens"
+    "lens",
+    "usageCollection",
+    "visualizations"
   ],
   "extraPublicDirs": [
     "common"

@@ -6,13 +6,13 @@
  */
 
 /* eslint-disable no-console */
-
 const { times } = require('lodash');
 const path = require('path');
 const yargs = require('yargs');
 const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
+  .parserConfiguration({ 'unknown-options-as-args': true })
   .option('kibana-install-dir', {
     default: '',
     type: 'string',
@@ -29,63 +29,69 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
-  .option('grep', {
-    alias: 'spec',
-    default: false,
-    type: 'string',
-    description:
-      'Specify the spec files to run (use doublequotes for glob matching)',
-  })
-  .option('open', {
-    default: false,
-    type: 'boolean',
-    description: 'Opens the Cypress Test Runner',
+  .option('times', {
+    type: 'number',
+    description: 'Repeat the test n number of times',
   })
   .option('bail', {
     default: false,
     type: 'boolean',
     description: 'stop tests after the first failure',
   })
-  .option('times', {
-    default: 1,
-    type: 'number',
-    description: 'Repeat the test n number of times',
-  })
   .help();
-
-const { server, runner, open, grep, bail, kibanaInstallDir } = argv;
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
-let ftrScript = 'functional_tests';
-if (server) {
-  ftrScript = 'functional_tests_server';
-} else if (runner || open) {
-  ftrScript = 'functional_test_runner';
+let ftrScript = 'functional_tests.js';
+if (argv.server) {
+  ftrScript = 'functional_tests_server.js';
+} else if (argv.runner) {
+  ftrScript = 'functional_test_runner.js';
 }
 
-const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
-const grepArg = grep ? `--grep "${grep}"` : '';
-const bailArg = bail ? `--bail` : '';
-const cmd = `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
+const cypressCliArgs = yargs(argv._).parserConfiguration({
+  'boolean-negation': false,
+}).argv;
 
-console.log(`Running "${cmd}"`);
+if (cypressCliArgs.grep) {
+  throw new Error('--grep is not supported. Please use --spec instead');
+}
 
-if (argv.times > 1) {
-  console.log(`The command will be executed ${argv.times} times`);
+const spawnArgs = [
+  `../../../../scripts/${ftrScript}`,
+  `--config=./ftr_config.ts`,
+  `--kibana-install-dir=${argv.kibanaInstallDir}`,
+  ...(argv.bail ? [`--bail`] : []),
+];
+
+function runTests() {
+  console.log(`Running e2e tests: "node ${spawnArgs.join(' ')}"`);
+
+  return childProcess.spawnSync('node', spawnArgs, {
+    cwd: e2eDir,
+    env: { ...process.env, CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs) },
+    encoding: 'utf8',
+    stdio: 'inherit',
+  });
 }
 
 const runCounter = { succeeded: 0, failed: 0, remaining: argv.times };
-times(argv.times, () => {
-  try {
-    childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });
+let exitStatus = 0;
+times(argv.times ?? 1, () => {
+  const child = runTests();
+  if (child.status === 0) {
     runCounter.succeeded++;
-  } catch (e) {
+  } else {
+    exitStatus = child.status;
     runCounter.failed++;
   }
+
   runCounter.remaining--;
 
   if (argv.times > 1) {
     console.log(runCounter);
   }
 });
+
+process.exitCode = exitStatus;
+console.log(`Quitting with exit code ${exitStatus}`);

@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import type { ESFilter } from '@kbn/es-types';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
+import { ALL_VALUES_SELECTED } from '../../configurations/constants/url_constants';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
-import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
-import { PersistableFilter } from '../../../../../../../lens/common';
 import { buildPhrasesFilter } from '../../configurations/utils';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
 
 interface Props {
   seriesId: number;

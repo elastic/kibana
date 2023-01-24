@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { getByTestId, fireEvent, getByText } from '@testing-library/react';
+import { getByTestId, fireEvent, getByText, act } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import type { ApmUrlParams } from '../../context/url_params_context/types';
 import * as useFetcherHook from '../../hooks/use_fetcher';
+import * as useApmDataViewHook from '../../hooks/use_apm_data_view';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../utils/test_helpers';
 import { fromQuery } from './links/url_helpers';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { SearchBar } from './search_bar';
 
 function setup({
@@ -37,12 +38,18 @@ function setup({
 
   const KibanaReactContext = createKibanaReactContext({
     usageCollection: { reportUiCounter: () => {} },
+    dataViews: { get: async () => {} },
   } as Partial<CoreStart>);
 
   // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
     .mockReturnValue(serviceTransactionTypes);
+
+  // mock transaction types
+  jest
+    .spyOn(useApmDataViewHook, 'useApmDataView')
+    .mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
@@ -91,7 +98,7 @@ describe('when transactionType is selected and multiple transaction types are gi
     expect(dropdown).toHaveValue('secondType');
   });
 
-  it('should update the URL when a transaction type is selected', () => {
+  it('should update the URL when a transaction type is selected', async () => {
     const { container } = setup({
       history,
       serviceTransactionTypes: ['firstType', 'secondType'],
@@ -112,7 +119,9 @@ describe('when transactionType is selected and multiple transaction types are gi
     expect(getByText(dropdown, 'secondType')).toBeInTheDocument();
 
     // change dropdown value
-    fireEvent.change(dropdown, { target: { value: 'firstType' } });
+    await act(async () => {
+      fireEvent.change(dropdown, { target: { value: 'firstType' } });
+    });
 
     // assert that value was changed
     expect(dropdown).toHaveValue('firstType');

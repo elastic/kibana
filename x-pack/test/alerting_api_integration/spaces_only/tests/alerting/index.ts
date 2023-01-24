@@ -11,10 +11,11 @@ import { buildUp, tearDown } from '..';
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', () => {
-    before(async () => buildUp(getService));
-    after(async () => tearDown(getService));
+    before(async () => await buildUp(getService));
+    after(async () => await tearDown(getService));
 
     loadTestFile(require.resolve('./aggregate'));
+    loadTestFile(require.resolve('./aggregate_post'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./disable'));
@@ -23,9 +24,12 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_alert_state'));
     loadTestFile(require.resolve('./get_alert_summary'));
+    loadTestFile(require.resolve('./get_execution_log'));
+    loadTestFile(require.resolve('./get_action_error_log'));
     loadTestFile(require.resolve('./rule_types'));
     loadTestFile(require.resolve('./event_log'));
     loadTestFile(require.resolve('./execution_status'));
+    loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./mute_all'));
     loadTestFile(require.resolve('./mute_instance'));
@@ -42,10 +46,18 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./notify_when'));
     loadTestFile(require.resolve('./ephemeral'));
     loadTestFile(require.resolve('./event_log_alerts'));
+    loadTestFile(require.resolve('./snooze'));
+    loadTestFile(require.resolve('./bulk_edit'));
+    loadTestFile(require.resolve('./capped_action_type'));
     loadTestFile(require.resolve('./scheduled_task_id'));
+    loadTestFile(require.resolve('./run_soon'));
+    loadTestFile(require.resolve('./flapping_history'));
+    loadTestFile(require.resolve('./check_registered_rule_types'));
+    loadTestFile(require.resolve('./alerts_as_data'));
     // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 
     // note that this test will destroy existing spaces
-    loadTestFile(require.resolve('./migrations'));
+    loadTestFile(require.resolve('./migrations.ts'));
+    loadTestFile(require.resolve('./migrations/index.ts'));
   });
 }

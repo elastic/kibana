@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanel,
   EuiTitle,
@@ -19,27 +18,28 @@ import {
   EuiFlexGroup,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   BasicOptions,
   SwitchOption,
   SelectOption,
   PalettePicker,
   LongLegendOptions,
-} from '../../../../../vis_default_editor/public';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-import { TruncateLabelsOption } from './truncate_labels';
-import { PaletteRegistry } from '../../../../../charts/public';
-import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieTypeProps } from '../../types';
+  LegendSizeSettings,
+} from '@kbn/vis-default-editor-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
-} from '../../../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
+import { TruncateLabelsOption } from './truncate_labels';
+import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
+import { PieTypeProps } from '../../types';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
@@ -96,14 +96,17 @@ const PieOptions = (props: PieOptionsProps) => {
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
+  const legendSize = stateParams.legendSize;
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),
     []
   );
 
   useEffect(() => {
-    setLegendVisibility(legendUiStateValue);
-  }, [legendUiStateValue]);
+    setLegendVisibility(legendUiStateValue ?? stateParams.legendDisplay === LegendDisplay.SHOW);
+  }, [legendUiStateValue, stateParams.legendDisplay]);
 
   useEffect(() => {
     const fetchPalettes = async () => {
@@ -120,6 +123,8 @@ const PieOptions = (props: PieOptionsProps) => {
     },
     [setValue]
   );
+
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
 
   const handleLegendDisplayChange = useCallback(
     (name: keyof PartitionVisParams, show: boolean) => {
@@ -155,6 +160,7 @@ const PieOptions = (props: PieOptionsProps) => {
           paramName="isDonut"
           value={stateParams.isDonut}
           setValue={setValue}
+          data-test-subj="visTypePieIsDonut"
         />
         {props.showElasticChartsOptions && stateParams.isDonut && (
           <EuiFormRow label={emptySizeRatioLabel} fullWidth>
@@ -217,9 +223,6 @@ const PieOptions = (props: PieOptionsProps) => {
               value={stateParams.nestedLegend}
               disabled={stateParams.legendDisplay === LegendDisplay.HIDE}
               setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
-                }
                 setValue(paramName, value);
               }}
               data-test-subj="visTypePieNestedLegendSwitch"
@@ -230,6 +233,15 @@ const PieOptions = (props: PieOptionsProps) => {
               maxLegendLines={stateParams.maxLegendLines ?? 1}
               setValue={setValue}
             />
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={handleLegendSizeChange}
+              isVerticalLegend={
+                stateParams.legendPosition === Position.Left ||
+                stateParams.legendPosition === Position.Right
+              }
+              showAutoOption={hadAutoLegendSize}
+            />
           </>
         )}
         {props.showElasticChartsOptions && palettesRegistry && (
@@ -238,9 +250,6 @@ const PieOptions = (props: PieOptionsProps) => {
             activePalette={stateParams.palette}
             paramName="palette"
             setPalette={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
-              }
               setValue(paramName, value);
             }}
           />
@@ -281,9 +290,6 @@ const PieOptions = (props: PieOptionsProps) => {
                 : stateParams.labels.position || LabelPositions.DEFAULT
             }
             setValue={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'label_position_selected');
-              }
               setLabels(paramName, value);
             }}
             data-test-subj="visTypePieLabelPositionSelect"
@@ -323,9 +329,6 @@ const PieOptions = (props: PieOptionsProps) => {
               paramName="valuesFormat"
               value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
               setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'values_format_selected');
-                }
                 setLabels(paramName, value);
               }}
               data-test-subj="visTypePieValueFormatsSelect"

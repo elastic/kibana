@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
-import { Query } from '@kbn/es-query';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import React, { useMemo } from 'react';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
-import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { LogFilterState } from '../../../containers/logs/log_filter';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState } from '../../../containers/logs/log_position';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights/log_highlights';
+import { useLogPositionStateContext } from '../../../containers/logs/log_position';
+import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { StreamLiveButton } from './components/stream_live_button';
 
 export const LogsToolbar = () => {
-  const { derivedIndexPattern } = useLogSourceContext();
-  const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
-    LogViewConfiguration.Context
-  );
-  const { filterQueryDraft, isFilterQueryDraftValid, applyLogFilterQuery, setLogFilterQueryDraft } =
-    useContext(LogFilterState.Context);
-  const { setSurroundingLogsId } = useContext(LogFlyout.Context);
+  const { derivedDataView } = useLogViewContext();
+  const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } =
+    useLogViewConfigurationContext();
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibanaContextForPlugin().services;
 
   const {
     setHighlightTerms,
@@ -40,87 +37,73 @@ export const LogsToolbar = () => {
     hasNextHighlight,
     goToPreviousHighlight,
     goToNextHighlight,
-  } = useContext(LogHighlightsState.Context);
-  const {
-    isStreaming,
-    startLiveStreaming,
-    stopLiveStreaming,
-    startDateExpression,
-    endDateExpression,
-    updateDateRange,
-  } = useContext(LogPositionState.Context);
+  } = useLogHighlightsStateContext();
+  const { isStreaming, startLiveStreaming, stopLiveStreaming } = useLogPositionStateContext();
+
+  const dataViews = useMemo(
+    () => (derivedDataView != null ? [derivedDataView] : undefined),
+    [derivedDataView]
+  );
 
   return (
-    <div>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="l" wrap>
-        <QueryBarFlexItem>
-          <QueryStringInput
-            disableLanguageSwitcher={true}
-            iconType="search"
-            indexPatterns={[derivedIndexPattern]}
-            isInvalid={!isFilterQueryDraftValid}
-            onChange={(query: Query) => {
-              setSurroundingLogsId(null);
-              setLogFilterQueryDraft(query);
-            }}
-            onSubmit={(query: Query) => {
-              setSurroundingLogsId(null);
-              applyLogFilterQuery(query);
-            }}
-            placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
-              defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
-            })}
-            query={filterQueryDraft}
-          />
-        </QueryBarFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <LogCustomizationMenu>
-                <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
-                <LogTextScaleControls
-                  availableTextScales={availableTextScales}
-                  textScale={textScale}
-                  setTextScale={setTextScale}
-                />
-              </LogCustomizationMenu>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <LogHighlightsMenu
-                onChange={setHighlightTerms}
-                isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
-                activeHighlights={
-                  highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
-                }
-                goToPreviousHighlight={goToPreviousHighlight}
-                goToNextHighlight={goToNextHighlight}
-                hasPreviousHighlight={hasPreviousHighlight}
-                hasNextHighlight={hasNextHighlight}
+    <>
+      <SearchBar
+        appName={i18n.translate('xpack.infra.appName', {
+          defaultMessage: 'Infra logs',
+        })}
+        iconType="search"
+        placeholder={i18n.translate('xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder', {
+          defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
+        })}
+        useDefaultBehaviors={true}
+        indexPatterns={dataViews}
+        showQueryInput={true}
+        showQueryMenu={false}
+        showFilterBar={true}
+        showDatePicker={true}
+        displayStyle="inPage"
+      />
+      <EuiSpacer size="s" />
+      <div>
+        <EuiFlexGroup
+          alignItems="stretch"
+          justifyContent="flexStart"
+          direction="row"
+          gutterSize="none"
+        >
+          <EuiFlexItem grow={false}>
+            <LogCustomizationMenu>
+              <LogTextWrapControls wrap={textWrap} setTextWrap={setTextWrap} />
+              <LogTextScaleControls
+                availableTextScales={availableTextScales}
+                textScale={textScale}
+                setTextScale={setTextScale}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LogDatepicker
-            startDateExpression={startDateExpression}
-            endDateExpression={endDateExpression}
-            onStartStreaming={startLiveStreaming}
-            onStopStreaming={stopLiveStreaming}
-            isStreaming={isStreaming}
-            onUpdateDateRange={updateDateRange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+            </LogCustomizationMenu>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LogHighlightsMenu
+              onChange={setHighlightTerms}
+              isLoading={loadLogEntryHighlightsRequest.state === 'pending'}
+              activeHighlights={
+                highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length > 0
+              }
+              goToPreviousHighlight={goToPreviousHighlight}
+              goToNextHighlight={goToNextHighlight}
+              hasPreviousHighlight={hasPreviousHighlight}
+              hasNextHighlight={hasNextHighlight}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <StreamLiveButton
+              isStreaming={isStreaming}
+              onStartStreaming={startLiveStreaming}
+              onStopStreaming={stopLiveStreaming}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    </>
   );
 };
-
-const QueryBarFlexItem = euiStyled(EuiFlexItem)`
-  @media (min-width: 1200px) {
-    flex: 0 0 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-`;

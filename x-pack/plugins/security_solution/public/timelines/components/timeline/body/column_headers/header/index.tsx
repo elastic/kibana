@@ -10,14 +10,14 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../../store/timeline';
-import { OnFilterChange } from '../../../events';
-import { Sort } from '../../sort';
+import type { OnFilterChange } from '../../../events';
+import type { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
@@ -43,7 +43,8 @@ export const HeaderComponent: React.FC<Props> = ({
 
   const onColumnSort = useCallback(() => {
     const columnId = header.id;
-    const columnType = header.type ?? 'text';
+    const columnType = header.type ?? '';
+    const esTypes = header.esTypes ?? [];
     const sortDirection = getNewSortDirectionOnClick({
       clickedHeader: header,
       currentSort: sort,
@@ -56,6 +57,7 @@ export const HeaderComponent: React.FC<Props> = ({
         {
           columnId,
           columnType,
+          esTypes,
           sortDirection,
         },
       ];
@@ -65,6 +67,7 @@ export const HeaderComponent: React.FC<Props> = ({
         {
           columnId,
           columnType,
+          esTypes,
           sortDirection,
         },
         ...sort.slice(headerIndex + 1),
@@ -83,7 +86,7 @@ export const HeaderComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { isLoading } = useDeepEqualSelector(
     (state) => getManageTimeline(state, timelineId) || { isLoading: false }
   );

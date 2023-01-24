@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { TelemetryConfigType } from './config';
 import { TelemetryPlugin } from './plugin';
 

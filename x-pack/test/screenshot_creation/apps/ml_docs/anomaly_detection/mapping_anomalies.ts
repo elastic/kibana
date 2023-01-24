@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
-import { LOGS_INDEX_PATTERN } from '../index';
+import { LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
-  const maps = getPageObject('maps');
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
   const renderable = getService('renderable');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
@@ -67,19 +66,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('set data visualizer options');
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
       await ml.dataVisualizerIndexBased.clickUseFullDataButton('14,074');
-      await ml.dataVisualizerTable.setSampleSizeInputValue(
-        'all',
-        'geo.coordinates',
-        '14074 (100%)'
-      );
       await ml.dataVisualizerTable.setFieldNameFilter(['geo.dest']);
 
       await ml.testExecution.logTestStep('set maps options and take screenshot');
       await ml.dataVisualizerTable.ensureDetailsOpen('geo.dest');
       await renderable.waitForRender();
-      await maps.openLegend();
 
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'weblogs-data-visualizer-choropleth',
         screenshotDirectories
       );
@@ -102,7 +95,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobWizardMultiMetric.scrollSplitFieldIntoView();
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'weblogs-multimetric-wizard-vector',
         screenshotDirectories
       );
@@ -121,8 +114,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('scroll map into view and take screenshot');
       await ml.anomalyExplorer.scrollMapContainerIntoView();
       await renderable.waitForRender();
-      await maps.openLegend();
-      await mlScreenshots.takeScreenshot('weblogs-anomaly-explorer-vectors', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'weblogs-anomaly-explorer-vectors',
+        screenshotDirectories
+      );
     });
   });
 }

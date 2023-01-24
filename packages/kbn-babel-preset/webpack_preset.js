@@ -8,7 +8,8 @@
 
 const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
-module.exports = () => {
+/** @type {import('@babel/core').ConfigFunction} */
+module.exports = (api, options = {}) => {
   return {
     presets: [
       [
@@ -18,11 +19,12 @@ module.exports = () => {
           modules: false,
           // Please read the explanation for this
           // in node_preset.js
-          corejs: '3.21.1',
+          corejs: '3.27.1',
           bugfixes: true,
+          browserslistEnv: api.env('production') ? 'production' : 'dev',
         },
       ],
-      require('./common_preset'),
+      [require('./common_preset'), options],
     ],
     env: {
       production: {
@@ -55,7 +57,7 @@ module.exports = () => {
           [
             require.resolve('@emotion/babel-preset-css-prop'),
             {
-              labelFormat: '[local]',
+              labelFormat: '[filename]--[local]',
             },
           ],
         ],

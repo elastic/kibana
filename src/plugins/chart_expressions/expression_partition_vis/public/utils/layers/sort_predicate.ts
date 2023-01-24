@@ -7,7 +7,7 @@
  */
 
 import { ArrayEntry } from '@elastic/charts';
-import { Datatable } from '../../../../../../../src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 
 type SortFn = (([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => number) | undefined;
@@ -34,8 +34,9 @@ const sortPredicateSaveSourceOrder: SortPredicatePureFn =
   () =>
   ([, node1], [, node2]) => {
     const [index1] = node1.inputIndex ?? [];
-    if (index1 !== undefined) {
-      return index1;
+    const [index2] = node2.inputIndex ?? [];
+    if (index1 !== undefined && index2 !== undefined) {
+      return index1 - index2;
     }
     return node2.value - node1.value;
   };
@@ -46,10 +47,13 @@ const sortPredicatePieDonut: SortPredicatePieDonutFn = (visParams) =>
 const sortPredicateMosaic: SortPredicateDefaultFn = (visData, columns) => {
   const sortingMap = columns[0]?.id ? extractUniqTermsMap(visData, columns[0].id) : {};
 
-  return ([name1, node1], [, node2]) => {
+  return ([name1, node1], [name2, node2]) => {
     // Sorting for first group
-    if (columns.length === 1 || (node1.children.length && name1 in sortingMap)) {
-      return sortingMap[name1];
+    if (
+      columns.length === 1 ||
+      (node1.children.length && name1 in sortingMap && node2.children.length && name2 in sortingMap)
+    ) {
+      return sortingMap[name1] - sortingMap[name2];
     }
 
     // Sorting for second group

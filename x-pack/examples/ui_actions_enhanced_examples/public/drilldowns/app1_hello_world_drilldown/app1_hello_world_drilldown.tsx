@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { SAMPLE_APP1_CLICK_TRIGGER, SampleApp1ClickContext } from '../../triggers';
 
 export interface Config extends SerializableRecord {
@@ -20,7 +19,7 @@ export interface Config extends SerializableRecord {
 type Trigger = typeof SAMPLE_APP1_CLICK_TRIGGER;
 type Context = SampleApp1ClickContext;
 
-export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: Trigger[] }>;
+export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: string[] }>;
 
 export const APP1_HELLO_WORLD_DRILLDOWN = 'APP1_HELLO_WORLD_DRILLDOWN';
 
@@ -37,11 +36,7 @@ export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
     return [SAMPLE_APP1_CLICK_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
-    config,
-    onConfig,
-    context,
-  }) => (
+  public readonly CollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth
@@ -50,8 +45,6 @@ export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
       />
     </EuiFormRow>
   );
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     name: '',

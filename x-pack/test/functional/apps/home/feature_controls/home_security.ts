@@ -13,13 +13,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['security', 'home']);
   const testSubjects = getService('testSubjects');
+  const kbnServer = getService('kibanaServer');
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
-      );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kbnServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json'
+      );
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
@@ -30,9 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
 
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
-      );
+      await kbnServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('global all privileges', () => {
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows the "Manage" action item', async () => {
-        await testSubjects.existOrFail('homManagementActionItem', {
+        await testSubjects.existOrFail('homeManage', {
           timeout: 2000,
         });
       });
@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show the "Manage" action item', async () => {
-        await testSubjects.missingOrFail('homManagementActionItem', {
+        await testSubjects.missingOrFail('homeManage', {
           timeout: 2000,
         });
       });

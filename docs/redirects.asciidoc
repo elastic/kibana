@@ -329,7 +329,7 @@ This content has moved. Refer to <<kuery-query>>.
 [role="exclude",id="discover-document-context"]
 == View surrounding documents
 
-This content has moved. Refer to <<discover-view-surrounding-documents>>.
+This content has moved. Refer to <<document-explorer>>.
 
 [role="exclude",id="field-formatters-string"]
 == String field formatters
@@ -396,12 +396,27 @@ This content has moved. Refer to <<saved-object-migrations>>.
 
 This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
 
-[role="exclude",id="upgrade-assistant"]
-== Upgrade Assistant
-
-This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
-
 [role="exclude",id="brew"]
 == Install {kib} on macOS with Homebrew
 
 This page has been deleted. Refer to <<install>>.
+
+[role="exclude",id="discover-view-document"]
+== View a document
+
+This page has been deleted. Refer to <<document-explorer>>.
+
+[role="exclude",id="advanced-osquery"]
+== Advanced Osquery
+
+This page has been deleted. Refer to <<osquery>>.
+
+[role="exclude",id="ml-sync"]
+== Sync machine learning objects API
+
+This page has been deleted. Refer to <<machine-learning-api-sync>>.
+
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
+
+This page has been deleted. Refer to <<alerting-getting-started>>.

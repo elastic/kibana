@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type ExpectedSectionTableEntries = Record<string, string>;
@@ -21,7 +21,11 @@ export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable
 
 export type MlDFAJobTable = ProvidedType<typeof MachineLearningDataFrameAnalyticsTableProvider>;
 
-export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: FtrProviderContext) {
+export function MachineLearningDataFrameAnalyticsTableProvider({
+  getPageObject,
+  getService,
+}: FtrProviderContext) {
+  const headerPage = getPageObject('header');
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -124,7 +128,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     ) {
       const testSubjStr =
         tableEnvironment === 'mlDataFrameAnalytics'
-          ? 'mlRefreshPageButton'
+          ? 'mlDatePickerRefreshPageButton'
           : 'mlAnalyticsRefreshListButton';
       await this.waitForRefreshButtonLoaded(testSubjStr);
       await testSubjects.click(`~${testSubjStr}`);
@@ -170,6 +174,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
           timeout: 5 * 1000,
         });
       });
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async openMapView(analyticsId: string) {
@@ -207,7 +212,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     public async assertAnalyticsJobDisplayedInTable(
       analyticsId: string,
       shouldBeDisplayed: boolean,
-      refreshButtonTestSubj = 'mlRefreshPageButton'
+      refreshButtonTestSubj = 'mlDatePickerRefreshPageButton'
     ) {
       await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
       await testSubjects.click(`~${refreshButtonTestSubj}`);

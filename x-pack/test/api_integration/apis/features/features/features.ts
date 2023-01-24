@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFeature } from '../../../../../plugins/features/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -100,6 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
             'dev_tools',
             'actions',
             'enterpriseSearch',
+            'filesManagement',
+            'filesSharedImage',
             'advancedSettings',
             'indexPatterns',
             'graph',
@@ -116,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
             'logs',
             'maps',
             'osquery',
+            'rulesSettings',
             'uptime',
             'siem',
             'securitySolutionCases',

@@ -1,16 +1,24 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/securitysolution-hook-utils",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-api",
+    "@kbn/securitysolution-list-utils",
+    "@kbn/securitysolution-utils",
+    "@kbn/core-http-browser-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

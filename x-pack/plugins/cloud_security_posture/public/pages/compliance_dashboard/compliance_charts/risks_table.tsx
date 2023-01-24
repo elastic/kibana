@@ -7,127 +7,93 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiLink,
-  EuiText,
 } from '@elastic/eui';
-import { CloudPostureStats, ResourceType } from '../../../../common/types';
-import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import * as TEXT from '../translations';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
-
-const mockData = [
-  {
-    name: 'pods',
-    totalFindings: 2,
-    totalPassed: 1,
-    totalFailed: 1,
-  },
-  {
-    name: 'etcd',
-    totalFindings: 5,
-    totalPassed: 0,
-    totalFailed: 5,
-  },
-  {
-    name: 'cluster',
-    totalFindings: 2,
-    totalPassed: 2,
-    totalFailed: 0,
-  },
-  {
-    name: 'system',
-    totalFindings: 10,
-    totalPassed: 6,
-    totalFailed: 4,
-  },
-  {
-    name: 'api',
-    totalFindings: 19100,
-    totalPassed: 2100,
-    totalFailed: 17000,
-  },
-  {
-    name: 'server',
-    totalFindings: 7,
-    totalPassed: 4,
-    totalFailed: 3,
-  },
-];
+import { i18n } from '@kbn/i18n';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
+import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 
 export interface RisksTableProps {
-  data: CloudPostureStats['resourcesTypes'];
+  data: ComplianceDashboardData['groupedFindingsEvaluation'];
   maxItems: number;
-  onCellClick: (resourceTypeName: string) => void;
+  onCellClick: (name: string) => void;
   onViewAllClick: () => void;
+  viewAllButtonTitle: string;
+  compact?: boolean;
 }
 
 export const getTopRisks = (
-  resourcesTypes: CloudPostureStats['resourcesTypes'],
+  groupedFindingsEvaluation: ComplianceDashboardData['groupedFindingsEvaluation'],
   maxItems: number
 ) => {
-  const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);
-  const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
+  const sorted = groupedFindingsEvaluation
+    .slice()
+    .sort((first, second) => first.postureScore - second.postureScore);
 
   return sorted.slice(0, maxItems);
 };
 
 export const RisksTable = ({
-  data: resourcesTypes,
+  data: cisSectionsEvaluations,
   maxItems,
   onCellClick,
   onViewAllClick,
+  viewAllButtonTitle,
+  compact,
 }: RisksTableProps) => {
-  const columns = useMemo(
+  const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
         field: 'name',
-        name: TEXT.RESOURCE_TYPE,
-        render: (resourceTypeName: ResourceType['name']) => (
-          <EuiLink onClick={() => onCellClick(resourceTypeName)}>{resourceTypeName}</EuiLink>
+        truncateText: true,
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+              defaultMessage: 'CIS Section',
+            }),
+        render: (name: GroupedFindingsEvaluation['name']) => (
+          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate" color="text">
+            {name}
+          </EuiLink>
         ),
       },
       {
-        field: 'totalFailed',
-        name: TEXT.FINDINGS,
-        render: (totalFailed: ResourceType['totalFailed'], resource: ResourceType) => (
-          <>
-            <EuiText size="s" color="danger">
-              <CompactFormattedNumber number={resource.totalFailed} />
-            </EuiText>
-            <EuiText size="s">
-              {'/'}
-              <CompactFormattedNumber number={resource.totalFindings} />
-            </EuiText>
-          </>
+        field: 'postureScore',
+        width: '115px',
+        name: compact
+          ? ''
+          : i18n.translate('xpack.csp.dashboard.risksTable.complianceColumnLabel', {
+              defaultMessage: 'Compliance',
+            }),
+        render: (postureScore: GroupedFindingsEvaluation['postureScore'], data) => (
+          <ComplianceScoreBar totalPassed={data.totalPassed} totalFailed={data.totalFailed} />
         ),
       },
     ],
-    [onCellClick]
+    [compact, onCellClick]
   );
 
-  const items = useMemo(() => getTopRisks(resourcesTypes, maxItems), [resourcesTypes, maxItems]);
+  const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
+    <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
-        <EuiBasicTable<ResourceType>
-          rowHeader="name"
-          items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTopRisks(mockData, maxItems) : items}
+        <EuiInMemoryTable<GroupedFindingsEvaluation>
+          items={sortedByComplianceScore}
           columns={columns}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="center" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
-              {TEXT.VIEW_ALL_FAILED_FINDINGS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div>
+          <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
+            {viewAllButtonTitle}
+          </EuiButtonEmpty>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

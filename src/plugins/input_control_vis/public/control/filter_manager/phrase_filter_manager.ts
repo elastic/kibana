@@ -17,8 +17,8 @@ import {
   isPhraseFilter,
   PhraseFilter,
 } from '@kbn/es-query';
+import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
 import { FilterManager } from './filter_manager';
-import { DataViewsContract, FilterManager as QueryFilterManager } from '../../../../data/public';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(

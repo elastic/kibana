@@ -6,22 +6,22 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import {
+import type {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreSetup, ElasticsearchClient, Logger } from 'src/core/server';
-import {
+import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  throwUnrecoverableError,
-} from '../../../../../task_manager/server';
-import { EndpointAppContext } from '../../types';
+} from '@kbn/task-manager-plugin/server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import type { EndpointAppContext } from '../../types';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
-import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '2h';
@@ -256,7 +256,7 @@ export class CheckMetadataTransformsTask {
 
       const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
 
-      const { packageInfo, paths } = await packageClient.getRegistryPackage(
+      const { packageInfo, paths } = await packageClient.getPackage(
         FLEET_ENDPOINT_PACKAGE,
         pkgVersion
       );

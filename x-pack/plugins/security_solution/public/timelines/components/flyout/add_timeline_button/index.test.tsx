@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { AddTimelineButton } from './';
+import { AddTimelineButton } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../../../common/mock';
 import { getAllTimeline, useGetAllTimeline } from '../../../containers/all';
 import { mockHistory, Router } from '../../../../common/mock/router';
+import * as i18n from '../../timeline/properties/translations';
 
 jest.mock('../../open_timeline/use_timeline_status', () => {
   const originalModule = jest.requireActual('../../open_timeline/use_timeline_status');
@@ -50,20 +52,11 @@ jest.mock('../../../containers/all', () => {
 });
 
 jest.mock('../../timeline/properties/new_template_timeline', () => ({
-  NewTemplateTimeline: jest.fn(() => <div data-test-subj="create-template-btn" />),
+  NewTemplateTimeline: jest.fn(() => <div>{'Create new timeline template'}</div>),
 }));
 
 jest.mock('../../timeline/properties/helpers', () => ({
-  Description: jest.fn().mockReturnValue(<div data-test-subj="Description" />),
-  ExistingCase: jest.fn().mockReturnValue(<div data-test-subj="ExistingCase" />),
-  NewCase: jest.fn().mockReturnValue(<div data-test-subj="NewCase" />),
-  NewTimeline: jest.fn().mockReturnValue(<div data-test-subj="create-default-btn" />),
-  NotesButton: jest.fn().mockReturnValue(<div data-test-subj="NotesButton" />),
-}));
-
-jest.mock('../../../../common/components/inspect', () => ({
-  InspectButton: jest.fn().mockReturnValue(<div />),
-  InspectButtonContainer: jest.fn(({ children }) => <div>{children}</div>),
+  NewTimeline: jest.fn().mockReturnValue(<div>{'Create new timeline'}</div>),
 }));
 
 jest.mock('../../../../common/containers/source', () => ({
@@ -71,7 +64,6 @@ jest.mock('../../../../common/containers/source', () => ({
 }));
 
 describe('AddTimelineButton', () => {
-  let wrapper: ReactWrapper;
   const props = {
     timelineId: TimelineId.active,
   };
@@ -89,36 +81,30 @@ describe('AddTimelineButton', () => {
           },
         },
       });
-      wrapper = mount(<AddTimelineButton {...props} />);
+      render(<AddTimelineButton {...props} />);
     });
 
     afterEach(() => {
       (useKibana as jest.Mock).mockReset();
     });
 
-    test('it renders settings-plus-in-circle', () => {
-      expect(wrapper.find('[data-test-subj="settings-plus-in-circle"]').exists()).toBeTruthy();
+    test('it renders the add new timeline btn', () => {
+      expect(screen.getByLabelText(i18n.ADD_TIMELINE)).toBeInTheDocument();
     });
 
     test('it renders create timeline btn', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy()
-      );
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      expect(screen.getByText(i18n.NEW_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders create timeline template btn', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy()
-      );
+    test('it renders create timeline template btn', () => {
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      expect(screen.getByText(i18n.NEW_TEMPLATE_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders Open timeline btn', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="open-timeline-button"]').exists()).toBeTruthy()
-      );
+    test('it renders Open timeline btn', () => {
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
     });
   });
 
@@ -135,36 +121,30 @@ describe('AddTimelineButton', () => {
           },
         },
       });
-      wrapper = mount(<AddTimelineButton {...props} />);
+      render(<AddTimelineButton {...props} />);
     });
 
     afterEach(() => {
       (useKibana as jest.Mock).mockReset();
     });
 
-    test('it renders settings-plus-in-circle', () => {
-      expect(wrapper.find('[data-test-subj="settings-plus-in-circle"]').exists()).toBeTruthy();
+    test('it renders the add new timeline btn', () => {
+      expect(screen.getByLabelText(i18n.ADD_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders create timeline btn', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy()
-      );
+    test('it renders create timeline btn', () => {
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      expect(screen.getByText(i18n.NEW_TIMELINE)).toBeInTheDocument();
     });
 
-    test('it renders create timeline template btn', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy()
-      );
+    test('it renders create timeline template btn', () => {
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      expect(screen.getByText(i18n.NEW_TEMPLATE_TIMELINE)).toBeInTheDocument();
     });
 
     test('it renders Open timeline btn', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="open-timeline-button"]').exists()).toBeTruthy()
-      );
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
     });
   });
 
@@ -191,7 +171,7 @@ describe('AddTimelineButton', () => {
         refetch: jest.fn(),
       });
 
-      wrapper = mount(
+      render(
         <TestProviders>
           <Router history={mockHistory}>
             <AddTimelineButton {...props} />
@@ -205,28 +185,25 @@ describe('AddTimelineButton', () => {
     });
 
     it('should render timelines table', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="open-timeline-button"]').exists()).toBeTruthy();
-      });
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('open-timeline-button')).toBeVisible();
 
-      wrapper.find('[data-test-subj="open-timeline-button"]').first().simulate('click');
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="timelines-table"]').exists()).toBeTruthy();
-      });
+      userEvent.click(screen.getByTestId('open-timeline-button'));
+      expect(screen.getByTestId('timelines-table')).toBeInTheDocument();
     });
 
     it('should render correct actions', async () => {
-      wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
-      await waitFor(() =>
-        expect(wrapper.find('[data-test-subj="open-timeline-button"]').exists()).toBeTruthy()
-      );
+      userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('open-timeline-button')).toBeVisible();
 
-      wrapper.find('[data-test-subj="open-timeline-button"]').first().simulate('click');
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBeTruthy();
-        expect(wrapper.find('[data-test-subj="create-from-template"]').exists()).toBeFalsy();
+      userEvent.click(screen.getByTestId('open-timeline-button'));
+
+      screen.queryAllByTestId('open-duplicate').forEach((element) => {
+        expect(element).toBeInTheDocument();
       });
+      expect(screen.queryByTestId('create-from-template')).not.toBeInTheDocument();
     });
   });
 });

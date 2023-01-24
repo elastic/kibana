@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
@@ -70,7 +71,7 @@ beforeEach(() => {
   mockRetrieveClient.find.mockResolvedValue({ total: 0, saved_objects: [], per_page: 0, page: 0 });
   mockUpdateClient = savedObjectsClientMock.create();
   mockSavedObjects.getScopedClient.mockImplementation((request, params) =>
-    params?.excludedWrappers?.[0] === 'encryptedSavedObjects'
+    params?.excludedExtensions?.[0] === ENCRYPTION_EXTENSION_ID
       ? mockRetrieveClient
       : mockUpdateClient
   );
@@ -89,7 +90,7 @@ it('correctly setups Saved Objects clients', async () => {
   expect(mockSavedObjects.getScopedClient).toHaveBeenCalledTimes(2);
   expect(mockSavedObjects.getScopedClient).toHaveBeenCalledWith(mockRequest, {
     includedHiddenTypes: ['type-id-2', 'type-id-4'],
-    excludedWrappers: ['encryptedSavedObjects'],
+    excludedExtensions: [ENCRYPTION_EXTENSION_ID],
   });
   expect(mockSavedObjects.getScopedClient).toHaveBeenCalledWith(mockRequest, {
     includedHiddenTypes: ['type-id-2', 'type-id-4'],

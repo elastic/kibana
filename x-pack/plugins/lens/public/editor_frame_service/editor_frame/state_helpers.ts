@@ -5,65 +5,288 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { difference } from 'lodash';
+import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import {
   Datasource,
+  DatasourceLayers,
   DatasourceMap,
-  DatasourcePublicAPI,
-  FramePublicAPI,
+  IndexPattern,
+  IndexPatternMap,
+  IndexPatternRef,
   InitializationOptions,
-  Visualization,
-  VisualizationDimensionGroupConfig,
   VisualizationMap,
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { ErrorMessage } from '../types';
-import {
-  getMissingCurrentDatasource,
-  getMissingIndexPatterns,
-  getMissingVisualizationTypeError,
-  getUnknownVisualizationTypeError,
-} from '../error_helper';
-import { DatasourceStates } from '../../state_management';
+import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
+import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
+import { readFromStorage } from '../../settings_storage';
+import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 
-export async function initializeDatasources(
-  datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates,
+function getIndexPatterns(
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+  initialId?: string,
+  adHocDataviews?: string[]
+) {
+  const indexPatternIds = [];
+
+  // use the initialId only when no context is passed over
+  if (!initialContext && initialId) {
+    indexPatternIds.push(initialId);
+  }
+  if (initialContext) {
+    if ('isVisualizeAction' in initialContext) {
+      indexPatternIds.push(...initialContext.indexPatternIds);
+    } else {
+      indexPatternIds.push(initialContext.dataViewSpec.id!);
+    }
+  }
+
+  if (references) {
+    for (const reference of references) {
+      if (reference.type === 'index-pattern') {
+        indexPatternIds.push(reference.id);
+      }
+    }
+  }
+  if (adHocDataviews) {
+    indexPatternIds.push(...adHocDataviews);
+  }
+  return [...new Set(indexPatternIds)];
+}
+
+const getLastUsedIndexPatternId = (
+  storage: IStorageWrapper,
+  indexPatternRefs: IndexPatternRef[]
+) => {
+  const indexPattern = readFromStorage(storage, 'indexPatternId');
+  return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
+};
+
+const getRefsForAdHocDataViewsFromContext = (
+  indexPatternRefs: IndexPatternRef[],
+  usedIndexPatternsIds: string[],
+  indexPatterns: Record<string, IndexPattern>
+) => {
+  const indexPatternIds = indexPatternRefs.map(({ id }) => id);
+  const adHocDataViewsIds = usedIndexPatternsIds.filter((id) => !indexPatternIds.includes(id));
+
+  const adHocDataViewsList = Object.values(indexPatterns).filter(({ id }) =>
+    adHocDataViewsIds.includes(id)
+  );
+  return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
+};
+
+export async function initializeDataViews(
+  {
+    dataViews,
+    datasourceMap,
+    datasourceStates,
+    storage,
+    defaultIndexPatternId,
+    references,
+    initialContext,
+    adHocDataViews: persistedAdHocDataViews,
+  }: {
+    dataViews: DataViewsContract;
+    datasourceMap: DatasourceMap;
+    datasourceStates: DatasourceStates;
+    defaultIndexPatternId: string;
+    storage: IStorageWrapper;
+    references?: SavedObjectReference[];
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+    adHocDataViews?: Record<string, DataViewSpec>;
+  },
   options?: InitializationOptions
 ) {
-  const states: DatasourceStates = {};
-  await Promise.all(
-    Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
-      if (datasourceStates[datasourceId]) {
-        return datasource
-          .initialize(
-            datasourceStates[datasourceId].state || undefined,
-            references,
-            initialContext,
-            options
-          )
-          .then((datasourceState) => {
-            states[datasourceId] = { isLoading: false, state: datasourceState };
-          });
-      }
+  const adHocDataViews = Object.fromEntries(
+    Object.entries(persistedAdHocDataViews || {}).map(([id, persistedSpec]) => {
+      const spec = DataViewPersistableStateService.inject(persistedSpec, references || []);
+      return [id, spec];
     })
   );
+  const { isFullEditor } = options ?? {};
+
+  // make it explicit or TS will infer never[] and break few lines down
+  const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
+    ? loadIndexPatternRefs(dataViews)
+    : []);
+
+  // if no state is available, use the fallbackId
+  const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+  const fallbackId = lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id;
+  const initialId =
+    !initialContext &&
+    Object.keys(datasourceMap).every((datasourceId) => !datasourceStates[datasourceId]?.state)
+      ? fallbackId
+      : undefined;
+
+  const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
+
+  const usedIndexPatternsIds = getIndexPatterns(
+    references,
+    initialContext,
+    initialId,
+    adHocDataviewsIds
+  );
+
+  // load them
+  const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+
+  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
+
+  const indexPatterns = await loadIndexPatterns({
+    dataViews,
+    patterns: usedIndexPatternsIds,
+    notUsedPatterns,
+    cache: {},
+    adHocDataViews,
+  });
+
+  const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(
+    indexPatternRefs,
+    usedIndexPatternsIds,
+    indexPatterns
+  );
+  return {
+    indexPatternRefs: sortDataViewRefs([...indexPatternRefs, ...adHocDataViewsRefs]),
+    indexPatterns,
+  };
+}
+
+/**
+ * This function composes both initializeDataViews & initializeDatasources into a single call
+ */
+export async function initializeSources(
+  {
+    dataViews,
+    datasourceMap,
+    visualizationMap,
+    visualizationState,
+    datasourceStates,
+    storage,
+    defaultIndexPatternId,
+    references,
+    initialContext,
+    adHocDataViews,
+  }: {
+    dataViews: DataViewsContract;
+    datasourceMap: DatasourceMap;
+    visualizationMap: VisualizationMap;
+    visualizationState: VisualizationState;
+    datasourceStates: DatasourceStates;
+    defaultIndexPatternId: string;
+    storage: IStorageWrapper;
+    references?: SavedObjectReference[];
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+    adHocDataViews?: Record<string, DataViewSpec>;
+  },
+  options?: InitializationOptions
+) {
+  const { indexPatternRefs, indexPatterns } = await initializeDataViews(
+    {
+      datasourceMap,
+      datasourceStates,
+      initialContext,
+      dataViews,
+      storage,
+      defaultIndexPatternId,
+      references,
+      adHocDataViews,
+    },
+    options
+  );
+  return {
+    indexPatterns,
+    indexPatternRefs,
+    datasourceStates: initializeDatasources({
+      datasourceMap,
+      datasourceStates,
+      initialContext,
+      indexPatternRefs,
+      indexPatterns,
+      references,
+    }),
+    visualizationState: initializeVisualization({
+      visualizationMap,
+      visualizationState,
+      references,
+      initialContext,
+    }),
+  };
+}
+
+export function initializeVisualization({
+  visualizationMap,
+  visualizationState,
+  references,
+  initialContext,
+}: {
+  visualizationState: VisualizationState;
+  visualizationMap: VisualizationMap;
+  references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+}) {
+  if (visualizationState?.activeId) {
+    return (
+      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
+        visualizationState.state,
+        references,
+        initialContext
+      ) ?? visualizationState.state
+    );
+  }
+  return visualizationState.state;
+}
+
+export function initializeDatasources({
+  datasourceMap,
+  datasourceStates,
+  indexPatternRefs,
+  indexPatterns,
+  references,
+  initialContext,
+}: {
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  indexPatterns: Record<string, IndexPattern>;
+  indexPatternRefs: IndexPatternRef[];
+  references?: SavedObjectReference[];
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+}) {
+  // init datasources
+  const states: DatasourceStates = {};
+  for (const [datasourceId, datasource] of Object.entries(datasourceMap)) {
+    if (datasourceStates[datasourceId]) {
+      const state = datasource.initialize(
+        datasourceStates[datasourceId].state || undefined,
+        references,
+        initialContext,
+        indexPatternRefs,
+        indexPatterns
+      );
+      states[datasourceId] = { isLoading: false, state };
+    }
+  }
   return states;
 }
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
-  datasourceMap: DatasourceMap
+  datasourceMap: DatasourceMap,
+  indexPatterns: DataViewsState['indexPatterns']
 ) {
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+  const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
     .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
     .forEach((id) => {
@@ -75,6 +298,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
         datasourceLayers[layer] = datasourceMap[id].getPublicAPI({
           state: datasourceState,
           layerId: layer,
+          indexPatterns,
         });
       });
     });
@@ -84,70 +308,80 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
-  doc: Document
-): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
+  doc: Document,
+  services: {
+    uiSettings: IUiSettingsClient;
+    storage: IStorageWrapper;
+    dataViews: DataViewsContract;
+    timefilter: TimefilterContract;
+  }
+): Promise<{
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+}> {
   const {
-    state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
+    state: {
+      visualization: persistedVisualizationState,
+      datasourceStates: persistedDatasourceStates,
+      adHocDataViews,
+      internalReferences,
+    },
     visualizationType,
     references,
     title,
     description,
   } = doc;
   if (!visualizationType) {
-    return {
-      ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
-    };
-  }
-  if (!visualizations[visualizationType]) {
-    return {
-      ast: null,
-      errors: [getUnknownVisualizationTypeError(visualizationType)],
-    };
+    return { ast: null, indexPatterns: {}, indexPatternRefs: [] };
   }
   const visualization = visualizations[visualizationType!];
-  const datasourceStates = await initializeDatasources(
-    datasourceMap,
-    Object.fromEntries(
-      Object.entries(persistedDatasourceStates).map(([id, state]) => [
-        id,
-        { isLoading: false, state },
-      ])
-    ),
-    references,
-    undefined,
+  const visualizationState = initializeVisualization({
+    visualizationMap: visualizations,
+    visualizationState: {
+      state: persistedVisualizationState,
+      activeId: visualizationType,
+    },
+    references: [...references, ...(internalReferences || [])],
+  });
+  const datasourceStatesFromSO = Object.fromEntries(
+    Object.entries(persistedDatasourceStates).map(([id, state]) => [
+      id,
+      { isLoading: false, state },
+    ])
+  );
+  const { indexPatterns, indexPatternRefs } = await initializeDataViews(
+    {
+      datasourceMap,
+      datasourceStates: datasourceStatesFromSO,
+      references,
+      dataViews: services.dataViews,
+      storage: services.storage,
+      defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
+      adHocDataViews,
+    },
     { isFullEditor: false }
   );
+  const datasourceStates = initializeDatasources({
+    datasourceMap,
+    datasourceStates: datasourceStatesFromSO,
+    references: [...references, ...(internalReferences || [])],
+    indexPatterns,
+    indexPatternRefs,
+  });
 
-  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap);
+  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
     return {
       ast: null,
-      errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
+      indexPatterns,
+      indexPatternRefs,
     };
   }
 
-  const indexPatternValidation = validateRequiredIndexPatterns(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId]
-  );
-
-  if (indexPatternValidation) {
-    return {
-      ast: null,
-      errors: indexPatternValidation,
-    };
-  }
-
-  const validationResult = validateDatasourceAndVisualization(
-    datasourceMap[datasourceId],
-    datasourceStates[datasourceId].state,
-    visualization,
-    visualizationState,
-    { datasourceLayers }
-  );
+  const currentTimeRange = services.timefilter.getAbsoluteTime();
 
   return {
     ast: buildExpression({
@@ -158,71 +392,25 @@ export async function persistedStateToExpression(
       datasourceMap,
       datasourceStates,
       datasourceLayers,
+      indexPatterns,
+      dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
     }),
-    errors: validationResult,
+    indexPatterns,
+    indexPatternRefs,
   };
 }
 
 export function getMissingIndexPattern(
   currentDatasource: Datasource | null,
-  currentDatasourceState: { state: unknown } | null
+  currentDatasourceState: { state: unknown } | null,
+  indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState == null || currentDatasource == null) {
+  if (currentDatasourceState?.state == null || currentDatasource == null) {
     return [];
   }
-  const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state);
+  const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);
   if (!missingIds.length) {
     return [];
   }
   return missingIds;
 }
-
-const validateRequiredIndexPatterns = (
-  currentDatasource: Datasource,
-  currentDatasourceState: { state: unknown } | null
-): ErrorMessage[] | undefined => {
-  const missingIds = getMissingIndexPattern(currentDatasource, currentDatasourceState);
-
-  if (!missingIds.length) {
-    return;
-  }
-
-  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' }];
-};
-
-export const validateDatasourceAndVisualization = (
-  currentDataSource: Datasource | null,
-  currentDatasourceState: unknown | null,
-  currentVisualization: Visualization | null,
-  currentVisualizationState: unknown | undefined,
-  frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
-): ErrorMessage[] | undefined => {
-  const layersGroups = currentVisualizationState
-    ? currentVisualization
-        ?.getLayerIds(currentVisualizationState)
-        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
-          const groups = currentVisualization?.getConfiguration({
-            frame: frameAPI,
-            layerId,
-            state: currentVisualizationState,
-          }).groups;
-          if (groups) {
-            memo[layerId] = groups;
-          }
-          return memo;
-        }, {})
-    : undefined;
-
-  const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
-    : undefined;
-
-  const visualizationValidationErrors = currentVisualizationState
-    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI.datasourceLayers)
-    : undefined;
-
-  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
-    return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
-  }
-  return undefined;
-};

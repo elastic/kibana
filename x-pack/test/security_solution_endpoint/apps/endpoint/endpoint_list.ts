@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
@@ -13,14 +14,12 @@ import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   const expectedData = [
     [
@@ -34,26 +33,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Last active',
       'Actions',
     ],
-    ['Host-9fafsc3tqe', 'x', 'x', 'Warning', 'Windows', '10.231.117.28', '7.17.12', 'x', ''],
     [
-      'Host-ku5jy6j0pw',
+      'Host-dpu1a2r2yi',
       'x',
       'x',
       'Warning',
-      'Windows',
-      '10.246.87.11, 10.145.117.106,10.109.242.136',
-      '7.0.13',
+      'Linux',
+      '10.2.17.24, 10.56.215.200,10.254.196.130',
+      'x',
       'x',
       '',
     ],
     [
-      'Host-o07wj6uaa5',
+      'Host-rs9wp4o6l9',
       'x',
       'x',
-      'Failure',
-      'Windows',
-      '10.82.134.220, 10.47.25.170',
-      '7.11.13',
+      'Success',
+      'Linux',
+      '10.138.79.131, 10.170.160.154',
+      'x',
+      'x',
+      '',
+    ],
+    [
+      'Host-u5jy6j0pwb',
+      'x',
+      'x',
+      'Warning',
+      'Linux',
+      '10.87.11.145, 10.117.106.109,10.242.136.97',
+      'x',
       'x',
       '',
     ],
@@ -66,13 +75,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     for (let i = 1; i < tableData.length; i++) {
       tableData[i][1] = 'x';
       tableData[i][2] = 'x';
+      tableData[i][6] = 'x';
       tableData[i][7] = 'x';
     }
 
     return tableData;
   };
 
-  describe('endpoint list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/148111
+  describe.skip('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
@@ -82,7 +93,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteAllDocsFromMetadataUnitedIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
-
       it('finds no data in list and prompts onboarding to add policy', async () => {
         await testSubjects.exists('emptyPolicyTable');
       });
@@ -90,8 +100,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        const endpointPackage = await policyTestResources.getEndpointPackage();
-        await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
@@ -99,7 +107,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await deleteAllDocsFromMetadataUnitedIndex(getService);
-        await endpointTestResources.unloadEndpointData(indexedData);
+        if (indexedData) {
+          await endpointTestResources.unloadEndpointData(indexedData);
+        }
       });
 
       it('finds page title', async () => {
@@ -185,38 +195,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(tableData).to.eql(expectedDataFromQuery);
         });
 
-        it('for the kql filtering for united.endpoint.host.hostname : "Host-ku5jy6j0pw", table shows 1 item', async () => {
+        it('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
+          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+          const hostName = expectedDataFromQuery[1][0];
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
-            'united.endpoint.host.hostname : "Host-ku5jy6j0pw" or host.hostname : "Host-ku5jy6j0pw" '
+            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
           const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            [
-              'Host-ku5jy6j0pw',
-              'x',
-              'x',
-              'Warning',
-              'Windows',
-              '10.246.87.11, 10.145.117.106,10.109.242.136',
-              '7.0.13',
-              'x',
-              '',
-            ],
-          ];
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
             1,

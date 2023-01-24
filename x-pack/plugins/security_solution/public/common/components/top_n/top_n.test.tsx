@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { TimelineId } from '../../../../common/types';
 import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
-import { TopN, Props as TopNProps } from './top_n';
+import type { Props as TopNProps } from './top_n';
+import { TopN } from './top_n';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -29,11 +31,14 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');
+jest.mock('../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 
@@ -106,7 +111,7 @@ describe('TopN', () => {
     indexPattern: mockIndexPattern,
     options: defaultOptions,
     query,
-    setAbsoluteRangeDatePickerTarget: 'global',
+    setAbsoluteRangeDatePickerTarget: InputsModelId.global,
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
@@ -130,60 +135,6 @@ describe('TopN', () => {
     });
   });
 
-  describe('view selection', () => {
-    const detectionAlertsTimelines = [
-      TimelineId.detectionsPage,
-      TimelineId.detectionsRulesDetailsPage,
-    ];
-
-    const nonDetectionAlertTables = [
-      TimelineId.hostsPageEvents,
-      TimelineId.hostsPageExternalAlerts,
-      TimelineId.networkPageExternalAlerts,
-      TimelineId.casePage,
-    ];
-
-    test('it disables view selection when timelineId is undefined', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <TopN {...testProps} timelineId={undefined} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
-    });
-
-    test('it disables view selection when timelineId is `active`', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <TopN {...testProps} timelineId={TimelineId.active} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
-    });
-
-    detectionAlertsTimelines.forEach((timelineId) => {
-      test(`it enables view selection for detection alert table '${timelineId}'`, () => {
-        const wrapper = mount(
-          <TestProviders>
-            <TopN {...testProps} timelineId={timelineId} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(false);
-      });
-    });
-
-    nonDetectionAlertTables.forEach((timelineId) => {
-      test(`it disables view selection for NON detection alert table '${timelineId}'`, () => {
-        const wrapper = mount(
-          <TestProviders>
-            <TopN {...testProps} timelineId={timelineId} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
-      });
-    });
-  });
-
   describe('events view', () => {
     let wrapper: ReactWrapper;
 
@@ -196,9 +147,9 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'raw'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+        true
+      );
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'raw'`, () => {
@@ -232,9 +183,9 @@ describe('TopN', () => {
         </TestProviders>
       );
       await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-        ).toBe(false);
+        expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+          false
+        );
       });
     });
   });
@@ -256,9 +207,9 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'all'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+        true
+      );
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'all'`, () => {

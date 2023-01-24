@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { ElasticsearchClient } from 'src/core/server';
+import { ClusterDetailsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { TIMEOUT } from './constants';
 
 /**
@@ -25,6 +25,6 @@ export async function getClusterStats(esClient: ElasticsearchClient) {
  * @param esClient Scoped Elasticsearch client
  */
 export const getClusterUuids: ClusterDetailsGetter = async ({ esClient }) => {
-  const body = await esClient.cluster.stats({ timeout: TIMEOUT });
+  const body = await esClient.info({ filter_path: 'cluster_uuid' });
   return [{ clusterUuid: body.cluster_uuid }];
 };

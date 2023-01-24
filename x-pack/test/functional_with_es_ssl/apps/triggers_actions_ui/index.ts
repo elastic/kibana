@@ -9,11 +9,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Actions and Triggers app', function () {
-    this.tags('ciGroup10');
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./alerts_list'));
     loadTestFile(require.resolve('./alert_create_flyout'));
     loadTestFile(require.resolve('./details'));
     loadTestFile(require.resolve('./connectors'));
+    loadTestFile(require.resolve('./logs_list'));
+    loadTestFile(require.resolve('./rules_settings'));
   });
 };

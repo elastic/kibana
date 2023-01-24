@@ -1,19 +1,23 @@
 ---
-id: kibDataPlugin
-slug: /kibana-dev-docs/services/data-plugin
-title: Data services
-image: https://source.unsplash.com/400x175/?Search
-summary: The data plugin contains services for searching, querying and filtering.
-date: 2020-12-02
-tags: ['kibana', 'dev', 'contributor', 'api docs']
+id: kibDataViewsPlugin
+slug: /kibana-dev-docs/services/data-views-plugin
+title: Data Views services
+description: The data views plugin contains services for dealing with Kibana's Data Views.
+date: 2022-10-05
+tags: ['kibana', 'dev', 'contributor', 'api docs', 'data views', 'has data']
 ---
 
 # Data Views
 
 The data views API provides a consistent method of structuring and formatting documents
-and field lists across the various Kibana apps. Its typically used in conjunction with
+and field lists across the various Kibana apps. It's typically used in conjunction with
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 *Note: Kibana index patterns are currently being renamed to data views. There will be some naming inconsistencies until the transition is complete.*
 
+### Services
 
+**hasData:** A standardized way to check the empty state for indices and data views.
+- `hasESData: () => Promise<boolean>; // Check to see if ES data exists`
+- `hasDataView: () => Promise<boolean>; // Check to see if data view exists (managed or user created)`
+- `hasUserDataView: () => Promise<boolean>; // Check to see if user created data views exists`

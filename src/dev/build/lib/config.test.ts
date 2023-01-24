@@ -8,8 +8,8 @@
 
 import { resolve } from 'path';
 
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
 
@@ -29,7 +29,11 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
   return await Config.create({
     isRelease: true,
     targetAllPlatforms,
+    dockerContextUseLocalArtifact: false,
+    dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
   });
 };
@@ -44,7 +48,7 @@ describe('#getKibanaPkg()', () => {
 describe('#getNodeVersion()', () => {
   it('returns the node version from the kibana package.json', async () => {
     const config = await setup();
-    expect(config.getNodeVersion()).toEqual(kibanaPackageJson.engines.node);
+    expect(config.getNodeVersion()).toEqual(kibanaPackageJson.engines?.node);
   });
 });
 
@@ -144,7 +148,7 @@ describe('#getNodePlatforms()', () => {
     });
     const platforms = config.getNodePlatforms();
     expect(platforms).toBeInstanceOf(Array);
-    if (process.platform !== 'linux') {
+    if (!(process.platform === 'linux' && process.arch === 'x64')) {
       expect(platforms).toHaveLength(2);
       expect(platforms[0]).toBe(config.getPlatformForThisOs());
       expect(platforms[1]).toBe(config.getPlatform('linux', 'x64'));

@@ -6,30 +6,37 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiPageTemplate, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiLink,
+} from '@elastic/eui';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
-import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
-import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
+import type { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
+import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 interface CommonProps {
   policyId: string;
   policyName: string;
   listId: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
-  getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
-      | Partial<HostIsolationExceptionsPageLocation>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
-  ({ policyId, policyName, listId, labels, getPolicyArtifactsPath, getArtifactPath }) => {
+  ({
+    policyId,
+    policyName,
+    listId,
+    labels,
+    canWriteArtifact = false,
+    getPolicyArtifactsPath,
+    getArtifactPath,
+  }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const { onClickHandler, toRouteUrl } = useGetLinkTo(
       policyId,
@@ -52,24 +59,34 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
           iconType="plusInCircle"
           data-test-subj="policy-artifacts-empty-unassigned"
           title={<h2>{labels.emptyUnassignedTitle}</h2>}
-          body={labels.emptyUnassignedMessage(policyName)}
+          body={
+            canWriteArtifact
+              ? labels.emptyUnassignedMessage(policyName)
+              : labels.emptyUnassignedNoPrivilegesMessage(policyName)
+          }
           actions={[
-            ...(canCreateArtifactsByPolicy
+            ...(canCreateArtifactsByPolicy && canWriteArtifact
               ? [
                   <EuiButton
                     color="primary"
                     fill
                     onClick={onClickPrimaryButtonHandler}
-                    data-test-subj="assign-artifacts-button"
+                    data-test-subj="unassigned-assign-artifacts-button"
                   >
                     {labels.emptyUnassignedPrimaryActionButtonTitle}
                   </EuiButton>,
                 ]
               : []),
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink onClick={onClickHandler} href={toRouteUrl}>
-              {labels.emptyUnassignedSecondaryActionButtonTitle}
-            </EuiLink>,
+            canWriteArtifact ? (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiLink
+                onClick={onClickHandler}
+                href={toRouteUrl}
+                data-test-subj="unassigned-manage-artifacts-button"
+              >
+                {labels.emptyUnassignedSecondaryActionButtonTitle}
+              </EuiLink>
+            ) : null,
           ]}
         />
       </EuiPageTemplate>

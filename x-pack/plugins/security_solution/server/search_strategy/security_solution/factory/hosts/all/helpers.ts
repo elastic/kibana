@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
-import { get, has, head } from 'lodash/fp';
-import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import {
+import { set } from '@kbn/safer-lodash-set/fp';
+import { get, has } from 'lodash/fp';
+import { hostFieldsMap } from '@kbn/securitysolution-ecs';
+import type {
   HostAggEsItem,
-  HostBuckets,
   HostsEdges,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
@@ -57,22 +56,7 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   const aggField = hostFieldsMap[fieldName]
     ? hostFieldsMap[fieldName].replace(/\./g, '_')
     : fieldName.replace(/\./g, '_');
-  if (
-    [
-      'host.ip',
-      'host.mac',
-      'cloud.instance.id',
-      'cloud.machine.type',
-      'cloud.provider',
-      'cloud.region',
-    ].includes(fieldName) &&
-    has(aggField, bucket)
-  ) {
-    const data: HostBuckets = get(aggField, bucket);
-    return data.buckets.map((obj) => obj.key);
-  } else if (has(`${aggField}.buckets`, bucket)) {
-    return getFirstItem(get(`${aggField}`, bucket));
-  } else if (has(aggField, bucket)) {
+  if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;
   } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
@@ -80,18 +64,10 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
       case 'host.name':
         return get('key', bucket) || null;
       case 'host.os.name':
-        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
+        return get('os.hits.hits[0].fields["host.os.name"]', bucket) || null;
       case 'host.os.version':
-        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
+        return get('os.hits.hits[0].fields["host.os.version"]', bucket) || null;
     }
   }
   return null;
-};
-
-const getFirstItem = (data: HostBuckets): string | null => {
-  const firstItem = head(data.buckets);
-  if (firstItem == null) {
-    return null;
-  }
-  return firstItem.key;
 };

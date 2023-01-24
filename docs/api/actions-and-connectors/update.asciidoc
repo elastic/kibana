@@ -1,20 +1,33 @@
 [[update-connector-api]]
-=== Update connector API
+== Update connector API
 ++++
 <titleabbrev>Update connector</titleabbrev>
 ++++
 
-Updates the attributes for an existing connector.
+Updates the attributes for a connector.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
 
 [[update-connector-api-request]]
-==== Request
+=== {api-request-title}
 
 `PUT <kibana host>:<port>/api/actions/connector/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
+[discrete]
+=== {api-prereq-title}
+
+You must have `all` privileges for the *{connectors-feature}* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
 [[update-connector-api-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -22,36 +35,49 @@ Updates the attributes for an existing connector.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[role="child_attributes"]
 [[update-connector-api-request-body]]
-==== Request body
-
-`name`::
-  (Required, string) The new name of the connector.
+=== {api-request-body-title}
 
 `config`::
-  (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+(Required, object) The new connector configuration. Configuration properties
+vary depending on the connector type. For example:
++
+--
+include::create.asciidoc[tag=connector-config]
+--
+
+`name`::
+(Required, string) The new name of the connector.
 
 `secrets`::
-  (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The updated secrets configuration for the connector. Secrets
+properties vary depending on the connector type. For information about the
+secrets configuration properties, refer to
+<<action-types,Action and connector types>>.
++
+--
+include::create.asciidoc[tag=connector-secrets]
+--
 
 [[update-connector-api-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[update-connector-api-example]]
-==== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+PUT api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
 {
   "name": "updated-connector",
   "config": {
     "index": "updated-index"
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -69,6 +95,7 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
+  "is_deprecated": false,
   "is_missing_secrets": false
 }
 --------------------------------------------------

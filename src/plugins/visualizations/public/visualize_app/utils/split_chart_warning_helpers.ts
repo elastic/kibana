@@ -7,7 +7,7 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import { AggConfigs } from '../../../../data/common';
+import { AggConfigs } from '@kbn/data-plugin/common';
 import { NEW_HEATMAP_CHARTS_LIBRARY, NEW_GAUGE_CHARTS_LIBRARY } from '../constants';
 
 export const CHARTS_WITHOUT_SMALL_MULTIPLES = {
@@ -15,7 +15,13 @@ export const CHARTS_WITHOUT_SMALL_MULTIPLES = {
   gauge: 'gauge',
 } as const;
 
+export const CHARTS_TO_BE_DEPRECATED = {
+  pie: 'pie',
+  controls: 'input_control_vis',
+} as const;
+
 export type CHARTS_WITHOUT_SMALL_MULTIPLES = $Values<typeof CHARTS_WITHOUT_SMALL_MULTIPLES>;
+export type CHARTS_TO_BE_DEPRECATED = $Values<typeof CHARTS_TO_BE_DEPRECATED>;
 
 export const CHARTS_CONFIG_TOKENS = {
   [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: NEW_HEATMAP_CHARTS_LIBRARY,

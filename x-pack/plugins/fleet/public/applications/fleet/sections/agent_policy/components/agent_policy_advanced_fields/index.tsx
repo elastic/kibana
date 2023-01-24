@@ -18,22 +18,35 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiSuperSelect,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../../common';
+import styled from 'styled-components';
+
+import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 
-import { policyHasFleetServer } from '../../../agents/services/has_fleet_server';
-
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
+import { policyHasFleetServer } from '../../../../services';
+
+import {
+  useOutputOptions,
+  useDownloadSourcesOptions,
+  DEFAULT_SELECT_VALUE,
+  useFleetServerHostsOptions,
+} from './hooks';
+
+const LeftPaddedEUIBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -56,10 +69,19 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     dataOutputOptions,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
-  } = useOutputOptions();
+  } = useOutputOptions(agentPolicy);
+  const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
+    useDownloadSourcesOptions(agentPolicy);
+
+  const { fleetServerHostsOptions, isLoading: isLoadingFleetServerHostsOption } =
+    useFleetServerHostsOptions(agentPolicy);
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
+
+  const hasManagedPackagePolicy =
+    'package_policies' in agentPolicy &&
+    agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
   return (
     <>
@@ -102,7 +124,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h4 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"
@@ -175,6 +197,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectLogsCheckbox',
               label: (
                 <>
                   <FormattedMessage
@@ -197,6 +220,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             },
             {
               id: `${dataTypes.Metrics}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectMetricsCheckbox',
               label: (
                 <>
                   <FormattedMessage
@@ -247,39 +271,78 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         title={
           <h4>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
-              defaultMessage="Unenrollment timeout"
+              id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
+              defaultMessage="Inactivity timeout"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically unenroll after being gone for this period of time."
+            id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
           />
         }
       >
         <EuiFormRow
           fullWidth
           error={
-            touchedFields.unenroll_timeout && validation.unenroll_timeout
-              ? validation.unenroll_timeout
+            touchedFields.inactivity_timeout && validation.inactivity_timeout
+              ? validation.inactivity_timeout
               : null
           }
-          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+          isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
         >
           <EuiFieldNumber
             fullWidth
             disabled={agentPolicy.is_managed === true}
-            value={agentPolicy.unenroll_timeout || ''}
+            value={agentPolicy.inactivity_timeout || ''}
             min={0}
             onChange={(e) => {
               updateAgentPolicy({
-                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+                inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
               });
             }}
-            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+            isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.fleetServerHostsLabel"
+              defaultMessage="Fleet Server"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.fleetServerHostsDescripton"
+            defaultMessage="Select to which Fleet Server the agents in this policy will communicate."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.fleet_server_host_id && validation.fleet_server_host_id
+              ? validation.fleet_server_host_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
+        >
+          <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
+            valueOfSelected={agentPolicy.fleet_server_host_id || DEFAULT_SELECT_VALUE}
+            fullWidth
+            isLoading={isLoadingFleetServerHostsOption}
+            onChange={(e) => {
+              updateAgentPolicy({
+                fleet_server_host_id: e !== DEFAULT_SELECT_VALUE ? e : null,
+              });
+            }}
+            options={fleetServerHostsOptions}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -309,12 +372,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
         >
           <EuiSuperSelect
-            valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
+            disabled={agentPolicy.is_managed === true}
+            valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
               updateAgentPolicy({
-                data_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+                data_output_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={dataOutputOptions}
@@ -347,15 +411,109 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
         >
           <EuiSuperSelect
-            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
+            disabled={agentPolicy.is_managed === true}
+            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
               updateAgentPolicy({
-                monitoring_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+                monitoring_output_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={monitoringOutputOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
+              defaultMessage="Agent Binary Download"
+              data-test-subj="agentPolicyForm.downloadSource.label"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
+            defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.download_source_id && validation.download_source_id
+              ? validation.download_source_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
+        >
+          <EuiSuperSelect
+            valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
+            fullWidth
+            isLoading={isLoadingDownloadSources}
+            onChange={(e) => {
+              updateAgentPolicy({
+                download_source_id: e !== DEFAULT_SELECT_VALUE ? e : null,
+              });
+            }}
+            options={dataDownloadSourceOptions}
+            data-test-subj="agentPolicyForm.downloadSource.select"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
+                defaultMessage:
+                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
+              })}
+            >
+              <LeftPaddedEUIBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel"
+                  defaultMessage="Deprecated"
+                />
+              </LeftPaddedEUIBadge>
+            </EuiToolTip>
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -381,15 +539,28 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               >
                 {(deleteAgentPolicyPrompt) => {
                   return (
-                    <EuiButton
-                      color="danger"
-                      onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
+                    <EuiToolTip
+                      content={
+                        hasManagedPackagePolicy ? (
+                          <FormattedMessage
+                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
+                            defaultMessage="Agent policy with managed package policies cannot be deleted."
+                          />
+                        ) : undefined
+                      }
                     >
-                      <FormattedMessage
-                        id="xpack.fleet.policyForm.deletePolicyActionText"
-                        defaultMessage="Delete policy"
-                      />
-                    </EuiButton>
+                      <EuiButton
+                        data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
+                        color="danger"
+                        onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
+                        isDisabled={hasManagedPackagePolicy}
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.policyForm.deletePolicyActionText"
+                          defaultMessage="Delete policy"
+                        />
+                      </EuiButton>
+                    </EuiToolTip>
                   );
                 }}
               </AgentPolicyDeleteProvider>

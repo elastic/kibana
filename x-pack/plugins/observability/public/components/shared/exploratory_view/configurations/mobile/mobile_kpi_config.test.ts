@@ -12,6 +12,7 @@ import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { testMobileKPIAttr } from '../test_data/mobile_test_attribute';
 import { getLayerConfigs } from '../../hooks/use_lens_attributes';
 import { DataViewState } from '../../hooks/use_app_data_view';
+import { ReportTypes } from '../../../../..';
 
 describe('Mobile kpi config test', function () {
   mockAppDataView();
@@ -29,14 +30,14 @@ describe('Mobile kpi config test', function () {
         dataType: 'mobile',
       },
     ],
-    'kpi-over-time',
+    ReportTypes.KPI,
     {} as any,
     { mobile: mockDataView } as DataViewState,
     obsvReportConfigMap
   );
 
   beforeEach(() => {
-    lnsAttr = new LensAttributes(layerConfigs);
+    lnsAttr = new LensAttributes(layerConfigs, ReportTypes.KPI);
   });
   it('should return expected json', function () {
     expect(lnsAttr.getJSON()).toEqual(testMobileKPIAttr);

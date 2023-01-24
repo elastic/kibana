@@ -9,7 +9,7 @@ import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   CHANGE_ALERT_STATUS,
   CLICK_TO_CHANGE_ALERT_STATUS,
@@ -22,12 +22,12 @@ interface StatusPopoverButtonProps {
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfoWithValues;
   indexName: string;
-  timelineId: string;
+  scopeId: string;
   handleOnEventClosed: () => void;
 }
 
 export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
-  ({ eventId, contextId, enrichedFieldInfo, indexName, timelineId, handleOnEventClosed }) => {
+  ({ eventId, contextId, enrichedFieldInfo, indexName, scopeId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -39,10 +39,14 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
     const { actionItems } = useAlertsActions({
       closePopover: closeAfterAction,
       eventId,
-      timelineId,
+      scopeId,
       indexName,
       alertStatus: enrichedFieldInfo.values[0] as Status,
     });
+
+    // statusPopoverVisible includes the logic for the visibility of the popover in
+    // case actionItems is an empty array ( ex, when user has read access ).
+    const statusPopoverVisible = useMemo(() => actionItems.length > 0, [actionItems]);
 
     const button = useMemo(
       () => (
@@ -56,13 +60,18 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           fieldFormat={enrichedFieldInfo.data.format}
           isDraggable={false}
           truncate={false}
-          isButton={true}
-          onClick={togglePopover}
+          isButton={statusPopoverVisible}
+          onClick={statusPopoverVisible ? togglePopover : undefined}
           onClickAriaLabel={CLICK_TO_CHANGE_ALERT_STATUS}
         />
       ),
-      [contextId, eventId, enrichedFieldInfo, togglePopover]
+      [contextId, eventId, enrichedFieldInfo, togglePopover, statusPopoverVisible]
     );
+
+    // EuiPopover is not needed if statusPopoverVisible is false
+    if (!statusPopoverVisible) {
+      return button;
+    }
 
     return (
       <EuiPopover
@@ -70,6 +79,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        data-test-subj="alertStatus"
       >
         <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
         <EuiContextMenuPanel items={actionItems} />

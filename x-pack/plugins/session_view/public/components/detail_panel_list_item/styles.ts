@@ -19,12 +19,21 @@ export const useStyles = ({ display }: StylesDeps) => {
   const cached = useMemo(() => {
     const item: CSSObject = {
       display,
-      alignItems: 'center',
-      padding: euiTheme.size.s,
+      alignContent: 'center',
+      padding: `${euiTheme.size.xs} ${euiTheme.size.s} `,
       width: '100%',
-      fontSize: 'inherit',
       fontWeight: 'inherit',
-      minHeight: '36px',
+      height: 'max-content',
+      minHeight: euiTheme.size.l,
+      letterSpacing: '0px',
+      textAlign: 'left',
+
+      '& .euiToolTipAnchor': {
+        width: `calc(100% - ${euiTheme.size.xl})`,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      },
     };
 
     const copiableItem: CSSObject = {
@@ -34,6 +43,7 @@ export const useStyles = ({ display }: StylesDeps) => {
       '&:hover': {
         background: transparentize(euiTheme.colors.primary, 0.1),
       },
+      height: 'fit-content',
     };
 
     return {

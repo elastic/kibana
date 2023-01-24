@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Kibana cors', function () {
-    this.tags('ciGroup12');
     loadTestFile(require.resolve('./cors'));
   });
 }

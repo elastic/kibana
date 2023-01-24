@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,9 +23,16 @@ import {
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
+  EuiToolTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
-import { partition } from 'lodash';
-import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
+import { isEmpty, partition, some } from 'lodash';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '@kbn/alerting-plugin/common/parse_duration';
+import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
   RuleAction,
@@ -33,14 +40,15 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  ActionConnectorMode,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 import { ConnectorsSelection } from './connectors_selection';
+import { ActionNotifyWhen } from './action_notify_when';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -49,12 +57,14 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
+  setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
-  defaultParams: DefaultActionParams;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideNotifyWhen?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -80,6 +90,7 @@ export const ActionTypeForm = ({
   onConnectorSelected,
   onDeleteAction,
   setActionParamsProperty,
+  setActionFrequencyProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -89,7 +100,8 @@ export const ActionTypeForm = ({
   setActionGroupIdByIndex,
   actionTypeRegistry,
   isActionGroupDisabledForActionType,
-  defaultParams,
+  recoveryActionGroup,
+  hideNotifyWhen = false,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -103,27 +115,56 @@ export const ActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+  const [actionThrottle, setActionThrottle] = useState<number | null>(
+    actionItem.frequency?.throttle
+      ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
+      : null
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+  );
+
+  const getDefaultParams = async () => {
+    const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
+    let defaultParams;
+    if (actionItem.group === recoveryActionGroup) {
+      defaultParams = connectorType.defaultRecoveredActionParams;
+    }
+
+    if (!defaultParams) {
+      defaultParams = connectorType.defaultActionParams;
+    }
+
+    return defaultParams;
+  };
 
   useEffect(() => {
-    setAvailableActionVariables(
-      messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
-    );
-    if (defaultParams) {
-      for (const [key, paramValue] of Object.entries(defaultParams)) {
-        if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
-          setActionParamsProperty(key, paramValue, index);
+    (async () => {
+      setAvailableActionVariables(
+        messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+      );
+
+      const defaultParams = await getDefaultParams();
+      if (defaultParams) {
+        for (const [key, paramValue] of Object.entries(defaultParams)) {
+          if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
+            setActionParamsProperty(key, paramValue, index);
+          }
         }
       }
-    }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
 
   useEffect(() => {
-    if (defaultParams && actionGroup) {
-      for (const [key, paramValue] of Object.entries(defaultParams)) {
-        setActionParamsProperty(key, paramValue, index);
+    (async () => {
+      const defaultParams = await getDefaultParams();
+      if (defaultParams && actionGroup) {
+        for (const [key, paramValue] of Object.entries(defaultParams)) {
+          setActionParamsProperty(key, paramValue, index);
+        }
       }
-    }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionGroup]);
 
@@ -136,6 +177,13 @@ export const ActionTypeForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
+
+  // useEffect(() => {
+  //   if (!actionItem.frequency) {
+  //     setActionFrequency(DEFAULT_FREQUENCY, index);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [actionItem.frequency]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -161,8 +209,38 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const actionNotifyWhen = (
+    <ActionNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      onNotifyWhenChange={useCallback(
+        (notifyWhen) => {
+          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onThrottleChange={useCallback(
+        (throttle: number | null, throttleUnit: string) => {
+          setActionThrottle(throttle);
+          setActionThrottleUnit(throttleUnit);
+          setActionFrequencyProperty(
+            'throttle',
+            throttle ? `${throttle}${throttleUnit}` : null,
+            index
+          );
+        },
+        [setActionFrequencyProperty, index]
+      )}
+    />
+  );
+
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
+
+  const showActionGroupErrorIcon = (): boolean => {
+    return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
+  };
 
   const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
   const checkEnabledResult = checkActionFormActionTypeEnabled(
@@ -170,10 +248,13 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const showSelectActionGroup = actionGroups && selectedActionGroup && setActionGroupIdByIndex;
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
-      {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
+      {showSelectActionGroup && (
         <>
+          <EuiSpacer size="xs" />
           <EuiSuperSelect
             prepend={
               <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
@@ -198,10 +279,10 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
-
-          <EuiSpacer size="l" />
         </>
       )}
+      {!hideNotifyWhen && actionNotifyWhen}
+      {(showSelectActionGroup || !hideNotifyWhen) && <EuiSpacer size="l" />}
       <EuiFormRow
         fullWidth
         label={
@@ -253,6 +334,7 @@ export const ActionTypeForm = ({
               messageVariables={availableActionVariables}
               defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
               actionConnector={actionConnector}
+              executionMode={ActionConnectorMode.ActionForm}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -274,13 +356,31 @@ export const ActionTypeForm = ({
       data-test-subj={`alertActionAccordion-${index}`}
       buttonContent={
         <EuiFlexGroup gutterSize="l" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-          </EuiFlexItem>
+          {showActionGroupErrorIcon() ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
+                  { defaultMessage: 'Action contains errors.' }
+                )}
+              >
+                <EuiIcon
+                  data-test-subj="action-group-error-icon"
+                  type="alert"
+                  color="danger"
+                  size="m"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiText>
               <div>
-                <EuiFlexGroup gutterSize="s">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <FormattedMessage
                       defaultMessage="{actionConnectorName}"
@@ -318,6 +418,15 @@ export const ActionTypeForm = ({
               </div>
             </EuiText>
           </EuiFlexItem>
+          {actionTypeRegistered && actionTypeRegistered.isExperimental && (
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                data-test-subj="action-type-form-beta-badge"
+                label={betaBadgeProps.label}
+                tooltipContent={betaBadgeProps.tooltipContent}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
       extraAction={

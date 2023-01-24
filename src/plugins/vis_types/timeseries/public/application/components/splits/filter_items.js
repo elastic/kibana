@@ -12,11 +12,13 @@ import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
-import uuid from 'uuid';
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { v1 as uuidv1 } from 'uuid';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, withEuiTheme } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
+import { tsvbEditorRowStyles } from '../../styles/common.styles';
+
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -48,15 +50,20 @@ class FilterItemsUi extends Component {
 
     const newFilter = () => ({
       color: this.props.model.color,
-      id: uuid.v1(),
+      id: uuidv1(),
       filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
     });
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const { intl } = this.props;
+    const { intl, theme } = this.props;
 
     return (
-      <EuiFlexGroup gutterSize="s" className="tvbAggRow" alignItems="center" key={model.id}>
+      <EuiFlexGroup
+        gutterSize="s"
+        css={tsvbEditorRowStyles(theme.euiTheme)}
+        alignItems="center"
+        key={model.id}
+      >
         <EuiFlexItem grow={false}>
           <ColorPicker
             disableTrash={true}
@@ -120,4 +127,4 @@ FilterItemsUi.propTypes = {
   indexPatterns: PropTypes.string,
 };
 
-export const FilterItems = injectI18n(FilterItemsUi);
+export const FilterItems = injectI18n(withEuiTheme(FilterItemsUi));

@@ -6,17 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
 import type { MlCommonDataGrid } from './common_data_grid';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   commonDataGrid: MlCommonDataGrid
 ) {
+  const headerPage = getPageObject('header');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -190,7 +191,15 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     async assertTotalFeatureImportanceEvaluatePanelExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-FeatureImportanceSummary');
       await this.scrollFeatureImportanceIntoView();
-      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 30 * 1000 });
+
+      // Depending on the analytics result, there's either the feature
+      // importance chart or a callout about uniform data. Since we're not
+      // testing the quality of analytics here, we're fine with both panel
+      // contents.
+      await mlCommonUI.assertOneOfExists(
+        ['mlTotalFeatureImportanceChart', 'mlNoTotalFeatureImportanceCallout'],
+        30 * 1000
+      );
     },
 
     async assertFeatureImportanceDecisionPathElementsExists() {
@@ -364,12 +373,13 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async expandContentSection(sectionId: string, shouldExpand: boolean) {
+      await headerPage.waitUntilLoadingHasFinished();
       const contentSubj = `mlDFExpandableSection-${sectionId}-content`;
       const expandableContentExists = await testSubjects.exists(contentSubj, { timeout: 1000 });
 
       if (expandableContentExists !== shouldExpand) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(
+          await testSubjects.clickWhenNotDisabledWithoutRetry(
             `mlDFExpandableSection-${sectionId}-toggle-button`
           );
           if (shouldExpand) {

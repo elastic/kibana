@@ -19,8 +19,9 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
@@ -205,24 +206,47 @@ export class RemoteClusterTable extends Component {
           defaultMessage: 'Mode',
         }),
         sortable: true,
-        render: (mode) =>
+        render: (mode) => {
+          let modeMessage;
           mode === PROXY_MODE
-            ? mode
-            : i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
-                defaultMessage: 'default',
-              }),
+            ? (modeMessage = mode)
+            : (modeMessage = i18n.translate(
+                'xpack.remoteClusters.remoteClusterList.table.sniffModeDescription',
+                {
+                  defaultMessage: 'default',
+                }
+              ));
+          const modeMessageComponent = (
+            <EuiFlexItem grow={false} className="remoteClustersConnectionMode__message">
+              <EuiText
+                id="xpack.remoteClusters.remoteClusterList.table.sniffModeDescription"
+                data-test-subj="remoteClusterConnectionModeMessage"
+                size="s"
+              >
+                {modeMessage}
+              </EuiText>
+            </EuiFlexItem>
+          );
+          return modeMessageComponent;
+        },
       },
       {
         field: 'mode',
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.addressesColumnTitle', {
           defaultMessage: 'Addresses',
         }),
+        dataTestSubj: 'remoteClustersAddress',
         truncateText: true,
         render: (mode, { seeds, proxyAddress }) => {
-          if (mode === PROXY_MODE) {
-            return proxyAddress;
-          }
-          return seeds.join(', ');
+          const clusterAddressString = mode === PROXY_MODE ? proxyAddress : seeds.join(', ');
+          const connectionMode = (
+            <EuiFlexItem grow={false} className="remoteClustersConnectionAddress__message">
+              <EuiText data-test-subj="remoteClusterConnectionAddressMessage" size="s">
+                {clusterAddressString}
+              </EuiText>
+            </EuiFlexItem>
+          );
+          return connectionMode;
         },
       },
       {
@@ -236,10 +260,16 @@ export class RemoteClusterTable extends Component {
         sortable: true,
         width: '160px',
         render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
-          if (mode === PROXY_MODE) {
-            return connectedSocketsCount;
-          }
-          return connectedNodesCount;
+          const remoteNodesCount =
+            mode === PROXY_MODE ? connectedSocketsCount : connectedNodesCount;
+          const connectionMode = (
+            <EuiFlexItem grow={false} className="remoteClustersNodeCount__message">
+              <EuiText data-test-subj="remoteClusterNodeCountMessage" size="s">
+                {remoteNodesCount}
+              </EuiText>
+            </EuiFlexItem>
+          );
+          return connectionMode;
         },
       },
       {

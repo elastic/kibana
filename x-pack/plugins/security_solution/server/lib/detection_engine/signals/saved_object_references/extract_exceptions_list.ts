@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../rule_schema';
 import { getSavedObjectNamePatternForExceptionsList } from './utils';
 
 /**

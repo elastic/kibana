@@ -12,21 +12,21 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
-import { CoreStart } from 'kibana/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { AllSeries } from '@kbn/observability-plugin/public';
 import { StartDependencies } from './plugin';
-import { AllSeries } from '../../../plugins/observability/public';
 
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  defaultIndexPattern: IndexPattern | null;
+  defaultIndexPattern: DataView | null;
 }) => {
   const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
 

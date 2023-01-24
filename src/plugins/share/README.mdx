@@ -2,7 +2,7 @@
 id: kibDevSharePluginReadme
 slug: /kibana-dev-docs/tutorials/share
 title: Kibana share Plugin
-summary: Introduction to Kibana "share" plugin services (sharing popup menu, URL locators, and short URLs).
+description: Introduction to Kibana "share" plugin services (sharing popup menu, URL locators, and short URLs).
 date: 2022-02-21
 tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'share', 'url', 'short-url', 'locator']
 ---
@@ -212,19 +212,6 @@ const url = await shortUrls.create({
   params: {
     dashboardId: '123',
   }
-});
-```
-
-You can make the short URL slug human-readable by specifying the
-`humanReadableSlug` flag:
-
-```ts
-const url = await shortUrls.create({
-  locator,
-  params: {
-    dashboardId: '123',
-  },
-  humanReadableSlug: true,
 });
 ```
 

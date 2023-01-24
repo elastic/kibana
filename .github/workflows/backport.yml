@@ -1,10 +1,10 @@
 on:
   pull_request_target:
-    branches:
-      - main
-    types:
-      - labeled
-      - closed
+    branches: ['main']
+    types: ['labeled', 'closed']
+
+env:
+  NODE_ENV: kibana-github-action
 
 jobs:
   backport:
@@ -19,9 +19,14 @@ jobs:
       )
     steps:
       - name: Backport Action
-        uses: sqren/backport-github-action@v7.4.0
+        uses: sqren/backport-github-action@v8.9.7
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
-      - name: Backport log
-        run: cat ~/.backport/backport.log
+      - name: Info log
+        if: ${{ success() }}
+        run: cat /home/runner/.backport/backport.info.log
+
+      - name: Debug log
+        if: ${{ failure() }}
+        run: cat /home/runner/.backport/backport.debug.log

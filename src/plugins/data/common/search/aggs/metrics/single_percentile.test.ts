@@ -42,7 +42,8 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
   });
 
@@ -142,7 +143,8 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
 
     expect(aggConfigs.toDsl()).toMatchSnapshot();

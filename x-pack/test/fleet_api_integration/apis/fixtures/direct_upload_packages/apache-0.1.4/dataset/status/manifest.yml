@@ -1,0 +1,22 @@
+title: Apache status metrics
+release: experimental
+type: metrics
+streams:
+- input: apache/metrics
+  vars:
+  - name: period
+    type: text
+    title: Period
+    multi: false
+    required: true
+    show_user: true
+    default: 10s
+  - name: server_status_path
+    type: text
+    title: Server Status Path
+    multi: false
+    required: true
+    show_user: false
+    default: /server-status
+  title: Apache status metrics
+  description: Collect Apache status metrics

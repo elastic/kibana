@@ -6,37 +6,29 @@
  */
 
 import {
-  EuiLinkAnchorProps,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
-// Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
-import { FunctionComponent } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import rehype2react from 'rehype-react';
-import { Plugin, PluggableList } from 'unified';
+
 import * as timelineMarkdownPlugin from './timeline';
+import * as osqueryMarkdownPlugin from './osquery';
+import * as insightMarkdownPlugin from './insight';
 
 export const { uiPlugins, parsingPlugins, processingPlugins } = {
   uiPlugins: getDefaultEuiMarkdownUiPlugins(),
   parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins() as [
-    [Plugin, Remark2RehypeOptions],
-    [
-      typeof rehype2react,
-      Parameters<typeof rehype2react>[0] & {
-        components: { a: FunctionComponent<EuiLinkAnchorProps>; timeline: unknown };
-      }
-    ],
-    ...PluggableList
-  ],
+  processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
 };
 
 uiPlugins.push(timelineMarkdownPlugin.plugin);
+uiPlugins.push(osqueryMarkdownPlugin.plugin);
 
+parsingPlugins.push(insightMarkdownPlugin.parser);
 parsingPlugins.push(timelineMarkdownPlugin.parser);
+parsingPlugins.push(osqueryMarkdownPlugin.parser);
 
 // This line of code is TS-compatible and it will break if [1][1] change in the future.
+processingPlugins[1][1].components.insight = insightMarkdownPlugin.renderer;
 processingPlugins[1][1].components.timeline = timelineMarkdownPlugin.renderer;
+processingPlugins[1][1].components.osquery = osqueryMarkdownPlugin.renderer;

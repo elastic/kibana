@@ -19,16 +19,13 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import {
-  ImmutableArray,
-  ProtectionModes,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { ConfigFormHeading } from '../../components/config_form';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
 
 export const UserNotification = React.memo(
@@ -39,6 +36,7 @@ export const UserNotification = React.memo(
     protection: PolicyProtection;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
+    const showEditableFormFields = useShowEditableFormFields();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const dispatch = useDispatch<(action: AppAction) => void>();
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
@@ -142,7 +140,7 @@ export const UserNotification = React.memo(
           id={`${protection}UserNotificationCheckbox}`}
           onChange={handleUserNotificationCheckbox}
           checked={userNotificationSelected}
-          disabled={selected === ProtectionModes.off}
+          disabled={!showEditableFormFields || selected === ProtectionModes.off}
           label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.notifyUser', {
             defaultMessage: 'Notify user',
           })}
@@ -199,6 +197,7 @@ export const UserNotification = React.memo(
               value={userNotificationMessage}
               onChange={handleCustomUserNotification}
               fullWidth={true}
+              disabled={!showEditableFormFields}
               data-test-subj={`${protection}UserNotificationCustomMessage`}
             />
           </>

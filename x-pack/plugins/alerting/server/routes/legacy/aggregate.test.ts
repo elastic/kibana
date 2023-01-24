@@ -6,14 +6,14 @@
  */
 
 import { aggregateAlertRoute } from './aggregate';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
@@ -23,7 +23,7 @@ jest.mock('../../lib/track_legacy_route_usage', () => ({
   trackLegacyRouteUsage: jest.fn(),
 }));
 
-jest.mock('../../lib/license_api_access.ts', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -54,6 +54,11 @@ describe('aggregateAlertRoute', () => {
         pending: 1,
         unknown: 0,
       },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
+      },
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
@@ -76,6 +81,11 @@ describe('aggregateAlertRoute', () => {
             "ok": 15,
             "pending": 1,
             "unknown": 0,
+          },
+          "ruleLastRunOutcome": Object {
+            "failed": 2,
+            "succeeded": 1,
+            "warning": 3,
           },
         },
       }
@@ -112,6 +122,11 @@ describe('aggregateAlertRoute', () => {
         active: 23,
         pending: 1,
         unknown: 0,
+      },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
       },
     });
 

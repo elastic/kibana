@@ -9,10 +9,10 @@ import expect from '@kbn/expect';
 
 import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { LIST_ID } from '../../../../plugins/lists/common/constants.mock';
+import { LIST_ID } from '@kbn/lists-plugin/common/constants.mock';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { createListsIndex, deleteListsIndex, deleteAllExceptions } from '../../utils';
 
 interface SummaryResponseType {

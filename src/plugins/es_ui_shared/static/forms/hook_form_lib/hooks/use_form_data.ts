@@ -16,8 +16,8 @@ interface Options<I> {
   watch?: string | string[];
   form?: FormHook<any>;
   /**
-   * Use this handler if you want to listen to field value change
-   * before the validations are ran.
+   * Use this handler if you want to listen to field values changes immediately
+   * (**before** the validations are ran) instead of relying on a useEffect()
    */
   onChange?: (formData: I) => void;
 }
@@ -51,20 +51,35 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
 
   const previousRawData = useRef<FormData>(initialValue);
   const isMounted = useRef(false);
+  /**
+   * The first time the subscribe listener is called with no form data (empty object)
+   * this means that no field has mounted --> we don't want to update the state just yet.
+   */
+  const isFirstSubscribeListenerCall = useRef(true);
   const [formData, setFormData] = useState<I>(() => unflattenObject<I>(previousRawData.current));
 
-  /**
-   * We do want to offer to the consumer a handler to serialize the form data that changes each time
-   * the formData **state** changes. This is why we added the "formData" dep to the array and added the eslint override.
-   */
-  const serializer = useCallback(() => {
+  const formDataSerializer = useCallback(() => {
     return getFormData();
+    /**
+     * The "form.getFormData()" handler (which serializes the form data) is a static ref that does not change
+     * when the underlying form data changes. As we do want to return to the consumer a handler to serialize the form data
+     * that **does** changes along with the form data we've added the "formData" state to the useCallback dependencies.
+     */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getFormData, formData]);
 
   useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
-      if (!isMounted.current && Object.keys(raw).length === 0) {
+      if (isFirstSubscribeListenerCall.current && Object.keys(raw).length === 0) {
+        // No field has mounted and been added to the form yet, skip this invocation.
+        isFirstSubscribeListenerCall.current = false;
         return;
       }
 
@@ -78,14 +93,18 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
             onChange(nextState);
           }
 
-          setFormData(nextState);
+          if (isMounted.current) {
+            setFormData(nextState);
+          }
         }
       } else {
         const nextState = unflattenObject<I>(raw);
         if (onChange) {
           onChange(nextState);
         }
-        setFormData(nextState);
+        if (isMounted.current) {
+          setFormData(nextState);
+        }
       }
     });
 
@@ -95,17 +114,10 @@ export const useFormData = <I extends object = FormData, T extends object = I>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stringifiedWatch, getFormData$, onChange]);
 
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   if (!isMounted.current && Object.keys(formData).length === 0) {
     // No field has mounted yet
-    return [formData, serializer, false];
+    return [formData, formDataSerializer, false];
   }
 
-  return [formData, serializer, true];
+  return [formData, formDataSerializer, true];
 };

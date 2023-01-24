@@ -7,14 +7,26 @@
 
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { htmlIdGenerator } from '@elastic/eui';
+import { FIELD_ORIGIN, STYLE_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import {
+  ESSearchSourceDescriptor,
+  VectorStyleDescriptor,
+} from '@kbn/maps-plugin/common/descriptor_types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
+import { SEVERITY_COLOR_RAMP } from '../../common';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
-import { VectorSourceRequestMeta } from '../../../maps/common';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
+import { tabColor } from '../../common/util/group_color_utils';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
+import { AnomalySource } from './anomaly_source';
+import { SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -22,44 +34,131 @@ export const ML_ANOMALY_LAYERS = {
   TYPICAL_TO_ACTUAL: 'typical to actual',
 } as const;
 
+export const CUSTOM_COLOR_RAMP = {
+  type: STYLE_TYPE.DYNAMIC,
+  options: {
+    customColorRamp: SEVERITY_COLOR_RAMP,
+    field: {
+      name: 'record_score',
+      origin: FIELD_ORIGIN.SOURCE,
+    },
+    useCustomColorRamp: true,
+  },
+};
+
+export const ACTUAL_STYLE = {
+  type: 'VECTOR',
+  properties: {
+    fillColor: CUSTOM_COLOR_RAMP,
+    lineColor: CUSTOM_COLOR_RAMP,
+  },
+  isTimeAware: false,
+};
+
+export const TYPICAL_STYLE = {
+  type: 'VECTOR',
+  properties: {
+    fillColor: {
+      type: 'STATIC',
+      options: {
+        color: '#98A2B2',
+      },
+    },
+    lineColor: {
+      type: 'STATIC',
+      options: {
+        color: '#fff',
+      },
+    },
+    lineWidth: {
+      type: 'STATIC',
+      options: {
+        size: 2,
+      },
+    },
+    iconSize: {
+      type: 'STATIC',
+      options: {
+        size: 6,
+      },
+    },
+  },
+};
+
 export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
-const INFLUENCER_LIMIT = 3;
-const INFLUENCER_MAX_VALUES = 3;
-
-export function getInfluencersHtmlString(
-  influencers: Array<{ influencer_field_name: string; influencer_field_values: string[] }>,
-  splitFields: string[]
-) {
-  let htmlString = '<ul>';
-  let influencerCount = 0;
-  for (let i = 0; i < influencers.length; i++) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { influencer_field_name, influencer_field_values } = influencers[i];
-    // Skip if there are no values or it's a partition field
-    if (!influencer_field_values.length || splitFields.includes(influencer_field_name)) continue;
-
-    const fieldValuesString = influencer_field_values.slice(0, INFLUENCER_MAX_VALUES).join(', ');
-
-    htmlString += `<li>${influencer_field_name}: ${fieldValuesString}</li>`;
-    influencerCount += 1;
-
-    if (influencerCount === INFLUENCER_LIMIT) {
-      break;
-    }
-  }
-  htmlString += '</ul>';
-
-  return htmlString;
-}
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
-function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
-  const convertWithRounding = (point: string) => Math.round(Number(point) * 100) / 100;
-  const convert = (point: string) => Number(point);
-  return actualCoordinateStr
+function getCoordinates(latLonString: string): number[] {
+  return latLonString
     .split(',')
-    .map(round ? convertWithRounding : convert)
+    .map((coordinate: string) => Number(coordinate))
     .reverse();
+}
+
+export function getInitialAnomaliesLayers(jobId: string) {
+  const initialLayers = [];
+  for (const layer in ML_ANOMALY_LAYERS) {
+    if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
+      initialLayers.push({
+        id: htmlIdGenerator()(),
+        type: LAYER_TYPE.GEOJSON_VECTOR,
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId,
+          typicalActual: ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS],
+        }),
+        style:
+          ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS] === ML_ANOMALY_LAYERS.TYPICAL
+            ? TYPICAL_STYLE
+            : ACTUAL_STYLE,
+      });
+    }
+  }
+  return initialLayers;
+}
+
+export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
+  const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
+  for (const index in sourceIndexWithGeoFields) {
+    if (sourceIndexWithGeoFields.hasOwnProperty(index)) {
+      const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
+
+      geoFields.forEach((geoField) => {
+        const color = tabColor(geoField);
+
+        initialLayers.push({
+          id: htmlIdGenerator()(),
+          type: LAYER_TYPE.GEOJSON_VECTOR,
+          style: {
+            type: 'VECTOR',
+            properties: {
+              fillColor: {
+                type: 'STATIC',
+                options: {
+                  color,
+                },
+              },
+              lineColor: {
+                type: 'STATIC',
+                options: {
+                  color,
+                },
+              },
+            },
+          } as unknown as VectorStyleDescriptor,
+          sourceDescriptor: {
+            id: htmlIdGenerator()(),
+            type: SOURCE_TYPES.ES_SEARCH,
+            tooltipProperties: [geoField],
+            label: index,
+            indexPatternId: dataViewId,
+            geoField,
+            scalingType: SCALING_TYPES.MVT,
+          } as unknown as ESSearchSourceDescriptor,
+        });
+      });
+    }
+  }
+  return initialLayers;
 }
 
 export async function getResultsForJobId(
@@ -136,21 +235,10 @@ export async function getResultsForJobId(
   const features: Feature[] =
     resp?.hits.hits.map(({ _source }) => {
       const geoResults = _source.geo_results;
-      const actualCoordStr = geoResults && geoResults.actual_point;
-      const typicalCoordStr = geoResults && geoResults.typical_point;
-      let typical: number[] = [];
-      let typicalDisplay: number[] = [];
-      let actual: number[] = [];
-      let actualDisplay: number[] = [];
-
-      if (actualCoordStr !== undefined) {
-        actual = getCoordinates(actualCoordStr);
-        actualDisplay = getCoordinates(actualCoordStr, true);
-      }
-      if (typicalCoordStr !== undefined) {
-        typical = getCoordinates(typicalCoordStr);
-        typicalDisplay = getCoordinates(typicalCoordStr, true);
-      }
+      const actual =
+        geoResults && geoResults.actual_point ? getCoordinates(geoResults.actual_point) : [0, 0];
+      const typical =
+        geoResults && geoResults.typical_point ? getCoordinates(geoResults.typical_point) : [0, 0];
 
       let geometry: Geometry;
       if (locationType === ML_ANOMALY_LAYERS.TYPICAL || locationType === ML_ANOMALY_LAYERS.ACTUAL) {
@@ -173,25 +261,30 @@ export async function getResultsForJobId(
         ...(_source.over_field_name ? { [_source.over_field_name]: _source.over_field_value } : {}),
       };
 
+      const splitFieldKeys = Object.keys(splitFields);
+      const influencers = _source.influencers
+        ? _source.influencers.filter(
+            ({ influencer_field_name: name, influencer_field_values: values }) => {
+              // remove influencers without values and influencers on partition fields
+              return values.length && !splitFieldKeys.includes(name);
+            }
+          )
+        : [];
+
       return {
         type: 'Feature',
         geometry,
         properties: {
           actual,
-          actualDisplay,
           typical,
-          typicalDisplay,
           fieldName: _source.field_name,
           functionDescription: _source.function_description,
           timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
           record_score: Math.floor(_source.record_score),
           ...(Object.keys(splitFields).length > 0 ? splitFields : {}),
-          ...(_source.influencers?.length
+          ...(influencers.length
             ? {
-                influencers: getInfluencersHtmlString(
-                  _source.influencers,
-                  Object.keys(splitFields)
-                ),
+                influencers,
               }
             : {}),
         },

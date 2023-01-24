@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
-import {
-  AGENT_POLICY_API_ROUTES,
+import type { KbnClient } from '@kbn/test';
+import type { AxiosResponse } from 'axios';
+import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
-  DeletePackagePoliciesResponse,
-  PACKAGE_POLICY_API_ROUTES,
-} from '../../../../fleet/common';
-import { PolicyData } from '../types';
+  PostDeletePackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common';
+import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
 import { wrapErrorAndRejectPromise } from './utils';
 
@@ -71,7 +69,6 @@ export const indexFleetEndpointPolicy = async (
     description: 'Protect the worlds data',
     policy_id: agentPolicy.data.item.id,
     enabled: true,
-    output_id: '',
     inputs: [
       {
         type: 'endpoint',
@@ -105,7 +102,7 @@ export const indexFleetEndpointPolicy = async (
 };
 
 export interface DeleteIndexedFleetEndpointPoliciesResponse {
-  integrationPolicies: DeletePackagePoliciesResponse | undefined;
+  integrationPolicies: PostDeletePackagePoliciesResponse | undefined;
   agentPolicies: DeleteAgentPolicyResponse[] | undefined;
 }
 
@@ -135,7 +132,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeletePackagePoliciesResponse>
+        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
     ).data;
   }
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
+import { ToastsStart } from '@kbn/core/public';
+import { isTimeRangeValid } from '../../../utils/validate_time';
 
 /**
  * Validates a given time filter range, provided by URL or UI
@@ -18,9 +18,7 @@ export function validateTimeRange(
   { from, to }: { from: string; to: string },
   toastNotifications: ToastsStart
 ): boolean {
-  const fromMoment = dateMath.parse(from);
-  const toMoment = dateMath.parse(to);
-  if (!fromMoment || !toMoment || !fromMoment.isValid() || !toMoment.isValid()) {
+  if (!isTimeRangeValid({ from, to })) {
     toastNotifications.addDanger({
       title: i18n.translate('discover.notifications.invalidTimeRangeTitle', {
         defaultMessage: `Invalid time range`,

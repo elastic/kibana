@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { Rule, RawAlertInstance } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -20,10 +22,8 @@ import {
   AlertState,
   AlertThreadPoolRejectionsStats,
 } from '../../common/types/alerts';
-import { Alert } from '../../../alerting/server';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert as Rule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 

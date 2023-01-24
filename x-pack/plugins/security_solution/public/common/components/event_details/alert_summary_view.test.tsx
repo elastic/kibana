@@ -6,20 +6,21 @@
  */
 
 import React from 'react';
-import { waitFor, render } from '@testing-library/react';
+import { waitFor, render, act } from '@testing-library/react';
 
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
+import * as i18n from './translations';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
   return {
     useRuleWithFallback: jest.fn(),
   };
@@ -29,7 +30,7 @@ const props = {
   data: mockAlertDetailsData as TimelineEventsDetailsItem[],
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
-  timelineId: 'detections-page',
+  scopeId: 'alerts-page',
   title: '',
   goToTable: jest.fn(),
 };
@@ -43,43 +44,62 @@ describe('AlertSummaryView', () => {
       },
     });
   });
-  test('render correct items', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-    expect(getByTestId('summary-view')).toBeInTheDocument();
-  });
-
-  test('it renders the action cell by default', () => {
-    const { getAllByTestId } = render(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-    expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
-  });
-
-  test('Renders the correct global fields', () => {
-    const { getByText } = render(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-
-    ['host.name', 'user.name', 'Rule type', 'query'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+  test('render correct items', async () => {
+    await act(async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...props} />
+        </TestProviders>
+      );
+      expect(getByTestId('summary-view')).toBeInTheDocument();
     });
   });
 
-  test('it does NOT render the action cell for the active timeline', () => {
-    const { queryAllByTestId } = render(
-      <TestProviders>
-        <AlertSummaryView {...props} timelineId={TimelineId.active} />
-      </TestProviders>
-    );
-    expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+  test('it renders the action cell by default', async () => {
+    await act(async () => {
+      const { getAllByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...props} />
+        </TestProviders>
+      );
+      expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
+    });
+  });
+
+  test('Renders the correct global fields', async () => {
+    await act(async () => {
+      const { getByText } = render(
+        <TestProviders>
+          <AlertSummaryView {...props} />
+        </TestProviders>
+      );
+
+      ['host.name', 'user.name', i18n.RULE_TYPE, 'query', 'rule.name'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
+    });
+  });
+
+  test('it does NOT render the action cell for the active timeline', async () => {
+    await act(async () => {
+      const { queryAllByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+      expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+    });
+  });
+
+  test('it does NOT render the action cell when readOnly is passed', async () => {
+    await act(async () => {
+      const { queryAllByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...{ ...props, isReadOnly: true }} />
+        </TestProviders>
+      );
+      expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+    });
   });
 
   test("render no investigation guide if it doesn't exist", async () => {
@@ -88,16 +108,18 @@ describe('AlertSummaryView', () => {
         note: null,
       },
     });
-    const { queryByTestId } = render(
-      <TestProviders>
-        <AlertSummaryView {...props} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
+    await act(async () => {
+      const { queryByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...props} />
+        </TestProviders>
+      );
+      await waitFor(() => {
+        expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
+      });
     });
   });
-  test('Network event renders the correct summary rows', () => {
+  test('Network event renders the correct summary rows', async () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -111,25 +133,27 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
 
-    [
-      'host.name',
-      'user.name',
-      'destination.address',
-      'source.address',
-      'source.port',
-      'process.name',
-    ].forEach((fieldId) => {
-      expect(getByText(fieldId));
+      [
+        'host.name',
+        'user.name',
+        'destination.address',
+        'source.address',
+        'source.port',
+        'process.name',
+      ].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('DNS network event renders the correct summary rows', () => {
+  test('DNS network event renders the correct summary rows', async () => {
     const renderProps = {
       ...props,
       data: [
@@ -151,18 +175,20 @@ describe('AlertSummaryView', () => {
         } as TimelineEventsDetailsItem,
       ],
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
 
-    ['dns.question.name', 'process.name'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+      ['dns.question.name', 'process.name'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Memory event code renders additional summary rows', () => {
+  test('Memory event code renders additional summary rows', async () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -176,16 +202,18 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['host.name', 'user.name', 'Target.process.executable'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['host.name', 'user.name', 'Target.process.executable'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
-  test('Behavior event code renders additional summary rows', () => {
+  test('Behavior event code renders additional summary rows', async () => {
     const actualRuleDescription = 'The actual rule description';
     const renderProps = {
       ...props,
@@ -215,17 +243,19 @@ describe('AlertSummaryView', () => {
         },
       ] as TimelineEventsDetailsItem[],
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['host.name', 'user.name', 'process.name', actualRuleDescription].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['host.name', 'user.name', 'process.name', actualRuleDescription].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Malware event category shows file fields', () => {
+  test('Malware event category shows file fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'event' && item.field === 'event.category') {
@@ -248,17 +278,19 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['host.name', 'user.name', 'file.name', 'file.hash.sha256'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['host.name', 'user.name', 'file.name', 'file.hash.sha256'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Ransomware event code shows correct fields', () => {
+  test('Ransomware event code shows correct fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'event' && item.field === 'event.code') {
@@ -281,17 +313,19 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['process.hash.sha256', 'Ransomware.feature'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['process.hash.sha256', 'Ransomware.feature'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Machine learning events show correct fields', () => {
+  test('Machine learning events show correct fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -314,17 +348,21 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['i_am_the_ml_job_id', 'kibana.alert.rule.parameters.anomaly_threshold'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['i_am_the_ml_job_id', 'kibana.alert.rule.parameters.anomaly_threshold'].forEach(
+        (fieldId) => {
+          expect(getByText(fieldId));
+        }
+      );
     });
   });
 
-  test('[legacy] Machine learning events show correct fields', () => {
+  test('[legacy] Machine learning events show correct fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -347,17 +385,19 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['i_am_the_ml_job_id', 'signal.rule.anomaly_threshold'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['i_am_the_ml_job_id', 'signal.rule.anomaly_threshold'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Threat match events show correct fields', () => {
+  test('Threat match events show correct fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -384,17 +424,19 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['threat_index*', '*query*'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['threat_index*', '*query*'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('[legacy] Threat match events show correct fields', () => {
+  test('[legacy] Threat match events show correct fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -421,17 +463,19 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['threat_index*', '*query*'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['threat_index*', '*query*'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Ransomware event code resolves fields from the source event', () => {
+  test('Ransomware event code resolves fields from the source event', async () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -452,17 +496,19 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
-    ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
-      expect(getByText(fieldId));
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+      ['host.name', 'user.name', 'process.name'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Threshold events have special fields', () => {
+  test('Threshold events have special fields', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -509,24 +555,20 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
 
-    [
-      'Threshold Count',
-      'host.name [threshold]',
-      'host.id [threshold]',
-      'Threshold Cardinality',
-      'count(host.name) >= 9001',
-    ].forEach((fieldId) => {
-      expect(getByText(fieldId));
+      ['Event Count', 'Event Cardinality', 'host.name', 'host.id'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
     });
   });
 
-  test('Threshold fields are not shown when data is malformated', () => {
+  test('Threshold fields are not shown when data is malformated', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -575,27 +617,29 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
-    const { getByText } = render(
-      <TestProvidersComponent>
-        <AlertSummaryView {...renderProps} />
-      </TestProvidersComponent>
-    );
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
 
-    ['Threshold Count'].forEach((fieldId) => {
-      expect(getByText(fieldId));
-    });
+      ['Event Count'].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
 
-    [
-      'host.name [threshold]',
-      'host.id [threshold]',
-      'Threshold Cardinality',
-      'count(host.name) >= 9001',
-    ].forEach((fieldText) => {
-      expect(() => getByText(fieldText)).toThrow();
+      [
+        'host.name [threshold]',
+        'host.id [threshold]',
+        'Event Cardinality',
+        'count(host.name) >= 9001',
+      ].forEach((fieldText) => {
+        expect(() => getByText(fieldText)).toThrow();
+      });
     });
   });
 
-  test('Threshold fields are not shown when data is partially missing', () => {
+  test('Threshold fields are not shown when data is partially missing', async () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
         if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
@@ -625,21 +669,64 @@ describe('AlertSummaryView', () => {
       ...props,
       data: enhancedData,
     };
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+
+      //  The `value` fields are missing here, so the enriched field info cannot be calculated correctly
+      ['host.id [threshold]', 'Threshold Cardinality', 'count(host.name) >= 9001'].forEach(
+        (fieldText) => {
+          expect(() => getByText(fieldText)).toThrow();
+        }
+      );
+    });
+  });
+
+  test('New terms events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['new_terms'],
+            originalValue: ['new_terms'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.new_terms',
+        values: ['127.0.0.1'],
+        originalValue: ['127.0.0.1'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.parameters.new_terms_fields',
+        values: ['host.ip'],
+        originalValue: ['host.ip'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+
     const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
 
-    //  The `value` fields are missing here, so the enriched field info cannot be calculated correctly
-    ['host.id [threshold]', 'Threshold Cardinality', 'count(host.name) >= 9001'].forEach(
-      (fieldText) => {
-        expect(() => getByText(fieldText)).toThrow();
-      }
-    );
+    ['New Terms', '127.0.0.1', 'New Terms fields', 'host.ip'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
   });
 
-  test("doesn't render empty fields", () => {
+  test("doesn't render empty fields", async () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -655,12 +742,14 @@ describe('AlertSummaryView', () => {
       }) as TimelineEventsDetailsItem[],
     };
 
-    const { queryByTestId } = render(
-      <TestProviders>
-        <AlertSummaryView {...renderProps} />
-      </TestProviders>
-    );
+    await act(async () => {
+      const { queryByTestId } = render(
+        <TestProviders>
+          <AlertSummaryView {...renderProps} />
+        </TestProviders>
+      );
 
-    expect(queryByTestId('event-field-kibana.alert.rule.name')).not.toBeInTheDocument();
+      expect(queryByTestId('event-field-kibana.alert.rule.name')).not.toBeInTheDocument();
+    });
   });
 });

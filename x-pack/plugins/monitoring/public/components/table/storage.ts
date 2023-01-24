@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { STORAGE_KEY } from '../../../common/constants';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface TableValues {
   filterText: any;

@@ -8,6 +8,7 @@
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { PipelinesTable } from './pipelines_table';
+import { EuiLink } from '@elastic/eui';
 
 describe('PipelinesTable component', () => {
   let props;
@@ -52,21 +53,21 @@ describe('PipelinesTable component', () => {
 
   it('calls createPipeline on create button clicked', () => {
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('.euiButton--primary').simulate('click');
+    wrapper.find('button[data-test-subj="btnAdd"]').simulate('click');
     expect(createPipeline).toHaveBeenCalled();
   });
 
   it('calls delete prompt on delete click', () => {
     props.selection = [{ id: 'testPipeline' }];
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('.euiButton--danger').simulate('click');
+    wrapper.find('button[data-test-subj="btnDeletePipeline"]').simulate('click');
     expect(onDeleteSelectedPipelines).toHaveBeenCalled();
   });
 
   it('calls openPipeline on id click', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('EuiLink').simulate('click');
+    wrapper.find(EuiLink).find('button').simulate('click');
     expect(openPipeline).toHaveBeenCalledWith('testPipeline');
   });
 });

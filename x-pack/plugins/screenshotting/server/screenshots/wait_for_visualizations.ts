@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 interface CompletedItemsCountParameters {
   context: string;
@@ -37,30 +36,38 @@ const getCompletedItemsCount = ({
  */
 export const waitForVisualizations = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   timeout: number,
   toEqual: number,
   layout: Layout
 ): Promise<void> => {
-  const span = apm.startSpan('wait_for_visualizations', 'wait');
+  const { kbnLogger } = eventLogger;
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'waiting for each visualization to complete rendering',
+    Actions.WAIT_VISUALIZATIONS,
+    'wait'
+  );
+
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
-  logger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
+  kbnLogger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {
-    await browser.waitFor({
+    await browser.waitFor<CompletedItemsCountParameters[]>({
       fn: getCompletedItemsCount,
       args: [{ renderCompleteSelector, context: CONTEXT_WAITFORELEMENTSTOBEINDOM, count: toEqual }],
       timeout,
     });
 
-    logger.debug(`found ${toEqual} rendered elements in the DOM`);
+    kbnLogger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
-    logger.error(err);
-    throw new Error(
+    kbnLogger.error(err);
+    const newError = new Error(
       `An error occurred when trying to wait for ${toEqual} visualizations to finish rendering. ${err.message}`
     );
+    eventLogger.error(newError, Actions.WAIT_VISUALIZATIONS);
+    throw newError;
   }
 
-  span?.end();
+  spanEnd();
 };

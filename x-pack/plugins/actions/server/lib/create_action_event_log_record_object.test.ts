@@ -13,6 +13,7 @@ describe('createActionEventLogRecordObject', () => {
       createActionEventLogRecordObject({
         actionId: '1',
         action: 'execute-start',
+        consumer: 'test-consumer',
         timestamp: '1970-01-01T00:00:00.000Z',
         task: {
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -27,6 +28,9 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        spaceId: 'default',
+        name: 'test name',
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -37,6 +41,7 @@ describe('createActionEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'test-consumer',
             execution: {
               uuid: '123abc',
             },
@@ -50,9 +55,17 @@ describe('createActionEventLogRecordObject', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
+        },
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
         },
       },
     });
@@ -67,6 +80,7 @@ describe('createActionEventLogRecordObject', () => {
         message: 'action execution start',
         namespace: 'default',
         executionId: '123abc',
+        consumer: 'test-consumer',
         savedObjects: [
           {
             id: '2',
@@ -75,6 +89,7 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       event: {
@@ -84,6 +99,7 @@ describe('createActionEventLogRecordObject', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'test-consumer',
             execution: {
               uuid: '123abc',
             },
@@ -98,6 +114,58 @@ describe('createActionEventLogRecordObject', () => {
             type_id: '.email',
           },
         ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      message: 'action execution start',
+    });
+  });
+
+  test('created action event "execute" with no kibana.alert.rule fields', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        actionExecutionId: '123abc',
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+          },
+        ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
       },
       message: 'action execution start',
     });
@@ -120,6 +188,8 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        name: 'test name',
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       event: {
@@ -146,7 +216,141 @@ describe('createActionEventLogRecordObject', () => {
           schedule_delay: undefined,
           scheduled: '1970-01-01T00:00:00.000Z',
         },
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
       },
+    });
+  });
+
+  test('created action event "execute" with related saved object', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        relatedSavedObjects: [
+          {
+            type: 'alert',
+            typeId: '.rule-type',
+            id: '123',
+          },
+        ],
+        actionExecutionId: '123abc',
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+            rule_type_id: '.rule-type',
+          },
+        },
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+          },
+          {
+            id: '123',
+            rel: 'primary',
+            type: 'alert',
+            namespace: undefined,
+            type_id: '.rule-type',
+          },
+        ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      message: 'action execution start',
+    });
+  });
+
+  test('created action event "execute" for preconfigured connector with space_agnostic true', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        actionExecutionId: '123abc',
+        isPreconfigured: true,
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+            space_agnostic: true,
+          },
+        ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      message: 'action execution start',
     });
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
+
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 import {
@@ -12,7 +14,6 @@ import {
   createExtensionPointStorageMock,
 } from '../extension_points/extension_point_storage.mock';
 import type { ExtensionPointCallbackDataArgument } from '../extension_points';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 
 import {
   getCreateExceptionListItemOptionsMock,
@@ -25,7 +26,7 @@ import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
 
 describe('exception_list_client', () => {
-  describe('Mock client sanity checks', () => {
+  describe('Mock client checks', () => {
     test('it returns the exception list as expected', async () => {
       const mock = getExceptionListClientMock();
       const list = await mock.getExceptionList({
@@ -298,6 +299,7 @@ describe('exception_list_client', () => {
         (): ReturnType<ExceptionListClient['importExceptionListAndItems']> => {
           return exceptionListClient.importExceptionListAndItems({
             exceptionsToImport: toReadable([getExceptionListItemSchemaMock()]),
+            generateNewListId: false,
             maxExceptionsImportSize: 10_000,
             overwrite: true,
           });

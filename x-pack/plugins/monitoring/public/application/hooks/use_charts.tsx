@@ -5,15 +5,15 @@
  * 2.0.
  */
 import moment from 'moment';
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useMonitoringTimeContainerContext } from './use_monitoring_time';
 
 export function useCharts() {
   const { services } = useKibana<{ data: any }>();
   const history = useHistory();
-  const { handleTimeChange } = useContext(MonitoringTimeContainer.Context);
+  const { handleTimeChange } = useMonitoringTimeContainerContext();
 
   const [zoomInLevel, setZoomInLevel] = useState(0);
 

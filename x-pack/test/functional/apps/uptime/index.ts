@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
+} from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
@@ -42,8 +42,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
 
   describe('Uptime app', function () {
-    this.tags('ciGroup10');
-
     beforeEach('delete settings', async () => {
       await deleteUptimeSettingsObject(server);
     });
@@ -56,7 +54,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
-      loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
     });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { estypes } from '@elastic/elasticsearch';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
@@ -63,7 +64,7 @@ const getSavedObjectsList = async ({
   filter,
 }: {
   esClient: ElasticsearchClient;
-  searchAfter: string[] | undefined;
+  searchAfter: estypes.SortResults | undefined;
   kibanaIndex: string;
   filterPath: string[];
   filter: ESFilterProps;
@@ -132,7 +133,6 @@ export async function fetchRollupSavedSearches(
 
     savedSearchesList = await getSavedObjectsList({
       ...searchProps,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: savedSearchesList.hits.hits[savedSearchesList.hits.hits.length - 1].sort,
     });
   }
@@ -201,7 +201,6 @@ export async function fetchRollupVisualizations(
 
     savedVisualizationsList = await getSavedObjectsList({
       ...searchProps,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: sort,
     });
   }

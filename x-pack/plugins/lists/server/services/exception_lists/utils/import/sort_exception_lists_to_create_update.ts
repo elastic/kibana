@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from 'kibana/server';
+import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   BulkErrorSchema,
@@ -21,11 +21,13 @@ export const sortExceptionListsToUpdateOrCreate = ({
   lists,
   existingLists,
   isOverwrite,
+  generateNewListId,
   user,
 }: {
   lists: ImportExceptionListSchemaDecoded[];
   existingLists: Record<string, ExceptionListSchema>;
   isOverwrite: boolean;
+  generateNewListId: boolean;
   user: string;
 }): {
   errors: BulkErrorSchema[];
@@ -77,7 +79,7 @@ export const sortExceptionListsToUpdateOrCreate = ({
             name,
             os_types: [],
             tags,
-            tie_breaker_id: uuid.v4(),
+            tie_breaker_id: uuidv4(),
             type,
             updated_by: user,
             version,
@@ -99,6 +101,27 @@ export const sortExceptionListsToUpdateOrCreate = ({
             updated_by: user,
           },
           id: existingLists[listId].id,
+          type: savedObjectType,
+        },
+      ];
+    } else if (existingLists[listId] != null && generateNewListId) {
+      const attributes: ExceptionListSoSchema = {
+        ...existingLists[listId],
+        comments: undefined,
+        created_at: dateNow,
+        created_by: user,
+        description,
+        entries: undefined,
+        immutable: false,
+        item_id: undefined,
+        list_type: 'list',
+        tie_breaker_id: uuidv4(),
+        updated_by: user,
+      };
+      results.listsToCreate = [
+        ...results.listsToCreate,
+        {
+          attributes,
           type: savedObjectType,
         },
       ];

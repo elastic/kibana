@@ -34,7 +34,7 @@ import {
   tagNameMaxLength,
   tagDescriptionMaxLength,
 } from '../../../common';
-import { TagBadge } from '../../components';
+import { TagBadge } from '..';
 import { getRandomColor, useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {
@@ -58,10 +58,16 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  // we don't want this value to change when the user edit the name.
+  // we don't want this value to change when the user edits the tag
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialName = useMemo(() => tag.name, []);
-
+  const initialTag = useMemo(() => tag, []);
+  const tagHasBeenModified = useMemo(
+    () =>
+      tag.name !== initialTag.name ||
+      tag.color !== initialTag.color ||
+      tag.description !== initialTag.description,
+    [initialTag, tag]
+  );
   const setName = useMemo(() => setField('name'), [setField]);
   const setColor = useMemo(() => setField('color'), [setField]);
   const setDescription = useMemo(() => setField('description'), [setField]);
@@ -94,7 +100,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               id="xpack.savedObjectsTagging.management.editModal.title"
               defaultMessage="Edit '{name}' tag"
               values={{
-                name: initialName,
+                name: initialTag.name,
               }}
             />
           ) : (
@@ -232,7 +238,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   fill
                   data-test-subj="createModalConfirmButton"
                   onClick={onFormSubmit}
-                  isDisabled={submitting}
+                  isDisabled={submitting || (isEdit && !tagHasBeenModified)}
                 >
                   {isEdit ? (
                     <FormattedMessage

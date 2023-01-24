@@ -9,23 +9,42 @@ import React, { Fragment, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TableListView } from '../../../../../src/plugins/kibana_react/public';
+import { TableListView } from '@kbn/content-management-table-list';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
 import { GraphWorkspaceSavedObject } from '../types';
 import { GraphServices } from '../application';
 
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
+
+type GraphUserContent = UserContentCommonSchema;
+
+const toTableListViewSavedObject = (savedObject: GraphWorkspaceSavedObject): GraphUserContent => {
+  return {
+    id: savedObject.id!,
+    updatedAt: savedObject.updatedAt!,
+    references: savedObject.references ?? [],
+    type: savedObject.type,
+    attributes: {
+      title: savedObject.title,
+      description: savedObject.description,
+    },
+  };
+};
+
 export interface ListingRouteProps {
-  deps: GraphServices;
+  deps: Omit<GraphServices, 'savedObjects'>;
 }
 
 export function ListingRoute({
-  deps: { chrome, savedObjects, savedObjectsClient, coreStart, capabilities, addBasePath },
+  deps: { chrome, savedObjectsClient, coreStart, capabilities, addBasePath, uiSettings },
 }: ListingRouteProps) {
-  const listingLimit = savedObjects.settings.getListingLimit();
-  const initialPageSize = savedObjects.settings.getPerPage();
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const history = useHistory();
   const query = new URLSearchParams(useLocation().search);
   const initialFilter = query.get('filter') || '';
@@ -44,25 +63,23 @@ export function ListingRoute({
         { savedObjectsClient, basePath: coreStart.http.basePath },
         search,
         listingLimit
-      );
+      ).then(({ total, hits }) => ({
+        total,
+        hits: hits.map(toTableListViewSavedObject),
+      }));
     },
     [coreStart.http.basePath, listingLimit, savedObjectsClient]
   );
 
   const editItem = useCallback(
-    (savedWorkspace: GraphWorkspaceSavedObject) => {
+    (savedWorkspace: { id: string }) => {
       history.push(getEditPath(savedWorkspace));
     },
     [history]
   );
 
-  const getViewUrl = useCallback(
-    (savedWorkspace: GraphWorkspaceSavedObject) => getEditUrl(addBasePath, savedWorkspace),
-    [addBasePath]
-  );
-
   const deleteItems = useCallback(
-    async (savedWorkspaces: GraphWorkspaceSavedObject[]) => {
+    async (savedWorkspaces: Array<{ id: string }>) => {
       await deleteSavedWorkspace(
         savedObjectsClient,
         savedWorkspaces.map((cur) => cur.id!)
@@ -73,17 +90,13 @@ export function ListingRoute({
 
   return (
     <I18nProvider>
-      <TableListView
-        tableCaption={i18n.translate('xpack.graph.listing.graphsTitle', {
-          defaultMessage: 'Graphs',
-        })}
+      <TableListView<GraphUserContent>
+        id="graph"
         headingId="graphListingHeading"
-        rowHeader="title"
         createItem={capabilities.graph.save ? createItem : undefined}
         findItems={findItems}
         deleteItems={capabilities.graph.delete ? deleteItems : undefined}
         editItem={capabilities.graph.save ? editItem : undefined}
-        tableColumns={getTableColumns(getViewUrl)}
         listingLimit={listingLimit}
         initialFilter={initialFilter}
         initialPageSize={initialPageSize}
@@ -92,7 +105,6 @@ export function ListingRoute({
           createItem,
           coreStart.application
         )}
-        toastNotifications={coreStart.notifications.toasts}
         entityName={i18n.translate('xpack.graph.listing.table.entityName', {
           defaultMessage: 'graph',
         })}
@@ -102,7 +114,7 @@ export function ListingRoute({
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
-        theme={coreStart.theme}
+        getDetailViewLink={({ id }) => getEditUrl(addBasePath, { id })}
       />
     </I18nProvider>
   );
@@ -183,41 +195,4 @@ function getNoItemsMessage(
       }
     />
   );
-}
-
-// TODO this is an EUI type but EUI doesn't provide this typing yet
-interface DataColumn {
-  field: string;
-  name: string;
-  sortable?: boolean;
-  render?: (value: string, item: GraphWorkspaceSavedObject) => React.ReactNode;
-  dataType?: 'auto' | 'string' | 'number' | 'date' | 'boolean';
-}
-
-function getTableColumns(getViewUrl: (record: GraphWorkspaceSavedObject) => string): DataColumn[] {
-  return [
-    {
-      field: 'title',
-      name: i18n.translate('xpack.graph.listing.table.titleColumnName', {
-        defaultMessage: 'Title',
-      }),
-      sortable: true,
-      render: (field, record) => (
-        <EuiLink
-          href={getViewUrl(record)}
-          data-test-subj={`graphListingTitleLink-${record.title.split(' ').join('-')}`}
-        >
-          {field}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'description',
-      name: i18n.translate('xpack.graph.listing.table.descriptionColumnName', {
-        defaultMessage: 'Description',
-      }),
-      dataType: 'string',
-      sortable: true,
-    },
-  ];
 }

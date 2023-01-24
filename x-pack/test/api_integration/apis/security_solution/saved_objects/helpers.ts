@@ -6,8 +6,8 @@
  */
 
 import type SuperTest from 'supertest';
-import uuid from 'uuid';
-import { TimelineType } from '../../../../../plugins/security_solution/common/types/timeline';
+import { v4 as uuidv4 } from 'uuid';
+import { TimelineType } from '@kbn/security-solution-plugin/common/types/timeline';
 
 export const createBasicTimeline = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
@@ -36,7 +36,7 @@ export const createBasicTimelineTemplate = async (
       version: null,
       timeline: {
         title: titleToSaved,
-        templateTimelineId: uuid.v4(),
+        templateTimelineId: uuidv4(),
         templateTimelineVersion: 1,
         timelineType: TimelineType.template,
       },

@@ -11,17 +11,18 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import fs from 'fs';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
   testFiles?: string[];
+  publicBaseUrl?: boolean;
 }
 
-// test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
   '.jira',
@@ -57,44 +58,25 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    // Find all folders in ./fixtures/plugins
-    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter((file) =>
-      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
-    );
+    // Find all folders in ./plugins since we treat all them as plugin folder
+    const pluginDir = path.resolve(__dirname, 'plugins');
+    const pluginPaths = fs
+      .readdirSync(pluginDir)
+      .map((n) => path.resolve(pluginDir, n))
+      .filter((p) => fs.statSync(p));
 
     // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
-    const alertingAllFiles = fs.readdirSync(
-      path.resolve(
-        __dirname,
-        '..',
-        '..',
-        'alerting_api_integration',
-        'common',
-        'fixtures',
-        'plugins'
-      )
+    const alertingPluginDir = path.resolve(
+      __dirname,
+      '../../alerting_api_integration/common/plugins'
     );
-
-    const alertingPlugins = alertingAllFiles.filter((file) =>
-      fs
-        .statSync(
-          path.resolve(
-            __dirname,
-            '..',
-            '..',
-            'alerting_api_integration',
-            'common',
-            'fixtures',
-            'plugins',
-            file
-          )
-        )
-        .isDirectory()
-    );
+    const alertingPluginsPaths = fs
+      .readdirSync(alertingPluginDir)
+      .map((n) => path.resolve(alertingPluginDir, n))
+      .filter((p) => fs.statSync(p));
 
     return {
-      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
+      testFiles,
       servers,
       services,
       junit: {
@@ -115,30 +97,28 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          // Actions simulators plugin. Needed for testing push to external services.
-          ...alertingPlugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(
-                __dirname,
-                '..',
-                '..',
-                'alerting_api_integration',
-                'common',
-                'fixtures',
-                'plugins',
-                pluginDir
-              )}`
-          ),
-          ...plugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
-          ),
+          ...pluginPaths.concat(alertingPluginsPaths).map((p) => `--plugin-path=${p}`),
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'preconfigured-servicenow': {
+              name: 'preconfigured-servicenow',
+              actionTypeId: '.servicenow',
+              config: {
+                apiUrl: 'https://example.com',
+                usesTableApi: false,
+              },
+              secrets: {
+                username: 'elastic',
+                password: 'elastic',
+              },
+            },
+          })}`,
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
@@ -148,7 +128,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.ruleRegistry.write.cache.enabled=false',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
         ],
       },
     };

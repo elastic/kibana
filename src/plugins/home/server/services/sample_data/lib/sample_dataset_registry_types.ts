@@ -58,4 +58,11 @@ export interface AppLinkData {
    * The icon for this app link.
    */
   icon: string;
+  /**
+   * Index of the links (ascending order, smallest will be displayed first).
+   * Used for ordering in the dropdown.
+   *
+   * @remark links without order defined will be displayed last
+   */
+  order?: number;
 }

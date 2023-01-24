@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectMigrationMap,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { InternalManifestSchema } from '../../schemas/artifacts';
+import type { InternalManifestSchema } from '../../schemas/artifacts';
 
 export type OldInternalManifestSchema = Omit<InternalManifestSchema, 'artifacts'> & {
   ids: string[];

@@ -12,9 +12,9 @@ import {
   ConcreteTaskInstance,
   TaskInstanceWithDeprecatedFields,
   TaskStatus,
-} from '../../../../plugins/task_manager/server/task';
+} from '@kbn/task-manager-plugin/server/task';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -135,6 +135,60 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.task.taskType).to.eql(`sampleTaskRemovedType`);
       expect(response.body._source?.task.status).to.eql(`unrecognized`);
+    });
+
+    it('8.5.0 migrates active tasks to set enabled to true', async () => {
+      const response = await es.search<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          size: 100,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      const tasks = response.body.hits.hits;
+      tasks
+        .filter(
+          (task) =>
+            task._source?.task.status !== 'failed' && task._source?.task.status !== 'unrecognized'
+        )
+        .forEach((task) => {
+          expect(task._source?.task.enabled).to.eql(true);
+        });
+    });
+
+    it('8.5.0 does not migrates failed and unrecognized', async () => {
+      const response = await es.search<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          size: 100,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      const tasks = response.body.hits.hits;
+      tasks
+        .filter(
+          (task) =>
+            task._source?.task.status === 'failed' || task._source?.task.status === 'unrecognized'
+        )
+        .forEach((task) => {
+          expect(task._source?.task.enabled).to.be(undefined);
+        });
     });
   });
 }

@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from 'kibana/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AggConfigSerialized, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import {
+  AggParamsMapping,
+  AggConfigSerialized,
+  SerializedSearchSourceFields,
+  METRIC_TYPES,
+  BUCKET_TYPES,
+} from '@kbn/data-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SavedObjectAttributes } from '@kbn/core/types';
 
 export interface VisParams {
   [key: string]: any;
@@ -49,3 +56,26 @@ export interface SerializedVis<T = VisParams> {
   uiState?: any;
   data: SerializedVisData;
 }
+interface SchemaConfigParams {
+  precision?: number;
+  useGeocentroid?: boolean;
+}
+
+export type SupportedAggregation = METRIC_TYPES | BUCKET_TYPES;
+
+type SchemasByAggs<Aggs extends SupportedAggregation> = {
+  [Agg in Aggs]: GenericSchemaConfig<Agg>;
+}[Aggs];
+
+export interface GenericSchemaConfig<Agg extends SupportedAggregation> {
+  accessor: number;
+  label: string;
+  format: SerializedFieldFormat;
+  params: SchemaConfigParams;
+  aggType: Agg;
+  aggId?: string;
+  aggParams?: AggParamsMapping[Agg];
+}
+
+export type SchemaConfig<Aggs extends SupportedAggregation = SupportedAggregation> =
+  SchemasByAggs<Aggs>;

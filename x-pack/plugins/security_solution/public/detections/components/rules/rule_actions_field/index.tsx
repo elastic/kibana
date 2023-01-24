@@ -12,21 +12,16 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { FieldHook, useFormContext } from '../../../../shared_imports';
-import {
-  ActionForm,
-  ActionType,
-  loadActionTypes,
-  ActionVariables,
-} from '../../../../../../triggers_actions_ui/public';
-import { AlertAction } from '../../../../../../alerting/common';
-import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleAction, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { FieldHook } from '../../../../shared_imports';
+import { useFormContext } from '../../../../shared_imports';
+import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
 interface Props {
   field: FieldHook;
-  hasErrorOnCreationCaseAction: boolean;
   messageVariables: ActionVariables;
 }
 
@@ -61,34 +56,16 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const getSupportedActions = (
-  actionTypes: ActionType[],
-  hasErrorOnCreationCaseAction: boolean
-): ActionType[] => {
-  return actionTypes.filter((actionType) => {
-    if (actionType.id === '.case' && hasErrorOnCreationCaseAction) {
-      return false;
-    }
-    return NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id);
-  });
-};
-
-export const RuleActionsField: React.FC<Props> = ({
-  field,
-  hasErrorOnCreationCaseAction,
-  messageVariables,
-}) => {
+export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
-  const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
-    http,
-    triggersActionsUi: { actionTypeRegistry },
+    triggersActionsUi: { getActionForm },
   } = useKibana().services;
 
-  const actions: AlertAction[] = useMemo(
-    () => (!isEmpty(field.value) ? (field.value as AlertAction[]) : []),
+  const actions: RuleAction[] = useMemo(
+    () => (!isEmpty(field.value) ? (field.value as RuleAction[]) : []),
     [field.value]
   );
 
@@ -105,44 +82,66 @@ export const RuleActionsField: React.FC<Props> = ({
 
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
-      const updatedActions = [...(actions as Array<Partial<AlertAction>>)];
+      const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.setValue, actions]
+    [field, actions]
   );
 
   const setAlertActionsProperty = useCallback(
-    (updatedActions: AlertAction[]) => field.setValue(updatedActions),
+    (updatedActions: RuleAction[]) => field.setValue(updatedActions),
     [field]
   );
 
   const setActionParamsProperty = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (key: string, value: any, index: number) => {
-      const updatedActions = [...actions];
-      updatedActions[index] = {
-        ...updatedActions[index],
-        params: {
-          ...updatedActions[index].params,
-          [key]: value,
-        },
-      };
-      field.setValue(updatedActions);
+    (key: string, value: RuleActionParam, index: number) => {
+      // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
+      // wrapping field.setValue in setTimeout fixes the issue above
+      // and triggers validation after params have been updated
+      setTimeout(
+        () =>
+          field.setValue((prevValue: RuleAction[]) => {
+            const updatedActions = [...prevValue];
+            updatedActions[index] = {
+              ...updatedActions[index],
+              params: {
+                ...updatedActions[index].params,
+                [key]: value,
+              },
+            };
+            return updatedActions;
+          }),
+        0
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.setValue, actions]
+    [field]
   );
 
-  useEffect(() => {
-    (async function () {
-      const actionTypes = convertArrayToCamelCase(await loadActionTypes({ http })) as ActionType[];
-      const supportedTypes = getSupportedActions(actionTypes, hasErrorOnCreationCaseAction);
-      setSupportedActionTypes(supportedTypes);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasErrorOnCreationCaseAction]);
+  const actionForm = useMemo(
+    () =>
+      getActionForm({
+        actions,
+        messageVariables,
+        defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
+        setActionIdByIndex,
+        setActions: setAlertActionsProperty,
+        setActionParamsProperty,
+        setActionFrequencyProperty: () => {},
+        featureId: SecurityConnectorFeatureId,
+        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
+        hideActionHeader: true,
+        hideNotifyWhen: true,
+      }),
+    [
+      actions,
+      getActionForm,
+      messageVariables,
+      setActionIdByIndex,
+      setActionParamsProperty,
+      setAlertActionsProperty,
+    ]
+  );
 
   useEffect(() => {
     if (isSubmitting || !field.errors.length) {
@@ -154,31 +153,19 @@ export const RuleActionsField: React.FC<Props> = ({
     }
   }, [isSubmitted, isSubmitting, field.isChangingValue, isValid, field.errors, setFieldErrors]);
 
-  if (!supportedActionTypes) return <></>;
-
   return (
     <ContainerActions $caseIndexes={caseActionIndexes}>
       {fieldErrors ? (
         <>
           <FieldErrorsContainer>
             <EuiCallOut title={FORM_ERRORS_TITLE} color="danger" iconType="alert">
-              <ReactMarkdown source={fieldErrors} />
+              <ReactMarkdown>{fieldErrors}</ReactMarkdown>
             </EuiCallOut>
           </FieldErrorsContainer>
           <EuiSpacer />
         </>
       ) : null}
-      <ActionForm
-        actions={actions}
-        messageVariables={messageVariables}
-        defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
-        setActionIdByIndex={setActionIdByIndex}
-        setActions={setAlertActionsProperty}
-        setActionParamsProperty={setActionParamsProperty}
-        actionTypeRegistry={actionTypeRegistry}
-        actionTypes={supportedActionTypes}
-        defaultActionMessage={DEFAULT_ACTION_MESSAGE}
-      />
+      {actionForm}
     </ContainerActions>
   );
 };

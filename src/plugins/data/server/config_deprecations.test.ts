@@ -9,14 +9,14 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '../../../core/server/mocks';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
-import { autocompleteConfigDeprecationProvider } from './config_deprecations';
+import { configDeprecationProvider } from './config_deprecations';
 
 const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
-  const deprecations = autocompleteConfigDeprecationProvider(configDeprecationFactory);
+  const deprecations = configDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
   const migrated = applyDeprecations(
     settings,
@@ -37,40 +37,113 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
 
 describe('Config Deprecations', () => {
   it('does not report deprecations for default configuration', () => {
-    const defaultConfig = { data: { autocomplete: { valueSuggestions: {} } } };
+    const defaultConfig = { data: { search: { sessions: {} } } };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
     expect(migrated).toEqual(defaultConfig);
     expect(messages).toHaveLength(0);
   });
 
-  it('renames kibana.autocompleteTerminateAfter to data.autocomplete.valueSuggestions.terminateAfter', () => {
+  it('renames xpack.data_enhanced.search.sessions.* to data.search.sessions.*', () => {
     const config = {
-      kibana: {
-        autocompleteTerminateAfter: 123,
+      xpack: {
+        data_enhanced: {
+          search: {
+            sessions: {
+              enabled: false,
+            },
+          },
+        },
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana?.autocompleteTerminateAfter).not.toBeDefined();
-    expect(migrated.data.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
+    expect(migrated.xpack?.data_enhanced).not.toBeDefined();
+    expect(migrated.data.search.sessions.enabled).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocompleteTerminateAfter\\" has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
+        "Setting \\"xpack.data_enhanced.search.sessions\\" has been replaced by \\"data.search.sessions\\"",
       ]
     `);
   });
 
-  it('renames kibana.autocompleteTimeout to data.autocomplete.valueSuggestions.timeout', () => {
+  test('reports about old, no longer used configs', () => {
     const config = {
-      kibana: {
-        autocompleteTimeout: 123,
+      data: {
+        search: {
+          sessions: {
+            enabled: false,
+            pageSize: 1000,
+            trackingInterval: '30s',
+            cleanupInterval: '30s',
+            expireInterval: '30s',
+            monitoringTaskTimeout: '30s',
+            notTouchedInProgressTimeout: '30s',
+          },
+        },
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana?.autocompleteTimeout).not.toBeDefined();
-    expect(migrated.data.autocomplete.valueSuggestions.timeout).toEqual(123);
+    expect(migrated).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "search": Object {
+            "sessions": Object {
+              "enabled": false,
+            },
+          },
+        },
+      }
+    `);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocompleteTimeout\\" has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
+        "You no longer need to configure \\"data.search.sessions.pageSize\\".",
+        "You no longer need to configure \\"data.search.sessions.trackingInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.cleanupInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
+        "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+      ]
+    `);
+  });
+
+  test('reports about old, no longer used configs from xpack.data_enhanced', () => {
+    const config = {
+      xpack: {
+        data_enhanced: {
+          search: {
+            sessions: {
+              enabled: false,
+              pageSize: 1000,
+              trackingInterval: '30s',
+              cleanupInterval: '30s',
+              expireInterval: '30s',
+              monitoringTaskTimeout: '30s',
+              notTouchedInProgressTimeout: '30s',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "search": Object {
+            "sessions": Object {
+              "enabled": false,
+            },
+          },
+        },
+      }
+    `);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"xpack.data_enhanced.search.sessions\\" has been replaced by \\"data.search.sessions\\"",
+        "You no longer need to configure \\"data.search.sessions.pageSize\\".",
+        "You no longer need to configure \\"data.search.sessions.trackingInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.cleanupInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
+        "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
       ]
     `);
   });

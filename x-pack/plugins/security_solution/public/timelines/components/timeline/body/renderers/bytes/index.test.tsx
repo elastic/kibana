@@ -26,6 +26,8 @@ describe('Bytes', () => {
           contextId="test"
           eventId="abc"
           fieldName="network.bytes"
+          fieldType="string"
+          isAggregatable={true}
           isDraggable={true}
           value={`1234567`}
         />

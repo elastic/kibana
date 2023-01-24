@@ -7,14 +7,17 @@
 
 import expect from '@kbn/expect';
 
+import { TimeSeriesQuery } from '@kbn/triggers-actions-ui-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
-import { TimeSeriesQuery } from '../../../../../../../plugins/triggers_actions_ui/server';
+import { getUrlPrefix } from '../../../../../common/lib';
 
-import { createEsDocuments } from './create_test_data';
+import { createEsDocumentsWithGroups } from '../lib/create_test_data';
 
-const INDEX_THRESHOLD_TIME_SERIES_QUERY_URL = 'api/triggers_actions_ui/data/_time_series_query';
+const INDEX_THRESHOLD_TIME_SERIES_QUERY_URL =
+  'internal/triggers_actions_ui/data/_time_series_query';
 
 const START_DATE_MM_DD_HH_MM_SS_MS = '01-01T00:00:00.000Z';
 const START_DATE = `2020-${START_DATE_MM_DD_HH_MM_SS_MS}`;
@@ -60,7 +63,13 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       await esTestIndexTool.setup();
       // To browse the documents created, comment out esTestIndexTool.destroy() in below, then:
       //   curl http://localhost:9220/.kibaka-alerting-test-data/_search?size=100 | json
-      await createEsDocuments(es, esTestIndexTool, START_DATE, INTERVALS, INTERVAL_MILLIS);
+      await createEsDocumentsWithGroups({
+        es,
+        esTestIndexTool,
+        endDate: START_DATE,
+        intervals: INTERVALS,
+        intervalMillis: INTERVAL_MILLIS,
+      });
     });
 
     after(async () => {
@@ -75,6 +84,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE_PLUS_YEAR, 0]] }],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -88,6 +98,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE_MINUS_YEAR, 0]] }],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -101,6 +112,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
 
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -123,6 +135,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -147,6 +160,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -178,6 +192,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -213,6 +228,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
         ],
+        truncated: false,
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
@@ -282,6 +298,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       });
       const expected = {
         results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
+        truncated: false,
       };
       expect(await runQueryExpect(query, 200)).eql(expected);
     });
@@ -296,6 +313,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       });
       const expected = {
         results: [],
+        truncated: false,
       };
       expect(await runQueryExpect(query, 200)).eql(expected);
     });

@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-avatar-solution",
+    "@kbn/shared-ux-card-no-data",
+    "@kbn/shared-ux-page-no-data-types",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-page-no-data-mocks",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -111,8 +111,10 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     } catch (e) {
       // TODO add error handling
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adJobsApiService]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
     ((selectionUpdate) => {
       if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
@@ -142,6 +144,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   useEffect(() => {
     if (defaultOptions) return;
     fetchOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

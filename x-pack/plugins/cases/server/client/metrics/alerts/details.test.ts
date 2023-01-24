@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { CasesClientMock, createCasesClientMock } from '../../mocks';
-import { CasesClientArgs } from '../../types';
-import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
+import type { CasesClientMock } from '../../mocks';
+import { createCasesClientMock } from '../../mocks';
+import type { CasesClientArgs } from '../../types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { AlertDetails } from './details';
 import { mockAlertsService } from '../test_utils/alerts';
-import { BaseHandlerCommonOptions } from '../types';
+import type { SingleCaseBaseHandlerCommonOptions } from '../types';
 
 describe('AlertDetails', () => {
   let client: CasesClientMock;
   let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
   let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
-  let constructorOptions: BaseHandlerCommonOptions;
+  let constructorOptions: SingleCaseBaseHandlerCommonOptions;
 
   beforeEach(() => {
     client = createMockClient();
@@ -37,7 +38,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     expect(await handler.compute()).toEqual({});
   });
@@ -50,7 +51,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     handler.setupFeature('alerts.hosts');
 
@@ -65,7 +66,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for hosts when the count aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.hosts');
@@ -81,7 +82,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for users when the count aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.users');
@@ -97,7 +98,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for hosts when the top hits aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.hosts');
@@ -113,7 +114,7 @@ describe('AlertDetails', () => {
   });
 
   it('returns the default zero values for users when the top hits aggregation returns undefined', async () => {
-    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
+    mockServices.services.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails(constructorOptions);
     handler.setupFeature('alerts.users');
@@ -136,7 +137,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     expect(await handler.compute()).toEqual({});
   });
@@ -149,7 +150,7 @@ describe('AlertDetails', () => {
     const handler = new AlertDetails({
       caseId: '',
       casesClient: client,
-      clientArgs: {} as CasesClientArgs,
+      clientArgs: { services: {} } as CasesClientArgs,
     });
     expect(await handler.compute()).toEqual({});
     expect(await handler.compute()).toEqual({});
@@ -222,7 +223,9 @@ function createMockClientArgs() {
 
   const clientArgs = {
     logger,
-    alertsService,
+    services: {
+      alertsService,
+    },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

@@ -7,8 +7,10 @@
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -32,8 +34,16 @@ export const generateTitle = (pages: Title) => pages.join(' - ');
 export const enterpriseSearchTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME]);
 
+export const analyticsTitle = (page: Title = []) => generateTitle([...page, ANALYTICS_PLUGIN.NAME]);
+
+export const elasticsearchTitle = (page: Title = []) =>
+  generateTitle([...page, 'Getting started with Elasticsearch']);
+
 export const appSearchTitle = (page: Title = []) =>
   generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);
 
 export const workplaceSearchTitle = (page: Title = []) =>
   generateTitle([...page, WORKPLACE_SEARCH_PLUGIN.NAME]);
+
+export const searchExperiencesTitle = (page: Title = []) =>
+  generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);

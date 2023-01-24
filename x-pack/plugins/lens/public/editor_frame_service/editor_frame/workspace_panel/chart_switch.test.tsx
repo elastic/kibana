@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   createMockVisualization,
   mockStoreDeps,
@@ -30,7 +31,6 @@ jest.mock('react-virtualized-auto-sizer', () => {
 
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { ChartSwitch } from './chart_switch';
-import { PaletteOutput } from 'src/plugins/charts/public';
 import { applyChanges } from '../../../state_management';
 
 describe('chart_switch', () => {
@@ -146,7 +146,7 @@ describe('chart_switch', () => {
   }
 
   function showFlyout(instance: ReactWrapper) {
-    instance.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
+    instance.find('button[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
   function switchTo(subType: string, instance: ReactWrapper) {
@@ -197,7 +197,7 @@ describe('chart_switch', () => {
     const visualizationMap = mockVisualizationMap();
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
-    (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
+    (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
     const datasourceMap = mockDatasourceMap();
     const datasourceStates = mockDatasourceStates();
     const { instance, lensStore } = await mountWithProvider(
@@ -407,7 +407,7 @@ describe('chart_switch', () => {
     const visualizationMap = mockVisualizationMap();
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a']);
-    (frame.datasourceLayers.a.getTableSpec as jest.Mock).mockReturnValue([]);
+    (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
 
     const { instance } = await mountWithProvider(
       <ChartSwitch
@@ -494,8 +494,8 @@ describe('chart_switch', () => {
 
     switchTo('visB', instance);
     expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'b');
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'c');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'b');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'c');
     expect(visualizationMap.visB.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
         keptLayerIds: ['a'],
@@ -599,7 +599,8 @@ describe('chart_switch', () => {
 
   it('should not remove layers and initialize with existing state when switching between subtypes without data', async () => {
     const frame = mockFrame(['a']);
-    frame.datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
+    const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+    datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
     const visualizationMap = mockVisualizationMap();
     visualizationMap.visC.getSuggestions = jest.fn().mockReturnValue([]);
     visualizationMap.visC.switchVisualizationType = jest.fn(() => 'switched');

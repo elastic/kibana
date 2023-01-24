@@ -1,0 +1,14 @@
+---
+id: kibDevDocsOpsManagedVscodeConfig
+slug: /kibana-dev-docs/ops/managed-vscode-config
+title: "@kbn/managed-vscode-config"
+description: Config options for vscode that are automatically setup for contributors
+date: 2022-05-24
+tags: ['kibana', 'dev', 'contributor', 'operations', 'vscode']
+---
+
+This package contains VSCode settings which are automatically setup for contributors on bootstrap. This is done via the <DocLink id="kibDevDocsOpsManagedVscodeConfigCli" /> using `node scripts/update_vscode_config`.
+
+In order to support contributors maintaining workspace-specific configuration of their own, this tool prefixes all managed config settings with `// @managed` comments. If you want to override any config that is `// @managed` then just update that comment to `// self managed` and the update script won't touch that key/value.
+
+`// self managed` comments are only necessary for keys which are currently or might become managed in the future. Config keys which are not managed are always preserved when updating the `.vscode` directory.

@@ -21,6 +21,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../common/types';
 import { UseRequestResponse } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
@@ -31,8 +32,6 @@ import {
   PolicyDeleteProvider,
 } from '../../../../components';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
-
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   policies: SlmPolicy[];

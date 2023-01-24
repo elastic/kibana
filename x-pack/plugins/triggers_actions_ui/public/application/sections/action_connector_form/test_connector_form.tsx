@@ -22,17 +22,22 @@ import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  ActionConnector,
+  ActionConnectorMode,
+  ActionTypeRegistryContract,
+  IErrorObject,
+} from '../../../types';
 
-export interface ConnectorAddFlyoutProps {
+export interface TestConnectorFormProps {
   connector: ActionConnector;
   executeEnabled: boolean;
   isExecutingAction: boolean;
   setActionParams: (params: Record<string, unknown>) => void;
   actionParams: Record<string, unknown>;
-  onExecutAction: () => Promise<ActionTypeExecutorResult<unknown>>;
-  executionResult: Option<ActionTypeExecutorResult<unknown>>;
+  onExecutionAction: () => Promise<void>;
+  executionResult: Option<ActionTypeExecutorResult<unknown> | undefined>;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
@@ -42,10 +47,10 @@ export const TestConnectorForm = ({
   executionResult,
   actionParams,
   setActionParams,
-  onExecutAction,
+  onExecutionAction,
   isExecutingAction,
   actionTypeRegistry,
-}: ConnectorAddFlyoutProps) => {
+}: TestConnectorFormProps) => {
   const [actionErrors, setActionErrors] = useState<IErrorObject>({});
   const [hasErrors, setHasErrors] = useState<boolean>(false);
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
@@ -90,6 +95,7 @@ export const TestConnectorForm = ({
               }
               messageVariables={[]}
               actionConnector={connector}
+              executionMode={ActionConnectorMode.Test}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -129,7 +135,7 @@ export const TestConnectorForm = ({
               isLoading={isExecutingAction}
               isDisabled={!executeEnabled || hasErrors || isExecutingAction}
               data-test-subj="executeActionButton"
-              onClick={onExecutAction}
+              onClick={onExecutionAction}
             >
               <FormattedMessage
                 defaultMessage="Run"
@@ -150,7 +156,7 @@ export const TestConnectorForm = ({
       children: pipe(
         executionResult,
         map((result) =>
-          result.status === 'ok' ? (
+          result?.status === 'ok' ? (
             <SuccessfulExecution />
           ) : (
             <FailedExecussion executionResult={result} />
@@ -161,7 +167,7 @@ export const TestConnectorForm = ({
     },
   ];
 
-  return <EuiSteps steps={steps} />;
+  return <EuiSteps steps={steps} data-test-subj="test-connector-form" />;
 };
 
 const AwaitingExecution = () => (
@@ -198,9 +204,9 @@ const SuccessfulExecution = () => (
 );
 
 const FailedExecussion = ({
-  executionResult: { message, serviceMessage },
+  executionResult,
 }: {
-  executionResult: ActionTypeExecutorResult<unknown>;
+  executionResult: ActionTypeExecutorResult<unknown> | undefined;
 }) => {
   const items = [
     {
@@ -211,7 +217,7 @@ const FailedExecussion = ({
         }
       ),
       description:
-        message ??
+        executionResult?.message ??
         i18n.translate(
           'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureUnknownReason',
           {
@@ -220,7 +226,7 @@ const FailedExecussion = ({
         ),
     },
   ];
-  if (serviceMessage) {
+  if (executionResult?.serviceMessage) {
     items.push({
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureAdditionalDetails',
@@ -228,7 +234,7 @@ const FailedExecussion = ({
           defaultMessage: 'Details:',
         }
       ),
-      description: serviceMessage,
+      description: executionResult.serviceMessage,
     });
   }
   return (

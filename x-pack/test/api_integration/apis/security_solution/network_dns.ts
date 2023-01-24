@@ -12,7 +12,7 @@ import {
   Direction,
   NetworkDnsFields,
   NetworkDnsStrategyResponse,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -38,7 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           options: {
             defaultIndex: ['packetbeat-*'],
-            docValueFields: [],
             factoryQueryType: NetworkQueries.dns,
             filterQuery:
               '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
@@ -69,7 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
             ip: '151.205.0.17',
             defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.dns,
-            docValueFields: [],
             inspect: false,
             pagination: {
               activePage: 0,

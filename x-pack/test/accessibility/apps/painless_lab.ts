@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const retry = getService('retry');
 
-  describe('Accessibility Painless Lab Editor', () => {
+  describe('Accessibility Painless Lab Editor Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('painlessLab');
     });

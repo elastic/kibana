@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionQueryFilter, QueryFilter } from './query_filter';
 import { queryToAst } from './query_to_ast';
 

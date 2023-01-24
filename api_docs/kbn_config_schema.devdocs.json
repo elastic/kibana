@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.AnyType",
+        "id": "def-common.AnyType",
         "type": "Class",
         "tags": [],
         "label": "AnyType",
@@ -20,27 +28,28 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.AnyType",
+            "section": "def-common.AnyType",
             "text": "AnyType"
           },
           " extends ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<any>"
         ],
         "path": "packages/kbn-config-schema/src/types/any_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.AnyType.Unnamed",
+            "id": "def-common.AnyType.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -50,10 +59,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/any_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.AnyType.Unnamed.$1",
+                "id": "def-common.AnyType.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -64,6 +74,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/any_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -71,7 +82,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.AnyType.handleError",
+            "id": "def-common.AnyType.handleError",
             "type": "Function",
             "tags": [],
             "label": "handleError",
@@ -81,10 +92,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/any_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.AnyType.handleError.$1",
+                "id": "def-common.AnyType.handleError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -94,11 +106,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/any_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.AnyType.handleError.$2",
+                "id": "def-common.AnyType.handleError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ value }",
@@ -108,6 +121,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/any_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -118,17 +132,18 @@
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.ByteSizeValue",
+        "id": "def-common.ByteSizeValue",
         "type": "Class",
         "tags": [],
         "label": "ByteSizeValue",
         "description": [],
         "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.parse",
+            "id": "def-common.ByteSizeValue.parse",
             "type": "Function",
             "tags": [],
             "label": "parse",
@@ -137,18 +152,19 @@
               "(text: string) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               }
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ByteSizeValue.parse.$1",
+                "id": "def-common.ByteSizeValue.parse.$1",
                 "type": "string",
                 "tags": [],
                 "label": "text",
@@ -158,6 +174,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -165,7 +182,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.Unnamed",
+            "id": "def-common.ByteSizeValue.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -175,10 +192,11 @@
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ByteSizeValue.Unnamed.$1",
+                "id": "def-common.ByteSizeValue.Unnamed.$1",
                 "type": "number",
                 "tags": [],
                 "label": "valueInBytes",
@@ -188,6 +206,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -195,7 +214,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.isGreaterThan",
+            "id": "def-common.ByteSizeValue.isGreaterThan",
             "type": "Function",
             "tags": [],
             "label": "isGreaterThan",
@@ -204,19 +223,20 @@
               "(other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean"
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ByteSizeValue.isGreaterThan.$1",
+                "id": "def-common.ByteSizeValue.isGreaterThan.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "other",
@@ -224,14 +244,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.ByteSizeValue",
+                    "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   }
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -239,7 +260,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.isLessThan",
+            "id": "def-common.ByteSizeValue.isLessThan",
             "type": "Function",
             "tags": [],
             "label": "isLessThan",
@@ -248,19 +269,20 @@
               "(other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean"
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ByteSizeValue.isLessThan.$1",
+                "id": "def-common.ByteSizeValue.isLessThan.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "other",
@@ -268,14 +290,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.ByteSizeValue",
+                    "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   }
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -283,7 +306,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.isEqualTo",
+            "id": "def-common.ByteSizeValue.isEqualTo",
             "type": "Function",
             "tags": [],
             "label": "isEqualTo",
@@ -292,19 +315,20 @@
               "(other: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ") => boolean"
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ByteSizeValue.isEqualTo.$1",
+                "id": "def-common.ByteSizeValue.isEqualTo.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "other",
@@ -312,14 +336,15 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.ByteSizeValue",
+                    "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   }
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -327,7 +352,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.getValueInBytes",
+            "id": "def-common.ByteSizeValue.getValueInBytes",
             "type": "Function",
             "tags": [],
             "label": "getValueInBytes",
@@ -337,12 +362,13 @@
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ByteSizeValue.toString",
+            "id": "def-common.ByteSizeValue.toString",
             "type": "Function",
             "tags": [],
             "label": "toString",
@@ -354,10 +380,11 @@
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ByteSizeValue.toString.$1",
+                "id": "def-common.ByteSizeValue.toString.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "returnUnit",
@@ -368,6 +395,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -378,7 +406,7 @@
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.ConditionalType",
+        "id": "def-common.ConditionalType",
         "type": "Class",
         "tags": [],
         "label": "ConditionalType",
@@ -386,27 +414,28 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ConditionalType",
+            "section": "def-common.ConditionalType",
             "text": "ConditionalType"
           },
           "<A, B, C> extends ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B | C>"
         ],
         "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ConditionalType.Unnamed",
+            "id": "def-common.ConditionalType.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -416,10 +445,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.Unnamed.$1",
+                "id": "def-common.ConditionalType.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "leftOperand",
@@ -430,11 +460,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.Unnamed.$2",
+                "id": "def-common.ConditionalType.Unnamed.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "rightOperand",
@@ -445,20 +476,21 @@
                   "<A> | ",
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<unknown>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.Unnamed.$3",
+                "id": "def-common.ConditionalType.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "equalType",
@@ -466,20 +498,21 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<B>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.Unnamed.$4",
+                "id": "def-common.ConditionalType.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "notEqualType",
@@ -487,20 +520,21 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<C>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.Unnamed.$5",
+                "id": "def-common.ConditionalType.Unnamed.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -511,6 +545,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -518,7 +553,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ConditionalType.handleError",
+            "id": "def-common.ConditionalType.handleError",
             "type": "Function",
             "tags": [],
             "label": "handleError",
@@ -528,10 +563,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.handleError.$1",
+                "id": "def-common.ConditionalType.handleError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -541,11 +577,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ConditionalType.handleError.$2",
+                "id": "def-common.ConditionalType.handleError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ value }",
@@ -555,6 +592,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -565,7 +603,7 @@
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.ObjectType",
+        "id": "def-common.ObjectType",
         "type": "Class",
         "tags": [],
         "label": "ObjectType",
@@ -573,43 +611,44 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<P> extends ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Readonly<{ [K in keyof OptionalProperties<P>]?: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.TypeOf",
+            "section": "def-common.TypeOf",
             "text": "TypeOf"
           },
           "<P[K]> | undefined; } & { [K in keyof RequiredProperties<P>]: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.TypeOf",
+            "section": "def-common.TypeOf",
             "text": "TypeOf"
           },
           "<P[K]>; }>>"
         ],
         "path": "packages/kbn-config-schema/src/types/object_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ObjectType.Unnamed",
+            "id": "def-common.ObjectType.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -619,10 +658,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/object_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.Unnamed.$1",
+                "id": "def-common.ObjectType.Unnamed.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -632,11 +672,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.Unnamed.$2",
+                "id": "def-common.ObjectType.Unnamed.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -647,6 +688,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -654,7 +696,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ObjectType.extends",
+            "id": "def-common.ObjectType.extends",
             "type": "Function",
             "tags": [],
             "label": "extends",
@@ -665,19 +707,20 @@
               "<NP extends ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.NullableProps",
+                "section": "def-common.NullableProps",
                 "text": "NullableProps"
               },
               ">(newProps: NP, newOptions?: ExtendedObjectTypeOptions<P, NP> | undefined) => ExtendedObjectType<P, NP>"
             ],
             "path": "packages/kbn-config-schema/src/types/object_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.extends.$1",
+                "id": "def-common.ObjectType.extends.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "newProps",
@@ -687,11 +730,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.extends.$2",
+                "id": "def-common.ObjectType.extends.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "newOptions",
@@ -701,6 +745,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -708,7 +753,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ObjectType.handleError",
+            "id": "def-common.ObjectType.handleError",
             "type": "Function",
             "tags": [],
             "label": "handleError",
@@ -718,10 +763,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/object_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.handleError.$1",
+                "id": "def-common.ObjectType.handleError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -731,11 +777,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.handleError.$2",
+                "id": "def-common.ObjectType.handleError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "{ reason, value }",
@@ -745,6 +792,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -752,7 +800,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ObjectType.validateKey",
+            "id": "def-common.ObjectType.validateKey",
             "type": "Function",
             "tags": [],
             "label": "validateKey",
@@ -762,10 +810,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/object_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.validateKey.$1",
+                "id": "def-common.ObjectType.validateKey.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -775,11 +824,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ObjectType.validateKey.$2",
+                "id": "def-common.ObjectType.validateKey.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -789,6 +839,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -799,7 +850,7 @@
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.SchemaTypeError",
+        "id": "def-common.SchemaTypeError",
         "type": "Class",
         "tags": [],
         "label": "SchemaTypeError",
@@ -807,9 +858,9 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.SchemaTypeError",
+            "section": "def-common.SchemaTypeError",
             "text": "SchemaTypeError"
           },
           " extends ",
@@ -817,10 +868,11 @@
         ],
         "path": "packages/kbn-config-schema/src/errors/schema_type_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.SchemaTypeError.Unnamed",
+            "id": "def-common.SchemaTypeError.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -830,10 +882,11 @@
             ],
             "path": "packages/kbn-config-schema/src/errors/schema_type_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.SchemaTypeError.Unnamed.$1",
+                "id": "def-common.SchemaTypeError.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -843,11 +896,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/errors/schema_type_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.SchemaTypeError.Unnamed.$2",
+                "id": "def-common.SchemaTypeError.Unnamed.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "path",
@@ -857,6 +911,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/errors/schema_type_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -867,7 +922,7 @@
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.Type",
+        "id": "def-common.Type",
         "type": "Class",
         "tags": [],
         "label": "Type",
@@ -875,19 +930,20 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V>"
         ],
         "path": "packages/kbn-config-schema/src/types/type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.Type.type",
+            "id": "def-common.Type.type",
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
@@ -896,11 +952,12 @@
               "V"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.Type.__isKbnConfigSchemaType",
+            "id": "def-common.Type.__isKbnConfigSchemaType",
             "type": "boolean",
             "tags": [],
             "label": "__isKbnConfigSchemaType",
@@ -909,11 +966,12 @@
               "true"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.Type.internalSchema",
+            "id": "def-common.Type.internalSchema",
             "type": "Object",
             "tags": [
               "type"
@@ -926,11 +984,12 @@
               "AnySchema"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.Type.Unnamed",
+            "id": "def-common.Type.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -940,10 +999,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.Unnamed.$1",
+                "id": "def-common.Type.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "schema",
@@ -953,11 +1013,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.Unnamed.$2",
+                "id": "def-common.Type.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -968,6 +1029,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -975,7 +1037,7 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.Type.validate",
+            "id": "def-common.Type.validate",
             "type": "Function",
             "tags": [],
             "label": "validate",
@@ -985,10 +1047,11 @@
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.validate.$1",
+                "id": "def-common.Type.validate.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -998,11 +1061,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.validate.$2",
+                "id": "def-common.Type.validate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -1012,11 +1076,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.validate.$3",
+                "id": "def-common.Type.validate.$3",
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
@@ -1026,6 +1091,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1033,7 +1099,31 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.Type.handleError",
+            "id": "def-common.Type.getSchemaStructure",
+            "type": "Function",
+            "tags": [],
+            "label": "getSchemaStructure",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.SchemaStructureEntry",
+                "text": "SchemaStructureEntry"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.Type.handleError",
             "type": "Function",
             "tags": [],
             "label": "handleError",
@@ -1042,18 +1132,19 @@
               "(type: string, context: Record<string, any>, path: string[]) => string | void | ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.SchemaTypeError",
+                "section": "def-common.SchemaTypeError",
                 "text": "SchemaTypeError"
               }
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.handleError.$1",
+                "id": "def-common.Type.handleError.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -1063,11 +1154,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.handleError.$2",
+                "id": "def-common.Type.handleError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -1077,11 +1169,12 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.Type.handleError.$3",
+                "id": "def-common.Type.handleError.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "path",
@@ -1091,6 +1184,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1101,7 +1195,7 @@
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.ValidationError",
+        "id": "def-common.ValidationError",
         "type": "Class",
         "tags": [],
         "label": "ValidationError",
@@ -1109,9 +1203,9 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ValidationError",
+            "section": "def-common.ValidationError",
             "text": "ValidationError"
           },
           " extends ",
@@ -1119,10 +1213,11 @@
         ],
         "path": "packages/kbn-config-schema/src/errors/validation_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.ValidationError.Unnamed",
+            "id": "def-common.ValidationError.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -1132,10 +1227,11 @@
             ],
             "path": "packages/kbn-config-schema/src/errors/validation_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ValidationError.Unnamed.$1",
+                "id": "def-common.ValidationError.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "error",
@@ -1143,19 +1239,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.SchemaTypeError",
+                    "section": "def-common.SchemaTypeError",
                     "text": "SchemaTypeError"
                   }
                 ],
                 "path": "packages/kbn-config-schema/src/errors/validation_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.ValidationError.Unnamed.$2",
+                "id": "def-common.ValidationError.Unnamed.$2",
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
@@ -1165,6 +1262,7 @@
                 ],
                 "path": "packages/kbn-config-schema/src/errors/validation_error.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1177,7 +1275,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.isConfigSchema",
+        "id": "def-common.isConfigSchema",
         "type": "Function",
         "tags": [],
         "label": "isConfigSchema",
@@ -1187,10 +1285,11 @@
         ],
         "path": "packages/kbn-config-schema/src/typeguards/is_config_schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.isConfigSchema.$1",
+            "id": "def-common.isConfigSchema.$1",
             "type": "Any",
             "tags": [],
             "label": "obj",
@@ -1200,6 +1299,7 @@
             ],
             "path": "packages/kbn-config-schema/src/typeguards/is_config_schema.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1207,12 +1307,52 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/config-schema",
+        "id": "def-common.SchemaStructureEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaStructureEntry",
+        "description": [],
+        "path": "packages/kbn-config-schema/src/types/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.SchemaStructureEntry.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.SchemaStructureEntry.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.NullableProps",
+        "id": "def-common.NullableProps",
         "type": "Type",
         "tags": [],
         "label": "NullableProps",
@@ -1221,20 +1361,21 @@
           "{ [x: string]: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<any> | null | undefined; }"
         ],
         "path": "packages/kbn-config-schema/src/types/object_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.Props",
+        "id": "def-common.Props",
         "type": "Type",
         "tags": [],
         "label": "Props",
@@ -1243,20 +1384,21 @@
           "{ [x: string]: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<any>; }"
         ],
         "path": "packages/kbn-config-schema/src/types/object_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.Schema",
+        "id": "def-common.Schema",
         "type": "Type",
         "tags": [],
         "label": "Schema",
@@ -1267,17 +1409,17 @@
           "<any> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.AnyType",
+            "section": "def-common.AnyType",
             "text": "AnyType"
           },
           "; arrayOf: <T>(itemType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<T>, options?: ",
@@ -1285,9 +1427,9 @@
           "<T> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<T[]>; boolean: (options?: ",
@@ -1295,9 +1437,9 @@
           "<boolean> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean>; buffer: (options?: ",
@@ -1305,9 +1447,9 @@
           "<Buffer> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Buffer>; byteSize: (options?: ",
@@ -1315,47 +1457,47 @@
           " | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ByteSizeValue",
+            "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
           ">; conditional: <A extends ",
           "ConditionalTypeValue",
           ", B, C>(leftOperand: ",
           "Reference",
-          "<A>, rightOperand: ",
+          "<A>, rightOperand: A | ",
+          "Reference",
+          "<A> | ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
-          "<unknown> | A | ",
-          "Reference",
-          "<A>, equalType: ",
+          "<unknown>, equalType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, notEqualType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, options?: ",
@@ -1363,9 +1505,9 @@
           "<B | C> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ConditionalType",
+            "section": "def-common.ConditionalType",
             "text": "ConditionalType"
           },
           "<A, B, C>; contextRef: <T>(key: string) => ",
@@ -1375,9 +1517,9 @@
           " | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<moment.Duration>; ip: (options?: ",
@@ -1385,33 +1527,33 @@
           " | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string>; literal: <T extends string | number | boolean | null>(value: T) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<T>; mapOf: <K, V>(keyType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<K>, valueType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V>, options?: ",
@@ -1419,49 +1561,49 @@
           "<K, V> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Map<K, V>>; maybe: <V>(type: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V>) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V | undefined>; nullable: <V>(type: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V>) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V | null>; never: () => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<never>; number: (options?: ",
@@ -1469,17 +1611,17 @@
           " | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<number>; object: <P extends ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Props",
+            "section": "def-common.Props",
             "text": "Props"
           },
           ">(props: P, options?: ",
@@ -1487,89 +1629,89 @@
           "<P> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<P>; oneOf: { <A, B, C, D, E, F, G, H, I, J>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<E>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<F>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<G>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<H>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<I>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<J>], options?: ",
@@ -1577,81 +1719,81 @@
           "<A | B | C | D | E | F | G | H | I | J> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D | E | F | G | H | I | J>; <A, B, C, D, E, F, G, H, I>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<E>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<F>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<G>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<H>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<I>], options?: ",
@@ -1659,73 +1801,73 @@
           "<A | B | C | D | E | F | G | H | I> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D | E | F | G | H | I>; <A, B, C, D, E, F, G, H>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<E>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<F>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<G>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<H>], options?: ",
@@ -1733,65 +1875,65 @@
           "<A | B | C | D | E | F | G | H> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D | E | F | G | H>; <A, B, C, D, E, F, G>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<E>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<F>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<G>], options?: ",
@@ -1799,57 +1941,57 @@
           "<A | B | C | D | E | F | G> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D | E | F | G>; <A, B, C, D, E, F>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<E>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<F>], options?: ",
@@ -1857,49 +1999,49 @@
           "<A | B | C | D | E | F> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D | E | F>; <A, B, C, D, E>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<E>], options?: ",
@@ -1907,41 +2049,41 @@
           "<A | B | C | D | E> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D | E>; <A, B, C, D>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<D>], options?: ",
@@ -1949,33 +2091,33 @@
           "<A | B | C | D> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C | D>; <A, B, C>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<C>], options?: ",
@@ -1983,25 +2125,25 @@
           "<A | B | C> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B | C>; <A, B>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>, ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<B>], options?: ",
@@ -2009,17 +2151,17 @@
           "<A | B> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A | B>; <A>(types: [",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>], options?: ",
@@ -2027,25 +2169,25 @@
           "<A> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<A>; }; recordOf: <K extends string, V>(keyType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<K>, valueType: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<V>, options?: ",
@@ -2053,9 +2195,9 @@
           "<K, V> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<Record<K, V>>; stream: (options?: ",
@@ -2065,9 +2207,9 @@
           "> | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<",
@@ -2079,9 +2221,9 @@
           " | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string>; uri: (options?: ",
@@ -2089,20 +2231,21 @@
           " | undefined) => ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string>; }"
         ],
-        "path": "packages/kbn-config-schema/src/index.ts",
+        "path": "packages/kbn-config-schema/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.TypeOf",
+        "id": "def-common.TypeOf",
         "type": "Type",
         "tags": [],
         "label": "TypeOf",
@@ -2112,23 +2255,25 @@
         ],
         "path": "packages/kbn-config-schema/src/types/object_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
         "parentPluginId": "@kbn/config-schema",
-        "id": "def-server.schema",
+        "id": "def-common.schema",
         "type": "Object",
         "tags": [],
         "label": "schema",
         "description": [],
-        "path": "packages/kbn-config-schema/src/index.ts",
+        "path": "packages/kbn-config-schema/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.any",
+            "id": "def-common.schema.any",
             "type": "Function",
             "tags": [],
             "label": "any",
@@ -2139,19 +2284,20 @@
               "<any> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.AnyType",
+                "section": "def-common.AnyType",
                 "text": "AnyType"
               }
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.any.$1",
+                "id": "def-common.schema.any.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2160,14 +2306,15 @@
                   "TypeOptions",
                   "<any> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.arrayOf",
+            "id": "def-common.schema.arrayOf",
             "type": "Function",
             "tags": [],
             "label": "arrayOf",
@@ -2176,9 +2323,9 @@
               "<T>(itemType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<T>, options?: ",
@@ -2186,20 +2333,21 @@
               "<T> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<T[]>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.arrayOf.$1",
+                "id": "def-common.schema.arrayOf.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "itemType",
@@ -2207,19 +2355,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<T>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.arrayOf.$2",
+                "id": "def-common.schema.arrayOf.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -2228,14 +2377,15 @@
                   "ArrayOptions",
                   "<T> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.boolean",
+            "id": "def-common.schema.boolean",
             "type": "Function",
             "tags": [],
             "label": "boolean",
@@ -2246,20 +2396,21 @@
               "<boolean> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<boolean>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.boolean.$1",
+                "id": "def-common.schema.boolean.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2268,14 +2419,15 @@
                   "TypeOptions",
                   "<boolean> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.buffer",
+            "id": "def-common.schema.buffer",
             "type": "Function",
             "tags": [],
             "label": "buffer",
@@ -2286,20 +2438,21 @@
               "<Buffer> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<Buffer>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.buffer.$1",
+                "id": "def-common.schema.buffer.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2308,14 +2461,15 @@
                   "TypeOptions",
                   "<Buffer> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.byteSize",
+            "id": "def-common.schema.byteSize",
             "type": "Function",
             "tags": [],
             "label": "byteSize",
@@ -2326,28 +2480,29 @@
               " | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
+                "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
               ">"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.byteSize.$1",
+                "id": "def-common.schema.byteSize.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2356,14 +2511,15 @@
                   "ByteSizeOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.conditional",
+            "id": "def-common.schema.conditional",
             "type": "Function",
             "tags": [],
             "label": "conditional",
@@ -2373,30 +2529,30 @@
               "ConditionalTypeValue",
               ", B, C>(leftOperand: ",
               "Reference",
-              "<A>, rightOperand: ",
+              "<A>, rightOperand: A | ",
+              "Reference",
+              "<A> | ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
-              "<unknown> | A | ",
-              "Reference",
-              "<A>, equalType: ",
+              "<unknown>, equalType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, notEqualType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, options?: ",
@@ -2404,20 +2560,21 @@
               "<B | C> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ConditionalType",
+                "section": "def-common.ConditionalType",
                 "text": "ConditionalType"
               },
               "<A, B, C>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.conditional.$1",
+                "id": "def-common.schema.conditional.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "leftOperand",
@@ -2426,34 +2583,37 @@
                   "Reference",
                   "<A>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.conditional.$2",
+                "id": "def-common.schema.conditional.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "rightOperand",
                 "description": [],
                 "signature": [
+                  "A | ",
+                  "Reference",
+                  "<A> | ",
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
-                  "<unknown> | A | ",
-                  "Reference",
-                  "<A>"
+                  "<unknown>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.conditional.$3",
+                "id": "def-common.schema.conditional.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "equalType",
@@ -2461,19 +2621,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<B>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.conditional.$4",
+                "id": "def-common.schema.conditional.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "notEqualType",
@@ -2481,19 +2642,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<C>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.conditional.$5",
+                "id": "def-common.schema.conditional.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2502,14 +2664,15 @@
                   "TypeOptions",
                   "<B | C> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.contextRef",
+            "id": "def-common.schema.contextRef",
             "type": "Function",
             "tags": [],
             "label": "contextRef",
@@ -2519,25 +2682,27 @@
               "ContextReference",
               "<T>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.contextRef.$1",
+                "id": "def-common.schema.contextRef.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.duration",
+            "id": "def-common.schema.duration",
             "type": "Function",
             "tags": [],
             "label": "duration",
@@ -2548,20 +2713,21 @@
               " | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<moment.Duration>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.duration.$1",
+                "id": "def-common.schema.duration.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2570,14 +2736,15 @@
                   "DurationOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.ip",
+            "id": "def-common.schema.ip",
             "type": "Function",
             "tags": [],
             "label": "ip",
@@ -2588,20 +2755,21 @@
               " | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.ip.$1",
+                "id": "def-common.schema.ip.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -2610,14 +2778,15 @@
                   "IpOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.literal",
+            "id": "def-common.schema.literal",
             "type": "Function",
             "tags": [],
             "label": "literal",
@@ -2626,20 +2795,21 @@
               "<T extends string | number | boolean | null>(value: T) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<T>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.literal.$1",
+                "id": "def-common.schema.literal.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
@@ -2647,14 +2817,15 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.mapOf",
+            "id": "def-common.schema.mapOf",
             "type": "Function",
             "tags": [],
             "label": "mapOf",
@@ -2663,17 +2834,17 @@
               "<K, V>(keyType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<K>, valueType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<V>, options?: ",
@@ -2681,20 +2852,21 @@
               "<K, V> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<Map<K, V>>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.mapOf.$1",
+                "id": "def-common.schema.mapOf.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "keyType",
@@ -2702,19 +2874,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<K>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.mapOf.$2",
+                "id": "def-common.schema.mapOf.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "valueType",
@@ -2722,19 +2895,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<V>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.mapOf.$3",
+                "id": "def-common.schema.mapOf.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2743,14 +2917,15 @@
                   "MapOfOptions",
                   "<K, V> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.maybe",
+            "id": "def-common.schema.maybe",
             "type": "Function",
             "tags": [],
             "label": "maybe",
@@ -2759,28 +2934,29 @@
               "<V>(type: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<V>) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<V | undefined>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.maybe.$1",
+                "id": "def-common.schema.maybe.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "type",
@@ -2788,21 +2964,22 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<V>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.nullable",
+            "id": "def-common.schema.nullable",
             "type": "Function",
             "tags": [],
             "label": "nullable",
@@ -2811,28 +2988,29 @@
               "<V>(type: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<V>) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<V | null>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.nullable.$1",
+                "id": "def-common.schema.nullable.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "type",
@@ -2840,21 +3018,22 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<V>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.never",
+            "id": "def-common.schema.never",
             "type": "Function",
             "tags": [],
             "label": "never",
@@ -2863,21 +3042,22 @@
               "() => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<never>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.number",
+            "id": "def-common.schema.number",
             "type": "Function",
             "tags": [],
             "label": "number",
@@ -2888,20 +3068,21 @@
               " | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<number>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.number.$1",
+                "id": "def-common.schema.number.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -2910,14 +3091,15 @@
                   "NumberOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.object",
+            "id": "def-common.schema.object",
             "type": "Function",
             "tags": [],
             "label": "object",
@@ -2926,9 +3108,9 @@
               "<P extends ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Props",
+                "section": "def-common.Props",
                 "text": "Props"
               },
               ">(props: P, options?: ",
@@ -2936,20 +3118,21 @@
               "<P> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<P>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.object.$1",
+                "id": "def-common.schema.object.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
@@ -2957,12 +3140,13 @@
                 "signature": [
                   "P"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.object.$2",
+                "id": "def-common.schema.object.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -2971,14 +3155,15 @@
                   "ObjectTypeOptions",
                   "<P> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.oneOf",
+            "id": "def-common.schema.oneOf",
             "type": "Function",
             "tags": [],
             "label": "oneOf",
@@ -2987,81 +3172,81 @@
               "{ <A, B, C, D, E, F, G, H, I, J>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<E>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<F>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<G>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<H>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<I>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<J>], options?: ",
@@ -3069,81 +3254,81 @@
               "<A | B | C | D | E | F | G | H | I | J> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D | E | F | G | H | I | J>; <A, B, C, D, E, F, G, H, I>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<E>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<F>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<G>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<H>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<I>], options?: ",
@@ -3151,73 +3336,73 @@
               "<A | B | C | D | E | F | G | H | I> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D | E | F | G | H | I>; <A, B, C, D, E, F, G, H>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<E>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<F>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<G>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<H>], options?: ",
@@ -3225,65 +3410,65 @@
               "<A | B | C | D | E | F | G | H> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D | E | F | G | H>; <A, B, C, D, E, F, G>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<E>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<F>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<G>], options?: ",
@@ -3291,57 +3476,57 @@
               "<A | B | C | D | E | F | G> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D | E | F | G>; <A, B, C, D, E, F>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<E>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<F>], options?: ",
@@ -3349,49 +3534,49 @@
               "<A | B | C | D | E | F> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D | E | F>; <A, B, C, D, E>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<E>], options?: ",
@@ -3399,41 +3584,41 @@
               "<A | B | C | D | E> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D | E>; <A, B, C, D>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<D>], options?: ",
@@ -3441,33 +3626,33 @@
               "<A | B | C | D> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C | D>; <A, B, C>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<C>], options?: ",
@@ -3475,25 +3660,25 @@
               "<A | B | C> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B | C>; <A, B>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>, ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<B>], options?: ",
@@ -3501,17 +3686,17 @@
               "<A | B> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A | B>; <A>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>], options?: ",
@@ -3519,19 +3704,20 @@
               "<A> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<A>; }"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
-            "deprecated": false
+            "path": "packages/kbn-config-schema/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.recordOf",
+            "id": "def-common.schema.recordOf",
             "type": "Function",
             "tags": [],
             "label": "recordOf",
@@ -3540,17 +3726,17 @@
               "<K extends string, V>(keyType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<K>, valueType: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<V>, options?: ",
@@ -3558,20 +3744,21 @@
               "<K, V> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<Record<K, V>>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.recordOf.$1",
+                "id": "def-common.schema.recordOf.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "keyType",
@@ -3579,19 +3766,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<K>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.recordOf.$2",
+                "id": "def-common.schema.recordOf.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "valueType",
@@ -3599,19 +3787,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config-schema",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.Type",
+                    "section": "def-common.Type",
                     "text": "Type"
                   },
                   "<V>"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.recordOf.$3",
+                "id": "def-common.schema.recordOf.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3620,14 +3809,15 @@
                   "RecordOfOptions",
                   "<K, V> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.stream",
+            "id": "def-common.schema.stream",
             "type": "Function",
             "tags": [],
             "label": "stream",
@@ -3640,22 +3830,23 @@
               "> | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<",
               "Stream",
               ">"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.stream.$1",
+                "id": "def-common.schema.stream.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3666,14 +3857,15 @@
                   "Stream",
                   "> | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.siblingRef",
+            "id": "def-common.schema.siblingRef",
             "type": "Function",
             "tags": [],
             "label": "siblingRef",
@@ -3683,25 +3875,27 @@
               "SiblingReference",
               "<T>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.siblingRef.$1",
+                "id": "def-common.schema.siblingRef.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.string",
+            "id": "def-common.schema.string",
             "type": "Function",
             "tags": [],
             "label": "string",
@@ -3712,20 +3906,21 @@
               " | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.string.$1",
+                "id": "def-common.schema.string.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3734,14 +3929,15 @@
                   "StringOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
-            "id": "def-server.schema.uri",
+            "id": "def-common.schema.uri",
             "type": "Function",
             "tags": [],
             "label": "uri",
@@ -3752,20 +3948,21 @@
               " | undefined) => ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string>"
             ],
-            "path": "packages/kbn-config-schema/src/index.ts",
+            "path": "packages/kbn-config-schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/config-schema",
-                "id": "def-server.schema.uri.$1",
+                "id": "def-common.schema.uri.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -3774,8 +3971,9 @@
                   "URIOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-schema/src/index.ts",
-                "deprecated": false
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -3783,13 +3981,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

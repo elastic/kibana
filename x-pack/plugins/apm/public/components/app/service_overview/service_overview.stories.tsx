@@ -5,18 +5,13 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import type { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import { ServiceOverview } from '.';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import {
-  APMServiceContext,
-  APMServiceContextValue,
-} from '../../../context/apm_service/apm_service_context';
-import { ServiceOverview } from './';
+import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
@@ -26,7 +21,6 @@ const stories: Meta<{}> = {
       const serviceName = 'testServiceName';
       const mockCore = {
         http: {
-          basePath: { prepend: () => {} },
           get: (endpoint: string) => {
             switch (endpoint) {
               case `/api/apm/services/${serviceName}/annotation/search`:
@@ -40,31 +34,19 @@ const stories: Meta<{}> = {
             }
           },
         },
-        notifications: { toasts: { add: () => {} } },
-        uiSettings: { get: () => 'Browser' },
       } as unknown as CoreStart;
       const serviceContextValue = {
-        alerts: [],
         serviceName,
       } as unknown as APMServiceContextValue;
-      const KibanaReactContext = createKibanaReactContext(mockCore);
 
       return (
-        <MemoryRouter
-          initialEntries={[
-            `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now`,
-          ]}
+        <MockApmPluginStorybook
+          routePath="/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now"
+          serviceContextValue={serviceContextValue}
+          apmContext={{ core: mockCore } as unknown as ApmPluginContextValue}
         >
-          <KibanaReactContext.Provider>
-            <MockApmPluginContextWrapper
-              value={{ core: mockCore } as ApmPluginContextValue}
-            >
-              <APMServiceContext.Provider value={serviceContextValue}>
-                <StoryComponent />
-              </APMServiceContext.Provider>
-            </MockApmPluginContextWrapper>
-          </KibanaReactContext.Provider>
-        </MemoryRouter>
+          <StoryComponent />
+        </MockApmPluginStorybook>
       );
     },
   ],

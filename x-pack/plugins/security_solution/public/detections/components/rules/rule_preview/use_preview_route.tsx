@@ -6,44 +6,37 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { Unit } from '@elastic/datemath';
-import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { FieldValueQueryBar } from '../query_bar';
-import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
-import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
-import { FieldValueThreshold } from '../threshold_input';
-import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import { usePreviewRule } from './use_preview_rule';
+import { formatPreviewRule } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/rule_schema';
+import type {
+  AboutStepRule,
+  DefineStepRule,
+  ScheduleStepRule,
+  TimeframePreviewOptions,
+} from '../../../pages/detection_engine/rules/types';
 
 interface PreviewRouteParams {
-  isDisabled: boolean;
-  index: string[];
-  threatIndex: string[];
-  query: FieldValueQueryBar;
-  threatQuery: FieldValueQueryBar;
-  ruleType: Type;
-  timeFrame: Unit;
-  threatMapping: ThreatMapping;
-  threshold: FieldValueThreshold;
-  machineLearningJobId: string[];
-  anomalyThreshold: number;
+  defineRuleData?: DefineStepRule;
+  aboutRuleData?: AboutStepRule;
+  scheduleRuleData?: ScheduleStepRule;
+  exceptionsList?: List[];
+  timeframeOptions: TimeframePreviewOptions;
 }
 
 export const usePreviewRoute = ({
-  index,
-  isDisabled,
-  query,
-  threatIndex,
-  threatQuery,
-  timeFrame,
-  ruleType,
-  threatMapping,
-  threshold,
-  machineLearningJobId,
-  anomalyThreshold,
+  defineRuleData,
+  aboutRuleData,
+  scheduleRuleData,
+  exceptionsList,
+  timeframeOptions,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
-  const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
+  const { isLoading, response, rule, setRule } = usePreviewRule({
+    timeframeOptions,
+  });
   const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
   const [isAborted, setIsAborted] = useState<boolean>(!!response.isAborted);
   const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
@@ -67,52 +60,30 @@ export const usePreviewRoute = ({
 
   useEffect(() => {
     clearPreview();
-  }, [
-    clearPreview,
-    index,
-    isDisabled,
-    query,
-    threatIndex,
-    threatQuery,
-    timeFrame,
-    ruleType,
-    threatMapping,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
-  ]);
+  }, [clearPreview, defineRuleData, aboutRuleData, scheduleRuleData]);
 
   useEffect(() => {
+    if (!defineRuleData || !aboutRuleData || !scheduleRuleData) {
+      return;
+    }
     if (isRequestTriggered && rule === null) {
       setRule(
         formatPreviewRule({
-          index,
-          query,
-          ruleType,
-          threatIndex,
-          threatMapping,
-          threatQuery,
-          timeFrame,
-          threshold,
-          machineLearningJobId,
-          anomalyThreshold,
+          defineRuleData,
+          aboutRuleData,
+          scheduleRuleData,
+          exceptionsList,
         })
       );
     }
   }, [
-    index,
     isRequestTriggered,
-    query,
     rule,
-    ruleType,
     setRule,
-    threatIndex,
-    threatMapping,
-    threatQuery,
-    timeFrame,
-    threshold,
-    machineLearningJobId,
-    anomalyThreshold,
+    defineRuleData,
+    aboutRuleData,
+    scheduleRuleData,
+    exceptionsList,
   ]);
 
   return {

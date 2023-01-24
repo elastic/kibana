@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -24,60 +25,60 @@ import {
   DefaultFieldRendererOverflow,
   MoreContainer,
 } from './field_renderers';
-import { mockData } from '../../../network/components/details/mock';
-import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
-import { HostEcs } from '../../../../common/ecs/host';
+import { mockData } from '../../../explore/network/components/details/mock';
+import type { AutonomousSystem } from '../../../../common/search_strategy';
+import { FlowTarget } from '../../../../common/search_strategy';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../common/lib/kibana');
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
+jest.mock('../../../common/lib/kibana/kibana_react', () => {
   return {
-    ...original,
-    EuiScreenReaderOnly: () => <></>,
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
+            `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
+        },
+      },
+    }),
   };
 });
 
 describe('Field Renderers', () => {
-  const mount = useMountAppended();
-
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
+      const { asFragment } = render(
         locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when no fields provided', () => {
-      const wrapper = mount(
-        <TestProviders>{locationRenderer([], mockData.complete)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{locationRenderer([], mockData.complete)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when invalid fields provided', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           {locationRenderer(['source.geo.my_house'], mockData.complete)}
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(dateRenderer(mockData.complete.source?.firstSeen));
+      const { asFragment } = render(dateRenderer(mockData.complete.source?.firstSeen));
 
-      expect(wrapper).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
-      const wrapper = mount(<TestProviders>{dateRenderer(null)}</TestProviders>);
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{dateRenderer(null)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });
 
@@ -86,25 +87,25 @@ describe('Field Renderers', () => {
     const halfEmptyMock: AutonomousSystem = { organization: { name: 'Test Org' }, number: null };
 
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
+      const { asFragment } = render(
         autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-string field provided', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>{autonomousSystemRenderer(halfEmptyMock, FlowTarget.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>{autonomousSystemRenderer(emptyMock, FlowTarget.source)}</TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });
 
@@ -120,29 +121,26 @@ describe('Field Renderers', () => {
       ip: undefined,
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
-
-      expect(wrapper).toMatchSnapshot();
+      const { asFragment } = render(
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
+      );
+      expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
-      const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
-      const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });
 
@@ -163,66 +161,64 @@ describe('Field Renderers', () => {
       ip: ['10.10.10.10'],
     };
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
+      const { asFragment } = render(
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
+      );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
       );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
-      const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
-      const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
     test('it renders emptyTagValue when no host.name is provided', () => {
-      const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyNameHost, FlowTarget.source)}</TestProviders>
-      );
-      expect(wrapper.text()).toEqual(getEmptyValue());
+      render(<TestProviders>{hostNameRenderer(emptyNameHost, FlowTarget.source)}</TestProviders>);
+      expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });
 
   describe('#whoisRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(whoisRenderer('10.10.10.10'));
+      const { asFragment } = render(whoisRenderer('10.10.10.10'));
 
-      expect(wrapper).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
   });
 
   describe('#reputationRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(<TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>);
+      const { asFragment } = render(
+        <TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>
+      );
 
-      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
   });
 
   describe('DefaultFieldRenderer', () => {
     test('it should render a single item', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DefaultFieldRenderer rowItems={['item1']} attrName={'item1'} idPrefix={'prefix-1'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('item1 ');
+      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual('item1 ');
     });
 
     test('it should render two items', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DefaultFieldRenderer
             displayCount={5}
@@ -232,11 +228,14 @@ describe('Field Renderers', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('item1,item2 ');
+
+      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual(
+        'item1,item2 '
+      );
     });
 
     test('it should render all items when the item count exactly equals displayCount', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DefaultFieldRenderer
             displayCount={5}
@@ -247,11 +246,13 @@ describe('Field Renderers', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('item1,item2,item3,item4,item5 ');
+      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual(
+        'item1,item2,item3,item4,item5 '
+      );
     });
 
     test('it should render all items up to displayCount and the expected "+ n More" popover anchor text for items greater than displayCount', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DefaultFieldRenderer
             displayCount={5}
@@ -261,8 +262,9 @@ describe('Field Renderers', () => {
           />
         </TestProviders>
       );
-
-      expect(wrapper.text()).toEqual('item1,item2,item3,item4,item5  ,+2 More');
+      expect(screen.getByTestId('DefaultFieldRendererComponent').textContent).toEqual(
+        'item1,item2,item3,item4,item5  ,+2 More'
+      );
     });
   });
 
@@ -271,75 +273,103 @@ describe('Field Renderers', () => {
     const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
 
     test('it should only render the items after overflowIndexStart', () => {
-      const wrapper = mount(
+      render(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
-      expect(wrapper.text()).toEqual('item6item7');
+      expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
     });
 
     test('it should render all the items when overflowIndexStart is zero', () => {
-      const wrapper = mount(
+      render(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={0}
+          rowItems={rowItems}
         />
       );
 
-      expect(wrapper.text()).toEqual('item1item2item3item4item5item6item7');
+      expect(screen.getByTestId('more-container').textContent).toEqual(
+        'item1item2item3item4item5item6item7'
+      );
     });
 
-    test('it should have the overflow `auto` style to enable scrolling when necessary', () => {
-      const wrapper = mount(
+    test('it should have the eui-yScroll to enable scrolling when necessary', () => {
+      render(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
-      expect(
-        wrapper.find('[data-test-subj="more-container"]').first().props().style?.overflow
-      ).toEqual('auto');
+      expect(screen.getByTestId('more-container')).toHaveClass('eui-yScroll');
     });
 
     test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
-      const wrapper = mount(
+      render(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
-      expect(
-        wrapper.find('[data-test-subj="more-container"]').first().props().style?.maxHeight
-      ).toEqual(DEFAULT_MORE_MAX_HEIGHT);
+      expect(screen.getByTestId('more-container')).toHaveStyle(
+        `max-height: ${DEFAULT_MORE_MAX_HEIGHT}`
+      );
+    });
+
+    test('it should render with correct attrName prop', () => {
+      render(
+        <MoreContainer
+          fieldType="keyword"
+          idPrefix={idPrefix}
+          isAggregatable={true}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+          rowItems={rowItems}
+          attrName="mock.attr"
+        />
+      );
+
+      screen
+        .getAllByTestId('render-content-mock.attr')
+        .forEach((element) => expect(element).toBeInTheDocument());
     });
 
     test('it should only invoke the optional render function, when provided, for the items after overflowIndexStart', () => {
-      const render = jest.fn();
+      const renderFn = jest.fn();
 
-      mount(
+      render(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          render={render}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          render={renderFn}
+          rowItems={rowItems}
         />
       );
 
-      expect(render).toHaveBeenCalledTimes(2);
+      expect(renderFn).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -348,39 +378,45 @@ describe('Field Renderers', () => {
     const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
 
     test('it should render the length of items after the overflowIndexStart', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            fieldType="keyword"
             idPrefix={idPrefix}
-            rowItems={rowItems}
+            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            rowItems={rowItems}
           />
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(' ,+2 More');
-      expect(wrapper.find('[data-test-subj="more-container"]').first().exists()).toBe(false);
+      expect(screen.getByTestId('DefaultFieldRendererOverflow-button').textContent).toEqual(
+        '+2 More'
+      );
+      expect(screen.queryByTestId('more-container')).not.toBeInTheDocument();
     });
 
     test('it should render the items after overflowIndexStart in the popover', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            fieldType="keyword"
             idPrefix={idPrefix}
-            rowItems={rowItems}
+            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            rowItems={rowItems}
           />
         </TestProviders>
       );
 
-      wrapper.find('button').first().simulate('click');
-      wrapper.update();
-      expect(wrapper.find('.euiPopover').first().exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="more-container"]').first().text()).toEqual(
-        'item6item7'
-      );
+      userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
+
+      expect(
+        screen.getByText('You are in a dialog. To close this dialog, hit escape.')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
     });
   });
 });

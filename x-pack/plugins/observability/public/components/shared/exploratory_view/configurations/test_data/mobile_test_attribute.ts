@@ -5,28 +5,32 @@
  * 2.0.
  */
 
+import { mockDataView } from '../../rtl_helpers';
+
 export const testMobileKPIAttr = {
   title: 'Prefilled from exploratory view app',
   description: '',
-  references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
-  ],
+  references: [],
   visualizationType: 'lnsXY',
   state: {
+    adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
+    internalReferences: [
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0',
+        type: 'index-pattern',
+      },
+    ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
-            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],
+            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0-0'],
             columns: {
               'x-axis-column-layer0': {
                 sourceField: '@timestamp',
@@ -34,13 +38,14 @@ export const testMobileKPIAttr = {
                 isBucketed: true,
                 label: '@timestamp',
                 operationType: 'date_histogram',
-                params: { interval: 'auto' },
+                params: { interval: 'auto', includeEmptyRows: true },
                 scale: 'interval',
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 isBucketed: false,
-                label: 'Median of System memory usage',
+                label: 'test-series',
                 operationType: 'median',
+                params: {},
                 scale: 'ratio',
                 sourceField: 'system.memory.usage',
                 dataType: 'number',
@@ -57,21 +62,28 @@ export const testMobileKPIAttr = {
       },
     },
     visualization: {
-      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+        legendSize: 'auto',
+        shouldTruncate: false,
+      },
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X',
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
       layers: [
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0', color: 'green', axisMode: 'left' }],
+          yConfig: [{ forAccessor: 'y-axis-column-layer0-0', color: 'green', axisMode: 'left' }],
           xAccessor: 'x-axis-column-layer0',
         },
       ],

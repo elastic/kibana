@@ -6,14 +6,13 @@
  */
 
 import React, { Component } from 'react';
-import { Map as MbMap, Point as MbPoint } from '@kbn/mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
-import { MapMouseEvent } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapMouseEvent, PointLike } from '@kbn/mapbox-gl';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../draw_control';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
@@ -84,7 +83,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
   };
 
   _onClick = async (event: MapMouseEvent, drawControl?: MapboxDraw) => {
-    const mbLngLatPoint: MbPoint = event.point;
+    const mbLngLatPoint: PointLike = event.point;
     // Currently feature deletion is the only onClick handling
     if (!this.props.editLayer || this.props.drawShape !== DRAW_SHAPE.DELETE) {
       return;
@@ -103,7 +102,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING,
       },
-    ] as [MbPoint, MbPoint];
+    ] as [PointLike, PointLike];
     const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbEditLayerIds,
       filter: ['all', EXCLUDE_CENTROID_FEATURES],

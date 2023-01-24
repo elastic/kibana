@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-const fn = require(`src/plugins/vis_types/timelion/server/series_functions/fit`);
+const fn = require('./fit');
 import moment from 'moment';
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
-import getSeriesList from './helpers/get_single_series_list';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './test_helpers/get_single_series_list';
 import _ from 'lodash';
 
 describe('fit.js', function () {

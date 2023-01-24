@@ -5,18 +5,33 @@
  * 2.0.
  */
 
-import { truncate } from 'lodash';
-import open from 'opn';
-import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
-import { parse as parseUrl } from 'url';
-import { Headers, Logger } from 'src/core/server';
+import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
-} from '../../../../../../src/plugins/screenshot_mode/server';
+} from '@kbn/screenshot-mode-plugin/server';
+import { truncate } from 'lodash';
+import open from 'opn';
+import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
+import { Subject } from 'rxjs';
+import { parse as parseUrl } from 'url';
+import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
+import { Layout } from '../../layouts';
+import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
+import { getFooterTemplate, getHeaderTemplate } from './templates';
+
+declare module 'puppeteer' {
+  interface Page {
+    _client(): CDPSession;
+  }
+
+  interface Target {
+    _targetId: string;
+  }
+}
 
 export type Context = Record<string, unknown>;
 
@@ -34,12 +49,6 @@ export interface ElementPosition {
   };
 }
 
-export interface Viewport {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
 interface OpenOptions {
   context?: Context;
   headers: Headers;
@@ -51,9 +60,9 @@ interface WaitForSelectorOpts {
   timeout: number;
 }
 
-interface EvaluateOpts {
-  fn: EvaluateFn;
-  args: SerializableOrJSHandle[];
+interface EvaluateOpts<A extends unknown[]> {
+  fn: EvaluateFunc<A>;
+  args: unknown[];
 }
 
 interface EvaluateMetaOpts {
@@ -77,18 +86,14 @@ interface InterceptedRequest {
 
 const WAIT_FOR_DELAY_MS: number = 100;
 
-function getDisallowedOutgoingUrlError(interceptedUrl: string) {
-  return new Error(
-    `Received disallowed outgoing URL: "${interceptedUrl}". Failing the request and closing the browser.`
-  );
-}
-
 /**
  * @internal
  */
 export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;
+  private screenshottingErrorSubject = new Subject<Error>();
+  readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
@@ -111,7 +116,7 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.goto and wait to see the Kibana DOM content
    */
-  async open(
+  public async open(
     url: string,
     { headers, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
@@ -122,7 +127,7 @@ export class HeadlessChromiumDriver {
     this.interceptedCount = 0;
 
     /**
-     * Integrate with the screenshot mode plugin contract by calling this function before any other
+     * Integrate with the screenshot mode plugin contract by calling this function before whatever other
      * scripts have run on the browser page.
      */
     await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotModeEnabled);
@@ -155,10 +160,117 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
-  /*
-   * Call Page.screenshot and return a base64-encoded string of the image
+  /**
+   * Despite having "preserveDrawingBuffer": "true" for WebGL driven canvas elements
+   * we may still get a blank canvas in PDFs. As a further mitigation
+   * we convert WebGL backed canvases to images and inline replace the canvas element.
+   * The visual result is identical.
+   *
+   * The drawback is that we are mutating the page and so if anything were to interact
+   * with it after we ran this function it may lead to issues. Ideally, once Chromium
+   * fixes how PDFs are generated we can remove this code. See:
+   *
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=809065
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=137576
+   *
+   * Idea adapted from: https://github.com/puppeteer/puppeteer/issues/1731#issuecomment-864345938
    */
-  async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
+  private async workaroundWebGLDrivenCanvases() {
+    const canvases = await this.page.$$('canvas');
+    for (const canvas of canvases) {
+      await canvas.evaluate((thisCanvas: Element) => {
+        if (
+          (thisCanvas as HTMLCanvasElement).getContext('webgl') ||
+          (thisCanvas as HTMLCanvasElement).getContext('webgl2')
+        ) {
+          const newDiv = document.createElement('div');
+          const img = document.createElement('img');
+          img.src = (thisCanvas as HTMLCanvasElement).toDataURL('image/png');
+          newDiv.appendChild(img);
+          thisCanvas.parentNode!.replaceChild(newDiv, thisCanvas);
+        }
+      });
+    }
+  }
+
+  /**
+   * Timeout errors may occur when waiting for data or the brower render events to complete. This mutates the
+   * page, and has the drawback anything were to interact with the page after we ran this function, it may lead
+   * to issues. Ideally, timeout errors wouldn't occur because ES would return pre-loaded results data
+   * statically.
+   */
+  private async injectScreenshottingErrorHeader(error: Error, containerSelector: string) {
+    await this.page.evaluate(
+      (selector: string, text: string) => {
+        let container = document.querySelector(selector);
+        if (!container) {
+          container = document.querySelector('body');
+        }
+
+        const errorBoundary = document.createElement('div');
+        errorBoundary.className = 'euiErrorBoundary';
+
+        const divNode = document.createElement('div');
+        divNode.className = 'euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge';
+
+        const preNode = document.createElement('pre');
+        preNode.className = 'euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap';
+
+        const codeNode = document.createElement('code');
+        codeNode.className = 'euiCodeBlock__code';
+
+        errorBoundary.appendChild(divNode);
+        divNode.appendChild(preNode);
+        preNode.appendChild(codeNode);
+        codeNode.appendChild(document.createTextNode(text));
+
+        container?.insertBefore(errorBoundary, container.firstChild);
+      },
+      containerSelector,
+      error.toString()
+    );
+  }
+
+  public async printA4Pdf({
+    title,
+    logo,
+    error,
+  }: {
+    title: string;
+    logo?: string;
+    error?: Error;
+  }): Promise<Buffer> {
+    await this.workaroundWebGLDrivenCanvases();
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, getPrintLayoutSelectors().screenshot);
+    }
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
+    });
+  }
+
+  /*
+   * Receive a PNG buffer of the page screenshot from Chromium
+   */
+  public async screenshot({
+    elementPosition,
+    layout,
+    error,
+  }: {
+    elementPosition: ElementPosition;
+    layout: Layout;
+    error?: Error;
+  }): Promise<Buffer | undefined> {
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, layout.selectors.screenshot);
+    }
+
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -167,6 +279,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
     if (Buffer.isBuffer(screenshot)) {
@@ -180,13 +293,17 @@ export class HeadlessChromiumDriver {
     return undefined;
   }
 
-  evaluate({ fn, args = [] }: EvaluateOpts, meta: EvaluateMetaOpts, logger: Logger): Promise<any> {
+  evaluate<A extends unknown[], T = void>(
+    { fn, args = [] }: EvaluateOpts<A>,
+    meta: EvaluateMetaOpts,
+    logger: Logger
+  ): Promise<T> {
     logger.debug(`evaluate ${meta.context}`);
 
-    return this.page.evaluate(fn, ...args);
+    return this.page.evaluate(fn as EvaluateFunc<unknown[]>, ...args) as Promise<T>;
   }
 
-  async waitForSelector(
+  public async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
@@ -204,26 +321,34 @@ export class HeadlessChromiumDriver {
     return response;
   }
 
-  public async waitFor({
+  public async waitFor<T extends unknown[] = unknown[]>({
     fn,
     args,
     timeout,
   }: {
-    fn: EvaluateFn;
-    args: SerializableOrJSHandle[];
+    fn: EvaluateFunc<T>;
+    args: unknown[];
     timeout: number;
   }): Promise<void> {
-    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
+    await this.page.waitForFunction(
+      fn as EvaluateFunc<unknown[]>,
+      { timeout, polling: WAIT_FOR_DELAY_MS },
+      ...args
+    );
   }
 
-  async setViewport(
-    { width: _width, height: _height, zoom }: Viewport,
+  /**
+   * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
+   * viewport can not be captured.
+   */
+  public async setViewport(
+    { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
     const width = Math.floor(_width);
     const height = Math.floor(_height);
 
-    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(`Setting viewport to: width=${width} height=${height} scaleFactor=${zoom}`);
 
     await this.page.setViewport({
       width,
@@ -238,8 +363,8 @@ export class HeadlessChromiumDriver {
       return;
     }
 
-    // FIXME: retrieve the client in open() and  pass in the client
-    const client = this.page.client();
+    // FIXME: retrieve the client in open() and  pass in the client?
+    const client = this.page._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -262,7 +387,9 @@ export class HeadlessChromiumDriver {
           requestId,
         });
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingErrorSubject.next(error);
+        logger.error(error);
         return;
       }
 
@@ -312,7 +439,9 @@ export class HeadlessChromiumDriver {
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingErrorSubject.next(error);
+        logger.error(error);
         return;
       }
     });
@@ -326,12 +455,12 @@ export class HeadlessChromiumDriver {
     // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
+    const client = this.page._client();
     const target = this.page.target();
-    const client = await target.createCDPSession();
+    const targetId = target._targetId;
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 
@@ -359,7 +488,7 @@ export class HeadlessChromiumDriver {
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
-    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    // IE: https://feeds.elastic.co/kibana/v8.0.0.json
     const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;

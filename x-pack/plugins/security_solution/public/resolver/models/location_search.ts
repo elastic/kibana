@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PanelViewAndParameters } from '../types';
+import type { PanelViewAndParameters } from '../types';
 import * as schema from './schema';
 
 /**

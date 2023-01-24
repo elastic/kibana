@@ -5,90 +5,230 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  Chart,
-  DARK_THEME,
-  Datum,
-  LIGHT_THEME,
-  PartialTheme,
-  Partition,
-  PartitionLayout,
-  Settings,
-} from '@elastic/charts';
-import styled from 'styled-components';
+  CountIndexPatternColumn,
+  PersistedIndexPatternLayer,
+  PieVisualizationState,
+  TermsIndexPatternColumn,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
+import { EuiText } from '@elastic/eui';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ChartWrapper } from '../chart_wrapper';
-import { I18LABELS } from '../translations';
+  PROCESSOR_EVENT,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
+import { getEsFilter } from '../../../../services/data/get_es_filter';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import type { UxUIFilters } from '../../../../../typings/ui_filters';
 
-const StyleChart = styled.div`
-  height: 100%;
-`;
+const BUCKET_SIZE = 9;
 
-interface Props {
-  options?: Array<{
-    count: number;
-    name: string;
-  }>;
-  loading: boolean;
+export enum VisitorBreakdownMetric {
+  OS_BREAKDOWN = 'user_agent.os.name',
+  UA_BREAKDOWN = 'user_agent.name',
 }
 
-const theme: PartialTheme = {
-  chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
-  legend: {
-    verticalWidth: 100,
-  },
-  partition: {
-    linkLabel: { maximumSection: Infinity, maxCount: 0 },
-    outerSizeRatio: 1, // - 0.5 * Math.random(),
-    circlePadding: 4,
-  },
-};
+interface LensAttributes {
+  metric: VisitorBreakdownMetric;
+  uiFilters: UxUIFilters;
+  urlQuery?: string;
+  dataView: DataView;
+}
 
-export function VisitorBreakdownChart({ loading, options }: Props) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+type Props = {
+  start: string;
+  end: string;
+  onFilter: (metric: VisitorBreakdownMetric, event: any) => void;
+} & LensAttributes;
 
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
+export function VisitorBreakdownChart({
+  start,
+  end,
+  onFilter,
+  uiFilters,
+  urlQuery,
+  metric,
+  dataView,
+}: Props) {
+  const kibana = useKibanaServices();
+  const LensEmbeddableComponent = kibana.lens.EmbeddableComponent;
+  const [localDataViewId] = useState<string>(uuidv4());
+
+  const lensAttributes = useMemo(
+    () =>
+      getVisitorBreakdownLensAttributes({
+        uiFilters,
+        urlQuery,
+        metric,
+        dataView,
+        localDataViewId,
+      }),
+    [uiFilters, urlQuery, metric, dataView, localDataViewId]
+  );
+
+  const filterHandler = useCallback(
+    (event) => {
+      onFilter(metric, event);
+    },
+    [onFilter, metric]
+  );
+
+  if (!LensEmbeddableComponent) {
+    return <EuiText>No lens component</EuiText>;
+  }
 
   return (
-    <ChartWrapper loading={loading} height="245px" maxWidth="430px">
-      <StyleChart>
-        <Chart>
-          <Settings
-            showLegend
-            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-            theme={theme}
-          />
-          <Partition
-            id="spec_1"
-            data={
-              options?.length ? options : [{ count: 1, name: I18LABELS.noData }]
-            }
-            layout={PartitionLayout.sunburst}
-            clockwiseSectors={false}
-            valueAccessor={(d: Datum) => d.count as number}
-            valueGetter="percent"
-            percentFormatter={(d: number) =>
-              `${Math.round((d + Number.EPSILON) * 100) / 100}%`
-            }
-            layers={[
-              {
-                groupByRollup: (d: Datum) => d.name,
-                shape: {
-                  fillColor: (d) =>
-                    euiChartTheme.theme.colors?.vizColors?.[d.sortIndex]!,
-                },
-              },
-            ]}
-          />
-        </Chart>
-      </StyleChart>
-    </ChartWrapper>
+    <LensEmbeddableComponent
+      id={`ux-visitor-breakdown-${metric.replaceAll('.', '-')}`}
+      hidePanelTitles
+      withDefaultActions
+      style={{ minHeight: '250px', height: '100%' }}
+      attributes={lensAttributes}
+      timeRange={{
+        from: start ?? '',
+        to: end ?? '',
+      }}
+      viewMode={ViewMode.VIEW}
+      onFilter={filterHandler}
+    />
   );
+}
+
+const visConfig: PieVisualizationState = {
+  layers: [
+    {
+      layerId: 'layer1',
+      primaryGroups: ['col1'],
+      metrics: ['col2'],
+      categoryDisplay: 'default',
+      legendDisplay: 'hide',
+      numberDisplay: 'percent',
+      showValuesInLegend: true,
+      nestedLegend: false,
+      layerType: 'data',
+    },
+  ],
+  shape: 'pie',
+};
+
+export function getVisitorBreakdownLensAttributes({
+  uiFilters,
+  urlQuery,
+  metric,
+  dataView,
+  localDataViewId,
+}: LensAttributes & {
+  localDataViewId: string;
+}): TypedLensByValueInput['attributes'] {
+  const localDataView = dataView.toSpec(false);
+  localDataView.id = localDataViewId;
+
+  const dataLayer: PersistedIndexPatternLayer = {
+    incompleteColumns: {},
+    columnOrder: ['col1', 'col2'],
+    columns: {
+      col1: {
+        label: `Top ${BUCKET_SIZE} values of ${metric}`,
+        dataType: 'string',
+        operationType: 'terms',
+        scale: 'ordinal',
+        sourceField: metric,
+        isBucketed: true,
+        params: {
+          size: BUCKET_SIZE,
+          orderBy: {
+            type: 'column',
+            columnId: 'col2',
+          },
+          orderDirection: 'desc',
+          otherBucket: true,
+          parentFormat: {
+            id: 'terms',
+          },
+        },
+      } as TermsIndexPatternColumn,
+      col2: {
+        label: 'Count of records',
+        dataType: 'number',
+        operationType: 'count',
+        isBucketed: false,
+        scale: 'ratio',
+        sourceField: '___records___',
+        params: {
+          emptyAsNull: true,
+        },
+      } as CountIndexPatternColumn,
+    },
+  };
+
+  return {
+    visualizationType: 'lnsPie',
+    title: `ux-visitor-breakdown-${metric}`,
+    references: [],
+    state: {
+      internalReferences: [
+        {
+          id: localDataView.id,
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: localDataView.id,
+          name: 'indexpattern-datasource-layer-layer1',
+          type: 'index-pattern',
+        },
+      ],
+      adHocDataViews: {
+        [localDataView.id]: localDataView,
+      },
+      datasourceStates: {
+        formBased: {
+          layers: {
+            layer1: dataLayer,
+          },
+        },
+      },
+      filters: [
+        {
+          meta: {},
+          query: {
+            bool: {
+              filter: [
+                { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+                {
+                  terms: {
+                    [PROCESSOR_EVENT]: [ProcessorEvent.transaction],
+                  },
+                },
+                {
+                  exists: {
+                    field: 'transaction.marks.navigationTiming.fetchStart',
+                  },
+                },
+                ...getEsFilter(uiFilters),
+                ...(urlQuery
+                  ? [
+                      {
+                        wildcard: {
+                          'url.full': `*${urlQuery}*`,
+                        },
+                      },
+                    ]
+                  : []),
+              ],
+              must_not: [...getEsFilter(uiFilters, true)],
+            },
+          },
+        },
+      ],
+      query: { language: 'kuery', query: '' },
+      visualization: visConfig,
+    },
+  };
 }

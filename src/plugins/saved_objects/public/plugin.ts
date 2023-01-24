@@ -6,31 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 
 import './index.scss';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   createSavedObjectClass,
   SavedObjectDecoratorRegistry,
   SavedObjectDecoratorConfig,
 } from './saved_object';
-import { DataPublicPluginStart } from '../../data/public';
-import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
+import { setStartServices } from './kibana_services';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
 }
 
 export interface SavedObjectsStart {
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   settings: {
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.8.0
+     */
     getPerPage: () => number;
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.8.0
+     */
     getListingLimit: () => number;
   };
 }
@@ -51,6 +64,7 @@ export class SavedObjectsPublicPlugin
     };
   }
   public start(core: CoreStart, { data, dataViews }: SavedObjectsStartDeps) {
+    setStartServices(core);
     return {
       SavedObjectClass: createSavedObjectClass(
         {

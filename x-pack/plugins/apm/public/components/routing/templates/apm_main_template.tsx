@@ -6,19 +6,18 @@
  */
 
 import { EuiPageHeaderProps } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityPageTemplateProps } from '@kbn/observability-plugin/public/components/shared/page_template/page_template';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  useKibana,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { ServiceGroupSaveButton } from '../../app/service_groups';
+import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
-import { enableServiceGroups } from '../../../../../observability/public';
-import { ServiceGroupSaveButton } from '../../app/service_groups';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings'];
@@ -39,6 +38,8 @@ export function ApmMainTemplate({
   children,
   environmentFilter = true,
   showServiceGroupSaveButton = false,
+  showServiceGroupsNav = false,
+  selectedNavButton,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
@@ -46,11 +47,14 @@ export function ApmMainTemplate({
   children: React.ReactNode;
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
-} & KibanaPageTemplateProps) {
+  showServiceGroupsNav?: boolean;
+  selectedNavButton?: 'serviceGroups' | 'allServices';
+} & KibanaPageTemplateProps &
+  Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observability } = services;
+  const { http, docLinks, observability, application } = services;
   const basePath = http?.basePath.get();
 
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
@@ -58,6 +62,19 @@ export function ApmMainTemplate({
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
+
+  // create static data view on inital load
+  useFetcher(
+    (callApmApi) => {
+      const canCreateDataView =
+        application?.capabilities.savedObjectsManagement.edit;
+
+      if (canCreateDataView) {
+        return callApmApi('POST /internal/apm/data_view/static');
+      }
+    },
+    [application?.capabilities.savedObjectsManagement.edit]
+  );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)
@@ -73,35 +90,36 @@ export function ApmMainTemplate({
       [shouldBypassNoDataScreen, data?.hasData]
     );
 
+  const isLoading =
+    status === FETCH_STATUS.LOADING ||
+    fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
+
   const noDataConfig = getNoDataConfig({
     basePath,
     docsLink: docLinks!.links.observability.guide,
     hasApmData: data?.hasData,
     hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
     shouldBypassNoDataScreen,
-    loading:
-      status === FETCH_STATUS.LOADING ||
-      fleetApmPoliciesStatus === FETCH_STATUS.LOADING,
+    loading: isLoading,
   });
 
-  const {
-    services: { uiSettings },
-  } = useKibana<ApmPluginStartDeps>();
-  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
-  const renderServiceGroupSaveButton =
-    showServiceGroupSaveButton && isServiceGroupsEnabled;
   const rightSideItems = [
-    ...(renderServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
     ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
 
   const pageTemplate = (
     <ObservabilityPageTemplate
       noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
+      isPageDataLoaded={isLoading === false}
       pageHeader={{
         pageTitle,
         rightSideItems,
         ...pageHeader,
+        children:
+          showServiceGroupsNav && selectedNavButton ? (
+            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+          ) : null,
       }}
       {...pageTemplateProps}
     >

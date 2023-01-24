@@ -7,7 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
-import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
+import type { RulePreviewLogs } from '../../../../../common/detection_engine/rule_schema';
 import * as i18n from './translations';
 
 interface PreviewLogsComponentProps {
@@ -67,7 +67,7 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
       {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
       <LogAccordion logs={sortedLogs.errors} isError />
       <LogAccordion logs={sortedLogs.warnings}>
-        {isAborted && <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} />}
+        {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
       </LogAccordion>
     </>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 import { UPGRADE_ASSISTANT_TELEMETRY } from '../../common/constants';
 import { telemetrySavedObjectMigrations } from './migrations';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ClusterClientAdapter,
   IClusterClientAdapter,
@@ -13,11 +13,14 @@ import {
   getQueryBody,
   FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
+  AggregateEventsWithAuthFilter,
+  getQueryBodyWithAuthFilter,
 } from './cluster_client_adapter';
 import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { fromKueryExpression } from '@kbn/es-query';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
@@ -44,7 +47,7 @@ describe('indexDocument', () => {
     });
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
-      body: [{ create: { _index: 'event-log' } }, { message: 'foo' }],
+      body: [{ create: { _index: 'event-log', require_alias: true } }, { message: 'foo' }],
     });
   });
 
@@ -55,7 +58,7 @@ describe('indexDocument', () => {
       return logger.error.mock.calls.length !== 0;
     });
 
-    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log"}},{"message":"foo"}]`;
+    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log","require_alias":true}},{"message":"foo"}]`;
     expect(logger.error).toHaveBeenCalledWith(expectedMessage);
   });
 });
@@ -92,7 +95,10 @@ describe('buffering documents', () => {
 
     const expectedBody = [];
     for (let i = 0; i < EVENT_BUFFER_LENGTH - 1; i++) {
-      expectedBody.push({ create: { _index: 'event-log' } }, { message: `foo ${i}` });
+      expectedBody.push(
+        { create: { _index: 'event-log', require_alias: true } },
+        { message: `foo ${i}` }
+      );
     }
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
@@ -112,7 +118,10 @@ describe('buffering documents', () => {
 
     const expectedBody = [];
     for (let i = 0; i < EVENT_BUFFER_LENGTH; i++) {
-      expectedBody.push({ create: { _index: 'event-log' } }, { message: `foo ${i}` });
+      expectedBody.push(
+        { create: { _index: 'event-log', require_alias: true } },
+        { message: `foo ${i}` }
+      );
     }
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(1, {
@@ -120,7 +129,7 @@ describe('buffering documents', () => {
     });
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
-      body: [{ create: { _index: 'event-log' } }, { message: `foo 100` }],
+      body: [{ create: { _index: 'event-log', require_alias: true } }, { message: `foo 100` }],
     });
   });
 
@@ -146,7 +155,7 @@ describe('buffering documents', () => {
       const expectedBody = [];
       for (let j = 0; j < EVENT_BUFFER_LENGTH; j++) {
         expectedBody.push(
-          { create: { _index: 'event-log' } },
+          { create: { _index: 'event-log', require_alias: true } },
           { message: `foo ${i * EVENT_BUFFER_LENGTH + j}` }
         );
       }
@@ -689,6 +698,252 @@ describe('aggregateEventsBySavedObject', () => {
           options,
           pick(options.aggregateOptions, ['start', 'end', 'filter'])
         ),
+        aggs: {
+          genericAgg: {
+            term: {
+              field: 'event.action',
+              size: 10,
+            },
+          },
+        },
+      },
+    });
+    expect(result).toEqual({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+    });
+  });
+});
+
+describe('aggregateEventsWithAuthFilter', () => {
+  const DEFAULT_OPTIONS = {
+    ...queryOptionsSchema.validate({}),
+    aggs: {
+      genericAgg: {
+        term: {
+          field: 'event.action',
+          size: 10,
+        },
+      },
+    },
+  };
+
+  test('should call cluster with correct options', async () => {
+    clusterClient.search.mockResponse({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+    const options: AggregateEventsWithAuthFilter = {
+      index: 'index-name',
+      namespaces: ['namespace'],
+      type: 'saved-object-type',
+      aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
+      authFilter: fromKueryExpression('test:test'),
+    };
+    const result = await clusterClientAdapter.aggregateEventsWithAuthFilter(options);
+
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toEqual({
+      index: 'index-name',
+      body: {
+        size: 0,
+        query: getQueryBodyWithAuthFilter(
+          logger,
+          options,
+          pick(options.aggregateOptions, ['start', 'end', 'filter'])
+        ),
+        aggs: {
+          genericAgg: {
+            term: {
+              field: 'event.action',
+              size: 10,
+            },
+          },
+        },
+      },
+    });
+    expect(result).toEqual({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  test('should call cluster with correct options when includeSpaceAgnostic is true', async () => {
+    clusterClient.search.mockResponse({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+    const options: AggregateEventsWithAuthFilter = {
+      index: 'index-name',
+      namespaces: ['namespace'],
+      type: 'saved-object-type',
+      aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
+      authFilter: fromKueryExpression('test:test'),
+      includeSpaceAgnostic: true,
+    };
+    const result = await clusterClientAdapter.aggregateEventsWithAuthFilter(options);
+
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toEqual({
+      index: 'index-name',
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      test: 'test',
+                    },
+                  },
+                ],
+              },
+            },
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              {
+                                bool: {
+                                  should: [
+                                    {
+                                      term: {
+                                        'kibana.saved_objects.namespace': {
+                                          value: 'namespace',
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              {
+                                match: {
+                                  'kibana.saved_objects.space_agnostic': true,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+
         aggs: {
           genericAgg: {
             term: {
@@ -1383,6 +1638,467 @@ describe('getQueryBody', () => {
                   },
                 },
               ],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2020-07-08T00:52:28.350Z',
+              },
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                lte: '2020-07-10T00:52:28.350Z',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('getQueryBodyWithAuthFilter', () => {
+  const options = {
+    index: 'index-name',
+    namespaces: undefined,
+    type: 'saved-object-type',
+    authFilter: fromKueryExpression('test:test'),
+  };
+  test('should correctly build query with namespace filter when namespace is undefined', () => {
+    expect(
+      getQueryBodyWithAuthFilter(logger, options as AggregateEventsWithAuthFilter, {})
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match: {
+                  test: 'test',
+                },
+              },
+            ],
+          },
+        },
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query with namespace filter when namespace is specified', () => {
+    expect(
+      getQueryBodyWithAuthFilter(
+        logger,
+        { ...options, namespaces: ['namespace'] } as AggregateEventsWithAuthFilter,
+        {}
+      )
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match: {
+                  test: 'test',
+                },
+              },
+            ],
+          },
+        },
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'kibana.saved_objects.namespace': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when filter is specified', () => {
+    expect(
+      getQueryBodyWithAuthFilter(logger, options as AggregateEventsWithAuthFilter, {
+        filter: 'event.provider: alerting AND event.action:execute',
+      })
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'event.provider': 'alerting',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'event.action': 'execute',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        test: 'test',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when start is specified', () => {
+    expect(
+      getQueryBodyWithAuthFilter(logger, options as AggregateEventsWithAuthFilter, {
+        start: '2020-07-08T00:52:28.350Z',
+      })
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match: {
+                  test: 'test',
+                },
+              },
+            ],
+          },
+        },
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2020-07-08T00:52:28.350Z',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when end is specified', () => {
+    expect(
+      getQueryBodyWithAuthFilter(logger, options as AggregateEventsWithAuthFilter, {
+        end: '2020-07-10T00:52:28.350Z',
+      })
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match: {
+                  test: 'test',
+                },
+              },
+            ],
+          },
+        },
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                lte: '2020-07-10T00:52:28.350Z',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should correctly build query when start and end are specified', () => {
+    expect(
+      getQueryBodyWithAuthFilter(logger, options as AggregateEventsWithAuthFilter, {
+        start: '2020-07-08T00:52:28.350Z',
+        end: '2020-07-10T00:52:28.350Z',
+      })
+    ).toEqual({
+      bool: {
+        filter: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match: {
+                  test: 'test',
+                },
+              },
+            ],
+          },
+        },
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        'kibana.saved_objects.rel': {
+                          value: 'primary',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.saved_objects.type': {
+                          value: 'saved-object-type',
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
             },
           },
           {

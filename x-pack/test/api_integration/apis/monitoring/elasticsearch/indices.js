@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import relocatingShardsFixture from './fixtures/indices_shards_relocating';
-import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all';
-import indicesRedClusterFixture from './fixtures/indices_red_cluster';
-import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all';
+import relocatingShardsFixture from './fixtures/indices_shards_relocating.json';
+import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all.json';
+import indicesRedClusterFixture from './fixtures/indices_red_cluster.json';
+import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
 
@@ -18,7 +18,7 @@ import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../contexts/ml';
 
-import { DataFrameAnalyticsConfig } from '../common';
+import { DataFrameAnalyticsConfig } from '.';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { DataFrameTaskStateType } from '../pages/analytics_management/components/analytics_list/common';
@@ -29,6 +29,7 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
+import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
@@ -95,9 +96,7 @@ export const useResultsViewConfig = (jobId: string) => {
           }
 
           try {
-            const destIndex = Array.isArray(jobConfigUpdate.dest.index)
-              ? jobConfigUpdate.dest.index[0]
-              : jobConfigUpdate.dest.index;
+            const destIndex = getDestinationIndex(jobConfigUpdate);
             const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
             let dataView: DataView | undefined;
 
@@ -148,6 +147,7 @@ export const useResultsViewConfig = (jobId: string) => {
         setIsLoadingJobConfig(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

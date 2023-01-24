@@ -6,50 +6,107 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { EuiTabProps } from '../../types';
-import { Process } from '../../../common/types/process_tree';
-import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
+import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
-import { DetailPanelHostTab } from '../detail_panel_host_tab';
+import { DetailPanelMetadataTab } from '../detail_panel_metadata_tab';
+import { useStyles } from './styles';
+import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
+import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  selectedProcess: Process;
-  onProcessSelected?: (process: Process) => void;
+  selectedProcess: Process | null;
+  alerts?: ProcessEvent[];
+  alertsCount: number;
+  isFetchingAlerts: boolean;
+  hasNextPageAlerts?: boolean;
+  fetchNextPageAlerts: () => void;
+  investigatedAlertId?: string;
+  onJumpToEvent: (event: ProcessEvent) => void;
+  onShowAlertDetails: (alertId: string) => void;
 }
 
 /**
  * Detail panel in the session view.
  */
-export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPanelDeps) => {
+export const SessionViewDetailPanel = ({
+  alerts,
+  alertsCount,
+  isFetchingAlerts,
+  hasNextPageAlerts,
+  fetchNextPageAlerts,
+  selectedProcess,
+  investigatedAlertId,
+  onJumpToEvent,
+  onShowAlertDetails,
+}: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
-  const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
 
-  const tabs: EuiTabProps[] = useMemo(
-    () => [
+  const alertsCountStr = useMemo(() => {
+    return alertsCount >= ALERT_COUNT_THRESHOLD ? ALERT_COUNT_THRESHOLD + '+' : alertsCount + '';
+  }, [alertsCount]);
+
+  const tabs: EuiTabProps[] = useMemo(() => {
+    const hasAlerts = !!alerts?.length;
+
+    return [
       {
         id: 'process',
-        name: 'Process',
-        content: <DetailPanelProcessTab processDetail={processDetail} />,
+        name: i18n.translate('xpack.sessionView.detailsPanel.process', {
+          defaultMessage: 'Process',
+        }),
+        content: <DetailPanelProcessTab selectedProcess={selectedProcess} />,
       },
       {
-        id: 'host',
-        name: 'Host',
-        content: <DetailPanelHostTab processHost={selectedProcess.events[0].host} />,
+        id: 'metadata',
+        name: i18n.translate('xpack.sessionView.detailsPanel.metadata', {
+          defaultMessage: 'Metadata',
+        }),
+        content: (
+          <DetailPanelMetadataTab
+            processHost={selectedProcess?.getDetails()?.host}
+            processContainer={selectedProcess?.getDetails()?.container}
+            processOrchestrator={selectedProcess?.getDetails()?.orchestrator}
+            processCloud={selectedProcess?.getDetails()?.cloud}
+          />
+        ),
       },
       {
         id: 'alerts',
-        disabled: true,
-        name: 'Alerts',
-        append: (
+        name: i18n.translate('xpack.sessionView.detailsPanel.alerts', {
+          defaultMessage: 'Alerts',
+        }),
+        append: hasAlerts && (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
-            10
+            {alertsCountStr}
           </EuiNotificationBadge>
         ),
-        content: null,
+        content: alerts && (
+          <DetailPanelAlertTab
+            alerts={alerts}
+            isFetchingAlerts={isFetchingAlerts}
+            hasNextPageAlerts={hasNextPageAlerts}
+            fetchNextPageAlerts={fetchNextPageAlerts}
+            onJumpToEvent={onJumpToEvent}
+            onShowAlertDetails={onShowAlertDetails}
+            investigatedAlertId={investigatedAlertId}
+          />
+        ),
       },
-    ],
-    [processDetail, selectedProcess.events]
-  );
+    ];
+  }, [
+    alerts,
+    alertsCountStr,
+    fetchNextPageAlerts,
+    hasNextPageAlerts,
+    isFetchingAlerts,
+    selectedProcess,
+    onJumpToEvent,
+    onShowAlertDetails,
+    investigatedAlertId,
+  ]);
 
   const onSelectedTabChanged = useCallback((id: string) => {
     setSelectedTabId(id);
@@ -60,8 +117,10 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
     [tabs, selectedTabId]
   );
 
+  const styles = useStyles();
+
   return (
-    <>
+    <div css={styles.detailsPanel}>
       <EuiTabs size="l" expand>
         {tabs.map((tab, index) => (
           <EuiTab
@@ -77,6 +136,6 @@ export const SessionViewDetailPanel = ({ selectedProcess }: SessionViewDetailPan
         ))}
       </EuiTabs>
       {tabContent}
-    </>
+    </div>
   );
 };

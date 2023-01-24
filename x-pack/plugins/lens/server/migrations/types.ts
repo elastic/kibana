@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { PaletteOutput } from 'src/plugins/charts/common';
-import { Filter } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/public';
-import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
-import type { CustomPaletteParams, LayerType, PersistableFilter } from '../../common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import type { Query, Filter } from '@kbn/es-query';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { LayerType, PersistableFilter, ValueLabelConfig } from '../../common';
 
 export type CustomVisualizationMigrations = Record<string, () => MigrateFunctionsObject>;
 
@@ -203,7 +202,7 @@ export type LensDocShape810<VisualizationState = unknown> = Omit<
   'filters' | 'state'
 > & {
   filters: Filter[];
-  state: Omit<LensDocShape715['state'], 'datasourceStates'> & {
+  state: Omit<LensDocShape715<VisualizationState>['state'], 'datasourceStates'> & {
     datasourceStates: {
       indexpattern: Omit<LensDocShape715['state']['datasourceStates']['indexpattern'], 'layers'> & {
         layers: Record<
@@ -257,3 +256,71 @@ export interface VisState820 {
   rowHeight: 'auto' | 'single' | 'custom';
   rowHeightLines: number;
 }
+
+export type LensDocShape830<VisualizationState = unknown> = LensDocShape810<VisualizationState>;
+
+export interface XYVisualizationStatePre830 extends VisState820 {
+  valueLabels: 'hide' | 'inside' | 'outside';
+}
+
+export interface XYVisualizationState830 extends VisState820 {
+  valueLabels: ValueLabelConfig;
+}
+
+export type VisStatePre830 = XYVisualizationStatePre830;
+export type VisState830 = XYVisualizationState830;
+
+export interface XYVisStatePre850 {
+  layers: Array<
+    | {
+        layerId: string;
+        layerType: Exclude<LayerType, 'annotations'>;
+      }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string }>;
+      }
+  >;
+}
+
+export interface XYVisState850 {
+  layers: Array<
+    | {
+        layerId: string;
+        layerType: Exclude<LayerType, 'annotations'>;
+      }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string; type: 'manual' | 'query' }>;
+        ignoreGlobalFilters: boolean;
+      }
+  >;
+}
+export type VisState850 = XYVisState850;
+export type VisState840 = VisState830;
+export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
+
+export type LensDocShape850<VisualizationState = unknown> = LensDocShape840<VisualizationState>;
+
+export type LensDocShape860<VisualizationState = unknown> = Omit<
+  LensDocShape850<VisualizationState>,
+  'state'
+> & {
+  state: Omit<LensDocShape850<VisualizationState>['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      // This is hardcoded as our only datasource
+      formBased: {
+        currentIndexPatternId: string;
+        layers: Record<
+          string,
+          {
+            columnOrder: string[];
+            columns: Record<string, Record<string, unknown>>;
+          }
+        >;
+      };
+    };
+  };
+};

@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiText,
@@ -14,28 +15,103 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  CriteriaWithPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useLocation } from 'react-router-dom';
+import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import { PolicyData } from '../../../../../common/endpoint/types';
-import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
-import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
+import {
+  useGetEndpointSecurityPackage,
+  useGetEndpointSpecificPolicies,
+} from '../../../services/policies/hooks';
+import { PolicyEmptyState } from '../../../components/management_empty_state';
+import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { getPoliciesPath } from '../../../common/routing';
+import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
+import { PolicyEndpointCount } from './components/policy_endpoint_count';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
+  const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+  const { search } = useLocation();
+  const { getAppUrl } = useAppUrl();
+  const toasts = useToasts();
 
   // load the list of policies
-  const { data, isFetching, error } = useGetEndpointSpecificPolicies({
+  const {
+    data,
+    isFetching: policyIsFetching,
+    error,
+  } = useGetEndpointSpecificPolicies({
     page: pagination.page,
     perPage: pagination.pageSize,
   });
 
-  const totalItemCount = data?.total ?? 0;
+  // grab endpoint version for empty page
+  const { data: endpointPackageInfo, isFetching: packageIsFetching } =
+    useGetEndpointSecurityPackage({
+      customQueryOptions: {
+        onError: (err) => {
+          toasts.addDanger(
+            i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
+              defaultMessage: 'Error retrieving the endpoint package version',
+            })
+          );
+        },
+      },
+    });
 
+  const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
+
+  const policyListPath = useMemo(() => getPoliciesPath(search), [search]);
+
+  const backLink: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: policyListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.policy.backToPolicyList', {
+        defaultMessage: 'Back to policy list',
+      }),
+      href: getAppUrl({ path: policyListPath }),
+    };
+  }, [getAppUrl, policyListPath]);
+
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
+    'fleet',
+    {
+      path: pagePathGetters.add_integration_to_policy({
+        pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
+      })[1],
+      state: {
+        onCancelNavigateTo: [
+          APP_UI_ID,
+          {
+            path: policyListPath,
+          },
+        ],
+        onCancelUrl: getAppUrl({ path: getPoliciesPath() }),
+        onSaveNavigateTo: [
+          APP_UI_ID,
+          {
+            path: policyListPath,
+          },
+        ],
+      },
+    }
+  );
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
       defaultMessage: 'Last Updated',
@@ -57,6 +133,7 @@ export const PolicyList = memo(() => {
                 policyId={policy.id}
                 className="eui-textTruncate"
                 data-test-subj="policyNameCellLink"
+                backLink={backLink}
               >
                 {policy.name}
               </EndpointPolicyLink>
@@ -77,7 +154,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'created-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="created-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -110,7 +189,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'updated-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="updated-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -131,19 +212,28 @@ export const PolicyList = memo(() => {
         },
       },
       {
-        field: '-',
+        field: '',
         name: i18n.translate('xpack.securitySolution.policy.list.endpoints', {
           defaultMessage: 'Endpoints',
         }),
-      },
-      {
-        field: '-',
-        name: i18n.translate('xpack.securitySolution.policy.list.actions', {
-          defaultMessage: 'Actions',
-        }),
+        width: '8%',
+        render: (policy: PolicyData) => {
+          const count = policy.agents ?? 0;
+
+          return (
+            <PolicyEndpointCount
+              className="eui-textTruncate"
+              data-test-subj="policyEndpointCountLink"
+              policyId={policy.id}
+              nonLinkCondition={authLoading || !canReadEndpointList || count === 0}
+            >
+              {count}
+            </PolicyEndpointCount>
+          );
+        },
       },
     ];
-  }, []);
+  }, [backLink, authLoading, canReadEndpointList]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
@@ -171,31 +261,44 @@ export const PolicyList = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="policyListPage"
+      hideHeader={totalItemCount === 0}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
-        defaultMessage: 'Policy List',
+        defaultMessage: 'Policies',
       })}
       subtitle={i18n.translate('xpack.securitySolution.policy.list.subtitle', {
         defaultMessage:
-          'Use endpoint policies to customize endpoint security protections and other configurations',
+          'Use policies to customize endpoint and cloud workload protections and other configurations',
       })}
     >
-      <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
-        <FormattedMessage
-          id="xpack.securitySolution.policy.list.totalCount"
-          defaultMessage="Showing {totalItemCount, plural, one {# policy} other {# policies}}"
-          values={{ totalItemCount }}
-        />
-      </EuiText>
-      <EuiHorizontalRule margin="xs" />
-      <EuiBasicTable
-        data-test-subj="policyListTable"
-        items={data?.items || []}
-        columns={policyColumns}
-        pagination={tablePagination}
-        onChange={handleTableOnChange}
-        loading={isFetching}
-        error={error !== null ? policyListErrorMessage : ''}
-      />
+      {totalItemCount > 0 ? (
+        <>
+          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
+            <FormattedMessage
+              id="xpack.securitySolution.policy.list.totalCount"
+              defaultMessage="Showing {totalItemCount, plural, one {# policy} other {# policies}}"
+              values={{ totalItemCount }}
+            />
+          </EuiText>
+          <EuiHorizontalRule margin="xs" />
+          <EuiBasicTable
+            data-test-subj="policyListTable"
+            items={data?.items || []}
+            columns={policyColumns}
+            pagination={tablePagination}
+            onChange={handleTableOnChange}
+            loading={policyIsFetching}
+            error={error !== null ? policyListErrorMessage : ''}
+          />
+        </>
+      ) : (
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState
+            loading={packageIsFetching}
+            onActionClick={handleCreatePolicyClick}
+            policyEntryPoint
+          />
+        </ManagementEmptyStateWrapper>
+      )}
     </AdministrationListPage>
   );
 });

@@ -7,12 +7,13 @@
 
 jest.mock('../registry');
 
-import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
+import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
 
 import * as Registry from '../registry';
 
@@ -21,9 +22,16 @@ import { appContextService } from '../../app_context';
 
 import { PackageNotFoundError } from '../../../errors';
 
+import { getSettings } from '../../settings';
+
 import { getPackageInfo, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+
+jest.mock('../../settings');
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {
@@ -41,7 +49,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '22222-22222-2222-2222',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -65,7 +72,6 @@ describe('When using EPM `get` services', () => {
             package: { name: 'system', title: 'System', version: '0.10.4' },
             enabled: true,
             policy_id: '11111-111111-11111-11111', // << duplicate id with plicy below
-            output_id: 'ca111b80-43c1-11eb-84bf-7177b74381c5',
             inputs: [],
             revision: 1,
             created_at: '2020-12-21T19:22:04.902Z',
@@ -88,7 +94,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '11111-111111-11111-11111',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -112,7 +117,6 @@ describe('When using EPM `get` services', () => {
             namespace: 'default',
             policy_id: '33333-33333-333333-333333',
             enabled: true,
-            output_id: '',
             inputs: [],
             package: { name: 'system', title: 'System', version: '0.10.4' },
             revision: 1,
@@ -186,11 +190,16 @@ describe('When using EPM `get` services', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
+      jest.clearAllMocks();
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.getRegistryPackage.mockResolvedValue({
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         packageInfo: {
           name: 'my-package',
@@ -319,6 +328,82 @@ describe('When using EPM `get` services', () => {
           latestVersion: '1.0.0',
           status: 'installed',
         });
+      });
+
+      it('sets the latestVersion to installed version when an installed package is newer than package in registry', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            version: '2.0.0',
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
+        });
+      });
+    });
+
+    describe('skipArchive', () => {
+      it('avoids loading archive when skipArchive = true', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
+      });
+
+      // when calling the get package endpoint without a package version we
+      // were previously incorrectly getting the info from archive
+      it('avoids loading archive when skipArchive = true and no version supplied', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
   });

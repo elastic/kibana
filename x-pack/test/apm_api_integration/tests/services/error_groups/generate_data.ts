@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
-import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const config = {
   PROD_LIST_RATE: 75,
@@ -27,7 +27,9 @@ export async function generateData({
   start: number;
   end: number;
 }) {
-  const serviceGoProdInstance = apm.service(serviceName, 'production', 'go').instance('instance-a');
+  const serviceGoProdInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
 
   const transactionNameProductList = 'GET /api/product/list';
   const transactionNameProductId = 'GET /api/product/:id';
@@ -45,48 +47,48 @@ export async function generateData({
     timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductList)
+          .transaction({ transactionName: transactionNameProductList })
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_ERROR_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductList)
-          .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
+          .transaction({ transactionName: transactionNameProductList })
+          .errors(
+            serviceGoProdInstance.error({ message: ERROR_NAME_1, type: 'foo' }).timestamp(timestamp)
+          )
           .duration(1000)
           .timestamp(timestamp)
           .failure()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(PROD_ID_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductId)
+          .transaction({ transactionName: transactionNameProductId })
           .timestamp(timestamp)
           .duration(1000)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('1m')
       .rate(PROD_ID_ERROR_RATE)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductId)
-          .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
+          .transaction({ transactionName: transactionNameProductId })
+          .errors(
+            serviceGoProdInstance.error({ message: ERROR_NAME_2, type: 'bar' }).timestamp(timestamp)
+          )
           .duration(1000)
           .timestamp(timestamp)
           .failure()
-          .serialize()
       ),
   ]);
 }

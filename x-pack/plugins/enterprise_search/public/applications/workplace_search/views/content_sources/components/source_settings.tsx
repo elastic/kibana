@@ -8,7 +8,6 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { isEmpty } from 'lodash';
 
 import {
   EuiButton,
@@ -21,7 +20,11 @@ import {
   EuiSpacer,
   EuiFilePicker,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
@@ -43,7 +46,7 @@ import {
 } from '../../../constants';
 import { getEditPath } from '../../../routes';
 import { handlePrivateKeyUpload } from '../../../utils';
-import { AddSourceLogic } from '../components/add_source/add_source_logic';
+
 import {
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
@@ -59,6 +62,8 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { AddSourceLogic } from './add_source/add_source_logic';
+
 import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 
 import { SourceLayout } from './source_layout';
@@ -70,7 +75,6 @@ export const SourceSettings: React.FC = () => {
     setStagedPrivateKey,
     updateContentSourceConfiguration,
   } = useActions(SourceLogic);
-  const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
     contentSource: { name, id, serviceType, isOauth1, secret },
@@ -79,19 +83,26 @@ export const SourceSettings: React.FC = () => {
     isConfigurationUpdateButtonLoading,
   } = useValues(SourceLogic);
 
-  const {
-    sourceConfigData: { configuredFields },
-  } = useValues(AddSourceLogic);
+  // Even though SourceLogic.values.contentSource.serviceType is retrieved async
+  // by SourceLogic, it will always be defined by the time this view is rendered
+  // because it is not displayed until SourceLogic has retrieved the content source and
+  // SourceLogic.values.dataLoading === false
+  const addSourceLogic = AddSourceLogic({ serviceType });
+  const { getSourceConfigData } = useActions(addSourceLogic);
+
+  const { sourceConfigData, dataLoading } = useValues(addSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
+    getSourceConfigData();
   }, []);
 
   const isGithubApp =
     serviceType === GITHUB_VIA_APP_SERVICE_TYPE ||
     serviceType === GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE;
+
+  const isCustomSource = serviceType === 'custom';
 
   const editPath = isGithubApp
     ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
@@ -102,10 +113,8 @@ export const SourceSettings: React.FC = () => {
   const showConfirm = () => setModalVisibility(true);
   const hideConfirm = () => setModalVisibility(false);
 
-  const showOauthConfig = !isGithubApp && isOrganization && !isEmpty(configuredFields);
+  const showSourceConfig = !isGithubApp && !isCustomSource && isOrganization;
   const showGithubAppConfig = isGithubApp;
-
-  const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -151,7 +160,11 @@ export const SourceSettings: React.FC = () => {
   );
 
   return (
-    <SourceLayout pageChrome={[NAV.SETTINGS]} pageViewTelemetry="source_settings">
+    <SourceLayout
+      pageChrome={[NAV.SETTINGS]}
+      pageViewTelemetry="source_settings"
+      isLoading={dataLoading}
+    >
       <ViewContentHeader title={SOURCE_SETTINGS_HEADING} />
       <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
@@ -181,16 +194,9 @@ export const SourceSettings: React.FC = () => {
           </EuiFlexGroup>
         </form>
       </ContentSection>
-      {showOauthConfig && (
+      {showSourceConfig && (
         <ContentSection title={SOURCE_CONFIG_TITLE}>
-          <SourceConfigFields
-            isOauth1={isOauth1}
-            clientId={clientId}
-            clientSecret={clientSecret}
-            publicKey={publicKey}
-            consumerKey={consumerKey}
-            baseUrl={baseUrl}
-          />
+          <SourceConfigFields isOauth1={isOauth1} sourceConfigData={sourceConfigData} />
           <EuiFormRow>
             <EuiButtonEmptyTo to={editPath as string} flush="left">
               {SOURCE_CONFIG_LINK}
@@ -216,7 +222,10 @@ export const SourceSettings: React.FC = () => {
                 <EuiFilePicker
                   key={secret!.fingerprint} // clear staged file by rerendering the file picker each time the fingerprint changes
                   onChange={(files) => handlePrivateKeyUpload(files, setStagedPrivateKey)}
-                  initialPromptText="Upload a new .pem file to rotate the private key"
+                  initialPromptText={i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.sources.sourceSettings.pemKeyPrompText',
+                    { defaultMessage: 'Upload a new .pem file to rotate the private key' }
+                  )}
                   accept=".pem"
                 />
               </>
@@ -226,7 +235,7 @@ export const SourceSettings: React.FC = () => {
               isLoading={isConfigurationUpdateButtonLoading}
               disabled={!stagedPrivateKey}
             >
-              {isConfigurationUpdateButtonLoading ? 'Loading…' : 'Save'}
+              {SAVE_BUTTON_LABEL}
             </EuiButton>
           </EuiForm>
         </ContentSection>

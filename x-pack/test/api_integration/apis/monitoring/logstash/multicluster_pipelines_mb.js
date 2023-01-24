@@ -6,41 +6,44 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/multicluster_pipelines';
+import fixture from './fixtures/multicluster_pipelines.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('pipelines listing multicluster mb', () => {
-    const archive =
-      'x-pack/test/functional/es_archives/monitoring/logstash_pipelines_multicluster_mb';
-    const timeRange = {
-      min: '2019-11-11T15:13:45.266Z',
-      max: '2019-11-11T15:17:05.399Z',
-    };
-    const pagination = {
-      size: 10,
-      index: 0,
-    };
+  describe('pipelines listing multicluster - metricbeat and package', () => {
+    ['mb', 'package'].forEach((source) => {
+      describe(`pipelines listing multicluster ${source}`, () => {
+        const archive = `x-pack/test/functional/es_archives/monitoring/logstash_pipelines_multicluster_${source}`;
+        const timeRange = {
+          min: '2019-11-11T15:13:45.266Z',
+          max: '2019-11-11T15:17:05.399Z',
+        };
+        const pagination = {
+          size: 10,
+          index: 0,
+        };
 
-    before('load archive', () => {
-      return setup(archive);
-    });
+        before('load archive', () => {
+          return setup(archive);
+        });
 
-    after('unload archive', () => {
-      return tearDown();
-    });
+        after('unload archive', () => {
+          return tearDown(archive);
+        });
 
-    it('should get the pipelines', async () => {
-      const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/hJS0FZ7wR9GGdYs8RNW8pw/logstash/pipelines')
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, pagination })
-        .expect(200);
+        it('should get the pipelines', async () => {
+          const { body } = await supertest
+            .post('/api/monitoring/v1/clusters/hJS0FZ7wR9GGdYs8RNW8pw/logstash/pipelines')
+            .set('kbn-xsrf', 'xxx')
+            .send({ timeRange, pagination })
+            .expect(200);
 
-      expect(body).to.eql(fixture);
+          expect(body).to.eql(fixture);
+        });
+      });
     });
   });
 }

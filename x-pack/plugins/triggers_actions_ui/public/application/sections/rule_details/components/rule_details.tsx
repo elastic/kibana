@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useReducer } from 'react';
-import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -15,23 +14,36 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPageContentBody,
-  EuiSwitch,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
-  EuiLoadingSpinner,
-  EuiIconTip,
-  EuiEmptyPrompt,
-  EuiPageTemplate,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
+import { RuleActionsPopover } from './rule_actions_popover';
+import {
+  hasAllPrivilege,
+  hasExecuteActionsCapability,
+  hasManageApiKeysCapability,
+} from '../../../lib/capabilities';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Rule, RuleType, ActionType, ActionConnector } from '../../../../types';
+import {
+  Rule,
+  RuleType,
+  ActionType,
+  ActionConnector,
+  TriggersActionsUiConfig,
+} from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
@@ -39,11 +51,23 @@ import {
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
-import { routeToRuleDetails } from '../../../constants';
-import { rulesErrorReasonTranslationsMapping } from '../../rules_list/translations';
+import { routeToRules } from '../../../constants';
+import {
+  rulesErrorReasonTranslationsMapping,
+  rulesWarningReasonTranslationsMapping,
+} from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
+import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { runRule } from '../../../lib/run_rule';
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../../rules_list/translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -51,16 +75,24 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'unmuteRule' | 'muteRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
+
+const ruleDetailStyle = {
+  minWidth: 0,
+};
 
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
   actionTypes,
-  disableRule,
-  enableRule,
-  unmuteRule,
-  muteRule,
+  bulkDisableRules,
+  bulkEnableRules,
+  bulkDeleteRules,
+  snoozeRule,
+  unsnoozeRule,
   requestRefresh,
   refreshToken,
 }) => {
@@ -72,21 +104,30 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setBreadcrumbs,
     chrome,
     http,
+    notifications: { toasts },
   } = useKibana().services;
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
 
+  const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
+
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
 
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
+
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([
-      getAlertingSectionBreadcrumb('rules'),
-      getRuleDetailsBreadcrumb(rule.id, rule.name),
-    ]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -115,11 +156,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
-    hasAllPrivilege(rule, ruleType) &&
+    hasAllPrivilege(rule.consumer, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 
-  const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
     // can the user save the rule
     canSaveRule &&
@@ -128,17 +168,64 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const ruleActions = rule.actions;
-  const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
-  const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
-  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
-  const [isMutedUpdating, setIsMutedUpdating] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(rule.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [dissmissRuleErrors, setDissmissRuleErrors] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    await runRule(http, toasts, id);
+  };
+
+  // Check whether interval is below configured minium
+  useEffect(() => {
+    if (rule.schedule.interval && config.minimumScheduleInterval) {
+      if (
+        parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+      ) {
+        const configurationToast = toasts.addInfo({
+          'data-test-subj': 'intervalConfigToast',
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastTitle',
+            {
+              defaultMessage: 'Configuration settings',
+            }
+          ),
+          text: toMountPoint(
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
+                  defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
+                />
+              </p>
+              {hasEditButton && (
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="ruleIntervalToastEditButton"
+                      onClick={() => {
+                        toasts.remove(configurationToast);
+                        setEditFlyoutVisibility(true);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton"
+                        defaultMessage="Edit rule"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </>
+          ),
+        });
+      }
+    }
+  }, [rule.schedule.interval, config.minimumScheduleInterval, toasts, hasEditButton]);
 
   const setRule = async () => {
-    history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
+    history.push(getRuleDetailsRoute(rule.id));
+  };
+
+  const goToRulesList = () => {
+    history.push(routeToRules);
   };
 
   const getRuleStatusErrorReasonText = () => {
@@ -149,40 +236,91 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
-  const rightPageHeaderButtons = hasEditButton
-    ? [
-        <>
-          <EuiButtonEmpty
-            data-test-subj="openEditRuleFlyoutButton"
-            iconType="pencil"
-            onClick={() => setEditFlyoutVisibility(true)}
-            name="edit"
-            disabled={!ruleType.enabledInLicense}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
-          {editFlyoutVisible && (
-            <RuleEdit
-              initialRule={rule}
-              onClose={() => {
-                setInitialRule(rule);
-                setEditFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleType={ruleType}
-              onSave={setRule}
-            />
-          )}
-        </>,
-      ]
-    : [];
+  const getRuleStatusWarningReasonText = () => {
+    if (rule.executionStatus.warning && rule.executionStatus.warning.reason) {
+      return rulesWarningReasonTranslationsMapping[rule.executionStatus.warning.reason];
+    } else {
+      return rulesWarningReasonTranslationsMapping.unknown;
+    }
+  };
+
+  const editButton = hasEditButton ? (
+    <>
+      <EuiButtonEmpty
+        data-test-subj="openEditRuleFlyoutButton"
+        iconType="pencil"
+        onClick={() => setEditFlyoutVisibility(true)}
+        name="edit"
+        disabled={!ruleType.enabledInLicense}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
+          defaultMessage="Edit"
+        />
+      </EuiButtonEmpty>
+      {editFlyoutVisible && (
+        <RuleEdit
+          initialRule={rule}
+          onClose={() => {
+            setInitialRule(rule);
+            setEditFlyoutVisibility(false);
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+          ruleType={ruleType}
+          onSave={setRule}
+        />
+      )}
+    </>
+  ) : null;
+
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+  const { showToast } = useBulkOperationToast({});
+
+  const onDeleteConfirm = async () => {
+    setIsDeleteModalVisibility(false);
+    const { errors, total } = await bulkDeleteRules({
+      ids: rulesToDelete,
+    });
+    showToast({ action: 'DELETE', errors, total });
+    setRulesToDelete([]);
+    goToRulesList();
+  };
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    setRulesToDelete([]);
+  };
 
   return (
     <>
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmDeletionButtonText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+          confirmModalText={getConfirmDeletionModalText(
+            rulesToDelete.length,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+        />
+      )}
+      <UpdateApiKeyModalConfirmation
+        onCancel={() => {
+          setRulesToUpdateAPIKey([]);
+        }}
+        idsToUpdate={rulesToUpdateAPIKey}
+        apiUpdateApiKeyCall={bulkUpdateAPIKey}
+        setIsLoadingState={() => {}}
+        onUpdated={async () => {
+          setRulesToUpdateAPIKey([]);
+          requestRefresh();
+        }}
+      />
       <EuiPageHeader
         data-test-subj="ruleDetailsTitle"
         bottomBorder
@@ -193,8 +331,70 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             values={{ ruleName: rule.name }}
           />
         }
+        description={
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
+                        defaultMessage="Type"
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
+                          defaultMessage="API key owner"
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                      <b>{rule.apiKeyOwner}</b>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        }
         rightSideItems={[
-          <ViewInApp rule={rule} />,
+          <RuleActionsPopover
+            canSaveRule={canSaveRule}
+            rule={rule}
+            onDelete={(ruleId) => {
+              setIsDeleteModalVisibility(true);
+              setRulesToDelete([ruleId]);
+            }}
+            onApiKeyUpdate={(ruleId) => {
+              setRulesToUpdateAPIKey([ruleId]);
+            }}
+            onEnableDisable={async (enable) => {
+              if (enable) {
+                await bulkEnableRules({ ids: [rule.id] });
+              } else {
+                await bulkDisableRules({ ids: [rule.id] });
+              }
+              requestRefresh();
+            }}
+            onRunRule={onRunRule}
+          />,
+          editButton,
           <EuiButtonEmpty
             data-test-subj="refreshRulesButton"
             iconType="refresh"
@@ -207,199 +407,53 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          ...rightPageHeaderButtons,
+          <ViewInApp rule={rule} />,
         ]}
       />
       <EuiSpacer size="l" />
       <EuiPageContentBody>
-        <EuiFlexGroup wrap responsive={false} gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
-                  defaultMessage="Type"
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            {uniqueActions && uniqueActions.length ? (
-              <>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
-                    defaultMessage="Actions"
-                  />{' '}
-                  {hasActionsWithBrokenConnector && (
-                    <EuiIconTip
-                      data-test-subj="actionWithBrokenConnector"
-                      type="rule"
-                      color="danger"
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
-                        {
-                          defaultMessage:
-                            'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
-                        }
-                      )}
-                      position="right"
+        {rule.enabled &&
+        rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
+                <p>
+                  <EuiIcon color="danger" type="alert" />
+                  &nbsp;
+                  <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
+                  {rule.executionStatus.error?.message}
+                  &nbsp;
+                  <EuiLink
+                    href={`${http.basePath.get()}/app/management/stack/license_management`}
+                    color="primary"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+                      defaultMessage="Manage license"
                     />
-                  )}
-                </EuiText>
-
-                <EuiSpacer size="xs" />
-                <EuiFlexGroup wrap gutterSize="s">
-                  {uniqueActions.map((action, index) => (
-                    <EuiFlexItem key={index} grow={false}>
-                      <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                        {actionTypesByTypeId[action].name ?? action}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </>
-            ) : null}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer />
-            <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
-              <EuiFlexItem grow={false}>
-                {isEnabledUpdating ? (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.enableLoadingTitle"
-                          defaultMessage="Enable"
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <EuiSwitch
-                    name="enable"
-                    disabled={!canSaveRule || !ruleType.enabledInLicense}
-                    checked={isEnabled}
-                    data-test-subj="enableSwitch"
-                    onChange={async () => {
-                      setIsEnabledUpdating(true);
-                      if (isEnabled) {
-                        setIsEnabled(false);
-                        await disableRule(rule);
-                        // Reset dismiss if previously clicked
-                        setDissmissRuleErrors(false);
-                      } else {
-                        setIsEnabled(true);
-                        await enableRule(rule);
-                      }
-                      requestRefresh();
-                      setIsEnabledUpdating(false);
-                    }}
-                    label={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.enableTitle"
-                        defaultMessage="Enable"
-                      />
-                    }
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {isMutedUpdating ? (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiLoadingSpinner size="m" />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.muteLoadingTitle"
-                          defaultMessage="Mute"
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <EuiSwitch
-                    name="mute"
-                    checked={isMuted}
-                    disabled={!canSaveRule || !isEnabled || !ruleType.enabledInLicense}
-                    data-test-subj="muteSwitch"
-                    onChange={async () => {
-                      setIsMutedUpdating(true);
-                      if (isMuted) {
-                        setIsMuted(false);
-                        await unmuteRule(rule);
-                      } else {
-                        setIsMuted(true);
-                        await muteRule(rule);
-                      }
-                      requestRefresh();
-                      setIsMutedUpdating(false);
-                    }}
-                    label={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.muteTitle"
-                        defaultMessage="Mute"
-                      />
-                    }
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {rule.enabled && !dissmissRuleErrors && rule.executionStatus.status === 'error' ? (
+                  </EuiLink>
+                </p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        {rule.enabled && rule.executionStatus.status === 'warning' ? (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
-                color="danger"
-                data-test-subj="ruleErrorBanner"
+                color="warning"
+                data-test-subj="ruleWarningBanner"
                 size="s"
-                title={getRuleStatusErrorReasonText()}
-                iconType="rule"
+                iconType="alert"
               >
-                <EuiText size="s" color="danger" data-test-subj="ruleErrorMessageText">
-                  {rule.executionStatus.error?.message}
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" wrap={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="dismiss-execution-error"
-                      color="danger"
-                      onClick={() => setDissmissRuleErrors(true)}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.dismissButtonTitle"
-                        defaultMessage="Dismiss"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  {rule.executionStatus.error?.reason ===
-                    AlertExecutionStatusErrorReasons.License && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        href={`${http.basePath.get()}/app/management/stack/license_management`}
-                        color="danger"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                          defaultMessage="Manage license"
-                        />
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                <p>
+                  <EuiIcon color="warning" type="alert" />
+                  &nbsp;
+                  {getRuleStatusWarningReasonText()}
+                  &nbsp;
+                  {rule.executionStatus.warning?.message}
+                </p>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -412,89 +466,41 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 color="warning"
                 data-test-subj="actionWithBrokenConnectorWarningBanner"
                 size="s"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle',
-                  {
-                    defaultMessage:
-                      'There is an issue with one of the connectors associated with this rule.',
-                  }
-                )}
               >
-                {hasEditButton && (
-                  <EuiFlexGroup gutterSize="s" wrap={true}>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
-                        color="warning"
-                        onClick={() => setEditFlyoutVisibility(true)}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"
-                          defaultMessage="Edit rule"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
+                <p>
+                  <EuiIcon color="warning" type="alert" />
+                  &nbsp;
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
+                    defaultMessage="There is an issue with one of the connectors associated with this rule."
+                  />
+                  &nbsp;
+                  {hasEditButton && (
+                    <EuiLink
+                      data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
+                      color="primary"
+                      onClick={() => setEditFlyoutVisibility(true)}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"
+                        defaultMessage="Edit rule"
+                      />
+                    </EuiLink>
+                  )}
+                </p>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
         <EuiFlexGroup>
-          <EuiFlexItem>
-            {rule.enabled ? (
-              <RuleRouteWithApi
-                requestRefresh={requestRefresh}
-                refreshToken={refreshToken}
-                rule={rule}
-                ruleType={ruleType}
-                readOnly={!canSaveRule}
-              />
-            ) : (
-              <>
-                <EuiSpacer />
-                <EuiPageTemplate template="empty">
-                  <EuiEmptyPrompt
-                    data-test-subj="disabledEmptyPrompt"
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRuleTitle"
-                          defaultMessage="Disabled Rule"
-                        />
-                      </h2>
-                    }
-                    body={
-                      <>
-                        <p>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRule"
-                            defaultMessage="This rule is disabled and cannot be displayed."
-                          />
-                        </p>
-                      </>
-                    }
-                    actions={[
-                      <EuiButton
-                        data-test-subj="disabledEmptyPromptAction"
-                        color="primary"
-                        fill
-                        disabled={isEnabledUpdating}
-                        onClick={async () => {
-                          setIsEnabledUpdating(true);
-                          setIsEnabled(true);
-                          await enableRule(rule);
-                          requestRefresh();
-                          setIsEnabledUpdating(false);
-                        }}
-                      >
-                        Enable
-                      </EuiButton>,
-                    ]}
-                  />
-                </EuiPageTemplate>
-              </>
-            )}
+          <EuiFlexItem style={ruleDetailStyle}>
+            <RuleRouteWithApi
+              requestRefresh={requestRefresh}
+              refreshToken={refreshToken}
+              rule={rule}
+              ruleType={ruleType}
+              readOnly={!canSaveRule}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>

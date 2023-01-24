@@ -11,10 +11,8 @@
   "kibanaVersion":"kibana",
   "optionalPlugins":[
     "home",
-     "security",
-     "spaces",
-     "features",
-     "usageCollection"
+    "taskManager",
+    "usageCollection"
   ],
   "owner":{
      "githubTeam":"response-ops",
@@ -26,14 +24,17 @@
      "embeddable",
      "esUiShared",
      "lens",
+     "licensing",
      "features",
      "kibanaReact",
      "kibanaUtils",
      "triggersActionsUi",
-     "management"
+     "management",
+     "spaces",
+     "security",
+     "notifications"
   ],
   "requiredBundles": [
-    "home",
     "savedObjects"
   ],
   "server":true,

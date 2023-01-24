@@ -16,6 +16,7 @@ import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
+import { GettingStarted } from './guided_onboarding';
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
@@ -67,6 +68,9 @@ export function HomeApp({ directories, solutions }) {
         <Switch>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+          <Route path="/getting_started">
+            <GettingStarted />
+          </Route>
           <Route exact path="/">
             <Home
               addBasePath={addBasePath}
@@ -75,6 +79,7 @@ export function HomeApp({ directories, solutions }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               hasUserDataView={() => dataViewsService.hasUserDataView()}
+              isCloudEnabled={isCloudEnabled}
             />
           </Route>
           <Redirect to="/" />

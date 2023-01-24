@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllTagsFindRequest } from '../../../../../common/api';
+import type { AllTagsFindRequest } from '../../../../../common/api';
 import { CASE_TAGS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
@@ -15,7 +15,8 @@ export const getTagsRoute = createCasesRoute({
   path: CASE_TAGS_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       const options = request.query as AllTagsFindRequest;
 
       return response.ok({ body: await client.cases.getTags({ ...options }) });

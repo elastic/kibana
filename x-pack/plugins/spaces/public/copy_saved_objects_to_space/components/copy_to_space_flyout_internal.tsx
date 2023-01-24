@@ -259,7 +259,7 @@ export const CopyToSpaceFlyoutInternal = (props: CopyToSpaceFlyoutProps) => {
               <h2>
                 <FormattedMessage
                   id="xpack.spaces.management.copyToSpaceFlyoutHeader"
-                  defaultMessage="Copy to space"
+                  defaultMessage="Copy to spaces"
                 />
               </h2>
             </EuiTitle>

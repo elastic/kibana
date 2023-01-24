@@ -15,17 +15,13 @@ import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
 const { setup } = pageHelpers.pipelinesList;
 
 describe('<PipelinesList />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: PipelineListTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   describe('With pipelines', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -72,12 +68,10 @@ describe('<PipelinesList />', () => {
 
     test('should reload the pipeline data', async () => {
       const { actions } = testBed;
-      const totalRequests = server.requests.length;
 
       await actions.clickReloadButton();
 
-      expect(server.requests.length).toBe(totalRequests + 1);
-      expect(server.requests[server.requests.length - 1].url).toBe(API_BASE_PATH);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(API_BASE_PATH, expect.anything());
     });
 
     test('should show the details of a pipeline', async () => {
@@ -94,7 +88,7 @@ describe('<PipelinesList />', () => {
       const { actions, component } = testBed;
       const { name: pipelineName } = pipeline1;
 
-      httpRequestsMockHelpers.setDeletePipelineResponse({
+      httpRequestsMockHelpers.setDeletePipelineResponse(pipelineName, {
         itemsDeleted: [pipelineName],
         errors: [],
       });
@@ -117,11 +111,10 @@ describe('<PipelinesList />', () => {
 
       component.update();
 
-      const deleteRequest = server.requests[server.requests.length - 2];
-
-      expect(deleteRequest.method).toBe('DELETE');
-      expect(deleteRequest.url).toBe(`${API_BASE_PATH}/${pipelineName}`);
-      expect(deleteRequest.status).toEqual(200);
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/${pipelineName}`,
+        expect.anything()
+      );
     });
   });
 
@@ -130,7 +123,7 @@ describe('<PipelinesList />', () => {
       httpRequestsMockHelpers.setLoadPipelinesResponse([]);
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       const { exists, component, find } = testBed;
       component.update();
@@ -144,15 +137,15 @@ describe('<PipelinesList />', () => {
   describe('Error handling', () => {
     beforeEach(async () => {
       const error = {
-        status: 500,
+        statusCode: 500,
         error: 'Internal server error',
         message: 'Internal server error',
       };
 
-      httpRequestsMockHelpers.setLoadPipelinesResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setLoadPipelinesResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();

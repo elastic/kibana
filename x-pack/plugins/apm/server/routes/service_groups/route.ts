@@ -6,18 +6,24 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import Boom from '@hapi/boom';
+import datemath from '@kbn/datemath';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
-import { getServiceGroups } from '../service_groups/get_service_groups';
-import { getServiceGroup } from '../service_groups/get_service_group';
-import { saveServiceGroup } from '../service_groups/save_service_group';
-import { deleteServiceGroup } from '../service_groups/delete_service_group';
-import { lookupServices } from '../service_groups/lookup_services';
+import { getServiceGroups } from './get_service_groups';
+import { getServiceGroup } from './get_service_group';
+import { saveServiceGroup } from './save_service_group';
+import { deleteServiceGroup } from './delete_service_group';
+import { lookupServices } from './lookup_services';
 import {
-  ServiceGroup,
+  validateServiceGroupKuery,
   SavedServiceGroup,
 } from '../../../common/service_groups';
+import { getServicesCounts } from './get_services_counts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getServiceGroupAlerts } from './get_service_group_alerts';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -28,8 +34,12 @@ const serviceGroupsRoute = createApmServerRoute({
     resources
   ): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const serviceGroups = await getServiceGroups({ savedObjectsClient });
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+    const serviceGroups = await getServiceGroups({
+      savedObjectsClient,
+    });
     return { serviceGroups };
   },
 });
@@ -46,7 +56,9 @@ const serviceGroupRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<{ serviceGroup: SavedServiceGroup }> => {
     const { context, params } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
     const serviceGroup = await getServiceGroup({
       savedObjectsClient,
       serviceGroupId: params.query.serviceGroup,
@@ -58,11 +70,11 @@ const serviceGroupRoute = createApmServerRoute({
 const serviceGroupSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-group',
   params: t.type({
-    query: t.intersection([
-      rangeRt,
+    query: t.union([
       t.partial({
         serviceGroupId: t.string,
       }),
+      t.undefined,
     ]),
     body: t.type({
       groupName: t.string,
@@ -72,26 +84,23 @@ const serviceGroupSaveRoute = createApmServerRoute({
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources): ReturnType<typeof saveServiceGroup> => {
     const { context, params } = resources;
-    const { start, end, serviceGroupId } = params.query;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const setup = await setupRequest(resources);
-    const items = await lookupServices({
-      setup,
-      kuery: params.body.kuery,
-      start,
-      end,
-    });
-    const serviceNames = items.map(({ serviceName }): string => serviceName);
-    const serviceGroup: ServiceGroup = {
-      ...params.body,
-      serviceNames,
-    };
-    await saveServiceGroup({
+    const { serviceGroupId } = params.query;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+    const { isValidFields, isValidSyntax, message } = validateServiceGroupKuery(
+      params.body.kuery
+    );
+    if (!(isValidFields && isValidSyntax)) {
+      throw Boom.badRequest(message);
+    }
+
+    return saveServiceGroup({
       savedObjectsClient,
       serviceGroupId,
-      serviceGroup,
+      serviceGroup: params.body,
     });
   },
 });
@@ -107,7 +116,7 @@ const serviceGroupDeleteRoute = createApmServerRoute({
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     await deleteServiceGroup({
       savedObjectsClient,
       serviceGroupId,
@@ -126,16 +135,73 @@ const serviceGroupServicesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
-    const { params } = resources;
+    const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
-    const setup = await setupRequest(resources);
+    const {
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+    const [apmEventClient, maxNumberOfServices] = await Promise.all([
+      getApmEventClient(resources),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+    ]);
     const items = await lookupServices({
-      setup,
+      apmEventClient,
       kuery,
       start,
       end,
+      maxNumberOfServices,
     });
     return { items };
+  },
+});
+type ServiceGroupCounts = Record<string, { services: number; alerts: number }>;
+const serviceGroupCountsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-group/counts',
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources): Promise<ServiceGroupCounts> => {
+    const { context, logger, plugins, request } = resources;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+
+    const spacesPluginStart = await plugins.spaces?.start();
+
+    const [serviceGroups, apmAlertsClient, apmEventClient, activeSpace] =
+      await Promise.all([
+        getServiceGroups({ savedObjectsClient }),
+        getApmAlertsClient(resources),
+        getApmEventClient(resources),
+        await spacesPluginStart?.spacesService.getActiveSpace(request),
+      ]);
+
+    const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
+      getServicesCounts({
+        apmEventClient,
+        serviceGroups,
+        start: datemath.parse('now-24h')!.toDate().getTime(),
+        end: datemath.parse('now')!.toDate().getTime(),
+      }),
+      getServiceGroupAlerts({
+        serviceGroups,
+        apmAlertsClient,
+        context,
+        logger,
+        spaceId: activeSpace?.id,
+      }),
+    ]);
+    const serviceGroupCounts: ServiceGroupCounts = serviceGroups.reduce(
+      (acc, { id }): ServiceGroupCounts => ({
+        ...acc,
+        [id]: {
+          services: servicesCounts[id],
+          alerts: serviceGroupAlertsCount[id],
+        },
+      }),
+      {}
+    );
+    return serviceGroupCounts;
   },
 });
 
@@ -145,4 +211,5 @@ export const serviceGroupRouteRepository = {
   ...serviceGroupSaveRoute,
   ...serviceGroupDeleteRoute,
   ...serviceGroupServicesRoute,
+  ...serviceGroupCountsRoute,
 };

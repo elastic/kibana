@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import { META_ENGINES_DOCS_URL } from '../../routes';
-import {
-  META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION,
-  META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK,
-} from '../meta_engine_creation/constants';
 
 export const ENGINES_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.engines.title', {
   defaultMessage: 'Engines',
@@ -29,24 +19,6 @@ export const ENGINES_OVERVIEW_TITLE = i18n.translate(
 export const META_ENGINES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.metaEngines.title',
   { defaultMessage: 'Meta Engines' }
-);
-
-export const META_ENGINES_DESCRIPTION = (
-  <>
-    {META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION}
-    <br />
-    <FormattedMessage
-      id="xpack.enterpriseSearch.appSearch.metaEngines.upgradeDescription"
-      defaultMessage="{readDocumentationLink} for more information or upgrade to a Platinum license to get started."
-      values={{
-        readDocumentationLink: (
-          <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
-            {META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK}
-          </EuiLink>
-        ),
-      }}
-    />
-  </>
 );
 
 export const SOURCE_ENGINES_TITLE = i18n.translate(

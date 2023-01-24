@@ -9,7 +9,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
-import { AndOrBadge } from './';
+import { AndOrBadge } from '.';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });

@@ -19,7 +19,7 @@ import {
 } from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpRequestsMockHelpers } = setupEnvironment();
 
   let testBed: FieldEditorTestBed;
   let onChange: jest.Mock<Props['onChange']> = jest.fn();
@@ -65,12 +65,11 @@ describe('<FieldEditor />', () => {
   };
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
@@ -99,7 +98,7 @@ describe('<FieldEditor />', () => {
   test('should accept a defaultValue and onChange prop to forward the form state', async () => {
     const field = {
       name: 'foo',
-      type: 'date',
+      type: 'date' as const,
       script: { source: 'emit("hello")' },
     };
 
@@ -113,7 +112,7 @@ describe('<FieldEditor />', () => {
     expect(lastState.submit).toBeDefined();
 
     const { data: formData } = await submitFormAndGetData(lastState);
-    expect(formData).toEqual(field);
+    expect(formData).toEqual({ ...field, format: null });
 
     // Make sure that both isValid and isSubmitted state are now "true"
     lastState = getLastStateUpdate();
@@ -129,7 +128,10 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          namesNotAllowed: existingFields,
+          namesNotAllowed: {
+            fields: existingFields,
+            runtimeComposites: [],
+          },
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }
@@ -166,7 +168,10 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          namesNotAllowed: existingRuntimeFieldNames,
+          namesNotAllowed: {
+            fields: existingRuntimeFieldNames,
+            runtimeComposites: [],
+          },
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }

@@ -5,87 +5,49 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { initialData, useGetActionLicense, ActionLicenseState } from './use_get_action_license';
-import { actionLicenses } from './mock';
+import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
+import { useGetActionLicense } from './use_get_action_license';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetActionLicense', () => {
   const abortCtrl = new AbortController();
+  let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
-  });
-
-  it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ActionLicenseState>(() =>
-        useGetActionLicense()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual(initialData);
-    });
+    appMockRenderer = createAppMockRenderer();
   });
 
   it('calls getActionLicense with correct arguments', async () => {
     const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
-
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, ActionLicenseState>(() =>
-        useGetActionLicense()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal);
+    const { waitForNextUpdate } = renderHook(() => useGetActionLicense(), {
+      wrapper: appMockRenderer.AppWrapper,
     });
-  });
 
-  it('gets action license', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ActionLicenseState>(() =>
-        useGetActionLicense()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        actionLicense: actionLicenses[1],
-      });
-    });
-  });
-
-  it('set isLoading to true when posting case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ActionLicenseState>(() =>
-        useGetActionLicense()
-      );
-      await waitForNextUpdate();
-      expect(result.current.isLoading).toBe(true);
-    });
+    await waitForNextUpdate();
+    expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal);
   });
 
   it('unhappy path', async () => {
+    const addError = jest.fn();
+
+    (useToasts as jest.Mock).mockReturnValue({ addError });
     const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
     spyOnGetActionLicense.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ActionLicenseState>(() =>
-        useGetActionLicense()
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        actionLicense: null,
-        isLoading: false,
-        isError: true,
-      });
+    const { waitForNextUpdate } = renderHook(() => useGetActionLicense(), {
+      wrapper: appMockRenderer.AppWrapper,
     });
+    await waitForNextUpdate();
+
+    expect(addError).toHaveBeenCalled();
   });
 });

@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import type { GetTransformsStatsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms_stats';
-import { isGetTransformsStatsResponseSchema } from '../../../../plugins/transform/common/api_schemas/type_guards';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import type { GetTransformsStatsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms_stats';
+import { isGetTransformsStatsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
@@ -73,29 +73,29 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return a list of transforms statistics for super-user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get('/api/transform/transforms/_stats')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, status, body);
 
       assertTransformsStatsResponseBody(body);
     });
 
     it('should return a list of transforms statistics view-only user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/transform/transforms/_stats`)
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, status, body);
 
       assertTransformsStatsResponseBody(body);
     });

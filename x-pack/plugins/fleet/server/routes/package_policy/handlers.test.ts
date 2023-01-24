@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import type { KibanaRequest } from 'kibana/server';
-import type { RouteConfig } from 'kibana/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RouteConfig } from '@kbn/core/server';
+
+import type { FleetAuthzRouter } from '../../services/security';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type {
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
   FleetRequestHandlerContext,
@@ -22,18 +24,19 @@ import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
-import type { FleetAuthzRouter } from '../security';
 import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
-import { registerRoutes } from './index';
+import { getPackagePoliciesHandler } from './handlers';
 
-const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
+import { registerRoutes } from '.';
+
+const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 
 jest.mock(
   '../../services/package_policy',
   (): {
-    packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+    packagePolicyService: jest.Mocked<PackagePolicyClient>;
   } => {
     return {
       packagePolicyService: {
@@ -63,12 +66,39 @@ jest.mock(
         delete: jest.fn(),
         get: jest.fn(),
         getByIDs: jest.fn(),
-        list: jest.fn(),
+        list: jest.fn(async (_, __) => {
+          return {
+            total: 1,
+            perPage: 10,
+            page: 1,
+            items: [
+              {
+                id: `123`,
+                name: `Package Policy 123`,
+                description: '',
+                created_at: '2022-12-19T20:43:45.879Z',
+                created_by: 'elastic',
+                updated_at: '2022-12-19T20:43:45.879Z',
+                updated_by: 'elastic',
+                policy_id: `agent-policy-id-a`,
+                enabled: true,
+                inputs: [],
+                namespace: 'default',
+                package: {
+                  name: 'a-package',
+                  title: 'package A',
+                  version: '1.0.0',
+                },
+                revision: 1,
+              },
+            ],
+          };
+        }),
         listIds: jest.fn(),
         update: jest.fn(),
         // @ts-ignore
         runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
-          callbackType === 'postPackagePolicyDelete'
+          callbackType === 'packagePolicyPostDelete'
             ? Promise.resolve(undefined)
             : Promise.resolve(packagePolicy)
         ),
@@ -85,7 +115,7 @@ jest.mock(
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfoFromRegistry: jest.fn(() => Promise.resolve()),
+    getPackageInfo: jest.fn(() => Promise.resolve()),
   };
 });
 
@@ -93,17 +123,20 @@ describe('When calling package policy', () => {
   let routerMock: jest.Mocked<FleetAuthzRouter>;
   let routeHandler: FleetRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let context: jest.Mocked<FleetRequestHandlerContext>;
+  let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let packagePolicyServiceWithAuthzMock: jest.Mocked<PackagePolicyClient>;
 
   beforeEach(() => {
     routerMock = httpServiceMock.createRouter() as unknown as jest.Mocked<FleetAuthzRouter>;
     registerRoutes(routerMock);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
+    packagePolicyServiceWithAuthzMock = (await context.fleet).packagePolicyService
+      .asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
   });
 
@@ -128,7 +161,6 @@ describe('When calling package policy', () => {
           description: '',
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           enabled: true,
-          output_id: '',
           inputs: [],
           namespace: 'default',
           package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' },
@@ -138,8 +170,8 @@ describe('When calling package policy', () => {
 
     // Set the routeConfig and routeHandler to the Create API
     beforeEach(() => {
-      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-        path.startsWith(PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN)
+      [routeConfig, routeHandler] = routerMock.post.mock.calls.find(
+        ([{ path }]) => path === PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN
       )!;
     });
 
@@ -222,7 +254,6 @@ describe('When calling package policy', () => {
             ],
             name: 'endpoint-1',
             namespace: 'default',
-            output_id: '',
             package: {
               name: 'endpoint',
               title: 'Elastic Endpoint',
@@ -233,7 +264,7 @@ describe('When calling package policy', () => {
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
 
-        expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
+        expect(packagePolicyServiceWithAuthzMock.create.mock.calls[0][2]).toEqual({
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
@@ -254,13 +285,42 @@ describe('When calling package policy', () => {
           ],
           name: 'endpoint-1',
           namespace: 'default',
-          output_id: '',
           package: {
             name: 'endpoint',
             title: 'Elastic Endpoint',
             version: '0.5.0',
           },
         });
+      });
+    });
+
+    describe('postCreate callback registration', () => {
+      it('should call to packagePolicyCreate and packagePolicyPostCreate call backs', async () => {
+        const request = getCreateKibanaRequest();
+        await routeHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalled();
+        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(2);
+
+        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
+        const secondCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[1][0];
+
+        expect(firstCB).toEqual('packagePolicyCreate');
+        expect(secondCB).toEqual('packagePolicyPostCreate');
+      });
+
+      it('should not call packagePolicyPostCreate call back in case of packagePolicy create failed', async () => {
+        const request = getCreateKibanaRequest();
+
+        packagePolicyServiceWithAuthzMock.create.mockImplementationOnce(() => {
+          throw new Error('foo');
+        });
+
+        await routeHandler(context, request, response);
+        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
+
+        expect(firstCB).toEqual('packagePolicyCreate');
+        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(1);
       });
     });
   });
@@ -290,7 +350,6 @@ describe('When calling package policy', () => {
       description: 'desc',
       policy_id: '2',
       enabled: true,
-      output_id: '3',
       inputs: [
         {
           type: 'logfile',
@@ -364,7 +423,6 @@ describe('When calling package policy', () => {
         description: '',
         policy_id: '3',
         enabled: false,
-        output_id: '',
         inputs: [
           {
             type: 'metrics',
@@ -405,6 +463,79 @@ describe('When calling package policy', () => {
       await routeHandler(context, request, response);
       expect(response.ok).toHaveBeenCalledWith({
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
+      });
+    });
+  });
+
+  describe('list api handler', () => {
+    it('should return agent count when `withAgentCount` query param is used', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          withAgentCount: true,
+        },
+      });
+      (
+        (await context.core).elasticsearch.client.asInternalUser.search as jest.Mock
+      ).mockImplementation(() => {
+        return {
+          took: 3,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: 100,
+            max_score: 0,
+            hits: [],
+          },
+          aggregations: {
+            agent_counts: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'agent-policy-id-a',
+                  doc_count: 100,
+                },
+              ],
+            },
+          },
+        };
+      });
+
+      await getPackagePoliciesHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          page: 1,
+          perPage: 10,
+          total: 1,
+          items: [
+            {
+              agents: 100,
+              created_at: '2022-12-19T20:43:45.879Z',
+              created_by: 'elastic',
+              description: '',
+              enabled: true,
+              id: '123',
+              inputs: [],
+              name: 'Package Policy 123',
+              namespace: 'default',
+              package: {
+                name: 'a-package',
+                title: 'package A',
+                version: '1.0.0',
+              },
+              policy_id: 'agent-policy-id-a',
+              revision: 1,
+              updated_at: '2022-12-19T20:43:45.879Z',
+              updated_by: 'elastic',
+            },
+          ],
+        },
       });
     });
   });

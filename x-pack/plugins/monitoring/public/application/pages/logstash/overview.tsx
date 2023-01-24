@@ -7,14 +7,13 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { Overview } from '../../../components/logstash/overview';
 import { LogstashTemplate } from './logstash_template';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -25,7 +24,7 @@ export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => 
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   }) as any;
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const [data, setData] = useState(null);
   // const [showShardActivityHistory, setShowShardActivityHistory] = useState(false);
 

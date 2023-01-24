@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import rison from 'rison-node';
-import type { HttpFetchQuery } from 'src/core/public';
-import { HttpSetup, IUiSettingsClient } from 'src/core/public';
+import rison from '@kbn/rison';
+import type { HttpFetchQuery } from '@kbn/core/public';
+import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,

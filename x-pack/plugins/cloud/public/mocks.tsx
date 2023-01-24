@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { CloudStart } from '.';
-import { ServicesProvider } from '../public/services';
 
 function createSetupMock() {
   return {
@@ -19,28 +18,24 @@ function createSetupMock() {
     deploymentUrl: 'deployment-url',
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
+    isElasticStaffOwned: true,
+    trialEndDate: new Date('2020-10-01T14:13:12Z'),
+    registerCloudService: jest.fn(),
   };
 }
-
-const config = {
-  chat: {
-    enabled: true,
-    chatURL: 'chat-url',
-    user: {
-      id: 'user-id',
-      email: 'test-user@elastic.co',
-      jwt: 'identity-jwt',
-    },
-  },
-};
 
 const getContextProvider: () => React.FC =
   () =>
   ({ children }) =>
-    <ServicesProvider {...config}>{children}</ServicesProvider>;
+    <>{children}</>;
 
 const createStartMock = (): jest.Mocked<CloudStart> => ({
   CloudContextProvider: jest.fn(getContextProvider()),
+  cloudId: 'mock-cloud-id',
+  isCloudEnabled: true,
+  deploymentUrl: 'deployment-url',
+  profileUrl: 'profile-url',
+  organizationUrl: 'organization-url',
 });
 
 export const cloudMock = {

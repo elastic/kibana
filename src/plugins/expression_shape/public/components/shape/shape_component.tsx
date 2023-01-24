@@ -8,7 +8,6 @@
 
 import React, { useState, useEffect, useCallback, RefCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { withSuspense } from '../../../../presentation_util/public';
 import {
   ShapeRef,
   ShapeAttributes,
@@ -18,11 +17,9 @@ import {
 } from '../reusable';
 import { Dimensions, ShapeComponentProps } from './types';
 import { getViewBox } from '../../../common/lib';
-import { LazyShapeDrawer } from '../..';
+import { ShapeDrawerComponent } from '../..';
 
-const ShapeDrawer = withSuspense(LazyShapeDrawer);
-
-function ShapeComponent({
+export function ShapeComponent({
   onLoaded,
   parentNode,
   shape: shapeType,
@@ -78,7 +75,7 @@ function ShapeComponent({
 
   return (
     <div className="shapeAligner">
-      <ShapeDrawer
+      <ShapeDrawerComponent
         shapeType={shapeType}
         shapeContentAttributes={shapeContentAttributes}
         shapeAttributes={shapeAttributes}
@@ -87,7 +84,3 @@ function ShapeComponent({
     </div>
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { ShapeComponent as default };

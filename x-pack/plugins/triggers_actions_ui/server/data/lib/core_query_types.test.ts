@@ -10,7 +10,7 @@
 import { ObjectType } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { CoreQueryParams } from './core_query_types';
-import { MAX_GROUPS } from '../index';
+import { MAX_GROUPS } from '..';
 
 const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   index: 'index-name',
@@ -19,6 +19,7 @@ const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   groupBy: 'all',
   timeWindowSize: 5,
   timeWindowUnit: 'm',
+  filterKuery: 'event.provider: alerting',
 };
 
 export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
@@ -181,6 +182,13 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
       delete params.aggField;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
         `"[aggField]: must have a value when [aggType] is \\"avg\\""`
+      );
+    });
+
+    it('fails for invalid filterKuery', async () => {
+      params.filterKuery = 'event:';
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+        '"[filterKuery]: Filter query is invalid."'
       );
     });
   });

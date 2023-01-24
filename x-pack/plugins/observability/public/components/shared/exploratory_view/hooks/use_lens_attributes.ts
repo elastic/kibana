@@ -7,7 +7,12 @@
 
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
+import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
+import { useLensFormulaHelper } from './use_lens_formula_helper';
+import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import {
   AllSeries,
@@ -17,21 +22,21 @@ import {
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
-
 import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import { DataViewState, useAppDataViewContext } from './use_app_data_view';
-import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 import { useTheme } from '../../../../hooks/use_theme';
-import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 
-export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
+export const getFiltersFromDefs = (
+  reportDefinitions: SeriesUrl['reportDefinitions'] | SeriesUrl['textReportDefinitions']
+) => {
   return Object.entries(reportDefinitions ?? {})
     .map(([field, value]) => {
       return {
         field,
-        values: value,
+        values: Array.isArray(value) ? value : [value],
       };
     })
     .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
@@ -42,7 +47,8 @@ export function getLayerConfigs(
   reportType: ReportViewType,
   theme: EuiTheme,
   dataViews: DataViewState,
-  reportConfigMap: ReportConfigMap
+  reportConfigMap: ReportConfigMap,
+  spaceId?: string
 ) {
   const layerConfigs: LayerConfig[] = [];
 
@@ -60,26 +66,33 @@ export function getLayerConfigs(
         dataView,
         dataType: series.dataType,
         reportConfigMap,
+        spaceId,
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
-        getFiltersFromDefs(series.reportDefinitions)
+        getFiltersFromDefs(series.reportDefinitions),
+        getFiltersFromDefs(series.textReportDefinitions)
       );
 
-      const color = `euiColorVis${seriesIndex}`;
+      const color = (theme.eui as unknown as Record<string, string>)?.[`euiColorVis${seriesIndex}`];
+      let seriesColor = series.color!;
+      if (reportType !== 'single-metric') {
+        seriesColor = series.color ?? color;
+      }
 
       layerConfigs.push({
         filters,
-        indexPattern: dataView,
+        dataView,
         seriesConfig,
         time: series.time,
         name: series.name,
+        color: seriesColor,
         breakdown: series.breakdown === LABEL_FIELDS_BREAKDOWN ? undefined : series.breakdown,
         seriesType: series.seriesType,
         operationType: series.operationType,
         reportDefinitions: series.reportDefinitions ?? {},
         selectedMetricField: series.selectedMetricField,
-        color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
+        showPercentileAnnotations: series.showPercentileAnnotations,
       });
     }
   });
@@ -92,16 +105,20 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
   const { dataViews } = useAppDataViewContext();
 
+  const spaceId = useKibanaSpace();
+
   const { reportConfigMap } = useExploratoryView();
 
   const theme = useTheme();
+
+  const lensFormulaHelper = useLensFormulaHelper();
 
   return useMemo(() => {
     // we only use the data from url to apply, since that gets updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
     const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
 
-    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT) {
+    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT || !lensFormulaHelper) {
       return null;
     }
     const layerConfigs = getLayerConfigs(
@@ -109,17 +126,38 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       reportTypeT,
       theme,
       dataViews,
-      reportConfigMap
+      reportConfigMap,
+      spaceId.space?.id
     );
 
     if (layerConfigs.length < 1) {
       return null;
     }
 
-    const lensAttributes = new LensAttributes(layerConfigs);
+    if (reportTypeT === 'single-metric') {
+      const lensAttributes = new SingleMetricLensAttributes(
+        layerConfigs,
+        reportTypeT,
+        lensFormulaHelper
+      );
 
-    return lensAttributes.getJSON();
+      return lensAttributes.getJSON('lnsLegacyMetric', lastRefresh);
+    }
+
+    if (reportTypeT === 'heatmap') {
+      const lensAttributes = new HeatMapLensAttributes(
+        layerConfigs,
+        reportTypeT,
+        lensFormulaHelper
+      );
+
+      return lensAttributes.getJSON('lnsHeatmap', lastRefresh);
+    }
+
+    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT, lensFormulaHelper);
+
+    return lensAttributes.getJSON('lnsXY', lastRefresh);
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViews, reportType, storage, theme, lastRefresh, allSeries]);
+  }, [dataViews, reportType, storage, theme, lastRefresh, allSeries, lensFormulaHelper]);
 };

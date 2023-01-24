@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import {
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type {
   AugmentedSecurityJobFields,
   Module,
   ModuleJob,
@@ -13,7 +14,6 @@ import {
   SecurityJob,
 } from '../types';
 import { mlModules } from '../ml_modules';
-import { MlSummaryJob } from '../../../../../../ml/public';
 
 /**
  * Helper function for converting from ModuleJob -> SecurityJob
@@ -32,7 +32,7 @@ export const moduleToSecurityJob = (
     datafeedState: '',
     hasDatafeed: false,
     isSingleMetricViewerJob: false,
-    jobState: '',
+    jobState: 'closed',
     memory_status: '',
     processed_record_count: 0,
     id: moduleJob.id,
@@ -46,6 +46,7 @@ export const moduleToSecurityJob = (
     awaitingNodeAssignment: false,
     jobTags: {},
     bucketSpanSeconds: 900,
+    customSettings: moduleJob.config.custom_settings,
   };
 };
 

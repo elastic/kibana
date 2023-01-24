@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { DataView } from 'src/plugins/data/common';
+import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DiscoverServices } from '../build_services';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { createSearchSourceMock } from '../../../data/common/search/search_source/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
-import { indexPatternMock } from '../__mocks__/index_pattern';
+import { dataViewMock } from '../__mocks__/data_view';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
@@ -43,7 +43,7 @@ describe('getSharingData', () => {
   });
 
   test('returns valid data for sharing', async () => {
-    const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const result = await getSharingData(searchSourceMock, { columns: [] }, services);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -54,7 +54,7 @@ describe('getSharingData', () => {
   });
 
   test('returns valid data for sharing when columns are selected', async () => {
-    const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const result = await getSharingData(
       searchSourceMock,
       { columns: ['column_a', 'column_b'] },
@@ -72,13 +72,19 @@ describe('getSharingData', () => {
   });
 
   test('getSearchSource does not add fields to the searchSource', async () => {
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
     expect(getSearchSource()).toMatchInlineSnapshot(`
       Object {
-        "index": "the-index-pattern-id",
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": "true",
+          },
+        ],
+        "index": "the-data-view-id",
         "sort": Array [
           Object {
             "_doc": "desc",
@@ -98,7 +104,7 @@ describe('getSharingData', () => {
         return originalGet(key, ...args);
       },
     } as unknown as IUiSettingsClient;
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(
@@ -117,7 +123,7 @@ describe('getSharingData', () => {
     );
     expect(getSearchSource()).toMatchInlineSnapshot(`
       Object {
-        "index": "the-index-pattern-id",
+        "index": "the-data-view-id",
         "sort": Array [
           Object {
             "_doc": "desc",
@@ -128,7 +134,7 @@ describe('getSharingData', () => {
   });
 
   test('getSearchSource does add fields to the searchSource when columns are selected', async () => {
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(
@@ -146,18 +152,18 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource().fields).toStrictEqual([
-      'cool-timefield',
-      'cool-field-1',
-      'cool-field-2',
-      'cool-field-3',
-      'cool-field-4',
-      'cool-field-5',
-      'cool-field-6',
+      { field: 'cool-timefield', include_unmapped: 'true' },
+      { field: 'cool-field-1', include_unmapped: 'true' },
+      { field: 'cool-field-2', include_unmapped: 'true' },
+      { field: 'cool-field-3', include_unmapped: 'true' },
+      { field: 'cool-field-4', include_unmapped: 'true' },
+      { field: 'cool-field-5', include_unmapped: 'true' },
+      { field: 'cool-field-6', include_unmapped: 'true' },
     ]);
   });
 
   test('fields have prepended timeField', async () => {
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
     const searchSourceMock = createSearchSourceMock({ index });
@@ -194,14 +200,11 @@ describe('getSharingData', () => {
   test('fields conditionally do not have prepended timeField', async () => {
     services.uiSettings = {
       get: (key: string) => {
-        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-          return true;
-        }
-        return false;
+        return key === DOC_HIDE_TIME_COLUMN_SETTING;
       },
     } as unknown as IUiSettingsClient;
 
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
     const searchSourceMock = createSearchSourceMock({ index });

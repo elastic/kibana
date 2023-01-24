@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject } from '@kbn/utility-types';
-import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange } from '../utils/index';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { JsonObject } from '@kbn/utility-types';
+import type { EventStats } from '../../../../../../common/endpoint/types';
+import type { NodeID } from '../utils';
+import type { ResolverQueryParams } from './base';
+import { BaseResolverQuery } from './base';
 
 interface AggBucket {
   key: string;
@@ -25,23 +28,12 @@ interface CategoriesAgg extends AggBucket {
   };
 }
 
-interface StatsParams {
-  schema: ResolverSchema;
-  indexPatterns: string | string[];
-  timeRange: TimeRange;
-}
-
 /**
  * Builds a query for retrieving descendants of a node.
  */
-export class StatsQuery {
-  private readonly schema: ResolverSchema;
-  private readonly indexPatterns: string | string[];
-  private readonly timeRange: TimeRange;
-  constructor({ schema, indexPatterns, timeRange }: StatsParams) {
-    this.schema = schema;
-    this.indexPatterns = indexPatterns;
-    this.timeRange = timeRange;
+export class StatsQuery extends BaseResolverQuery {
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
+    super({ schema, indexPatterns, timeRange, isInternalRequest });
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -50,15 +42,7 @@ export class StatsQuery {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },
@@ -85,6 +69,32 @@ export class StatsQuery {
               terms: { field: 'event.category', size: 1000 },
             },
           },
+        },
+      },
+    };
+  }
+
+  private alertStatsQuery(
+    nodes: NodeID[],
+    index: string,
+    includeHits: boolean
+  ): { size: number; query: object; index: string; aggs: object; fields?: string[] } {
+    return {
+      size: includeHits ? 5000 : 0,
+      query: {
+        bool: {
+          filter: [
+            ...this.getRangeFilter(),
+            {
+              terms: { [this.schema.id]: nodes },
+            },
+          ],
+        },
+      },
+      index,
+      aggs: {
+        ids: {
+          terms: { field: this.schema.id },
         },
       },
     };
@@ -117,24 +127,97 @@ export class StatsQuery {
    * @param client used to make requests to Elasticsearch
    * @param nodes an array of unique IDs representing nodes in a resolver graph
    */
-  async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<Record<string, EventStats>> {
+  async search(
+    client: IScopedClusterClient,
+    nodes: NodeID[],
+    alertsClient: AlertsClient | undefined,
+    includeHits: boolean
+  ): Promise<{ eventStats?: Record<string, EventStats>; alertIds?: string[] }> {
     if (nodes.length <= 0) {
       return {};
     }
 
-    // leaving unknown here because we don't actually need the hits part of the body
-    const body = await client.asCurrentUser.search({
-      body: this.query(nodes),
-      index: this.indexPatterns,
-    });
+    const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+    const alertIndex =
+      typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(',');
 
-    // @ts-expect-error declare aggegations type explicitly
-    return body.aggregations?.ids?.buckets.reduce(
-      (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
-        ...cummulative,
-        [bucket.key]: StatsQuery.getEventStats(bucket),
+    const [body, alertsBody] = await Promise.all([
+      await esClient.search({
+        body: this.query(nodes),
+        index: this.indexPatterns,
       }),
+      alertsClient
+        ? await alertsClient.find(this.alertStatsQuery(nodes, alertIndex, includeHits))
+        : { hits: { hits: [] } },
+    ]);
+    // @ts-expect-error declare aggegations type explicitly
+    const eventAggs: CategoriesAgg[] = body.aggregations?.ids?.buckets ?? [];
+    // @ts-expect-error declare aggegations type explicitly
+    const alertAggs: AggBucket[] = alertsBody.aggregations?.ids?.buckets ?? [];
+    const eventsWithAggs = new Set([
+      ...eventAggs.map((agg) => agg.key),
+      ...alertAggs.map((agg) => agg.key),
+    ]);
+    const alertsAggsMap = new Map(alertAggs.map(({ key, doc_count: docCount }) => [key, docCount]));
+    const eventAggsMap = new Map<string, EventStats>(
+      eventAggs.map(({ key, doc_count: docCount, categories }): [string, EventStats] => [
+        key,
+        {
+          ...StatsQuery.getEventStats({ key, doc_count: docCount, categories }),
+        },
+      ])
+    );
+    const alertIdsRaw: Array<string | undefined> = alertsBody.hits.hits.map((hit) => hit._id);
+    const alertIds = alertIdsRaw.flatMap((id) => (!id ? [] : [id]));
+
+    const eventAggStats = [...eventsWithAggs.values()];
+    const eventStats = eventAggStats.reduce(
+      (cummulative: Record<string, EventStats>, id: string) => {
+        const alertCount = alertsAggsMap.get(id);
+        const otherEvents = eventAggsMap.get(id);
+        if (alertCount !== undefined) {
+          if (otherEvents !== undefined) {
+            return {
+              ...cummulative,
+              [id]: {
+                total: alertCount + otherEvents.total,
+                byCategory: {
+                  alert: alertCount,
+                  ...otherEvents.byCategory,
+                },
+              },
+            };
+          } else {
+            return {
+              ...cummulative,
+              [id]: {
+                total: alertCount,
+                byCategory: {
+                  alert: alertCount,
+                },
+              },
+            };
+          }
+        } else {
+          if (otherEvents !== undefined) {
+            return {
+              ...cummulative,
+              [id]: {
+                total: otherEvents.total,
+                byCategory: otherEvents.byCategory,
+              },
+            };
+          } else {
+            return {};
+          }
+        }
+      },
       {}
     );
+    if (includeHits) {
+      return { alertIds, eventStats };
+    } else {
+      return { eventStats };
+    }
   }
 }

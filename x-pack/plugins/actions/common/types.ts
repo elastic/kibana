@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+export {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from './connector_feature_config';
 export interface ActionType {
   id: string;
   name: string;
@@ -14,16 +20,18 @@ export interface ActionType {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
+  supportedFeatureIds: string[];
 }
 
-export interface ActionResult {
-  id: string;
-  actionTypeId: string;
-  name: string;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Record<string, any>;
-  isPreconfigured: boolean;
+export enum InvalidEmailReason {
+  invalid = 'invalid',
+  notAllowed = 'notAllowed',
+}
+
+export interface ValidatedEmail {
+  address: string;
+  valid: boolean;
+  reason?: InvalidEmailReason;
 }
 
 // the result returned from an action type executor function
@@ -39,6 +47,10 @@ export interface ActionTypeExecutorResult<Data> {
   retry?: null | boolean | Date;
 }
 
+export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
+  error?: Error;
+};
+
 export function isActionTypeExecutorResult(
   result: unknown
 ): result is ActionTypeExecutorResult<unknown> {
@@ -48,4 +60,8 @@ export function isActionTypeExecutorResult(
     typeof unsafeResult?.actionId === 'string' &&
     ActionTypeExecutorResultStatusValues.includes(unsafeResult?.status)
   );
+}
+
+export interface ActionsPublicConfigType {
+  allowedEmailDomains: string[];
 }

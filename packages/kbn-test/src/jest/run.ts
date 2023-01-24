@@ -20,30 +20,48 @@
 import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
-import { buildArgv } from 'jest-cli/build/cli';
-import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { map } from 'lodash';
+import getopts from 'getopts';
+import jestFlags from './jest_flags.json';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
-// Patch node 16 types to be compatible with jest 26
-// https://github.com/facebook/jest/issues/11640#issuecomment-893867514
-/* eslint-disable */
-declare global {
-  namespace NodeJS {
-    interface Global {}
-    interface InspectOptions {}
-
-    interface ConsoleConstructor extends console.ConsoleConstructor {}
-  }
-}
-/* eslint-enable */
-
 export function runJest(configName = 'jest.config.js') {
-  const argv = buildArgv(process.argv);
+  const unknownFlag: string[] = [];
+  const argv = getopts(process.argv.slice(2), {
+    ...jestFlags,
+    unknown(v) {
+      unknownFlag.push(v);
+      return false;
+    },
+  });
+
+  if (argv.help) {
+    run();
+    process.exit(0);
+  }
+
+  if (unknownFlag.length) {
+    const flags = unknownFlag.join(', ');
+
+    throw createFailError(
+      `unexpected flag: ${flags}
+
+  If this flag is valid you might need to update the flags in "packages/kbn-test/src/jest/run.js".
+
+  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
+  flags jest supports
+
+`
+    );
+  }
+
   const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({
@@ -59,7 +77,7 @@ export function runJest(configName = 'jest.config.js') {
   const cwd: string = process.env.INIT_CWD || process.cwd();
 
   if (!argv.config) {
-    testFiles = argv._.splice(2).map((p) => resolve(cwd, p.toString()));
+    testFiles = argv._.map((p) => resolve(cwd, p.toString()));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 

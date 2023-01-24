@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  Direction,
+import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
   RiskScoreRequestOptions,
-  RiskScoreFields,
   RiskScoreSortField,
 } from '../../../../../../common/search_strategy';
+import { Direction, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const QUERY_SIZE = 10;
@@ -65,8 +64,12 @@ const getQueryOrder = (sort?: RiskScoreSortField): Sort => {
     ];
   }
 
-  if (sort.field === RiskScoreFields.risk) {
-    return [{ [RiskScoreFields.riskScore]: sort.direction }];
+  if (sort.field === RiskScoreFields.hostRisk) {
+    return [{ [RiskScoreFields.hostRiskScore]: sort.direction }];
+  }
+
+  if (sort.field === RiskScoreFields.userRisk) {
+    return [{ [RiskScoreFields.userRiskScore]: sort.direction }];
   }
 
   return [{ [sort.field]: sort.direction }];

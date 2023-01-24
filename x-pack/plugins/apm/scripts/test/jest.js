@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@kbn/babel-register').install();
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 const { run } = require('jest');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 
-const config = require('../../jest.config.js');
+const config = require('../../jest.config');
 
 const argv = [...process.argv.slice(2), '--config', JSON.stringify(config)];
 

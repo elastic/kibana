@@ -9,11 +9,11 @@
 import React, { useState } from 'react';
 
 import useMount from 'react-use/lib/useMount';
+import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataViewPicker } from './data_view_picker';
-import { DataView, DataViewListItem } from '../../../../data_views/common';
-import { injectStorybookDataView } from '../../services/storybook/data_views';
+import { injectStorybookDataView } from '../../services/data_views/data_views.story';
 import { storybookFlightsDataView } from '../../mocks';
-import { pluginServices, registry, StorybookParams } from '../../services/storybook';
+import { pluginServices, registry, StorybookParams } from '../../services/plugin_services.story';
 
 export default {
   component: DataViewPicker,
@@ -46,7 +46,7 @@ export function Example({}: {} & StorybookParams) {
     });
   };
 
-  const triggerLabel = dataView?.title || 'Choose Data View';
+  const triggerLabel = dataView?.getName() || 'Choose Data View';
 
   return (
     <DataViewPicker

@@ -5,12 +5,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type ErrorGroups =
@@ -53,101 +53,97 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('errors group', () => {
-        const appleTransaction = {
-          name: 'GET /apple 🍎 ',
-          successRate: 75,
-          failureRate: 25,
-        };
+  registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
+    describe('errors group', () => {
+      const appleTransaction = {
+        name: 'GET /apple 🍎 ',
+        successRate: 75,
+        failureRate: 25,
+      };
 
-        const bananaTransaction = {
-          name: 'GET /banana 🍌',
-          successRate: 50,
-          failureRate: 50,
-        };
+      const bananaTransaction = {
+        name: 'GET /banana 🍌',
+        successRate: 50,
+        failureRate: 50,
+      };
 
+      before(async () => {
+        const serviceInstance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance('instance-a');
+
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(appleTransaction.successRate)
+            .generator((timestamp) =>
+              serviceInstance
+                .transaction({ transactionName: appleTransaction.name })
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(appleTransaction.failureRate)
+            .generator((timestamp) =>
+              serviceInstance
+                .transaction({ transactionName: appleTransaction.name })
+                .errors(
+                  serviceInstance.error({ message: 'error 1', type: 'foo' }).timestamp(timestamp)
+                )
+                .duration(1000)
+                .timestamp(timestamp)
+                .failure()
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(bananaTransaction.successRate)
+            .generator((timestamp) =>
+              serviceInstance
+                .transaction({ transactionName: bananaTransaction.name })
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(bananaTransaction.failureRate)
+            .generator((timestamp) =>
+              serviceInstance
+                .transaction({ transactionName: bananaTransaction.name })
+                .errors(
+                  serviceInstance.error({ message: 'error 2', type: 'bar' }).timestamp(timestamp)
+                )
+                .duration(1000)
+                .timestamp(timestamp)
+                .failure()
+            ),
+        ]);
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('returns the correct data', () => {
+        let errorGroups: ErrorGroups;
         before(async () => {
-          const serviceInstance = apm
-            .service(serviceName, 'production', 'go')
-            .instance('instance-a');
+          const response = await callApi();
+          errorGroups = response.body.errorGroups;
+        });
 
-          await synthtraceEsClient.index([
-            timerange(start, end)
-              .interval('1m')
-              .rate(appleTransaction.successRate)
-              .spans((timestamp) =>
-                serviceInstance
-                  .transaction(appleTransaction.name)
-                  .timestamp(timestamp)
-                  .duration(1000)
-                  .success()
-                  .serialize()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(appleTransaction.failureRate)
-              .spans((timestamp) =>
-                serviceInstance
-                  .transaction(appleTransaction.name)
-                  .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-                  .serialize()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(bananaTransaction.successRate)
-              .spans((timestamp) =>
-                serviceInstance
-                  .transaction(bananaTransaction.name)
-                  .timestamp(timestamp)
-                  .duration(1000)
-                  .success()
-                  .serialize()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(bananaTransaction.failureRate)
-              .spans((timestamp) =>
-                serviceInstance
-                  .transaction(bananaTransaction.name)
-                  .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .failure()
-                  .serialize()
-              ),
+        it('returns correct number of errors', () => {
+          expect(errorGroups.length).to.equal(2);
+          expect(errorGroups.map((error) => error.name).sort()).to.eql(['error 1', 'error 2']);
+        });
+
+        it('returns correct occurences', () => {
+          const numberOfBuckets = 15;
+          expect(errorGroups.map((error) => error.occurrences).sort()).to.eql([
+            appleTransaction.failureRate * numberOfBuckets,
+            bananaTransaction.failureRate * numberOfBuckets,
           ]);
         });
-
-        after(() => synthtraceEsClient.clean());
-
-        describe('returns the correct data', () => {
-          let errorGroups: ErrorGroups;
-          before(async () => {
-            const response = await callApi();
-            errorGroups = response.body.errorGroups;
-          });
-
-          it('returns correct number of errors', () => {
-            expect(errorGroups.length).to.equal(2);
-            expect(errorGroups.map((error) => error.name).sort()).to.eql(['error 1', 'error 2']);
-          });
-
-          it('returns correct occurences', () => {
-            const numberOfBuckets = 15;
-            expect(errorGroups.map((error) => error.occurrences).sort()).to.eql([
-              appleTransaction.failureRate * numberOfBuckets,
-              bananaTransaction.failureRate * numberOfBuckets,
-            ]);
-          });
-        });
       });
-    }
-  );
+    });
+  });
 }

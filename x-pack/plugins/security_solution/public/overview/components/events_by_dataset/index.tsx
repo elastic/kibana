@@ -7,32 +7,34 @@
 
 import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
-import uuid from 'uuid';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import styled from 'styled-components';
+import { EuiButton } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import {
+import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { eventsStackByOptions } from '../../../hosts/pages/navigation';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
-import { HostsTableType } from '../../../hosts/store/model';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import {
+  eventsStackByOptions,
+  eventsHistogramConfig,
+} from '../../../common/components/events_tab/histogram_configurations';
+import { HostsTableType } from '../../../explore/hosts/store/model';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
-import { LinkButton } from '../../../common/components/links';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const DEFAULT_STACK_BY = 'event.dataset';
@@ -49,10 +51,12 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
+  // Make a unique query type everywhere this query is used
+  queryType: 'topN' | 'overview';
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   showSpacer?: boolean;
-  timelineId?: string;
+  scopeId?: string;
   toggleTopN?: () => void;
 }
 
@@ -60,6 +64,13 @@ const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
   text: fieldName,
   value: fieldName,
 });
+
+const StyledLinkButton = styled(EuiButton)`
+  margin-left: 0;
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-left: ${({ theme }) => theme.eui.euiSizeL};
+  }
+`;
 
 const EventsByDatasetComponent: React.FC<Props> = ({
   combinedQueries,
@@ -73,16 +84,16 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   onlyField,
   paddingSize,
   query,
+  queryType,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   showLegend,
   showSpacer = true,
-  timelineId,
+  scopeId,
   to,
   toggleTopN,
 }) => {
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
   useEffect(() => {
     return () => {
@@ -110,12 +121,12 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
   const eventsCountViewEventsButton = useMemo(
     () => (
-      <LinkButton
+      <StyledLinkButton
         onClick={goToHostEvents}
         href={formatUrl(getTabsOnHostsUrl(HostsTableType.events))}
       >
         {i18n.VIEW_EVENTS}
-      </LinkButton>
+      </StyledLinkButton>
     ),
     [goToHostEvents, formatUrl]
   );
@@ -143,9 +154,9 @@ const EventsByDatasetComponent: React.FC<Props> = ({
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
-      ...histogramConfigs,
+      ...eventsHistogramConfig,
       stackByOptions:
-        onlyField != null ? [getHistogramOption(onlyField)] : histogramConfigs.stackByOptions,
+        onlyField != null ? [getHistogramOption(onlyField)] : eventsHistogramConfig.stackByOptions,
       defaultStackByOption:
         onlyField != null
           ? getHistogramOption(onlyField)
@@ -188,7 +199,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       showLegend={showLegend}
       skip={filterQuery === undefined}
       startDate={from}
-      timelineId={timelineId}
+      scopeId={scopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
     />

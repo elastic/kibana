@@ -19,7 +19,7 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { CurationsLogic } from './';
+import { CurationsLogic } from '.';
 
 describe('CurationsLogic', () => {
   const { mount } = new LogicMounter(CurationsLogic);

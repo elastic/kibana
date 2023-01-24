@@ -1,0 +1,14 @@
+{
+  "id": "userProfileExamples",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "Kibana Platform Security",
+    "githubTeam": "kibana-security"
+  },
+  "description": "Demo of how to implement a suggest user functionality",
+  "requiredPlugins": ["developerExamples", "security", "spaces"],
+  "optionalPlugins": []
+}

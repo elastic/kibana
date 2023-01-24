@@ -6,26 +6,23 @@
  */
 
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHasData } from '../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { getEmptySections } from '../../../pages/overview/empty_section';
+import { getContent } from './content';
+import { ObservabilityAppServices } from '../../../application/types';
 
 export function ObservabilityStatus() {
-  const { core } = usePluginContext();
+  const { http, docLinks } = useKibana<ObservabilityAppServices>().services;
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ core });
+  const content = getContent(http, docLinks);
 
-  const boxes = appEmptySections.map((app) => {
+  const boxes = content.map((app) => {
     return {
-      id: app.id,
-      dataSourceName: app.title,
+      ...app,
       hasData: hasDataMap[app.id]?.hasData ?? false,
-      description: app.description,
       modules: [],
-      integrationLink: app.href ?? '',
-      learnMoreLink: app.href ?? '',
     };
   });
 

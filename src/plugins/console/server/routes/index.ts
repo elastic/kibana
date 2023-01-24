@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
 import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import { ESConfigForProxy } from '../types';
 import { ProxyConfigCollection } from '../lib';
+import { handleEsError } from '../shared_imports';
 
 import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
+import { registerAutocompleteEntitiesRoute } from './api/console/autocomplete_entities';
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
@@ -31,6 +33,9 @@ export interface RouteDependencies {
     esLegacyConfigService: EsLegacyConfigService;
     specDefinitionService: SpecDefinitionsService;
   };
+  lib: {
+    handleEsError: typeof handleEsError;
+  };
   kibanaVersion: SemVer;
 }
 
@@ -38,4 +43,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerEsConfigRoute(dependencies);
   registerProxyRoute(dependencies);
   registerSpecDefinitionsRoute(dependencies);
+  registerAutocompleteEntitiesRoute(dependencies);
 };

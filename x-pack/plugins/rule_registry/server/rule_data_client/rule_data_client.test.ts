@@ -6,20 +6,23 @@
  */
 
 import { left, right } from 'fp-ts/lib/Either';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { Dataset, RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
-import { createNoMatchingIndicesError } from '../../../../../src/plugins/data_views/server/fetcher/lib/errors';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
+import { ElasticsearchClient } from '@kbn/core/server';
 
-const mockLogger = loggingSystemMock.create().get();
+const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
 const mockResourceInstaller = resourceInstallerMock.create();
 
 // Be careful setting this delay too high. Jest tests can time out
-const delay = (ms: number = 3000) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number = 1500) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface GetRuleDataClientOptionsOpts {
   isWriteEnabled?: boolean;
@@ -51,7 +54,7 @@ function getRuleDataClientOptions({
       waitUntilReadyForReading ?? Promise.resolve(right(scopedClusterClient) as WaitResult),
     waitUntilReadyForWriting:
       waitUntilReadyForWriting ?? Promise.resolve(right(scopedClusterClient) as WaitResult),
-    logger: mockLogger,
+    logger,
   };
 }
 
@@ -70,13 +73,10 @@ describe('RuleDataClient', () => {
   });
 
   describe('getReader()', () => {
-    beforeAll(() => {
-      getFieldsForWildcardMock.mockResolvedValue(['foo']);
-      IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
-    });
-
     beforeEach(() => {
-      getFieldsForWildcardMock.mockClear();
+      jest.resetAllMocks();
+      getFieldsForWildcardMock.mockResolvedValue({ fields: ['foo'] });
+      IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
     afterAll(() => {
@@ -115,6 +115,10 @@ describe('RuleDataClient', () => {
           body: query,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error performing search in RuleDataClient - something went wrong!`
+      );
     });
 
     test('waits until cluster client is ready before getDynamicIndexPattern', async () => {
@@ -142,6 +146,10 @@ describe('RuleDataClient', () => {
       await expect(reader.getDynamicIndexPattern()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"something went wrong!"`
       );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error fetching index patterns in RuleDataClient - something went wrong!`
+      );
     });
 
     test('correct handles no_matching_indices errors from getFieldsForWildcard', async () => {
@@ -154,6 +162,8 @@ describe('RuleDataClient', () => {
         timeFieldName: '@timestamp',
         title: '.alerts-observability.apm.alerts*',
       });
+
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     test('handles errors getting cluster client', async () => {
@@ -184,132 +194,181 @@ describe('RuleDataClient', () => {
       jest.clearAllMocks();
     });
 
-    describe('bulk()', () => {
-      test('logs debug and returns undefined if writing is disabled', async () => {
-        const ruleDataClient = new RuleDataClient(
-          getRuleDataClientOptions({ isWriteEnabled: false })
-        );
-        const writer = ruleDataClient.getWriter();
+    test('throws error if writing is disabled', async () => {
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({ isWriteEnabled: false })
+      );
 
-        // Previously, a delay between calling getWriter() and using a writer function
-        // would cause an Unhandled promise rejection if there were any errors getting a writer
-        // Adding this delay in the tests to ensure this does not pop up again.
-        await delay();
+      await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Rule registry writing is disabled. Make sure that \\"xpack.ruleRegistry.write.enabled\\" configuration is not set to false and \\"observability.apm\\" is not disabled in \\"xpack.ruleRegistry.write.disabledRegistrationContexts\\" within \\"kibana.yml\\"."`
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Writing is disabled, bulk() will not write any data.`
+      );
+    });
 
-        expect(await writer.bulk({})).toEqual(undefined);
-        expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Writing is disabled, bulk() will not write any data.`
-        );
+    test('throws error if initialization of writer fails due to index error', async () => {
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({
+          waitUntilReadyForWriting: Promise.resolve(
+            left(new Error('could not get cluster client'))
+          ),
+        })
+      );
+      expect(ruleDataClient.isWriteEnabled()).toBe(true);
+      await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"There has been a catastrophic error trying to install index level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: could not get cluster client"`
+      );
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        new RuleDataWriterInitializationError(
+          'index',
+          'observability.apm',
+          new Error('could not get cluster client')
+        )
+      );
+      expect(logger.error).toHaveBeenNthCalledWith(
+        2,
+        `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+      );
+      expect(ruleDataClient.isWriteEnabled()).toBe(false);
+
+      // getting the writer again at this point should throw another error
+      await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Writing is disabled, bulk() will not write any data.`
+      );
+    });
+
+    test('throws error if initialization of writer fails due to namespace error', async () => {
+      mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockRejectedValueOnce(
+        new Error('bad resource installation')
+      );
+      const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
+      expect(ruleDataClient.isWriteEnabled()).toBe(true);
+      await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"There has been a catastrophic error trying to install namespace level resources for the following registration context: observability.apm. This may have been due to a non-additive change to the mappings, removal and type changes are not permitted. Full error: Error: bad resource installation"`
+      );
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        new RuleDataWriterInitializationError(
+          'namespace',
+          'observability.apm',
+          new Error('bad resource installation')
+        )
+      );
+      expect(logger.error).toHaveBeenNthCalledWith(
+        2,
+        `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+      );
+      expect(ruleDataClient.isWriteEnabled()).toBe(false);
+
+      // getting the writer again at this point should throw another error
+      await expect(() => ruleDataClient.getWriter()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Rule registry writing is disabled due to an error during Rule Data Client initialization."`
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Writing is disabled, bulk() will not write any data.`
+      );
+    });
+
+    test('uses cached cluster client when repeatedly initializing writer', async () => {
+      const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
+
+      await ruleDataClient.getWriter();
+      await ruleDataClient.getWriter();
+      await ruleDataClient.getWriter();
+      await ruleDataClient.getWriter();
+      await ruleDataClient.getWriter();
+
+      expect(mockResourceInstaller.installAndUpdateNamespaceLevelResources).toHaveBeenCalledTimes(
+        1
+      );
+    });
+  });
+
+  describe('bulk()', () => {
+    test('logs debug and returns undefined if clusterClient is not defined', async () => {
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({
+          waitUntilReadyForWriting: new Promise((resolve) =>
+            resolve(right(undefined as unknown as ElasticsearchClient))
+          ),
+        })
+      );
+      const writer = await ruleDataClient.getWriter();
+
+      // Previously, a delay between calling getWriter() and using a writer function
+      // would cause an Unhandled promise rejection if there were any errors getting a writer
+      // Adding this delay in the tests to ensure this does not pop up again.
+      await delay();
+
+      expect(await writer.bulk({})).toEqual(undefined);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Writing is disabled, bulk() will not write any data.`
+      );
+    });
+
+    test('throws and logs error if bulk function throws error', async () => {
+      const error = new Error('something went wrong!');
+      scopedClusterClient.bulk.mockRejectedValueOnce(error);
+      const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
+      expect(ruleDataClient.isWriteEnabled()).toBe(true);
+      const writer = await ruleDataClient.getWriter();
+
+      // Previously, a delay between calling getWriter() and using a writer function
+      // would cause an Unhandled promise rejection if there were any errors getting a writer
+      // Adding this delay in the tests to ensure this does not pop up again.
+      await delay();
+
+      await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"something went wrong!"`
+      );
+      expect(logger.error).toHaveBeenNthCalledWith(1, error);
+      expect(ruleDataClient.isWriteEnabled()).toBe(true);
+    });
+
+    test('waits until cluster client is ready before calling bulk', async () => {
+      scopedClusterClient.bulk.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          {}
+        ) as unknown as estypes.BulkResponse
+      );
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({
+          waitUntilReadyForWriting: new Promise((resolve) =>
+            setTimeout(resolve, 3000, right(scopedClusterClient))
+          ),
+        })
+      );
+
+      const writer = await ruleDataClient.getWriter();
+      // Previously, a delay between calling getWriter() and using a writer function
+      // would cause an Unhandled promise rejection if there were any errors getting a writer
+      // Adding this delay in the tests to ensure this does not pop up again.
+      await delay();
+
+      const response = await writer.bulk({});
+
+      expect(response).toEqual({
+        body: {},
+        headers: {
+          'x-elastic-product': 'Elasticsearch',
+        },
+        meta: {},
+        statusCode: 200,
+        warnings: [],
       });
 
-      test('logs error, returns undefined and turns off writing if initialization error', async () => {
-        const ruleDataClient = new RuleDataClient(
-          getRuleDataClientOptions({
-            waitUntilReadyForWriting: Promise.resolve(
-              left(new Error('could not get cluster client'))
-            ),
-          })
-        );
-        expect(ruleDataClient.isWriteEnabled()).toBe(true);
-        const writer = ruleDataClient.getWriter();
-
-        // Previously, a delay between calling getWriter() and using a writer function
-        // would cause an Unhandled promise rejection if there were any errors getting a writer
-        // Adding this delay in the tests to ensure this does not pop up again.
-        await delay();
-
-        expect(await writer.bulk({})).toEqual(undefined);
-        expect(mockLogger.error).toHaveBeenNthCalledWith(
-          1,
-          new RuleDataWriterInitializationError(
-            'index',
-            'observability.apm',
-            new Error('could not get cluster client')
-          )
-        );
-        expect(mockLogger.error).toHaveBeenNthCalledWith(
-          2,
-          `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
-        );
-        expect(ruleDataClient.isWriteEnabled()).toBe(false);
-      });
-
-      test('logs error, returns undefined and turns off writing if resource installation error', async () => {
-        const error = new Error('bad resource installation');
-        mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockRejectedValueOnce(error);
-        const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
-        expect(ruleDataClient.isWriteEnabled()).toBe(true);
-        const writer = ruleDataClient.getWriter();
-
-        // Previously, a delay between calling getWriter() and using a writer function
-        // would cause an Unhandled promise rejection if there were any errors getting a writer
-        // Adding this delay in the tests to ensure this does not pop up again.
-        await delay();
-
-        expect(await writer.bulk({})).toEqual(undefined);
-        expect(mockLogger.error).toHaveBeenNthCalledWith(
-          1,
-          new RuleDataWriterInitializationError('namespace', 'observability.apm', error)
-        );
-        expect(mockLogger.error).toHaveBeenNthCalledWith(
-          2,
-          `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
-        );
-        expect(ruleDataClient.isWriteEnabled()).toBe(false);
-      });
-
-      test('logs error and returns undefined if bulk function throws error', async () => {
-        const error = new Error('something went wrong!');
-        scopedClusterClient.bulk.mockRejectedValueOnce(error);
-        const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
-        expect(ruleDataClient.isWriteEnabled()).toBe(true);
-        const writer = ruleDataClient.getWriter();
-
-        // Previously, a delay between calling getWriter() and using a writer function
-        // would cause an Unhandled promise rejection if there were any errors getting a writer
-        // Adding this delay in the tests to ensure this does not pop up again.
-        await delay();
-
-        expect(await writer.bulk({})).toEqual(undefined);
-        expect(mockLogger.error).toHaveBeenNthCalledWith(1, error);
-        expect(ruleDataClient.isWriteEnabled()).toBe(true);
-      });
-
-      test('waits until cluster client is ready before calling bulk', async () => {
-        const ruleDataClient = new RuleDataClient(
-          getRuleDataClientOptions({
-            waitUntilReadyForWriting: new Promise((resolve) =>
-              setTimeout(resolve, 3000, right(scopedClusterClient))
-            ),
-          })
-        );
-
-        const writer = ruleDataClient.getWriter();
-        // Previously, a delay between calling getWriter() and using a writer function
-        // would cause an Unhandled promise rejection if there were any errors getting a writer
-        // Adding this delay in the tests to ensure this does not pop up again.
-        await delay();
-
-        const response = await writer.bulk({});
-
-        expect(response).toEqual({
-          body: {},
-          headers: {
-            'x-elastic-product': 'Elasticsearch',
-          },
-          meta: {},
-          statusCode: 200,
-          warnings: [],
-        });
-
-        expect(scopedClusterClient.bulk).toHaveBeenCalledWith(
-          {
-            index: `.alerts-observability.apm.alerts-default`,
-            require_alias: true,
-          },
-          { meta: true }
-        );
-      });
+      expect(scopedClusterClient.bulk).toHaveBeenCalledWith(
+        {
+          index: `.alerts-observability.apm.alerts-default`,
+          require_alias: true,
+        },
+        { meta: true }
+      );
     });
   });
 });

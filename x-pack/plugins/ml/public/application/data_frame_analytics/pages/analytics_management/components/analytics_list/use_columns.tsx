@@ -33,8 +33,6 @@ import {
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
-import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -43,6 +41,7 @@ enum TASK_STATE_COLOR {
   started = 'primary',
   starting = 'primary',
   stopped = 'hollow',
+  stopping = 'hollow',
 }
 
 export const getTaskStateBadge = (
@@ -143,18 +142,20 @@ export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
     pageState: { jobId },
   });
 
-  return <EuiLink href={href}>{jobId}</EuiLink>;
+  return (
+    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={jobId}>
+      {jobId}
+    </EuiLink>
+  );
 };
 
 export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
-  isManagementTable: boolean = false,
   isMlEnabledInSpace: boolean = true,
-  spacesApi?: SpacesPluginStart,
   refresh: () => void = () => {}
 ) => {
-  const { actions, modals } = useActions(isManagementTable);
+  const { actions, modals } = useActions();
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
     if (index !== -1) {
@@ -197,7 +198,7 @@ export const useColumns = (
                   values: { analyticsId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
@@ -211,9 +212,6 @@ export const useColumns = (
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
-      render: (jobId: string) => {
-        return isManagementTable ? <DFAnalyticsJobIdLink jobId={jobId} /> : jobId;
-      },
     },
     {
       field: DataFrameAnalyticsListColumn.description,
@@ -276,37 +274,10 @@ export const useColumns = (
         defaultMessage: 'Actions',
       }),
       actions,
-      width: isManagementTable === true ? '100px' : '150px',
+      width: '150px',
       'data-test-subj': 'mlAnalyticsTableColumnActions',
     },
   ];
-
-  if (isManagementTable === true) {
-    if (spacesApi) {
-      // insert before last column
-      columns.splice(columns.length - 1, 0, {
-        name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
-          defaultMessage: 'Spaces',
-        }),
-        render: (item: DataFrameAnalyticsListRow) =>
-          Array.isArray(item.spaceIds) ? (
-            <JobSpacesList
-              spacesApi={spacesApi}
-              spaceIds={item.spaceIds ?? []}
-              id={item.id}
-              jobType="data-frame-analytics"
-              refresh={refresh}
-            />
-          ) : null,
-        width: '90px',
-        'data-test-subj': 'mlAnalyticsTableColumnSpaces',
-      });
-    }
-    // Remove actions if Ml not enabled in current space
-    if (isMlEnabledInSpace === false) {
-      columns.pop();
-    }
-  }
 
   return { columns, modals };
 };

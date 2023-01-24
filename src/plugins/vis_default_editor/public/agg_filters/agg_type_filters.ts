@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { IAggType, IAggConfig, IndexPattern, search } from '../../../data/public';
+import { IAggType, IAggConfig, search } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const { propFilter } = search.aggs;
 const filterByName = propFilter('name');
 
 type AggTypeFilter = (
   aggType: IAggType,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   aggConfig: IAggConfig,
   aggFilter: string[]
 ) => boolean;
@@ -50,7 +51,7 @@ const filters: AggTypeFilter[] = [
 
 export function filterAggTypes(
   aggTypes: IAggType[],
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   aggConfig: IAggConfig,
   aggFilter: string[]
 ) {

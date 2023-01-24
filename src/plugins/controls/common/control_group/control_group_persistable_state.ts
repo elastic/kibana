@@ -10,9 +10,14 @@ import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
-} from '../../../embeddable/common/types';
+} from '@kbn/embeddable-plugin/common/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { ControlGroupInput, ControlPanelState } from './types';
-import { SavedObjectReference } from '../../../../core/types';
+import {
+  makeControlOrdersZeroBased,
+  removeHideExcludeAndHideExists,
+} from './control_group_migrations';
 
 type ControlGroupInputWithType = Partial<ControlGroupInput> & { type: string };
 
@@ -82,4 +87,17 @@ export const createControlGroupExtract = (
     }
     return { state: workingState as EmbeddableStateWithType, references };
   };
+};
+
+export const migrations: MigrateFunctionsObject = {
+  '8.2.0': (state) => {
+    const controlInput = state as unknown as ControlGroupInput;
+    // for hierarchical chaining it is required that all control orders start at 0.
+    return makeControlOrdersZeroBased(controlInput);
+  },
+  '8.7.0': (state) => {
+    const controlInput = state as unknown as ControlGroupInput;
+    // need to set `hideExclude` and `hideExists` to `undefined` for all options list controls.
+    return removeHideExcludeAndHideExists(controlInput);
+  },
 };

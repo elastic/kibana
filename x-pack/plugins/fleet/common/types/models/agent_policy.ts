@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '../../types';
+import type { MonitoringType, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -24,20 +24,25 @@ export interface NewAgentPolicy {
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
+  inactivity_timeout?: number;
   is_preconfigured?: boolean;
   // Nullable to allow user to reset to default outputs
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
+  download_source_id?: string | null;
+  fleet_server_host_id?: string | null;
+  schema_version?: string;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
-  package_policies: string[] | PackagePolicy[];
+  package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
   revision: number;
+  agents?: number;
 }
 
 export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
@@ -58,6 +63,7 @@ export interface FullAgentPolicyInput {
   type: string;
   data_stream: { namespace: string };
   use_output: string;
+  package_policy_id: string;
   meta?: {
     package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
     [key: string]: unknown;
@@ -77,6 +83,8 @@ export interface FullAgentPolicyOutputPermissions {
 }
 
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+  proxy_url?: string;
+  proxy_headers?: any;
   [key: string]: any;
 };
 
@@ -89,9 +97,7 @@ export interface FullAgentPolicy {
     [output: string]: FullAgentPolicyOutputPermissions;
   };
   fleet?:
-    | {
-        hosts: string[];
-      }
+    | FullAgentPolicyFleetConfig
     | {
         kibana: FullAgentPolicyKibanaConfig;
       };
@@ -105,6 +111,18 @@ export interface FullAgentPolicy {
       metrics: boolean;
       logs: boolean;
     };
+    download: { sourceURI: string };
+  };
+}
+
+export interface FullAgentPolicyFleetConfig {
+  hosts: string[];
+  proxy_url?: string;
+  proxy_headers?: any;
+  ssl?: {
+    verification_mode?: string;
+    certificate_authorities?: string[];
+    renegotiation?: string;
   };
 }
 
@@ -150,4 +168,8 @@ export interface FleetServerPolicy {
    * Auto unenroll any Elastic Agents which have not checked in for this many seconds
    */
   unenroll_timeout?: number;
+  /**
+   * Mark agents as inactive if they have not checked in for this many seconds
+   */
+  inactivity_timeout?: number;
 }

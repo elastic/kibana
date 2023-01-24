@@ -6,21 +6,23 @@
  */
 
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { ActionConnector } from '../../../common/api';
+import type { FieldHook, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   useFormData,
-  FieldHook,
   useFormContext,
-  FieldConfig,
-} from '../../common/shared_imports';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ActionConnector } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { FormProps, schema } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import * as i18n from '../../common/translations';
 
 interface Props {
   connectors: ActionConnector[];
@@ -54,6 +56,7 @@ ConnectorFields.displayName = 'ConnectorFields';
 const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
   const { getFields, setFieldValue } = useFormContext();
   const { connector: configurationConnector } = useCaseConfigure();
+  const { actions } = useApplicationCapabilities();
 
   const handleConnectorChange = useCallback(() => {
     const { fields } = getFields();
@@ -75,6 +78,14 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
     config: schema.connectorId as FieldConfig,
     connectors,
   });
+
+  if (!actions.read) {
+    return (
+      <EuiText data-test-subj="create-case-connector-permissions-error-msg" size="s">
+        <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+      </EuiText>
+    );
+  }
 
   return (
     <EuiFlexGroup>

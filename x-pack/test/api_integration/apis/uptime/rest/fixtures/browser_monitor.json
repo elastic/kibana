@@ -1,15 +1,20 @@
 {
   "type": "browser",
   "enabled": true,
+  "alert": {
+    "status": {
+      "enabled": true
+    }
+  },
+  "journey_id": "",
+  "project_id": "",
   "schedule": {
     "number": "3",
     "unit": "m"
   },
   "service.name": "",
-  "tags": [
-    "cookie-test",
-    "browser"
-  ],
+  "config_id": "",
+  "tags": ["cookie-test", "browser"],
   "timeout": "16",
   "__ui": {
     "script_source": {
@@ -25,6 +30,7 @@
   "source.zip_url.folder": "",
   "source.zip_url.proxy_url": "",
   "source.inline.script": "step(\"Visit /users api route\", async () => {\\n  const response = await page.goto('https://nextjs-test-synthetics.vercel.app/api/users');\\n  expect(response.status()).toEqual(200);\\n});",
+  "source.project.content": "",
   "params": "",
   "screenshots": "on",
   "synthetics_args": [],
@@ -38,5 +44,18 @@
   "throttling.config": "5d/3u/20l",
   "locations": [],
   "name": "Test HTTP Monitor 03",
-  "namespace": "testnamespace"
+  "namespace": "testnamespace",
+  "origin": "ui",
+  "form_monitor_type": "multistep",
+  "urls": "",
+  "url.port": null,
+  "id": "",
+  "hash": "",
+  "playwright_options": "",
+  "playwright_text_assertion": "",
+  "ssl.certificate": "",
+  "ssl.certificate_authorities": "",
+  "ssl.supported_protocols": ["TLSv1.1", "TLSv1.2", "TLSv1.3"],
+  "ssl.verification_mode": "full",
+  "revision": 1
 }

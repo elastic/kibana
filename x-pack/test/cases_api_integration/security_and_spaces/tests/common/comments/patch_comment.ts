@@ -7,13 +7,13 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
 import {
   AttributesTypeAlerts,
   AttributesTypeUser,
   CommentType,
-} from '../../../../../../plugins/cases/common/api';
+} from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
 import {
   defaultUser,
   postCaseReq,

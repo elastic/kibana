@@ -10,7 +10,7 @@ import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -21,9 +21,11 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 jest.mock('moment', () => {
-  const moment = function () {};
-  moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
-  return moment;
+  const actual = jest.requireActual('moment');
+  return {
+    ...actual,
+    duration: () => ({ humanize: () => 'HUMANIZED_DURATION' }),
+  };
 });
 
 jest.mock('../static_globals', () => ({
@@ -69,6 +71,7 @@ describe('LicenseExpirationRule', () => {
 
   describe('execute', () => {
     function FakeDate() {}
+
     FakeDate.prototype.valueOf = () => 1;
 
     const clusterUuid = 'abc123';
@@ -200,7 +203,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
@@ -222,7 +224,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
@@ -243,7 +244,6 @@ describe('LicenseExpirationRule', () => {
       const type = rule.getRuleType();
       await type.executor({
         ...executorOptions,
-        // @ts-ignore
         params: rule.ruleOptions.defaultParams,
       } as any);
       expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);

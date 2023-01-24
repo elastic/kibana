@@ -8,20 +8,16 @@
 import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  LazyShapeDrawer,
-  ShapeDrawerComponentProps,
+  ShapeDrawerComponent,
   getDefaultShapeData,
   SvgConfig,
   ShapeRef,
   ViewBoxParams,
-} from '../../../../../../src/plugins/expression_shape/public';
-import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/expression-shape-plugin/public';
 
 interface Props {
   shape?: string;
 }
-
-const ShapeDrawer = withSuspense<ShapeDrawerComponentProps, ShapeRef>(LazyShapeDrawer);
 
 function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
   const { minX, minY, width, height } = defaultViewBox;
@@ -45,7 +41,7 @@ export const ShapePreview: FC<Props> = ({ shape }) => {
   if (!shape) return <div className="canvasShapePreview" />;
   return (
     <div className="canvasShapePreview">
-      <ShapeDrawer
+      <ShapeDrawerComponent
         ref={shapeRef}
         shapeType={shape}
         shapeAttributes={{

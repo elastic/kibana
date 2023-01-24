@@ -24,14 +24,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
+import { isHttpFetchError } from '@kbn/core-http-browser';
+import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
 import {
   isEsIndices,
   isEsIngestPipelines,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
+import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -39,7 +42,6 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { isHttpFetchError } from '../../../../common/request';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
@@ -49,7 +51,7 @@ import {
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
-import { EsIndexName, IndexPatternTitle } from './common';
+import { EsIndexName, DataViewTitle } from './common';
 import {
   continuousModeDelayValidator,
   retentionPolicyMaxAgeValidator,
@@ -99,14 +101,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     );
 
     // Index pattern state
-    const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
-    const [createIndexPattern, setCreateIndexPattern] = useState(
-      canCreateDataView === false ? false : defaults.createIndexPattern
+    const [dataViewTitles, setDataViewTitles] = useState<DataViewTitle[]>([]);
+    const [createDataView, setCreateDataView] = useState(
+      canCreateDataView === false ? false : defaults.createDataView
     );
-    const [indexPatternAvailableTimeFields, setIndexPatternAvailableTimeFields] = useState<
-      string[]
-    >([]);
-    const [indexPatternTimeField, setIndexPatternTimeField] = useState<string | undefined>();
+    const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
+    const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
     const onTimeFieldChanged = React.useCallback(
       (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -117,11 +117,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         }
         // Find the time field based on the selected value
         // this is to account for undefined when user chooses not to use a date field
-        const timeField = indexPatternAvailableTimeFields.find((col) => col === value);
+        const timeField = dataViewAvailableTimeFields.find((col) => col === value);
 
-        setIndexPatternTimeField(timeField);
+        setDataViewTimeField(timeField);
       },
-      [setIndexPatternTimeField, indexPatternAvailableTimeFields]
+      [setDataViewTimeField, dataViewAvailableTimeFields]
     );
 
     const { overlays, theme } = useAppDependencies();
@@ -134,7 +134,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
         const pivotQuery = getPivotQuery(searchQuery);
         const previewRequest = getPreviewTransformRequestBody(
-          searchItems.indexPattern.title,
+          searchItems.dataView.getIndexPattern(),
           pivotQuery,
           partialPreviewRequest,
           stepDefineState.runtimeMappings
@@ -148,8 +148,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             (col) => properties[col].type === 'date'
           );
 
-          setIndexPatternAvailableTimeFields(timeFields);
-          setIndexPatternTimeField(timeFields[0]);
+          setDataViewAvailableTimeFields(timeFields);
+          setDataViewTimeField(timeFields[0]);
         } else {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
@@ -228,7 +228,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         }
 
         try {
-          setIndexPatternTitles(await deps.data.indexPatterns.getTitles());
+          setDataViewTitles(await deps.data.dataViews.getTitles());
         } catch (e) {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
@@ -245,7 +245,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const dateFieldNames = searchItems.indexPattern.fields
+    const dateFieldNames = searchItems.dataView.fields
       .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
       .map((f) => f.name)
       .sort();
@@ -291,7 +291,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const indexNameExists = indexNames.some((name) => destinationIndex === name);
     const indexNameEmpty = destinationIndex === '';
     const indexNameValid = isValidIndexName(destinationIndex);
-    const indexPatternTitleExists = indexPatternTitles.some((name) => destinationIndex === name);
+    const dataViewTitleExists = dataViewTitles.some((name) => destinationIndex === name);
 
     const [transformFrequency, setTransformFrequency] = useState(defaults.transformFrequency);
     const isTransformFrequencyValid = transformFrequencyValidator(transformFrequency);
@@ -305,6 +305,14 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformSettingsMaxPageSearchSize
     );
 
+    const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
+      string | number | undefined
+    >(defaults.transformSettingsNumFailureRetries);
+    const isTransformSettingsNumFailureRetriesValid =
+      transformSettingsNumFailureRetries === undefined ||
+      transformSettingsNumFailureRetries === '-' ||
+      integerRangeMinus1To100Validator(transformSettingsNumFailureRetries).length === 0;
+
     const valid =
       !transformIdEmpty &&
       transformIdValid &&
@@ -313,7 +321,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       isTransformSettingsMaxPageSearchSizeValid &&
       !indexNameEmpty &&
       indexNameValid &&
-      (!indexPatternTitleExists || !createIndexPattern) &&
+      (!dataViewTitleExists || !createDataView) &&
       (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid)) &&
       (!isRetentionPolicyAvailable ||
         !isRetentionPolicyEnabled ||
@@ -327,7 +335,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       onChange({
         continuousModeDateField,
         continuousModeDelay,
-        createIndexPattern,
+        createDataView,
         isContinuousModeEnabled,
         isRetentionPolicyEnabled,
         retentionPolicyDateField,
@@ -337,11 +345,18 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         transformFrequency,
         transformSettingsMaxPageSearchSize,
         transformSettingsDocsPerSecond,
+        transformSettingsNumFailureRetries:
+          transformSettingsNumFailureRetries === undefined ||
+          transformSettingsNumFailureRetries === ''
+            ? undefined
+            : typeof transformSettingsNumFailureRetries === 'number'
+            ? transformSettingsNumFailureRetries
+            : parseInt(transformSettingsNumFailureRetries, 10),
         destinationIndex,
         destinationIngestPipeline,
         touched: true,
         valid,
-        indexPatternTimeField,
+        dataViewTimeField,
         _meta: defaults._meta,
       });
       // custom comparison
@@ -349,7 +364,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     }, [
       continuousModeDateField,
       continuousModeDelay,
-      createIndexPattern,
+      createDataView,
       isContinuousModeEnabled,
       isRetentionPolicyEnabled,
       retentionPolicyDateField,
@@ -358,10 +373,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformDescription,
       transformFrequency,
       transformSettingsMaxPageSearchSize,
+      transformSettingsNumFailureRetries,
       destinationIndex,
       destinationIngestPipeline,
       valid,
-      indexPatternTimeField,
+      dataViewTimeField,
       /* eslint-enable react-hooks/exhaustive-deps */
     ]);
 
@@ -530,9 +546,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           ) : null}
 
           <EuiFormRow
-            isInvalid={
-              (createIndexPattern && indexPatternTitleExists) || canCreateDataView === false
-            }
+            isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}
             error={[
               ...(canCreateDataView === false
                 ? [
@@ -543,7 +557,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     </EuiText>,
                   ]
                 : []),
-              ...(createIndexPattern && indexPatternTitleExists
+              ...(createDataView && dataViewTitleExists
                 ? [
                     i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
                       defaultMessage: 'A data view with this title already exists.',
@@ -553,25 +567,23 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             ]}
           >
             <EuiSwitch
-              name="transformCreateIndexPattern"
+              name="transformCreateDataView"
               disabled={canCreateDataView === false}
               label={i18n.translate('xpack.transform.stepCreateForm.createDataViewLabel', {
                 defaultMessage: 'Create Kibana data view',
               })}
-              checked={createIndexPattern === true}
-              onChange={() => setCreateIndexPattern(!createIndexPattern)}
-              data-test-subj="transformCreateIndexPatternSwitch"
+              checked={createDataView === true}
+              onChange={() => setCreateDataView(!createDataView)}
+              data-test-subj="transformCreateDataViewSwitch"
             />
           </EuiFormRow>
-          {createIndexPattern &&
-            !indexPatternTitleExists &&
-            indexPatternAvailableTimeFields.length > 0 && (
-              <StepDetailsTimeField
-                indexPatternAvailableTimeFields={indexPatternAvailableTimeFields}
-                indexPatternTimeField={indexPatternTimeField}
-                onTimeFieldChanged={onTimeFieldChanged}
-              />
-            )}
+          {createDataView && !dataViewTitleExists && dataViewAvailableTimeFields.length > 0 && (
+            <StepDetailsTimeField
+              dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+              dataViewTimeField={dataViewTimeField}
+              onTimeFieldChanged={onTimeFieldChanged}
+            />
+          )}
 
           {/* Continuous mode */}
           <EuiFormRow
@@ -781,7 +793,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               }
               helpText={i18n.translate('xpack.transform.stepDetailsForm.frequencyHelpText', {
                 defaultMessage:
-                  'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
+                  'The interval to check for changes in source indices when the transformation runs continuously.',
               })}
             >
               <EuiFieldText
@@ -789,7 +801,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   'xpack.transform.stepDetailsForm.editFlyoutFormFrequencyPlaceholderText',
                   {
                     defaultMessage: 'Default: {defaultValue}',
-                    values: { defaultValue: '1m' },
+                    values: { defaultValue: DEFAULT_TRANSFORM_FREQUENCY },
                   }
                 )}
                 value={transformFrequency}
@@ -819,7 +831,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
                 {
                   defaultMessage:
-                    'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+                    'The initial page size to use for the composite aggregation for each checkpoint.',
                 }
               )}
             >
@@ -843,6 +855,58 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
                 isInvalid={!isTransformFrequencyValid}
                 data-test-subj="transformMaxPageSearchSizeInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              data-test-subj="transformNumFailureRetriesFormRow"
+              label={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformNumFailureRetriesLabel',
+                {
+                  defaultMessage: 'Number of failure retries',
+                }
+              )}
+              isInvalid={!isTransformSettingsNumFailureRetriesValid}
+              error={
+                !isTransformSettingsNumFailureRetriesValid && [
+                  i18n.translate('xpack.transform.stepDetailsForm.NumFailureRetriesError', {
+                    defaultMessage:
+                      'Number of retries needs to be between 0 and 100, or -1 for infinite retries.',
+                  }),
+                ]
+              }
+              helpText={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformNumRetriesHelpText',
+                {
+                  defaultMessage:
+                    'The number of retries on a recoverable failure before the transform task is marked as failed. Set it to -1 for infinite retries.',
+                }
+              )}
+            >
+              <EuiFieldText
+                value={
+                  transformSettingsNumFailureRetries ||
+                  (transformSettingsNumFailureRetries !== undefined &&
+                    transformSettingsNumFailureRetries >= -1)
+                    ? transformSettingsNumFailureRetries.toString()
+                    : ''
+                }
+                onChange={(e) => {
+                  if (e.target.value === '') {
+                    setTransformSettingsNumFailureRetries(undefined);
+                    return;
+                  }
+                  setTransformSettingsNumFailureRetries(
+                    e.target.value === '-' ? '-' : parseInt(e.target.value, 10)
+                  );
+                }}
+                aria-label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.numFailureRetriesAriaLabel',
+                  {
+                    defaultMessage: 'Choose a maximum number of retries.',
+                  }
+                )}
+                isInvalid={!isTransformSettingsNumFailureRetriesValid}
+                data-test-subj="transformNumFailureRetriesInput"
               />
             </EuiFormRow>
           </EuiAccordion>

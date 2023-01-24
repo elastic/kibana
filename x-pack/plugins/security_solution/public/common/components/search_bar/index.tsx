@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
-import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import type { FilterManager, TimeRange, SavedQuery } from 'src/plugins/data/public';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { OnTimeChangeProps } from '@elastic/eui';
-
+import type { OnTimeChangeProps } from '@elastic/eui';
 import { inputsActions } from '../../store/inputs';
-import { InputsRange } from '../../store/inputs/model';
-import { InputsModelId } from '../../store/inputs/constants';
-import { State, inputsModel } from '../../store';
+import type { InputsRange } from '../../store/inputs/model';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { State, inputsModel } from '../../store';
 import { formatDate } from '../super_date_picker';
 import {
   endSelector,
@@ -34,32 +34,31 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { hostsActions } from '../../../hosts/store';
-import { networkActions } from '../../../network/store';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-
-const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
+import { usersActions } from '../../../explore/users/store';
+import { hostsActions } from '../../../explore/hosts/store';
+import { networkActions } from '../../../explore/network/store';
+import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
+import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
-  id: InputsModelId;
+  id: InputsModelId.global | InputsModelId.timeline;
   indexPattern: DataViewBase;
   pollForSignalIndex?: () => void;
   timelineId?: string;
   dataTestSubj?: string;
+  hideFilterBar?: boolean;
+  hideQueryInput?: boolean;
 }
-
-const SearchBarContainer = styled.div`
-  .globalQueryBar {
-    padding: 0px;
-  }
-`;
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     end,
     filterQuery,
     fromStr,
+    hideFilterBar = false,
+    hideQueryInput = false,
     id,
     indexPattern,
     isLoading = false,
@@ -79,21 +78,34 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           timefilter: { timefilter },
           filterManager,
         },
+      },
+      unifiedSearch: {
         ui: { SearchBar },
       },
-      storage,
     } = useKibana().services;
+
+    const dispatch = useDispatch();
+    const setTablesActivePageToZero = useCallback(() => {
+      dispatch(usersActions.setUsersTablesActivePageToZero());
+      dispatch(hostsActions.setHostTablesActivePageToZero());
+      dispatch(networkActions.setNetworkTablesActivePageToZero());
+    }, [dispatch]);
+
+    useSyncSearchBarUrlParams();
+    useSyncTimerangeUrlParam();
 
     useEffect(() => {
       if (fromStr != null && toStr != null) {
         timefilter.setTime({ from: fromStr, to: toStr });
       } else if (start != null && end != null) {
+        setTablesActivePageToZero();
+
         timefilter.setTime({
           from: new Date(start).toISOString(),
           to: new Date(end).toISOString(),
         });
       }
-    }, [end, fromStr, start, timefilter, toStr]);
+    }, [end, fromStr, start, timefilter, toStr, setTablesActivePageToZero]);
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -112,6 +124,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           isQuickSelection,
           updateTime: false,
           filterManager,
+          setTablesActivePageToZero,
         };
         let isStateUpdated = false;
 
@@ -157,6 +170,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         filterQuery,
         queries,
         updateSearch,
+        setTablesActivePageToZero,
       ]
     );
 
@@ -171,12 +185,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
             isQuickSelection: true,
             updateTime: true,
             filterManager,
+            setTablesActivePageToZero,
           });
         } else {
           queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      [updateSearch, id, filterManager, queries]
+      [updateSearch, id, filterManager, queries, setTablesActivePageToZero]
     );
 
     const onSaved = useCallback(
@@ -202,6 +217,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           isQuickSelection,
           updateTime: false,
           filterManager,
+          setTablesActivePageToZero,
         };
 
         if (savedQueryUpdated.attributes.timefilter) {
@@ -219,7 +235,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         updateSearch(updateSearchBar);
       },
-      [id, toStr, end, fromStr, start, filterManager, updateSearch]
+      [id, toStr, end, fromStr, start, filterManager, updateSearch, setTablesActivePageToZero]
     );
 
     const onClearSavedQuery = useCallback(() => {
@@ -239,19 +255,20 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           resetSavedQuery: true,
           savedQuery: undefined,
           filterManager,
+          setTablesActivePageToZero,
         });
       }
-    }, [savedQuery, updateSearch, id, toStr, end, fromStr, start, filterManager]);
-
-    const saveAppStateToStorage = useCallback(
-      (filters: Filter[]) => storage.set(APP_STATE_STORAGE_KEY, filters),
-      [storage]
-    );
-
-    const getAppStateFromStorage = useCallback(
-      () => storage.get(APP_STATE_STORAGE_KEY) ?? [],
-      [storage]
-    );
+    }, [
+      savedQuery,
+      updateSearch,
+      id,
+      toStr,
+      end,
+      fromStr,
+      start,
+      filterManager,
+      setTablesActivePageToZero,
+    ]);
 
     useEffect(() => {
       let isSubscribed = true;
@@ -261,22 +278,14 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
-              saveAppStateToStorage(filterManager.getAppFilters());
-              setSearchBarFilter({
-                id,
-                filters: filterManager.getFilters(),
-              });
+              const filters = filterManager.getFilters();
+
+              setSearchBarFilter({ id, filters });
+              setTablesActivePageToZero();
             }
           },
         })
       );
-
-      // for the initial state
-      filterManager.setAppFilters(getAppStateFromStorage());
-      setSearchBarFilter({
-        id,
-        filters: filterManager.getFilters(),
-      });
 
       return () => {
         isSubscribed = false;
@@ -288,11 +297,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     return (
-      <SearchBarContainer data-test-subj={`${id}DatePicker`}>
+      <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={indexPatterns}
+          indexPatterns={indexPatterns as DataView[]}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
@@ -300,14 +309,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onSaved={onSaved}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
-          showFilterBar={true}
+          showFilterBar={!hideFilterBar}
           showDatePicker={true}
-          showQueryBar={true}
-          showQueryInput={true}
+          showQueryInput={!hideQueryInput}
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}
         />
-      </SearchBarContainer>
+      </div>
     );
   },
   (prevProps, nextProps) =>
@@ -354,7 +362,7 @@ const makeMapStateToProps = () => {
 SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
-  id: InputsModelId;
+  id: InputsModelId.global | InputsModelId.timeline;
   filters?: Filter[];
   filterManager: FilterManager;
   query?: Query;
@@ -362,6 +370,7 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   resetSavedQuery?: boolean;
   timelineId?: string;
   updateTime: boolean;
+  setTablesActivePageToZero: () => void;
 }
 
 export const dispatchUpdateSearch =
@@ -376,8 +385,9 @@ export const dispatchUpdateSearch =
     savedQuery,
     start,
     timelineId,
-    filterManager,
     updateTime = false,
+    filterManager,
+    setTablesActivePageToZero,
   }: UpdateReduxSearchBar): void => {
     if (updateTime) {
       const fromDate = formatDate(start);
@@ -435,12 +445,12 @@ export const dispatchUpdateSearch =
     if (filters != null) {
       filterManager.setFilters(filters);
     }
+
     if (savedQuery != null || resetSavedQuery) {
       dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
     }
 
-    dispatch(hostsActions.setHostTablesActivePageToZero());
-    dispatch(networkActions.setNetworkTablesActivePageToZero());
+    setTablesActivePageToZero();
   };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({

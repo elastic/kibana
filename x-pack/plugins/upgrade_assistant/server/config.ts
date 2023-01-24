@@ -4,98 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SemVer } from 'semver';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'src/core/server';
-
-import { MAJOR_VERSION } from '../common/constants';
-
-const kibanaVersion = new SemVer(MAJOR_VERSION);
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 // -------------------------------
-// >= 8.x
+// >= 8.6 UA is always enabled to guide stack upgrades
+// even for minor releases.
 // -------------------------------
-const schemaLatest = schema.object({
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+const configSchema = schema.object({
+  featureSet: schema.object({
+    /**
+     * Ml Snapshot should only be enabled for major version upgrades. Currently this
+     * is manually set to `true` on every `x.last` version.
+     * ML Upgrade mode can be toggled from outside Kibana, the purpose
+     * of this feature guard is to hide all ML related deprecations from the end user
+     * until the next major upgrade.
+     *
+     * When we want to enable ML model snapshot deprecation warnings again we need
+     * to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
+     * to something higher than 7.0.0 in the Elasticsearch code.
+     */
+    mlSnapshots: schema.boolean({ defaultValue: false }),
+    /**
+     * Migrating system indices should only be enabled for major version upgrades.
+     * Currently this is manually set to `true` on every `x.last` version.
+     */
+    migrateSystemIndices: schema.boolean({ defaultValue: false }),
+    /**
+     * Deprecations with reindexing corrective actions are only enabled for major version upgrades.
+     * Currently this is manually set to `true` on every `x.last` version.
+     *
+     * The reindex action includes some logic that is specific to the 8.0 upgrade
+     * End users could get into a bad situation if this is enabled before this logic is fixed.
+     */
+    reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
   }),
-  /*
-   * This will default to true up until the last minor before the next major.
-   * In readonly mode, the user will not be able to perform any actions in the UI
-   * and will be presented with a message indicating as such.
-   */
-  readonly: schema.boolean({ defaultValue: true }),
-});
-
-const configLatest: PluginConfigDescriptor<UpgradeAssistantConfig> = {
-  exposeToBrowser: {
-    ui: true,
-    readonly: true,
-  },
-  schema: schemaLatest,
-  deprecations: () => [],
-};
-
-export type UpgradeAssistantConfig = TypeOf<typeof schemaLatest>;
-
-// -------------------------------
-// 7.x
-// -------------------------------
-const schema7x = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  /*
-   * This will default to true up until the last minor before the next major.
-   * In readonly mode, the user will not be able to perform any actions in the UI
-   * and will be presented with a message indicating as such.
-   */
-  readonly: schema.boolean({ defaultValue: false }),
 });
 
-export type UpgradeAssistantConfig7x = TypeOf<typeof schema7x>;
+export type UpgradeAssistantConfig = TypeOf<typeof configSchema>;
 
-const config7x: PluginConfigDescriptor<UpgradeAssistantConfig7x> = {
+export const config: PluginConfigDescriptor<UpgradeAssistantConfig> = {
   exposeToBrowser: {
     ui: true,
-    readonly: true,
+    featureSet: true,
   },
-  schema: schema7x,
-  deprecations: () => [
-    (completeConfig, rootPath, addDeprecation) => {
-      if (get(completeConfig, 'xpack.upgrade_assistant.enabled') === undefined) {
-        return completeConfig;
-      }
-
-      addDeprecation({
-        configPath: 'xpack.upgrade_assistant.enabled',
-        level: 'critical',
-        title: i18n.translate('xpack.upgradeAssistant.deprecations.enabledTitle', {
-          defaultMessage: 'Setting "xpack.upgrade_assistant.enabled" is deprecated',
-        }),
-        message: i18n.translate('xpack.upgradeAssistant.deprecations.enabledMessage', {
-          defaultMessage:
-            'To disallow users from accessing the Upgrade Assistant UI, use the "xpack.upgrade_assistant.ui.enabled" setting instead of "xpack.upgrade_assistant.enabled".',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.upgradeAssistant.deprecations.enabled.manualStepOneMessage', {
-              defaultMessage: 'Open the kibana.yml config file.',
-            }),
-            i18n.translate('xpack.upgradeAssistant.deprecations.enabled.manualStepTwoMessage', {
-              defaultMessage:
-                'Change the "xpack.upgrade_assistant.enabled" setting to "xpack.upgrade_assistant.ui.enabled".',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
-  ],
+  schema: configSchema,
+  deprecations: () => [],
 };
-
-export const config: PluginConfigDescriptor<UpgradeAssistantConfig | UpgradeAssistantConfig7x> =
-  kibanaVersion.major < 8 ? config7x : configLatest;

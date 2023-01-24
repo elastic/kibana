@@ -11,9 +11,9 @@ import ReactDOM from 'react-dom';
 
 import {
   EuiText,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiCard,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
@@ -22,7 +22,7 @@ import {
   EuiLink,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { ExampleDefinition } from './types';
 
 interface Props {

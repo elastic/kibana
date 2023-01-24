@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-import glob from 'glob';
+import globby from 'globby';
 import { safeLoad } from 'js-yaml';
 
 import { getField, processFields } from './field';
@@ -27,7 +27,7 @@ expect.addSnapshotSerializer({
 
 test('tests loading fields.yml', () => {
   // Find all .yml files to run tests on
-  const files = glob.sync(path.join(__dirname, '/tests/*.yml'));
+  const files = globby.sync(path.join(__dirname, '/tests/*.yml'));
   for (const file of files) {
     const fieldsYML = readFileSync(file, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
@@ -623,5 +623,51 @@ describe('processFields', () => {
       },
     ];
     expect(processFields(fields)).toEqual(fieldsExpected);
+  });
+
+  test('handle wildcard field', () => {
+    const wildcardFields = [
+      {
+        name: 'a.*.b',
+        type: 'keyword',
+      },
+      {
+        name: 'a.b.*',
+        type: 'scaled_float',
+      },
+    ];
+
+    expect(processFields(wildcardFields)).toMatchInlineSnapshot(`
+      [
+        {
+          "name": "a",
+          "type": "group",
+          "fields": [
+            {
+              "name": "*",
+              "type": "group",
+              "fields": [
+                {
+                  "name": "b",
+                  "type": "object",
+                  "object_type": "keyword"
+                }
+              ]
+            },
+            {
+              "name": "b",
+              "type": "group",
+              "fields": [
+                {
+                  "name": "*",
+                  "type": "object",
+                  "object_type": "scaled_float"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    `);
   });
 });

@@ -23,7 +23,7 @@ describe('Skip to Bottom Button', function () {
 
   it('should be clickable', function () {
     component = mountWithIntl(<SkipBottomButton {...props} />);
-    component.simulate('click');
+    component.find('[data-test-subj="discoverSkipTableButton"]').last().simulate('click');
     expect(props.onClick).toHaveBeenCalled();
   });
 });

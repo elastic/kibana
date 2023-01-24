@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { fromKueryExpression } from '@kbn/es-query';
+import { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { securityMock } from '../../../../plugins/security/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
-} from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
+} from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import {
   AlertingAuthorization,
   WriteOperations,
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -192,7 +192,9 @@ beforeEach(() => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'myApp',
   }));
   features.getKibanaFeatures.mockReturnValue([
@@ -208,8 +210,8 @@ describe('AlertingAuthorization', () => {
   describe('constructor', () => {
     test(`fetches the user's current space`, async () => {
       const space = {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         disabledFeatures: [],
       };
       getSpace.mockResolvedValue(space);
@@ -839,7 +841,7 @@ describe('AlertingAuthorization', () => {
           })
         ).filter
       ).toEqual(
-        esKuery.fromKueryExpression(
+        fromKueryExpression(
           `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );

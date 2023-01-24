@@ -6,13 +6,14 @@
  */
 
 import { useMemo } from 'react';
+import { usePreviousPeriodLabel } from './use_previous_period_text';
+import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
 import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 import { useTimeRange } from './use_time_range';
-import { useApmParams } from './use_apm_params';
+import { useAnyOfApmParams } from './use_apm_params';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
@@ -23,26 +24,17 @@ export function useTransactionLatencyChartsFetcher({
 }) {
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: {
-      transactionName,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { transactionName, latencyAggregationType },
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+    query: { rangeFrom, rangeTo, offset, comparisonEnabled },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -66,8 +58,10 @@ export function useTransactionLatencyChartsFetcher({
                 transactionType,
                 transactionName,
                 latencyAggregationType,
-                comparisonStart,
-                comparisonEnd,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }
@@ -83,16 +77,18 @@ export function useTransactionLatencyChartsFetcher({
       transactionName,
       transactionType,
       latencyAggregationType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
+      comparisonEnabled,
     ]
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const memoizedData = useMemo(
     () =>
       getLatencyChartSelector({
         latencyChart: data,
         latencyAggregationType,
+        previousPeriodLabel,
       }),
     // It should only update when the data has changed
     // eslint-disable-next-line react-hooks/exhaustive-deps

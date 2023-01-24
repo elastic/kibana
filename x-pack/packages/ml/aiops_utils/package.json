@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/aiops-utils",
+  "description": "Static utilities for AIOps related efforts.",
+  "author": "Machine Learning UI",
+  "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-aiops-utils",
+  "private": true,
+  "version": "1.0.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

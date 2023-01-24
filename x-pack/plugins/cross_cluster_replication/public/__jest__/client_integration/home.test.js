@@ -11,18 +11,13 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 const { setup } = pageHelpers.home;
 
 describe('<CrossClusterReplicationHome />', () => {
-  let server;
   let httpRequestsMockHelpers;
   let find;
   let exists;
   let component;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {
@@ -49,7 +44,7 @@ describe('<CrossClusterReplicationHome />', () => {
     });
 
     test('should set the default selected tab to "Follower indices"', () => {
-      expect(component.find('.euiTab-isSelected').text()).toBe('Follower indices');
+      expect(component.find('button.euiTab-isSelected').text()).toBe('Follower indices');
 
       // Verify that the <FollowerIndicesList /> component is rendered
       expect(component.find('FollowerIndicesList').length).toBe(1);
@@ -64,7 +59,7 @@ describe('<CrossClusterReplicationHome />', () => {
       await nextTick();
       component.update();
 
-      expect(component.find('.euiTab-isSelected').text()).toBe('Auto-follow patterns');
+      expect(component.find('button.euiTab-isSelected').text()).toBe('Auto-follow patterns');
 
       // Verify that the <AutoFollowPatternList /> component is rendered
       expect(component.find('AutoFollowPatternList').length).toBe(1);

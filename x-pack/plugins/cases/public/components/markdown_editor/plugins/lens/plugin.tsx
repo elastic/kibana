@@ -6,19 +6,18 @@
  */
 
 import { first } from 'rxjs/operators';
+import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiMarkdownEditorUiPlugin,
   EuiMarkdownContext,
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiMarkdownAstNodePosition,
   EuiBetaBadge,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
@@ -27,12 +26,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import type { TypedLensByValueInput } from '../../../../../../lens/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { ModalContainer } from './modal_container';
-import type { EmbeddablePackageState } from '../../../../../../../../src/plugins/embeddable/public';
 import { SavedObjectFinderUi } from './saved_objects_finder';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';

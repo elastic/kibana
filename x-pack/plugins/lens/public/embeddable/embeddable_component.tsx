@@ -6,9 +6,9 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart, ThemeServiceStart } from 'kibana/public';
-import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableFactory,
@@ -19,14 +19,15 @@ import {
   EmbeddableStart,
   IEmbeddable,
   useEmbeddableFactory,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
-import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
-import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState, MetricState } from '../../common';
-import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
-import type { HeatmapVisualizationState } from '../heatmap_visualization/types';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { XYState } from '../visualizations/xy/types';
+import type { PieVisualizationState, LegacyMetricState } from '../../common';
+import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
+import type { MetricVisualizationState } from '../visualizations/metric/visualization';
+import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<
@@ -36,7 +37,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   visualizationType: TVisType;
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
-      indexpattern: IndexPatternPersistedState;
+      formBased: FormBasedPersistedState;
     };
     visualization: TVisState;
   };
@@ -51,7 +52,8 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
-    | LensAttributes<'lnsMetric', MetricState>
+    | LensAttributes<'lnsLegacyMetric', LegacyMetricState>
+    | LensAttributes<'lnsMetric', MetricVisualizationState>
     | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
     | LensAttributes<'lnsGauge', GaugeVisualizationState>
     | LensAttributes<string, unknown>;
@@ -60,6 +62,7 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {
   withDefaultActions?: boolean;
   extraActions?: Action[];
+  showInspector?: boolean;
 };
 
 interface PluginsStartDependencies {
@@ -87,6 +90,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
           input={input}
           theme={theme}
           extraActions={input.extraActions}
+          showInspector={input.showInspector}
           withDefaultActions={input.withDefaultActions}
         />
       );
@@ -117,6 +121,7 @@ interface EmbeddablePanelWrapperProps {
   input: EmbeddableComponentProps;
   theme: ThemeServiceStart;
   extraActions?: Action[];
+  showInspector?: boolean;
   withDefaultActions?: boolean;
 }
 
@@ -128,6 +133,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   input,
   theme,
   extraActions,
+  showInspector = true,
   withDefaultActions,
 }) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });
@@ -152,7 +158,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
 
         return [...(extraActions ?? []), ...actions];
       }}
-      inspector={inspector}
+      inspector={showInspector ? inspector : undefined}
       actionPredicate={actionPredicate}
       showShadow={false}
       showBadges={false}

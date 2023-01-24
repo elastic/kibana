@@ -6,26 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart } from 'kibana/public';
-import type { SavedObject } from 'src/plugins/saved_objects/public';
+import type { OverlayStart } from '@kbn/core/public';
+import type { ConfirmModalSavedObjectMeta } from './types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
-  savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,
+  { title, displayName }: ConfirmModalSavedObjectMeta,
   overlays: OverlayStart
-): Promise<true> {
+): Promise<boolean> {
   const confirmMessage = i18n.translate(
     'xpack.lens.confirmModal.saveDuplicateConfirmationMessage',
     {
       defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
-      values: { title: savedObject.title, name: savedObject.getDisplayName() },
+      values: { title, name: displayName },
     }
   );
 
   const confirmButtonText = i18n.translate('xpack.lens.confirmModal.saveDuplicateButtonLabel', {
     defaultMessage: 'Save {name}',
-    values: { name: savedObject.getDisplayName() },
+    values: { name: displayName },
   });
   try {
     return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ListResult } from '../../../common';
+import type { ListResult } from '../../../common/types';
 import type { ListWithKuery } from '../../types';
 
 export interface NewArtifact {
@@ -79,6 +79,10 @@ export interface ArtifactsClientInterface {
   getArtifact(id: string): Promise<Artifact | undefined>;
 
   createArtifact(options: ArtifactsClientCreateOptions): Promise<Artifact>;
+
+  bulkCreateArtifacts(
+    optionsList: ArtifactsClientCreateOptions[]
+  ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }>;
 
   deleteArtifact(id: string): Promise<void>;
 

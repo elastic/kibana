@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { Node, NodeType } from '../../../../../plugins/apm/common/connections';
-import { roundNumber } from '../../../utils';
+import { Node, NodeType } from '@kbn/apm-plugin/common/connections';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../plugins/apm/common/environment_filter_values';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
+} from '@kbn/apm-plugin/common/environment_filter_values';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { roundNumber } from '../../../utils';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives[archiveName];
 
   function getName(node: Node) {
-    return node.type === NodeType.service ? node.serviceName : node.backendName;
+    return node.type === NodeType.service ? node.serviceName : node.dependencyName;
   }
 
   registry.when(
@@ -267,7 +267,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const lastValue = roundNumber(last(opbeansNode?.currentStats.latency.timeseries)?.y);
 
         expect(firstValue).to.be(roundNumber(20 / 3));
-        expect(lastValue).to.be('1.000');
+        expect(lastValue).to.be(1);
       });
 
       it('returns postgres as an external dependency', () => {
@@ -282,7 +282,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           throughput: roundNumber(postgres?.currentStats.throughput.value),
           errorRate: roundNumber(postgres?.currentStats.errorRate.value),
           impact: postgres?.currentStats.impact,
-          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'backendName', 'type'),
+          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'dependencyName', 'type'),
         };
 
         const count = 1;
@@ -292,8 +292,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(values).to.eql({
           spanType: 'external',
           spanSubtype: 'http',
-          backendName: 'postgres',
-          type: 'backend',
+          dependencyName: 'postgres',
+          type: 'dependency',
           errorRate: roundNumber(errors / count),
           latency: roundNumber(sum / count),
           throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),

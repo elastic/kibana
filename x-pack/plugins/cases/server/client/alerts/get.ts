@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { CasesClientGetAlertsResponse } from './types';
-import { CasesClientArgs } from '..';
-import { AlertInfo } from '../../common/types';
+import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
+import type { CasesClientGetAlertsResponse } from './types';
+import type { CasesClientArgs } from '..';
+import type { AlertInfo } from '../../common/types';
+import type { Alert } from '../../services/alerts';
+
+function isAlert(
+  doc?: MgetResponseItem<unknown>
+): doc is Omit<GetGetResult<Alert>, '_source'> & { _source: Alert } {
+  return Boolean(doc && !('error' in doc) && '_source' in doc);
+}
 
 export const getAlerts = async (
   alertsInfo: AlertInfo[],
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
-  const { alertsService } = clientArgs;
+  const { alertsService } = clientArgs.services;
   if (alertsInfo.length === 0) {
     return [];
   }
@@ -23,7 +31,7 @@ export const getAlerts = async (
     return [];
   }
 
-  return alerts.docs.map((alert) => ({
+  return alerts.docs.filter(isAlert).map((alert) => ({
     id: alert._id,
     index: alert._index,
     ...alert._source,

@@ -82,4 +82,186 @@ describe('Utils class', () => {
       'e", f"',
     ]);
   });
+
+  describe('formatRequestBodyDoc', function () {
+    const tests = [
+      {
+        source: ['{\n  "test": {}\n}'],
+        indent: false,
+        assert: ['{"test":{}}'],
+      },
+      {
+        source: ['{"test":{}}'],
+        indent: true,
+        assert: ['{\n  "test": {}\n}'],
+      },
+      {
+        source: ['{\n  "test": """a\n  b"""\n}'],
+        indent: false,
+        assert: ['{"test":"a\\n  b"}'],
+      },
+      {
+        source: ['{"test":"a\\n  b"}'],
+        indent: true,
+        assert: ['{\n  "test": """a\n  b"""\n}'],
+      },
+    ];
+
+    tests.forEach(({ source, indent, assert }, id) => {
+      test(`Test ${id}`, () => {
+        const formattedData = utils.formatRequestBodyDoc(source, indent);
+        expect(formattedData.data).toEqual(assert);
+      });
+    });
+  });
+
+  describe('hasComments', function () {
+    const runCommentTests = (tests) => {
+      tests.forEach(({ source, assert }) => {
+        test(`\n${source}`, () => {
+          const hasComments = utils.hasComments(source);
+          expect(hasComments).toEqual(assert);
+        });
+      });
+    };
+
+    describe('match single line comments', () => {
+      runCommentTests([
+        { source: '{\n  "test": {\n   // "f": {}\n   "a": "b"\n  }\n}', assert: true },
+        {
+          source: '{\n  "test": {\n   "a": "b",\n   "f": {\n     # "b": {}\n   }\n  }\n}',
+          assert: true,
+        },
+      ]);
+    });
+
+    describe('match multiline comments', () => {
+      runCommentTests([
+        { source: '{\n /* "test": {\n    "a": "b"\n  } */\n}', assert: true },
+        {
+          source:
+            '{\n  "test": {\n    "a": "b",\n   /* "f": {\n      "b": {}\n    } */\n    "c": 1\n  }\n}',
+          assert: true,
+        },
+      ]);
+    });
+
+    describe('ignore non-comment tokens', () => {
+      runCommentTests([
+        { source: '{"test":{"a":"b","f":{"b":{"c":{}}}}}', assert: false },
+        {
+          source: '{\n  "test": {\n    "a": "b",\n    "f": {\n      "b": {}\n    }\n  }\n}',
+          assert: false,
+        },
+        { source: '{\n  "test": {\n    "f": {}\n  }\n}', assert: false },
+      ]);
+    });
+
+    describe.skip('ignore comment tokens as values', () => {
+      runCommentTests([
+        { source: '{\n  "test": {\n    "f": "//"\n  }\n}', assert: false },
+        { source: '{\n  "test": {\n    "f": "/* */"\n  }\n}', assert: false },
+        { source: '{\n  "test": {\n    "f": "#"\n  }\n}', assert: false },
+      ]);
+    });
+
+    describe.skip('ignore comment tokens as field names', () => {
+      runCommentTests([
+        { source: '{\n  "#": {\n    "f": {}\n  }\n}', assert: false },
+        { source: '{\n  "//": {\n    "f": {}\n  }\n}', assert: false },
+        { source: '{\n  "/* */": {\n    "f": {}\n  }\n}', assert: false },
+      ]);
+    });
+  });
+
+  test('get response with most severe status code', () => {
+    expect(
+      utils.getResponseWithMostSevereStatusCode([
+        { response: { statusCode: 500 } },
+        { response: { statusCode: 400 } },
+        { response: { statusCode: 200 } },
+      ])
+    ).toEqual({ response: { statusCode: 500 } });
+
+    expect(
+      utils.getResponseWithMostSevereStatusCode([
+        { response: { statusCode: 0 } },
+        { response: { statusCode: 100 } },
+        { response: { statusCode: 201 } },
+      ])
+    ).toEqual({ response: { statusCode: 201 } });
+
+    expect(utils.getResponseWithMostSevereStatusCode(undefined)).toBe(undefined);
+  });
+
+  describe('replaceVariables', () => {
+    function testVariables(data, variables, expected) {
+      const result = utils.replaceVariables([data], [variables]);
+      expect(result).toEqual([expected]);
+    }
+
+    it('should replace variables in url and body', () => {
+      testVariables(
+        { url: '${v1}/search', data: ['{\n  "f": "${v1}"\n}'] },
+        { name: 'v1', value: 'test' },
+        {
+          url: 'test/search',
+          data: ['{\n  "f": "test"\n}'],
+        }
+      );
+    });
+
+    describe('with booleans as field value', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v2}"\n}'] },
+        { name: 'v2', value: 'true' },
+        {
+          url: 'test',
+          data: ['{\n  "f": true\n}'],
+        }
+      );
+    });
+
+    describe('with objects as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v3}"\n}'] },
+        { name: 'v3', value: '{"f": "test"}' },
+        { url: 'test', data: ['{\n  "f": {"f": "test"}\n}'] }
+      );
+    });
+
+    describe('with arrays as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v5}"\n}'] },
+        { name: 'v5', value: '[{"t": "test"}]' },
+        { url: 'test', data: ['{\n  "f": [{"t": "test"}]\n}'] }
+      );
+    });
+
+    describe('with numbers as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v6}"\n}'] },
+        { name: 'v6', value: '1' },
+        { url: 'test', data: ['{\n  "f": 1\n}'] }
+      );
+    });
+
+    describe('with other variables as field values', () => {
+      // Currently, variables embedded in other variables' values aren't replaced.
+      // Once we build this feature, this test will fail and need to be updated.
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v4}"\n}'] },
+        { name: 'v4', value: '{"v1": "${v1}", "v6": "${v6}"}' },
+        { url: 'test', data: ['{\n  "f": {"v1": "${v1}", "v6": "${v6}"}\n}'] }
+      );
+    });
+
+    describe('with uuids as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v7}"\n}'] },
+        { name: 'v7', value: '9893617a-a08f-4e5c-bc41-95610dc2ded8' },
+        { url: 'test', data: ['{\n  "f": "9893617a-a08f-4e5c-bc41-95610dc2ded8"\n}'] }
+      );
+    });
+  });
 });

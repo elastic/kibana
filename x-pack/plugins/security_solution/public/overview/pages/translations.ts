@@ -18,17 +18,6 @@ export const NEWS_FEED_TITLE = i18n.translate(
   }
 );
 
-export const PAGE_SUBTITLE = i18n.translate('xpack.securitySolution.overview.pageSubtitle', {
-  defaultMessage: 'Security Information & Event Management with the Elastic Stack',
-});
-
-export const RECENT_CASES = i18n.translate(
-  'xpack.securitySolution.overview.recentCasesSidebarTitle',
-  {
-    defaultMessage: 'Recent cases',
-  }
-);
-
 export const RECENT_TIMELINES = i18n.translate(
   'xpack.securitySolution.overview.recentTimelinesSidebarTitle',
   {
@@ -36,8 +25,8 @@ export const RECENT_TIMELINES = i18n.translate(
   }
 );
 
-export const ALERT_COUNT = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
-  defaultMessage: 'Detection alert trend',
+export const ALERT_TREND = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
+  defaultMessage: 'Alert trend',
 });
 
 export const TOP = (fieldName: string) =>
@@ -53,3 +42,25 @@ export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.overview.viewA
 export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
 });
+
+export const DETECTION_RESPONSE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.pageTitle',
+  {
+    defaultMessage: 'Detection & Response',
+  }
+);
+
+export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.pageDesc',
+  {
+    defaultMessage:
+      'Detect threats from users and devices within your network with Entity Analytics',
+  }
+);
+
+export const TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);

@@ -10,7 +10,8 @@ import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elas
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
-import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -28,6 +29,7 @@ interface Props {
   anchorPosition: PopoverAnchorPosition;
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
 }
 
@@ -73,11 +75,12 @@ export class NavControlPopover extends Component<Props, State> {
     const button = this.getActiveSpaceButton();
 
     let element: React.ReactNode;
-    if (!this.state.loading && this.state.spaces.length < 2) {
+    if (this.state.loading || this.state.spaces.length < 2) {
       element = (
         <SpacesDescription
           id={popoutContentId}
-          onManageSpacesClick={this.toggleSpaceSelector}
+          isLoading={this.state.loading}
+          toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
         />
@@ -87,11 +90,12 @@ export class NavControlPopover extends Component<Props, State> {
         <SpacesMenu
           id={popoutContentId}
           spaces={this.state.spaces}
-          isLoading={this.state.loading}
           serverBasePath={this.props.serverBasePath}
-          onManageSpacesClick={this.toggleSpaceSelector}
+          toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
+          navigateToUrl={this.props.navigateToUrl}
+          activeSpace={this.state.activeSpace}
         />
       );
     }
@@ -131,15 +135,19 @@ export class NavControlPopover extends Component<Props, State> {
     });
   }
 
+  private getAlignedLoadingSpinner() {
+    return <EuiLoadingSpinner size="m" className="eui-alignMiddle" />;
+  }
+
   private getActiveSpaceButton = () => {
     const { activeSpace } = this.state;
 
     if (!activeSpace) {
-      return this.getButton(<EuiLoadingSpinner size="m" />, 'loading');
+      return this.getButton(this.getAlignedLoadingSpinner(), 'loading spaces navigation');
     }
 
     return this.getButton(
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+      <Suspense fallback={this.getAlignedLoadingSpinner()}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
       </Suspense>,
       (activeSpace as Space).name
@@ -152,17 +160,29 @@ export class NavControlPopover extends Component<Props, State> {
         aria-controls={popoutContentId}
         aria-expanded={this.state.showSpaceSelector}
         aria-haspopup="true"
-        aria-label={linkTitle}
+        aria-label={i18n.translate('xpack.spaces.navControl.popover.spacesNavigationLabel', {
+          defaultMessage: 'Spaces navigation',
+        })}
+        aria-describedby="spacesNavDetails"
         data-test-subj="spacesNavSelector"
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
       >
         {linkIcon}
+        <p id="spacesNavDetails" hidden>
+          {i18n.translate('xpack.spaces.navControl.popover.spaceNavigationDetails', {
+            defaultMessage:
+              '{space} is the currently selected space. Click this button to open a popover that allows you to select the active space.',
+            values: {
+              space: linkTitle,
+            },
+          })}
+        </p>
       </EuiHeaderSectionItemButton>
     );
   };
 
-  private toggleSpaceSelector = () => {
+  protected toggleSpaceSelector = () => {
     const isOpening = !this.state.showSpaceSelector;
     if (isOpening) {
       this.loadSpaces();

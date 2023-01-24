@@ -7,20 +7,25 @@
 
 import React from 'react';
 
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
-import { SecuritySubPluginRoutes } from '../app/types';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { CASES_PATH } from '../../common/constants';
 import { Cases } from './pages';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
-export const CasesRoutes = () => (
-  <TrackApplicationView viewId="case">
-    <Cases />
-  </TrackApplicationView>
-);
+export const CasesRoutes = () => {
+  return (
+    <PluginTemplateWrapper>
+      <TrackApplicationView viewId="case">
+        <Cases />
+      </TrackApplicationView>
+    </PluginTemplateWrapper>
+  );
+};
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: CASES_PATH,
-    render: CasesRoutes,
+    component: CasesRoutes,
   },
 ];

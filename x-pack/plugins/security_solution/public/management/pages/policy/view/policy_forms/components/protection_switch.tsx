@@ -12,27 +12,35 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { AppAction } from '../../../../../../common/store/actions';
-import {
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
+import type { AppAction } from '../../../../../../common/store/actions';
+import type {
   ImmutableArray,
-  ProtectionModes,
   UIPolicyConfig,
+  AdditionalOnSwitchChangeParams,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
 export const ProtectionSwitch = React.memo(
   ({
     protection,
     protectionLabel,
     osList,
+    additionalOnSwitchChange,
   }: {
     protection: PolicyProtection;
     protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    additionalOnSwitchChange?: ({
+      value,
+      policyConfigData,
+      protectionOsList,
+    }: AdditionalOnSwitchChangeParams) => UIPolicyConfig;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const showEditableFormFields = useShowEditableFormFields();
     const dispatch = useDispatch<(action: AppAction) => void>();
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
 
@@ -83,13 +91,26 @@ export const ProtectionSwitch = React.memo(
               }
             }
           }
-          dispatch({
-            type: 'userChangedPolicyConfig',
-            payload: { policyConfig: newPayload },
-          });
+          if (additionalOnSwitchChange) {
+            dispatch({
+              type: 'userChangedPolicyConfig',
+              payload: {
+                policyConfig: additionalOnSwitchChange({
+                  value: event.target.checked,
+                  policyConfigData: newPayload,
+                  protectionOsList: osList,
+                }),
+              },
+            });
+          } else {
+            dispatch({
+              type: 'userChangedPolicyConfig',
+              payload: { policyConfig: newPayload },
+            });
+          }
         }
       },
-      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList]
+      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList, additionalOnSwitchChange]
     );
 
     return (
@@ -103,6 +124,7 @@ export const ProtectionSwitch = React.memo(
         })}
         checked={selected !== ProtectionModes.off}
         onChange={handleSwitchChange}
+        disabled={!showEditableFormFields}
       />
     );
   }

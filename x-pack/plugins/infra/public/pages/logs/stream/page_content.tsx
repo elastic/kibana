@@ -5,59 +5,43 @@
  * 2.0.
  */
 
+import { useActor } from '@xstate/react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { LogsPageLogsContent } from './page_logs_content';
-import { LogsPageTemplate } from '../page_template';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+import {
+  LogStreamPageState,
+  useLogStreamPageStateContext,
+} from '../../../observability_logs/log_stream_page/state';
+import { InvalidStateCallout } from '../../../observability_logs/xstate_helpers';
+import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { StreamPageLogsContentForState } from './page_logs_content';
+import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
+import { LogStreamPageContentProviders } from './page_providers';
 
-const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
-  defaultMessage: 'Stream',
-});
+export const ConnectedStreamPageContent: React.FC = () => {
+  const logStreamPageStateService = useLogStreamPageStateContext();
 
-export const StreamPageContent: React.FunctionComponent = () => {
-  const {
-    hasFailedLoading,
-    isLoading,
-    isUninitialized,
-    loadSource,
-    latestLoadSourceFailures,
-    sourceStatus,
-  } = useLogSourceContext();
+  const [logStreamPageState] = useActor(logStreamPageStateService);
 
-  if (isLoading || isUninitialized) {
-    return <SourceLoadingPage />;
-  } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
-  } else {
-    return (
-      <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
-        <LogsPageTemplate
-          hasData={sourceStatus?.logIndexStatus !== 'missing'}
-          pageHeader={{
-            pageTitle: streamTitle,
-          }}
-        >
-          <LogsPageLogsContent />
-        </LogsPageTemplate>
-      </LogStreamPageWrapper>
-    );
-  }
+  return <StreamPageContentForState logStreamPageState={logStreamPageState} />;
 };
 
-// This is added to facilitate a full height layout whereby the
-// inner container will set it's own height and be scrollable.
-// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-export const LogStreamPageWrapper = euiStyled.div`
-  .euiPage .euiPageContentBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    width: 100%;
-    height: 100%;
+export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStreamPageState }> = ({
+  logStreamPageState,
+}) => {
+  if (logStreamPageState.matches('uninitialized') || logStreamPageState.matches('loadingLogView')) {
+    return <SourceLoadingPage />;
+  } else if (logStreamPageState.matches('loadingLogViewFailed')) {
+    return <ConnectedLogViewErrorPage />;
+  } else if (logStreamPageState.matches('missingLogViewIndices')) {
+    return <StreamPageMissingIndicesContent />;
+  } else if (logStreamPageState.matches({ hasLogViewIndices: 'initialized' })) {
+    return (
+      <LogStreamPageContentProviders logStreamPageState={logStreamPageState}>
+        <StreamPageLogsContentForState logStreamPageState={logStreamPageState} />
+      </LogStreamPageContentProviders>
+    );
+  } else {
+    return <InvalidStateCallout state={logStreamPageState} />;
   }
-`;
+};

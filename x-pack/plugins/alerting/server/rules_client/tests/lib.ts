@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { IEventLogClient } from '../../../../event_log/server';
-import { actionsClientMock } from '../../../../actions/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { ConstructorOptions } from '../rules_client';
-import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
 
@@ -50,13 +50,17 @@ export function getBeforeSetup(
   jest.resetAllMocks();
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
-  taskManager.runNow.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '' });
+  taskManager.bulkRemoveIfExist.mockResolvedValue({
+    statuses: [{ id: 'taskId', type: 'alert', success: true }],
+  });
   const actionsClient = actionsClientMock.create();
 
   actionsClient.getBulk.mockResolvedValueOnce([
     {
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'test',
       name: 'test',
       config: {
@@ -66,6 +70,7 @@ export function getBeforeSetup(
     {
       id: '2',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'test2',
       name: 'test2',
       config: {
@@ -76,6 +81,7 @@ export function getBeforeSetup(
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isDeprecated: false,
       name: 'test',
     },
   ]);
@@ -89,7 +95,9 @@ export function getBeforeSetup(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(

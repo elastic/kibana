@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { savedMap } from '../../../canvas_plugin_src/functions/external/saved_map';
+import type { savedMap } from '../../../canvas_plugin_src/functions/external/saved_map';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

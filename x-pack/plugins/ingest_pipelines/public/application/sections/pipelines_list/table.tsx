@@ -16,8 +16,9 @@ import {
   EuiTableFieldDataColumnType,
   EuiPopover,
   EuiContextMenu,
+  EuiBadge,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
@@ -144,6 +145,15 @@ export const PipelineTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
+      filters: [
+        {
+          type: 'is',
+          field: 'isManaged',
+          name: i18n.translate('xpack.ingestPipelines.list.table.isManagedFilterLabel', {
+            defaultMessage: 'Managed',
+          }),
+        },
+      ],
     },
     pagination: {
       initialPageSize: 10,
@@ -156,7 +166,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => (
+        render: (name: string, pipeline) => (
           <EuiLink
             data-test-subj="pipelineDetailsLink"
             {...reactRouterNavigate(history, {
@@ -165,6 +175,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
             })}
           >
             {name}
+            {pipeline.isManaged && (
+              <>
+                &nbsp;
+                <EuiBadge color="hollow" data-test-subj="isManagedBadge">
+                  {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
+                    defaultMessage: 'Managed',
+                  })}
+                </EuiBadge>
+              </>
+            )}
           </EuiLink>
         ),
       },

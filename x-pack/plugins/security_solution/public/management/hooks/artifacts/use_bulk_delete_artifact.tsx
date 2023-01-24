@@ -5,16 +5,22 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import { HttpFetchError } from 'kibana/public';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useBulkDeleteArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customOptions: UseQueryOptions<ExceptionListItemSchema[], HttpFetchError> = DEFAULT_OPTIONS,
+  customOptions: UseMutationOptions<
+    ExceptionListItemSchema[],
+    IHttpFetchError,
+    Array<{ itemId?: string; id?: string }>,
+    () => void
+  > = DEFAULT_OPTIONS,
   options: {
     concurrency: number;
   } = {
@@ -22,13 +28,13 @@ export function useBulkDeleteArtifact(
   }
 ): UseMutationResult<
   ExceptionListItemSchema[],
-  HttpFetchError,
+  IHttpFetchError,
   Array<{ itemId?: string; id?: string }>,
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema[],
-    HttpFetchError,
+    IHttpFetchError,
     Array<{ itemId?: string; id?: string }>,
     () => void
   >((exceptionIds: Array<{ itemId?: string; id?: string }>) => {

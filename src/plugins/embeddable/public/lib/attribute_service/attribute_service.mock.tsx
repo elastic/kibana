@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '../index';
-import { coreMock } from '../../../../../core/public/mocks';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
+import { coreMock } from '@kbn/core/public/mocks';
 import { AttributeServiceOptions } from './attribute_service';
-import { CoreStart } from 'src/core/public';
-import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './index';
+import { CoreStart } from '@kbn/core/public';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from '.';
 
 export const mockAttributeService = <
   A extends { title: string },
@@ -27,8 +27,6 @@ export const mockAttributeService = <
   const core = customCore ? customCore : coreMock.createStart();
   return new AttributeService<A, V, R, M>(
     type,
-    jest.fn(),
-    core.i18n.Context,
     core.notifications.toasts,
     options,
     jest.fn().mockReturnValue(() => ({ getDisplayName: () => type }))

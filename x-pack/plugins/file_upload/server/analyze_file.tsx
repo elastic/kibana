@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import type {
   AnalysisResult,
   FormattedOverrides,
@@ -22,6 +22,8 @@ export async function analyzeFile(
   const body = await client.asInternalUser.textStructure.findStructure(
     {
       body: data,
+      // @ts-expect-error TextStructureFindStructureRequest type is out of date and doesn't include ecs_compatibility
+      ecs_compatibility: 'v1',
       ...overrides,
     },
     { maxRetries: 0 }

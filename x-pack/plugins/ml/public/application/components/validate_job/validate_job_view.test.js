@@ -20,7 +20,7 @@ jest.mock('../../util/dependency_cache', () => ({
   }),
 }));
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },

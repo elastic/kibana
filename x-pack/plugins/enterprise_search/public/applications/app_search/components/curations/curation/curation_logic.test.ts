@@ -17,7 +17,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../test_helpers';
 
-import { CurationLogic } from './';
+import { CurationLogic } from '.';
 
 describe('CurationLogic', () => {
   const { mount } = new LogicMounter(CurationLogic);
@@ -380,7 +380,7 @@ describe('CurationLogic', () => {
     });
 
     describe('updateCuration', () => {
-      beforeAll(() => jest.useFakeTimers());
+      beforeAll(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterAll(() => jest.useRealTimers());
 
       it('should make a PUT API call with queries and promoted/hidden IDs to update', async () => {

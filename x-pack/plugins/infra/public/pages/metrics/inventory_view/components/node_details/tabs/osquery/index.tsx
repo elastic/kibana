@@ -7,10 +7,10 @@
 
 import { EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../../../hooks/use_kibana';
 import { TabContent, TabProps } from '../shared';
-import { Source } from '../../../../../../../containers/metrics_source';
+import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';
@@ -20,7 +20,7 @@ const TabComponent = (props: TabProps) => {
   const nodeId = props.node.id;
   const nodeType = props.nodeType as InventoryItemType;
   const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useContext(Source.Context);
+  const { sourceId } = useSourceContext();
   const { currentTimeRange } = useWaffleTimeContext();
   const { loading, metadata } = useMetadata(
     nodeId,
@@ -48,7 +48,7 @@ const TabComponent = (props: TabProps) => {
 
     return (
       <TabContent>
-        <OsqueryAction metadata={metadata} />
+        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField />
       </TabContent>
     );
   }, [OsqueryAction, loading, metadata]);

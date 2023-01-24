@@ -35,15 +35,24 @@
             "section": "def-common.LangModuleType",
             "text": "LangModuleType"
           },
+          " | ",
+          {
+            "pluginId": "@kbn/monaco",
+            "scope": "common",
+            "docId": "kibKbnMonacoPluginApi",
+            "section": "def-common.CustomLangModuleType",
+            "text": "CustomLangModuleType"
+          },
           ") => void"
         ],
         "path": "packages/kbn-monaco/src/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
             "id": "def-common.registerLanguage.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "language",
             "description": [],
@@ -54,10 +63,19 @@
                 "docId": "kibKbnMonacoPluginApi",
                 "section": "def-common.LangModuleType",
                 "text": "LangModuleType"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.CustomLangModuleType",
+                "text": "CustomLangModuleType"
               }
             ],
             "path": "packages/kbn-monaco/src/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -66,6 +84,60 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.BaseWorkerDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseWorkerDefinition",
+        "description": [],
+        "path": "packages/kbn-monaco/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.BaseWorkerDefinition.getSyntaxErrors",
+            "type": "Function",
+            "tags": [],
+            "label": "getSyntaxErrors",
+            "description": [],
+            "signature": [
+              "(modelUri: string) => Promise<",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.EditorError",
+                "text": "EditorError"
+              },
+              "[] | undefined>"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.BaseWorkerDefinition.getSyntaxErrors.$1",
+                "type": "string",
+                "tags": [],
+                "label": "modelUri",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-monaco/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/monaco",
         "id": "def-common.CompleteLangModuleType",
@@ -92,6 +164,7 @@
         ],
         "path": "packages/kbn-monaco/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -105,7 +178,8 @@
               ".LanguageConfiguration"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -118,7 +192,8 @@
               "Function"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -131,7 +206,8 @@
               "Function"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -155,6 +231,54 @@
             ],
             "path": "packages/kbn-monaco/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.CustomLangModuleType",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomLangModuleType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/monaco",
+            "scope": "common",
+            "docId": "kibKbnMonacoPluginApi",
+            "section": "def-common.CustomLangModuleType",
+            "text": "CustomLangModuleType"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/monaco",
+            "scope": "common",
+            "docId": "kibKbnMonacoPluginApi",
+            "section": "def-common.LangModuleType",
+            "text": "LangModuleType"
+          }
+        ],
+        "path": "packages/kbn-monaco/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.CustomLangModuleType.onLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "onLanguage",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-monaco/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -170,6 +294,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -179,7 +304,8 @@
             "label": "startLineNumber",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -189,7 +315,8 @@
             "label": "startColumn",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -199,7 +326,8 @@
             "label": "endLineNumber",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -209,7 +337,8 @@
             "label": "endColumn",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -219,7 +348,50 @@
             "label": "message",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQLCustomAutocompleteCallbacks",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLCustomAutocompleteCallbacks",
+        "description": [],
+        "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getSourceIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getSourceIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCustomAutocompleteCallbacks.getFieldsIdentifiers",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldsIdentifiers",
+            "description": [],
+            "signature": [
+              "CallbackFn | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/esql/lib/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -233,6 +405,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -242,7 +415,8 @@
             "label": "ID",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -253,10 +427,11 @@
             "description": [],
             "signature": [
               "languages",
-              ".IMonarchLanguage"
+              ".IMonarchLanguage | undefined"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -270,7 +445,8 @@
               ".LanguageConfiguration | undefined"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -283,20 +459,8 @@
               "Function | undefined"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
-            "id": "def-common.LangModuleType.getSyntaxErrors",
-            "type": "Object",
-            "tags": [],
-            "label": "getSyntaxErrors",
-            "description": [],
-            "signature": [
-              "Function | undefined"
-            ],
-            "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -310,6 +474,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -319,7 +484,8 @@
             "label": "isValidating",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -329,7 +495,8 @@
             "label": "isValid",
             "description": [],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -349,7 +516,8 @@
               "[]"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -363,6 +531,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -372,7 +541,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -382,7 +552,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -396,6 +567,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -405,7 +577,8 @@
             "label": "label",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -415,10 +588,11 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+              "\"type\" | \"method\" | \"keyword\" | \"field\" | \"property\" | \"class\" | \"constructor\""
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -428,7 +602,8 @@
             "label": "documentation",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -438,7 +613,8 @@
             "label": "insertText",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -451,7 +627,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -465,6 +642,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -474,7 +652,8 @@
             "label": "isIncomplete",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -494,7 +673,8 @@
               "[]"
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -508,6 +688,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -528,7 +709,8 @@
               "[]"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -538,16 +720,47 @@
     "misc": [
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQL_LANG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_LANG_ID",
+        "description": [],
+        "signature": [
+          "\"esql\""
+        ],
+        "path": "packages/kbn-monaco/src/esql/lib/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQL_THEME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_THEME_ID",
+        "description": [],
+        "signature": [
+          "\"esqlTheme\""
+        ],
+        "path": "packages/kbn-monaco/src/esql/lib/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessCompletionKind",
         "type": "Type",
         "tags": [],
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+          "\"type\" | \"method\" | \"keyword\" | \"field\" | \"property\" | \"class\" | \"constructor\""
         ],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -562,43 +775,128 @@
         ],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
         "parentPluginId": "@kbn/monaco",
-        "id": "def-common.EsqlLang",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
         "type": "Object",
         "tags": [],
-        "label": "EsqlLang",
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
         "description": [],
-        "path": "packages/kbn-monaco/src/esql/index.ts",
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "node_modules/monaco-yaml/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "node_modules/monaco-yaml/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQLLang",
+        "type": "Object",
+        "tags": [],
+        "label": "ESQLLang",
+        "description": [],
+        "path": "packages/kbn-monaco/src/esql/language.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.EsqlLang.ID",
+            "id": "def-common.ESQLLang.ID",
             "type": "string",
             "tags": [],
             "label": "ID",
             "description": [],
-            "path": "packages/kbn-monaco/src/esql/index.ts",
-            "deprecated": false
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.EsqlLang.lexerRules",
-            "type": "Object",
+            "id": "def-common.ESQLLang.onLanguage",
+            "type": "Function",
             "tags": [],
-            "label": "lexerRules",
+            "label": "onLanguage",
             "description": [],
             "signature": [
-              "languages",
-              ".IMonarchLanguage"
+              "() => Promise<void>"
             ],
-            "path": "packages/kbn-monaco/src/esql/index.ts",
-            "deprecated": false
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLLang.getSuggestionProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getSuggestionProvider",
+            "description": [],
+            "signature": [
+              "(callbacks?: ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.ESQLCustomAutocompleteCallbacks",
+                "text": "ESQLCustomAutocompleteCallbacks"
+              },
+              " | undefined) => ",
+              "ESQLCompletionAdapter"
+            ],
+            "path": "packages/kbn-monaco/src/esql/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ESQLLang.getSuggestionProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "callbacks",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/monaco",
+                    "scope": "common",
+                    "docId": "kibKbnMonacoPluginApi",
+                    "section": "def-common.ESQLCustomAutocompleteCallbacks",
+                    "text": "ESQLCustomAutocompleteCallbacks"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-monaco/src/esql/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -612,6 +910,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/painless/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -621,7 +920,8 @@
             "label": "ID",
             "description": [],
             "path": "packages/kbn-monaco/src/painless/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -652,6 +952,7 @@
             ],
             "path": "packages/kbn-monaco/src/painless/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -665,7 +966,8 @@
                   "\"filter\" | \"score\" | \"painless_test\" | \"boolean_script_field_script_field\" | \"date_script_field\" | \"double_script_field_script_field\" | \"ip_script_field_script_field\" | \"long_script_field_script_field\" | \"processor_conditional\" | \"string_script_field_script_field\""
                 ],
                 "path": "packages/kbn-monaco/src/painless/language.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/monaco",
@@ -685,7 +987,8 @@
                   "[] | undefined"
                 ],
                 "path": "packages/kbn-monaco/src/painless/language.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -700,7 +1003,8 @@
               "Language"
             ],
             "path": "packages/kbn-monaco/src/painless/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -714,7 +1018,8 @@
               ".LanguageConfiguration"
             ],
             "path": "packages/kbn-monaco/src/painless/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -735,6 +1040,7 @@
             ],
             "path": "packages/kbn-monaco/src/painless/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -760,8 +1066,49 @@
             ],
             "path": "packages/kbn-monaco/src/painless/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.SQLLang",
+        "type": "Object",
+        "tags": [],
+        "label": "SQLLang",
+        "description": [],
+        "path": "packages/kbn-monaco/src/sql/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.SQLLang.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "path": "packages/kbn-monaco/src/sql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.SQLLang.lexerRules",
+            "type": "Object",
+            "tags": [],
+            "label": "lexerRules",
+            "description": [],
+            "signature": [
+              "languages",
+              ".IMonarchLanguage"
+            ],
+            "path": "packages/kbn-monaco/src/sql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -775,6 +1122,7 @@
         "description": [],
         "path": "packages/kbn-monaco/src/xjson/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/monaco",
@@ -784,7 +1132,8 @@
             "label": "ID",
             "description": [],
             "path": "packages/kbn-monaco/src/xjson/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -798,7 +1147,8 @@
               ".IMonarchLanguage"
             ],
             "path": "packages/kbn-monaco/src/xjson/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/monaco",
@@ -812,7 +1162,8 @@
               ".LanguageConfiguration"
             ],
             "path": "packages/kbn-monaco/src/xjson/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

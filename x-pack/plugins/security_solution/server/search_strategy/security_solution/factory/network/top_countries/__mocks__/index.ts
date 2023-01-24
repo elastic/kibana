@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkTopCountriesRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
   NetworkQueries,
-  NetworkTopCountriesRequestOptions,
   NetworkTopTablesFields,
 } from '../../../../../../../common/search_strategy';
 

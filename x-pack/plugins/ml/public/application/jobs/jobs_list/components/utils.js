@@ -13,7 +13,7 @@ import {
   getToastNotificationService,
   toastNotificationServiceProvider,
 } from '../../../services/toast_notification_service';
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { getApplication, getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
 import { getDataViewNames } from '../../../util/index_utils';
@@ -21,7 +21,9 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/state
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
-import { isPopulatedObject } from '../../../../../common/util/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -287,7 +289,7 @@ export async function cloneJob(jobId) {
       );
     }
 
-    window.location.href = '#/jobs/new_job';
+    getApplication().navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {
     getToastNotificationService().displayErrorToast(
       error,
@@ -318,9 +320,9 @@ export function closeJobs(jobs, finish = () => {}) {
     });
 }
 
-export function resetJobs(jobIds, finish = () => {}) {
+export function resetJobs(jobIds, deleteUserAnnotations, finish = () => {}) {
   mlJobService
-    .resetJobs(jobIds)
+    .resetJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
       showResults(resp, JOB_ACTION.RESET);
       finish();
@@ -336,10 +338,10 @@ export function resetJobs(jobIds, finish = () => {}) {
     });
 }
 
-export function deleteJobs(jobs, finish = () => {}) {
+export function deleteJobs(jobs, deleteUserAnnotations, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
   mlJobService
-    .deleteJobs(jobIds)
+    .deleteJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
       showResults(resp, JOB_STATE.DELETED);
       finish();

@@ -1,0 +1,18 @@
+{
+  "id": "eventAnnotation",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "description": "The Event Annotation service contains expressions for event annotations",
+  "extraPublicDirs": [
+    "common"
+  ],
+  "requiredPlugins": [
+    "expressions",
+    "data"
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-visualizations"
+  }
+}

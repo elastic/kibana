@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 
 import { getCreateMigration } from './create_migration';
 import { EncryptionError, EncryptionErrorOperation } from './crypto';

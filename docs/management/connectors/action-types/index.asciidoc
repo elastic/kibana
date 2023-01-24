@@ -5,7 +5,8 @@
 <titleabbrev>Index</titleabbrev>
 ++++
 
-The index connector will index a document into {es}. See also the {ref}/indices-create-index.html[create index API].
+The index connector will index a document into {es}. See also the 
+{ref}/indices-create-index.html[create index API].
 
 [float]
 [[index-connector-configuration]]
@@ -13,10 +14,21 @@ The index connector will index a document into {es}. See also the {ref}/indices-
 
 Index connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Index::     The {es} index to be written to.
-Refresh::   Setting for the {ref}/docs-refresh.html[refresh] policy for the write request.
-Execution time field::  This field will be automatically set to the time the alert condition was detected.
+Name::
+The name of the connector. The name is used to identify a connector in the 
+management UI connector listing, or in the connector list when configuring an 
+action.
+
+Index::
+The {es} index to be written to.
+
+Refresh::
+Setting for the {ref}/docs-refresh.html[refresh] policy for the write request.
+
+Execution time field:: 
+This field will be automatically set to the time the alert condition was 
+detected.
+
 
 [float]
 [[Preconfigured-index-configuration]]
@@ -35,13 +47,19 @@ Execution time field::  This field will be automatically set to the time the ale
 
 Config defines information for the connector type.
 
-`index`:: A string that corresponds to *Index*.
-`refresh`:: A boolean that corresponds to *Refresh*. Defaults to `false`.
-`executionTimeField`:: A string that corresponds to *Execution time field*.
+`index`::
+A string that corresponds to *Index*.
+
+`refresh`::
+A boolean that corresponds to *Refresh*. Defaults to `false`.
+
+`executionTimeField`::
+A string that corresponds to *Execution time field*.
+
 
 [float]
 [[define-index-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define Index connector properties.
 
@@ -53,13 +71,16 @@ Test Index action parameters.
 [role="screenshot"]
 image::management/connectors/images/index-params-test.png[Index params test]
 
+
 [float]
 [[index-action-configuration]]
 ==== Action configuration
 
 Index actions have the following properties.
 
-Document::  The document to index in JSON format.
+Document::
+The document to index in JSON format.
+
 
 [float]
 [[index-action-example]]
@@ -70,9 +91,9 @@ Example of the index document for Index Threshold rule:
 [source,text]
 --------------------------------------------------
 {
-    "rule_id": "{{ruleId}}",
-    "rule_name": "{{ruleName}}",
-    "alert_id": "{{alertId}}",
+    "rule_id": "{{rule.id}}",
+    "rule_name": "{{rule.name}}",
+    "alert_id": "{{alert.id}}",
     "context_message": "{{context.message}}"
 }
 --------------------------------------------------
@@ -97,6 +118,7 @@ PUT test
 }
 --------------------------------------------------
 
+
 [float]
 [[preconfigured-connector-alert-history]]
 === Alert history {es} index connector
@@ -105,29 +127,42 @@ experimental[] {kib} offers a preconfigured index connector to facilitate indexi
 
 [WARNING]
 ==================================================
-This functionality is in technical preview and may be changed or removed completely in a future release.
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
 ==================================================
 
-To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`.
+To use this connector, set the 
+<<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> 
+configuration to `true`.
 
 ```js
   xpack.actions.preconfiguredAlertHistoryEsIndex: true
 ```
 
-When creating a new rule, add an <<index-action-type, Index action>> and select the `Alert history Elasticsearch index (preconfigured)` connector.
+When creating a new rule, add an <<index-action-type, Index action>> and select 
+the `Alert history Elasticsearch index (preconfigured)` connector.
 
 [role="screenshot"]
 image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
 
-Documents are indexed using a preconfigured schema that captures the <<defining-rules-actions-variables, action variables>> available for the rule. By default, these documents are indexed into the `kibana-alert-history-default` index, but you can specify a different index. Index names must start with `kibana-alert-history-` to take advantage of the preconfigured alert history index template.
+Documents are indexed using a preconfigured schema that captures the 
+<<defining-rules-actions-variables, action variables>> available for the rule. 
+By default, these documents are indexed into the `kibana-alert-history-default` 
+index, but you can specify a different index. Index names must start with 
+`kibana-alert-history-` to take advantage of the preconfigured alert history 
+index template.
 
 [IMPORTANT]
 ==============================================
-To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices. Refer to <<kibana-role-management>> for more information.
+To write documents to the preconfigured index, you must have `all` or `write` 
+privileges to the `kibana-alert-history-*` indices. Refer to 
+<<kibana-role-management>> for more information.
 ==============================================
 
 [NOTE]
 ==================================================
-The `kibana-alert-history-*` indices are not configured to use ILM so they must be maintained manually. If the index size grows large,
-consider using the {ref}/docs-delete-by-query.html[delete by query] API to clean up older documents in the index.
+The `kibana-alert-history-*` indices are not configured to use ILM so they must 
+be maintained manually. If the index size grows large, consider using the 
+{ref}/docs-delete-by-query.html[delete by query] API to clean up older documents 
+in the index.
 ==================================================

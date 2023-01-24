@@ -9,12 +9,11 @@ import { head } from 'lodash/fp';
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../common/types';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
-import { parseValue } from './parse_value';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex((item) => item.field === columnName) !== -1;
@@ -28,7 +27,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     isDraggable = true,
-    timelineId,
+    scopeId,
     truncate,
     values,
     linkValues,
@@ -39,26 +38,64 @@ export const plainColumnRenderer: ColumnRenderer = {
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
     isDraggable?: boolean;
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
-  }) =>
-    values != null
-      ? values.map((value, i) => (
-          <FormattedFieldValue
-            asPlainText={asPlainText}
-            contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
-            eventId={eventId}
-            fieldFormat={field.format || ''}
-            fieldName={columnName}
-            fieldType={field.type || ''}
-            isDraggable={isDraggable}
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
-            linkValue={head(linkValues)}
-            truncate={truncate}
-            value={parseValue(value)}
-          />
-        ))
-      : getEmptyTagValue(),
+  }) => {
+    if (!Array.isArray(values) || values.length === 0) {
+      return getEmptyTagValue();
+    }
+    // Draggable columns should render individual fields to give the user
+    // fine-grained control over the individual values
+    if (isDraggable) {
+      return values.map((value, i) => (
+        <FormattedFieldValue
+          asPlainText={asPlainText}
+          contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
+          eventId={eventId}
+          fieldFormat={field.format ?? ''}
+          fieldName={columnName}
+          isAggregatable={field.aggregatable ?? false}
+          fieldType={field.type ?? ''}
+          isDraggable={isDraggable}
+          key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          linkValue={head(linkValues)}
+          truncate={truncate}
+          value={value}
+        />
+      ));
+    } else {
+      // In case the column isn't draggable, fields are joined
+      // to give users a faster overview of all values.
+      // (note: the filter-related hover actions still produce individual filters for each value)
+      return (
+        <FormattedFieldValue
+          asPlainText={asPlainText}
+          contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
+          eventId={eventId}
+          fieldFormat={field.format ?? ''}
+          fieldName={columnName}
+          isAggregatable={field.aggregatable ?? false}
+          fieldType={field.type ?? ''}
+          isDraggable={isDraggable}
+          key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}`}
+          linkValue={head(linkValues)}
+          truncate={truncate}
+          value={joinValues(values)}
+        />
+      );
+    }
+  },
 };
+
+function joinValues(values: string[] | undefined | null): string | undefined | null {
+  if (Array.isArray(values)) {
+    if (values.length > 0) {
+      return values.join(', ');
+    } else {
+      return values[0];
+    }
+  }
+  return values;
+}

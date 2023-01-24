@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
+import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
-import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common';
-import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
-import type { FleetAuthzRouter } from '../security';
+import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
+import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
 
@@ -28,7 +29,8 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
   if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
-    if (!context.fleet.authz.fleet.all) {
+    const fleetContext = await context.fleet;
+    if (!fleetContext.authz.fleet.all) {
       return response.ok({
         body: {
           success: false,
@@ -38,7 +40,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     }
     // check the manage_service_account cluster privilege
     else if (request.query.fleetServerSetup) {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
       });
@@ -59,7 +61,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   try {
     const tokenResponse = await esClient.transport.request<{
       created?: boolean;
@@ -76,11 +78,11 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
       });
     } else {
       const error = new GenerateServiceTokenError('Unable to generate service token');
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } catch (e) {
     const error = new GenerateServiceTokenError(e);
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -89,7 +91,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       validate: CheckPermissionsRequestSchema,
-      options: { tags: [] },
     },
     getCheckPermissionsHandler
   );

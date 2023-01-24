@@ -75,7 +75,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
-  const resultsField = jobConfig.dest.results_field;
+  const resultsField = jobConfig.dest.results_field ?? 'ml';
 
   const loadGeneralizationData = async (ignoreDefaultQuery: boolean = true) => {
     setIsLoadingGeneralization(true);
@@ -218,6 +218,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     setIsTrainingFilter(isTraining);
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(searchQuery)]);
 
   return (

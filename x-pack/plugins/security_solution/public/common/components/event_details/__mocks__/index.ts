@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export const mockAlertDetailsData = [
+export const generateAlertDetailsDataMock = () => [
   { category: 'process', field: 'process.name', values: ['-'], originalValue: '-' },
   { category: 'process', field: 'process.pid', values: [0], originalValue: 0 },
   { category: 'process', field: 'process.executable', values: ['-'], originalValue: '-' },
+  {
+    category: 'process',
+    field: 'process.entry_leader.entity_id',
+    values: ['2938b3f873b4f3n84f938'],
+    originalValue: '2938b3f873b4f3n84f938',
+  },
   {
     category: 'agent',
     field: 'agent.hostname',
@@ -479,6 +485,12 @@ export const mockAlertDetailsData = [
   },
   {
     category: 'kibana',
+    field: 'kibana.alert.original_event.id',
+    values: ['f7bc2422-cb1e-4427-ba33-6f496ee8360c'],
+    originalValue: 'f7bc2422-cb1e-4427-ba33-6f496ee8360c',
+  },
+  {
+    category: 'kibana',
     field: 'kibana.alert.original_event.code',
     values: [4625],
     originalValue: 4625,
@@ -641,4 +653,12 @@ export const mockAlertDetailsData = [
     values: ['dummy.exe'],
     originalValue: ['dummy.exe'],
   },
+  {
+    category: 'rule',
+    field: 'rule.name',
+    values: ['Test Rule Name'],
+    originalValue: ['Test Rule Name'],
+  },
 ];
+
+export const mockAlertDetailsData = generateAlertDetailsDataMock();

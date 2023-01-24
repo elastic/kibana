@@ -6,9 +6,9 @@
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../alerting/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('Stack Alerts Feature Privileges', () => {

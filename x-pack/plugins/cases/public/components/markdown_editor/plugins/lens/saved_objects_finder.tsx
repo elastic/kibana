@@ -11,12 +11,12 @@ import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import type { EuiFieldSearchProps, IconType, EuiFormRowProps } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFieldSearch,
-  EuiFieldSearchProps,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -28,16 +28,14 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTablePagination,
-  IconType,
   EuiFormRow,
-  EuiFormRowProps,
 } from '@elastic/eui';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject, CoreStart } from 'src/core/public';
+import type { SimpleSavedObject, CoreStart } from '@kbn/core/public';
 
-import { LISTING_LIMIT_SETTING } from '../../../../../../../../src/plugins/saved_objects/public';
+import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -51,12 +49,14 @@ export interface SavedObjectMetaData<T = unknown> {
 
 interface FinderAttributes {
   title?: string;
+  name?: string;
   type: string;
 }
 
 interface SavedObjectFinderState {
   items: Array<{
     title: string | null;
+    name: string | null;
     id: SimpleSavedObject['id'];
     type: SimpleSavedObject['type'];
     savedObject: SimpleSavedObject<FinderAttributes>;
@@ -126,7 +126,7 @@ export class SavedObjectFinderUi extends React.Component<
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
-      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
+      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
@@ -160,13 +160,15 @@ export class SavedObjectFinderUi extends React.Component<
         page: 0,
         items: resp.savedObjects.map((savedObject) => {
           const {
-            attributes: { title },
+            attributes: { name, title },
             id,
             type,
           } = savedObject;
-
+          const titleToUse = typeof title === 'string' ? title : '';
+          const nameToUse = name && typeof name === 'string' ? name : titleToUse;
           return {
-            title: typeof title === 'string' ? title : '',
+            title: titleToUse,
+            name: nameToUse,
             id,
             type,
             savedObject,
@@ -394,10 +396,7 @@ export class SavedObjectFinderUi extends React.Component<
                   </EuiFilterButton>
                 }
               >
-                <EuiContextMenuPanel
-                  watchedItemProps={['icon', 'disabled']}
-                  items={this.getSortOptions()}
-                />
+                <EuiContextMenuPanel items={this.getSortOptions()} />
               </EuiPopover>
               {this.props.showFilter && (
                 <EuiPopover
@@ -430,7 +429,6 @@ export class SavedObjectFinderUi extends React.Component<
                   }
                 >
                   <EuiContextMenuPanel
-                    watchedItemProps={['icon', 'disabled']}
                     items={this.props.savedObjectMetaData.map((metaData) => (
                       <EuiContextMenuItem
                         key={metaData.type}
@@ -491,7 +489,7 @@ export class SavedObjectFinderUi extends React.Component<
 
                 const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
                   ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
-                  : `${item.title} (${currentSavedObjectMetaData.name})`;
+                  : `${item.name} (${currentSavedObjectMetaData.name})`;
 
                 const iconType = (
                   currentSavedObjectMetaData ||
@@ -504,7 +502,7 @@ export class SavedObjectFinderUi extends React.Component<
                   <EuiListGroupItem
                     key={item.id}
                     iconType={iconType}
-                    label={item.title}
+                    label={item.name}
                     onClick={
                       onChoose
                         ? () => {

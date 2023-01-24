@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { HttpResponsePayload } from '@kbn/core/server';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
@@ -24,9 +24,9 @@ const bodySchema = schema.object({
     schema.literal('ip_field'),
     schema.literal('keyword_field'),
     schema.literal('long_field'),
+    schema.literal('composite_field'),
   ]),
   document: schema.object({}, { unknowns: 'allow' }),
-  documentId: schema.string(),
 });
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
@@ -38,50 +38,30 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
       },
     },
     async (ctx, req, res) => {
-      const { client } = ctx.core.elasticsearch;
+      const { client } = (await ctx.core).elasticsearch;
 
-      const type = req.body.context.split('_field')[0] as estypes.MappingRuntimeFieldType;
       const body = {
-        runtime_mappings: {
-          my_runtime_field: {
-            type,
-            script: req.body.script,
-          },
+        script: req.body.script,
+        context: req.body.context,
+        context_setup: {
+          document: req.body.document,
+          index: req.body.index,
         },
-        size: 1,
-        query: {
-          term: {
-            _id: req.body.documentId,
-          },
-        },
-        fields: ['my_runtime_field'],
       };
 
       try {
-        // Ideally we want to use the Painless _execute API to get the runtime field preview.
-        // There is a current ES limitation that requires a user to have too many privileges
-        // to execute the script. (issue: https://github.com/elastic/elasticsearch/issues/48856)
-        // Until we find a way to execute a script without advanced privileges we are going to
-        // use the Search API to get the field value (and possible errors).
-        // Note: here is the PR were we changed from using Painless _execute to _search and should be
-        // reverted when the ES issue is fixed: https://github.com/elastic/kibana/pull/115070
-        const response = await client.asCurrentUser.search({
-          index: req.body.index,
-          body,
-        });
-
-        const fieldValue = response.hits.hits[0]?.fields?.my_runtime_field ?? '';
+        // client types need to be update to support this request format
+        // @ts-expect-error
+        const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
+        const fieldValue = result as HttpResponsePayload;
 
         return res.ok({ body: { values: fieldValue } });
-      } catch (error: any) {
+      } catch (error) {
         // Assume invalid painless script was submitted
         // Return 200 with error object
         const handleCustomError = () => {
           return res.ok({
-            body: {
-              values: [],
-              error: error.body.error.failed_shards[0]?.reason ?? {},
-            },
+            body: { values: [], ...error.body },
           });
         };
 

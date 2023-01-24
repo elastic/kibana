@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { AGG_TYPE, JOIN_FIELD_NAME_PREFIX, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
 export type BucketProperties = Record<string | number, unknown>;
@@ -18,8 +18,8 @@ export function getField(indexPattern: DataView, fieldName: string): DataViewFie
   if (!field) {
     throw new Error(
       i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
-        values: { fieldName, indexPatternTitle: indexPattern.title },
+        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternName}'.`,
+        values: { fieldName, indexPatternName: indexPattern.getName() },
       })
     );
   }

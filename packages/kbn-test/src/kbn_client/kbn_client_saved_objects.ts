@@ -10,8 +10,9 @@ import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { isAxiosResponseError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -83,7 +84,7 @@ interface DeleteObjectsOptions {
 
 async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
   if (arr.length) {
-    await lastValueFrom(
+    await Rx.lastValueFrom(
       Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
     );
   }
@@ -222,18 +223,40 @@ export class KbnClientSavedObjects {
   public async cleanStandardList(options?: { space?: string }) {
     // add types here
     const types = [
-      'search',
+      'url',
       'index-pattern',
+      'action',
+      'query',
+      'alert',
+      'graph-workspace',
+      'tag',
       'visualization',
+      'canvas-element',
+      'canvas-workpad',
       'dashboard',
+      'search',
       'lens',
       'map',
-      'graph-workspace',
-      'query',
-      'tag',
-      'url',
-      'canvas-workpad',
+      'cases',
+      'uptime-dynamic-settings',
+      'osquery-saved-query',
+      'osquery-pack',
+      'infrastructure-ui-source',
+      'metrics-explorer-view',
+      'inventory-view',
+      'infrastructure-monitoring-log-view',
+      'apm-indices',
+      // Fleet saved object types
+      'ingest-outputs',
+      'ingest-download-sources',
+      'ingest-agent-policies',
+      'ingest-package-policies',
+      'epm-packages',
+      'epm-packages-assets',
+      'fleet-preconfiguration-deletion-record',
+      'fleet-fleet-server-host',
     ];
+
     const newOptions = { types, space: options?.space };
     await this.clean(newOptions);
   }

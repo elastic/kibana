@@ -9,25 +9,30 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { ContextApp } from './context_app';
 import { DiscoverServices } from '../../build_services';
-import { indexPatternsMock } from '../../__mocks__/index_patterns';
+import { dataViewsMock } from '../../__mocks__/data_views';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { themeServiceMock } from '../../../../../core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { HistoryLocationState } from '../../build_services';
 
 const mockFilterManager = createFilterManagerMock();
-const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
+const mockNavigationPlugin = {
+  ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
+};
 
 describe('ContextApp test', () => {
   const services = {
     data: {
+      ...dataPluginMock.createStartContract(),
       search: {
         searchSource: {
           createEmpty: jest.fn(),
@@ -42,7 +47,7 @@ describe('ContextApp test', () => {
         save: true,
       },
     },
-    indexPatterns: indexPatternsMock,
+    dataViews: dataViewsMock,
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
@@ -60,21 +65,30 @@ describe('ContextApp test', () => {
     filterManager: mockFilterManager,
     uiSettings: uiSettingsMock,
     storage: new LocalStorageMock({}),
+    chrome: { setBreadcrumbs: jest.fn() },
+    locator: {
+      useUrl: jest.fn(() => ''),
+      navigate: jest.fn(),
+      getUrl: jest.fn(() => Promise.resolve('mock-url')),
+    },
+    contextLocator: { getRedirectUrl: jest.fn(() => '') },
+    singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
   } as unknown as DiscoverServices;
 
   const defaultProps = {
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
+    locationState: {} as HistoryLocationState,
   };
 
   const topNavProps = {
     appName: 'context',
     showSearchBar: true,
-    showQueryBar: false,
+    showQueryInput: false,
     showFilterBar: true,
     showSaveQuery: false,
     showDatePicker: false,
-    indexPatterns: [indexPatternMock],
+    indexPatterns: [dataViewMock],
     useDefaultBehaviors: true,
   };
 
@@ -111,11 +125,11 @@ describe('ContextApp test', () => {
     expect(mockFilterManager.addFilters.mock.calls[0][0]).toEqual([
       {
         $state: { store: 'appState' },
-        meta: { alias: null, disabled: false, index: 'the-index-pattern-id', negate: false },
+        meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
         query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
       },
     ]);
-    expect(indexPatternsMock.updateSavedObject.mock.calls.length).toBe(1);
-    expect(indexPatternsMock.updateSavedObject.mock.calls[0]).toEqual([indexPatternMock, 0, true]);
+    expect(dataViewsMock.updateSavedObject.mock.calls.length).toBe(1);
+    expect(dataViewsMock.updateSavedObject.mock.calls[0]).toEqual([dataViewMock, 0, true]);
   });
 });

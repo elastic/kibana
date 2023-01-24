@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
 
@@ -29,7 +29,7 @@ export const registerBulkGetRoute = (
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const managementService = await managementServicePromise;
-      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const objects = req.body;
       const uniqueTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());

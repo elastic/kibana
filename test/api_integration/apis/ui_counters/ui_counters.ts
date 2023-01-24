@@ -9,8 +9,8 @@
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
 import moment from 'moment';
+import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UsageCountersSavedObject } from '../../../../src/plugins/usage_collection/server';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

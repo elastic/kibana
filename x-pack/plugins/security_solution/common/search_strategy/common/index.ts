@@ -4,40 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 export type {
   Inspect,
   SortField,
   TimerangeInput,
   PaginationInputPaginated,
-  DocValueFields,
   CursorType,
   TotalValue,
-} from '../../../../timelines/common';
-export { Direction } from '../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+export { Direction } from '@kbn/timelines-plugin/common';
 
 export type Maybe<T> = T | null;
 
 export type SearchHit = IEsSearchResponse<object>['rawResponse']['hits']['hits'][0];
 
+export interface KpiHistogramData {
+  x?: Maybe<number>;
+  y?: Maybe<number>;
+}
+
+export interface KpiHistogram<T> {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+  count: T;
+}
+
+export interface KpiGeneralHistogramCount {
+  value?: number;
+  doc_count?: number;
+}
+
 export interface PageInfoPaginated {
   activePage: number;
   fakeTotalCount: number;
   showMorePagesIndicator: boolean;
-}
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: Maybe<string>;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: Maybe<string>;
-}
-
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
 }
 
 export interface ShardsResponse {
@@ -69,6 +71,7 @@ export interface Hits<T, U> {
 
 export interface GenericBuckets {
   key: string;
+  key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
 

@@ -45,25 +45,31 @@ export class TileServiceSelect extends Component<Props, State> {
   }
 
   _loadTmsOptions = async () => {
-    const emsTMSServices = await getEmsTmsServices();
+    try {
+      const emsTMSServices = await getEmsTmsServices();
 
-    if (!this._isMounted) {
-      return;
+      if (!this._isMounted) {
+        return;
+      }
+
+      const emsTmsOptions = emsTMSServices.map((tmsService) => {
+        return {
+          value: tmsService.getId(),
+          text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
+        };
+      });
+      emsTmsOptions.unshift({
+        value: AUTO_SELECT,
+        text: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
+          defaultMessage: 'Autoselect based on Kibana theme',
+        }),
+      });
+      this.setState({ emsTmsOptions, hasLoaded: true });
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({ emsTmsOptions: [], hasLoaded: true });
+      }
     }
-
-    const emsTmsOptions = emsTMSServices.map((tmsService) => {
-      return {
-        value: tmsService.getId(),
-        text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
-      };
-    });
-    emsTmsOptions.unshift({
-      value: AUTO_SELECT,
-      text: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
-        defaultMessage: 'Autoselect based on Kibana theme',
-      }),
-    });
-    this.setState({ emsTmsOptions, hasLoaded: true });
   };
 
   _onChange = (e: ChangeEvent<HTMLSelectElement>) => {

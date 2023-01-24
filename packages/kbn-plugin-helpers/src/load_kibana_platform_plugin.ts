@@ -8,8 +8,9 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { parseKibanaPlatformPlugin, KibanaPlatformPlugin, createFailError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { parseKibanaPlatformPlugin, KibanaPlatformPlugin } from '@kbn/plugin-discovery';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 export type Plugin = KibanaPlatformPlugin;
 

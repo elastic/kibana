@@ -43,24 +43,31 @@ export default function () {
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         `--security.showInsecureClusterWarning=false`,
+        '--csp.disableUnsafeEval=true',
         '--telemetry.banner=false',
         '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging
         '--telemetry.sendUsageTo=staging',
         `--server.maxPayload=1679958`,
         // newsfeed mock service
-        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
+        `--plugin-path=${path.join(__dirname, 'plugins', 'newsfeed')}`,
+        // otel mock service
+        `--plugin-path=${path.join(__dirname, 'plugins', 'otel_metrics')}`,
         `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
-        // code coverage reporting plugin
-        ...(!!process.env.CODE_COVERAGE
-          ? [`--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'coverage')}`]
-          : []),
-        '--logging.appenders.deprecation.type=console',
-        '--logging.appenders.deprecation.layout.type=json',
-        '--logging.loggers[0].name=elasticsearch.deprecation',
-        '--logging.loggers[0].level=all',
-        '--logging.loggers[0].appenders[0]=deprecation',
+        `--logging.appenders.deprecation=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'json',
+          },
+        })}`,
+        `--logging.loggers=${JSON.stringify([
+          {
+            name: 'elasticsearch.deprecation',
+            level: 'all',
+            appenders: ['deprecation'],
+          },
+        ])}`,
       ],
     },
     services,

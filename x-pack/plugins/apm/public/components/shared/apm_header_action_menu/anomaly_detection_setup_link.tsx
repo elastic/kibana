@@ -82,6 +82,7 @@ export function AnomalyDetectionSetupLink() {
       color={color}
       href={getLegacyApmHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
+      data-test-subj="apmAnomalyDetectionHeaderLink"
     >
       {pre}
       <span style={{ marginInlineStart: theme.eui.euiSizeS }}>

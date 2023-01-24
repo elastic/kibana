@@ -11,7 +11,7 @@
         "label": "LazyLogStreamWrapper",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "infra",
             "scope": "public",
@@ -19,31 +19,31 @@
             "section": "def-public.LogStreamProps",
             "text": "LogStreamProps"
           },
-          ">) => JSX.Element"
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
             "id": "def-public.LazyLogStreamWrapper.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "infra",
                 "scope": "public",
                 "docId": "kibInfraPluginApi",
                 "section": "def-public.LogStreamProps",
                 "text": "LogStreamProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -71,6 +71,7 @@
         ],
         "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -83,7 +84,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -99,6 +101,7 @@
         "description": [],
         "path": "x-pack/plugins/infra/public/lib/lib.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -115,6 +118,7 @@
         ],
         "path": "x-pack/plugins/infra/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -128,6 +132,7 @@
         "description": [],
         "path": "x-pack/plugins/infra/common/formatters/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -141,6 +146,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -151,7 +157,8 @@
                 "label": "val",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/number.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -169,6 +176,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -179,7 +187,8 @@
                 "label": "bytes",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -197,6 +206,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -207,7 +217,8 @@
                 "label": "bytes",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -225,6 +236,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -235,7 +247,8 @@
                 "label": "bytes",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/bytes.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -251,6 +264,7 @@
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -261,40 +275,203 @@
                 "label": "val",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/percent.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
           {
             "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.highPercision",
+            "id": "def-public.FORMATTERS.highPrecision",
             "type": "Function",
             "tags": [],
-            "label": "highPercision",
+            "label": "highPrecision",
             "description": [],
             "signature": [
               "(val: number) => string"
             ],
             "path": "x-pack/plugins/infra/common/formatters/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.highPercision.$1",
+                "id": "def-public.FORMATTERS.highPrecision.$1",
                 "type": "number",
                 "tags": [],
                 "label": "val",
                 "description": [],
                 "path": "x-pack/plugins/infra/common/formatters/high_precision.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
         ],
         "initialIsOpen": false
       }
-    ]
+    ],
+    "start": {
+      "parentPluginId": "infra",
+      "id": "def-public.InfraClientStartExports",
+      "type": "Interface",
+      "tags": [],
+      "label": "InfraClientStartExports",
+      "description": [],
+      "path": "x-pack/plugins/infra/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.logViews",
+          "type": "Object",
+          "tags": [],
+          "label": "logViews",
+          "description": [],
+          "signature": [
+            "LogViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.telemetry",
+          "type": "Object",
+          "tags": [],
+          "label": "telemetry",
+          "description": [],
+          "signature": [
+            "ITelemetryClient"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.ContainerMetricsTable",
+          "type": "Function",
+          "tags": [],
+          "label": "ContainerMetricsTable",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "UseNodeMetricsTableOptions",
+            " & Partial<",
+            "SourceProviderProps",
+            ">) => JSX.Element"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "infra",
+              "id": "def-public.InfraClientStartExports.ContainerMetricsTable.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "UseNodeMetricsTableOptions",
+                " & Partial<",
+                "SourceProviderProps",
+                ">"
+              ],
+              "path": "x-pack/plugins/infra/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.HostMetricsTable",
+          "type": "Function",
+          "tags": [],
+          "label": "HostMetricsTable",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "UseNodeMetricsTableOptions",
+            " & Partial<",
+            "SourceProviderProps",
+            ">) => JSX.Element"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "infra",
+              "id": "def-public.InfraClientStartExports.HostMetricsTable.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "UseNodeMetricsTableOptions",
+                " & Partial<",
+                "SourceProviderProps",
+                ">"
+              ],
+              "path": "x-pack/plugins/infra/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.PodMetricsTable",
+          "type": "Function",
+          "tags": [],
+          "label": "PodMetricsTable",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "UseNodeMetricsTableOptions",
+            " & Partial<",
+            "SourceProviderProps",
+            ">) => JSX.Element"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "infra",
+              "id": "def-public.InfraClientStartExports.PodMetricsTable.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "UseNodeMetricsTableOptions",
+                " & Partial<",
+                "SourceProviderProps",
+                ">"
+              ],
+              "path": "x-pack/plugins/infra/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -307,8 +484,9 @@
         "tags": [],
         "label": "InfraConfig",
         "description": [],
-        "path": "x-pack/plugins/infra/server/types.ts",
+        "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "infra",
@@ -320,8 +498,9 @@
             "signature": [
               "{ inventory_threshold: { group_by_page_size: number; }; metric_threshold: { group_by_page_size: number; }; }"
             ],
-            "path": "x-pack/plugins/infra/server/types.ts",
-            "deprecated": false
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "infra",
@@ -333,8 +512,9 @@
             "signature": [
               "{ compositeSize: number; }"
             ],
-            "path": "x-pack/plugins/infra/server/types.ts",
-            "deprecated": false
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "infra",
@@ -346,8 +526,9 @@
             "signature": [
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/infra/server/types.ts",
-            "deprecated": false
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -369,6 +550,7 @@
         ],
         "path": "x-pack/plugins/infra/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -380,8 +562,9 @@
       "tags": [],
       "label": "InfraPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/infra/server/plugin.ts",
+      "path": "x-pack/plugins/infra/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "infra",
@@ -395,8 +578,9 @@
             "InfraStaticSourceConfiguration",
             ") => void"
           ],
-          "path": "x-pack/plugins/infra/server/plugin.ts",
+          "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "infra",
@@ -408,8 +592,9 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/infra/server/plugin.ts",
+              "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -422,15 +607,120 @@
               "signature": [
                 "InfraStaticSourceConfiguration"
               ],
-              "path": "x-pack/plugins/infra/server/plugin.ts",
+              "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginSetup.logViews",
+          "type": "Object",
+          "tags": [],
+          "label": "logViews",
+          "description": [],
+          "signature": [
+            "LogViewsServiceSetup"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "infra",
+      "id": "def-server.InfraPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InfraPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/infra/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.logViews",
+          "type": "Object",
+          "tags": [],
+          "label": "logViews",
+          "description": [],
+          "signature": [
+            "LogViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.getMetricIndices",
+          "type": "Function",
+          "tags": [],
+          "label": "getMetricIndices",
+          "description": [],
+          "signature": [
+            "(savedObjectsClient: ",
+            {
+              "pluginId": "@kbn/core-saved-objects-api-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+              "section": "def-common.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
+            },
+            ", sourceId?: string | undefined) => Promise<string>"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "infra",
+              "id": "def-server.InfraPluginStart.getMetricIndices.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "savedObjectsClient",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-saved-objects-api-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                  "section": "def-common.SavedObjectsClientContract",
+                  "text": "SavedObjectsClientContract"
+                }
+              ],
+              "path": "x-pack/plugins/infra/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "infra",
+              "id": "def-server.InfraPluginStart.getMetricIndices.$2",
+              "type": "string",
+              "tags": [],
+              "label": "sourceId",
+              "description": [],
+              "signature": [
+                "string | undefined"
+              ],
+              "path": "x-pack/plugins/infra/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
             }
           ],
           "returnComment": []
         }
       ],
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },

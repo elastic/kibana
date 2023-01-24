@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, omit } from 'lodash';
+import { get, omit, pick } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { DataViewBase } from './types';
@@ -64,7 +64,10 @@ export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
   }
 
   if (!filter.query) {
-    filter.query = {};
+    filter = { ...filter, query: {} };
+  } else {
+    // handle the case where .query already exists and filter has other top level keys on there
+    filter = pick(filter, ['meta', 'query', '$state']);
   }
 
   // @ts-ignore

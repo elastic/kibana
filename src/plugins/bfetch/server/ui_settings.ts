@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiSettingsParams } from 'src/core/server';
+import { UiSettingsParams } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { DISABLE_BFETCH_COMPRESSION, DISABLE_BFETCH } from '../common';
 

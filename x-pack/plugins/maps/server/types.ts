@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { MapsEmsPluginServerSetup } from '../../../../src/plugins/maps_ems/server';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { MapsEmsPluginServerSetup } from '@kbn/maps-ems-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+} from '@kbn/data-plugin/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 
 export interface SetupDeps {
   data: DataPluginSetup;

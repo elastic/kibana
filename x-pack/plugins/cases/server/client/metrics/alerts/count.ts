@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
-import { BaseHandler } from '../base_handler';
-import { BaseHandlerCommonOptions } from '../types';
+import { SingleCaseBaseHandler } from '../single_case_base_handler';
+import type { SingleCaseBaseHandlerCommonOptions } from '../types';
 
-export class AlertsCount extends BaseHandler {
-  constructor(options: BaseHandlerCommonOptions) {
+export class AlertsCount extends SingleCaseBaseHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(options, ['alerts.count']);
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } =
-      this.options.clientArgs;
+  public async compute(): Promise<SingleCaseMetricsResponse> {
+    const {
+      unsecuredSavedObjectsClient,
+      authorization,
+      services: { attachmentService },
+      logger,
+    } = this.options.clientArgs;
 
-    const { caseId, casesClient } = this.options;
+    const { casesClient } = this.options;
 
     try {
       // This will perform an authorization check to ensure the user has access to the parent case
       const theCase = await casesClient.cases.get({
-        id: caseId,
+        id: this.caseId,
         includeComments: false,
       });
 
@@ -46,7 +50,7 @@ export class AlertsCount extends BaseHandler {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to count alerts attached case id: ${caseId}: ${error}`,
+        message: `Failed to count alerts attached case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });

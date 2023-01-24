@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import type { KibanaLocation } from 'src/plugins/share/public';
+import type { KibanaLocation } from '@kbn/share-plugin/public';
 import React from 'react';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
-import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
-import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { CollectConfigContainer } from './components';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   AdvancedUiActionsStart,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
-} from '../../../../../ui_actions_enhanced/public';
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
+import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
-import {
-  CollectConfigProps,
-  StartServicesGetter,
-  UiComponent,
-} from '../../../../../../../src/plugins/kibana_utils/public';
 import { Config } from './types';
 
 export interface Params {
@@ -38,7 +33,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 {
   constructor(protected readonly params: Params) {
     this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
-    this.CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+    this.CollectConfig = this.ReactCollectConfig;
   }
 
   public abstract readonly id: string;
@@ -61,7 +56,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     CollectConfigProps<Config, BaseActionFactoryContext>
   >;
 
-  public readonly CollectConfig: UiComponent<
+  public readonly CollectConfig: React.FC<
     CollectConfigProps<DrilldownConfig, BaseActionFactoryContext>
   >;
 

@@ -4,19 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { SyntheticEvent } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
+import type { SyntheticEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
   EuiButtonIcon,
   EuiButtonProps,
-  EuiLink,
   EuiLinkProps,
   PropsForAnchor,
   PropsForButton,
 } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPopover,
+} from '@elastic/eui';
 import styled from 'styled-components';
-
+import { FormattedMessage } from '@kbn/i18n-react';
+import { defaultToEmptyTag } from '../empty_value';
+export interface ReputationLinkSetting {
+  name: string;
+  url_template: string;
+}
 export const LinkButton: React.FC<
   PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
 > = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
@@ -70,3 +81,88 @@ export const PortContainer = styled.div`
     top: -1px;
   }
 `;
+
+interface ReputationLinkOverflowProps {
+  rowItems: ReputationLinkSetting[];
+  render?: (item: ReputationLinkSetting) => React.ReactNode;
+  overflowIndexStart?: number;
+  moreMaxHeight: string;
+}
+
+export const ReputationLinksOverflow = React.memo<ReputationLinkOverflowProps>(
+  ({ moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
+    const button = useMemo(
+      () => (
+        <>
+          {' ,'}
+          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+            {`+${rowItems.length - overflowIndexStart} `}
+            <FormattedMessage
+              id="xpack.securitySolution.reputationLinks.moreLabel"
+              defaultMessage="More"
+            />
+          </EuiButtonEmpty>
+        </>
+      ),
+      [togglePopover, overflowIndexStart, rowItems.length]
+    );
+
+    return (
+      <EuiFlexItem grow={false}>
+        {rowItems.length > overflowIndexStart && (
+          <EuiPopover
+            id="popover"
+            button={button}
+            isOpen={isOpen}
+            closePopover={togglePopover}
+            repositionOnScroll
+            panelClassName="withHoverActions__popover"
+          >
+            <MoreReputationLinksContainer
+              render={render}
+              rowItems={rowItems}
+              moreMaxHeight={moreMaxHeight}
+              overflowIndexStart={overflowIndexStart}
+            />
+          </EuiPopover>
+        )}
+      </EuiFlexItem>
+    );
+  }
+);
+
+ReputationLinksOverflow.displayName = 'ReputationLinksOverflow';
+
+export const MoreReputationLinksContainer = React.memo<ReputationLinkOverflowProps>(
+  ({ moreMaxHeight, overflowIndexStart, render, rowItems }) => {
+    const moreItems = useMemo(
+      () =>
+        rowItems.slice(overflowIndexStart).map((rowItem, index) => {
+          return (
+            <EuiFlexItem grow={1} key={`${rowItem}-${index}`}>
+              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
+            </EuiFlexItem>
+          );
+        }),
+      [overflowIndexStart, render, rowItems]
+    );
+
+    return (
+      <div
+        data-test-subj="more-container"
+        className="eui-yScroll"
+        style={{
+          maxHeight: moreMaxHeight,
+          paddingRight: '2px',
+        }}
+      >
+        <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
+          {moreItems}
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+);
+MoreReputationLinksContainer.displayName = 'MoreReputationLinksContainer';

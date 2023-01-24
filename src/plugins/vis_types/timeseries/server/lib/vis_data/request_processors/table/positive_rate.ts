@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { calculateAggRoot } from './calculate_agg_root';
-import { UI_SETTINGS } from '../../../../../../../data/common';
 
 import type { TableRequestProcessorsFunction } from './types';
-
-// @ts-expect-error not typed yet
 import { createPositiveRate, filter } from '../series/positive_rate';
 
 export const positiveRate: TableRequestProcessorsFunction =

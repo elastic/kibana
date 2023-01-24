@@ -18,19 +18,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import { IndexPatternField } from 'src/plugins/data/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 function fieldsToOptions(
-  fields?: IndexPatternField[],
-  isFieldDisabled?: (field: IndexPatternField) => boolean
-): Array<EuiComboBoxOptionOption<IndexPatternField>> {
+  fields?: DataViewField[],
+  isFieldDisabled?: (field: DataViewField) => boolean
+): Array<EuiComboBoxOptionOption<DataViewField>> {
   if (!fields) {
     return [];
   }
 
   return fields
     .map((field) => {
-      const option: EuiComboBoxOptionOption<IndexPatternField> = {
+      const option: EuiComboBoxOptionOption<DataViewField> = {
         value: field,
         label: field.displayName ? field.displayName : field.name,
       };
@@ -45,14 +45,14 @@ function fieldsToOptions(
 }
 
 type Props = Omit<
-  EuiComboBoxProps<IndexPatternField>,
+  EuiComboBoxProps<DataViewField>,
   'isDisabled' | 'onChange' | 'options' | 'renderOption' | 'selectedOptions' | 'singleSelection'
 > & {
-  fields?: IndexPatternField[];
+  fields?: DataViewField[];
   onChange: (fieldName?: string) => void;
   value: string | null; // index pattern field name
-  isFieldDisabled?: (field: IndexPatternField) => boolean;
-  getFieldDisabledReason?: (field: IndexPatternField) => string | null;
+  isFieldDisabled?: (field: DataViewField) => boolean;
+  getFieldDisabledReason?: (field: DataViewField) => string | null;
 };
 
 export function SingleFieldSelect({
@@ -64,7 +64,7 @@ export function SingleFieldSelect({
   ...rest
 }: Props) {
   function renderOption(
-    option: EuiComboBoxOptionOption<IndexPatternField>,
+    option: EuiComboBoxOptionOption<DataViewField>,
     searchValue: string,
     contentClassName: string
   ) {
@@ -91,13 +91,13 @@ export function SingleFieldSelect({
     );
   }
 
-  const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<IndexPatternField>>) => {
+  const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>>) => {
     onChange(_.get(selectedOptions, '0.value.name'));
   };
 
-  const selectedOptions: Array<EuiComboBoxOptionOption<IndexPatternField>> = [];
+  const selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>> = [];
   if (value && fields) {
-    const selectedField = fields.find((field: IndexPatternField) => {
+    const selectedField = fields.find((field: DataViewField) => {
       return field.name === value;
     });
     if (selectedField) {

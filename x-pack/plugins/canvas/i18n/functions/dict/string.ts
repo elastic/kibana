@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { string } from '../../../canvas_plugin_src/functions/common/string';
+import type { string } from '../../../canvas_plugin_src/functions/common/string';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

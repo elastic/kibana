@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const ADDED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.addedField', {
   defaultMessage: 'added',
@@ -83,6 +84,14 @@ export const EDIT_COMMENT = i18n.translate('xpack.cases.caseView.edit.comment', 
   defaultMessage: 'Edit comment',
 });
 
+export const DELETE_COMMENT = i18n.translate('xpack.cases.caseView.delete.comment', {
+  defaultMessage: 'Delete comment',
+});
+
+export const DELETE_COMMENT_TITLE = i18n.translate('xpack.cases.caseView.deleteTitle.comment', {
+  defaultMessage: 'Delete this comment?',
+});
+
 export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
@@ -147,3 +156,53 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
   defaultMessage: 'Back to Cases',
 });
+
+export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity', {
+  defaultMessage: 'Activity',
+});
+
+export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.tabs.alerts.emptyDescription',
+  {
+    defaultMessage: 'No alerts have been added to this case.',
+  }
+);
+
+export const SEND_EMAIL_ARIA = (user: string) =>
+  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
+    values: { user },
+    defaultMessage: 'click to send an email to {user}',
+  });
+
+export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.editAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to edit assignees',
+  }
+);
+
+export const NO_ASSIGNEES = i18n.translate('xpack.cases.caseView.noAssignees', {
+  defaultMessage: 'No users are assigned',
+});
+
+export const ASSIGN_A_USER = i18n.translate('xpack.cases.caseView.assignUser', {
+  defaultMessage: 'Assign a user',
+});
+
+export const SPACED_OR = i18n.translate('xpack.cases.caseView.spacedOrText', {
+  defaultMessage: ' or ',
+});
+
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourself', {
+  defaultMessage: 'assign yourself',
+});
+
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.caseView.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { ConfigType } from '../../../../..';
+import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { SetupPlugins } from '../../../../../plugin';
+import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import {
   getDraftTimeline,
@@ -74,7 +74,7 @@ export const cleanDraftTimelinesRoute = (
           request.body.timelineType === TimelineType.template
             ? {
                 timelineType: request.body.timelineType,
-                templateTimelineId: uuid.v4(),
+                templateTimelineId: uuidv4(),
                 templateTimelineVersion: 1,
               }
             : {};

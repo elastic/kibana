@@ -22,38 +22,50 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  SERVICE_NAME,
-  SPAN_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
+import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
-import { BackendContents } from './backend_contents';
+import { DependencyContents } from './dependency_contents';
+import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 
-function getContentsComponent(selectedNodeData: cytoscape.NodeDataDefinition) {
+function getContentsComponent(
+  selectedElementData:
+    | cytoscape.NodeDataDefinition
+    | cytoscape.EdgeDataDefinition,
+  isTraceExplorerEnabled: boolean
+) {
   if (
-    selectedNodeData.groupedConnections &&
-    Array.isArray(selectedNodeData.groupedConnections)
+    selectedElementData.groupedConnections &&
+    Array.isArray(selectedElementData.groupedConnections)
   ) {
     return ExternalsListContents;
   }
-  if (selectedNodeData[SERVICE_NAME]) {
+  if (selectedElementData[SERVICE_NAME]) {
     return ServiceContents;
   }
-  if (selectedNodeData[SPAN_TYPE] === 'resource') {
+  if (selectedElementData[SPAN_TYPE] === 'resource') {
     return ResourceContents;
   }
 
-  return BackendContents;
+  if (
+    isTraceExplorerEnabled &&
+    selectedElementData.source &&
+    selectedElementData.target
+  ) {
+    return EdgeContents;
+  }
+
+  return DependencyContents;
 }
 
 export interface ContentsProps {
-  nodeData: cytoscape.NodeDataDefinition;
+  elementData: cytoscape.NodeDataDefinition | cytoscape.ElementDataDefinition;
   environment: Environment;
   kuery: string;
   start: string;
@@ -78,19 +90,26 @@ export function Popover({
 }: PopoverProps) {
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
-  const [selectedNode, setSelectedNode] = useState<
-    cytoscape.NodeSingular | undefined
+  const [selectedElement, setSelectedElement] = useState<
+    cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined
   >(undefined);
   const deselect = useCallback(() => {
     if (cy) {
       cy.elements().unselect();
     }
-    setSelectedNode(undefined);
-  }, [cy, setSelectedNode]);
-  const renderedHeight = selectedNode?.renderedHeight() ?? 0;
-  const renderedWidth = selectedNode?.renderedWidth() ?? 0;
-  const { x, y } = selectedNode?.renderedPosition() ?? { x: -10000, y: -10000 };
-  const isOpen = !!selectedNode;
+    setSelectedElement(undefined);
+  }, [cy, setSelectedElement]);
+
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
+
+  const renderedHeight = selectedElement?.renderedHeight() ?? 0;
+  const renderedWidth = selectedElement?.renderedWidth() ?? 0;
+  const box = selectedElement?.renderedBoundingBox({});
+
+  const x = box ? box.x1 + box.w / 2 : -10000;
+  const y = box ? box.y1 + box.h / 2 : -10000;
+
+  const isOpen = !!selectedElement;
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
@@ -99,20 +118,20 @@ export function Popover({
   };
   const trigger = <div style={triggerStyle} />;
   const zoom = cy?.zoom() ?? 1;
-  const height = selectedNode?.height() ?? 0;
+  const height = selectedElement?.height() ?? 0;
   const translateY = y - ((zoom + 1) * height) / 4;
   const popoverStyle: CSSProperties = {
     position: 'absolute',
     transform: `translate(${x}px, ${translateY}px)`,
   };
-  const selectedNodeData = selectedNode?.data() ?? {};
+  const selectedElementData = selectedElement?.data() ?? {};
   const popoverRef = useRef<EuiPopover>(null);
-  const selectedNodeId = selectedNodeData.id;
+  const selectedElementId = selectedElementData.id;
 
   // Set up Cytoscape event handlers
   useEffect(() => {
     const selectHandler: cytoscape.EventHandler = (event) => {
-      setSelectedNode(event.target);
+      setSelectedElement(event.target);
     };
 
     if (cy) {
@@ -120,6 +139,10 @@ export function Popover({
       cy.on('unselect', 'node', deselect);
       cy.on('viewport', deselect);
       cy.on('drag', 'node', deselect);
+      if (isTraceExplorerEnabled) {
+        cy.on('select', 'edge', selectHandler);
+        cy.on('unselect', 'edge', deselect);
+      }
     }
 
     return () => {
@@ -128,9 +151,11 @@ export function Popover({
         cy.removeListener('unselect', 'node', deselect);
         cy.removeListener('viewport', undefined, deselect);
         cy.removeListener('drag', 'node', deselect);
+        cy.removeListener('select', 'edge', selectHandler);
+        cy.removeListener('unselect', 'edge', deselect);
       }
     };
-  }, [cy, deselect]);
+  }, [cy, deselect, isTraceExplorerEnabled]);
 
   // Handle positioning of popover. This makes it so the popover positions
   // itself correctly and the arrows are always pointing to where they should.
@@ -146,20 +171,23 @@ export function Popover({
       if (cy) {
         cy.animate({
           ...getAnimationOptions(theme),
-          center: { eles: cy.getElementById(selectedNodeId) },
+          center: { eles: cy.getElementById(selectedElementId) },
         });
       }
     },
-    [cy, selectedNodeId, theme]
+    [cy, selectedElementId, theme]
   );
 
-  const isAlreadyFocused = focusedServiceName === selectedNodeId;
+  const isAlreadyFocused = focusedServiceName === selectedElementId;
 
   const onFocusClick = isAlreadyFocused
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(selectedNodeData);
+  const ContentsComponent = getContentsComponent(
+    selectedElementData,
+    isTraceExplorerEnabled
+  );
 
   return (
     <EuiPopover
@@ -169,7 +197,6 @@ export function Popover({
       isOpen={isOpen}
       ref={popoverRef}
       style={popoverStyle}
-      initialFocus={false}
     >
       <EuiFlexGroup
         direction="column"
@@ -179,14 +206,14 @@ export function Popover({
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }}>
-              {selectedNodeData.label ?? selectedNodeId}
+              {selectedElementData.label ?? selectedElementId}
             </h3>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>
         <ContentsComponent
           onFocusClick={onFocusClick}
-          nodeData={selectedNodeData}
+          elementData={selectedElementData}
           environment={environment}
           kuery={kuery}
           start={start}

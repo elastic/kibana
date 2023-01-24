@@ -15,23 +15,25 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { EqlTabContentComponent, Props as EqlTabContentComponentProps } from './index';
+import type { Props as EqlTabContentComponentProps } from '.';
+import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../containers/index';
-import { useTimelineEventsDetails } from '../../../containers/details/index';
+import { useTimelineEvents } from '../../../containers';
+import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
 
-jest.mock('../../../containers/index', () => ({
+jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details/index', () => ({
+jest.mock('../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('../body/events/index', () => ({
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
+jest.mock('../body/events', () => ({
   Events: () => <></>,
 }));
 
@@ -44,41 +46,7 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        theme: {
-          theme$: {},
-        },
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-        },
-        cases: {
-          ui: {
-            getCasesContext: () => mockCasesContext,
-          },
-        },
-        docLinks: { links: { query: { eql: 'url-eql_doc' } } },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
-        },
-      },
-    }),
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
+jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline', () => {
   let props = {} as EqlTabContentComponentProps;
@@ -188,7 +156,6 @@ describe('Timeline', () => {
     test('it does render the timeline table when the source is loading with no events', () => {
       (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
-        docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],

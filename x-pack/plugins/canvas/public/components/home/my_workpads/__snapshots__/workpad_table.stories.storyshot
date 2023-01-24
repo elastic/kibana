@@ -2,7 +2,7 @@
 
 exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
 <div
-  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  className="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
 >
   <div>
     <div
@@ -18,6 +18,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <input
+              aria-invalid={false}
               aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
               className="euiFieldSearch euiFieldSearch--fullWidth"
               data-test-subj="tableListSearchBox"
@@ -37,7 +38,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="search"
                   size="m"
-                />
+                >
+                  
+                </span>
               </span>
             </div>
           </div>
@@ -73,7 +76,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 className="euiFilePicker__icon"
                 data-euiicon-type="importAction"
                 size="m"
-              />
+              >
+                
+              </span>
               <div
                 className="euiFilePicker__promptText"
               >
@@ -85,7 +90,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--l"
+      className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
     />
     <div
       className="euiBasicTable"
@@ -131,13 +136,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 className="euiTableSortMobile"
               >
                 <div
-                  className="euiPopover euiPopover--anchorDownRight"
+                  className="euiPopover emotion-euiPopover"
                 >
                   <div
-                    className="euiPopover__anchor"
+                    className="euiPopover__anchor css-16vtueo-render"
                   >
                     <button
-                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                      className="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
                       disabled={false}
                       onClick={[Function]}
                       type="button"
@@ -150,7 +155,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           color="inherit"
                           data-euiicon-type="arrowDown"
                           size="s"
-                        />
+                        >
+                          
+                        </span>
                         <span
                           className="euiButtonEmpty__text"
                         >
@@ -170,7 +177,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           tabIndex={-1}
         >
           <caption
-            className="euiScreenReaderOnly euiTableCaption"
+            className="euiTableCaption emotion-euiScreenReaderOnly"
           />
           <thead>
             <tr>
@@ -296,7 +303,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiTableSortIcon"
                       data-euiicon-type="sortDown"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </button>
               </th>
@@ -370,9 +379,10 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 >
                   <a
                     aria-label="Load workpad 'Workpad 2'"
-                    className="euiLink euiLink--primary"
+                    className="euiLink emotion-euiLink-primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-2"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -442,13 +452,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
-                          className="euiToolTipAnchor"
+                          className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
                           <button
                             aria-label="Export workpad"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
@@ -461,7 +471,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="exportAction"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -469,13 +481,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
-                          className="euiToolTipAnchor"
+                          className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
                           <button
                             aria-label="Clone workpad"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
@@ -488,7 +500,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="copy"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -544,9 +558,10 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 >
                   <a
                     aria-label="Load workpad 'Workpad 1'"
-                    className="euiLink euiLink--primary"
+                    className="euiLink emotion-euiLink-primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-1"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -616,13 +631,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
-                          className="euiToolTipAnchor"
+                          className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
                           <button
                             aria-label="Export workpad"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
@@ -635,7 +650,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="exportAction"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -643,13 +660,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
-                          className="euiToolTipAnchor"
+                          className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
                           <button
                             aria-label="Clone workpad"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
@@ -662,7 +679,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="copy"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -718,9 +737,10 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 >
                   <a
                     aria-label="Load workpad 'Workpad 0'"
-                    className="euiLink euiLink--primary"
+                    className="euiLink emotion-euiLink-primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-0"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -790,13 +810,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
-                          className="euiToolTipAnchor"
+                          className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
                           <button
                             aria-label="Export workpad"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
@@ -809,7 +829,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="exportAction"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -817,13 +839,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                         className="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
-                          className="euiToolTipAnchor"
+                          className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                           onMouseOut={[Function]}
                           onMouseOver={[Function]}
                         >
                           <button
                             aria-label="Clone workpad"
-                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            className="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                             disabled={false}
                             onBlur={[Function]}
                             onClick={[Function]}
@@ -836,7 +858,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="copy"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -850,22 +874,22 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
       </div>
       <div>
         <div
-          className="euiSpacer euiSpacer--m"
+          className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
         />
         <div
-          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow eui-xScroll"
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
         >
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              className="euiPopover euiPopover--anchorUpRight"
+              className="euiPopover emotion-euiPopover"
             >
               <div
-                className="euiPopover__anchor"
+                className="euiPopover__anchor css-16vtueo-render"
               >
                 <button
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  className="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
                   data-test-subj="tablePaginationPopoverButton"
                   disabled={false}
                   onClick={[Function]}
@@ -879,7 +903,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                     <span
                       className="euiButtonEmpty__text"
                     >
@@ -897,19 +923,19 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
           >
             <nav
               aria-label="Pagination for table: "
-              className="euiPagination"
+              className="euiPagination emotion-euiPagination-EuiPagination"
             >
               <span
                 aria-atomic="true"
                 aria-relevant="additions text"
-                className="euiScreenReaderOnly"
+                className="emotion-euiScreenReaderOnly"
                 role="status"
               >
                 Page 1 of 1
               </span>
               <button
                 aria-label="Previous page"
-                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+                className="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
                 disabled={true}
                 onClick={[Function]}
@@ -921,11 +947,13 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   color="inherit"
                   data-euiicon-type="arrowLeft"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
               <ul
                 aria-label="Pagination for table: "
-                className="euiPagination__list"
+                className="euiPagination__list emotion-euiPagination__list"
               >
                 <li
                   className="euiPagination__item"
@@ -934,7 +962,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     aria-controls="__table_generated-id"
                     aria-current={true}
                     aria-label="Page 1 of 1"
-                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
+                    className="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
                     data-test-subj="pagination-button-0"
                     disabled={true}
                     onClick={[Function]}
@@ -954,7 +982,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
               </ul>
               <button
                 aria-label="Next page"
-                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+                className="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
                 disabled={true}
                 onClick={[Function]}
@@ -966,7 +994,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   color="inherit"
                   data-euiicon-type="arrowRight"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
             </nav>
           </div>

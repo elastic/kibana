@@ -1,0 +1,259 @@
+{
+  "id": "@kbn/core-execution-context-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-browser",
+        "id": "def-common.ExecutionContextSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionContextSetup",
+        "description": [
+          "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
+        ],
+        "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser",
+            "id": "def-common.ExecutionContextSetup.context$",
+            "type": "Object",
+            "tags": [],
+            "label": "context$",
+            "description": [
+              "\nThe current context observable"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              ">"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser",
+            "id": "def-common.ExecutionContextSetup.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "\nSet the current top level context"
+            ],
+            "signature": [
+              "(c$: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-execution-context-browser",
+                "id": "def-common.ExecutionContextSetup.set.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "c$",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  }
+                ],
+                "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser",
+            "id": "def-common.ExecutionContextSetup.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGet the current top level context"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser",
+            "id": "def-common.ExecutionContextSetup.clear",
+            "type": "Function",
+            "tags": [],
+            "label": "clear",
+            "description": [
+              "\nclears the context"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser",
+            "id": "def-common.ExecutionContextSetup.getAsLabels",
+            "type": "Function",
+            "tags": [],
+            "label": "getAsLabels",
+            "description": [
+              "\nreturns apm labels"
+            ],
+            "signature": [
+              "() => ",
+              "Labels"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-browser",
+            "id": "def-common.ExecutionContextSetup.withGlobalContext",
+            "type": "Function",
+            "tags": [],
+            "label": "withGlobalContext",
+            "description": [
+              "\nmerges the current top level context with the specific event context"
+            ],
+            "signature": [
+              "(context?: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
+            ],
+            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-execution-context-browser",
+                "id": "def-common.ExecutionContextSetup.withGlobalContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-browser",
+        "id": "def-common.ExecutionContextStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutionContextStart",
+        "description": [
+          "\nSee {@link ExecutionContextSetup}."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-execution-context-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+            "section": "def-common.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          }
+        ],
+        "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

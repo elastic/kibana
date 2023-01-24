@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
-import type { Tag } from '../../../saved_objects_tagging/public';
+import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 
 const MAX_TAGS_TO_SHOW = 3;
 

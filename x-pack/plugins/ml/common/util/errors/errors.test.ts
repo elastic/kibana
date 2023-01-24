@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from './index';
+import { extractErrorMessage, MLHttpFetchError, EsErrorBody } from '.';
 
 describe('ML - error message utils', () => {
   describe('extractErrorMessage', () => {
@@ -39,9 +39,8 @@ describe('ML - error message utils', () => {
       expect(extractErrorMessage(stringMessage)).toBe(testMsg);
 
       // kibana error without attributes
-      const bodyWithoutAttributes: MLHttpFetchError<MLResponseError> = {
+      const bodyWithoutAttributes: MLHttpFetchError = {
         name: 'name',
-        req: {} as Request,
         request: {} as Request,
         message: 'Something else',
         body: {
@@ -53,9 +52,8 @@ describe('ML - error message utils', () => {
       expect(extractErrorMessage(bodyWithoutAttributes)).toBe(testMsg);
 
       // kibana error with attributes
-      const bodyWithAttributes: MLHttpFetchError<MLResponseError> = {
+      const bodyWithAttributes: MLHttpFetchError = {
         name: 'name',
-        req: {} as Request,
         request: {} as Request,
         message: 'Something else',
         body: {

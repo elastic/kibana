@@ -8,16 +8,21 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EmptyPlaceholder } from '../../../../charts/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ChartTypes } from '../../common/types';
 import { getIcon } from '../utils';
 
 interface Props {
   hasNegativeValues?: boolean;
   chartType: ChartTypes;
+  renderComplete?: () => void;
 }
 
-export const VisualizationNoResults: FC<Props> = ({ hasNegativeValues = false, chartType }) => {
+export const VisualizationNoResults: FC<Props> = ({
+  hasNegativeValues = false,
+  chartType,
+  renderComplete,
+}) => {
   if (hasNegativeValues) {
     const message = (
       <FormattedMessage
@@ -33,9 +38,16 @@ export const VisualizationNoResults: FC<Props> = ({ hasNegativeValues = false, c
         icon="alert"
         iconColor="warning"
         message={message}
+        renderComplete={renderComplete}
       />
     );
   }
 
-  return <EmptyPlaceholder dataTestSubj="partitionVisEmptyValues" icon={getIcon(chartType)} />;
+  return (
+    <EmptyPlaceholder
+      dataTestSubj="partitionVisEmptyValues"
+      icon={getIcon(chartType)}
+      renderComplete={renderComplete}
+    />
+  );
 };

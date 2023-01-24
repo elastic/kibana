@@ -5,30 +5,17 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
-import { useRouteSpy } from '../route/use_route_spy';
-
-const hideTimelineForRoutes = [`/cases/configure`, '/administration'];
+import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useShowTimelineForGivenPath } from './use_show_timeline_for_path';
 
 export const useShowTimeline = () => {
-  const [{ pageName, pathName }] = useRouteSpy();
+  const { pathname } = useLocation();
+  const getIsTimelineVisible = useShowTimelineForGivenPath();
 
-  const [showTimeline, setShowTimeline] = useState(
-    !hideTimelineForRoutes.includes(window.location.pathname)
+  const showTimeline = useMemo(
+    () => getIsTimelineVisible(pathname),
+    [pathname, getIsTimelineVisible]
   );
-
-  useEffect(() => {
-    if (
-      hideTimelineForRoutes.filter((route) => window.location.pathname.includes(route)).length > 0
-    ) {
-      if (showTimeline) {
-        setShowTimeline(false);
-      }
-    } else if (!showTimeline) {
-      setShowTimeline(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageName, pathName]);
-
   return [showTimeline];
 };

@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
+  RuleRegistryPluginStartContract as RuleRegistryPluginStart,
+} from '@kbn/rule-registry-plugin/server';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SessionViewSetupPlugins {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SessionViewStartPlugins {}
+export interface SessionViewSetupPlugins {
+  ruleRegistry: RuleRegistryPluginSetup;
+}
+
+export interface SessionViewStartPlugins {
+  ruleRegistry: RuleRegistryPluginStart;
+}

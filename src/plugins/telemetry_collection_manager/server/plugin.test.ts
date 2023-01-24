@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../core/server/mocks';
-import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
@@ -134,6 +134,15 @@ describe('Telemetry Collection Manager', () => {
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('caches the promise calling `getStats` for concurrent requests', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await Promise.all([setupApi.getStats(config), setupApi.getStats(config)]);
+            expect(collectionStrategy.statsGetter).toHaveBeenCalledTimes(1);
           });
 
           it('calls getStats with passed refreshCache config', async () => {
@@ -269,6 +278,15 @@ describe('Telemetry Collection Manager', () => {
             );
 
             getStatsCollectionConfig.mockRestore();
+          });
+
+          test('does not cache the promise calling `getStats` for concurrent requests', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await Promise.all([setupApi.getStats(config), setupApi.getStats(config)]);
+            expect(collectionStrategy.statsGetter).toHaveBeenCalledTimes(2);
           });
         });
 

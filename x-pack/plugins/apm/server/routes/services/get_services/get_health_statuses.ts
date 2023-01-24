@@ -10,30 +10,30 @@ import {
   getServiceHealthStatus,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { getServiceAnomalies } from '../../../routes/service_map/get_service_anomalies';
-import { ServicesItemsSetup } from './get_services_items';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
+import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
 interface AggregationParams {
   environment: string;
-  setup: ServicesItemsSetup;
+  mlClient?: MlClient;
   start: number;
   end: number;
 }
 
 export const getHealthStatuses = async ({
   environment,
-  setup,
+  mlClient,
   start,
   end,
 }: AggregationParams): Promise<
   Array<{ serviceName: string; healthStatus: ServiceHealthStatus }>
 > => {
-  if (!setup.ml) {
+  if (!mlClient) {
     return [];
   }
 
   const anomalies = await getServiceAnomalies({
-    setup,
+    mlClient,
     environment,
     start,
     end,

@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { CoreStartContext } from '../contexts/query_input_bar_context';
+import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IndexPatternValue } from '../../../common/types';
 
-import { QueryStringInput, QueryStringInputProps } from '../../../../../../plugins/data/public';
-import { getDataStart } from '../../services';
+import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
+import { TimeseriesVisDependencies } from '../../plugin';
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange' | 'isInvalid'> & {
   indexPatterns: IndexPatternValue[];
@@ -27,10 +28,21 @@ export function QueryBarWrapper({
   indexPatterns,
   'data-test-subj': dataTestSubj,
 }: QueryBarWrapperProps) {
-  const { indexPatterns: indexPatternsService } = getDataStart();
+  const dataViews = getDataViewsStart();
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
-  const coreStartContext = useContext(CoreStartContext);
+  const kibana = useKibana<TimeseriesVisDependencies>();
+  const {
+    appName,
+    unifiedSearch,
+    storage,
+    data,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    usageCollection,
+  } = kibana.services;
 
   useEffect(() => {
     async function fetchIndexes() {
@@ -41,14 +53,14 @@ export function QueryBarWrapper({
           if (isStringTypeIndexPattern(index)) {
             i.push(index);
           } else if (index?.id) {
-            const { indexPattern } = await fetchIndexPattern(index, indexPatternsService);
+            const { indexPattern } = await fetchIndexPattern(index, dataViews);
 
             if (indexPattern) {
               i.push(indexPattern);
             }
           }
         } else {
-          const defaultIndex = await indexPatternsService.getDefault();
+          const defaultIndex = await dataViews.getDefault();
 
           if (defaultIndex) {
             i.push(defaultIndex);
@@ -59,15 +71,26 @@ export function QueryBarWrapper({
     }
 
     fetchIndexes();
-  }, [indexPatterns, indexPatternsService]);
+  }, [indexPatterns, dataViews]);
 
   return (
     <QueryStringInput
+      appName={appName}
+      deps={{
+        unifiedSearch,
+        notifications,
+        http,
+        docLinks,
+        uiSettings,
+        data,
+        dataViews,
+        storage,
+        usageCollection,
+      }}
       query={query}
       onChange={onChange}
       isInvalid={isInvalid}
       indexPatterns={indexes}
-      {...coreStartContext}
       dataTestSubj={dataTestSubj}
     />
   );

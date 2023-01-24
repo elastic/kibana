@@ -6,7 +6,7 @@
  */
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -90,7 +90,7 @@ describe('fetchKibanaVersions', () => {
     await fetchKibanaVersions(esClient, clusters, size);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-kibana-*,.monitoring-kibana-*,*:metrics-kibana.stats-*,metrics-kibana.stats-*',
+        '*:.monitoring-kibana-*,.monitoring-kibana-*,*:metrics-kibana.stack_monitoring.stats-*,metrics-kibana.stack_monitoring.stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,
@@ -103,7 +103,7 @@ describe('fetchKibanaVersions', () => {
                   should: [
                     { term: { type: 'kibana_stats' } },
                     { term: { 'metricset.name': 'stats' } },
-                    { term: { 'data_stream.dataset': 'kibana.stats' } },
+                    { term: { 'data_stream.dataset': 'kibana.stack_monitoring.stats' } },
                   ],
                   minimum_should_match: 1,
                 },
@@ -146,6 +146,6 @@ describe('fetchKibanaVersions', () => {
     });
     await fetchKibanaVersions(esClient, clusters, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-kibana-*,metrics-kibana.stats-*');
+    expect(params.index).toBe('.monitoring-kibana-*,metrics-kibana.stack_monitoring.stats-*');
   });
 });

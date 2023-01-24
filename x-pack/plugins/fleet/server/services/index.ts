@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
@@ -43,7 +43,9 @@ export type { AgentClient, AgentService } from './agents';
 export { agentPolicyService } from './agent_policy';
 export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
+export { downloadSourceService } from './download_source';
 export { settingsService };
+export { dataStreamService } from './data_streams';
 
 // Plugin services
 export { appContextService } from './app_context';
@@ -58,3 +60,10 @@ export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 // Package Services
 export { PackageServiceImpl } from './epm';
 export type { PackageService, PackageClient } from './epm';
+
+// Fleet server policy config
+export { migrateSettingsToFleetServerHost } from './fleet_server_host';
+
+export { FleetUsageSender } from './telemetry/fleet_usage_sender';
+
+export { checkAllowedPackages } from './check_allowed_packages';

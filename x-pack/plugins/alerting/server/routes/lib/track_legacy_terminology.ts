@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { flatten } from 'lodash';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export const LEGACY_TERMS = ['alertTypeId', 'actionTypeId'];
 

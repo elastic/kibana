@@ -16,8 +16,8 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import { BrowserFields } from '../../../../../../timelines/common/search_strategy';
-import { Ecs } from '../../../../../common/ecs';
+import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -36,7 +36,7 @@ describe('DefaultCellRenderer', () => {
   const rowIndex = 3;
   const colIndex = 0;
   const setCellProps = jest.fn();
-  const timelineId = 'test';
+  const scopeId = 'test';
   const ecsData = {} as Ecs;
   const browserFields = {} as BrowserFields;
 
@@ -69,7 +69,7 @@ describe('DefaultCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -104,7 +104,7 @@ describe('DefaultCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
               truncate={truncate}
             />
           </DroppableWrapper>
@@ -114,7 +114,6 @@ describe('DefaultCellRenderer', () => {
 
     expect(mockImplementation.renderColumn).toBeCalledWith({
       asPlainText: false,
-      browserFields,
       columnName: header.id,
       ecsData,
       eventId,
@@ -123,7 +122,7 @@ describe('DefaultCellRenderer', () => {
       isDraggable: true,
       linkValues,
       rowRenderers: undefined,
-      timelineId,
+      scopeId,
       truncate,
       values: ['2018-11-05T19:03:25.937Z'],
     });
@@ -153,7 +152,7 @@ describe('DefaultCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -202,7 +201,7 @@ describe('host link rendering', () => {
               rowIndex={3}
               colIndex={0}
               setCellProps={jest.fn()}
-              timelineId={'timeline-1-query'}
+              scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -236,7 +235,7 @@ describe('host link rendering', () => {
               rowIndex={3}
               colIndex={0}
               setCellProps={jest.fn()}
-              timelineId={'timeline-1-query'}
+              scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -271,7 +270,7 @@ describe('host link rendering', () => {
               rowIndex={3}
               colIndex={0}
               setCellProps={jest.fn()}
-              timelineId={'timeline-1-query'}
+              scopeId={'timeline-1-query'}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>

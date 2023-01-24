@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { Vis } from '../../../../visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import OptionsTab, { OptionsTabProps } from './options_tab';
 
 describe('OptionsTab', () => {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { Context } from 'mocha';
+import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
 
@@ -16,6 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
+  const security = getService('security');
+  const supertestNoAuth = getService('supertestWithoutAuth');
 
   const shardDelayAgg = (delay: string) => ({
     aggs: {
@@ -27,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   });
 
-  async function markRequiresShardDelayAgg(testContext: Context) {
+  async function markRequiresShardDelayAgg(testContext: Mocha.Context) {
     const body = await es.info();
     if (!body.version.number.includes('SNAPSHOT')) {
       log.debug('Skipping because this build does not have the required shard_delay agg');
@@ -265,6 +267,48 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         verifyErrorResponse(resp.body, 400, 'parsing_exception', true);
+      });
+
+      it('should return 403 for lack of privledges', async () => {
+        const username = 'no_access';
+        const password = 't0pS3cr3t';
+
+        await security.user.create(username, {
+          password,
+          roles: ['test_shakespeare_reader'],
+        });
+
+        const loginResponse = await supertestNoAuth
+          .post('/internal/security/login')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: '/',
+            params: { username, password },
+          })
+          .expect(200);
+
+        const sessionCookie = parseCookie(loginResponse.headers['set-cookie'][0]);
+
+        await supertestNoAuth
+          .post(`/internal/search/ese`)
+          .set('kbn-xsrf', 'foo')
+          .set('Cookie', sessionCookie!.cookieString())
+          .send({
+            params: {
+              index: 'log*',
+              body: {
+                query: {
+                  match_all: {},
+                },
+              },
+              wait_for_completion_timeout: '10s',
+            },
+          })
+          .expect(403);
+
+        await security.testUser.restoreDefaults();
       });
     });
 

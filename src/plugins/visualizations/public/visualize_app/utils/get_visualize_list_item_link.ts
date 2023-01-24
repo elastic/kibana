@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { QueryState } from '../../../../data/public';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { getUISettings } from '../../services';
 import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
 
@@ -17,15 +17,26 @@ export const getVisualizeListItemLink = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   editApp: string | undefined,
-  editUrl: string
+  editUrl: string,
+  error: string | undefined = undefined
 ) => {
+  if (error) {
+    return undefined;
+  }
+
   // for visualizations the editApp is undefined
   let url = application.getUrlForApp(editApp ?? VISUALIZE_APP_NAME, {
     path: editApp ? editUrl : `#${editUrl}`,
   });
   const useHash = getUISettings().get('state:storeInSessionStorage');
-  const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
+  const globalStateInUrl =
+    kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY) || {};
 
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
+  url = setStateToKbnUrl<GlobalQueryStateFromUrl>(
+    GLOBAL_STATE_STORAGE_KEY,
+    globalStateInUrl,
+    { useHash },
+    url
+  );
   return url;
 };

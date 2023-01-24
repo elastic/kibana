@@ -5,15 +5,40 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
-import { validateTree } from '../../../../../common/endpoint/schema/resolver';
+import { firstValueFrom } from 'rxjs';
+
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ConfigType } from '../../../../config';
+
+import type { validateTree } from '../../../../../common/endpoint/schema/resolver';
+import { featureUsageService } from '../../../services/feature_usage';
 import { Fetcher } from './utils/fetch';
 
-export function handleTree(): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
+export function handleTree(
+  ruleRegistry: RuleRegistryPluginStartContract,
+  config: ConfigType,
+  licensing: LicensingPluginStart
+): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
   return async (context, req, res) => {
-    const client = context.core.elasticsearch.client;
-    const fetcher = new Fetcher(client);
+    const client = (await context.core).elasticsearch.client;
+    const {
+      experimentalFeatures: { insightsRelatedAlertsByProcessAncestry },
+    } = config;
+    const license = await firstValueFrom(licensing.license$);
+    const hasAccessToInsightsRelatedByProcessAncestry =
+      insightsRelatedAlertsByProcessAncestry && license.hasAtLeast('platinum');
+
+    if (hasAccessToInsightsRelatedByProcessAncestry) {
+      featureUsageService.notifyUsage('ALERTS_BY_PROCESS_ANCESTRY');
+    }
+
+    const alertsClient = hasAccessToInsightsRelatedByProcessAncestry
+      ? await ruleRegistry.getRacClientWithRequest(req)
+      : undefined;
+    const fetcher = new Fetcher(client, alertsClient);
     const body = await fetcher.tree(req.body);
     return res.ok({
       body,

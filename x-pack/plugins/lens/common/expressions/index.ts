@@ -6,11 +6,8 @@
  */
 
 export * from './counter_rate';
+export * from './collapse';
 export * from './format_column';
-export * from './rename_columns';
-export * from './merge_tables';
+export * from './map_to_columns';
 export * from './time_scale';
 export * from './datatable';
-export * from './xy_chart';
-
-export * from './expression_types';

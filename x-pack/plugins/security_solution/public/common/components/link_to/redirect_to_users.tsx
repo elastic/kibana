@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { UsersTableType } from '../../../users/store/model';
-import { USERS_PATH } from '../../../../common/constants';
+import type { UsersTableType } from '../../../explore/users/store/model';
 import { appendSearch } from './helpers';
 
-export const getUsersUrl = (search?: string) => `${USERS_PATH}${appendSearch(search)}`;
-
-export const getTabsOnUsersUrl = (tabName: UsersTableType, search?: string) =>
-  `/${tabName}${appendSearch(search)}`;
-
 export const getUsersDetailsUrl = (detailName: string, search?: string) =>
-  `/${detailName}${appendSearch(search)}`;
+  `/name/${detailName}${appendSearch(search)}`;
 
 export const getTabsOnUsersDetailsUrl = (
   detailName: string,
   tabName: UsersTableType,
   search?: string
-) => `/${detailName}/${tabName}${appendSearch(search)}`;
+) => `/name/${detailName}/${tabName}${appendSearch(search)}`;
+
+export const getTabsOnUsersUrl = (tabName: UsersTableType, search?: string) =>
+  `/${tabName}${appendSearch(search)}`;

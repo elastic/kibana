@@ -10,14 +10,15 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../common/mock';
-import { Form, useForm, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import { getFormMock } from '../__mock__/form';
 import { InsertTimeline } from '.';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
-jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../timeline_context/use_timeline_context');
 
 const useFormMock = useForm as jest.Mock;

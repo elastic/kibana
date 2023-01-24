@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { ColumnHeaderType, DataTableCellAction } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import type {
   BrowserFields,
   TimelineNonEcsData,
-} from '../../../../../timelines/common/search_strategy';
-import { TGridCellAction } from '../../../../../timelines/common/types';
-import { Ecs } from '../../../../common/ecs';
-import { ColumnHeaderType } from '../../../timelines/store/timeline/model';
-
-import { defaultCellActions, EmptyComponent } from './default_cell_actions';
-import { COLUMNS_WITH_LINKS } from './helpers';
+} from '@kbn/timelines-plugin/common/search_strategy';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { defaultCellActions } from './default_cell_actions';
+import { COLUMNS_WITH_LINKS, EmptyComponent } from './helpers';
 
 describe('default cell actions', () => {
   const browserFields: BrowserFields = {};
   const data: TimelineNonEcsData[][] = [[]];
   const ecsData: Ecs[] = [];
-  const timelineId = 'mockTimelineId';
+  const tableId = TableId.test;
   const pageSize = 10;
 
   test('columns without any link action (e.g.: signal.status) should return an empty component (not null or data grid would crash)', () => {
@@ -36,14 +35,14 @@ describe('default cell actions', () => {
     ];
 
     const columnsWithCellActions: EuiDataGridColumn[] = columnHeaders.map((header) => {
-      const buildAction = (tGridCellAction: TGridCellAction) =>
-        tGridCellAction({
+      const buildAction = (dataTableCellAction: DataTableCellAction) =>
+        dataTableCellAction({
           browserFields,
           data,
           ecsData,
           header: columnHeaders.find((h) => h.id === header.id),
           pageSize,
-          timelineId,
+          scopeId: tableId,
         });
 
       return {
@@ -65,17 +64,18 @@ describe('default cell actions', () => {
       initialWidth: 105,
     },
   ]);
+
   describe.each(columnHeadersToTest)('columns with a link action', (columnHeaders) => {
     test(`${columnHeaders.id ?? columnHeaders.type}`, () => {
       const columnsWithCellActions: EuiDataGridColumn[] = [columnHeaders].map((header) => {
-        const buildAction = (tGridCellAction: TGridCellAction) =>
-          tGridCellAction({
+        const buildAction = (dataTableCellAction: DataTableCellAction) =>
+          dataTableCellAction({
             browserFields,
             data,
             ecsData,
             header: [columnHeaders].find((h) => h.id === header.id),
             pageSize,
-            timelineId,
+            scopeId: tableId,
           });
 
         return {

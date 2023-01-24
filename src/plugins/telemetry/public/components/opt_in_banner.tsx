@@ -10,14 +10,16 @@ import * as React from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OptInMessage } from './opt_in_message';
+import { TelemetryConstants } from '..';
 
 interface Props {
   onChangeOptInClick: (isOptIn: boolean) => void;
+  telemetryConstants: TelemetryConstants;
 }
 
 export class OptInBanner extends React.PureComponent<Props> {
   render() {
-    const { onChangeOptInClick } = this.props;
+    const { onChangeOptInClick, telemetryConstants } = this.props;
     const title = (
       <FormattedMessage
         id="telemetry.welcomeBanner.title"
@@ -26,7 +28,7 @@ export class OptInBanner extends React.PureComponent<Props> {
     );
     return (
       <EuiCallOut iconType="questionInCircle" title={title}>
-        <OptInMessage />
+        <OptInMessage telemetryConstants={telemetryConstants} />
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>

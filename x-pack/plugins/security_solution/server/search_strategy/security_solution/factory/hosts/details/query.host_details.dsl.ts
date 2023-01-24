@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { cloudFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
+import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
-import { HOST_FIELDS, buildFieldsTermAggregation } from './helpers';
+import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
 export const buildHostDetailsQuery = ({
   hostName,
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
-  const esFields = reduceFields(HOST_FIELDS, {
+  const esFields = reduceFields(HOST_DETAILS_FIELDS, {
     ...hostFieldsMap,
     ...cloudFieldsMap,
   });
@@ -58,6 +58,16 @@ export const buildHostDetailsQuery = ({
         },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: [
+        ...esFields,
+        'agent.type',
+        'agent.id',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

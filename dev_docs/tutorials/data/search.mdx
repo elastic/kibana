@@ -2,7 +2,7 @@
 id: kibDevTutorialDataSearchAndSessions
 slug: /kibana-dev-docs/tutorials/data/search-and-sessions
 title: Kibana data.search Services
-summary: Kibana Search Services
+description: Kibana Search Services
 date: 2021-02-10
 tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'search', 'sessions', 'search-sessions']
 ---
@@ -18,7 +18,7 @@ However, the recommended and easiest way to search Elasticsearch is by using the
 Here is a basic example for using the `data.search` service from a custom plugin:
 
 ```ts
-import { CoreStart, Plugin } from 'kibana/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from '../../src/plugins/data';
 
 export interface MyPluginStartDependencies {
@@ -189,7 +189,7 @@ export const mySearchStrategyProvider = (
 
 ```ts
 // ./myPlugin/server/plugin.ts
-import type { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { mySearchStrategyProvider } from './my_strategy';
 
@@ -259,7 +259,7 @@ export const myEnhancedSearchStrategyProvider = (
       await ese.cancel(id, options, deps);
     },
     extend: async (id, keepAlive, options, deps) => {
-      // async search results are not stored indefinitely. By default, they expire after 7 days (or as defined by xpack.data_enhanced.search.sessions.defaultExpiration setting in kibana.yml).
+      // async search results are not stored indefinitely. By default, they expire after 7 days (or as defined by data.search.sessions.defaultExpiration setting in kibana.yml).
       // call the extend method of the async strategy you are using or implement your own extend function.
       await ese.extend(id, options, deps);
     },

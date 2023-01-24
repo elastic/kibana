@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { makeLensEmbeddableFactory } from '../../../lens/server/embeddable/make_lens_embeddable_factory';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import {
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import type {
+  CaseConnector,
   CaseResponse,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
-  CommentType,
 } from '../../common/api';
-import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
+import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -29,7 +29,13 @@ import {
   extractLensReferencesFromCommentString,
   getOrUpdateLensReferences,
   asArray,
+  transformNewCase,
+  getApplicationRoute,
+  getCaseViewPath,
 } from './utils';
+import { newCase } from '../routes/api/__mocks__/request_responses';
+import { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import { mockCases, mockCaseComments } from '../mocks';
 
 interface CommentReference {
   ids: string[];
@@ -67,6 +73,187 @@ function createCommentFindResponse(
 }
 
 describe('common utils', () => {
+  describe('transformNewCase', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    const connector: CaseConnector = {
+      id: '123',
+      name: 'My connector',
+      type: ConnectorTypes.jira,
+      fields: { issueType: 'Task', priority: 'High', parent: null },
+    };
+
+    it('transform correctly', () => {
+      const myCase = {
+        newCase: { ...newCase, connector },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with severity provided', () => {
+      const myCase = {
+        newCase: { ...newCase, connector, severity: CaseSeverity.MEDIUM },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "medium",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with assignees provided', () => {
+      const myCase = {
+        newCase: { ...newCase, connector, assignees: [{ uid: '1' }] },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [
+            Object {
+              "uid": "1",
+            },
+          ],
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+  });
+
   describe('transformCases', () => {
     it('transforms correctly', () => {
       const casesMap = new Map<string, CaseResponse>(
@@ -87,6 +274,7 @@ describe('common utils', () => {
         Object {
           "cases": Array [
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -103,12 +291,14 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-1",
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "defacement",
@@ -125,6 +315,7 @@ describe('common utils', () => {
               "version": "WzAsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -141,12 +332,14 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "Oh no, a bad meanie destroying data!",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-2",
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "Data Destruction",
@@ -163,6 +356,7 @@ describe('common utils', () => {
               "version": "WzQsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -183,12 +377,14 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-3",
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "LOLBins",
@@ -205,6 +401,7 @@ describe('common utils', () => {
               "version": "WzUsMV0=",
             },
             Object {
+              "assignees": Array [],
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -229,12 +426,14 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-4",
               "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "closed",
               "tags": Array [
                 "LOLBins",
@@ -272,6 +471,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -292,12 +492,14 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-3",
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -326,6 +528,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -346,12 +549,14 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-3",
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -381,6 +586,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -423,12 +629,14 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-3",
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -459,6 +667,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "assignees": Array [],
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -475,12 +684,14 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "This is a brand new case of a bad meanie defacing data",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-1",
           "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "defacement",
@@ -573,6 +784,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": "elastic@elastic.co",
             "full_name": "Elastic",
+            "profile_uid": undefined,
             "username": "elastic",
           },
           "owner": "securitySolution",
@@ -602,6 +814,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": undefined,
             "full_name": undefined,
+            "profile_uid": undefined,
             "username": undefined,
           },
           "owner": "securitySolution",
@@ -634,6 +847,7 @@ describe('common utils', () => {
           "created_by": Object {
             "email": null,
             "full_name": null,
+            "profile_uid": undefined,
             "username": null,
           },
           "owner": "securitySolution",
@@ -823,7 +1037,11 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        makeLensEmbeddableFactory(() => ({}), {}),
+        makeLensEmbeddableFactory(
+          () => ({}),
+          () => ({}),
+          {}
+        ),
         commentString
       );
 
@@ -922,7 +1140,11 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const updatedReferences = getOrUpdateLensReferences(
-        makeLensEmbeddableFactory(() => ({}), {}),
+        makeLensEmbeddableFactory(
+          () => ({}),
+          () => ({}),
+          {}
+        ),
         newCommentString,
         {
           references: currentCommentReferences,
@@ -961,6 +1183,131 @@ describe('common utils', () => {
 
     it('returns an array of one item when passed a number', () => {
       expect(asArray(100)).toEqual([100]);
+    });
+  });
+
+  describe('getApplicationRoute', () => {
+    const owners = Object.keys(OWNER_INFO) as Array<keyof typeof OWNER_INFO>;
+
+    it.each(owners)('returns the correct appRoute for owner: %s', (owner) => {
+      expect(getApplicationRoute(OWNER_INFO, owner)).toEqual(OWNER_INFO[owner].appRoute);
+    });
+
+    it('return the stack management app route if the owner info is not valid', () => {
+      // @ts-expect-error
+      expect(getApplicationRoute({ test: { appRoute: 'no-slash' } }, 'test')).toEqual(
+        '/app/management/insightsAndAlerting'
+      );
+    });
+
+    it('return the stack management app route if the owner is not valid', () => {
+      expect(getApplicationRoute(OWNER_INFO, 'not-valid')).toEqual(
+        '/app/management/insightsAndAlerting'
+      );
+    });
+  });
+
+  describe('getCaseViewPath', () => {
+    const publicBaseUrl = 'https://example.com';
+    const caseId = 'my-case-id';
+    const commentId = 'my-comment-id';
+
+    it('returns the case view path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('removes the ending slash from the publicBaseUrl correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl: 'https://example.com/',
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('remove the extra trailing slashes from case view path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('returns the case view path correctly with invalid owner', () => {
+      expect(getCaseViewPath({ publicBaseUrl, spaceId: 'default', caseId, owner: 'invalid' })).toBe(
+        'https://example.com/app/management/insightsAndAlerting/cases/my-case-id'
+      );
+    });
+
+    it('returns the case comment path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+          commentId,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
+    });
+
+    it('remove the extra trailing slashes from case comment path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+          commentId: '/my-comment-id',
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
+    });
+
+    it('returns the case tab path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+
+    it('remove the extra trailing slashes from case tab path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'default',
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+
+    it('adds the space correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          spaceId: 'test-space',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/s/test-space/app/security/cases/my-case-id');
     });
   });
 });

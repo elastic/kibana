@@ -7,12 +7,20 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from '../../../../../../data/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../doc_views_types';
 
 interface TableActionsProps {
+  mode?: 'inline' | 'as_popover';
   field: string;
   pinned: boolean;
   flattenedField: unknown;
@@ -24,6 +32,7 @@ interface TableActionsProps {
 }
 
 export const TableActions = ({
+  mode = 'as_popover',
   pinned,
   field,
   fieldMapping,
@@ -109,8 +118,8 @@ export const TableActions = ({
     : i18n.translate('discover.docViews.table.pinFieldAriaLabel', { defaultMessage: 'Pin field' });
   const pinnedIconType = pinned ? 'pinFilled' : 'pin';
 
-  const openPopover = useCallback(() => setIsOpen(true), [setIsOpen]);
-  const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const toggleOpenPopover = useCallback(() => setIsOpen((current) => !current), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePinned = useCallback(() => onTogglePinned(field), [field, onTogglePinned]);
   const onClickAction = useCallback(
     (callback: () => void) => () => {
@@ -131,6 +140,7 @@ export const TableActions = ({
           toolTipContent: filtersPairToolTip,
           icon: 'plusInCircle',
           disabled: filtersPairDisabled,
+          'data-test-subj': `addFilterForValueButton-${field}`,
           onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
         },
         {
@@ -147,7 +157,8 @@ export const TableActions = ({
           toolTipContent: filtersExistsToolTip,
           icon: 'filter',
           disabled: filtersExistsDisabled,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
+          'data-test-subj': `addExistsFilterButton-${field}`,
+          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
         },
         {
           name: toggleColumnsLabel,
@@ -166,13 +177,40 @@ export const TableActions = ({
     },
   ];
 
+  if (mode === 'inline') {
+    return (
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="xs"
+        className="kbnDocViewer__buttons"
+        data-test-subj={`fieldActionsGroup-${field}`}
+      >
+        {panels[0].items.map((item) => (
+          <EuiFlexItem key={item.icon} grow={false}>
+            <EuiToolTip content={item.name}>
+              <EuiButtonIcon
+                className="kbnDocViewer__actionButton"
+                data-test-subj={item['data-test-subj']}
+                aria-label={item['aria-label']}
+                iconType={item.icon}
+                iconSize="s"
+                disabled={item.disabled}
+                onClick={item.onClick}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
           data-test-subj={`openFieldActionsButton-${field}`}
           aria-label={openActionsLabel}
-          onClick={openPopover}
+          onClick={toggleOpenPopover}
           iconType="boxesHorizontal"
           color="text"
         />

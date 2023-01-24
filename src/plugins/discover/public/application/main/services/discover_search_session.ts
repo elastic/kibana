@@ -9,12 +9,12 @@
 import { History } from 'history';
 import * as Rx from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { DataPublicPluginStart } from '../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   createQueryParamObservable,
   getQueryParams,
   removeQueryParam,
-} from '../../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 
 export interface DiscoverSearchSessionManagerDeps {
@@ -31,6 +31,8 @@ export class DiscoverSearchSessionManager {
    * skips if `searchSessionId` matches current search session id
    */
   readonly newSearchSessionIdFromURL$: Rx.Observable<string | null>;
+  readonly searchSessionId$: Rx.Observable<string | undefined>;
+
   private readonly deps: DiscoverSearchSessionManagerDeps;
 
   constructor(deps: DiscoverSearchSessionManagerDeps) {
@@ -44,6 +46,7 @@ export class DiscoverSearchSessionManager {
         return !this.deps.session.isCurrentSession(searchSessionId);
       })
     );
+    this.searchSessionId$ = this.deps.session.getSession$();
   }
 
   /**

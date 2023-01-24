@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import type { CoreStart } from 'kibana/public';
-import type { Filter, Query } from '@kbn/es-query';
+import type { CoreStart } from '@kbn/core/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../application/explorer/explorer_constants';
-import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
-import type {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import { EntityField } from '../../common/util/anomaly_utils';
-import { isPopulatedObject } from '../../common/util/object_utils';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalyExplorerChartsEmbeddableType,
+  AnomalySwimLaneEmbeddableType,
+  MlEmbeddableTypes,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
-import type { DataView } from '../../../../../src/plugins/data_views/common';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -131,3 +130,10 @@ export function isAnomalyExplorerEmbeddable(
     arg.embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
   );
 }
+
+export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
+  TEmbeddableType extends AnomalySwimLaneEmbeddableType
+    ? AnomalySwimlaneEmbeddableInput
+    : TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
+    ? AnomalyChartsEmbeddableInput
+    : unknown;

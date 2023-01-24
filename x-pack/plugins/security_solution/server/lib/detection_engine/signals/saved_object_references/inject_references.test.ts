@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObjectReference } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+
+import type { RuleParams } from '../../rule_schema';
 import { injectReferences } from './inject_references';
-import { RuleParams } from '../../schemas/rule_schemas';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('inject_references', () => {

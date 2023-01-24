@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
-import { waitFor } from '@testing-library/react';
+import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
+
 import '../../mock/match_media';
+import { TableId, TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
-import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
+import {
+  ConditionalPortal,
+  disableHoverActions,
+  DraggableWrapper,
+  getStyle,
+} from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
@@ -27,13 +35,41 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const scopeIdsWithHoverActions = [
+  undefined,
+  TimelineId.active,
+  TableId.alternateTest,
+  TimelineId.casePage,
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnRuleDetailsPage,
+  TableId.hostsPageEvents,
+  TableId.hostsPageSessions,
+  TableId.kubernetesPageSessions,
+  TableId.networkPageEvents,
+  TimelineId.test,
+  TableId.usersPageEvents,
+];
+
+const scopeIdsNoHoverActions = [TableId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID];
+
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
   const message = 'draggable wrapper content';
   const mount = useMountAppended();
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  afterEach(() => {
+    const portal = document.querySelector('[data-euiportal="true"]');
+    if (portal != null) {
+      portal.innerHTML = '';
+    }
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   describe('rendering', () => {
@@ -100,10 +136,57 @@ describe('DraggableWrapper', () => {
 
       await waitFor(() => {
         wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
-        wrapper.update();
-        jest.runAllTimers();
-        wrapper.update();
         expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
+      });
+    });
+
+    scopeIdsWithHoverActions.forEach((scopeId) => {
+      test(`it renders hover actions (by default) when 'isDraggable' is false and timelineId is '${scopeId}'`, async () => {
+        const isDraggable = false;
+
+        const { container } = render(
+          <TestProviders>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DraggableWrapper
+                dataProvider={dataProvider}
+                isDraggable={isDraggable}
+                render={() => message}
+                scopeId={scopeId}
+              />
+            </DragDropContextWrapper>
+          </TestProviders>
+        );
+
+        fireEvent.mouseEnter(container.querySelector('[data-test-subj="withHoverActionsButton"]')!);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('hover-actions-copy-button')).toBeInTheDocument();
+        });
+      });
+    });
+
+    scopeIdsNoHoverActions.forEach((scopeId) => {
+      test(`it does NOT render hover actions when 'isDraggable' is false and timelineId is '${scopeId}'`, async () => {
+        const isDraggable = false;
+
+        const { container } = render(
+          <TestProviders>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DraggableWrapper
+                dataProvider={dataProvider}
+                isDraggable={isDraggable}
+                render={() => message}
+                scopeId={scopeId}
+              />
+            </DragDropContextWrapper>
+          </TestProviders>
+        );
+
+        fireEvent.mouseEnter(container.querySelector('[data-test-subj="withHoverActionsButton"]')!);
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('hover-actions-copy-button')).not.toBeInTheDocument();
+        });
       });
     });
   });
@@ -194,5 +277,19 @@ describe('ConditionalPortal', () => {
 
       expect(getStyle(style, snapshot)).toHaveProperty('transitionDuration', '0.00000001s');
     });
+  });
+
+  describe('disableHoverActions', () => {
+    scopeIdsNoHoverActions.forEach((scopeId) =>
+      test(`it returns true when timelineId is ${scopeId}`, () => {
+        expect(disableHoverActions(scopeId)).toBe(true);
+      })
+    );
+
+    scopeIdsWithHoverActions.forEach((scopeId) =>
+      test(`it returns false when timelineId is ${scopeId}`, () => {
+        expect(disableHoverActions(scopeId)).toBe(false);
+      })
+    );
   });
 });

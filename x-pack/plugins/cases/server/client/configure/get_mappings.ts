@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import { ConnectorMappings } from '../../../common/api';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { ConnectorMappings } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
-import { MappingsArgs } from './types';
+import type { CasesClientArgs } from '..';
+import type { MappingsArgs } from './types';
 
 export const getMappings = async (
   { connector }: MappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']> => {
-  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { connectorMappingsService },
+    logger,
+  } = clientArgs;
 
   try {
     const myConnectorMappings = await connectorMappingsService.find({

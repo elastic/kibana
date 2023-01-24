@@ -32,6 +32,7 @@ import {
   PRIVATE_PLATINUM_LICENSE_CALLOUT,
   PRIVATE_SOURCE,
   UPDATE_BUTTON,
+  EXTERNAL_SERVICE_TYPE,
 } from '../../../constants';
 import { getAddPath, getEditPath, getSourcesPath } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
@@ -46,7 +47,9 @@ export const Connectors: React.FC = () => {
 
   const availableConnectors = reject(
     connectors,
-    ({ serviceType }) => serviceType === CUSTOM_SERVICE_TYPE
+    ({ serviceType, externalConnectorServiceDescribed }) =>
+      serviceType === CUSTOM_SERVICE_TYPE ||
+      (serviceType === EXTERNAL_SERVICE_TYPE && !externalConnectorServiceDescribed)
   );
 
   const getRowActions = (configured: boolean, serviceType: string, supportedByLicense: boolean) => {

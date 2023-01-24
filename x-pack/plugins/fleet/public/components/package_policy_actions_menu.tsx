@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
-import type { EuiStepProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
@@ -20,16 +19,14 @@ import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
-  agentPolicy: AgentPolicy;
+  agentPolicy?: AgentPolicy;
   packagePolicy: InMemoryPackagePolicy;
-  viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
-  upgradePackagePolicyHref: string;
+  upgradePackagePolicyHref?: string;
 }> = ({
   agentPolicy,
   packagePolicy,
-  viewDataStep,
   showAddAgent,
   upgradePackagePolicyHref,
   defaultIsOpen = false,
@@ -40,10 +37,14 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
+  const isManaged = Boolean(packagePolicy.is_managed);
+  const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
+
+  const isAddAgentVisible = showAddAgent && agentPolicy && !agentPolicyIsManaged;
+
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
   }, []);
-
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -57,7 +58,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //     defaultMessage="View integration"
     //   />
     // </EuiContextMenuItem>,
-    ...(showAddAgent && !agentPolicy.is_managed
+    ...(isAddAgentVisible
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsAddAgentItem"
@@ -77,7 +78,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies}
+      disabled={!canWriteIntegrationPolicies || !agentPolicy}
       icon="pencil"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
@@ -91,7 +92,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsUpgradeItem"
-      disabled={!packagePolicy.hasUpgrade || !canWriteIntegrationPolicies}
+      disabled={
+        !packagePolicy.hasUpgrade || !canWriteIntegrationPolicies || !upgradePackagePolicyHref
+      }
       icon="refresh"
       href={upgradePackagePolicyHref}
       key="packagePolicyUpgrade"
@@ -110,7 +113,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy.is_managed) {
+  if (!agentPolicy || !agentPolicyIsManaged) {
     menuItems.push(
       <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
         {(deletePackagePoliciesPrompt) => {
@@ -142,12 +145,17 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicy}
-            viewDataStep={viewDataStep}
             onClose={onEnrollmentFlyoutClose}
+            isIntegrationFlow={true}
+            installedPackagePolicy={{
+              name: packagePolicy?.package?.name || '',
+              version: packagePolicy?.package?.version || '',
+            }}
           />
         </EuiPortal>
       )}
       <ContextMenuActions
+        isManaged={isManaged}
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}

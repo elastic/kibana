@@ -9,16 +9,13 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { Geometry, Polygon } from 'geojson';
-import rison, { RisonObject } from 'rison-node';
-import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
-import {
-  createSpatialFilterWithGeometry,
-  PreIndexedShape,
-} from '../../../../../common/elasticsearch_util';
-import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../../common/constants';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { MultiPolygon, Polygon } from 'geojson';
+import rison from '@kbn/rison';
+import { URL_MAX_LENGTH } from '@kbn/core/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { buildGeoShapeFilter, PreIndexedShape } from '../../../../../common/elasticsearch_util';
+import { ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
@@ -26,11 +23,11 @@ const META_OVERHEAD = 100;
 
 interface Props {
   onClose: () => void;
-  geometry: Geometry;
+  geometry?: MultiPolygon | Polygon;
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  loadPreIndexedShape: () => Promise<PreIndexedShape | null>;
+  loadPreIndexedShape?: () => Promise<PreIndexedShape | null>;
   geoFieldNames: string[];
 }
 
@@ -55,6 +52,10 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
   }
 
   _loadPreIndexedShape = async () => {
+    if (!this.props.loadPreIndexedShape) {
+      return null;
+    }
+
     this.setState({
       isLoading: true,
     });
@@ -87,9 +88,9 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
       return;
     }
 
-    const filter = createSpatialFilterWithGeometry({
+    const filter = buildGeoShapeFilter({
       preIndexedShape,
-      geometry: this.props.geometry as Polygon,
+      geometry: this.props.geometry,
       geometryLabel,
       geoFieldNames: this.props.geoFieldNames,
       relation,
@@ -98,9 +99,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     // Ensure filter will not overflow URL. Filters that contain geometry can be extremely large.
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
-      window.location.href.length +
-        rison.encode(filter as unknown as RisonObject).length +
-        META_OVERHEAD >
+      window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
       URL_MAX_LENGTH
     ) {
       this.setState({
@@ -127,12 +126,13 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
         )}
         getFilterActions={this.props.getFilterActions}
         getActionContext={this.props.getActionContext}
-        intitialGeometryLabel={this.props.geometry.type.toLowerCase()}
+        intitialGeometryLabel={i18n.translate(
+          'xpack.maps.tooltip.geometryFilterForm.initialGeometryLabel',
+          {
+            defaultMessage: 'feature',
+          }
+        )}
         onSubmit={this._createFilter}
-        isFilterGeometryClosed={
-          this.props.geometry.type !== GEO_JSON_TYPE.LINE_STRING &&
-          this.props.geometry.type !== GEO_JSON_TYPE.MULTI_LINE_STRING
-        }
         isLoading={this.state.isLoading}
         errorMsg={this.state.errorMsg}
       />

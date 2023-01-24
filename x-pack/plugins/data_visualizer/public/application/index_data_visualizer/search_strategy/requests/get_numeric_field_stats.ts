@@ -10,39 +10,39 @@ import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  MAX_PERCENT,
-  PERCENTILE_SPACING,
-  SAMPLER_TOP_TERMS_SHARD_SIZE,
-  SAMPLER_TOP_TERMS_THRESHOLD,
-} from './constants';
-import {
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import type { Aggs, FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type {
-  Field,
-  NumericFieldStats,
-  Bucket,
-  FieldStatsError,
-} from '../../../../../common/types/field_stats';
-import { processDistributionData } from '../../utils/process_distribution_data';
-import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '../../../../../../../../src/plugins/data/common';
-import type { ISearchStart } from '../../../../../../../../src/plugins/data/public';
+} from '@kbn/data-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
+import { processTopValues } from './utils';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
+import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
+import type {
+  Aggs,
+  Bucket,
+  FieldStatsCommonRequestParams,
+} from '../../../../../common/types/field_stats';
+import type {
+  Field,
+  NumericFieldStats,
+  FieldStatsError,
+} from '../../../../../common/types/field_stats';
+import { processDistributionData } from '../../utils/process_distribution_data';
 import { extractErrorProperties } from '../../utils/error_utils';
-import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import {
+  isIKibanaSearchResponse,
+  isNormalSamplingOption,
+} from '../../../../../common/types/field_stats';
 
 export const getNumericFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -86,25 +86,12 @@ export const getNumericFieldsStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-    if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
-          top,
-        },
-      };
-    } else {
-      aggs[`${safeFieldName}_top`] = top;
-    }
+    aggs[`${safeFieldName}_top`] = top;
   });
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
+    aggs: buildAggregationWithSamplingOption(aggs, params.samplingOption),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 
@@ -137,7 +124,7 @@ export const fetchNumericFieldsStats = (
         if (!isIKibanaSearchResponse(resp)) return resp;
 
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+        const aggsPath = ['sample'];
 
         const batchStats: NumericFieldStats[] = [];
 
@@ -159,28 +146,23 @@ export const fetchNumericFieldsStats = (
             topAggsPath.push('top');
           }
 
-          const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
+          const fieldAgg = get(aggregations, [...topAggsPath], {}) as { buckets: Bucket[] };
+          const { topValuesSampleSize, topValues } = processTopValues(fieldAgg);
 
           const stats: NumericFieldStats = {
             fieldName: field.fieldName,
-            count: docCount,
             min: get(fieldStatsResp, 'min', 0),
             max: get(fieldStatsResp, 'max', 0),
             avg: get(fieldStatsResp, 'avg', 0),
             isTopValuesSampled:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+              isNormalSamplingOption(params.samplingOption) ||
+              (isDefined(params.samplingProbability) && params.samplingProbability < 1),
             topValues,
-            topValuesSampleSize: topValues.reduce(
-              (acc, curr) => acc + curr.doc_count,
-              get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
-            ),
-            topValuesSamplerShardSize:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-                ? SAMPLER_TOP_TERMS_SHARD_SIZE
-                : samplerShardSize,
+            topValuesSampleSize,
+            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
-          if (stats.count > 0) {
+          if (docCount > 0) {
             const percentiles = get(
               aggregations,
               [...aggsPath, `${safeFieldName}_percentiles`, 'values'],

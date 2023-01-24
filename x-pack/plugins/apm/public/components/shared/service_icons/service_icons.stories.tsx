@@ -7,13 +7,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import {
   APIReturnType,
   createCallApmApi,
 } from '../../../services/rest/create_call_apm_api';
-import { ServiceIcons } from './';
+import { ServiceIcons } from '.';
 
 type ServiceDetailsReturnType =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;
@@ -115,10 +115,13 @@ Example.args = {
       },
     },
     container: {
-      os: 'Linux',
-      type: 'Kubernetes',
-      isContainerized: true,
       totalNumberInstances: 1,
+      image: 'container image name',
+    },
+    kubernetes: {
+      deployments: ['opbeans-java', 'opbeans-go-nsn'],
+      replicasets: ['opbeans-go-6dff977956', 'opbeans-go-nsn-864bdcbc5b'],
+      namespaces: ['default'],
     },
     cloud: {
       provider: 'gcp',

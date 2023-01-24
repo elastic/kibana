@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RisonValue, encode } from 'rison-node';
+import type { RisonValue } from '@kbn/rison';
+import { encode } from '@kbn/rison';
 import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
 export const replacement = (match: string, p1: string, p2: string) => {

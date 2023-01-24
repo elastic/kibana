@@ -68,8 +68,10 @@ exports[`Table render conflict summary modal  1`] = `
   </EuiModalBody>
   <EuiModalFooter>
     <EuiButton
+      color="primary"
       fill={true}
       onClick={[Function]}
+      size="m"
     >
       <FormattedMessage
         defaultMessage="Close"
@@ -93,11 +95,7 @@ exports[`Table render name 2`] = `
   <span>
      
     <EuiIconTip
-      content={
-        <span>
-          This field exists on the data view only.
-        </span>
-      }
+      content="This field exists on the data view only."
       title="Runtime field"
       type="indexRuntime"
     />
@@ -320,10 +318,11 @@ exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
 <span
-  aria-label="Is searchable"
   color="success"
   data-euiicon-type="dot"
-/>
+>
+  Is searchable
+</span>
 `;
 
 exports[`Table should render timestamp field name 1`] = `

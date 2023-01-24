@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, mergeWith, cloneDeep, unset } from 'lodash';
+import { mapValues, trimEnd, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
-import {
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-} from '../../../../../../src/core/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
+} from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { CommentAttributes } from '../../../common/api';
 import { CommentType } from '../../../common/api';
+import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
   isLensMarkdownNode,
-  LensMarkdownNode,
-  MarkdownNode,
   parseCommentString,
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
-import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
 import { logError } from './utils';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
+import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
 
 interface UnsanitizedComment {
   comment: string;
@@ -51,6 +53,7 @@ interface SanitizedCommentWithAssociation {
 }
 
 export interface CreateCommentsMigrationsDeps {
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
@@ -60,10 +63,19 @@ export const createCommentsMigrations = (
   const lensMigrations = migrationDeps.lensEmbeddableFactory().migrations;
   const lensMigrationObject =
     typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
+
   const embeddableMigrations = mapValues<
     MigrateFunctionsObject,
     SavedObjectMigrationFn<{ comment?: string }>
   >(lensMigrationObject, migrateByValueLensVisualizations) as MigrateFunctionsObject;
+
+  const persistableStateAttachmentMigrations = mapValues<
+    MigrateFunctionsObject,
+    SavedObjectMigrationFn<CommentAttributes>
+  >(
+    getAllPersistableAttachmentMigrations(migrationDeps.persistableStateAttachmentTypeRegistry),
+    migratePersistableStateAttachments
+  ) as MigrateFunctionsObject;
 
   const commentsMigrations = {
     '7.11.0': (
@@ -115,14 +127,38 @@ export const createCommentsMigrations = (
     '8.1.0': removeAssociationType,
   };
 
-  return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
+  return mergeSavedObjectMigrationMaps(
+    persistableStateAttachmentMigrations,
+    mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations)
+  );
 };
 
+export const migratePersistableStateAttachments =
+  (migrate: MigrateFunction): SavedObjectMigrationFn<CommentAttributes, CommentAttributes> =>
+  (doc: SavedObjectUnsanitizedDoc<CommentAttributes>) => {
+    if (doc.attributes.type !== CommentType.persistableState) {
+      return doc;
+    }
+
+    const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = doc.attributes;
+
+    const migratedState = migrate({
+      persistableStateAttachmentState,
+      persistableStateAttachmentTypeId,
+    }) as PersistableStateAttachmentState;
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
+      },
+      references: doc.references ?? [],
+    };
+  };
+
 export const migrateByValueLensVisualizations =
-  (
-    migrate: MigrateFunction,
-    version: string
-  ): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
+  (migrate: MigrateFunction): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
   (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
     if (doc.attributes.comment == null) {
       return doc;
@@ -169,26 +205,6 @@ export const stringifyCommentWithoutTrailingNewline = (
   // the original comment did not end with a newline so the markdown library is going to add one, so let's remove it
   // so the comment stays consistent
   return trimEnd(stringifiedComment, '\n');
-};
-
-/**
- * merge function maps adds the context param from the original implementation at:
- * src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts
- *  */
-export const mergeMigrationFunctionMaps = (
-  // using the saved object framework types here because they include the context, this avoids type errors in our tests
-  obj1: SavedObjectMigrationMap,
-  obj2: SavedObjectMigrationMap
-) => {
-  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
-    if (!srcValue || !objValue) {
-      return srcValue || objValue;
-    }
-    return (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
-      objValue(srcValue(doc, context), context);
-  };
-
-  return mergeWith({ ...obj1 }, obj2, customizer);
 };
 
 export const removeRuleInformation = (

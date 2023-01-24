@@ -8,7 +8,9 @@
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
+import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
+
+import type { Agent, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -46,12 +48,49 @@ export interface PackagePolicyEditExtensionComponentProps {
   }) => void;
 }
 
+/**
+ * UI Component Extension is used on the pages displaying the ability to see
+ * Policy response view
+ */
+export type PackagePolicyResponseExtensionComponent =
+  ComponentType<PackagePolicyResponseExtensionComponentProps>;
+
+export interface PackagePolicyResponseExtensionComponentProps {
+  /** The current agent to retrieve response from */
+  agent: Agent;
+  /** A callback function to set the `needs attention` state */
+  onShowNeedsAttentionBadge?: (val: boolean) => void;
+}
+
+/**
+ * UI Component Extension is used on the pages displaying the ability to see
+ * a generic endpoint errors list
+ */
+export type PackageGenericErrorsListComponent = ComponentType<PackageGenericErrorsListProps>;
+
+export interface PackageGenericErrorsListProps {
+  /** A list of errors from a package */
+  packageErrors: FleetServerAgentComponentUnit[];
+}
+
 /** Extension point registration contract for Integration Policy Edit views */
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
   useLatestPackageVersion?: boolean;
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+}
+
+export interface PackagePolicyResponseExtension {
+  package: string;
+  view: 'package-policy-response';
+  Component: LazyExoticComponent<PackagePolicyResponseExtensionComponent>;
+}
+
+export interface PackageGenericErrorsListExtension {
+  package: string;
+  view: 'package-generic-errors-list';
+  Component: LazyExoticComponent<PackageGenericErrorsListComponent>;
 }
 
 /** Extension point registration contract for Integration Policy Edit tabs views */
@@ -94,6 +133,19 @@ export interface PackagePolicyCreateExtension {
 }
 
 /**
+ * UI Component Extension is used on the pages displaying the ability to Create a multi step
+ * Integration Policy
+ */
+export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
+
+/** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
+export interface PackagePolicyCreateMultiStepExtension {
+  package: string;
+  view: 'package-policy-create-multi-step';
+  Component: LazyExoticComponent<PackagePolicyCreateMultiStepExtensionComponent>;
+}
+
+/**
  * UI Component Extension is used to display a Custom tab (and view) under a given Integration
  */
 export type PackageCustomExtensionComponent = ComponentType<PackageCustomExtensionComponentProps>;
@@ -133,8 +185,11 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
+  | PackagePolicyResponseExtension
   | PackagePolicyEditTabsExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension
   | PackageAssetsExtension
-  | AgentEnrollmentFlyoutFinalStepExtension;
+  | PackageGenericErrorsListExtension
+  | AgentEnrollmentFlyoutFinalStepExtension
+  | PackagePolicyCreateMultiStepExtension;

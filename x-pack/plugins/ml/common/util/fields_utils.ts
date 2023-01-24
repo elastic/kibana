@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   Field,
   Aggregation,
@@ -13,8 +14,14 @@ import {
   RollupFields,
   EVENT_RATE_FIELD_ID,
 } from '../types/fields';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+
+export const categoryFieldTypes = [
+  ES_FIELD_TYPES.TEXT,
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.VERSION,
+];
 
 // cross reference fields and aggs.
 // fields contain a list of aggs that are compatible, and vice versa.
@@ -92,7 +99,9 @@ function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
 }
 
 function getKeywordFields(fields: Field[]): Field[] {
-  return fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD);
+  return fields.filter(
+    (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.VERSION
+  );
 }
 
 function getTextFields(fields: Field[]): Field[] {
@@ -118,7 +127,7 @@ function getNumericalFields(fields: Field[]): Field[] {
   );
 }
 
-function getGeoFields(fields: Field[]): Field[] {
+export function getGeoFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) => f.type === ES_FIELD_TYPES.GEO_POINT || f.type === ES_FIELD_TYPES.GEO_SHAPE
   );
@@ -141,4 +150,8 @@ export function sortFields(fields: Field[]) {
     fields.splice(0, 0, eventRate);
   }
   return fields;
+}
+
+export function filterCategoryFields(fields: Field[], include = true) {
+  return fields.filter((f) => categoryFieldTypes.includes(f.type) === include);
 }

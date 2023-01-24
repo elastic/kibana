@@ -8,9 +8,8 @@
 
 const { get } = require('lodash');
 const memoizeOne = require('memoize-one');
-// eslint-disable-next-line import/no-unresolved
-const { parse: parseFn } = require('../grammar');
 const { functions: includedFunctions } = require('./functions');
+const { parse: parseFn } = require('./grammar.peggy');
 
 function parse(input, options) {
   if (input == null) {
@@ -36,7 +35,7 @@ function evaluate(expression, scope = {}, injectedFunctions = {}) {
 }
 
 function interpret(node, scope, injectedFunctions) {
-  const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line
+  const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line prefer-object-spread/prefer-object-spread
   return exec(node);
 
   function exec(node) {

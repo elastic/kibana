@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Query, METRIC_TYPES, KBN_FIELD_TYPES } from '../../../../data/common';
+import { Query, METRIC_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { PANEL_TYPES, TOOLTIP_MODES, TSVB_METRIC_TYPES } from '../enums';
-import type { IndexPatternValue, Annotation } from './index';
+import type { IndexPatternValue, Annotation } from '.';
 import type {
   ColorRules,
   BackgroundColorRules,
@@ -22,7 +22,7 @@ interface MetricVariable {
   name?: string;
 }
 
-interface Percentile {
+export interface Percentile {
   id: string;
   mode: 'line' | 'band';
   field?: string;
@@ -37,6 +37,7 @@ export type MetricType = METRIC_TYPES | TSVB_METRIC_TYPES;
 export interface Metric {
   field?: string;
   id: string;
+  gap_policy?: string;
   alias?: string;
   metric_agg?: string;
   numerator?: Query;
@@ -162,7 +163,7 @@ export interface Panel {
   max_bars: number;
   pivot_id?: string | Array<string | null>;
   pivot_label?: string;
-  pivot_rows?: string;
+  pivot_rows?: number | string;
   pivot_type?: KBN_FIELD_TYPES | Array<KBN_FIELD_TYPES | null>;
   series: Series[];
   show_grid: number;

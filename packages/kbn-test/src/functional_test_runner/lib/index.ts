@@ -8,13 +8,13 @@
 
 export { Lifecycle } from './lifecycle';
 export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
+export * from './config';
 export * from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
-export * from './test_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
+export { DedicatedTaskRunner } from './dedicated_task_runner';
 
 export type { Provider } from './providers';
 export * from './es_version';

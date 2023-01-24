@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import {
+import type {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../../src/core/types/elasticsearch';
+} from '@kbn/es-types';
+import { isNull } from 'lodash';
+import { EVENT_OUTCOME } from '../../../common/es_fields/apm';
+import { EventOutcome } from '../../../common/event_outcome';
 
-export const getOutcomeAggregation = () => ({
-  terms: {
-    field: EVENT_OUTCOME,
-    include: [EventOutcome.failure, EventOutcome.success],
-  },
-});
+export const getOutcomeAggregation = () => {
+  return {
+    terms: {
+      field: EVENT_OUTCOME,
+      include: [EventOutcome.failure, EventOutcome.success],
+    },
+  };
+};
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
@@ -45,6 +48,21 @@ export function calculateFailedTransactionRate(
   const failedTransactions = outcomes[EventOutcome.failure] ?? 0;
   const successfulTransactions = outcomes[EventOutcome.success] ?? 0;
 
+  return failedTransactions / (successfulTransactions + failedTransactions);
+}
+
+export function calculateFailedTransactionRateFromServiceMetrics({
+  failedTransactions,
+  successfulTransactions,
+}: {
+  failedTransactions: number | null;
+  successfulTransactions: number | null;
+}) {
+  if (isNull(failedTransactions) || failedTransactions === 0) {
+    return 0;
+  }
+
+  successfulTransactions = successfulTransactions ?? 0;
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
 

@@ -1,0 +1,38 @@
+get:
+  summary: Agents - Current Bulk Upgrades
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    actionId:
+                      type: string
+                    complete:
+                      type: boolean
+                    nbAgents:
+                      type: number
+                    nbAgentsAck:
+                      type: number
+                    version:
+                      type: string
+                    startTime:
+                      type: string
+                  required:
+                    - actionId
+                    - complete
+                    - nbAgents
+                    - nbAgentsAck
+                    - version
+                    - startTime
+            required:
+              - items
+  operationId: agents-current-upgrades

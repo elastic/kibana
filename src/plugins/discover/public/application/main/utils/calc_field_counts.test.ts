@@ -7,20 +7,17 @@
  */
 
 import { calcFieldCounts } from './calc_field_counts';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 describe('calcFieldCounts', () => {
   test('returns valid field count data', async () => {
     const rows = [
-      { _id: 1, _source: { message: 'test1', bytes: 20 } },
-      { _id: 2, _source: { name: 'test2', extension: 'jpg' } },
-    ] as unknown as ElasticSearchHit[];
-    const result = calcFieldCounts(rows, indexPatternMock);
+      { _id: '1', _index: 'test', _source: { message: 'test1', bytes: 20 } },
+      { _id: '2', _index: 'test', _source: { name: 'test2', extension: 'jpg' } },
+    ].map((row) => buildDataTableRecord(row));
+    const result = calcFieldCounts(rows);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "_index": 2,
-        "_score": 2,
         "bytes": 1,
         "extension": 1,
         "message": 1,
@@ -30,14 +27,12 @@ describe('calcFieldCounts', () => {
   });
   test('updates field count data', async () => {
     const rows = [
-      { _id: 1, _source: { message: 'test1', bytes: 20 } },
-      { _id: 2, _source: { name: 'test2', extension: 'jpg' } },
-    ] as unknown as ElasticSearchHit[];
-    const result = calcFieldCounts(rows, indexPatternMock);
+      { _id: '1', _index: 'test', _source: { message: 'test1', bytes: 20 } },
+      { _id: '2', _index: 'test', _source: { name: 'test2', extension: 'jpg' } },
+    ].map((row) => buildDataTableRecord(row));
+    const result = calcFieldCounts(rows);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "_index": 2,
-        "_score": 2,
         "bytes": 1,
         "extension": 1,
         "message": 1,

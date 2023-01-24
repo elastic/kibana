@@ -16,10 +16,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const supertest = getService('supertest');
     const retry = getService('retry');
 
-    // FLAKY: https://github.com/elastic/kibana/issues/88177
-    describe.skip('overview page alert flyout controls', function () {
+    describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+      const ruleName = 'uptime-test';
       let alerts: any;
       let common: any;
 
@@ -47,10 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can set alert interval', async () => {
         await alerts.setAlertInterval('11');
-      });
-
-      it('can set alert throttle interval', async () => {
-        await alerts.setAlertThrottleInterval('30');
       });
 
       it('can set alert status number of time', async () => {
@@ -88,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can save alert', async () => {
-        await alerts.clickSaveRuleButton();
+        await alerts.clickSaveRuleButton(ruleName);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
@@ -142,8 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/116865
-    describe.skip('tls alert', function () {
+    describe('tls alert', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -173,19 +168,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await alerts.setAlertInterval('11');
       });
 
-      it('can set alert throttle interval', async () => {
-        await alerts.setAlertThrottleInterval('30');
-      });
-
       it('can save alert', async () => {
-        await alerts.clickSaveRuleButton();
+        await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
         await pageObjects.common.closeToast();
       });
 
       it('has created a valid alert with expected parameters', async () => {
         let alert: any;
-        await retry.tryForTime(15000, async () => {
+        await retry.tryForTime(60 * 1000, async () => {
           const apiResponse = await supertest.get(`/api/alerts/_find?search=${alertId}`);
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === alertId

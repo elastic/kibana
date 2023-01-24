@@ -10,42 +10,35 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Fetch Node.js rules
 http_archive(
   name = "build_bazel_rules_nodejs",
-  sha256 = "8a7c981217239085f78acc9898a1f7ba99af887c1996ceb3b4504655383a2c3c",
-  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.0.0/rules_nodejs-4.0.0.tar.gz"],
+  patch_args = ["-p1"],
+  patches = ["//:src/dev/bazel/rules_nodejs_patches/normalized_paths_for_windows_runfiles.patch"],
+  sha256 = "6f15d75f9e99c19d9291ff8e64e4eb594a6b7d25517760a75ad3621a7a48c2df",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.7.0/rules_nodejs-4.7.0.tar.gz"],
 )
 
 # Now that we have the rules let's import from them to complete the work
-load("@build_bazel_rules_nodejs//:index.bzl", "check_rules_nodejs_version", "node_repositories", "yarn_install")
-
-# Assure we have at least a given rules_nodejs version
-check_rules_nodejs_version(minimum_version_string = "4.0.0")
+load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install")
 
 # Setup the Node.js toolchain for the architectures we want to support
-#
-# NOTE: darwin-arm64 is not being installed because bazel is not yet available on that architecture.
-# The PR for it was merged and should be available in the next release of bazel and bazelisk. As soon as they have it
-# we can update that rule.
 node_repositories(
   node_repositories = {
-    "16.13.2-darwin_amd64": ("node-v16.13.2-darwin-x64.tar.gz", "node-v16.13.2-darwin-x64", "900a952bb77533d349e738ff8a5179a4344802af694615f36320a888b49b07e6"),
-    "16.13.2-darwin_arm64": ("node-v16.13.2-darwin-arm64.tar.gz", "node-v16.13.2-darwin-arm64", "09d300008ad58792c12622a5eafdb14c931587bb88713df4df64cdf4ff2188d1"),
-    "16.13.2-linux_arm64": ("node-v16.13.2-linux-arm64.tar.xz", "node-v16.13.2-linux-arm64", "a3cf8e4e9fbea27573eee6da84720bf7227ddd22842b842d48049d6dfe55fb03"),
-    "16.13.2-linux_s390x": ("node-v16.13.2-linux-s390x.tar.xz", "node-v16.13.2-linux-s390x", "c4ba46fc19366f7377d28a60a98f741bfa38045d7924306244c51d1660afcc8d"),
-    "16.13.2-linux_amd64": ("node-v16.13.2-linux-x64.tar.xz", "node-v16.13.2-linux-x64", "7f5e9a42d6e86147867d35643c7b1680c27ccd45db85666fc52798ead5e74421"),
-    "16.13.2-windows_amd64": ("node-v16.13.2-win-x64.zip", "node-v16.13.2-win-x64", "107e3ece84b7fa1e80b3bdf03181d395246c7867e27b17b6d7e6fa9c7932b467"),
+    "18.13.0-darwin_amd64": ("node-v18.13.0-darwin-x64.tar.gz", "node-v18.13.0-darwin-x64", "8b57c4da4ff6cca19d5ef7953f8816e3406d1508a2e4ee7f997984b3b1d11b77"),
+    "18.13.0-darwin_arm64": ("node-v18.13.0-darwin-arm64.tar.gz", "node-v18.13.0-darwin-arm64", "418d535e64dbcbd628715180c2de4ffcecb8a84b81f233c60e6ab9f0d795c249"),
+    "18.13.0-linux_arm64": ("node-v18.13.0-linux-arm64.tar.xz", "node-v18.13.0-linux-arm64", "5b338667822341d1ea3b18d5b37d442a655829b9eafdc5f9008f00b8451ac148"),
+    "18.13.0-linux_amd64": ("node-v18.13.0-linux-x64.tar.xz", "node-v18.13.0-linux-x64", "7f5d6922a91986ef059ba8a4396aa435440adacfe6fc6fab60a857c8f2cf5e7a"),
+    "18.13.0-windows_amd64": ("node-v18.13.0-win-x64.zip", "node-v18.13.0-win-x64", "29c99ad1167ddbd72f2b15e91b560e36ac785b1873ba6791ab50d9d62f1957e2"),
   },
-  node_version = "16.13.2",
+  node_version = "18.13.0",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],
   yarn_repositories = {
-    "1.21.1": ("yarn-v1.21.1.tar.gz", "yarn-v1.21.1", "d1d9f4a0f16f5ed484e814afeb98f39b82d4728c6c8beaafb5abc99c02db6674"),
+    "1.22.19": ("yarn-v1.22.19.tar.gz", "yarn-v1.22.19", "732620bac8b1690d507274f025f3c6cfdc3627a84d9642e38a07452cc00e0f2e"),
   },
-  yarn_version = "1.21.1",
+  yarn_version = "1.22.19",
   yarn_urls = [
     "https://github.com/yarnpkg/yarn/releases/download/v{version}/{filename}",
   ],
-  package_json = ["//:package.json"],
 )
 
 # Run yarn_install rule to take care of dependencies
@@ -58,7 +51,6 @@ yarn_install(
   data = [
     "//:.yarnrc",
     "//:preinstall_check.js",
-    "//:node_modules/.yarn-integrity",
   ],
   exports_directories_only = True,
   symlink_node_modules = True,

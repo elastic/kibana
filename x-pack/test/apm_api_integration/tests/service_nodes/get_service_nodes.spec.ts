@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services/{serviceName}/serviceNodes',
+      endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
       params: {
         path: { serviceName },
         query: {
@@ -48,37 +48,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'Service nodes when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      before(async () => {
-        const instance = apm.service(serviceName, 'production', 'go').instance(instanceName);
-        await synthtraceEsClient.index(
-          timerange(start, end)
-            .interval('1m')
-            .rate(1)
-            .spans((timestamp) =>
-              instance
-                .appMetrics({
-                  'system.process.cpu.total.norm.pct': 1,
-                  'jvm.memory.heap.used': 1000,
-                  'jvm.memory.non_heap.used': 100,
-                  'jvm.thread.count': 25,
-                })
-                .timestamp(timestamp)
-                .serialize()
-            )
-        );
-      });
-      after(() => synthtraceEsClient.clean());
+  registry.when('Service nodes when data is loaded', { config: 'basic', archives: [] }, () => {
+    before(async () => {
+      const instance = apm
+        .service({ name: serviceName, environment: 'production', agentName: 'go' })
+        .instance(instanceName);
+      await synthtraceEsClient.index(
+        timerange(start, end)
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) =>
+            instance
+              .appMetrics({
+                'system.process.cpu.total.norm.pct': 1,
+                'jvm.memory.heap.used': 1000,
+                'jvm.memory.non_heap.used': 100,
+                'jvm.thread.count': 25,
+              })
+              .timestamp(timestamp)
+          )
+      );
+    });
+    after(() => synthtraceEsClient.clean());
 
-      it('returns service nodes', async () => {
-        const response = await callApi();
+    it('returns service nodes', async () => {
+      const response = await callApi();
 
-        expect(response.status).to.be(200);
+      expect(response.status).to.be(200);
 
-        expectSnapshot(response.body).toMatchInline(`
+      expectSnapshot(response.body).toMatchInline(`
           Object {
             "serviceNodes": Array [
               Object {
@@ -92,7 +90,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
           }
         `);
-      });
-    }
-  );
+    });
+  });
 }

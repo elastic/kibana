@@ -8,44 +8,29 @@
 
 import * as Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { CiStatsReporter, CiStatsReportTestsOptions, CiStatsTestType } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  CiStatsReporter,
+  CiStatsReportTestsOptions,
+  CiStatsTestType,
+} from '@kbn/ci-stats-reporter';
 
 import { Config } from '../../config';
-import { Runner } from '../../../fake_mocha_types';
-import { TestMetadata, ScreenshotRecord } from '../../test_metadata';
+import { Runner, Runnable } from '../../../fake_mocha_types';
 import { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
-interface Suite {
-  _beforeAll: Runnable[];
-  _beforeEach: Runnable[];
-  _afterEach: Runnable[];
-  _afterAll: Runnable[];
-}
-
-interface Runnable {
-  isFailed(): boolean;
-  isPending(): boolean;
-  duration?: number;
-  titlePath(): string[];
-  file: string;
-  title: string;
-  parent: Suite;
-  _screenshots?: ScreenshotRecord[];
-}
-
 function getHookType(hook: Runnable): CiStatsTestType {
-  if (hook.parent._afterAll.includes(hook)) {
+  if (hook.parent?._afterAll.includes(hook)) {
     return 'after all hook';
   }
-  if (hook.parent._afterEach.includes(hook)) {
+  if (hook.parent?._afterEach.includes(hook)) {
     return 'after each hook';
   }
-  if (hook.parent._beforeEach.includes(hook)) {
+  if (hook.parent?._beforeEach.includes(hook)) {
     return 'before each hook';
   }
-  if (hook.parent._beforeAll.includes(hook)) {
+  if (hook.parent?._beforeAll.includes(hook)) {
     return 'before all hook';
   }
 
@@ -56,15 +41,18 @@ export function setupCiStatsFtrTestGroupReporter({
   config,
   lifecycle,
   runner,
-  testMetadata,
   reporter,
 }: {
   config: Config;
   lifecycle: Lifecycle;
   runner: Runner;
-  testMetadata: TestMetadata;
   reporter: CiStatsReporter;
 }) {
+  const testGroupType = process.env.TEST_GROUP_TYPE_FUNCTIONAL;
+  if (!testGroupType) {
+    throw new Error('missing process.env.TEST_GROUP_TYPE_FUNCTIONAL');
+  }
+
   let startMs: number | undefined;
   runner.on('start', () => {
     startMs = Date.now();
@@ -74,8 +62,9 @@ export function setupCiStatsFtrTestGroupReporter({
   const group: CiStatsReportTestsOptions['group'] = {
     startTime: new Date(start).toJSON(),
     durationMs: 0,
-    type: config.path.startsWith('x-pack') ? 'X-Pack Functional Tests' : 'Functional Tests',
+    type: testGroupType,
     name: Path.relative(REPO_ROOT, config.path),
+    result: 'skip',
     meta: {
       ciGroup: config.get('suiteTags.include').find((t: string) => t.startsWith('ciGroup')),
       tags: [
@@ -94,17 +83,13 @@ export function setupCiStatsFtrTestGroupReporter({
       startTime: new Date(Date.now() - (runnable.duration ?? 0)).toJSON(),
       durationMs: runnable.duration ?? 0,
       seq: testRuns.length + 1,
-      file: Path.relative(REPO_ROOT, runnable.file),
+      file: Path.relative(REPO_ROOT, runnable.file ?? '.'),
       name: runnable.title,
       suites: runnable.titlePath().slice(0, -1),
       result: runnable.isFailed() ? 'fail' : runnable.isPending() ? 'skip' : 'pass',
       type,
       error: error?.stack,
       stdout: getSnapshotOfRunnableLogs(runnable),
-      screenshots: testMetadata.getScreenshots(runnable).map((s) => ({
-        base64Png: s.base64Png,
-        name: s.name,
-      })),
     });
   }
 
@@ -112,6 +97,11 @@ export function setupCiStatsFtrTestGroupReporter({
   runner.on('fail', (test: Runnable, error: Error) => {
     errors.set(test, error);
   });
+
+  let passCount = 0;
+  let failCount = 0;
+  runner.on('pass', () => (passCount += 1));
+  runner.on('fail', () => (failCount += 1));
 
   runner.on('hook end', (hook: Runnable) => {
     if (hook.isFailed()) {
@@ -146,6 +136,7 @@ export function setupCiStatsFtrTestGroupReporter({
 
     // update the durationMs
     group.durationMs = Date.now() - startMs;
+    group.result = failCount ? 'fail' : passCount ? 'pass' : 'skip';
   });
 
   lifecycle.cleanup.add(async () => {

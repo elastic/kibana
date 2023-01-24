@@ -6,32 +6,55 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-
-import { TestProviders } from '../../../common/mock';
+import { render } from '@testing-library/react';
+import { readCasesPermissions, TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
+import type { NoCasesComp } from '.';
 
 jest.mock('../../../common/navigation/hooks');
 
 describe('NoCases', () => {
+  const defaultProps: NoCasesComp = {
+    recentCasesFilterBy: 'recentlyCreated',
+  };
   it('if no cases, a link to create cases will exist', () => {
-    const wrapper = mount(
+    const result = render(
       <TestProviders>
-        <NoCases />
+        <NoCases {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().prop('href')).toEqual(
+    expect(result.getByTestId(`no-cases-create-case`)).toHaveAttribute(
+      'href',
       '/app/security/cases/create'
     );
   });
 
-  it('displays a message without a link to create a case when the user does not have write permissions', () => {
-    const wrapper = mount(
-      <TestProviders userCanCrud={false}>
-        <NoCases />
+  it('displays a message without a link to create a case when the user does not have create permissions', () => {
+    const result = render(
+      <TestProviders permissions={readCasesPermissions()}>
+        <NoCases {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).exists()).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="no-cases-readonly"]`).exists()).toBeTruthy();
+
+    expect(result.getByTestId(`no-cases-readonly`)).toBeInTheDocument();
+    expect(result.queryByTestId('no-cases-create-case')).not.toBeInTheDocument();
+  });
+
+  it('displays correct message when no cases are reported by user', () => {
+    const result = render(
+      <TestProviders>
+        <NoCases recentCasesFilterBy="myRecentlyReported" />
+      </TestProviders>
+    );
+    expect(result.getByTestId(`no-cases-create-case`)).toBeInTheDocument();
+  });
+
+  it('displays correct message when no cases are assigned to user', () => {
+    const result = render(
+      <TestProviders>
+        <NoCases recentCasesFilterBy="myRecentlyAssigned" />
+      </TestProviders>
+    );
+    expect(result.getByTestId(`no-cases-assigned-to-me`)).toBeInTheDocument();
   });
 });

@@ -18,7 +18,7 @@ describe('SyncAlertsSwitch', () => {
     jest.clearAllMocks();
   });
 
-  it('it renders', async () => {
+  it('renders', async () => {
     const wrapper = mount(
       <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
     );
@@ -26,7 +26,7 @@ describe('SyncAlertsSwitch', () => {
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
   });
 
-  it('it renders when disabled', async () => {
+  it('renders a simple status badge when disabled', async () => {
     const wrapper = mount(
       <StatusContextMenu
         disabled={true}
@@ -35,10 +35,11 @@ describe('SyncAlertsSwitch', () => {
       />
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-status-badge-open"]`).exists()).toBeTruthy();
   });
 
-  it('it renders the current status correctly', async () => {
+  it('renders the current status correctly', async () => {
     const wrapper = mount(
       <StatusContextMenu currentStatus={CaseStatuses.closed} onStatusChanged={onStatusChanged} />
     );
@@ -48,7 +49,7 @@ describe('SyncAlertsSwitch', () => {
     );
   });
 
-  it('it changes the status', async () => {
+  it('changes the status', async () => {
     const wrapper = mount(
       <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
     );
@@ -61,7 +62,7 @@ describe('SyncAlertsSwitch', () => {
     expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
   });
 
-  it('it does not call onStatusChanged if selection is same as current status', async () => {
+  it('does not call onStatusChanged if selection is same as current status', async () => {
     const wrapper = mount(
       <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
     );

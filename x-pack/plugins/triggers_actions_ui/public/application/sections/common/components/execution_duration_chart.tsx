@@ -38,7 +38,7 @@ const NUM_EXECUTIONS_OPTIONS = [120, 60, 30, 15].map((value) => ({
   text: i18n.translate(
     'xpack.triggersActionsUI.sections.executionDurationChart.numberOfExecutionsOption',
     {
-      defaultMessage: '{value} executions',
+      defaultMessage: '{value} runs',
       values: {
         value,
       },
@@ -70,7 +70,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
             <h4>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTitle"
-                defaultMessage="Recent execution durations"
+                defaultMessage="Recent run durations"
               />
             </h4>
           </EuiTitle>
@@ -79,12 +79,13 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
           <EuiFlexItem grow={false}>
             <EuiSelect
               id="select-number-execution-durations"
+              data-test-subj="executionDurationChartPanelSelect"
               options={NUM_EXECUTIONS_OPTIONS}
               value={numberOfExecutions}
               aria-label={i18n.translate(
                 'xpack.triggersActionsUI.sections.executionDurationChart.selectNumberOfExecutionDurationsLabel',
                 {
-                  defaultMessage: 'Select number of executions',
+                  defaultMessage: 'Select number of runs',
                 }
               )}
               onChange={onChange}
@@ -105,6 +106,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
           <>
             <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
               <Settings
+                // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                 theme={{
                   lineSeriesStyle: {
                     point: { visible: false },
@@ -160,7 +162,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.executionDurationChart.executionDurationNoData"
-                      defaultMessage="There are no available executions for this rule."
+                      defaultMessage="There is no available run duration information for this rule."
                     />
                   </p>
                 </>

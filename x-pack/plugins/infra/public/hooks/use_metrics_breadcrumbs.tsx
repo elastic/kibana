@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { METRICS_APP } from '../../common/constants';
 import { metricsTitle } from '../translations';

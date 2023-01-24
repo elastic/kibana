@@ -17,8 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
-  const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const rules = getService('rules');
 
   async function getAlertsByName(name: string) {
     const {
@@ -43,6 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
     await indexComboBox.click();
@@ -59,50 +60,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // need this two out of popup clicks to close them
     const nameInput = await testSubjects.find('ruleNameInput');
     await nameInput.click();
-  }
-
-  async function defineIndexThresholdAlert(alertName: string) {
-    await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
-    await testSubjects.click(`.index-threshold-SelectOption`);
-    await testSubjects.click('selectIndexExpression');
-    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await indexComboBox.click();
-    await indexComboBox.type('k');
-    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItem.click();
-    await testSubjects.click('thresholdAlertTimeFieldSelect');
-    await retry.try(async () => {
-      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-      expect(fieldOptions[1]).not.to.be(undefined);
-      await fieldOptions[1].click();
-    });
-    await testSubjects.click('closePopover');
-    // need this two out of popup clicks to close them
-    const nameInput = await testSubjects.find('ruleNameInput');
-    await nameInput.click();
-
-    await testSubjects.click('whenExpression');
-    await testSubjects.click('whenExpressionSelect');
-    await retry.try(async () => {
-      const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
-      expect(aggTypeOptions[1]).not.to.be(undefined);
-      await aggTypeOptions[1].click();
-    });
-
-    await testSubjects.click('ofExpressionPopover');
-    const ofComboBox = await find.byCssSelector('#ofField');
-    await ofComboBox.click();
-    const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
-    const ofOptions = ofOptionsString.trim().split('\n');
-    expect(ofOptions.length > 0).to.be(true);
-    await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
   }
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
+  }
+
+  async function discardNewRuleCreation() {
+    await rules.common.cancelRuleCreation();
   }
 
   describe('create alert', function () {
@@ -114,26 +81,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     afterEach(async () => {
       // Reset the Rules tab without reloading the entire page
       // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
-      await testSubjects.click('connectorsTab');
+      await testSubjects.click('logsTab');
       await testSubjects.click('rulesTab');
     });
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
-      await defineIndexThresholdAlert(alertName);
+      await rules.common.defineIndexThresholdAlert(alertName);
 
-      await testSubjects.click('notifyWhenSelect');
-      await testSubjects.click('onThrottleInterval');
-      await testSubjects.setValue('throttleInput', '10');
+      // filterKuery validation
+      await testSubjects.setValue('filterKuery', 'group:');
+      const filterKueryInput = await testSubjects.find('filterKuery');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
+      await testSubjects.setValue('filterKuery', 'group: group-0');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
 
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `alert '{{alertName}}' is active for group '{{context.group}}':
@@ -180,11 +153,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlwaysFiringAlert(alertName);
 
       // create Slack connector and attach an action using it
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
@@ -196,7 +169,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).type('some text ');
 
       await testSubjects.click('addAlertActionButton');
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
         await find.byCssSelector(
@@ -262,17 +235,44 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
+
+      await discardNewRuleCreation();
+    });
+
+    it('should show error when es_query is invalid', async () => {
+      const alertName = generateUniqueKey();
+      await defineEsQueryAlert(alertName);
+
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":""}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
+      await testSubjects.setValue('queryJsonEditor', '');
+      await discardNewRuleCreation();
     });
 
     it('should successfully test valid es_query alert', async () => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
+      await testSubjects.setValue('queryJsonEditor', '', {
+        clearWithKeyboard: true,
+      });
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
       // Valid query
       await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
         clearWithKeyboard: true,
@@ -281,22 +281,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await testSubjects.click('cancelSaveRuleButton');
-      await testSubjects.existOrFail('confirmRuleCloseModal');
-      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-    });
-
-    it('should show error when es_query is invalid', async () => {
-      const alertName = generateUniqueKey();
-      await defineEsQueryAlert(alertName);
-
-      // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
-        clearWithKeyboard: true,
-      });
-      await testSubjects.click('testQuery');
-      await testSubjects.missingOrFail('testQuerySuccess');
-      await testSubjects.existOrFail('testQueryError');
+      await discardNewRuleCreation();
     });
 
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
@@ -316,6 +301,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '.triggersActionsUI__ruleTypeNodeHeading'
       );
       expect(ruleTypesClearFilter.length).to.above(0);
+
+      await discardNewRuleCreation();
     });
   });
 };

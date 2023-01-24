@@ -6,9 +6,9 @@
  */
 
 import { adminTestUser } from '@kbn/test';
+import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrService } from '../ftr_provider_context';
-import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
-import type { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
 
 interface LoginOptions {
   expectSpaceSelector?: boolean;
@@ -30,6 +30,7 @@ export class SecurityPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly esArchiver = this.ctx.getService('esArchiver');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly userMenu = this.ctx.getService('userMenu');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly supertest = this.ctx.getService('supertestWithoutAuth');
@@ -37,6 +38,7 @@ export class SecurityPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly es = this.ctx.getService('es');
 
   public loginPage = Object.freeze({
     login: async (username?: string, password?: string, options: LoginOptions = {}) => {
@@ -62,6 +64,21 @@ export class SecurityPageObject extends FtrService {
           ? 'chrome'
           : undefined
       );
+    },
+
+    getInfoMessage: async () => {
+      return await this.retry.try(async () => {
+        const infoMessageContainer = await this.retry.try(() =>
+          this.testSubjects.find('loginInfoMessage')
+        );
+        const infoMessageText = await infoMessageContainer.getVisibleText();
+
+        if (!infoMessageText) {
+          throw new Error('Login Info Message not present yet');
+        }
+
+        return infoMessageText;
+      });
     },
 
     getErrorMessage: async () => {
@@ -232,7 +249,7 @@ export class SecurityPageObject extends FtrService {
 
   async initTests() {
     this.log.debug('SecurityPage:initTests');
-    await this.esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+    await this.kibanaServer.savedObjects.cleanStandardList();
     await this.esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     await this.browser.setWindowSize(1600, 1000);
   }
@@ -350,13 +367,6 @@ export class SecurityPageObject extends FtrService {
 
     const btn = await this.find.byButtonText(privilege);
     await btn.click();
-
-    // const options = await this.find.byCssSelector(`.euiFilterSelectItem`);
-    // Object.entries(options).forEach(([key, prop]) => {
-    //   console.log({ key, proto: prop.__proto__ });
-    // });
-
-    // await options.click();
   }
 
   async assignRoleToUser(role: string) {
@@ -503,7 +513,7 @@ export class SecurityPageObject extends FtrService {
       'editUserChangePasswordConfirmPasswordInput',
       user.confirm_password ?? ''
     );
-    await this.testSubjects.click('formFlyoutSubmitButton');
+    await this.testSubjects.click('changePasswordFormSubmitButton');
   }
 
   async updateUserProfile(user: UserFormValues) {
@@ -516,6 +526,13 @@ export class SecurityPageObject extends FtrService {
     await this.clickUserByUserName(user.username ?? '');
     await this.testSubjects.click('editUserDisableUserButton');
     await this.testSubjects.click('confirmModalConfirmButton');
+    await this.testSubjects.missingOrFail('confirmModalConfirmButton');
+    if (user.username) {
+      await this.retry.waitForWithTimeout('ES to acknowledge deactivation', 15000, async () => {
+        const userResponse = await this.es.security.getUser({ username: user.username });
+        return userResponse[user.username!].enabled === false;
+      });
+    }
     await this.submitUpdateUserForm();
   }
 
@@ -523,6 +540,13 @@ export class SecurityPageObject extends FtrService {
     await this.clickUserByUserName(user.username ?? '');
     await this.testSubjects.click('editUserEnableUserButton');
     await this.testSubjects.click('confirmModalConfirmButton');
+    await this.testSubjects.missingOrFail('confirmModalConfirmButton');
+    if (user.username) {
+      await this.retry.waitForWithTimeout('ES to acknowledge activation', 15000, async () => {
+        const userResponse = await this.es.security.getUser({ username: user.username });
+        return userResponse[user.username!].enabled === true;
+      });
+    }
     await this.submitUpdateUserForm();
   }
 

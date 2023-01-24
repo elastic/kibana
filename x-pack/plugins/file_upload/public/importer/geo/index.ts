@@ -11,9 +11,10 @@ import { ShapefileImporter, SHAPEFILE_TYPES } from './shapefile_importer';
 import { getFileExtension, validateFile } from '../validate_file';
 
 export const GEO_FILE_TYPES = [...GEOJSON_FILE_TYPES, ...SHAPEFILE_TYPES];
+const OPTIONS = { checkSizeLimit: false };
 
 export function geoImporterFactory(file: File): GeoFileImporter {
-  validateFile(file, GEO_FILE_TYPES);
+  validateFile(file, GEO_FILE_TYPES, OPTIONS);
 
   const extension = getFileExtension(file);
   return GEOJSON_FILE_TYPES.includes(extension)

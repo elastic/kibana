@@ -10,11 +10,11 @@ import React from 'react';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
-} from '../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
+import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { useLegacyUrlParams } from '../../../../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
@@ -24,10 +24,19 @@ interface Props {
 }
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
-  const {
-    urlParams: { latencyAggregationType, comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer',
+    '/dependencies/operation'
+  );
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
+  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
+
+  const { comparisonEnabled, offset } = query;
 
   if (!transaction) {
     return null;
@@ -47,7 +56,17 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       val: (
         <ServiceLink
           agentName={transaction.agent.name}
-          query={{ ...query, environment: nextEnvironment }}
+          query={{
+            kuery: query.kuery,
+            latencyAggregationType,
+            offset: query.offset,
+            rangeFrom: query.rangeFrom,
+            rangeTo: query.rangeTo,
+            comparisonEnabled: query.comparisonEnabled,
+            transactionType: transaction.transaction.type,
+            serviceGroup,
+            environment: nextEnvironment,
+          }}
           serviceName={transaction.service.name}
         />
       ),
@@ -68,7 +87,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
           comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
+          offset={offset}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>

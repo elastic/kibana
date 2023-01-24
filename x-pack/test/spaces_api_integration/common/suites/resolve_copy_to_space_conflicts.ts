@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
-import { EsArchiver } from '@kbn/es-archiver';
-import { SavedObject } from 'src/core/server';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
+import { SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 
 type TestResponse = Record<string, any>;
 
@@ -44,6 +44,21 @@ interface ResolveCopyToSpaceTestDefinition {
 
 const NON_EXISTENT_SPACE_ID = 'non_existent_space';
 
+const SPACE_DATA_TO_LOAD: Array<{ spaceName: string | null; dataUrl: string }> = [
+  {
+    spaceName: null,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/default_space.json',
+  },
+  {
+    spaceName: SPACE_1.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_1.json',
+  },
+  {
+    spaceName: SPACE_2.id,
+    dataUrl: 'x-pack/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2.json',
+  },
+];
+
 const getDestinationSpace = (originSpaceId?: string) => {
   if (!originSpaceId || originSpaceId === DEFAULT_SPACE_ID) {
     return 'space_1';
@@ -51,11 +66,11 @@ const getDestinationSpace = (originSpaceId?: string) => {
   return DEFAULT_SPACE_ID;
 };
 
-export function resolveCopyToSpaceConflictsSuite(
-  esArchiver: EsArchiver,
-  supertestWithAuth: SuperTest<any>,
-  supertestWithoutAuth: SuperTest<any>
-) {
+export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertestWithAuth = context.getService('supertest');
+  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
+
   const getVisualizationAtSpace = async (spaceId: string): Promise<SavedObject<any>> => {
     return supertestWithAuth
       .get(`${getUrlPrefix(spaceId)}/api/saved_objects/visualization/cts_vis_3_${spaceId}`)
@@ -487,16 +502,10 @@ export function resolveCopyToSpaceConflictsSuite(
         });
 
         describe('single-namespace types', () => {
-          beforeEach(() =>
-            esArchiver.load(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
+          beforeEach(
+            async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD)
           );
-          afterEach(() =>
-            esArchiver.unload(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
+          afterEach(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const dashboardObject = { type: 'dashboard', id: `cts_dashboard_${spaceId}` };
           const visualizationObject = { type: 'visualization', id: `cts_vis_3_${spaceId}` };
@@ -638,16 +647,8 @@ export function resolveCopyToSpaceConflictsSuite(
         const includeReferences = false;
         const createNewCopies = false;
         describe(`multi-namespace types with "overwrite" retry`, () => {
-          before(() =>
-            esArchiver.load(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
-          after(() =>
-            esArchiver.unload(
-              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-            )
-          );
+          before(async () => await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD));
+          after(async () => await testDataLoader.deleteFtrSavedObjectsData());
 
           const testCases = tests.multiNamespaceTestCases();
           testCases.forEach(({ testTitle, objects, retries, statusCode, response }) => {

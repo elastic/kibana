@@ -1,0 +1,440 @@
+{
+  "id": "@kbn/core-http-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-browser-mocks",
+        "id": "def-common.createHttpFetchError",
+        "type": "Function",
+        "tags": [],
+        "label": "createHttpFetchError",
+        "description": [],
+        "signature": [
+          "(message: string, name: string, request: Request, response: Response | undefined, body: TResponseBody | undefined) => ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IHttpFetchError",
+            "text": "IHttpFetchError"
+          },
+          "<unknown>"
+        ],
+        "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "Request"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Response | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$5",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TResponseBody | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-browser-mocks",
+        "id": "def-common.HttpSetupMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpSetupMock",
+        "description": [],
+        "signature": [
+          "{ basePath: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
+          "; anonymousPaths: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IAnonymousPaths",
+            "text": "IAnonymousPaths"
+          },
+          "; externalUrl: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IExternalUrl",
+            "text": "IExternalUrl"
+          },
+          "; intercept: jest.MockInstance<() => void, [interceptor: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpInterceptor",
+            "text": "HttpInterceptor"
+          },
+          "]>; fetch: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; delete: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; get: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; head: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; options: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; patch: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; post: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; put: jest.MockInstance<Promise<unknown>, [options: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpFetchOptionsWithPath",
+            "text": "HttpFetchOptionsWithPath"
+          },
+          "]>; addLoadingCountSource: jest.MockInstance<void, [countSource$: ",
+          "Observable",
+          "<number>]>; getLoadingCount$: jest.MockInstance<",
+          "Observable",
+          "<number>, []>; } & ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          " & { basePath: ",
+          {
+            "pluginId": "@kbn/core-http-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
+            "section": "def-common.BasePath",
+            "text": "BasePath"
+          },
+          "; anonymousPaths: jest.Mocked<",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IAnonymousPaths",
+            "text": "IAnonymousPaths"
+          },
+          ">; }"
+        ],
+        "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-http-browser-mocks",
+        "id": "def-common.httpServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "httpServiceMock",
+        "description": [],
+        "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.httpServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ basePath }?: { basePath?: string | undefined; }) => jest.Mocked<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              "HttpService",
+              ">>"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-mocks",
+                "id": "def-common.httpServiceMock.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ basePath?: string | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.httpServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "({ basePath, publicBaseUrl, }?: { basePath?: string | undefined; publicBaseUrl?: string | undefined; }) => ",
+              {
+                "pluginId": "@kbn/core-http-browser-mocks",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
+                "section": "def-common.HttpSetupMock",
+                "text": "HttpSetupMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-mocks",
+                "id": "def-common.httpServiceMock.createSetupContract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.httpServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "({ basePath, publicBaseUrl, }?: { basePath?: string | undefined; publicBaseUrl?: string | undefined; }) => ",
+              {
+                "pluginId": "@kbn/core-http-browser-mocks",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
+                "section": "def-common.HttpSetupMock",
+                "text": "HttpSetupMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-mocks",
+                "id": "def-common.httpServiceMock.createStartContract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.httpServiceMock.createBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "createBasePath",
+            "description": [],
+            "signature": [
+              "({ publicBaseUrl, serverBasePath, }?: { publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; }) => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              },
+              ">"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser-mocks",
+                "id": "def-common.httpServiceMock.createBasePath.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-browser-mocks/src/base_path.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

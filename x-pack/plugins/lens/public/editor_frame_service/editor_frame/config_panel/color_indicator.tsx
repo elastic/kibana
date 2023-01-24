@@ -18,7 +18,7 @@ export function ColorIndicator({
   children: React.ReactChild;
 }) {
   let indicatorIcon = null;
-  if (accessorConfig.triggerIcon && accessorConfig.triggerIcon !== 'none') {
+  if (accessorConfig.triggerIconType && accessorConfig.triggerIconType !== 'none') {
     const baseIconProps = {
       size: 's',
       className: 'lnsLayerPanel__colorIndicator',
@@ -26,7 +26,7 @@ export function ColorIndicator({
 
     indicatorIcon = (
       <EuiFlexItem grow={false}>
-        {accessorConfig.triggerIcon === 'color' && accessorConfig.color && (
+        {accessorConfig.triggerIconType === 'color' && accessorConfig.color && (
           <EuiIcon
             {...baseIconProps}
             color={accessorConfig.color}
@@ -39,7 +39,7 @@ export function ColorIndicator({
             })}
           />
         )}
-        {accessorConfig.triggerIcon === 'disabled' && (
+        {accessorConfig.triggerIconType === 'disabled' && (
           <EuiIcon
             {...baseIconProps}
             type="stopSlash"
@@ -49,7 +49,7 @@ export function ColorIndicator({
             })}
           />
         )}
-        {accessorConfig.triggerIcon === 'invisible' && (
+        {accessorConfig.triggerIconType === 'invisible' && (
           <EuiIcon
             {...baseIconProps}
             type="eyeClosed"
@@ -59,13 +59,35 @@ export function ColorIndicator({
             })}
           />
         )}
-        {accessorConfig.triggerIcon === 'colorBy' && (
+        {accessorConfig.triggerIconType === 'aggregate' && (
+          <EuiIcon
+            {...baseIconProps}
+            type="fold"
+            color="subdued"
+            aria-label={i18n.translate('xpack.lens.editorFrame.aggregateIndicatorLabel', {
+              defaultMessage:
+                'This dimension is not visible in the chart because all individual values are aggregated into a single value',
+            })}
+          />
+        )}
+        {accessorConfig.triggerIconType === 'colorBy' && (
           <EuiIcon
             {...baseIconProps}
             type="brush"
             color="text"
             aria-label={i18n.translate('xpack.lens.editorFrame.paletteColorIndicatorLabel', {
               defaultMessage: 'This dimension is using a palette',
+            })}
+          />
+        )}
+        {accessorConfig.triggerIconType === 'custom' && accessorConfig.customIcon && (
+          <EuiIcon
+            {...baseIconProps}
+            size="m"
+            type={accessorConfig.customIcon}
+            color={accessorConfig.color}
+            aria-label={i18n.translate('xpack.lens.editorFrame.customIconIndicatorLabel', {
+              defaultMessage: 'This dimension is using a custom icon',
             })}
           />
         )}

@@ -3,15 +3,15 @@
 exports[`ReasonFound should load ExplainCollectionInterval component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle emotion-euiTitle-l"
   >
     Monitoring is currently off
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText emotion-euiText-m"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -19,10 +19,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the cluster settings and found that 
@@ -43,27 +43,23 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>
@@ -74,15 +70,15 @@ Array [
 exports[`ReasonFound should load ExplainExporters component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle emotion-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText emotion-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -90,10 +86,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft emotion-euiText-m"
   >
     <p>
       We checked the 
@@ -143,65 +139,68 @@ Array [
 exports[`ReasonFound should load ExplainExportersCloud component 1`] = `
 Array [
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText emotion-euiText-m"
     >
       <p>
         Configure monitoring through 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Elasticsearch Service Console
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
         </a>
          Go to 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Logs and metrics
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink emotion-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener"
           target="_blank"
         >
           the documentation page.
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="emotion-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
-            class="euiScreenReaderOnly"
+            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
           >
             (opens in a new tab or window)
           </span>
@@ -210,10 +209,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft emotion-euiText-m"
   >
     <p>
       In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
@@ -225,15 +224,15 @@ Array [
 exports[`ReasonFound should load ExplainPluginEnabled component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle emotion-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText emotion-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -241,10 +240,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the node001foo settings and found that 

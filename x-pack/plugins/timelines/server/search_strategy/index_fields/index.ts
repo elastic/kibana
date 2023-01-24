@@ -8,22 +8,23 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
+  DataViewsServerPluginStart,
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
-  IndexFieldsStrategyResponse,
+  BeatFields,
   IndexField,
   IndexFieldsStrategyRequest,
-  BeatFields,
+  IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
-import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
@@ -37,11 +38,11 @@ export const indexFieldsProvider = (
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields.json').fieldsBeat;
 
   return {
     search: (request, options, deps) =>
-      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
+      from(requestIndexFieldSearchHandler(request, deps, beatFields, getStartServices)),
   };
 };
 
@@ -70,27 +71,40 @@ export const findExistingIndices = async (
       .map((p) => p.catch((e) => false))
   );
 
-export const requestIndexFieldSearch = async (
+export const requestIndexFieldSearchHandler = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  deps: SearchStrategyDependencies,
   beatFields: BeatFields,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  useInternalUser?: boolean
 ): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
-  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-  if ('dataViewId' in request && 'indices' in request) {
-    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
-  }
   const [
     ,
     {
       data: { indexPatterns },
     },
   ] = await getStartServices();
+  return requestIndexFieldSearch(request, deps, beatFields, indexPatterns, useInternalUser);
+};
+
+export const requestIndexFieldSearch = async (
+  request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  beatFields: BeatFields,
+  indexPatterns: DataViewsServerPluginStart,
+  useInternalUser?: boolean
+): Promise<IndexFieldsStrategyResponse> => {
+  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+  if ('dataViewId' in request && 'indices' in request) {
+    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
+  }
+
+  const esUser = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
   const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
-    esClient.asCurrentUser,
+    esUser,
     kRequest,
     true
   );
@@ -118,7 +132,7 @@ export const requestIndexFieldSearch = async (
     }
 
     const patternList = dataView.title.split(',');
-    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+    indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
@@ -131,23 +145,25 @@ export const requestIndexFieldSearch = async (
     }
   } else if ('indices' in request) {
     const patternList = dedupeIndexName(request.indices);
-    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
+    indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
     if (!request.onlyCheckIfIndicesExist) {
-      const fieldDescriptor = await Promise.all(
-        indicesExist.map(async (index, n) => {
-          if (index.startsWith('.alerts-observability')) {
-            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      const fieldDescriptor = (
+        await Promise.all(
+          indicesExist.map(async (index, n) => {
+            if (index.startsWith('.alerts-observability') || useInternalUser) {
+              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+                pattern: index,
+              });
+            }
+            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
               pattern: index,
             });
-          }
-          return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
-            pattern: index,
-          });
-        })
-      );
+          })
+        )
+      ).map((response) => response.fields || []);
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   }
@@ -173,7 +189,7 @@ export const requestIndexFieldSearch = async (
             _index: '',
             _id: '',
             _score: -1,
-            _source: null,
+            fields: {},
           },
         ],
       },
@@ -209,12 +225,13 @@ const missingFields: FieldSpec[] = [
 ];
 
 /**
- * Creates a single field item.
+ * Creates a single field item with category and indexes (index alias)
  *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time calling this function repeatedly. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
  * any n^2 operations.
+ * @param beatFields: BeatFields,
  * @param indexesAlias The index alias
  * @param index The index its self
  * @param indexesAliasIdx The index within the alias
@@ -223,9 +240,10 @@ export const createFieldItem = (
   beatFields: BeatFields,
   indexesAlias: string[],
   index: FieldSpec,
-  indexesAliasIdx: number
+  indexesAliasIdx: number | null
 ): IndexField => {
-  const alias = indexesAlias[indexesAliasIdx];
+  const alias = indexesAliasIdx != null ? [indexesAlias[indexesAliasIdx]] : indexesAlias;
+
   const splitIndexName = index.name.split('.');
   const indexName =
     splitIndexName[splitIndexName.length - 1] === 'text'
@@ -241,11 +259,13 @@ export const createFieldItem = (
     // the format type on FieldSpec is SerializedFieldFormat
     // and is a string on beatIndex
     format: index.format?.id ?? beatIndex.format,
-    indexes: [alias],
+    indexes: alias,
   };
 };
 
 /**
+ * Iterates over each field, adds description, category, and indexes (index alias)
+ *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time when being called. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
@@ -255,26 +275,37 @@ export const createFieldItem = (
  * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
+ * @param beatFields: BeatFields,
  * @param responsesFieldSpec The response index fields to loop over
  * @param indexesAlias The index aliases such as filebeat-*
  */
-export const formatFirstFields = async (
+export const formatIndexFields = async (
   beatFields: BeatFields,
   responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      const indexFieldNameHash: Record<string, number> = {};
       resolve(
         responsesFieldSpec.reduce(
-          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasIdx: number) => {
-            missingFields.forEach((index) => {
+          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
+            const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
+            missingFields.concat(fieldSpec).forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
+              const alreadyExistingIndexField = indexFieldNameHash[item.name];
+              if (alreadyExistingIndexField != null) {
+                const existingIndexField = accumulator[alreadyExistingIndexField];
+                if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
+                  accumulator[alreadyExistingIndexField].description = item.description;
+                }
+                accumulator[alreadyExistingIndexField].indexes = Array.from(
+                  new Set(existingIndexField.indexes.concat(item.indexes))
+                );
+                return;
+              }
               accumulator.push(item);
-            });
-            fieldSpec.forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
+              indexFieldNameHash[item.name] = accumulator.length - 1;
             });
             return accumulator;
           },
@@ -283,61 +314,4 @@ export const formatFirstFields = async (
       );
     });
   });
-};
-
-/**
- * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
- * in size at a time when being called. This function should be as optimized as possible
- * and should avoid any and all creation of new arrays, iterating over the arrays or performing
- * any n^2 operations. The `.push`, and `forEach` operations are expected within this function
- * to speed up performance. The "indexFieldNameHash" side effect hash avoids additional expensive n^2
- * look ups.
- *
- * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
- * has already consumed a lot of the event loop processing up to this function and we want to give
- * I/O opportunity to occur by scheduling this on the next loop.
- * @param fields The index fields to create the secondary fields for
- */
-export const formatSecondFields = async (fields: IndexField[]): Promise<IndexField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const indexFieldNameHash: Record<string, number> = {};
-      const reduced = fields.reduce((accumulator: IndexField[], indexfield: IndexField) => {
-        const alreadyExistingIndexField = indexFieldNameHash[indexfield.name];
-        if (alreadyExistingIndexField != null) {
-          const existingIndexField = accumulator[alreadyExistingIndexField];
-          if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
-            accumulator[alreadyExistingIndexField].description = indexfield.description;
-          }
-          accumulator[alreadyExistingIndexField].indexes = Array.from(
-            new Set([...existingIndexField.indexes, ...indexfield.indexes])
-          );
-          return accumulator;
-        }
-        accumulator.push(indexfield);
-        indexFieldNameHash[indexfield.name] = accumulator.length - 1;
-        return accumulator;
-      }, []);
-      resolve(reduced);
-    });
-  });
-};
-
-/**
- * Formats the index fields into a format the UI wants.
- *
- * NOTE: This will have array sizes up to 4.7 megs in size at a time when being called.
- * This function should be as optimized as possible and should avoid any and all creation
- * of new arrays, iterating over the arrays or performing any n^2 operations.
- * @param responsesFieldSpec  The response index fields to format
- * @param indexesAlias The index alias
- */
-export const formatIndexFields = async (
-  beatFields: BeatFields,
-  responsesFieldSpec: FieldSpec[][],
-  indexesAlias: string[]
-): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
-  const secondFields = await formatSecondFields(fields);
-  return secondFields;
 };

@@ -8,6 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -16,18 +17,22 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+} from '@kbn/core/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
+import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
@@ -52,15 +57,12 @@ import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
+import { UserProfileService } from './user_profile';
+import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
->;
-
-export type FeaturesService = Pick<
-  FeaturesPluginSetup,
-  'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
 /**
@@ -101,6 +103,10 @@ export interface SecurityPluginStart {
    * Authorization services to manage and access the permissions a particular user has.
    */
   authz: AuthorizationServiceSetup;
+  /**
+   * User profiles services to retrieve user profiles.
+   */
+  userProfiles: UserProfileServiceStart;
 }
 
 export interface PluginSetupDependencies {
@@ -112,6 +118,7 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
+  cloud?: CloudStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
@@ -173,6 +180,7 @@ export class SecurityPlugin
 
   private readonly auditService: AuditService;
   private readonly securityLicenseService = new SecurityLicenseService();
+  private readonly analyticsService: AnalyticsService;
   private readonly authorizationService = new AuthorizationService();
   private readonly elasticsearchService: ElasticsearchService;
   private readonly sessionManagementService: SessionManagementService;
@@ -183,6 +191,15 @@ export class SecurityPlugin
       throw new Error(`anonymousAccessStart is not registered!`);
     }
     return this.anonymousAccessStart;
+  };
+
+  private readonly userProfileService: UserProfileService;
+  private userProfileStart?: UserProfileServiceStartInternal;
+  private readonly getUserProfileService = () => {
+    if (!this.userProfileStart) {
+      throw new Error(`userProfileStart is not registered!`);
+    }
+    return this.userProfileStart;
   };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -202,6 +219,10 @@ export class SecurityPlugin
       this.initializerContext.logger.get('anonymous-access'),
       this.getConfig
     );
+    this.userProfileService = new UserProfileService(
+      this.initializerContext.logger.get('user-profile')
+    );
+    this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
   }
 
   public setup(
@@ -278,6 +299,8 @@ export class SecurityPlugin
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
     });
 
+    this.userProfileService.setup({ authz: this.authorizationSetup, license });
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
@@ -288,7 +311,6 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
-      getSpacesService: () => spaces?.spacesService,
     });
 
     this.registerDeprecations(core, license);
@@ -308,6 +330,8 @@ export class SecurityPlugin
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
+      getUserProfileService: this.getUserProfileService,
+      analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -335,7 +359,7 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { features, licensing, taskManager, spaces }: PluginStartDependencies
+    { cloud, features, licensing, taskManager, spaces }: PluginStartDependencies
   ) {
     this.logger.debug('Starting plugin');
 
@@ -346,7 +370,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
-      auditLogger: this.auditSetup!.withoutRequest,
+      audit: this.auditSetup!,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),
@@ -354,18 +378,28 @@ export class SecurityPlugin
     });
     this.session = session;
 
+    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
       config,
       featureUsageService: this.featureUsageServiceStart,
+      userProfileService: this.userProfileStart,
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
+      applicationName: this.authorizationSetup!.applicationName,
+      kibanaFeatures: features.getKibanaFeatures(),
+      isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
     });
 
-    this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
+    this.authorizationService.start({
+      features,
+      clusterClient,
+      online$: watchOnlineStatus$(),
+    });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
@@ -387,6 +421,11 @@ export class SecurityPlugin
         checkSavedObjectsPrivilegesWithRequest:
           this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
+      },
+      userProfiles: {
+        getCurrent: this.userProfileStart.getCurrent,
+        bulkGet: this.userProfileStart.bulkGet,
+        suggest: this.userProfileStart.suggest,
       },
     });
   }

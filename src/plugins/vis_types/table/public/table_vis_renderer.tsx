@@ -9,20 +9,37 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from 'kibana/public';
-import { VisualizationContainer } from '../../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../../expressions/common/expression_renderers';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { TableVisRenderValue } from './table_vis_fn';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 export const getTableVisRenderer: (
-  core: CoreStart
-) => ExpressionRenderDefinition<TableVisRenderValue> = (core) => ({
+  core: CoreStart,
+  usageCollection: UsageCollectionStart
+) => ExpressionRenderDefinition<TableVisRenderValue> = (core, usageCollection) => ({
   name: 'table_vis',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
+  render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -30,11 +47,29 @@ export const getTableVisRenderer: (
     const showNoResult =
       visData.table?.rows.length === 0 || (!visData.table && visData.tables.length === 0);
 
+    const renderCompete = () => {
+      const containerType = extractContainerType(handlers.getExecutionContext());
+      const visualizationType = 'agg_based';
+
+      if (containerType) {
+        const counterEvents = [
+          `render_${visualizationType}_table`,
+          !visData.table ? `render_${visualizationType}_table_split` : undefined,
+          canNavigateToLens ? `render_${visualizationType}_table_convertable` : undefined,
+        ].filter(Boolean) as string[];
+
+        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
+      }
+
+      handlers.done();
+    };
+
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <VisualizationContainer
           data-test-subj="tbvChartContainer"
           handlers={handlers}
+          renderComplete={renderCompete}
           showNoResult={showNoResult}
         >
           <TableVisualizationComponent
@@ -42,6 +77,7 @@ export const getTableVisRenderer: (
             handlers={handlers}
             visData={visData}
             visConfig={visConfig}
+            renderComplete={renderCompete}
           />
         </VisualizationContainer>
       </KibanaThemeProvider>,

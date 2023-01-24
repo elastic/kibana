@@ -106,6 +106,35 @@
 
 {
   "attributes": {
+    "description": "",
+    "layerListJSON": "[{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[\"name\"],\"applyGlobalQuery\":false,\"scalingType\":\"MVT\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3},\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.runtime_shape_name\",\"name\":\"__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"MVT_VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"runtime_shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}],\"applyGlobalQuery\":true,\"type\":\"ES_TERM_SOURCE\",\"indexPatternRefName\":\"layer_0_join_0_index_pattern\"}}]}]",
+    "mapStateJSON": "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-17m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"backgroundColor\":\"#ffffff\",\"customIcons\":[],\"disableInteractive\":false,\"disableTooltipControl\":false,\"hideToolbarOverlay\":false,\"hideLayerControl\":false,\"hideViewControl\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showScaleControl\":false,\"showSpatialFilters\":true,\"showTimesliderToggleButton\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+    "title": "mvt join example",
+    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"n1t6f\"]}"
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "f85dc420-ba99-11ec-8403-51529e77089a",
+  "migrationVersion": {
+    "map": "8.1.0"
+  },
+  "references": [
+      {
+          "id": "561253e0-f731-11e8-8487-11b9dd924f96",
+          "name": "layer_0_source_index_pattern",
+          "type": "index-pattern"
+      },
+      {
+          "id": "e20b2a30-f735-11e8-8ce0-9723965e01e3",
+          "name": "layer_0_join_0_index_pattern",
+          "type": "index-pattern"
+      }
+  ],
+  "type": "map",
+  "version": "Wzk0LDFd"
+}
+
+{
+  "attributes": {
     "fields": "[{\"name\":\"hour_of_day\",\"type\":\"number\",\"count\":0,\"scripted\":true,\"script\":\"doc['@timestamp'].value.getHour()\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
     "timeFieldName": "@timestamp",
     "title": "logstash-*"
@@ -962,6 +991,28 @@
 }
 
 {
+  "id": "68f85360-3913-11ed-aa60-654006132508",
+  "type": "map",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2022-09-20T18:39:40.421Z",
+  "version": "WzM0OSwxXQ==",
+  "attributes": {
+    "title": "adhoc data view",
+    "description": "",
+    "layerListJSON": "[{\"id\":\"e5b830e4-d939-4b82-b3df-ccb4c3fce478\",\"sourceDescriptor\":{\"geoField\":\"geo.coordinates\",\"id\":\"5883a356-bef3-4e87-89f4-6dfd95a5794d\",\"indexPatternId\":\"1a9589c7-c919-4d35-bd4c-fbe1bcf8dfe4\",\"label\":\"logstash-*\",\"scalingType\":\"MVT\",\"tooltipProperties\":[],\"type\":\"ES_SEARCH\"},\"type\":\"MVT_VECTOR\",\"visible\":true,\"style\":{},\"label\":\"adhocDataView\"}]",
+    "mapStateJSON": "{\"adHocDataViews\":[{\"id\":\"1a9589c7-c919-4d35-bd4c-fbe1bcf8dfe4\",\"title\":\"logstash-*\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"fieldFormats\":{},\"runtimeFieldMap\":{},\"fieldAttrs\":{},\"allowNoIndex\":false,\"name\":\"logstash adhoc data view\"}],\"zoom\":2.36,\"center\":{\"lon\":-116.75537,\"lat\":55.05932},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-22T00:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[{\"meta\":{\"index\":\"1a9589c7-c919-4d35-bd4c-fbe1bcf8dfe4\",\"params\":{\"lt\":1000,\"gte\":0},\"field\":\"bytes\",\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"range\",\"key\":\"bytes\",\"value\":{\"lt\":1000,\"gte\":0}},\"query\":{\"range\":{\"bytes\":{\"lt\":1000,\"gte\":0}}},\"$state\":{\"store\":\"appState\"}}],\"settings\":{\"autoFitToDataBounds\":false,\"backgroundColor\":\"#ffffff\",\"customIcons\":[],\"disableInteractive\":false,\"disableTooltipControl\":false,\"hideToolbarOverlay\":false,\"hideLayerControl\":false,\"hideViewControl\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"keydownScrollZoom\":false,\"maxZoom\":24,\"minZoom\":0,\"showScaleControl\":false,\"showSpatialFilters\":true,\"showTimesliderToggleButton\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+  },
+  "references": [],
+  "migrationVersion": {
+    "map": "8.4.0"
+  },
+  "coreMigrationVersion": "8.5.0"
+}
+
+{
   "attributes": {
     "description": "",
     "layerListJSON": "[{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_1_source_index_pattern\",\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"field\":{\"label\":\"hour_of_day\",\"name\":\"hour_of_day\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":4,\"maxSize\":24,\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3}}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"airfield\"}}}},\"type\":\"VECTOR\"}]",
@@ -984,4 +1035,101 @@
   "type": "map",
   "updated_at": "2019-10-10T17:02:48.465Z",
   "version": "WzQ4LDJd"
+}
+
+{
+    "attributes":
+    {
+        "@created": "2022-06-08T18:01:57.842Z",
+        "@timestamp": "2022-06-08T18:03:37.054Z",
+        "assets": {},
+        "colors": [
+            "#37988d",
+            "#c19628",
+            "#b83c6f",
+            "#3f9939",
+            "#1785b0",
+            "#ca5f35",
+            "#45bdb0",
+            "#f2bc33",
+            "#e74b8b",
+            "#4fbf48",
+            "#1ea6dc",
+            "#fd7643",
+            "#72cec3",
+            "#f5cc5d",
+            "#ec77a8",
+            "#7acf74",
+            "#4cbce4",
+            "#fd986f",
+            "#a1ded7",
+            "#f8dd91",
+            "#f2a4c5",
+            "#a6dfa2",
+            "#86d2ed",
+            "#fdba9f",
+            "#000000",
+            "#444444",
+            "#777777",
+            "#BBBBBB",
+            "#FFFFFF",
+            "rgba(255,255,255,0)"
+        ],
+        "css": ".canvasPage {\n\n}",
+        "height": 720,
+        "isWriteable": true,
+        "name": "Canvas with map",
+        "page": 0,
+        "pages":
+        [
+            {
+                "elements":
+                [
+                    {
+                        "expression": "embeddable \n  config=\"eyJ2aWV3TW9kZSI6ImVkaXQiLCJ0aW1lUmFuZ2UiOnsiZnJvbSI6Im5vdy0xNW0iLCJ0byI6Im5vdyJ9LCJkaXNhYmxlVHJpZ2dlcnMiOnRydWUsInJlbmRlck1vZGUiOiJub0ludGVyYWN0aXZpdHkiLCJzYXZlZE9iamVjdElkIjoiMTY0OWNjNzAtZjczNi0xMWU4LThjZTAtOTcyMzk2NWUwMWUzIiwiZmlsdGVycyI6W10sImlkIjoiZWxlbWVudC03N2VkYzdlNS0zNGQ1LTRmOTMtOGI3NS03ZDkyNTViZWIxYzgiLCJtYXBDZW50ZXIiOnsibGF0IjotMC4wNDY0NywibG9uIjo3Ny4zMzQyNiwiem9vbSI6My4wMn0sIm1hcEJ1ZmZlciI6eyJtaW5Mb24iOjQ1LCJtaW5MYXQiOi0yMS45NDMwNSwibWF4TG9uIjoxMTIuNSwibWF4TGF0IjoyMS45NDMwNX0sImlzTGF5ZXJUT0NPcGVuIjp0cnVlLCJvcGVuVE9DRGV0YWlscyI6WyJuMXQ2ZiJdLCJoaWRkZW5MYXllcnMiOltdfQ==\" type=\"map\"\n| render",
+                        "filter": null,
+                        "id": "element-77edc7e5-34d5-4f93-8b75-7d9255beb1c8",
+                        "position":
+                        {
+                            "angle": 0,
+                            "height": 583,
+                            "left": 20,
+                            "parent": null,
+                            "top": 20,
+                            "width": 1015
+                        }
+                    }
+                ],
+                "groups":
+                [],
+                "id": "page-d48646c8-9340-42c8-be6f-d19ae5ecb150",
+                "style":
+                {
+                    "background": "#FFF"
+                },
+                "transition":
+                {}
+            }
+        ],
+        "variables":
+        [],
+        "width": 1080
+    },
+    "coreMigrationVersion": "8.4.0",
+    "id": "workpad-c74f9c27-a142-4664-bf8a-69bf782fc268",
+    "migrationVersion":
+    {
+        "canvas-workpad": "8.3.0"
+    },
+    "references":
+    [
+        {
+            "id": "1649cc70-f736-11e8-8ce0-9723965e01e3",
+            "name": "element-77edc7e5-34d5-4f93-8b75-7d9255beb1c8:l0_embeddable.savedObjectId",
+            "type": "map"
+        }
+    ],
+    "type": "canvas-workpad",
+    "updated_at": "2022-06-08T18:03:37.060Z",
+    "version": "WzE0MSwxXQ=="
 }

@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 
 function createTestJobAndDatafeed() {
   const timestamp = Date.now();
@@ -68,8 +68,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let testJobId = '';
 
   describe('anomaly detection alert', function () {
-    this.tags('ciGroup13');
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');

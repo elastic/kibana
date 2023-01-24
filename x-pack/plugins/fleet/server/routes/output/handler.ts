@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -19,14 +19,14 @@ import type {
   GetOneOutputResponse,
   GetOutputsResponse,
   PostLogstashApiKeyResponse,
-} from '../../../common';
+} from '../../../common/types';
 import { outputService } from '../../services/output';
-import { defaultIngestErrorHandler, FleetUnauthorizedError } from '../../errors';
+import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = (await context.core).savedObjects.client;
   try {
     const outputs = await outputService.list(soClient);
 
@@ -39,14 +39,14 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 export const getOneOuputHandler: RequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = (await context.core).savedObjects.client;
   try {
     const output = await outputService.get(soClient, request.params.outputId);
 
@@ -62,7 +62,7 @@ export const getOneOuputHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -71,8 +71,9 @@ export const putOuputHandler: RequestHandler<
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     await outputService.update(soClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
@@ -94,7 +95,7 @@ export const putOuputHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -103,8 +104,9 @@ export const postOuputHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
     const output = await outputService.create(soClient, data, { id });
@@ -118,14 +120,14 @@ export const postOuputHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = (await context.core).savedObjects.client;
   try {
     await outputService.delete(soClient, request.params.outputId);
 
@@ -141,12 +143,12 @@ export const deleteOutputHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
 export const postLogstashApiKeyHandler: RequestHandler = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   try {
     const hasCreatePrivileges = await canCreateLogstashApiKey(esClient);
     if (!hasCreatePrivileges) {
@@ -162,6 +164,6 @@ export const postLogstashApiKeyHandler: RequestHandler = async (context, request
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

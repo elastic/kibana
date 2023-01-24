@@ -11,8 +11,8 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
+import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -37,10 +37,15 @@ export class ShareMenuManager {
        * @param options
        */
       toggleShareContextMenu: (options: ShowShareMenuOptions) => {
-        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose: this.onClose });
+        const onClose = () => {
+          this.onClose();
+          options.onClose?.();
+        };
+        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
+          onClose,
           menuItems,
           urlService,
           anonymousAccess,
@@ -64,19 +69,25 @@ export class ShareMenuManager {
     sharingData,
     menuItems,
     shareableUrl,
+    shareableUrlForSavedObject,
     embedUrlParamExtensions,
     theme,
     showPublicUrlSwitch,
     urlService,
     anonymousAccess,
+    snapshotShareWarning,
+    onClose,
+    objectTypeTitle,
+    disabledShareUrl,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
+    onClose: () => void;
   }) {
     if (this.isOpen) {
-      this.onClose();
+      onClose();
       return;
     }
 
@@ -90,7 +101,7 @@ export class ShareMenuManager {
             id="sharePopover"
             button={anchorElement}
             isOpen={true}
-            closePopover={this.onClose}
+            closePopover={onClose}
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
@@ -99,14 +110,18 @@ export class ShareMenuManager {
               allowShortUrl={allowShortUrl}
               objectId={objectId}
               objectType={objectType}
+              objectTypeTitle={objectTypeTitle}
               shareMenuItems={menuItems}
               sharingData={sharingData}
               shareableUrl={shareableUrl}
-              onClose={this.onClose}
+              shareableUrlForSavedObject={shareableUrlForSavedObject}
+              onClose={onClose}
               embedUrlParamExtensions={embedUrlParamExtensions}
               anonymousAccess={anonymousAccess}
               showPublicUrlSwitch={showPublicUrlSwitch}
               urlService={urlService}
+              snapshotShareWarning={snapshotShareWarning}
+              disabledShareUrl={disabledShareUrl}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

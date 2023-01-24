@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract, SavedObjectsServiceStart } from 'kibana/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
@@ -42,7 +47,7 @@ export const createInternalReadonlySoClient = (
   } as unknown as KibanaRequest;
 
   const internalSoClient = savedObjectsServiceStart.getScopedClient(fakeRequest, {
-    excludedWrappers: ['security'],
+    excludedExtensions: [SECURITY_EXTENSION_ID],
   });
 
   return new Proxy(internalSoClient, {

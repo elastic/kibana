@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock, deletePackagePolicyMock } from '../../../fleet/common/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  createNewPackagePolicyMock,
+  deletePackagePolicyMock,
+} from '@kbn/fleet-plugin/common/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -16,38 +19,44 @@ import {
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
+  getPackagePolicyPostCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
-import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
+import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
-import { ILicense } from '../../../licensing/common/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
-import type { SecuritySolutionRequestHandlerContext } from '../types';
-import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { getExceptionListSchemaMock } from '../../../lists/common/schemas/response/exception_list_schema.mock';
-import { ExceptionListClient } from '../../../lists/server';
-import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
 import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
 import { Manifest } from '../endpoint/lib/artifacts';
-import { NewPackagePolicy } from '../../../fleet/common/types/models';
-import { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import { DeletePackagePoliciesResponse } from '../../../fleet/common';
-import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
+import type { PostDeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+
+jest.mock('uuid', () => ({
+  v4: (): string => 'NEW_UUID',
+}));
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
-  let ctx: SecuritySolutionRequestHandlerContext;
+  let ctx: ReturnType<typeof requestContextMock.create>;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
@@ -80,7 +89,8 @@ describe('ingest_integration tests ', () => {
       enabled: true,
       streams: [],
       config: {
-        policy: { value: policyFactory() },
+        integration_config: {},
+        policy: { value: disableProtections(policyFactory()) },
         artifact_manifest: { value: manifest },
       },
     });
@@ -96,7 +106,7 @@ describe('ingest_integration tests ', () => {
         exceptionListClient
       );
 
-      return callback(createNewPackagePolicyMock(), ctx, req);
+      return callback(createNewPackagePolicyMock(), requestContextMock.convertContext(ctx), req);
     };
 
     const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -247,6 +257,74 @@ describe('ingest_integration tests ', () => {
     });
   });
 
+  describe('package policy post create callback', () => {
+    const logger = loggingSystemMock.create().get('ingest_integration.test');
+    const callback = getPackagePolicyPostCreateCallback(logger, exceptionListClient);
+    const policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+
+    it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+        eventFilters: {
+          nonInteractiveSession: true,
+        },
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      expect(await exceptionListClient.createExceptionList).toHaveBeenCalledWith(
+        expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
+      );
+
+      expect(await exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          tags: [`policy:${postCreatedPolicyConfig.id}`],
+          osTypes: ['linux'],
+          entries: [
+            {
+              field: 'process.entry_leader.interactive',
+              operator: 'included',
+              type: 'match',
+              value: 'false',
+            },
+          ],
+          itemId: 'NEW_UUID',
+          namespaceType: 'agnostic',
+        })
+      );
+    });
+
+    it('should not call Event Filters List and Event Filters List Item if nonInteractiveSession parameter is not present on integration config eventFilters', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      expect(await exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+
+      expect(await exceptionListClient.createExceptionListItem).not.toHaveBeenCalled();
+
+      expect(postCreatedPolicyConfig.inputs[0]!.config!.integration_config.value).toEqual(
+        integrationConfig
+      );
+    });
+  });
   describe('package policy update callback (when the license is below platinum)', () => {
     beforeEach(() => {
       licenseEmitter.next(Gold); // set license level to gold
@@ -262,9 +340,9 @@ describe('ingest_integration tests ', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
-        'Requires Platinum license'
-      );
+      await expect(() =>
+        callback(policyConfig, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow('Requires Platinum license');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
@@ -278,7 +356,11 @@ describe('ingest_integration tests ', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
@@ -299,7 +381,11 @@ describe('ingest_integration tests ', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
@@ -310,7 +396,7 @@ describe('ingest_integration tests ', () => {
       await callback(deletePackagePolicyMock());
     };
 
-    let removedPolicies: DeletePackagePoliciesResponse;
+    let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
 

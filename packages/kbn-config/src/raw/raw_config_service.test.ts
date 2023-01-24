@@ -8,7 +8,7 @@
 
 import { mockGetConfigFromFiles } from './raw_config_service.test.mocks';
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { RawConfigService } from './raw_config_service';
 
 const configFile = '/config/kibana.yml';
@@ -72,7 +72,7 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await configService.getConfig$().pipe(first()).toPromise();
+  const exampleConfig = await firstValueFrom(configService.getConfig$());
 
   expect(exampleConfig.key).toEqual('value');
   expect(Object.keys(exampleConfig)).toEqual(['key']);

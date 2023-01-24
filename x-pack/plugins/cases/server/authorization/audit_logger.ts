@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EcsEventOutcome } from 'kibana/server';
-import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
-import { AuditEvent, AuditLogger } from '../../../security/server';
-import { OwnerEntity } from './types';
+import type { EcsEventOutcome } from '@kbn/core/server';
+import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import type { OperationDetails } from '.';
+import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation } from '.';
+import type { OwnerEntity } from './types';
 
 interface CreateAuditMsgParams {
   operation: OperationDetails;
@@ -20,9 +21,9 @@ interface CreateAuditMsgParams {
  * Audit logger for authorization operations
  */
 export class AuthorizationAuditLogger {
-  private readonly auditLogger?: AuditLogger;
+  private readonly auditLogger: AuditLogger;
 
-  constructor(logger?: AuditLogger) {
+  constructor(logger: AuditLogger) {
     this.auditLogger = logger;
   }
 
@@ -31,11 +32,11 @@ export class AuthorizationAuditLogger {
    */
   private static createAuditMsg({ operation, error, entity }: CreateAuditMsgParams): AuditEvent {
     const doc =
-      entity !== undefined
+      entity?.id !== undefined
         ? `${operation.savedObjectType} [id=${entity.id}]`
         : `a ${operation.docType}`;
 
-    const ownerText = entity === undefined ? 'as any owners' : `as owner "${entity.owner}"`;
+    const ownerText = entity?.owner === undefined ? 'as any owners' : `as owner "${entity.owner}"`;
 
     let message: string;
     let outcome: EcsEventOutcome;
@@ -59,7 +60,7 @@ export class AuthorizationAuditLogger {
         type: [operation.ecsType],
         outcome,
       },
-      ...(entity !== undefined && {
+      ...(entity?.id !== undefined && {
         kibana: {
           saved_object: { type: operation.savedObjectType, id: entity.id },
         },
@@ -96,6 +97,6 @@ export class AuthorizationAuditLogger {
    * Logs an audit event based on the status of an operation.
    */
   public log(auditMsgParams: CreateAuditMsgParams) {
-    this.auditLogger?.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
+    this.auditLogger.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
   }
 }

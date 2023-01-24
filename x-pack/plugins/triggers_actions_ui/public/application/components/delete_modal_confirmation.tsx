@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
+import {
+  getSuccessfulDeletionNotificationText,
+  getFailedDeletionNotificationText,
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  CANCEL_BUTTON_TEXT,
+} from '../sections/rules_list/translations';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
@@ -19,6 +25,8 @@ export const DeleteModalConfirmation = ({
   onErrors,
   singleTitle,
   multipleTitle,
+  showWarningText,
+  warningText,
   setIsLoadingState,
 }: {
   idsToDelete: string[];
@@ -35,6 +43,8 @@ export const DeleteModalConfirmation = ({
   singleTitle: string;
   multipleTitle: string;
   setIsLoadingState: (isLoading: boolean) => void;
+  showWarningText?: boolean;
+  warningText?: string;
 }) => {
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
@@ -50,33 +60,12 @@ export const DeleteModalConfirmation = ({
   if (!deleteModalFlyoutVisible) {
     return null;
   }
-  const confirmModalText = i18n.translate(
-    'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.descriptionText',
-    {
-      defaultMessage:
-        "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
-      values: { numIdsToDelete, singleTitle, multipleTitle },
-    }
-  );
-  const confirmButtonText = i18n.translate(
-    'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.deleteButtonLabel',
-    {
-      defaultMessage:
-        'Delete {numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}} ',
-      values: { numIdsToDelete, singleTitle, multipleTitle },
-    }
-  );
-  const cancelButtonText = i18n.translate(
-    'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.cancelButtonLabel',
-    {
-      defaultMessage: 'Cancel',
-    }
-  );
+
   return (
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="deleteIdsConfirmation"
-      title={confirmButtonText}
+      title={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}
       onCancel={() => {
         setDeleteModalVisibility(false);
         onCancel();
@@ -91,36 +80,25 @@ export const DeleteModalConfirmation = ({
         const numErrors = errors.length;
         if (numSuccesses > 0) {
           toasts.addSuccess(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
-              {
-                defaultMessage:
-                  'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
-                values: { numSuccesses, singleTitle, multipleTitle },
-              }
-            )
+            getSuccessfulDeletionNotificationText(numSuccesses, singleTitle, multipleTitle)
           );
         }
 
         if (numErrors > 0) {
           toasts.addDanger(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
-              {
-                defaultMessage:
-                  'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
-                values: { numErrors, singleTitle, multipleTitle },
-              }
-            )
+            getFailedDeletionNotificationText(numErrors, singleTitle, multipleTitle)
           );
           await onErrors();
         }
         await onDeleted(successes);
       }}
-      cancelButtonText={cancelButtonText}
-      confirmButtonText={confirmButtonText}
+      cancelButtonText={CANCEL_BUTTON_TEXT}
+      confirmButtonText={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}
     >
-      {confirmModalText}
+      <p>{getConfirmDeletionModalText(numIdsToDelete, singleTitle, multipleTitle)}</p>
+      {showWarningText && (
+        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
+      )}
     </EuiConfirmModal>
   );
 };

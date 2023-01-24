@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { DataVisualizerPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => new DataVisualizerPlugin();

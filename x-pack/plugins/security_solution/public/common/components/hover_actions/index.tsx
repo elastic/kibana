@@ -6,15 +6,17 @@
  */
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { DraggableId } from 'react-beautiful-dnd';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
+import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
+import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
+import { SecurityPageName } from '../../../app/types';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -34,7 +36,7 @@ AdditionalContent.displayName = 'AdditionalContent';
 const StyledHoverActionsContainer = styled.div<{
   $showTopN: boolean;
   $showOwnFocus: boolean;
-  $hideTopN: boolean;
+  $hiddenActionsCount: number;
   $isActive: boolean;
 }>`
   display: flex;
@@ -81,8 +83,8 @@ const StyledHoverActionsContainer = styled.div<{
 `;
 
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
-  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+  min-width: ${({ $hiddenActionsCount }) => `${138 - $hiddenActionsCount * 26}px`};
+  padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
   position: relative;
 `;
 
@@ -96,14 +98,17 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   goGetTimelineId?: (args: boolean) => void;
+  hideAddToTimeline?: boolean;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
   showOwnFocus?: boolean;
   showTopN: boolean;
-  timelineId?: string | null;
+  scopeId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
@@ -135,14 +140,17 @@ export const HoverActions: React.FC<Props> = React.memo(
     enableOverflowButton = false,
     applyWidthAndPadding = true,
     field,
+    fieldType,
+    isAggregatable,
     goGetTimelineId,
     isObjectArray,
+    hideAddToTimeline = false,
     hideTopN = false,
     onFilterAdded,
     ownFocus,
     showOwnFocus = true,
     showTopN,
-    timelineId,
+    scopeId,
     toggleColumn,
     toggleTopN,
     values,
@@ -154,7 +162,6 @@ export const HoverActions: React.FC<Props> = React.memo(
       setIsActive((prev) => !prev);
       setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
     }, [isOverflowPopoverOpen, setIsOverflowPopoverOpen]);
-
     const handleHoverActionClicked = useCallback(() => {
       if (closeTopN) {
         closeTopN();
@@ -171,11 +178,11 @@ export const HoverActions: React.FC<Props> = React.memo(
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
-      if (isInit.current && goGetTimelineId != null && timelineId == null) {
+      if (isInit.current && goGetTimelineId != null && scopeId == null) {
         isInit.current = false;
         goGetTimelineId(true);
       }
-    }, [goGetTimelineId, timelineId]);
+    }, [goGetTimelineId, scopeId]);
 
     useEffect(() => {
       if (ownFocus) {
@@ -208,7 +215,23 @@ export const HoverActions: React.FC<Props> = React.memo(
       [ownFocus, toggleTopN]
     );
 
-    const isCaseView = timelineId === TimelineId.casePage;
+    const isCaseView = scopeId === TimelineId.casePage;
+    const isTimelineView = scopeId === TimelineId.active;
+    const isAlertDetailsView = scopeId === TimelineId.detectionsAlertDetailsPage;
+    // TODO Provide a list of disabled/enabled actions as props
+    const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
+
+    const hideFilters = useMemo(
+      () => (isAlertDetailsView || isEntityAnalyticsPage) && !isTimelineView,
+      [isTimelineView, isAlertDetailsView, isEntityAnalyticsPage]
+    );
+
+    const hiddenActionsCount = useMemo(() => {
+      const hiddenTopNActions = hideTopN ? 1 : 0; // hides the `Top N` button
+      const hiddenFilterActions = hideFilters ? 2 : 0; // hides both the `Filter In` and `Filter out` buttons
+
+      return hiddenTopNActions + hiddenFilterActions;
+    }, [hideFilters, hideTopN]);
 
     const { overflowActionItems, allActionItems } = useHoverActionItems({
       dataProvider,
@@ -217,7 +240,11 @@ export const HoverActions: React.FC<Props> = React.memo(
       draggableId,
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
+      fieldType,
+      hideFilters,
+      isAggregatable,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isCaseView,
       isObjectArray,
@@ -227,10 +254,10 @@ export const HoverActions: React.FC<Props> = React.memo(
       ownFocus,
       showTopN,
       stKeyboardEvent,
-      timelineId,
       toggleColumn,
       toggleTopN,
       values,
+      scopeId,
     });
 
     const Container = applyWidthAndPadding
@@ -248,7 +275,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
-          $hideTopN={hideTopN}
+          $hiddenActionsCount={hiddenActionsCount}
           $isActive={isActive}
           className={isActive ? 'hoverActions-active' : ''}
         >

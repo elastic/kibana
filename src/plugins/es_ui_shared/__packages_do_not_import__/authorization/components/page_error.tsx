@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 import React from 'react';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Error } from '../types';
 
 interface Props {

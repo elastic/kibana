@@ -7,22 +7,15 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import {
-  CoreSetup,
-  IRouter,
-  KibanaRequest,
-  RequestHandler,
-  RouteMethod,
-} from '../../../../../../../src/core/server';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
-import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
+import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   CallWithRequestParams,
-  InfraDatabaseFieldCapsResponse,
   InfraDatabaseGetIndicesAliasResponse,
   InfraDatabaseGetIndicesResponse,
   InfraDatabaseMultiResponse,
@@ -96,11 +89,6 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
-    endpoint: 'fieldCaps',
-    options?: CallWithRequestParams
-  ): Promise<InfraDatabaseFieldCapsResponse>;
-  callWithRequest(
-    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'indices.existsAlias',
     options?: CallWithRequestParams
   ): Promise<boolean>;
@@ -124,13 +112,12 @@ export class KibanaFramework {
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
-
   public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     params: CallWithRequestParams
   ) {
-    const { elasticsearch, uiSettings } = requestContext.core;
+    const { elasticsearch, uiSettings } = await requestContext.core;
 
     const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     if (endpoint === 'msearch') {
@@ -168,11 +155,6 @@ export class KibanaFramework {
           ...frozenIndicesParams,
         } as estypes.MsearchRequest);
         break;
-      case 'fieldCaps':
-        apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
-          ...params,
-        });
-        break;
       case 'indices.existsAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
           ...params,
@@ -205,9 +187,10 @@ export class KibanaFramework {
   public async getIndexPatternsServiceWithRequestContext(
     requestContext: InfraPluginRequestHandlerContext
   ) {
+    const { savedObjects, elasticsearch } = await requestContext.core;
     return await this.createIndexPatternsService(
-      requestContext.core.savedObjects.client,
-      requestContext.core.elasticsearch.client.asCurrentUser
+      savedObjects.client,
+      elasticsearch.client.asCurrentUser
     );
   }
 
@@ -223,7 +206,7 @@ export class KibanaFramework {
     elasticsearchClient: ElasticsearchClient
   ) {
     const [, startPlugins] = await this.core.getStartServices();
-    return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
+    return startPlugins.data.indexPatterns.dataViewsServiceFactory(
       savedObjectsClient,
       elasticsearchClient
     );

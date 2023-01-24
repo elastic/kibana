@@ -8,19 +8,23 @@
 import { Unionize } from 'utility-types';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationOptionsByType } from '@kbn/es-types';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getVizColorForIndex } from '../../../common/viz_colors';
-import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { APMEventESSearchRequest } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  APMEventClient,
+  APMEventESSearchRequest,
+} from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ChartBase } from './types';
 import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
+import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
+import { APMConfig } from '../..';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -42,14 +46,28 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
   };
 };
 
-export type GenericMetricsChart = Awaited<
-  ReturnType<typeof fetchAndTransformMetrics>
->;
+export type GenericMetricsChart = Awaited<FetchAndTransformMetrics>;
+
+export interface FetchAndTransformMetrics {
+  title: string;
+  key: string;
+  yUnit: YUnit;
+  series: Array<{
+    title: string;
+    key: string;
+    type: ChartType;
+    color: string;
+    overallValue: number;
+    data: Coordinate[];
+  }>;
+  description?: string;
+}
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
@@ -61,7 +79,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
@@ -70,14 +89,13 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs: T;
   additionalFilters?: QueryDslQueryContainer[];
   operationName: string;
-}) {
-  const { apmEventClient, config } = setup;
-
+}): Promise<FetchAndTransformMetrics> {
   const params: GenericMetricsRequest = {
     apm: {
       events: [ProcessorEvent.metric],
     },
     body: {
+      track_total_hits: 1,
       size: 0,
       query: {
         bool: {
@@ -115,6 +133,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     title: chartBase.title,
     key: chartBase.key,
     yUnit: chartBase.yUnit,
+    description: chartBase.description,
     series:
       hits.total.value === 0
         ? []

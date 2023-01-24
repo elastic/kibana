@@ -1,0 +1,12 @@
+{
+  "id": "kbnHealthGatewayStatus",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.1.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [],
+  "server": true,
+  "requiredBundles": []
+}

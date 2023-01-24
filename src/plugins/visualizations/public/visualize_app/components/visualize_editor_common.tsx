@@ -7,17 +7,18 @@
  */
 
 import './visualize_editor.scss';
+import { EventEmitter } from 'events';
 import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
-import { useKibana } from '../../../../kibana_react/public';
-import { urlFor } from '../../../../visualizations/public';
+import { urlFor } from '../..';
 import { getUISettings } from '../../services';
-import { SplitChartWarning } from './split_chart_warning';
+import { VizChartWarning } from './viz_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -28,6 +29,7 @@ import {
 import {
   CHARTS_CONFIG_TOKENS,
   CHARTS_WITHOUT_SMALL_MULTIPLES,
+  CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
 
@@ -47,6 +49,7 @@ interface VisualizeEditorCommonProps {
   originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
+  eventEmitter?: EventEmitter;
 }
 
 export const VisualizeEditorCommon = ({
@@ -65,6 +68,7 @@ export const VisualizeEditorCommon = ({
   visualizationIdFromUrl,
   embeddableId,
   visEditorRef,
+  eventEmitter,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -75,15 +79,16 @@ export const VisualizeEditorCommon = ({
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
         const newPath = `${urlFor(newObjectId!)}${services.history.location.search}`;
-        await services.spaces.ui.redirectLegacyUrl(
-          newPath,
-          i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
+        await services.spaces.ui.redirectLegacyUrl({
+          path: newPath,
+          aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+          objectNoun: i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
             defaultMessage: '{visName} visualization',
             values: {
               visName: visInstance?.vis?.type.title,
             },
-          })
-        );
+          }),
+        });
         return;
       }
     }
@@ -120,11 +125,12 @@ export const VisualizeEditorCommon = ({
 
   const chartsWithoutSmallMultiples: string[] = Object.values(CHARTS_WITHOUT_SMALL_MULTIPLES);
   const chartNeedsWarning = chartName ? chartsWithoutSmallMultiples.includes(chartName) : false;
+  const deprecatedCharts: string[] = Object.values(CHARTS_TO_BE_DEPRECATED);
+  const deprecatedChartsNeedWarning = chartName ? deprecatedCharts.includes(chartName) : false;
   const chartToken =
-    chartName && chartNeedsWarning
+    chartName && (chartNeedsWarning || deprecatedChartsNeedWarning)
       ? CHARTS_CONFIG_TOKENS[chartName as CHARTS_WITHOUT_SMALL_MULTIPLES]
       : undefined;
-
   const hasLegacyChartsEnabled = chartToken ? getUISettings().get(chartToken) : true;
 
   return (
@@ -145,13 +151,23 @@ export const VisualizeEditorCommon = ({
           visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
+          eventEmitter={eventEmitter}
         />
       )}
-      {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {visInstance?.vis?.type?.stage === 'experimental' &&
+        !visInstance?.vis?.type?.isDeprecated && <ExperimentalVisInfo />}
       {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
-        <SplitChartWarning
+        <VizChartWarning
           chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
           chartConfigToken={chartToken}
+        />
+      )}
+      {((hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName) ||
+        visInstance?.vis?.type?.isDeprecated) && (
+        <VizChartWarning
+          chartType={chartName as CHARTS_TO_BE_DEPRECATED}
+          chartConfigToken={chartToken ?? undefined}
+          mode="new"
         />
       )}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}

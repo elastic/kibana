@@ -24,7 +24,8 @@ exports[`Should render cancel button when drawing 1`] = `
         </EuiPanel>
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      data-test-subj="mapToolsControlPopover"
+      display="inline-block"
       hasArrow={true}
       id="toolsControlPopover"
       isOpen={false}
@@ -58,7 +59,6 @@ exports[`Should render cancel button when drawing 1`] = `
                 buttonLabel="Draw shape"
                 className="mapDrawControl__geometryFilterForm"
                 intitialGeometryLabel="shape"
-                isFilterGeometryClosed={true}
                 onSubmit={[Function]}
               />,
               "id": 1,
@@ -69,7 +69,6 @@ exports[`Should render cancel button when drawing 1`] = `
                 buttonLabel="Draw bounds"
                 className="mapDrawControl__geometryFilterForm"
                 intitialGeometryLabel="bounds"
-                isFilterGeometryClosed={true}
                 onSubmit={[Function]}
               />,
               "id": 2,
@@ -92,6 +91,7 @@ exports[`Should render cancel button when drawing 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
+      color="primary"
       fill={true}
       onClick={[Function]}
       size="s"
@@ -126,7 +126,8 @@ exports[`renders 1`] = `
     </EuiPanel>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  data-test-subj="mapToolsControlPopover"
+  display="inline-block"
   hasArrow={true}
   id="toolsControlPopover"
   isOpen={false}
@@ -160,7 +161,6 @@ exports[`renders 1`] = `
             buttonLabel="Draw shape"
             className="mapDrawControl__geometryFilterForm"
             intitialGeometryLabel="shape"
-            isFilterGeometryClosed={true}
             onSubmit={[Function]}
           />,
           "id": 1,
@@ -171,7 +171,6 @@ exports[`renders 1`] = `
             buttonLabel="Draw bounds"
             className="mapDrawControl__geometryFilterForm"
             intitialGeometryLabel="bounds"
-            isFilterGeometryClosed={true}
             onSubmit={[Function]}
           />,
           "id": 2,

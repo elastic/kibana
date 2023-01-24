@@ -7,25 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  METRIC_TYPE,
-  useUiTracker,
-} from '../../../../../../../../../observability/public';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_NAME,
   TRANSACTION_NAME,
-} from '../../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { useApmParams } from '../../../../../../../hooks/use_apm_params';
-import { BackendLink } from '../../../../../../shared/backend_link';
+import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
+import { DependencyLink } from '../../../../../../shared/dependency_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
+import { LatencyAggregationType } from '../../../../../../../../common/latency_aggregation_types';
 
 interface Props {
   span: Span;
@@ -33,13 +31,19 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
-  const {
-    environment,
-    latencyAggregationType,
-    comparisonEnabled,
-    comparisonType,
-  } = query;
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer',
+    '/dependencies/operation'
+  );
+  const { environment, comparisonEnabled, offset } = query;
+
+  const latencyAggregationType =
+    ('latencyAggregationType' in query && query.latencyAggregationType) ||
+    LatencyAggregationType.avg;
+
+  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
 
   const trackEvent = useUiTracker();
 
@@ -63,6 +67,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               agentName={transaction.agent.name}
               query={{
                 ...query,
+                serviceGroup,
                 environment: nextEnvironment,
               }}
               serviceName={transaction.service.name}
@@ -88,7 +93,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               environment={nextEnvironment}
               latencyAggregationType={latencyAggregationType}
               comparisonEnabled={comparisonEnabled}
-              comparisonType={comparisonType}
+              offset={offset}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>
@@ -109,10 +114,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
           ),
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
           val: (
-            <BackendLink
+            <DependencyLink
               query={{
                 ...query,
-                backendName: dependencyName,
+                dependencyName,
               }}
               subtype={span.span.subtype}
               type={span.span.type}
@@ -120,7 +125,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
                 trackEvent({
                   app: 'apm',
                   metricType: METRIC_TYPE.CLICK,
-                  metric: 'span_flyout_to_backend_detail',
+                  metric: 'span_flyout_to_dependency_detail',
                 });
               }}
             />

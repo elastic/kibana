@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchTypes } from '../../../../../../common/detection_engine/types';
+import type { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { isPrimitive } from './is_primitive';
 
 /**

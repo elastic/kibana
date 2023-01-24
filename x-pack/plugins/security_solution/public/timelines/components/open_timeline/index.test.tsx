@@ -26,12 +26,10 @@ import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
-import {
-  useTimelineTypes,
-  UseTimelineTypesArgs,
-  UseTimelineTypesResult,
-} from './use_timeline_types';
+import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
+import { useTimelineTypes } from './use_timeline_types';
 import { deleteTimelinesByIds } from '../../containers/api';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -58,9 +56,17 @@ jest.mock('../../containers/all', () => {
     useGetAllTimeline: jest.fn(),
   };
 });
-
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/link_to');
+const mockNavigateTo = jest.fn();
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...actual,
+    useNavigation: () => ({
+      getAppUrl: jest.fn(),
+      navigateTo: mockNavigateTo,
+    }),
+  };
+});
 
 jest.mock('../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../common/components/link_to');
@@ -81,6 +87,9 @@ jest.mock('../../containers/api', () => ({
   deleteTimelinesByIds: jest.fn(),
 }));
 
+jest.mock('../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
@@ -90,6 +99,9 @@ describe('StatefulOpenTimeline', () => {
     (useParams as jest.Mock).mockReturnValue({
       tabName: TimelineType.default,
       pageName: SecurityPageName.timelines,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
@@ -375,7 +387,7 @@ describe('StatefulOpenTimeline', () => {
       );
       wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
       wrapper.find('[data-test-subj="delete-timeline"]').first().simulate('click');
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
       await waitFor(() => {
         wrapper.update();
@@ -627,7 +639,7 @@ describe('StatefulOpenTimeline', () => {
     await waitFor(() => {
       wrapper
         .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
-        .first()
+        .last()
         .simulate('click');
 
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
@@ -658,5 +670,21 @@ describe('StatefulOpenTimeline', () => {
       );
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
     });
+  });
+
+  test('navigates to create rule page with timeline id in URL when Create rule from timeline click', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulOpenTimeline
+          data-test-subj="stateful-timeline"
+          isModal={false}
+          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+          title={title}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
+    wrapper.find('[data-test-subj="create-rule-from-timeline"]').first().simulate('click');
   });
 });

@@ -16,7 +16,7 @@ import {
   SECURITY_FEATURE_ID,
 } from '../../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
-import { MissingPrivileges } from './use_missing_privileges';
+import type { MissingPrivileges } from './use_missing_privileges';
 import {
   DetectionsRequirementsLink,
   SecuritySolutionRequirementsLink,

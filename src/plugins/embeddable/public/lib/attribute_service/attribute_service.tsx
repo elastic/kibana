@@ -9,15 +9,20 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { I18nStart, NotificationsStart } from 'src/core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
+import { NotificationsStart } from '@kbn/core/public';
+import {
+  SavedObjectSaveModal,
+  OnSaveProps,
+  SaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
-} from '../index';
+} from '..';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -45,7 +50,7 @@ export interface AttributeServiceOptions<
     attributes: SavedObjectAttributes,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
-  checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
+  checkForDuplicateTitle: (props: OnSaveProps) => Promise<boolean>;
   unwrapMethod?: (
     savedObjectId: string
   ) => Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>>;
@@ -61,11 +66,6 @@ export class AttributeService<
 > {
   constructor(
     private type: string,
-    private showSaveModal: (
-      saveModal: React.ReactElement,
-      I18nContext: I18nStart['Context']
-    ) => void,
-    private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>,
     getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
@@ -178,10 +178,10 @@ export class AttributeService<
         }
       };
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
-        this.showSaveModal(
+        showSaveModal(
           <SavedObjectSaveModal
             onSave={onSave}
-            onClose={() => reject()}
+            onClose={() => {}}
             title={get(
               saveOptions,
               'saveModalTitle',
@@ -190,8 +190,7 @@ export class AttributeService<
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}
-          />,
-          this.i18nContext
+          />
         );
       }
     });

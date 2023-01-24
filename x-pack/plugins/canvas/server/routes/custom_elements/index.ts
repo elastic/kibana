@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { initializeFindCustomElementsRoute } from './find';
 import { initializeGetCustomElementRoute } from './get';
 import { initializeCreateCustomElementRoute } from './create';

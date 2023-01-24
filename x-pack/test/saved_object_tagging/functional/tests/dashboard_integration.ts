@@ -7,10 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { TAGFILTER_DROPDOWN_SELECTOR } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -21,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    */
   const selectFilterTags = async (...tagNames: string[]) => {
     // open the filter dropdown
-    const filterButton = await find.byCssSelector('.euiFilterGroup .euiFilterButton');
+    const filterButton = await find.byCssSelector(TAGFILTER_DROPDOWN_SELECTOR);
     await filterButton.click();
     // select the tags
     for (const tagName of tagNames) {
@@ -30,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     }
     // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageBody .euiFieldSearch');
+    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
     await searchFilter.click();
     // wait until the table refreshes
     await listingTable.waitUntilTableIsLoaded();
@@ -38,17 +40,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard integration', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard'
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
       );
       await esArchiver.loadIfNeeded(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard'
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
       );
+      await kibanaServer.savedObjects.clean({ types: ['tag'] });
       await esArchiver.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
@@ -66,9 +69,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
-          'dashboard 4 with real data (tag-1)',
+        expect(itemNames.sort()).to.eql([
           'dashboard 3 (tag-1 and tag-3)',
+          'dashboard 4 with real data (tag-1)',
         ]);
       });
 
@@ -77,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
+        expect(itemNames.sort()).to.eql(['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']);
       });
 
       it('allows to filter by multiple tags', async () => {
@@ -85,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await listingTable.expectItemsCount('dashboard', 3);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
+        expect(itemNames.sort()).to.eql([
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',
           'dashboard 3 (tag-1 and tag-3)',

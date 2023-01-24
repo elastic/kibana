@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportApiJSON } from '../../../plugins/reporting/common/types';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
+  const esArchiver = getService('esArchiver');
+  const supertest = getService('supertestWithoutAuth');
 
   describe('Reporting error codes', () => {
     it('places error_code in report output', async () => {
@@ -38,6 +40,22 @@ export default function ({ getService }: FtrProviderContext) {
 
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+    });
+
+    it('adds warning text with cause of failure in report output', async () => {
+      await reportingAPI.createDataAnalystRole();
+      await reportingAPI.createDataAnalyst();
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+
+      const jobInfo = await supertest
+        .get('/api/reporting/jobs/info/kraz4j94154g0763b583rc37')
+        .auth('test_user', 'changeme');
+
+      expect(jobInfo.body.output.warnings).to.eql([
+        'Error: Max attempts reached (1). Queue timeout reached.',
+      ]);
+
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
   });
 }

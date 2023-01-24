@@ -13,48 +13,32 @@ import {
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiPopover,
-  EuiPortal,
+  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import styled from 'styled-components';
 
-import type { AgentPolicy } from '../../../../types';
-import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
+import type { Agent, AgentPolicy } from '../../../../types';
+import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
 
-const statusFilters = [
-  {
-    status: 'healthy',
-    label: i18n.translate('xpack.fleet.agentList.statusHealthyFilterText', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    status: 'unhealthy',
-    label: i18n.translate('xpack.fleet.agentList.statusUnhealthyFilterText', {
-      defaultMessage: 'Unhealthy',
-    }),
-  },
-  {
-    status: 'updating',
-    label: i18n.translate('xpack.fleet.agentList.statusUpdatingFilterText', {
-      defaultMessage: 'Updating',
-    }),
-  },
-  {
-    status: 'offline',
-    label: i18n.translate('xpack.fleet.agentList.statusOfflineFilterText', {
-      defaultMessage: 'Offline',
-    }),
-  },
-  {
-    status: 'inactive',
-    label: i18n.translate('xpack.fleet.agentList.statusInactiveFilterText', {
-      defaultMessage: 'Inactive',
-    }),
-  },
-];
+import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
+
+import { AgentBulkActions } from './bulk_actions';
+import type { SelectionMode } from './types';
+import { AgentActivityButton } from './agent_activity_button';
+import { AgentStatusFilter } from './agent_status_filter';
+
+const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
+  padding: ${(props) => props.theme.eui.euiSizeS};
+`;
+
+const FlexEndEuiFlexItem = styled(EuiFlexItem)`
+  align-self: flex-end;
+`;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
@@ -67,6 +51,20 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedStatusChange: (selectedStatus: string[]) => void;
   showUpgradeable: boolean;
   onShowUpgradeableChange: (showUpgradeable: boolean) => void;
+  tags: string[];
+  selectedTags: string[];
+  onSelectedTagsChange: (selectedTags: string[]) => void;
+  totalAgents: number;
+  totalInactiveAgents: number;
+  selectionMode: SelectionMode;
+  currentQuery: string;
+  selectedAgents: Agent[];
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
+  onClickAddAgent: () => void;
+  onClickAddFleetServer: () => void;
+  visibleAgents: Agent[];
+  onClickAgentActivity: () => void;
+  showAgentActivityTour: { isOpen: boolean };
 }> = ({
   agentPolicies,
   draftKuery,
@@ -78,14 +76,25 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedStatusChange,
   showUpgradeable,
   onShowUpgradeableChange,
+  tags,
+  selectedTags,
+  onSelectedTagsChange,
+  totalAgents,
+  totalInactiveAgents,
+  selectionMode,
+  currentQuery,
+  selectedAgents,
+  refreshAgents,
+  onClickAddAgent,
+  onClickAddFleetServer,
+  visibleAgents,
+  onClickAgentActivity,
+  showAgentActivityTour,
 }) => {
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
-
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
-  // Status for filtering
-  const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
+  const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
 
   // Add a agent policy id to current search
   const addAgentPolicyFilter = (policyId: string) => {
@@ -99,16 +108,62 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     );
   };
 
+  const addTagsFilter = (tag: string) => {
+    onSelectedTagsChange([...selectedTags, tag]);
+  };
+
+  const removeTagsFilter = (tag: string) => {
+    onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
+  };
+
   return (
     <>
-      {isEnrollmentFlyoutOpen ? (
-        <EuiPortal>
-          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
-        </EuiPortal>
-      ) : null}
-
       {/* Search and filter bar */}
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup direction="column">
+        <FlexEndEuiFlexItem>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <AgentActivityButton
+                onClickAgentActivity={onClickAgentActivity}
+                showAgentActivityTour={showAgentActivityTour}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                  />
+                }
+              >
+                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addFleetServerButton"
+                    defaultMessage="Add Fleet Server"
+                  />
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addAgentButton.tooltip"
+                    defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
+                  />
+                }
+              >
+                <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addButton"
+                    defaultMessage="Add agent"
+                  />
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </FlexEndEuiFlexItem>
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={6}>
@@ -121,46 +176,80 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   }
                 }}
                 indexPattern={AGENTS_INDEX}
+                dataTestSubj="agentList.queryInput"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <EuiFilterGroup>
+                <AgentStatusFilter
+                  selectedStatus={selectedStatus}
+                  onSelectedStatusChange={onSelectedStatusChange}
+                  totalInactiveAgents={totalInactiveAgents}
+                  disabled={agentPolicies.length === 0}
+                />
                 <EuiPopover
                   ownFocus
                   button={
                     <EuiFilterButton
                       iconType="arrowDown"
-                      onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
-                      isSelected={isStatusFilterOpen}
-                      hasActiveFilters={selectedStatus.length > 0}
-                      disabled={agentPolicies.length === 0}
+                      onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
+                      isSelected={isTagsFilterOpen}
+                      hasActiveFilters={selectedTags.length > 0}
+                      numActiveFilters={selectedTags.length}
+                      numFilters={tags.length}
+                      disabled={tags.length === 0}
+                      data-test-subj="agentList.tagsFilter"
                     >
                       <FormattedMessage
-                        id="xpack.fleet.agentList.statusFilterText"
-                        defaultMessage="Status"
+                        id="xpack.fleet.agentList.tagsFilterText"
+                        defaultMessage="Tags"
                       />
                     </EuiFilterButton>
                   }
-                  isOpen={isStatusFilterOpen}
-                  closePopover={() => setIsStatutsFilterOpen(false)}
+                  isOpen={isTagsFilterOpen}
+                  closePopover={() => setIsTagsFilterOpen(false)}
                   panelPaddingSize="none"
                 >
                   <div className="euiFilterSelect__items">
-                    {statusFilters.map(({ label, status }, idx) => (
-                      <EuiFilterSelectItem
-                        key={idx}
-                        checked={selectedStatus.includes(status) ? 'on' : undefined}
+                    <>
+                      {tags.map((tag, index) => (
+                        <EuiFilterSelectItem
+                          checked={selectedTags.includes(tag) ? 'on' : undefined}
+                          key={index}
+                          onClick={() => {
+                            if (selectedTags.includes(tag)) {
+                              removeTagsFilter(tag);
+                            } else {
+                              addTagsFilter(tag);
+                            }
+                          }}
+                        >
+                          {tag.length > MAX_TAG_DISPLAY_LENGTH ? (
+                            <EuiToolTip content={tag}>
+                              <span>{truncateTag(tag)}</span>
+                            </EuiToolTip>
+                          ) : (
+                            tag
+                          )}
+                        </EuiFilterSelectItem>
+                      ))}
+
+                      <EuiHorizontalRule margin="none" />
+
+                      <ClearAllTagsFilterItem
+                        showIcons={false}
                         onClick={() => {
-                          if (selectedStatus.includes(status)) {
-                            onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
-                          } else {
-                            onSelectedStatusChange([...selectedStatus, status]);
-                          }
+                          onSelectedTagsChange([]);
                         }}
                       >
-                        {label}
-                      </EuiFilterSelectItem>
-                    ))}
+                        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>Clear all</EuiFlexItem>
+                        </EuiFlexGroup>
+                      </ClearAllTagsFilterItem>
+                    </>
                   </div>
                 </EuiPopover>
                 <EuiPopover
@@ -174,6 +263,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       numActiveFilters={selectedAgentPolicies.length}
                       numFilters={agentPolicies.length}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.policyFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.policyFilterText"
@@ -208,6 +298,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
                   }}
+                  data-test-subj="agentList.showUpgradeable"
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentList.showUpgradeableFilterLabel"
@@ -216,16 +307,22 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                fill
-                iconType="plusInCircle"
-                onClick={() => setIsEnrollmentFlyoutOpen(true)}
-                data-test-subj="addAgentButton"
-              >
-                <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
-              </EuiButton>
-            </EuiFlexItem>
+            {(selectionMode === 'manual' && selectedAgents.length) ||
+            (selectionMode === 'query' && totalAgents > 0) ? (
+              <EuiFlexItem grow={false}>
+                <AgentBulkActions
+                  totalAgents={totalAgents}
+                  totalInactiveAgents={totalInactiveAgents}
+                  selectionMode={selectionMode}
+                  currentQuery={currentQuery}
+                  selectedAgents={selectedAgents}
+                  visibleAgents={visibleAgents}
+                  refreshAgents={refreshAgents}
+                  allTags={tags}
+                  agentPolicies={agentPolicies}
+                />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

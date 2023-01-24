@@ -6,60 +6,70 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getHealthStatuses } from './get_health_statuses';
+import { lookupServices } from '../../service_groups/lookup_services';
+
+export async function getServiceNamesFromTermsEnum({
+  apmEventClient,
+  environment,
+  maxNumberOfServices,
+}: {
+  apmEventClient: APMEventClient;
+  environment: Environment;
+  maxNumberOfServices: number;
+}) {
+  if (environment !== ENVIRONMENT_ALL.value) {
+    return [];
+  }
+  const response = await apmEventClient.termsEnum(
+    'get_services_from_terms_enum',
+    {
+      apm: {
+        events: [
+          ProcessorEvent.transaction,
+          ProcessorEvent.span,
+          ProcessorEvent.metric,
+          ProcessorEvent.error,
+        ],
+      },
+      size: maxNumberOfServices,
+      field: SERVICE_NAME,
+    }
+  );
+
+  return response.terms;
+}
 
 export async function getSortedAndFilteredServices({
-  setup,
+  mlClient,
+  apmEventClient,
   start,
   end,
   environment,
   logger,
   serviceGroup,
+  maxNumberOfServices,
 }: {
-  setup: Setup;
+  mlClient?: MlClient;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: Environment;
   logger: Logger;
   serviceGroup: ServiceGroup | null;
+  maxNumberOfServices: number;
 }) {
-  const { apmEventClient } = setup;
-
-  async function getServiceNamesFromTermsEnum() {
-    if (environment !== ENVIRONMENT_ALL.value) {
-      return [];
-    }
-    const response = await apmEventClient.termsEnum(
-      'get_services_from_terms_enum',
-      {
-        apm: {
-          events: [
-            ProcessorEvent.transaction,
-            ProcessorEvent.span,
-            ProcessorEvent.metric,
-            ProcessorEvent.error,
-          ],
-        },
-        body: {
-          size: 500,
-          field: SERVICE_NAME,
-        },
-      }
-    );
-
-    return response.terms;
-  }
-
   const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
     getHealthStatuses({
-      setup,
+      mlClient,
       start,
       end,
       environment,
@@ -68,8 +78,18 @@ export async function getSortedAndFilteredServices({
       return [];
     }),
     serviceGroup
-      ? getServiceNamesFromServiceGroup(serviceGroup)
-      : getServiceNamesFromTermsEnum(),
+      ? getServiceNamesFromServiceGroup({
+          apmEventClient,
+          start,
+          end,
+          maxNumberOfServices,
+          serviceGroup,
+        })
+      : getServiceNamesFromTermsEnum({
+          apmEventClient,
+          environment,
+          maxNumberOfServices,
+        }),
   ]);
 
   const services = joinByKey(
@@ -83,6 +103,25 @@ export async function getSortedAndFilteredServices({
   return services;
 }
 
-async function getServiceNamesFromServiceGroup(serviceGroup: ServiceGroup) {
-  return serviceGroup.serviceNames;
+async function getServiceNamesFromServiceGroup({
+  apmEventClient,
+  start,
+  end,
+  maxNumberOfServices,
+  serviceGroup: { kuery },
+}: {
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+  maxNumberOfServices: number;
+  serviceGroup: ServiceGroup;
+}) {
+  const services = await lookupServices({
+    apmEventClient,
+    kuery,
+    start,
+    end,
+    maxNumberOfServices,
+  });
+  return services.map(({ serviceName }) => serviceName);
 }

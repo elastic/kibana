@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPORT_INTERVAL_MS } from './constants';
+import { REPORT_INTERVAL_BUFFER_MS, REPORT_INTERVAL_MS } from './constants';
 import { isReportIntervalExpired } from './is_report_interval_expired';
 
 describe('isReportIntervalExpired', () => {
@@ -54,7 +54,9 @@ describe('isReportIntervalExpired', () => {
   });
 
   test('false when close but not yet', () => {
-    expect(isReportIntervalExpired(Date.now() - REPORT_INTERVAL_MS + 1000)).toBe(false);
+    expect(
+      isReportIntervalExpired(Date.now() - REPORT_INTERVAL_MS + REPORT_INTERVAL_BUFFER_MS + 1000)
+    ).toBe(false);
   });
 
   test('false when date in the future', () => {

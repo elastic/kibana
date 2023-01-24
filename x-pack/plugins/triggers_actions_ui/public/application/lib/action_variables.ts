@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { ActionVariables, REQUIRED_ACTION_VARIABLES, CONTEXT_ACTION_VARIABLES } from '../../types';
-import { ActionVariable } from '../../../../alerting/common';
 
 export type OmitMessageVariablesType = 'all' | 'keepContext';
 
@@ -41,11 +41,13 @@ export enum AlertProvidedActionVariables {
   ruleSpaceId = 'rule.spaceId',
   ruleTags = 'rule.tags',
   ruleType = 'rule.type',
+  ruleUrl = 'rule.url',
   date = 'date',
   alertId = 'alert.id',
   alertActionGroup = 'alert.actionGroup',
   alertActionGroupName = 'alert.actionGroupName',
   alertActionSubgroup = 'alert.actionSubgroup',
+  alertFlapping = 'alert.flapping',
 }
 
 export enum LegacyAlertProvidedActionVariables {
@@ -106,6 +108,14 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
+    name: AlertProvidedActionVariables.ruleUrl,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleUrlLabel', {
+      defaultMessage:
+        'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    }),
+  });
+
+  result.push({
     name: AlertProvidedActionVariables.date,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
       defaultMessage: 'The date the rule scheduled the action.',
@@ -145,6 +155,14 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
           'The human readable name of the action group of the alert that scheduled actions for the rule.',
       }
     ),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.alertFlapping,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertFlappingLabel', {
+      defaultMessage:
+        'A flag on the alert that indicates whether the alert status is changing repeatedly.',
+    }),
   });
 
   result.push({

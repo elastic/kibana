@@ -10,17 +10,17 @@ import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsTaggingApiUi,
   GetSearchBarFilterOptions,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../services';
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
+
+import { Tag } from '../../common';
 import { TagSearchBarOption } from '../components';
-import { byNameTagSorter } from '../utils';
 
 export interface BuildGetSearchBarFilterOptions {
-  cache: ITagsCache;
+  getTagList: () => Tag[];
 }
 
 export const buildGetSearchBarFilter = ({
-  cache,
+  getTagList,
 }: BuildGetSearchBarFilterOptions): SavedObjectsTaggingApiUi['getSearchBarFilter'] => {
   return ({ useName = true, tagField = 'tag' }: GetSearchBarFilterOptions = {}) => {
     return {
@@ -35,16 +35,13 @@ export const buildGetSearchBarFilter = ({
         // everytime the filter is opened. That way we can keep in sync in case of tags
         // that would be added without the searchbar having trigger a re-render.
         return Promise.resolve(
-          cache
-            .getState()
-            .sort(byNameTagSorter)
-            .map((tag) => {
-              return {
-                value: useName ? tag.name : tag.id,
-                name: tag.name,
-                view: <TagSearchBarOption tag={tag} />,
-              };
-            })
+          getTagList().map((tag) => {
+            return {
+              value: useName ? tag.name : tag.id,
+              name: tag.name,
+              view: <TagSearchBarOption tag={tag} />,
+            };
+          })
         );
       },
     };

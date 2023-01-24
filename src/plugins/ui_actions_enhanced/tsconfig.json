@@ -1,0 +1,33 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "public/**/*",
+    "server/**/*",
+    "common/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/es-query",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/handlebars",
+    "@kbn/rison",
+    "@kbn/datemath",
+    "@kbn/monaco",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

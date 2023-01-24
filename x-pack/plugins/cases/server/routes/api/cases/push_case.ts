@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
 import { CASE_PUSH_URL } from '../../../../common/constants';
-import { CaseRoute } from '../types';
+import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -21,7 +21,8 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
   path: CASE_PUSH_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
 
       const params = pipe(
         CasePushRequestParamsRt.decode(request.params),

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "telemetry_collectors/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/usage-collection-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

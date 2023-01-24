@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Option, none, some, fold } from 'fp-ts/lib/Option';
+import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,7 +14,8 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { AlertingFrameworkHealth } from '@kbn/alerting-plugin/common';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
@@ -52,12 +53,22 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         hasPermanentEncryptionKey: false,
       };
       if (healthStatus.isRulesAvailable) {
-        const alertingHealthResult = await alertingFrameworkHealth({ http });
-        healthStatus.isSufficientlySecure = alertingHealthResult.isSufficientlySecure;
-        healthStatus.hasPermanentEncryptionKey = alertingHealthResult.hasPermanentEncryptionKey;
+        // Get the framework health, but if not available, do NOT cause the
+        // framework health errors/toasts to appear, since the state is
+        // actually unknown. These also need to be set to clear the busy
+        // indicator.
+        const alertingHealthResult = await getAlertingFrameworkHealth(http);
+        if (isSome(alertingHealthResult)) {
+          healthStatus.isSufficientlySecure = alertingHealthResult.value.isSufficientlySecure;
+          healthStatus.hasPermanentEncryptionKey =
+            alertingHealthResult.value.hasPermanentEncryptionKey;
+        } else {
+          healthStatus.isSufficientlySecure = true;
+          healthStatus.hasPermanentEncryptionKey = true;
+        }
+        setAlertingHealth(some(healthStatus));
       }
 
-      setAlertingHealth(some(healthStatus));
       setLoadingHealthCheck(false);
     })();
   }, [http, setLoadingHealthCheck]);
@@ -92,6 +103,19 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     )
   );
 };
+
+// Return as an Option, returning none if error occurred getting health.
+// Currently, alerting health returns a 403 if the user is not authorized
+// for rules.
+async function getAlertingFrameworkHealth(
+  http: HttpSetup
+): Promise<Option<AlertingFrameworkHealth>> {
+  try {
+    return some(await alertingFrameworkHealth({ http }));
+  } catch (err) {
+    return none;
+  }
+}
 
 interface PromptErrorProps {
   docLinks: DocLinksStart;

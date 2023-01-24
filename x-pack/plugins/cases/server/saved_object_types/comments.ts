@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
-import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
+import type { CreateCommentsMigrationsDeps } from './migrations';
+import { createCommentsMigrations } from './migrations';
 
 export const createCaseCommentSavedObjectType = ({
   migrationDeps,
@@ -61,7 +62,38 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
+      },
+      externalReferenceId: {
+        type: 'keyword',
+      },
+      externalReferenceStorage: {
+        dynamic: false,
+        properties: {
+          // externalReferenceStorage.type
+          type: {
+            type: 'keyword',
+          },
+        },
+      },
+      externalReferenceAttachmentTypeId: {
+        type: 'keyword',
+      },
+      externalReferenceMetadata: {
+        dynamic: false,
+        type: 'object',
+        enabled: false,
+      },
+      persistableStateAttachmentTypeId: {
+        type: 'keyword',
+      },
+      persistableStateAttachmentState: {
+        dynamic: false,
+        type: 'object',
+        enabled: false,
       },
       pushed_at: {
         type: 'date',
@@ -75,6 +107,9 @@ export const createCaseCommentSavedObjectType = ({
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -103,11 +138,14 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
     },
   },
-  migrations: createCommentsMigrations(migrationDeps),
+  migrations: () => createCommentsMigrations(migrationDeps),
   management: {
     importableAndExportable: true,
     visibleInManagement: false,

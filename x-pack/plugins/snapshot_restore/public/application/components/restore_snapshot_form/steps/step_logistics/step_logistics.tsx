@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverGt from 'semver/functions/gt';
 import {
@@ -20,11 +20,15 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiTitle,
+  EuiCallOut,
   EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
 
+import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
 
@@ -33,13 +37,17 @@ import { useCore, useServices } from '../../../../app_context';
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
 
-import { StepProps } from '../index';
+import { StepProps } from '..';
 
 import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
 import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
+
+import { FeatureStatesFormField } from '../../../feature_states_form_field';
+
+export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
@@ -54,6 +62,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
     version,
+    featureStates: snapshotIncludeFeatureStates,
   } = snapshotDetails;
 
   const snapshotIndices = unfilteredSnapshotIndices.filter(
@@ -81,6 +90,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement,
     partial,
     includeGlobalState,
+    featureStates,
     includeAliases,
   } = restoreSettings;
 
@@ -147,6 +157,21 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renamePattern: '',
     renameReplacement: '',
   });
+
+  const selectedFeatureStateOptions = useMemo(() => {
+    return featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[];
+  }, [featureStates]);
+
+  const isFeatureStatesToggleEnabled =
+    featureStates !== undefined && !featureStates?.includes(FEATURE_STATES_NONE_OPTION);
+
+  const onFeatureStatesToggleChange = (event: EuiSwitchEvent) => {
+    const { checked } = event.target;
+
+    updateRestoreSettings({
+      featureStates: checked ? [] : [FEATURE_STATES_NONE_OPTION],
+    });
+  };
 
   return (
     <div
@@ -218,7 +243,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepLogistics.allDataStreamsAndIndicesLabel"
-                  defaultMessage="All data streams and indices, including system indices"
+                  defaultMessage="All data streams and indices"
                 />
               }
               checked={isAllIndicesAndDataStreams}
@@ -569,34 +594,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           </EuiTitle>
         }
         description={
-          <>
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
-              defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings and all system indices. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
-                    {i18n.translate(
-                      'xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDocLink',
-                      { defaultMessage: 'Learn more.' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-
-            {/* Only display callout if include_global_state is enabled and the snapshot was created by ES 7.12+
-             * Note: Once we support features states in the UI, we will also need to add a check here for that
-             * See https://github.com/elastic/kibana/issues/95128 more details
-             */}
-            {includeGlobalState && semverGt(version, '7.12.0') && (
-              <>
-                <EuiSpacer size="s" />
-                <SystemIndicesOverwrittenCallOut />
-              </>
-            )}
-          </>
+          <FormattedMessage
+            id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
+            defaultMessage="Restores the global cluster state as part of the snapshot."
+          />
         }
         fullWidth
       >
@@ -625,6 +626,89 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             data-test-subj="includeGlobalStateSwitch"
           />
         </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Include feature states */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesTitle"
+                defaultMessage="Restore feature state"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDescription"
+              defaultMessage="Restores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
+            />
+
+            {/* Only display callout if includeFeatureState is enabled and the snapshot was created by ES 7.12+ */}
+            {semverGt(version, '7.12.0') && isFeatureStatesToggleEnabled && (
+              <>
+                <EuiSpacer size="s" />
+                <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
+              </>
+            )}
+          </>
+        }
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace={true}
+          fullWidth
+          helpText={
+            snapshotIncludeFeatureStates ? null : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDisabledDescription"
+                defaultMessage="Not available for this snapshot."
+              />
+            )
+          }
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.restoreFeatureStatesLabel"
+                defaultMessage="Restore feature state from"
+              />
+            }
+            checked={isFeatureStatesToggleEnabled}
+            onChange={onFeatureStatesToggleChange}
+            disabled={snapshotIncludeFeatureStates?.length === 0}
+            data-test-subj="includeFeatureStatesSwitch"
+          />
+        </EuiFormRow>
+
+        {isFeatureStatesToggleEnabled && (
+          <>
+            <EuiSpacer size="m" />
+            <FeatureStatesFormField
+              featuresOptions={snapshotIncludeFeatureStates}
+              selectedOptions={selectedFeatureStateOptions}
+              onUpdateFormSettings={updateRestoreSettings}
+            />
+          </>
+        )}
+        {snapshotIncludeFeatureStates?.length === 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              size="s"
+              iconType="help"
+              color="warning"
+              data-test-subj="noFeatureStatesCallout"
+              title={i18n.translate(
+                'xpack.snapshotRestore.restoreForm.stepLogistics.noFeatureStates',
+                { defaultMessage: 'No feature states are included in this snapshot.' }
+              )}
+            />
+          </>
+        )}
       </EuiDescribedFormGroup>
 
       {/* Include aliases */}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useMemo, useState, useEffect } from 'react';
+import React, { useReducer, useMemo, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,8 +33,9 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { getInitialInterval } from './get_initial_interval';
 
 const RuleAdd = ({
   consumer,
@@ -46,10 +47,13 @@ const RuleAdd = ({
   initialValues,
   reloadRules,
   onSave,
-  metadata,
+  metadata: initialMetadata,
+  filteredRuleTypes,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
+  const [metadata, setMetadata] = useState(initialMetadata);
+  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
 
   const initialRule: InitialRule = useMemo(() => {
     return {
@@ -57,11 +61,10 @@ const RuleAdd = ({
       consumer,
       ruleTypeId,
       schedule: {
-        interval: DEFAULT_ALERT_INTERVAL,
+        interval: DEFAULT_RULE_INTERVAL,
       },
       actions: [],
       tags: [],
-      notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
@@ -69,7 +72,7 @@ const RuleAdd = ({
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
@@ -139,11 +142,19 @@ const RuleAdd = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getRuleActionErrors(rule as Rule, actionTypeRegistry);
+      const res = await getRuleActionErrors(rule.actions, actionTypeRegistry);
       setIsLoading(false);
       setRuleActionsErrors([...res]);
     })();
-  }, [rule, actionTypeRegistry]);
+  }, [rule.actions, actionTypeRegistry]);
+
+  useEffect(() => {
+    if (config.minimumScheduleInterval && !initialValues?.schedule?.interval) {
+      setRuleProperty('schedule', {
+        interval: getInitialInterval(config.minimumScheduleInterval.value),
+      });
+    }
+  }, [config.minimumScheduleInterval, initialValues]);
 
   useEffect(() => {
     if (rule.ruleTypeId && ruleTypeIndex) {
@@ -155,7 +166,7 @@ const RuleAdd = ({
   }, [rule.ruleTypeId, ruleTypeIndex, rule.schedule.interval, changedFromDefaultInterval]);
 
   useEffect(() => {
-    if (rule.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
+    if (rule.schedule.interval !== DEFAULT_RULE_INTERVAL && !changedFromDefaultInterval) {
       setChangedFromDefaultInterval(true);
     }
   }, [rule.schedule.interval, changedFromDefaultInterval]);
@@ -167,7 +178,7 @@ const RuleAdd = ({
     ) {
       setIsConfirmRuleCloseModalOpen(true);
     } else {
-      onClose(RuleFlyoutCloseReason.CANCELED);
+      onClose(RuleFlyoutCloseReason.CANCELED, metadata);
     }
   };
 
@@ -175,19 +186,18 @@ const RuleAdd = ({
     const savedRule = await onSaveRule();
     setIsSaving(false);
     if (savedRule) {
-      onClose(RuleFlyoutCloseReason.SAVED);
+      onClose(RuleFlyoutCloseReason.SAVED, metadata);
       if (onSaveHandler) {
-        onSaveHandler();
+        onSaveHandler(metadata);
       }
     }
   };
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
 
-  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
-    rule as Rule,
-    ruleType,
-    config
+  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = useMemo(
+    () => getRuleErrors(rule as Rule, ruleType, config),
+    [rule, ruleType, config]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
@@ -222,7 +232,7 @@ const RuleAdd = ({
         aria-labelledby="flyoutRuleAddTitle"
         size="m"
         maxWidth={620}
-        ownFocus={false}
+        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addRuleFlyoutTitle">
@@ -235,7 +245,7 @@ const RuleAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}
@@ -252,6 +262,8 @@ const RuleAdd = ({
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
+                filteredRuleTypes={filteredRuleTypes}
+                onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>
             <RuleAddFooter
@@ -297,7 +309,7 @@ const RuleAdd = ({
           <ConfirmRuleClose
             onConfirm={() => {
               setIsConfirmRuleCloseModalOpen(false);
-              onClose(RuleFlyoutCloseReason.CANCELED);
+              onClose(RuleFlyoutCloseReason.CANCELED, metadata);
             }}
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);

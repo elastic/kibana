@@ -11,8 +11,8 @@
   (we want the panel to be wider than the input)
 */
 
+import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
-  EuiSuperSelectProps,
   EuiScreenReaderOnly,
   EuiSuperSelectControl,
   EuiInputPopover,

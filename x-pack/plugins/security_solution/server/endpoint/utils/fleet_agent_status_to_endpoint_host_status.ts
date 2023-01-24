@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentStatus } from '../../../../fleet/common';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { HostStatus } from '../../../common/endpoint/types';
 
 // For an understanding of how fleet agent status is calculated:
@@ -17,7 +17,6 @@ const STATUS_MAPPING: ReadonlyMap<AgentStatus, HostStatus> = new Map([
   ['unenrolling', HostStatus.UPDATING],
   ['enrolling', HostStatus.UPDATING],
   ['updating', HostStatus.UPDATING],
-  ['warning', HostStatus.UNHEALTHY],
   ['error', HostStatus.UNHEALTHY],
   ['degraded', HostStatus.UNHEALTHY],
 ]);

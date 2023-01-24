@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CaseRoute } from '../types';
+import type { CaseRoute } from '../types';
 
-import { CasesStatusRequest } from '../../../../common/api';
+import type { CasesStatusRequest } from '../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -19,9 +19,10 @@ export const getStatusRoute: CaseRoute = createCasesRoute({
   method: 'get',
   path: CASE_STATUS_URL,
   options: { deprecated: true },
-  handler: async ({ context, request, response, logger, kibanaVersion }) => {
+  handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       return response.ok({
         body: await client.metrics.getStatusTotalsByType(request.query as CasesStatusRequest),
       });

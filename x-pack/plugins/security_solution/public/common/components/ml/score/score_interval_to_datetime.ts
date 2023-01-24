@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Anomaly } from '../types';
+import type { Anomaly } from '../types';
 
 export interface FromTo {
   from: string;

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
 import { shimWorkpad } from './shim_workpad';
@@ -23,7 +23,8 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const workpad = await context.canvas.workpad.get(request.params.id);
+      const canvasContext = await context.canvas;
+      const workpad = await canvasContext.workpad.get(request.params.id);
 
       shimWorkpad(workpad);
 

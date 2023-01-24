@@ -71,7 +71,7 @@ export interface Props {
   assets: AssetType[];
   /** Function to invoke when the modal is closed */
   onClose: () => void;
-  onAddAsset: (file: File) => void;
+  onAddAsset: (file: File) => Promise<void | string>;
 }
 
 export const AssetManager: FC<Props> = (props) => {

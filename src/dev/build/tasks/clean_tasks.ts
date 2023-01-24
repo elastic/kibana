@@ -7,7 +7,8 @@
  */
 
 import minimatch from 'minimatch';
-
+import { getPackages } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {
@@ -26,28 +27,11 @@ export const Clean: GlobalTask = {
   },
 };
 
-export const CleanPackages: Task = {
-  description: 'Cleaning source for packages that are now installed in node_modules',
+export const CleanPackageManagerRelatedFiles: Task = {
+  description: 'Cleaning package manager related files from the build folder',
 
   async run(config, log, build) {
-    await deleteAll(
-      [build.resolvePath('packages'), build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')],
-      log
-    );
-  },
-};
-
-export const CleanTypescript: Task = {
-  description: 'Cleaning typescript source files that have been transpiled to JS',
-
-  async run(config, log, build) {
-    log.info(
-      'Deleted %d files',
-      await scanDelete({
-        directory: build.resolvePath(),
-        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/],
-      })
-    );
+    await deleteAll([build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')], log);
   },
 };
 
@@ -74,12 +58,20 @@ export const CleanExtraFilesFromModules: Task = {
       '**/CONTRIBUTING.md',
       '**/Contributing.md',
       '**/contributing.md',
+      '**/README.md',
+      '**/readme.md',
+      '**/README.markdown',
+      '**/readme.markdown',
+      '**/README',
+
       '**/History.md',
       '**/HISTORY.md',
       '**/history.md',
       '**/CHANGELOG.md',
       '**/Changelog.md',
       '**/changelog.md',
+
+      '**/CODE_OF_CONDUCT.md',
 
       // examples
       '**/example',
@@ -89,16 +81,27 @@ export const CleanExtraFilesFromModules: Task = {
 
       // bins
       '**/.bin',
+      '**/bin',
 
       // linters
       '**/.eslintrc',
       '**/.eslintrc.js',
       '**/.eslintrc.yml',
+      '**/.eslintrc.json',
+      '**/.eslintignore',
+      '**/.jshintignore',
       '**/.prettierrc',
+      '**/.prettierrc.js',
+      '**/.prettierrc.yaml',
+      '**/.prettierrc.yml',
       '**/.jshintrc',
       '**/.babelrc',
+      '**/.babelrc.js',
       '**/.jscs.json',
       '**/.lint',
+      '**/.jscsrc',
+      '**/.nycrc',
+      '**/.taprc',
 
       // hints
       '**/*.flow',
@@ -120,25 +123,39 @@ export const CleanExtraFilesFromModules: Task = {
       '**/*.sass',
       '**/.ts',
       '**/.tsx',
+      '**/.tsbuildinfo',
 
       // editors
       '**/.editorconfig',
       '**/.vscode',
+      '**/.idea',
 
       // git
+      '**/.git',
+      '**/.github',
       '**/.gitattributes',
       '**/.gitkeep',
       '**/.gitempty',
       '**/.gitmodules',
       '**/.keep',
       '**/.empty',
+      '**/.patch',
 
       // ci
       '**/.travis.yml',
+      '**/.gitlab-ci.yml',
+      '**/circle.yml',
       '**/.coveralls.yml',
-      '**/.instanbul.yml',
-      '**/appveyor.yml',
+      '**/.istanbul.yml',
+      '**/.appveyor.yml',
       '**/.zuul.yml',
+      '**/.codeclimate.yml',
+      '**/.codecov.yml',
+      '**/.airtap.yml',
+      '**/.gitpod.yml',
+      '**/karma.conf.ci.js',
+      '**/karma.conf.js',
+      '**/karma-ci.conf.js',
 
       // metadata
       '**/package-lock.json',
@@ -148,13 +165,50 @@ export const CleanExtraFilesFromModules: Task = {
 
       // misc
       '**/.*ignore',
+      '**/*.log',
+      '**/.nvmrc',
       '**/.DS_Store',
       '**/Dockerfile',
       '**/docker-compose.yml',
 
-      // https://github.com/elastic/kibana/issues/107617
-      '**/png-js/images/*.png',
-    ]);
+      '**/*.png',
+      '**/*.jpg',
+      '**/*.jpeg',
+      '**/*.gif',
+      '**/*.webp',
+
+      '**/*.zip',
+      '**/*.7z',
+      '**/*.rar',
+      '**/*.tar',
+      '**/*.tgz',
+      '**/*.gz',
+
+      '**/*.cc',
+      '**/*.pl',
+      '**/*.py',
+      '**/*.gz',
+      '**/*.h',
+      '**/*.xml',
+      '**/*.html',
+
+      '**/*.development.js',
+      '**/*.dev.js',
+      '**/benchmark',
+      '**/benchmarks',
+      '**/benchmark.js',
+      '**/benchmarks.js',
+
+      '**/rollup.config.js',
+      '**/webpack.config.js',
+      '**/commitlint.config.js',
+      '**/styleguide.config.js',
+
+      '**/@elastic/eui/es',
+      '**/@elastic/eui/test-env',
+      '**/@elastic/eui/optimize',
+      '**/@elastic/eui/i18ntokens.json',
+    ]).concat([/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/]);
 
     log.info(
       'Deleted %d files',
@@ -198,5 +252,24 @@ export const CleanEmptyFolders: Task = {
       build.resolvePath('data'),
       build.resolvePath('logs'),
     ]);
+  },
+};
+
+export const DeleteBazelPackagesFromBuildRoot: Task = {
+  description:
+    'Deleting bazel packages outputs from build folder root as they are now installed as node_modules',
+
+  async run(config, log, build) {
+    const bazelPackagesOnBuildRoot = getPackages(REPO_ROOT).flatMap((pkg) => {
+      const bldSrc = build.resolvePath(pkg.normalizedRepoRelativeDir);
+
+      if (pkg.manifest.type.startsWith('plugin-')) {
+        return bldSrc;
+      }
+
+      return [bldSrc, build.resolvePath('node_modules', pkg.manifest.id, 'kibana.jsonc')];
+    });
+
+    await deleteAll(bazelPackagesOnBuildRoot, log);
   },
 };

@@ -1,0 +1,208 @@
+{
+  "id": "@kbn/core-saved-objects-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-browser",
+        "id": "def-common.SavedObjectsStart",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectsStart",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
+          },
+          {
+            "plugin": "core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/services.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/services.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/new_vis_modal.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/wizard/new_vis_modal.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
+          },
+          {
+            "plugin": "savedObjectsFinder",
+            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
+          },
+          {
+            "plugin": "savedObjectsFinder",
+            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/types.ts"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/application/types.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/services/platform.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/public/services/platform.ts"
+          },
+          {
+            "plugin": "transform",
+            "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
+          },
+          {
+            "plugin": "transform",
+            "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.test.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "core",
+            "path": "src/core/server/index.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-browser",
+            "id": "def-common.SavedObjectsStart.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "{@link SavedObjectsClientContract}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiBrowserPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

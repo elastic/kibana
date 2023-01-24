@@ -1,41 +1,82 @@
-[role="xpack"]
 [[servicenow-itom-action-type]]
-=== ServiceNow ITOM connector and action
+== {sn-itom} connector and action
 ++++
-<titleabbrev>ServiceNow ITOM</titleabbrev>
+<titleabbrev>{sn-itom}</titleabbrev>
 ++++
 
-The {sn} ITOM connector uses the https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[Event API] to create {sn} events.
+The {sn-itom} connector uses the
+https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[event API]
+to create {sn} events. You can use the connector for rule actions.
 
 [float]
 [[servicenow-itom-connector-prerequisites]]
-==== Prerequisites
-Create an integration user in {sn} and assign it the following roles.
+=== Prerequisites
 
+. <<servicenow-itom-connector-prerequisites-integration-user,Create a {sn} integration user and assign it the appropriate roles.>>
+. If you use open authorization (OAuth), you must also:
+.. <<servicenow-itom-connector-prerequisites-rsa-key,Create an RSA keypair and add an X.509 Certificate>>.
+.. <<servicenow-itom-connector-prerequisites-endpoint,Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map>>.
+
+[float]
+[[servicenow-itom-connector-prerequisites-integration-user]]
+==== Create a {sn} integration user
+
+To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles.
+
+. In your {sn} instance, go to *System Security -> Users and Groups -> Users*.
+. Click *New*.
+. Complete the form, then right-click on the menu bar and click *Save*.
+. Go to the *Roles* tab and click *Edit*.
+. Assign the integration user the following roles:
 * `personalize_choices`: Allows the user to retrieve Choice element options, such as Severity.
 * `evt_mgmt_integration`: Enables integration with external event sources by allowing the user to create events.
+. Click *Save*.
+
+[float]
+[[servicenow-itom-connector-prerequisites-rsa-key]]
+==== Create an RSA keypair and add an X.509 Certificate
+
+This step is required to use OAuth for authentication between Elastic and {sn}.
+
+include::servicenow.asciidoc[tag=servicenow-rsa-key]
+
+include::servicenow.asciidoc[tag=servicenow-certificate]
+
+[float]
+[[servicenow-itom-connector-prerequisites-endpoint]]
+==== Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map
+
+include::servicenow.asciidoc[tag=servicenow-endpoint]
 
 [float]
 [[servicenow-itom-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
-{sn} ITOM connectors have the following configuration properties.
+{sn-itom} connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector.
+Is OAuth::  The type of authentication to use.
 URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
+User Identifier:: Identifier to use for OAuth type authentication. This identifier should be the *User field* you selected during setup. For example, if the selected *User field* is *Email*, the user identifier should be the user's email address.
+Client ID:: The client ID assigned to your OAuth application.
+Client Secret:: The client secret assigned to your OAuth application.
+JWT Key ID:: The key ID assigned to the JWT verifier map of your OAuth application.
+Private Key:: The RSA private key generated during setup.
+Private Key Password:: The password for the RSA private key generated during setup, if set.
 
 [float]
 [[servicenow-itom-connector-networking-configuration]]
-==== Connector networking configuration
+=== Connector networking configuration
 
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[Preconfigured-servicenow-itom-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
+Connector using Basic Authentication
 [source,text]
 --
  my-servicenow-itom:
@@ -48,34 +89,62 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
      password: passwordkeystorevalue
 --
 
+Connector using OAuth
+[source,text]
+--
+ my-servicenow:
+   name: preconfigured-oauth-servicenow-connector-type
+   actionTypeId: .servicenow-itom
+   config:
+     apiUrl: https://example.service-now.com/
+     usesTableApi: false
+     isOAuth: true
+     userIdentifierValue: testuser@email.com
+     clientId: abcdefghijklmnopqrstuvwxyzabcdef
+     jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba
+   secrets:
+     clientSecret: secretsecret
+     privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY-----
+--
+
 Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
+`isOAuth`:: A boolean that corresponds to *Is OAuth* and indicates if the connector uses Basic Authentication or OAuth.
+`userIdentifierValue`:: A string that corresponds to *User Identifier*. Required if `isOAuth` is set to `true`.
+`clientId`:: A string that corresponds to *Client ID*, used for OAuth authentication. Required if `isOAuth` is set to `true`.
+`jwtKeyId`:: A string that corresponds to *JWT Key ID*, used for OAuth authentication. Required if `isOAuth` is set to `true`.
 
 Secrets defines sensitive information for the connector type.
 
-`username`:: A string that corresponds to *Username*.
-`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+`username`:: A string that corresponds to *Username*. Required if `isOAuth` is set to `false`.
+`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `isOAuth` is set to `false`.
+`clientSecret`:: A string that corresponds to *Client Secret*. Required if `isOAuth` is set to `true`.
+`privateKey`:: A string that corresponds to *Private Key*. Required if `isOAuth` is set to `true`.
+`privateKeyPassword`:: A string that corresponds to *Private Key Password*.
 
 [float]
 [[define-servicenow-itom-ui]]
-==== Define connector in Stack Management
+=== Define connector in {stack-manage-app}
 
-Define {sn} ITOM connector properties.
-
-[role="screenshot"]
-image::management/connectors/images/servicenow-itom-connector.png[ServiceNow ITOM connector]
-
-Test {sn} ITOM action parameters.
+Define {sn-itom} connector properties. Choose whether to use OAuth for authentication.
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-itom-params-test.png[ServiceNow ITOM params test]
+image::management/connectors/images/servicenow-itom-connector-basic.png[{sn-itom} connector using basic auth]
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-itom-connector-oauth.png[{sn-itom} connector using OAuth]
+
+Test {sn-itom} action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-itom-params-test.png[{sn-itom} params test]
 
 [float]
 [[servicenow-itom-action-configuration]]
-==== Action configuration
+=== Action configuration
 
-{sn} ITOM actions have the following configuration properties.
+{sn-itom} actions have the following configuration properties.
 
 Source::       The name of the event source type.
 Node::         The Host that the event was triggered for.
@@ -87,10 +156,10 @@ Message key::  All actions sharing this key will be associated with the same {sn
 Severity::     The severity of the event.
 Description::  The details about the event.
 
-Refer to https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[ServiceNow documentation] for more information about the properties.
+Refer to https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[{sn} documentation] for more information about the properties.
 
 [float]
 [[configuring-servicenow-itom]]
-==== Configure {sn} ITOM
+=== Configure {sn-itom}
 
 {sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

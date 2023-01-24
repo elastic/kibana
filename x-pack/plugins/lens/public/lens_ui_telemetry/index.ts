@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './factory';
+export {
+  setUsageCollectionStart,
+  getUsageCollectionStart,
+  trackUiCounterEvents,
+  getExecutionContextEvents,
+} from './track_counter_events';

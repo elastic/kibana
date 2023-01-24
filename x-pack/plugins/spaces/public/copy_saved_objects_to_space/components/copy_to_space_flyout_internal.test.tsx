@@ -10,8 +10,8 @@ import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { Space } from '../../../common';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
@@ -120,6 +120,8 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
+    // Wait for loading spinner to clear
+    await act(async () => {});
     wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);

@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { EuiLoadingElastic, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import {
+  EuiLoadingElastic,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 import { Container, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';

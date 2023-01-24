@@ -7,16 +7,16 @@
 
 import { Subject } from 'rxjs';
 
-import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
-} from '../../../task_manager/server';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
-import type { AuditLogger } from '../audit';
-import { auditLoggerMock } from '../audit/mocks';
+} from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import type { AuditServiceSetup } from '../audit';
+import { auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
@@ -34,10 +34,10 @@ mockSessionIndexCleanUp.mockResolvedValue();
 
 describe('SessionManagementService', () => {
   let service: SessionManagementService;
-  let auditLogger: AuditLogger;
+  let auditSetupMock: AuditServiceSetup;
   beforeEach(() => {
     service = new SessionManagementService(loggingSystemMock.createLogger());
-    auditLogger = auditLoggerMock.create();
+    auditSetupMock = auditServiceMock.create();
   });
 
   afterEach(() => {
@@ -100,7 +100,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       expect(
         service.start({
-          auditLogger,
+          audit: auditSetupMock,
           elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
           kibanaIndexName: '.kibana',
           online$: mockStatusSubject.asObservable(),
@@ -112,7 +112,7 @@ describe('SessionManagementService', () => {
     it('registers proper session index cleanup task runner', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -132,7 +132,7 @@ describe('SessionManagementService', () => {
     it('initializes session index and schedules session index cleanup task when Elasticsearch goes online', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -170,7 +170,7 @@ describe('SessionManagementService', () => {
     it('removes old cleanup task if cleanup interval changes', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -206,7 +206,7 @@ describe('SessionManagementService', () => {
     it('does not remove old cleanup task if cleanup interval does not change', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -233,7 +233,7 @@ describe('SessionManagementService', () => {
     it('schedules retry if index initialization fails', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -270,7 +270,7 @@ describe('SessionManagementService', () => {
     it('schedules retry if cleanup task registration fails', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
@@ -323,7 +323,7 @@ describe('SessionManagementService', () => {
     it('properly unsubscribes from status updates', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
-        auditLogger,
+        audit: auditSetupMock,
         elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),

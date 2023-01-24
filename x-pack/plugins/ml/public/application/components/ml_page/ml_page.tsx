@@ -5,52 +5,43 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
-import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
+import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
+import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { Subscription } from 'rxjs';
+
+import { EuiPageSection } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { Route } from 'react-router-dom';
-import type { AppMountParameters } from 'kibana/public';
-import { useSideNavItems } from './side_nav';
+import { type AppMountParameters } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { DatePickerWrapper } from '@kbn/ml-date-picker';
+
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
-import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
-import {
-  KibanaPageTemplate,
-  RedirectAppLinks,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { useDocTitle } from '../../routing/use_doc_title';
 
+import { MlPageHeaderRenderer } from '../page_header/page_header';
+
+import { useSideNavItems } from './side_nav';
+
+const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
+
 export const MlPageControlsContext = createContext<{
-  setPageTitle: (v?: React.ReactNode | undefined) => void;
+  headerPortal: HtmlPortalNode;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
-}>({ setPageTitle: () => {}, setHeaderActionMenu: () => {} });
-
-const ML_PAGE_ACTION = {
-  SET_HEADER: 'setPageHeader',
-};
-
-interface SetHeaderAction {
-  type: typeof ML_PAGE_ACTION.SET_HEADER;
-  payload: React.ReactNode;
-}
-
-type PageAction = SetHeaderAction;
-
-interface MlPageUIState {
-  pageHeader?: React.ReactNode;
-}
-
-function pageStateReducer(state: MlPageUIState, action: PageAction): MlPageUIState {
-  switch (action.type) {
-    case ML_PAGE_ACTION.SET_HEADER:
-      return { ...state, pageHeader: action.payload };
-  }
-
-  return state;
-}
+  setIsHeaderMounted: (v: boolean) => void;
+  isHeaderMounted: boolean;
+}>({
+  setHeaderActionMenu: () => {},
+  headerPortal: createHtmlPortalNode(),
+  isHeaderMounted: false,
+  setIsHeaderMounted: () => {},
+});
 
 /**
  * Main page component of the ML App
@@ -61,104 +52,140 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const {
     services: {
       http: { basePath },
+      mlServices: { httpService },
     },
   } = useMlKibana();
 
-  const [pageState, dispatch] = useReducer<typeof pageStateReducer>(pageStateReducer, {});
+  const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
+  const [isHeaderMounted, setIsHeaderMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const setPageTitle = useCallback(
-    (payload) => {
-      dispatch({ type: ML_PAGE_ACTION.SET_HEADER, payload });
-    },
-    [dispatch]
-  );
+  useEffect(() => {
+    const subscriptions = new Subscription();
+
+    subscriptions.add(
+      httpService.getLoadingCount$.subscribe((v) => {
+        setIsLoading(v !== 0);
+      })
+    );
+
+    return function cleanup() {
+      subscriptions.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const routeList = useMemo(
-    () => Object.values(routes).map((routeFactory) => routeFactory(navigateToPath, basePath.get())),
+    () =>
+      Object.values(routes)
+        .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
+        .filter((d) => !d.disabled),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const activeRoute = useActiveRoute(routeList);
 
   const rightSideItems = useMemo(() => {
-    return [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])];
-  }, [activeRoute.enableDatePicker]);
+    return [
+      ...(activeRoute.enableDatePicker
+        ? [<DatePickerWrapper isLoading={isLoading} width="full" />]
+        : []),
+    ];
+  }, [activeRoute.enableDatePicker, isLoading]);
 
   useDocTitle(activeRoute);
 
+  // The deprecated `KibanaPageTemplate` from`'@kbn/kibana-react-plugin/public'`
+  // had a `pageBodyProps` prop where we could pass in the `data-test-subj` for
+  // the `main` element. This is no longer available in the update template
+  // imported from `'@kbn/shared-ux-page-kibana-template'`. The following is a
+  // workaround to add the `data-test-subj` on the `main` element again.
+  useEffect(() => {
+    const mlApp = document.querySelector(ML_APP_SELECTOR) as HTMLElement;
+    if (mlApp && typeof activeRoute?.['data-test-subj'] === 'string') {
+      const mlAppMain = mlApp.querySelector('main') as HTMLElement;
+      if (mlAppMain) {
+        mlAppMain.setAttribute('data-test-subj', activeRoute?.['data-test-subj']);
+      }
+    }
+  }, [activeRoute]);
+
   return (
-    <KibanaPageTemplate
-      className={'ml-app'}
-      data-test-subj={'mlApp'}
-      restrictWidth={false}
-      // EUI TODO
-      // The different template options need to be manually recreated by the individual pages.
-      // These classes help enforce the layouts.
-      pageContentProps={{ className: 'kbnAppWrapper' }}
-      pageContentBodyProps={{ className: 'kbnAppWrapper' }}
-      solutionNav={{
-        name: i18n.translate('xpack.ml.plugin.title', {
-          defaultMessage: 'Machine Learning',
-        }),
-        icon: 'machineLearningApp',
-        items: useSideNavItems(activeRoute),
-      }}
-      pageHeader={{
-        pageTitle: pageState.pageHeader ?? <EuiLoadingContent lines={1} />,
-        rightSideItems,
-        restrictWidth: false,
-      }}
-      pageBodyProps={{
-        'data-test-subj': activeRoute?.['data-test-subj'],
+    <MlPageControlsContext.Provider
+      value={{
+        setHeaderActionMenu: pageDeps.setHeaderActionMenu,
+        headerPortal: headerPortalNode,
+        setIsHeaderMounted,
+        isHeaderMounted,
       }}
     >
-      <CommonPageWrapper setPageTitle={setPageTitle} pageDeps={pageDeps} routeList={routeList} />
-    </KibanaPageTemplate>
+      <KibanaPageTemplate
+        className={'ml-app'}
+        data-test-subj={'mlApp'}
+        restrictWidth={false}
+        solutionNav={{
+          name: i18n.translate('xpack.ml.plugin.title', {
+            defaultMessage: 'Machine Learning',
+          }),
+          icon: 'machineLearningApp',
+          items: useSideNavItems(activeRoute),
+        }}
+        pageHeader={{
+          pageTitle: <MlPageHeaderRenderer />,
+          rightSideItems,
+          restrictWidth: false,
+        }}
+      >
+        <CommonPageWrapper
+          headerPortal={headerPortalNode}
+          setIsHeaderMounted={setIsHeaderMounted}
+          pageDeps={pageDeps}
+          routeList={routeList}
+        />
+      </KibanaPageTemplate>
+    </MlPageControlsContext.Provider>
   );
 });
 
 interface CommonPageWrapperProps {
-  setPageTitle: (title?: React.ReactNode | undefined) => void;
+  setIsHeaderMounted: (v: boolean) => void;
   pageDeps: PageDependencies;
   routeList: MlRoute[];
+  headerPortal: HtmlPortalNode;
 }
 
-const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
-  ({ setPageTitle, pageDeps, routeList }) => {
-    const {
-      services: { application },
-    } = useMlKibana();
+const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, routeList }) => {
+  const {
+    services: { application },
+  } = useMlKibana();
 
-    return (
-      /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
-       * avoiding full page reload **/
-      <RedirectAppLinks application={application}>
-        <MlPageControlsContext.Provider
-          value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
-        >
-          <EuiPageContentBody restrictWidth={false}>
-            {routeList.map((route) => {
-              return (
-                <Route
-                  key={route.id}
-                  path={route.path}
-                  exact
-                  render={(props) => {
-                    window.setTimeout(() => {
-                      pageDeps.setBreadcrumbs(route.breadcrumbs);
-                    });
-                    return (
-                      <MlPageWrapper path={route.path}>
-                        {route.render(props, pageDeps)}
-                      </MlPageWrapper>
-                    );
-                  }}
-                />
-              );
-            })}
-          </EuiPageContentBody>
-        </MlPageControlsContext.Provider>
-      </RedirectAppLinks>
-    );
-  }
-);
+  return (
+    /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
+     * avoiding full page reload **/
+    <RedirectAppLinks coreStart={{ application }}>
+      <EuiPageSection restrictWidth={false}>
+        <Switch>
+          {routeList.map((route) => {
+            return (
+              <Route
+                key={route.id}
+                path={route.path}
+                exact
+                render={(props) => {
+                  window.setTimeout(() => {
+                    pageDeps.setBreadcrumbs(route.breadcrumbs);
+                  });
+                  return (
+                    <MlPageWrapper path={route.path}>{route.render(props, pageDeps)}</MlPageWrapper>
+                  );
+                }}
+              />
+            );
+          })}
+          <Redirect to="/overview" />
+        </Switch>
+      </EuiPageSection>
+    </RedirectAppLinks>
+  );
+});

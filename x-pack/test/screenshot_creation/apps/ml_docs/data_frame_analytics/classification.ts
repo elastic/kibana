@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { FLIGHTS_INDEX_PATTERN } from '../index';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
+import { FLIGHTS_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
 
   const screenshotDirectories = ['ml_docs', 'data_frame_analytics'];
 
@@ -70,14 +70,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.removeFocusFromElement();
+      await commonScreenshots.removeFocusFromElement();
       await ml.dataFrameAnalyticsCreation.scrollJobTypeSelectionIntoView();
-      await mlScreenshots.takeScreenshot('flights-classification-job-1', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('flights-classification-job-1', screenshotDirectories);
 
       await ml.testExecution.logTestStep('scroll to scatterplot matrix and take screenshot');
       await ml.dataFrameAnalyticsCreation.assertScatterplotMatrixLoaded();
       await ml.dataFrameAnalyticsCreation.scrollScatterplotMatrixIntoView();
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'flights-classification-scatterplot',
         screenshotDirectories
       );
@@ -97,8 +97,11 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('flights-classification-details', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
+        'flights-classification-details',
+        screenshotDirectories
+      );
     });
 
     it('results view screenshots', async () => {
@@ -123,15 +126,19 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataFrameAnalyticsResults.expandClassificationEvaluationSection(false);
       await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(false);
       await ml.dataFrameAnalyticsResults.expandScatterplotMatrixSection(false);
+      await ml.dataFrameAnalyticsResults.enableResultsTablePreviewHistogramCharts(true);
       await ml.dataFrameAnalyticsResults.scrollAnalysisIntoView();
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('flights-classification-results', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
+        'flights-classification-results',
+        screenshotDirectories
+      );
 
       await ml.testExecution.logTestStep('expand feature importance section and take screenshot');
       await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(true);
       await ml.dataFrameAnalyticsResults.scrollFeatureImportanceIntoView();
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
         'flights-classification-total-importance',
         screenshotDirectories
       );
@@ -140,21 +147,27 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('expand evaluation section and take screenshot');
       await ml.dataFrameAnalyticsResults.expandClassificationEvaluationSection(true);
       await ml.dataFrameAnalyticsResults.scrollClassificationEvaluationIntoView();
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot(
         'flights-classification-evaluation',
         screenshotDirectories
       );
-      await mlScreenshots.takeScreenshot('confusion-matrix-binary', screenshotDirectories);
-      await mlScreenshots.takeScreenshot('confusion-matrix-binary-accuracy', screenshotDirectories);
-      await ml.dataFrameAnalyticsResults.scrollRocCurveChartIntoView();
-      await mlScreenshots.takeScreenshot('flights-classification-roc-curve', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('confusion-matrix-binary', screenshotDirectories);
+      await commonScreenshots.takeScreenshot(
+        'confusion-matrix-binary-accuracy',
+        screenshotDirectories
+      );
+      await ml.dataFrameAnalyticsResults.scrollClassificationEvaluationIntoView();
+      await commonScreenshots.takeScreenshot(
+        'flights-classification-roc-curve',
+        screenshotDirectories
+      );
       await ml.dataFrameAnalyticsResults.expandClassificationEvaluationSection(false);
 
       await ml.testExecution.logTestStep('open decision path popover and take screenshot');
       await ml.dataFrameAnalyticsResults.scrollResultsIntoView();
       await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'flights-classification-importance',
         screenshotDirectories
       );

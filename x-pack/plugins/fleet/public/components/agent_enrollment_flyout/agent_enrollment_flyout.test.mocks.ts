@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
+    useFleetStatus: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
 });
@@ -16,23 +21,53 @@ jest.mock('../../hooks/use_request', () => {
   const module = jest.requireActual('../../hooks/use_request');
   return {
     ...module,
-    useGetSettings: jest.fn(),
-    sendGetFleetStatus: jest.fn(),
-    sendGetOneAgentPolicy: jest.fn(),
-    useGetAgents: jest.fn(),
+    useGetFleetServerHosts: jest.fn().mockReturnValue({
+      data: {
+        items: [
+          {
+            is_default: true,
+            host_urls: ['http://test.fr'],
+          },
+        ],
+      },
+    }),
+    useGetFleetProxies: jest.fn().mockReturnValue({
+      data: { items: [] },
+      isLoading: false,
+      isInitialRequest: false,
+    }),
+    useGetSettings: jest.fn().mockReturnValue({
+      data: { item: { fleet_server_hosts: ['test'] } },
+    }),
+    sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
+      data: { item: { package_policies: [] } },
+    }),
+    useGetAgents: jest.fn().mockReturnValue({
+      data: { items: [{ policy_id: 'fleet-server-policy' }] },
+    }),
     useGetAgentPolicies: jest.fn(),
   };
 });
 
+jest.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy', () => {
+  const module = jest.requireActual(
+    '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'
+  );
+  return {
+    ...module,
+    useFleetServerUnhealthy: jest.fn(),
+  };
+});
+
 jest.mock(
-  '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions',
+  '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form',
   () => {
     const module = jest.requireActual(
-      '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions'
+      '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form'
     );
     return {
       ...module,
-      useFleetServerInstructions: jest.fn(),
+      useAdvancedForm: jest.fn(),
     };
   }
 );
@@ -57,21 +92,22 @@ jest.mock('./steps', () => {
   const module = jest.requireActual('./steps');
   return {
     ...module,
-    AgentPolicySelectionStep: jest.fn(),
-    AgentEnrollmentKeySelectionStep: jest.fn(),
-    ViewDataStep: jest.fn(),
-    DownloadStep: jest.fn(),
+    AgentPolicySelectionStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'agent-policy-selection-step',
+      title: 'agent-policy-selection-step',
+    }),
+    AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'agent-enrollment-key-selection-step',
+      title: 'agent-enrollment-key-selection-step',
+    }),
+    DownloadStep: jest
+      .fn()
+      .mockReturnValue({ 'data-test-subj': 'download-step', title: 'download-step' }),
   };
 });
 
-jest.mock('@elastic/eui', () => {
-  const module = jest.requireActual('@elastic/eui');
+jest.mock('../../services/has_fleet_server', () => {
   return {
-    ...module,
-    EuiSteps: 'eui-steps',
+    policyHasFleetServer: jest.fn().mockReturnValue(true),
   };
-});
-
-jest.mock('../../applications/fleet/sections/agents/services/has_fleet_server', () => {
-  return { policyHasFleetServer: jest.fn().mockReturnValue(true) };
 });

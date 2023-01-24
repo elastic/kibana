@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const createClusterDataCheck = () => {
   let clusterHasUserData = false;
@@ -13,18 +13,24 @@ export const createClusterDataCheck = () => {
   return async function doesClusterHaveUserData(esClient: ElasticsearchClient, log: Logger) {
     if (!clusterHasUserData) {
       try {
-        const indices = await esClient.cat.indices({
-          format: 'json',
-          h: ['index', 'docs.count'],
+        const { indices = {} } = await esClient.indices.stats({
+          filter_path: 'indices.*.total.docs.count',
         });
-        clusterHasUserData = indices.some((indexCount) => {
-          const isInternalIndex =
-            indexCount.index?.startsWith('.') || indexCount.index?.startsWith('kibana_sample_');
 
-          return !isInternalIndex && parseInt(indexCount['docs.count']!, 10) > 0;
+        const indexIds = Object.keys(indices);
+
+        clusterHasUserData = indexIds.some((indexId: string) => {
+          // Check index to see if it starts with known internal prefixes
+          const isInternalIndex = indexId.startsWith('.') || indexId.startsWith('kibana_sample_');
+
+          // Check index to see if it has any docs
+          const hasDocs = (indices[indexId].total?.docs?.count || 0) > 0;
+
+          return !isInternalIndex && hasDocs;
         });
       } catch (e) {
         log.warn(`Error encountered while checking cluster for user data: ${e}`);
+
         clusterHasUserData = false;
       }
     }

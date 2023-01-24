@@ -8,25 +8,10 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  DiscoverGridDocumentToolbarBtn,
-  getDocId,
-  SelectButton,
-} from './discover_grid_document_selection';
-import { esHits } from '../../__mocks__/es_hits';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { DiscoverGridDocumentToolbarBtn, SelectButton } from './discover_grid_document_selection';
+import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { DiscoverGridContext } from './discover_grid_context';
-
-const baseContextMock = {
-  expanded: undefined,
-  setExpanded: jest.fn(),
-  rows: esHits,
-  onFilter: jest.fn(),
-  indexPattern: indexPatternMock,
-  isDarkMode: false,
-  selectedDocs: [],
-  setSelectedDocs: jest.fn(),
-};
+import { getDocId } from '../../utils/get_doc_id';
 
 describe('document selection', () => {
   describe('getDocId', () => {
@@ -50,7 +35,7 @@ describe('document selection', () => {
   describe('SelectButton', () => {
     test('is not checked', () => {
       const contextMock = {
-        ...baseContextMock,
+        ...discoverGridContextMock,
       };
 
       const component = mountWithIntl(
@@ -73,7 +58,7 @@ describe('document selection', () => {
 
     test('is checked', () => {
       const contextMock = {
-        ...baseContextMock,
+        ...discoverGridContextMock,
         selectedDocs: ['i::1::'],
       };
 
@@ -97,7 +82,7 @@ describe('document selection', () => {
 
     test('adding a selection', () => {
       const contextMock = {
-        ...baseContextMock,
+        ...discoverGridContextMock,
       };
 
       const component = mountWithIntl(
@@ -120,7 +105,7 @@ describe('document selection', () => {
     });
     test('removing a selection', () => {
       const contextMock = {
-        ...baseContextMock,
+        ...discoverGridContextMock,
         selectedDocs: ['i::1::'],
       };
 
@@ -147,7 +132,7 @@ describe('document selection', () => {
     test('it renders a button clickable button', () => {
       const props = {
         isFilterActive: false,
-        rows: esHits,
+        rows: discoverGridContextMock.rows,
         selectedDocs: ['i::1::'],
         setIsFilterActive: jest.fn(),
         setSelectedDocs: jest.fn(),

@@ -11,13 +11,14 @@ import {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
   metricsSourceConfigurationResponseRT,
-} from '../../../../plugins/infra/common/metrics_sources';
+} from '@kbn/infra-plugin/common/metrics_sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const SOURCE_API_URL = '/api/metrics/source/default';
+  const kibanaServer = getService('kibanaServer');
   const patchRequest = async (
     body: PartialMetricsSourceConfigurationProperties
   ): Promise<MetricsSourceConfigurationResponse | undefined> => {
@@ -32,8 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('sources', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-    beforeEach(() => esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
-    afterEach(() => esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
+    before(() => kibanaServer.savedObjects.cleanStandardList());
+    after(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('patch request', () => {
       it('applies all top-level field updates to an existing source', async () => {

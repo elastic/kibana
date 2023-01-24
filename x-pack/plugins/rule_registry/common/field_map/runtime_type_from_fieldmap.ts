@@ -23,7 +23,7 @@ const NumberFromString = new t.Type(
 
 const BooleanFromString = new t.Type(
   'BooleanFromString',
-  (u): u is boolean => typeof u === 'boolean',
+  (u): u is boolean => typeof u === 'string',
   (u, c) =>
     either.chain(t.string.validate(u, c), (s) => {
       switch (s.toLowerCase().trim()) {
@@ -34,7 +34,6 @@ const BooleanFromString = new t.Type(
         case '0':
         case 'false':
         case 'no':
-        case null:
           return t.success(false);
         default:
           return t.failure(u, c);
@@ -48,7 +47,7 @@ const esFieldTypeMap = {
   version: t.string,
   text: t.string,
   date: t.string,
-  boolean: t.union([t.number, BooleanFromString]),
+  boolean: t.union([t.boolean, BooleanFromString]),
   byte: t.union([t.number, NumberFromString]),
   long: t.union([t.number, NumberFromString]),
   integer: t.union([t.number, NumberFromString]),

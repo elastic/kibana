@@ -101,6 +101,7 @@ export function GroupDetails({
                   isInvalid={isInvalidName}
                 >
                   <EuiFieldText
+                    data-test-subj="apmGroupNameInput"
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
@@ -141,7 +142,7 @@ export function GroupDetails({
                 { defaultMessage: 'Description' }
               )}
               labelAppend={
-                <EuiText size="s" color="subdued">
+                <EuiText size="xs" color="subdued">
                   {i18n.translate(
                     'xpack.apm.serviceGroups.groupDetailsForm.description.optional',
                     { defaultMessage: 'Optional' }
@@ -172,6 +173,7 @@ export function GroupDetails({
                 }}
                 color="danger"
                 isDisabled={isLoading}
+                data-test-subj="apmDeleteGroupButton"
               >
                 {i18n.translate(
                   'xpack.apm.serviceGroups.groupDetailsForm.deleteGroup',

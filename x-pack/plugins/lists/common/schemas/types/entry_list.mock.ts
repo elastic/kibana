@@ -15,3 +15,10 @@ export const getEntryListMock = (): EntryList => ({
   operator: OPERATOR,
   type: LIST,
 });
+
+export const getEntryListExcludedMock = (): EntryList => ({
+  field: FIELD,
+  list: { id: LIST_ID, type: TYPE },
+  operator: 'excluded',
+  type: LIST,
+});

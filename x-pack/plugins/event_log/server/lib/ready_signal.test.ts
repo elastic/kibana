@@ -15,8 +15,11 @@ describe('ReadySignal', () => {
   });
 
   test('works as expected', async () => {
+    expect(readySignal.isEmitted()).toEqual(false);
     readySignal.signal(42);
+    expect(readySignal.isEmitted()).toEqual(true);
     const ready = await readySignal.wait();
     expect(ready).toBe(42);
+    expect(readySignal.isEmitted()).toEqual(true);
   });
 });

@@ -4,30 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from 'kibana/public';
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
+import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
-import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useSummaryArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  searchableFields: string[],
-  options: {
+  options: Partial<{
     filter: string;
     policies: string[];
-  } = {
-    filter: '',
-    policies: [],
-  },
-  customQueryOptions: UseQueryOptions<ExceptionListSummarySchema, HttpFetchError> = DEFAULT_OPTIONS
-): QueryObserverResult<ExceptionListSummarySchema, HttpFetchError> {
-  const { filter, policies } = options;
+  }> = DEFAULT_OPTIONS,
+  searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
+  customQueryOptions: Partial<UseQueryOptions<ExceptionListSummarySchema, IHttpFetchError>>
+): QueryObserverResult<ExceptionListSummarySchema, IHttpFetchError> {
+  const { filter = '', policies = [] } = options;
 
-  return useQuery<ExceptionListSummarySchema, HttpFetchError>(
-    ['summary', exceptionListApiClient, options],
+  return useQuery<ExceptionListSummarySchema, IHttpFetchError>(
+    ['summary', exceptionListApiClient, filter, policies],
     () => {
       return exceptionListApiClient.summary(
         parsePoliciesAndFilterToKql({
@@ -36,12 +36,6 @@ export function useSummaryArtifact(
         })
       );
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      keepPreviousData: true,
-      ...customQueryOptions,
-    }
+    customQueryOptions
   );
 }

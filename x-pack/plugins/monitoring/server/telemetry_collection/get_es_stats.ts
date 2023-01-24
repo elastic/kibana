@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -19,9 +20,17 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 export async function getElasticsearchStats(
   callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
-  const response = await fetchElasticsearchStats(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchElasticsearchStats(
+    callCluster,
+    clusterUuids,
+    start,
+    end,
+    maxBucketSize
+  );
   return handleElasticsearchStats(response);
 }
 
@@ -37,11 +46,12 @@ export async function getElasticsearchStats(
 export async function fetchElasticsearchStats(
   callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: maxBucketSize,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._source.cluster_uuid',
@@ -52,6 +62,7 @@ export async function fetchElasticsearchStats(
       'hits.hits._source.stack_stats',
     ],
     body: {
+      size: maxBucketSize,
       query: {
         bool: {
           filter: [
@@ -61,6 +72,15 @@ export async function fetchElasticsearchStats(
              */
             { term: { type: 'cluster_stats' } },
             { terms: { cluster_uuid: clusterUuids } },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: moment.utc(start).valueOf(),
+                  lte: moment.utc(end).valueOf(),
+                },
+              },
+            },
           ],
         },
       },

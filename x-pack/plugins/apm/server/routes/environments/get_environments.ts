@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, termQuery } from '../../../../observability/server';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
 import { Environment } from '../../../common/environment_rt';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
  * This is used for getting the list of environments for the environments selector,
@@ -23,12 +23,12 @@ import { Environment } from '../../../common/environment_rt';
 export async function getEnvironments({
   searchAggregatedTransactions,
   serviceName,
-  setup,
+  apmEventClient,
   size,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName?: string;
   searchAggregatedTransactions: boolean;
   size: number;
@@ -39,8 +39,6 @@ export async function getEnvironments({
     ? 'get_environments_for_service'
     : 'get_environments';
 
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [
@@ -50,6 +48,7 @@ export async function getEnvironments({
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

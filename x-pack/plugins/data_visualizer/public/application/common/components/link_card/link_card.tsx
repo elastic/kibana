@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactElement } from 'react';
+import React, { FC } from 'react';
 
 import {
   EuiIcon,
@@ -17,9 +17,10 @@ import {
   EuiPanel,
   EuiLink,
 } from '@elastic/eui';
+import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
-interface Props {
-  icon: IconType | ReactElement;
+export interface LinkCardProps {
+  icon: IconType;
   iconAreaLabel?: string;
   title: any;
   description: any;
@@ -31,7 +32,7 @@ interface Props {
 
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
-export const LinkCard: FC<Props> = ({
+export const LinkCard: FC<LinkCardProps> = ({
   icon,
   iconAreaLabel,
   title,
@@ -39,8 +40,10 @@ export const LinkCard: FC<Props> = ({
   onClick,
   href,
   isDisabled,
-  'data-test-subj': dateTestSubj,
+  'data-test-subj': dataTestSubj,
 }) => {
+  const euiTheme = useCurrentEuiTheme();
+
   const linkHrefAndOnClickProps = {
     ...(href ? { href } : {}),
     ...(onClick ? { onClick } : {}),
@@ -58,23 +61,23 @@ export const LinkCard: FC<Props> = ({
           background: 'transparent',
           outline: 'none',
         }}
-        data-test-subj={dateTestSubj}
+        data-test-subj={dataTestSubj}
         color="subdued"
         {...linkHrefAndOnClickProps}
       >
-        <EuiFlexGroup gutterSize="l" responsive={true}>
-          <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
+        <EuiFlexGroup gutterSize="s" responsive={true}>
+          <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.euiSizeXS }}>
             {typeof icon === 'string' ? (
-              <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
+              <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
             ) : (
               icon
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{title}</h3>
             </EuiTitle>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size={'s'}>
               <p>{description}</p>
             </EuiText>
           </EuiFlexItem>

@@ -16,6 +16,7 @@
       "description": [],
       "path": "x-pack/plugins/osquery/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -29,6 +30,7 @@
       "description": [],
       "path": "x-pack/plugins/osquery/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "osquery",
@@ -38,10 +40,196 @@
           "label": "OsqueryAction",
           "description": [],
           "signature": [
-            "((props: any) => JSX.Element) | undefined"
+            "((props: ",
+            "OsqueryActionProps",
+            " & { ecsData?: ",
+            "Ecs",
+            " | undefined; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryResults",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryResults",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "OsqueryActionResultsProps",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.OsqueryResults.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "OsqueryActionResultsProps"
+              ],
+              "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_results.tsx",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.LiveQueryField",
+          "type": "Function",
+          "tags": [],
+          "label": "LiveQueryField",
+          "description": [],
+          "signature": [
+            "(({ formMethods, ...props }: ",
+            "LiveQueryQueryFieldProps",
+            " & { formMethods: ",
+            "UseFormReturn",
+            "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any>; }) => JSX.Element) | undefined"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.isOsqueryAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "isOsqueryAvailable",
+          "description": [],
+          "signature": [
+            "(props: { agentId: string; }) => boolean"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.isOsqueryAvailable.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "path": "x-pack/plugins/osquery/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "osquery",
+                  "id": "def-public.OsqueryPluginStart.isOsqueryAvailable.$1.agentId",
+                  "type": "string",
+                  "tags": [],
+                  "label": "agentId",
+                  "description": [],
+                  "path": "x-pack/plugins/osquery/public/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.fetchInstallationStatus",
+          "type": "Function",
+          "tags": [],
+          "label": "fetchInstallationStatus",
+          "description": [],
+          "signature": [
+            "() => { loading: boolean; disabled: boolean; permissionDenied: boolean; }"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.OsqueryResponseActionTypeForm",
+          "type": "Function",
+          "tags": [],
+          "label": "OsqueryResponseActionTypeForm",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "OsqueryResponseActionsParamsFormProps",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.OsqueryResponseActionTypeForm.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "OsqueryResponseActionsParamsFormProps"
+              ],
+              "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "osquery",
+          "id": "def-public.OsqueryPluginStart.fetchAllLiveQueries",
+          "type": "Function",
+          "tags": [],
+          "label": "fetchAllLiveQueries",
+          "description": [],
+          "signature": [
+            "(config: ",
+            "UseAllLiveQueriesConfig",
+            ") => ",
+            "UseQueryResult",
+            "<{ data: Omit<",
+            "ActionsStrategyResponse",
+            ", \"edges\"> & { items: ",
+            "SearchHit",
+            "<object>[]; }; }, Error>"
+          ],
+          "path": "x-pack/plugins/osquery/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-public.OsqueryPluginStart.fetchAllLiveQueries.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                "UseAllLiveQueriesConfig"
+              ],
+              "path": "x-pack/plugins/osquery/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -64,7 +252,71 @@
       "description": [],
       "path": "x-pack/plugins/osquery/server/types.ts",
       "deprecated": false,
-      "children": [],
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "osquery",
+          "id": "def-server.OsqueryPluginSetup.osqueryCreateAction",
+          "type": "Function",
+          "tags": [],
+          "label": "osqueryCreateAction",
+          "description": [],
+          "signature": [
+            "(payload: { agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }, ecsData?: ",
+            {
+              "pluginId": "@kbn/ecs",
+              "scope": "common",
+              "docId": "kibKbnEcsPluginApi",
+              "section": "def-common.Ecs",
+              "text": "Ecs"
+            },
+            " | undefined) => void"
+          ],
+          "path": "x-pack/plugins/osquery/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.osqueryCreateAction.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "payload",
+              "description": [],
+              "signature": [
+                "{ agent_ids?: string[] | undefined; agent_all?: boolean | undefined; agent_platforms?: string[] | undefined; agent_policy_ids?: string[] | undefined; query?: string | undefined; queries?: { id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined; saved_query_id?: string | undefined; ecs_mapping?: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; pack_id?: string | undefined; alert_ids?: string[] | undefined; case_ids?: string[] | undefined; event_ids?: string[] | undefined; metadata?: object | undefined; }"
+              ],
+              "path": "x-pack/plugins/osquery/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "osquery",
+              "id": "def-server.OsqueryPluginSetup.osqueryCreateAction.$2",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "ecsData",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/ecs",
+                  "scope": "common",
+                  "docId": "kibKbnEcsPluginApi",
+                  "section": "def-common.Ecs",
+                  "text": "Ecs"
+                },
+                " | undefined"
+              ],
+              "path": "x-pack/plugins/osquery/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -77,6 +329,7 @@
       "description": [],
       "path": "x-pack/plugins/osquery/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -100,6 +353,7 @@
         ],
         "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -114,6 +368,7 @@
         ],
         "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -128,6 +383,7 @@
         ],
         "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -142,6 +398,7 @@
         ],
         "path": "x-pack/plugins/osquery/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -156,6 +413,7 @@
         ],
         "path": "x-pack/plugins/osquery/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -9,18 +9,19 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults } from 'lodash';
+import { omit, defaults, get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 
 import {
   SavedObject,
-  SavedObjectsSerializer,
+  ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -33,6 +34,7 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -40,7 +42,8 @@ export interface StoreOpts {
   taskManagerId: string;
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
+  adHocTaskCounter: AdHocTaskCounter;
 }
 
 export interface SearchOpts {
@@ -54,6 +57,7 @@ export interface SearchOpts {
 export interface AggregationOpts {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   query?: estypes.QueryDslQueryContainer;
+  runtime_mappings?: estypes.MappingRuntimeFields;
   size?: number;
 }
 
@@ -92,7 +96,8 @@ export class TaskStore {
   private esClient: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
-  private serializer: SavedObjectsSerializer;
+  private serializer: ISavedObjectsSerializer;
+  private adHocTaskCounter: AdHocTaskCounter;
 
   /**
    * Constructs a new TaskStore.
@@ -110,6 +115,7 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.adHocTaskCounter = opts.adHocTaskCounter;
   }
 
   /**
@@ -138,12 +144,49 @@ export class TaskStore {
         taskInstanceToAttributes(taskInstance),
         { id: taskInstance.id, refresh: false }
       );
+      if (get(taskInstance, 'schedule.interval', null) == null) {
+        this.adHocTaskCounter.increment();
+      }
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
 
     return savedObjectToConcreteTaskInstance(savedObject);
+  }
+
+  /**
+   * Bulk schedules a task.
+   *
+   * @param tasks - The tasks being scheduled.
+   */
+  public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
+    const objects = taskInstances.map((taskInstance) => {
+      this.definitions.ensureHas(taskInstance.taskType);
+      return {
+        type: 'task',
+        attributes: taskInstanceToAttributes(taskInstance),
+        id: taskInstance.id,
+      };
+    });
+
+    let savedObjects;
+    try {
+      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
+        objects,
+        { refresh: false }
+      );
+      this.adHocTaskCounter.increment(
+        taskInstances.filter((task) => {
+          return get(task, 'schedule.interval', null) == null;
+        }).length
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
   }
 
   /**
@@ -265,6 +308,22 @@ export class TaskStore {
   }
 
   /**
+   * Bulk removes the specified tasks from the index.
+   *
+   * @param {SavedObjectsBulkDeleteObject[]} savedObjectsToDelete
+   * @returns {Promise<SavedObjectsBulkDeleteResponse>}
+   */
+  public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
+    try {
+      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
+      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete);
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+  }
+
+  /**
    * Gets a task by id
    *
    * @param {string} id
@@ -332,6 +391,8 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
     const body = await this.esClient.search<
@@ -344,6 +405,7 @@ export class TaskStore {
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,
+        runtime_mappings,
         size,
       }),
     });

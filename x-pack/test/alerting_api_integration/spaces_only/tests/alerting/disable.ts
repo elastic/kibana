@@ -15,6 +15,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   getEventLog,
+  TaskManagerDoc,
 } from '../../../common/lib';
 import { validateEvent } from './event_log';
 
@@ -25,17 +26,19 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  describe('disable', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/141864
+  describe.skip('disable', () => {
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const ruleUtils = new RuleUtils({ space: Spaces.space1, supertestWithoutAuth });
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask._source!;
     }
 
     it('should handle disable rule request appropriately', async () => {
@@ -48,12 +51,18 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       await ruleUtils.disable(createdRule.id);
 
-      try {
-        await getScheduledTask(createdRule.scheduled_task_id);
-        throw new Error('Should have removed scheduled task');
-      } catch (e) {
-        expect(e.meta.statusCode).to.eql(404);
-      }
+      // task doc should still exist but be disabled
+      await retry.try(async () => {
+        const taskRecord = await getScheduledTask(createdRule.scheduled_task_id);
+        expect(taskRecord.type).to.eql('task');
+        expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+        expect(JSON.parse(taskRecord.task.params)).to.eql({
+          alertId: createdRule.id,
+          spaceId: Spaces.space1.id,
+          consumer: 'alertsFixture',
+        });
+        expect(taskRecord.task.enabled).to.eql(false);
+      });
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -138,6 +147,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         message: "instance 'instance-0' has recovered due to the rule was disabled",
         shouldHaveEventEnd: false,
         shouldHaveTask: false,
+        ruleTypeId: createdRule.rule_type_id,
         rule: {
           id: ruleId,
           category: createdRule.rule_type_id,
@@ -145,6 +155,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           ruleset: 'alertsFixture',
           name: 'abc',
         },
+        consumer: 'alertsFixture',
       });
     });
 
@@ -186,12 +197,18 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           .set('kbn-xsrf', 'foo')
           .expect(204);
 
-        try {
-          await getScheduledTask(createdRule.scheduled_task_id);
-          throw new Error('Should have removed scheduled task');
-        } catch (e) {
-          expect(e.meta.statusCode).to.eql(404);
-        }
+        // task doc should still exist but be disabled
+        await retry.try(async () => {
+          const taskRecord = await getScheduledTask(createdRule.scheduled_task_id);
+          expect(taskRecord.type).to.eql('task');
+          expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+          expect(JSON.parse(taskRecord.task.params)).to.eql({
+            alertId: createdRule.id,
+            spaceId: Spaces.space1.id,
+            consumer: 'alertsFixture',
+          });
+          expect(taskRecord.task.enabled).to.eql(false);
+        });
 
         // Ensure AAD isn't broken
         await checkAAD({

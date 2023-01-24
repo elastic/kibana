@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { schema } from '@kbn/config-schema';
-// @ts-ignore
-import { handleError } from '../../../../lib/errors/handle_error';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-// @ts-ignore
-import { getMetrics } from '../../../../lib/details/get_metrics';
+import {
+  postElasticsearchCcrShardRequestParamsRT,
+  postElasticsearchCcrShardRequestPayloadRT,
+  postElasticsearchCcrShardResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
+import { TimeRange } from '../../../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
-import { LegacyRequest } from '../../../../types';
-import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import {
+  getIndexPatterns,
+  getElasticsearchDataset,
+} from '../../../../lib/cluster/get_index_patterns';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { handleError } from '../../../../lib/errors/handle_error';
 import { Globals } from '../../../../static_globals';
+import { LegacyRequest, MonitoringCore } from '../../../../types';
 
 function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;
@@ -27,10 +31,12 @@ function getFormattedLeaderIndex(leaderIndex: string) {
   return leader;
 }
 
-async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: unknown[]) {
-  const min = moment.utc(req.payload.timeRange.min).valueOf();
-  const max = moment.utc(req.payload.timeRange.max).valueOf();
-
+async function getCcrStat(
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
+  esIndexPattern: string,
+  filters: unknown[]
+) {
+  const { min, max } = req.payload.timeRange;
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   const params = {
@@ -78,32 +84,23 @@ async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: u
   return await callWithRequest(req, 'search', params);
 }
 
-export function ccrShardRoute(server: { route: (p: any) => void; config: () => {} }) {
+export function ccrShardRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchCcrShardRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchCcrShardRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr/{index}/shard/{shardId}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          index: schema.string(),
-          shardId: schema.string(),
-        }),
-        payload: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
-    async handler(req: LegacyRequest) {
+    async handler(req) {
       const index = req.params.index;
       const shardId = req.params.shardId;
       const moduleType = 'elasticsearch';
       const dataset = 'ccr';
-      const esIndexPattern = getNewIndexPatterns({
+      const esIndexPattern = getIndexPatterns({
         config: Globals.app.config,
         ccs: req.payload.ccs,
         moduleType,
@@ -114,7 +111,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
         {
           bool: {
             should: [
-              { term: { 'data_stream.dataset': { value: `${moduleType}.${dataset}` } } },
+              { term: { 'data_stream.dataset': { value: getElasticsearchDataset(dataset) } } },
               {
                 term: {
                   'metricset.name': {
@@ -171,7 +168,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
 
         const leaderIndex = mbStat ? mbStat?.leader?.index : legacyStat?.leader_index;
 
-        return {
+        return postElasticsearchCcrShardResponsePayloadRT.encode({
           metrics,
           stat: mbStat ?? legacyStat,
           formattedLeader: getFormattedLeaderIndex(leaderIndex ?? ''),
@@ -179,7 +176,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
             ccrResponse.hits?.hits[0]?._source['@timestamp'] ??
             ccrResponse.hits?.hits[0]?._source.timestamp,
           oldestStat: oldestMBStat ?? oldestLegacyStat,
-        };
+        });
       } catch (err) {
         return handleError(err, req);
       }

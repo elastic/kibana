@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs/promises';
 
 import JSON5 from 'json5';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import * as Registry from '../services/epm/registry';
 import { generatePackageInfoFromArchiveBuffer } from '../services/epm/archive';
@@ -37,22 +37,32 @@ describe('validate bundled packages', () => {
   }
 
   async function setupPackageObjects() {
+    // APM is a special case package in that it's "bundled release" is not available
+    // on the v2 registry image, because v2 currently only contains production packages.
+    // We bundle APM from snapshot, but that bundled version isn't available in the docker
+    // image that's running EPR during FTR runs, so to avoid nasty test failures we don't
+    // verify APM here.
+    const EXCLUDED_PACKAGES = ['apm'];
+
     const bundledPackages = await getBundledPackageEntries();
 
     const packageObjects = await Promise.all(
-      bundledPackages.map(async (bundledPackage) => {
-        const registryPackage = await Registry.getRegistryPackage(
-          bundledPackage.name,
-          bundledPackage.version
-        );
+      bundledPackages
+        .filter((pkg) => !EXCLUDED_PACKAGES.includes(pkg.name))
+        .map(async (bundledPackage) => {
+          const registryPackage = await Registry.getPackage(
+            bundledPackage.name,
+            bundledPackage.version
+          );
 
-        const packageArchive = await Registry.fetchArchiveBuffer(
-          bundledPackage.name,
-          bundledPackage.version
-        );
+          const packageArchive = await Registry.fetchArchiveBuffer({
+            pkgName: bundledPackage.name,
+            pkgVersion: bundledPackage.version,
+            shouldVerify: false,
+          });
 
-        return { registryPackage, packageArchive };
-      })
+          return { registryPackage, packageArchive };
+        })
     );
 
     return packageObjects;

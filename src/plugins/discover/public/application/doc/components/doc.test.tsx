@@ -14,8 +14,8 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { dataViewMock } from '../../../__mocks__/data_view';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockSearchApi = jest.fn();
 
@@ -56,7 +56,8 @@ async function mountDoc(update = false) {
   const props = {
     id: '1',
     index: 'index1',
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
+    referrer: 'mock-referrer',
   } as DocProps;
   let comp!: ReactWrapper;
   const services = {
@@ -82,6 +83,8 @@ async function mountDoc(update = false) {
         }
       },
     },
+    locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
+    chrome: { setBreadcrumbs: jest.fn() },
   };
   await act(async () => {
     comp = mountWithIntl(

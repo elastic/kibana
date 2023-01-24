@@ -6,14 +6,15 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-import { ConfigType } from './config';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: string[] = [];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = [
+    // Remove property below once `get-file` FF is enabled or removed
+    'responseActionGetFileEnabled',
+  ];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -23,10 +24,9 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
     packagerTaskInterval: '60s',
+    prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
-    prebuiltRulesFromFileSystem: true,
-    prebuiltRulesFromSavedObjects: false,
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };
@@ -44,12 +44,7 @@ const withExperimentalFeature = (
   };
 };
 
-const withRuleRegistryEnabled = (config: ConfigType, isEnabled: boolean): ConfigType => {
-  return isEnabled ? withExperimentalFeature(config, 'ruleRegistryEnabled') : config;
-};
-
 export const configMock = {
   createDefault: createMockConfig,
   withExperimentalFeature,
-  withRuleRegistryEnabled,
 };

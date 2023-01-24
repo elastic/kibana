@@ -20,6 +20,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'geo_shape'
     | 'ip'
     | 'ip_range'
+    | 'match_only_text'
     | 'murmur3'
     | 'number'
     | 'number_range'
@@ -27,6 +28,8 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'string'
     | string
     | 'nested'
+    | 'gauge'
+    | 'counter'
     | 'version';
   label?: string;
   scripted?: boolean;
@@ -45,8 +48,9 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
   ip_range: { iconType: 'tokenIP' },
+  match_only_text: { iconType: 'tokenString' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
-  murmur3: { iconType: 'tokenFile' },
+  murmur3: { iconType: 'tokenSearchType' },
   number: { iconType: 'tokenNumber' },
   number_range: { iconType: 'tokenNumber' },
   histogram: { iconType: 'tokenHistogram' },
@@ -54,6 +58,8 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },
+  gauge: { iconType: 'tokenMetricGauge' },
+  counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
 };

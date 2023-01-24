@@ -15,4 +15,6 @@ export interface EsClusterExecOptions {
   password?: string;
   skipReadyCheck?: boolean;
   readyTimeout?: number;
+  onEarlyExit?: (msg: string) => void;
+  writeLogsToPath?: string;
 }

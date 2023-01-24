@@ -13,7 +13,7 @@ import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascr
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);
@@ -49,8 +49,8 @@ const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
 const LineNumber = euiStyled.div<{ highlight: boolean }>`
   position: relative;
   min-width: 42px;
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
-  padding-right: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+  padding-right: ${({ theme }) => theme.eui.euiSizeXS};
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
   line-height: ${LINE_HEIGHT}px;
   text-align: right;
@@ -138,7 +138,7 @@ export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
             style={xcode}
             PreTag={Line}
             CodeTag={Code}
-            customStyle={{ padding: null, overflowX: null }}
+            customStyle={{ padding: undefined, overflowX: undefined }}
           >
             {line}
           </SyntaxHighlighter>

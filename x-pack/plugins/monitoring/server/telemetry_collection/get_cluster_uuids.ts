@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import {
@@ -41,10 +41,10 @@ export async function fetchClusterUuids(
 
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: 0,
     ignore_unavailable: true,
     filter_path: 'aggregations.cluster_uuids.buckets.key',
     body: {
+      size: 0,
       query: createQuery({ type: 'cluster_stats', start, end }) as estypes.QueryDslQueryContainer,
       aggs: {
         cluster_uuids: {

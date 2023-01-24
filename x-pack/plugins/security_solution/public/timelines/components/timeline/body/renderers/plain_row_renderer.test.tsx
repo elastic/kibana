@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { TimelineId } from '../../../../../../common/types';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { plainRowRenderer } from './plain_row_renderer';
 
@@ -22,10 +22,9 @@ describe('plain_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = plainRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: mockDatum,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = shallow(<span>{children}</span>);
     expect(wrapper).toMatchSnapshot();
@@ -37,10 +36,9 @@ describe('plain_row_renderer', () => {
 
   test('should render a plain row', () => {
     const children = plainRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: mockDatum,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(<span>{children}</span>);
     expect(wrapper.text()).toEqual('');

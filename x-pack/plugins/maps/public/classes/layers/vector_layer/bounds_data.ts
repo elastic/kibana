@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { SOURCE_BOUNDS_DATA_REQUEST_ID } from '../../../../common/constants';
 import { MapExtent } from '../../../../common/descriptor_types';
 import { DataRequestContext } from '../../../actions';
@@ -22,7 +22,13 @@ export async function syncBoundsData({
   source: IVectorSource;
   sourceQuery: Query | null;
 }): Promise<MapExtent | null> {
-  const { startLoading, stopLoading, registerCancelCallback, dataFilters } = syncContext;
+  const {
+    startLoading,
+    stopLoading,
+    registerCancelCallback,
+    dataFilters,
+    isFeatureEditorOpenForLayer,
+  } = syncContext;
 
   const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${layerId}`);
 
@@ -33,9 +39,12 @@ export async function syncBoundsData({
     query: dataFilters.query,
     timeFilters: dataFilters.timeFilters,
     timeslice: dataFilters.timeslice,
+    embeddableSearchContext: dataFilters.embeddableSearchContext,
     filters: dataFilters.filters,
+    joinKeyFilter: dataFilters.joinKeyFilter,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
+    isFeatureEditorOpenForLayer,
   };
 
   let bounds = null;

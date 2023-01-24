@@ -6,7 +6,15 @@ exports[`GaugeComponent renders the chart 1`] = `
 >
   <Settings
     ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
     debugState={false}
+    noResults={
+      <EmptyPlaceholder
+        icon={[Function]}
+        renderComplete={[Function]}
+      />
+    }
+    onRenderChange={[Function]}
     theme={
       Array [
         Object {
@@ -18,7 +26,7 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
   />
-  <Component
+  <Goal
     actual={3}
     bandFillColor={[Function]}
     bands={
@@ -28,19 +36,17 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
     base={0}
+    domain={
+      Object {
+        "max": 4,
+        "min": 0,
+      }
+    }
     id="goal"
     labelMajor="Count of records   "
     labelMinor=""
     subtype="verticalBullet"
     tickValueFormatter={[Function]}
-    ticks={
-      Array [
-        0,
-        1.33,
-        2.67,
-        4,
-      ]
-    }
     tooltipValueFormatter={[Function]}
   />
 </Chart>

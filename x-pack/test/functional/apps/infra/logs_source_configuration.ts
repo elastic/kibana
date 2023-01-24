@@ -16,26 +16,49 @@ const COMMON_REQUEST_HEADERS = {
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
-  const pageObjects = getPageObjects(['common', 'infraLogs']);
+  const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Allows indices configuration', () => {
+      const logPosition = {
+        start: DATES.metricsAndLogs.stream.startWithData,
+        end: DATES.metricsAndLogs.stream.endWithData,
+      };
+      const formattedLocalStart = new Date(logPosition.start).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      it('renders the correct page title', async () => {
+        await pageObjects.infraLogs.navigateToTab('settings');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        retry.try(async () => {
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
+        });
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {
@@ -44,6 +67,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await infraSourceConfigurationForm.getForm();
         });
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
@@ -71,6 +96,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await infraSourceConfigurationForm.getForm();
         });
 
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
         await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await logIndicesInput.type('filebeat-*');
@@ -79,17 +106,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({
-          logPosition: {
-            start: DATES.metricsAndLogs.stream.startWithData,
-            end: DATES.metricsAndLogs.stream.endWithData,
-          },
-        });
+        await logsUi.logStreamPage.navigateTo({ logPosition });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
+          expect(columnHeaderLabels).to.eql([formattedLocalStart, 'event.dataset', 'Message']);
         });
 
         const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
@@ -104,12 +126,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('records telemetry for logs', async () => {
-        await logsUi.logStreamPage.navigateTo({
-          logPosition: {
-            start: DATES.metricsAndLogs.stream.startWithData,
-            end: DATES.metricsAndLogs.stream.endWithData,
-          },
-        });
+        await logsUi.logStreamPage.navigateTo({ logPosition });
 
         await logsUi.logStreamPage.getStreamEntries();
 
@@ -144,17 +161,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({
-          logPosition: {
-            start: DATES.metricsAndLogs.stream.startWithData,
-            end: DATES.metricsAndLogs.stream.endWithData,
-          },
-        });
+        await logsUi.logStreamPage.navigateTo({ logPosition });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
+          expect(columnHeaderLabels).to.eql([formattedLocalStart, 'host.name']);
         });
 
         const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();

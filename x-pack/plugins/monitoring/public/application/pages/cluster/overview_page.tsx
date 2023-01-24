@@ -7,16 +7,16 @@
 
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 import { PageTemplate } from '../page_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
@@ -33,7 +33,7 @@ export const ClusterOverview: React.FC<{}> = () => {
   const [clusters, setClusters] = useState([] as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
   const [loaded, setLoaded] = useState<boolean | null>(false);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   let tabs: TabMenuItem[] = [];
 

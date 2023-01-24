@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';

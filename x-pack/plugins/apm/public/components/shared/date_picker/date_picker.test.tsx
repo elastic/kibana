@@ -13,7 +13,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { DatePicker } from './';
+import { DatePicker } from '.';
 
 let history: MemoryHistory;
 
@@ -124,7 +124,7 @@ describe('DatePicker', () => {
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const { wrapper } = mountDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
@@ -139,7 +139,7 @@ describe('DatePicker', () => {
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     mountDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',

@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { FullSizeCenteredPage } from './full_size_centered_page';
 
-export const CspLoadingState: React.FunctionComponent = ({ children }) => (
-  <EuiFlexGroup direction="column" alignItems="center">
-    <EuiFlexItem>
+// Keep this component lean as it is part of the main app bundle
+export const CspLoadingState: React.FunctionComponent<{ ['data-test-subj']?: string }> = ({
+  children,
+  ...rest
+}) => {
+  return (
+    <FullSizeCenteredPage data-test-subj={rest['data-test-subj']}>
       <EuiLoadingSpinner size="xl" />
-    </EuiFlexItem>
-    <EuiFlexItem>{children}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+      <EuiSpacer />
+      {children}
+    </FullSizeCenteredPage>
+  );
+};

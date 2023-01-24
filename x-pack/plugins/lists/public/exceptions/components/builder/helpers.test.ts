@@ -6,23 +6,23 @@
  */
 
 import {
-  CreateExceptionListItemSchema,
   EntryExists,
   EntryList,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
-  ExceptionListItemSchema,
   ExceptionListType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  ALL_OPERATORS,
   BuilderEntry,
-  EXCEPTION_OPERATORS,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   EmptyEntry,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
   doesNotExistOperator,
@@ -53,12 +53,12 @@ import {
   isOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
-import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
@@ -596,13 +596,6 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns all operator options if "listType" is "detection"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'detection', false);
-      const expected: OperatorOption[] = EXCEPTION_OPERATORS;
-      expect(output).toEqual(expected);
-    });
-
     test('it returns "isOperator", "isNotOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', true);
@@ -618,13 +611,48 @@ describe('Exception builder helpers', () => {
     test('it returns list operators if specified to', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', false, true);
-      expect(output).toEqual(EXCEPTION_OPERATORS);
+      expect(output.some((operator) => operator.value === 'is_not_in_list')).toBeTruthy();
+      expect(output.some((operator) => operator.value === 'is_in_list')).toBeTruthy();
     });
 
     test('it does not return list operators if specified not to', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const payloadItem: FormattedBuilderEntry = {
+        ...getMockBuilderEntry(),
+        field: getField('@tags'),
+      };
       const output = getOperatorOptions(payloadItem, 'detection', false, false);
       expect(output).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
+    });
+
+    test('it returns all possible operators if list type is not "detection"', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'endpoint_events', false, true);
+      expect(output).toEqual(ALL_OPERATORS);
+    });
+
+    test('it returns all operators supported by detection engine if list type is "detection"', () => {
+      const payloadItem: FormattedBuilderEntry = {
+        ...getMockBuilderEntry(),
+        field: getField('@tags'),
+      };
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      expect(output).toEqual(DETECTION_ENGINE_EXCEPTION_OPERATORS);
+    });
+
+    test('it excludes wildcard operators if list type is "detection" and field is not a string', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      const expected: OperatorOption[] = [
+        isOperator,
+        isNotOperator,
+        isOneOfOperator,
+        isNotOneOfOperator,
+        existsOperator,
+        doesNotExistOperator,
+        isInListOperator,
+        isNotInListOperator,
+      ];
+      expect(output).toEqual(expected);
     });
   });
 
@@ -1027,15 +1055,37 @@ describe('Exception builder helpers', () => {
   });
 
   describe('#getFormattedBuilderEntries', () => {
-    test('it returns formatted entry with field undefined if it unable to find a matching index pattern field', () => {
+    test('it returns formatted entry with field undefined if it unable to find a matching index pattern field and "allowCustomFieldOptions" is "false"', () => {
       const payloadIndexPattern = getMockIndexPattern();
       const payloadItems: BuilderEntry[] = [getEntryMatchWithIdMock()];
-      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
+      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems, false);
       const expected: FormattedBuilderEntry[] = [
         {
           correspondingKeywordField: undefined,
           entryIndex: 0,
           field: undefined,
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: 'some host name',
+        },
+      ];
+      expect(output).toEqual(expected);
+    });
+
+    test('it returns formatted entry with field even if it is unable to find a matching index pattern field and "allowCustomFieldOptions" is "true"', () => {
+      const payloadIndexPattern = getMockIndexPattern();
+      const payloadItems: BuilderEntry[] = [getEntryMatchWithIdMock()];
+      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems, true);
+      const expected: FormattedBuilderEntry[] = [
+        {
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: {
+            name: 'host.name',
+            type: 'keyword',
+          },
           id: '123',
           nested: undefined,
           operator: isOperator,
@@ -1052,7 +1102,7 @@ describe('Exception builder helpers', () => {
         { ...getEntryMatchWithIdMock(), field: 'ip', value: 'some ip' },
         { ...getEntryMatchAnyWithIdMock(), field: 'extension', value: ['some extension'] },
       ];
-      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
+      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems, false);
       const field1: FieldSpec = {
         aggregatable: true,
         count: 0,
@@ -1110,7 +1160,7 @@ describe('Exception builder helpers', () => {
         { ...payloadParent },
       ];
 
-      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
+      const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems, false);
       const field1: FieldSpec = {
         aggregatable: true,
         count: 0,
@@ -1284,7 +1334,8 @@ describe('Exception builder helpers', () => {
         payloadItem,
         0,
         undefined,
-        undefined
+        undefined,
+        false
       );
       const field: FieldSpec = {
         aggregatable: false,
@@ -1309,6 +1360,95 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
+    test('it returns entry with field value undefined if "allowCustomFieldOptions" is "false" and no matching field found', () => {
+      const payloadIndexPattern: DataViewBase = {
+        ...getMockIndexPattern(),
+        fields: [
+          ...fields,
+          {
+            aggregatable: false,
+            count: 0,
+            esTypes: ['text'],
+            name: 'machine.os.raw.text',
+            readFromDocValues: true,
+            scripted: false,
+            searchable: false,
+            type: 'string',
+          },
+        ],
+      };
+      const payloadItem: BuilderEntry = {
+        ...getEntryMatchWithIdMock(),
+        field: 'custom.text',
+        value: 'some os',
+      };
+      const output = getFormattedBuilderEntry(
+        payloadIndexPattern,
+        payloadItem,
+        0,
+        undefined,
+        undefined,
+        false
+      );
+      const expected: FormattedBuilderEntry = {
+        correspondingKeywordField: undefined,
+        entryIndex: 0,
+        field: undefined,
+        id: '123',
+        nested: undefined,
+        operator: isOperator,
+        parent: undefined,
+        value: 'some os',
+      };
+      expect(output).toEqual(expected);
+    });
+
+    test('it returns entry with custom field value if "allowCustomFieldOptions" is "true" and no matching field found', () => {
+      const payloadIndexPattern: DataViewBase = {
+        ...getMockIndexPattern(),
+        fields: [
+          ...fields,
+          {
+            aggregatable: false,
+            count: 0,
+            esTypes: ['text'],
+            name: 'machine.os.raw.text',
+            readFromDocValues: true,
+            scripted: false,
+            searchable: false,
+            type: 'string',
+          },
+        ],
+      };
+      const payloadItem: BuilderEntry = {
+        ...getEntryMatchWithIdMock(),
+        field: 'custom.text',
+        value: 'some os',
+      };
+      const output = getFormattedBuilderEntry(
+        payloadIndexPattern,
+        payloadItem,
+        0,
+        undefined,
+        undefined,
+        true
+      );
+      const expected: FormattedBuilderEntry = {
+        correspondingKeywordField: undefined,
+        entryIndex: 0,
+        field: {
+          name: 'custom.text',
+          type: 'keyword',
+        },
+        id: '123',
+        nested: undefined,
+        operator: isOperator,
+        parent: undefined,
+        value: 'some os',
+      };
+      expect(output).toEqual(expected);
+    });
+
     test('it returns "FormattedBuilderEntry" with value "nested" of "child" when "parent" and "parentIndex" are defined', () => {
       const payloadIndexPattern = getMockIndexPattern();
       const payloadItem: BuilderEntry = { ...getEntryMatchWithIdMock(), field: 'child' };
@@ -1322,7 +1462,8 @@ describe('Exception builder helpers', () => {
         payloadItem,
         0,
         payloadParent,
-        1
+        1,
+        false
       );
       const field: FieldSpec = {
         aggregatable: false,
@@ -1372,7 +1513,8 @@ describe('Exception builder helpers', () => {
         payloadItem,
         0,
         undefined,
-        undefined
+        undefined,
+        false
       );
       const field: FieldSpec = {
         aggregatable: true,
@@ -1548,8 +1690,9 @@ describe('Exception builder helpers', () => {
     // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
     // for context around the temporary `id`
     test('it correctly validates entries that include a temporary `id`', () => {
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        { ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS },
+      ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS }]);
     });
@@ -1582,13 +1725,12 @@ describe('Exception builder helpers', () => {
         type: OperatorTypeEnum.MATCH,
         value: '',
       };
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([
-          {
-            ...rest,
-            entries: [...entries, mockEmptyException],
-          },
-        ]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1602,13 +1744,12 @@ describe('Exception builder helpers', () => {
         type: OperatorTypeEnum.MATCH,
         value: 'some value',
       };
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([
-          {
-            ...rest,
-            entries: [...entries, mockEmptyException],
-          },
-        ]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1622,13 +1763,12 @@ describe('Exception builder helpers', () => {
         type: OperatorTypeEnum.MATCH_ANY,
         value: ['some value'],
       };
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([
-          {
-            ...rest,
-            entries: [...entries, mockEmptyException],
-          },
-        ]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1640,13 +1780,12 @@ describe('Exception builder helpers', () => {
         field: '',
         type: OperatorTypeEnum.NESTED,
       };
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([
-          {
-            ...rest,
-            entries: [...entries, mockEmptyException],
-          },
-        ]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
@@ -1658,13 +1797,12 @@ describe('Exception builder helpers', () => {
         field: 'host.name',
         type: OperatorTypeEnum.NESTED,
       };
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([
-          {
-            ...rest,
-            entries: [...entries, mockEmptyException],
-          },
-        ]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
 
       expect(output).toEqual([
         {
@@ -1684,26 +1822,133 @@ describe('Exception builder helpers', () => {
         field: 'host.name',
         type: OperatorTypeEnum.NESTED,
       };
-      const output: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-        filterExceptionItems([
-          {
-            ...rest,
-            entries: [...entries, mockEmptyException],
-          },
-        ]);
+      const output: ExceptionsBuilderReturnExceptionItem[] = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
 
       expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
     });
 
-    test('it removes `temporaryId` from items', () => {
+    test('it removes `temporaryId` from "createExceptionListItemSchema" items', () => {
       const { meta, ...rest } = getNewExceptionItem({
         listId: '123',
+        name: 'rule name',
         namespaceType: 'single',
-        ruleName: 'rule name',
       });
       const exceptions = filterExceptionItems([{ ...rest, entries: [getEntryMatchMock()], meta }]);
 
       expect(exceptions).toEqual([{ ...rest, entries: [getEntryMatchMock()], meta: undefined }]);
+    });
+
+    test('it removes `temporaryId` from "createRuleExceptionListItemSchema" items', () => {
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: undefined,
+        name: 'rule name',
+        namespaceType: undefined,
+      });
+      const exceptions = filterExceptionItems([{ ...rest, entries: [getEntryMatchMock()], meta }]);
+
+      expect(exceptions).toEqual([{ ...rest, entries: [getEntryMatchMock()], meta: undefined }]);
+    });
+  });
+
+  describe('#getNewExceptionItem', () => {
+    it('returns new item with updated name', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: '123',
+        name: 'My Item Name',
+        namespaceType: 'single',
+      });
+
+      expect(rest.name).toEqual('My Item Name');
+    });
+
+    it('returns new item with list_id if one is passed in', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: '123',
+        name: 'My Item Name',
+        namespaceType: 'single',
+      });
+
+      expect(rest).toEqual({
+        comments: [],
+        description: 'Exception list item',
+        entries: [{ field: '', id: '123', operator: 'included', type: 'match', value: '' }],
+        item_id: undefined,
+        list_id: '123',
+        name: 'My Item Name',
+        namespace_type: 'single',
+        tags: [],
+        type: 'simple',
+      });
+    });
+
+    it('returns new item without list_id if none is passed in', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: undefined,
+        name: 'My Item Name',
+        namespaceType: 'single',
+      });
+
+      expect(rest).toEqual({
+        comments: [],
+        description: 'Exception list item',
+        entries: [{ field: '', id: '123', operator: 'included', type: 'match', value: '' }],
+        item_id: undefined,
+        list_id: undefined,
+        name: 'My Item Name',
+        namespace_type: 'single',
+        tags: [],
+        type: 'simple',
+      });
+    });
+
+    it('returns new item with namespace_type if one is passed in', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: '123',
+        name: 'My Item Name',
+        namespaceType: 'single',
+      });
+
+      expect(rest).toEqual({
+        comments: [],
+        description: 'Exception list item',
+        entries: [{ field: '', id: '123', operator: 'included', type: 'match', value: '' }],
+        item_id: undefined,
+        list_id: '123',
+        name: 'My Item Name',
+        namespace_type: 'single',
+        tags: [],
+        type: 'simple',
+      });
+    });
+
+    it('returns new item without namespace_type if none is passed in', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { meta, ...rest } = getNewExceptionItem({
+        listId: '123',
+        name: 'My Item Name',
+        namespaceType: undefined,
+      });
+
+      expect(rest).toEqual({
+        comments: [],
+        description: 'Exception list item',
+        entries: [{ field: '', id: '123', operator: 'included', type: 'match', value: '' }],
+        item_id: undefined,
+        list_id: '123',
+        name: 'My Item Name',
+        namespace_type: undefined,
+        tags: [],
+        type: 'simple',
+      });
     });
   });
 

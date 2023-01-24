@@ -14,7 +14,13 @@
 
 import { EventEmitter } from 'events';
 
-export interface Suite {
+export interface Suite extends Runnable {
+  _beforeAll: Runnable[];
+  _beforeEach: Runnable[];
+  _afterEach: Runnable[];
+  _afterAll: Runnable[];
+
+  currentTest?: Test;
   suites: Suite[];
   tests: Test[];
   title: string;
@@ -25,7 +31,7 @@ export interface Suite {
   suiteTag: string;
 }
 
-export interface Test {
+export interface Test extends Runnable {
   fullTitle(): string;
   title: string;
   file?: string;
@@ -34,9 +40,20 @@ export interface Test {
   pending?: boolean;
 }
 
+export interface Runnable {
+  isFailed(): boolean;
+  isPending(): boolean;
+  duration?: number;
+  titlePath(): string[];
+  file?: string;
+  title: string;
+  parent?: Suite;
+}
+
 export interface Runner extends EventEmitter {
   abort(): void;
   failures: any[];
+  uncaught: (error: Error) => void;
 }
 
 export interface Mocha {

@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { ExternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
 
 export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSpacesService, usageStatsServicePromise } = deps;

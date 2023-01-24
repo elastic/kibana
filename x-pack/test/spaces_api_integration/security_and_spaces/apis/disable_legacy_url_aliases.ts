@@ -10,7 +10,6 @@ import { getTestScenarios } from '../../../saved_object_api_integration/common/l
 import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
 import {
   disableLegacyUrlAliasesTestSuiteFactory,
-  DisableLegacyUrlAliasesTestCase,
   TEST_CASE_TARGET_TYPE,
   TEST_CASE_SOURCE_ID,
   DisableLegacyUrlAliasesTestDefinition,
@@ -18,16 +17,18 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
   SPACE_1: { spaceId: SPACE_1_ID },
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 
-const createTestCases = (...spaceIds: string[]): DisableLegacyUrlAliasesTestCase[] => {
-  return spaceIds.map((targetSpace) => ({
-    targetSpace,
-    targetType: TEST_CASE_TARGET_TYPE,
-    sourceId: TEST_CASE_SOURCE_ID,
-  }));
+const createTestCases = () => {
+  const baseCase = { targetType: TEST_CASE_TARGET_TYPE, sourceId: TEST_CASE_SOURCE_ID };
+  return {
+    [DEFAULT_SPACE_ID]: { ...baseCase, targetSpace: DEFAULT_SPACE_ID, expectFound: true }, // alias exists in the default space and should have been disabled
+    [SPACE_1_ID]: { ...baseCase, targetSpace: SPACE_1_ID, expectFound: false }, // alias does not exist in space_1
+    [SPACE_2_ID]: { ...baseCase, targetSpace: SPACE_2_ID, expectFound: true }, // alias exists in space_2 and should have been disabled
+  };
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -49,30 +50,34 @@ export default function ({ getService }: FtrProviderContext) {
     getTestScenarios().security.forEach(({ users }) => {
       // We are intentionally using "security" test scenarios here, *not* "securityAndSpaces", because of how these tests are structured.
 
+      const testCases = createTestCases();
+
       [
         users.noAccess,
         users.legacyAll,
         users.dualRead,
         users.readGlobally,
-        users.allAtDefaultSpace,
         users.readAtDefaultSpace,
         users.readAtSpace1,
       ].forEach((user) => {
-        const unauthorized = createTestDefinitions(createTestCases(SPACE_1_ID, SPACE_2_ID), true);
+        const unauthorized = createTestDefinitions(Object.values(testCases), true);
         _addTests(user, unauthorized);
       });
 
+      const authorizedDefaultSpace = [
+        ...createTestDefinitions(testCases[DEFAULT_SPACE_ID], false),
+        ...createTestDefinitions([testCases[SPACE_1_ID], testCases[SPACE_2_ID]], true),
+      ];
+      _addTests(users.allAtDefaultSpace, authorizedDefaultSpace);
+
       const authorizedSpace1 = [
-        ...createTestDefinitions(createTestCases(SPACE_1_ID), false),
-        ...createTestDefinitions(createTestCases(SPACE_2_ID), true),
+        ...createTestDefinitions(testCases[SPACE_1_ID], false),
+        ...createTestDefinitions([testCases[DEFAULT_SPACE_ID], testCases[SPACE_2_ID]], true),
       ];
       _addTests(users.allAtSpace1, authorizedSpace1);
 
       [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
-        const authorizedGlobally = createTestDefinitions(
-          createTestCases(SPACE_1_ID, SPACE_2_ID),
-          false
-        );
+        const authorizedGlobally = createTestDefinitions(Object.values(testCases), false);
         _addTests(user, authorizedGlobally);
       });
     });

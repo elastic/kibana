@@ -23,6 +23,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -33,7 +34,6 @@ import {
 import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../../../../src/plugins/saved_objects/public';
 import {
   useMlKibana,
   useMlApiContext,
@@ -76,6 +76,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   useEffect(function initialPageLoad() {
     setCurrentDataViewTitle(jobCreator.indexPatternTitle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -128,10 +129,12 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       <EuiModal onClose={onClose} data-test-subj="mlJobMgmtImportJobsFlyout">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
-              defaultMessage="Change data view"
-            />
+            <h1>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
+                defaultMessage="Change data view"
+              />
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -165,6 +168,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                         defaultMessage: 'Data view',
                       }
                     ),
+                    defaultSearchField: 'name',
                   },
                 ]}
                 fixedPageSize={fixedPageSize}

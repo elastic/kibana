@@ -9,9 +9,9 @@ import { useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { HttpFetchError } from 'kibana/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
@@ -54,7 +54,7 @@ import type { EsIngestPipeline } from '../../../common/types/es_ingest_pipeline'
 
 import { useAppDependencies } from '../app_dependencies';
 
-import { SavedSearchQuery } from './use_search_items';
+import type { SavedSearchQuery } from './use_search_items';
 
 // Default sampler shard size used for field histograms
 export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
@@ -73,7 +73,7 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
-      async getTransformNodes(): Promise<GetTransformNodesResponseSchema | HttpFetchError> {
+      async getTransformNodes(): Promise<GetTransformNodesResponseSchema | IHttpFetchError> {
         try {
           return await http.get(`${API_BASE_PATH}transforms/_nodes`);
         } catch (e) {
@@ -82,7 +82,7 @@ export const useApi = () => {
       },
       async getTransform(
         transformId: TransformId
-      ): Promise<GetTransformsResponseSchema | HttpFetchError> {
+      ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.get(`${API_BASE_PATH}transforms/${transformId}`);
         } catch (e) {
@@ -91,7 +91,7 @@ export const useApi = () => {
       },
       async getTransforms(
         fetchOptions: FetchOptions = {}
-      ): Promise<GetTransformsResponseSchema | HttpFetchError> {
+      ): Promise<GetTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.get(`${API_BASE_PATH}transforms`, fetchOptions);
         } catch (e) {
@@ -100,7 +100,7 @@ export const useApi = () => {
       },
       async getTransformStats(
         transformId: TransformId
-      ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+      ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
         try {
           return await http.get(`${API_BASE_PATH}transforms/${transformId}/_stats`);
         } catch (e) {
@@ -109,7 +109,7 @@ export const useApi = () => {
       },
       async getTransformsStats(
         fetchOptions: FetchOptions = {}
-      ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+      ): Promise<GetTransformsStatsResponseSchema | IHttpFetchError> {
         try {
           return await http.get(`${API_BASE_PATH}transforms/_stats`, fetchOptions);
         } catch (e) {
@@ -119,7 +119,7 @@ export const useApi = () => {
       async createTransform(
         transformId: TransformId,
         transformConfig: PutTransformsRequestSchema
-      ): Promise<PutTransformsResponseSchema | HttpFetchError> {
+      ): Promise<PutTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.put(`${API_BASE_PATH}transforms/${transformId}`, {
             body: JSON.stringify(transformConfig),
@@ -131,7 +131,7 @@ export const useApi = () => {
       async updateTransform(
         transformId: TransformId,
         transformConfig: PostTransformsUpdateRequestSchema
-      ): Promise<PostTransformsUpdateResponseSchema | HttpFetchError> {
+      ): Promise<PostTransformsUpdateResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}transforms/${transformId}/_update`, {
             body: JSON.stringify(transformConfig),
@@ -142,7 +142,7 @@ export const useApi = () => {
       },
       async deleteTransforms(
         reqBody: DeleteTransformsRequestSchema
-      ): Promise<DeleteTransformsResponseSchema | HttpFetchError> {
+      ): Promise<DeleteTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}delete_transforms`, {
             body: JSON.stringify(reqBody),
@@ -153,7 +153,7 @@ export const useApi = () => {
       },
       async getTransformsPreview(
         obj: PostTransformsPreviewRequestSchema
-      ): Promise<PostTransformsPreviewResponseSchema | HttpFetchError> {
+      ): Promise<PostTransformsPreviewResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}transforms/_preview`, {
             body: JSON.stringify(obj),
@@ -164,7 +164,7 @@ export const useApi = () => {
       },
       async resetTransforms(
         reqBody: ResetTransformsRequestSchema
-      ): Promise<ResetTransformsResponseSchema | HttpFetchError> {
+      ): Promise<ResetTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}reset_transforms`, {
             body: JSON.stringify(reqBody),
@@ -175,7 +175,7 @@ export const useApi = () => {
       },
       async startTransforms(
         reqBody: StartTransformsRequestSchema
-      ): Promise<StartTransformsResponseSchema | HttpFetchError> {
+      ): Promise<StartTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}start_transforms`, {
             body: JSON.stringify(reqBody),
@@ -186,7 +186,7 @@ export const useApi = () => {
       },
       async stopTransforms(
         transformsInfo: StopTransformsRequestSchema
-      ): Promise<StopTransformsResponseSchema | HttpFetchError> {
+      ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}stop_transforms`, {
             body: JSON.stringify(transformsInfo),
@@ -196,29 +196,38 @@ export const useApi = () => {
         }
       },
       async getTransformAuditMessages(
-        transformId: TransformId
-      ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
+        transformId: TransformId,
+        sortField: string,
+        sortDirection: 'asc' | 'desc'
+      ): Promise<
+        { messages: GetTransformsAuditMessagesResponseSchema; total: number } | IHttpFetchError
+      > {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/${transformId}/messages`);
+          return await http.get(`${API_BASE_PATH}transforms/${transformId}/messages`, {
+            query: {
+              sortField,
+              sortDirection,
+            },
+          });
         } catch (e) {
           return e;
         }
       },
-      async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
+      async esSearch(payload: any): Promise<estypes.SearchResponse | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}es_search`, { body: JSON.stringify(payload) });
         } catch (e) {
           return e;
         }
       },
-      async getEsIndices(): Promise<EsIndex[] | HttpFetchError> {
+      async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {
         try {
           return await http.get(`/api/index_management/indices`);
         } catch (e) {
           return e;
         }
       },
-      async getEsIngestPipelines(): Promise<EsIngestPipeline[] | HttpFetchError> {
+      async getEsIngestPipelines(): Promise<EsIngestPipeline[] | IHttpFetchError> {
         try {
           return await http.get('/api/ingest_pipelines');
         } catch (e) {
@@ -226,14 +235,14 @@ export const useApi = () => {
         }
       },
       async getHistogramsForFields(
-        indexPatternTitle: string,
+        dataViewTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
         runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
-      ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
+      ): Promise<FieldHistogramsResponseSchema | IHttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
+          return await http.post(`${API_BASE_PATH}field_histograms/${dataViewTitle}`, {
             body: JSON.stringify({
               query,
               fields,

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 interface Props {
   'data-test-subj'?: string;

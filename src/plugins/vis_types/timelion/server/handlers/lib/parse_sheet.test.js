@@ -8,7 +8,7 @@
 
 const parseSheet = require('./parse_sheet');
 
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 
 describe('timelion parse_sheet function', function () {
   it(`doesn't split expressions on whitespace`, async function () {

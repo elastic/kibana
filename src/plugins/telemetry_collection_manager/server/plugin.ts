@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -17,8 +17,10 @@ import type {
   SavedObjectsServiceStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
+  CoreStatus,
+} from '@kbn/core/server';
 
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
@@ -49,6 +51,7 @@ export class TelemetryCollectionManagerPlugin
   private readonly logger: Logger;
   private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;
+  private coreStatus$ = new ReplaySubject<CoreStatus>(1);
   private usageCollection?: UsageCollectionSetup;
   private elasticsearchClient?: IClusterClient;
   private savedObjectsService?: SavedObjectsServiceStart;
@@ -65,10 +68,13 @@ export class TelemetryCollectionManagerPlugin
   public setup(core: CoreSetup, { usageCollection }: TelemetryCollectionPluginsDepsSetup) {
     this.usageCollection = usageCollection;
 
+    core.status.core$.subscribe(this.coreStatus$);
+
     return {
       setCollectionStrategy: this.setCollectionStrategy.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      shouldGetTelemetry: this.shouldGetTelemetry.bind(this),
     };
   }
 
@@ -79,10 +85,27 @@ export class TelemetryCollectionManagerPlugin
     return {
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      shouldGetTelemetry: this.shouldGetTelemetry.bind(this),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.coreStatus$.complete();
+  }
+
+  /**
+   * Checks if Kibana is in a healthy state to attempt the Telemetry report generation:
+   * - Elasticsearch is active.
+   * - SavedObjects client is active.
+   * @private
+   */
+  private async shouldGetTelemetry() {
+    const { elasticsearch, savedObjects } = await firstValueFrom(this.coreStatus$);
+    return (
+      elasticsearch.level.toString() === 'available' &&
+      savedObjects.level.toString() === 'available'
+    );
+  }
 
   private setCollectionStrategy<T extends BasicStatsPayload>(
     collectionConfig: CollectionStrategyConfig<T>
@@ -317,20 +340,47 @@ export class TelemetryCollectionManagerPlugin
     }
 
     const cacheKey = this.createCacheKey(collectionSource, clustersDetails);
-    const cachedUsageStatsPayload = this.cacheManager.getFromCache<UsageStatsPayload[]>(cacheKey);
-    if (cachedUsageStatsPayload) {
-      return this.updateFetchedAt(cachedUsageStatsPayload);
+    const cachedUsageStatsPromise =
+      this.cacheManager.getFromCache<Promise<UsageStatsPayload[]>>(cacheKey);
+    if (cachedUsageStatsPromise) {
+      return this.updateFetchedAt(await cachedUsageStatsPromise);
     }
 
+    const statsFromCollectionPromise = this.getStatsFromCollection(
+      clustersDetails,
+      collection,
+      statsCollectionConfig
+    );
+    this.cacheManager.setCache(cacheKey, statsFromCollectionPromise);
+
+    try {
+      const stats = await statsFromCollectionPromise;
+      return this.updateFetchedAt(stats);
+    } catch (err) {
+      this.logger.debug(
+        `Failed to generate the telemetry report (${err.message}). Resetting the cache...`
+      );
+      this.cacheManager.resetCache();
+      throw err;
+    }
+  }
+
+  private async getStatsFromCollection(
+    clustersDetails: ClusterDetails[],
+    collection: CollectionStrategy,
+    statsCollectionConfig: StatsCollectionConfig
+  ) {
+    const context: StatsCollectionContext = {
+      logger: this.logger.get(collection.title),
+      version: this.version,
+    };
+    const { title: collectionSource } = collection;
     const now = new Date().toISOString();
     const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
-    const usageStatsPayload = stats.map((stat) => ({
+    return stats.map((stat) => ({
       collectionSource,
       cacheDetails: { updatedAt: now, fetchedAt: now },
       ...stat,
     }));
-    this.cacheManager.setCache(cacheKey, usageStatsPayload);
-
-    return this.updateFetchedAt(usageStatsPayload);
   }
 }

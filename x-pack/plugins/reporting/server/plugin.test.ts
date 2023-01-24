@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Logger } from 'kibana/server';
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
 import {

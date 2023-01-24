@@ -7,14 +7,14 @@
  */
 
 import { flow, mapValues } from 'lodash';
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SerializedSearchSourceFields } from 'src/plugins/data/public';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
   MigrateFunction,
-} from '../../../kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -26,6 +26,8 @@ import {
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
+  commonPreserveOldLegendSizeDefault,
+  commonRemoveExclamationCircleIcon,
 } from '../migrations/visualization_common_migrations';
 import { SerializedVis } from '../../common';
 
@@ -97,6 +99,16 @@ const byValueUpdatePieVisApi = (state: SerializableRecord) => ({
   savedVis: commonUpdatePieVisApi(state.savedVis),
 });
 
+const byValuePreserveOldLegendSizeDefault = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonPreserveOldLegendSizeDefault(state.savedVis),
+});
+
+const byValueRemoveExclamationCircleIcon = (state: SerializableRecord) => ({
+  ...state,
+  savedVis: commonRemoveExclamationCircleIcon(state.savedVis),
+});
+
 const getEmbeddedVisualizationSearchSourceMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
 ) =>
@@ -144,6 +156,8 @@ export const makeVisualizeEmbeddableFactory =
             '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
             '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
             '8.1.0': (state) => flow(byValueUpdatePieVisApi)(state),
+            '8.3.0': (state) => flow(byValuePreserveOldLegendSizeDefault)(state),
+            '8.5.0': (state) => flow(byValueRemoveExclamationCircleIcon)(state),
           }
         ),
     };

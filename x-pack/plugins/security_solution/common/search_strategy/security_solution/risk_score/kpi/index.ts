@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes, RiskScoreAggByFields, RiskSeverity } from '../..';
-import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../../../../../../../src/plugins/data/common';
-import { ESQuery } from '../../../../typed_json';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { FactoryQueryTypes, RiskScoreEntity, RiskSeverity } from '../..';
+import type { ESQuery } from '../../../../typed_json';
 
-import { Inspect, Maybe } from '../../../common';
+import type { Inspect, Maybe } from '../../../common';
 
 export interface KpiRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   factoryQueryType?: FactoryQueryTypes;
   filterQuery?: ESQuery | string | undefined;
-  aggBy: RiskScoreAggByFields;
+  entity: RiskScoreEntity;
 }
 
 export interface KpiRiskScoreStrategyResponse extends IEsSearchResponse {

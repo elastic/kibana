@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
-import ReactResizeDetector from 'react-resize-detector';
+import { useResizeDetector } from 'react-resize-detector';
 import ReactMonacoEditor from 'react-monaco-editor';
 import {
   htmlIdGenerator,
@@ -185,6 +185,13 @@ export const CodeEditor: React.FC<Props> = ({
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
   }, []);
+
+  useResizeDetector({
+    handleWidth: true,
+    handleHeight: true,
+    onResize: _updateDimensions,
+    refreshMode: 'debounce',
+  });
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
@@ -436,7 +443,7 @@ export const CodeEditor: React.FC<Props> = ({
           </div>
         ) : null}
         <MonacoEditor
-          theme={transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
+          theme={options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors')}
           language={languageId}
           value={value}
           onChange={onChange}
@@ -469,12 +476,6 @@ export const CodeEditor: React.FC<Props> = ({
           }}
         />
       </FullScreenDisplay>
-      <ReactResizeDetector
-        handleWidth
-        handleHeight
-        onResize={_updateDimensions}
-        refreshMode="debounce"
-      />
     </div>
   );
 };

@@ -12,21 +12,21 @@ import React from 'react';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { RenderCellValue } from '.';
-import { ColumnHeaderOptions } from '../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 
-jest.mock('../../../../common/lib/kibana/');
+jest.mock('../../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
   const eventId = '_id-123';
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 5;
-  const timelineId = 'test';
+  const scopeId = 'table-test';
 
   let data: TimelineNonEcsData[];
   let header: ColumnHeaderOptions;
@@ -48,7 +48,7 @@ describe('RenderCellValue', () => {
       rowIndex,
       colIndex: 0,
       setCellProps: jest.fn(),
-      timelineId,
+      scopeId,
     };
   });
 

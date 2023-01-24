@@ -99,7 +99,8 @@ const ruleDataClient = new RuleDataClient({
 // to start writing data, call `getWriter().bulk()`. It supports a `namespace`
 // property as well, that for instance can be used to write data to a space-specific
 // index.
-await ruleDataClient.getWriter().bulk({
+const writer = await ruleDataClient.getWriter();
+await writer.bulk({
   body: eventsToIndex.flatMap((event) => [{ index: {} }, event]),
 });
 
@@ -142,6 +143,7 @@ The following fields are defined in the technical field component template and s
 - `kibana.alert.ancestors`: the array of ancestors (if any) for the alert.
 - `kibana.alert.depth`: the depth of the alert in the ancestral tree (default 0).
 - `kibana.alert.building_block_type`: the building block type of the alert (default undefined).
+- `kibana.alert.time_range`: the time range of an alert. (default undefined).
 
 # Alerts as data
 

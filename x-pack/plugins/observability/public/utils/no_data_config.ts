@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '../../../../../src/core/public';
-import { KibanaPageTemplateProps } from '../../../../../src/plugins/kibana_react/public';
+import { IBasePath } from '@kbn/core/public';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 
 export function getNoDataConfig({
   docsLink,
@@ -17,13 +17,13 @@ export function getNoDataConfig({
   docsLink: string;
   basePath: IBasePath;
   hasData?: boolean;
-}): KibanaPageTemplateProps['noDataConfig'] {
+}): NoDataConfig | undefined {
   if (hasData === false) {
     return {
       solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
       }),
-      actions: {
+      action: {
         elasticAgent: {
           title: i18n.translate('xpack.observability.noDataConfig.beatsCard.title', {
             defaultMessage: 'Add integrations',

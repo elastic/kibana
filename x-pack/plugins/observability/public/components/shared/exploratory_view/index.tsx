@@ -8,20 +8,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { ExploratoryView } from './exploratory_view';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { DataViewContextProvider } from './hooks/use_app_data_view';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
   createSessionStorageStateStorage,
-} from '../../../../../../../src/plugins/kibana_utils/public/';
+} from '@kbn/kibana-utils-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { ExploratoryView } from './exploratory_view';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { DataViewContextProvider } from './hooks/use_app_data_view';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
-import { TypedLensByValueInput } from '../../../../../lens/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { RefreshButton } from './header/refresh_button';
 
 const PAGE_TITLE = i18n.translate('xpack.observability.expView.heading.label', {
   defaultMessage: 'Explore data',
@@ -72,15 +73,21 @@ export function ExploratoryViewPage({
       });
 
   return (
-    <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
-      <DataViewContextProvider>
-        <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+    <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+      <ObservabilityPageTemplate
+        pageHeader={{
+          pageTitle: PAGE_TITLE,
+          rightSideItems: [<RefreshButton />],
+        }}
+      >
+        <DataViewContextProvider>
           <ExploratoryView saveAttributes={saveAttributes} />
-        </UrlStorageContextProvider>
-      </DataViewContextProvider>
-    </ObservabilityPageTemplate>
+        </DataViewContextProvider>
+      </ObservabilityPageTemplate>
+    </UrlStorageContextProvider>
   );
 }
 
 // eslint-disable-next-line import/no-default-export
 export default ExploratoryViewPage;
+export { DataTypes } from './labels';

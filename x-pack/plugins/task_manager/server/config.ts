@@ -41,6 +41,14 @@ export const taskExecutionFailureThresholdSchema = schema.object(
   }
 );
 
+const eventLoopDelaySchema = schema.object({
+  monitor: schema.boolean({ defaultValue: true }),
+  warn_threshold: schema.number({
+    defaultValue: 5000,
+    min: 10,
+  }),
+});
+
 export const configSchema = schema.object(
   {
     /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -103,6 +111,9 @@ export const configSchema = schema.object(
     }),
     monitored_stats_health_verbose_log: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
+      level: schema.oneOf([schema.literal('debug'), schema.literal('info')], {
+        defaultValue: 'debug',
+      }),
       /* The amount of seconds we allow a task to delay before printing a warning server log */
       warn_delayed_task_start_in_seconds: schema.number({
         defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
@@ -118,6 +129,7 @@ export const configSchema = schema.object(
         max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
       }),
     }),
+    event_loop_delay: eventLoopDelaySchema,
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -138,3 +150,4 @@ export const configSchema = schema.object(
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
+export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

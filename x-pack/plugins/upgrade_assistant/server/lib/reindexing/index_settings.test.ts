@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAJOR_VERSION } from '../../../common/constants';
 import { versionService } from '../version';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
@@ -36,7 +35,6 @@ describe('transformFlatSettings', () => {
       transformFlatSettings({
         settings: {
           // Settings that should get preserved
-          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.number_of_replicas': '1',
           'index.number_of_shards': '5',
 
@@ -87,7 +85,6 @@ describe('transformFlatSettings', () => {
       transformFlatSettings({
         settings: {
           // Settings that should get preserved
-          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.number_of_replicas': '1',
           'index.number_of_shards': '5',
 
@@ -111,7 +108,6 @@ describe('transformFlatSettings', () => {
       transformFlatSettings({
         settings: {
           // Settings that should get preserved
-          // @ts-expect-error @elastic/elasticsearch doesn't declare it
           'index.number_of_replicas': '1',
           'index.number_of_shards': '5',
 
@@ -132,7 +128,7 @@ describe('transformFlatSettings', () => {
 
   describe('sourceNameForIndex', () => {
     beforeEach(() => {
-      versionService.setup(MAJOR_VERSION);
+      versionService.setup('8.0.0');
     });
 
     it('parses internal indices', () => {
@@ -153,7 +149,7 @@ describe('transformFlatSettings', () => {
 
   describe('generateNewIndexName', () => {
     beforeEach(() => {
-      versionService.setup(MAJOR_VERSION);
+      versionService.setup('8.0.0');
     });
 
     it('parses internal indices', () => {
@@ -220,7 +216,6 @@ describe('transformFlatSettings', () => {
             getReindexWarnings({
               settings: {
                 // Deprecated settings
-                // @ts-expect-error @elastic/elasticsearch doesn't declare it
                 'index.force_memory_term_dictionary': '1024',
                 'index.max_adjacency_matrix_filters': 'true',
                 'index.soft_deletes.enabled': 'true',
@@ -245,7 +240,6 @@ describe('transformFlatSettings', () => {
           expect(
             getReindexWarnings({
               settings: {
-                // @ts-expect-error @elastic/elasticsearch doesn't declare it
                 'index.number_of_replicas': '1',
               },
               mappings: {},

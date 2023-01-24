@@ -14,7 +14,7 @@ import {
   EmbeddableInput,
   IContainer,
   EmbeddableOutput,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { TodoEmbeddableComponent } from './todo_component';
 
 export const TODO_EMBEDDABLE = 'TODO_EMBEDDABLE';

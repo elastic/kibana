@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
-import { ESQuery } from '../../typed_json';
-import {
+import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import type { ESQuery } from '../../typed_json';
+import type {
   ActionsStrategyResponse,
   ActionsRequestOptions,
   ActionDetailsStrategyResponse,
@@ -16,10 +16,10 @@ import {
   ActionResultsStrategyResponse,
   ActionResultsRequestOptions,
 } from './actions';
-import { AgentsStrategyResponse, AgentsRequestOptions } from './agents';
-import { ResultsStrategyResponse, ResultsRequestOptions } from './results';
+import type { AgentsStrategyResponse, AgentsRequestOptions } from './agents';
+import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
-import { DocValueFields, SortField, PaginationInputPaginated } from '../common';
+import type { DocValueFields, SortField, PaginationInputPaginated } from '../common';
 
 export * from './actions';
 export * from './agents';
@@ -40,6 +40,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
+  componentTemplateExists?: boolean;
 }
 
 /** A mapping of semantic fields to their document counterparts */

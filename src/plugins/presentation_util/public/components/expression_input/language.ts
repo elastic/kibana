@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunction } from '@kbn/expressions-plugin/common';
 import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
 
 /**
@@ -17,6 +17,7 @@ import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
  */
 interface ExpressionsLanguage extends monaco.languages.IMonarchLanguage {
   keywords: string[];
+  deprecated: string[];
   symbols: RegExp;
   escapes: RegExp;
   digits: RegExp;
@@ -34,6 +35,7 @@ interface ExpressionsLanguage extends monaco.languages.IMonarchLanguage {
  */
 const expressionsLanguage: ExpressionsLanguage = {
   keywords: [],
+  deprecated: [],
 
   symbols: /[=|]/,
   escapes: /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
@@ -58,7 +60,12 @@ const expressionsLanguage: ExpressionsLanguage = {
         /[a-z_$][\w$]*/,
         {
           cases: {
-            '@keywords': 'keyword',
+            '@keywords': {
+              cases: {
+                '@deprecated': 'keyword.deprecated',
+                '@default': 'keyword',
+              },
+            },
             '@null': 'keyword',
             '@boolean': 'keyword',
             '@default': 'identifier',
@@ -107,6 +114,9 @@ const expressionsLanguage: ExpressionsLanguage = {
 
 export function registerExpressionsLanguage(functions: ExpressionFunction[]) {
   expressionsLanguage.keywords = functions.map((fn) => fn.name);
+  expressionsLanguage.deprecated = functions.filter((fn) => fn.deprecated).map((fn) => fn.name);
+  monaco.languages.onLanguage(EXPRESSIONS_LANGUAGE_ID, () => {
+    monaco.languages.setMonarchTokensProvider(EXPRESSIONS_LANGUAGE_ID, expressionsLanguage);
+  });
   monaco.languages.register({ id: EXPRESSIONS_LANGUAGE_ID });
-  monaco.languages.setMonarchTokensProvider(EXPRESSIONS_LANGUAGE_ID, expressionsLanguage);
 }

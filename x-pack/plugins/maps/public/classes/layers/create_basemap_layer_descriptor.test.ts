@@ -22,11 +22,9 @@ jest.mock('../../kibana_services', () => {
     },
   };
 });
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import { createBasemapLayerDescriptor } from './create_basemap_layer_descriptor';
 
@@ -80,15 +78,16 @@ describe('EMS is enabled', () => {
       id: '12345',
       includeInFitToBounds: true,
       label: null,
+      locale: 'autoselect',
       maxZoom: 24,
       minZoom: 0,
-      source: undefined,
       sourceDescriptor: {
+        id: undefined,
         isAutoSelect: true,
         lightModeDefault: 'road_map_desaturated',
         type: 'EMS_TMS',
       },
-      style: { type: 'TILE' },
+      style: { type: 'EMS_VECTOR_TILE', color: '' },
       type: 'EMS_VECTOR_TILE',
       visible: true,
     });

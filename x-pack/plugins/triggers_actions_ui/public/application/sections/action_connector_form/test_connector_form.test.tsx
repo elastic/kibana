@@ -11,12 +11,14 @@ import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
 import {
   ActionConnector,
-  ConnectorValidationResult,
+  ActionConnectorMode,
+  ActionParamsProps,
   GenericValidationResult,
 } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { waitFor, screen, render } from '@testing-library/react';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
@@ -53,9 +55,6 @@ const actionType = {
   id: 'my-action-type',
   iconClass: 'test',
   selectMessage: 'test',
-  validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-    return Promise.resolve({});
-  },
   validateParams: (): Promise<GenericValidationResult<unknown>> => {
     const validationResult = { errors: {} };
     return Promise.resolve(validationResult);
@@ -65,6 +64,34 @@ const actionType = {
 };
 const actionTypeRegistry = actionTypeRegistryMock.create();
 actionTypeRegistry.get.mockReturnValue(actionType);
+
+const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMode'>> = ({
+  executionMode,
+}) => {
+  return (
+    <EuiForm component="form">
+      <EuiFormRow label="Execution mode" helpText="Execution mode help text.">
+        <>
+          {executionMode === ActionConnectorMode.Test && (
+            <EuiFieldText data-test-subj="executionModeFieldTest" />
+          )}
+          {executionMode === ActionConnectorMode.ActionForm && (
+            <EuiFieldText data-test-subj="executionModeFieldActionForm" />
+          )}
+          {executionMode === undefined && (
+            <EuiFieldText data-test-subj="executionModeFieldUndefined" />
+          )}
+        </>
+      </EuiFormRow>
+    </EuiForm>
+  );
+};
+
+const mockedActionParamsFieldsExecutionMode = lazy(async () => ({
+  default: ({ executionMode }: { executionMode?: ActionConnectorMode }) => {
+    return <ExecutionModeComponent executionMode={executionMode} />;
+  },
+}));
 
 describe('test_connector_form', () => {
   it('renders initially as the action form and execute button and no result', async () => {
@@ -81,10 +108,7 @@ describe('test_connector_form', () => {
           actionParams={{}}
           setActionParams={() => {}}
           isExecutingAction={false}
-          onExecutAction={async () => ({
-            actionId: '',
-            status: 'ok',
-          })}
+          onExecutionAction={async () => {}}
           executionResult={none}
           actionTypeRegistry={actionTypeRegistry}
         />
@@ -96,6 +120,49 @@ describe('test_connector_form', () => {
 
     const result = wrapper?.find('[data-test-subj="executionAwaiting"]');
     expect(result?.exists()).toBeTruthy();
+  });
+
+  it('renders the execution test field', async () => {
+    const actionTypeExecutionMode = {
+      id: 'execution-mode-type',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFieldsExecutionMode,
+    };
+    const actionTypeRegistryExecutionMode = actionTypeRegistryMock.create();
+    actionTypeRegistryExecutionMode.get.mockReturnValue(actionTypeExecutionMode);
+
+    const connector = {
+      actionTypeId: actionTypeExecutionMode.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
+
+    render(
+      <I18nProvider>
+        <TestConnectorForm
+          connector={connector}
+          executeEnabled={true}
+          actionParams={{}}
+          setActionParams={() => {}}
+          isExecutingAction={false}
+          onExecutionAction={async () => {}}
+          executionResult={none}
+          actionTypeRegistry={actionTypeRegistryExecutionMode}
+        />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
+    });
   });
 
   it('renders successful results', async () => {
@@ -112,10 +179,7 @@ describe('test_connector_form', () => {
           actionParams={{}}
           setActionParams={() => {}}
           isExecutingAction={false}
-          onExecutAction={async () => ({
-            actionId: '',
-            status: 'ok',
-          })}
+          onExecutionAction={async () => {}}
           executionResult={some({
             actionId: '',
             status: 'ok',
@@ -142,11 +206,7 @@ describe('test_connector_form', () => {
           actionParams={{}}
           setActionParams={() => {}}
           isExecutingAction={false}
-          onExecutAction={async () => ({
-            actionId: '',
-            status: 'error',
-            message: 'Error Message',
-          })}
+          onExecutionAction={async () => {}}
           executionResult={some({
             actionId: '',
             status: 'error',

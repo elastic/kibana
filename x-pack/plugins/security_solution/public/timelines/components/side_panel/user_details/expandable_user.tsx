@@ -8,17 +8,19 @@
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UserOverview } from '../../../../overview/components/user_overview';
-import { useUserDetails } from '../../../../users/containers/users/details';
+import { useUserDetails } from '../../../../explore/users/containers/users/details';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 
 export const QUERY_ID = 'usersDetailsQuery';
 export interface ExpandableUserProps {
@@ -57,6 +59,7 @@ export const ExpandableUserDetails = ({
 }: ExpandableUserProps & { contextID: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
+  const dispatch = useDispatch();
 
   const [loading, { userDetails }] = useUserDetails({
     endDate: to,
@@ -66,6 +69,20 @@ export const ExpandableUserDetails = ({
     skip: isInitializing,
   });
 
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
+
   return (
     <AnomalyTableProvider
       criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
@@ -73,7 +90,7 @@ export const ExpandableUserDetails = ({
       endDate={to}
       skip={isInitializing}
     >
-      {({ isLoadingAnomaliesData, anomaliesData }) => (
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <UserOverview
           userName={userName}
           isInDetailsSidePanel={true}
@@ -86,14 +103,9 @@ export const ExpandableUserDetails = ({
           isLoadingAnomaliesData={isLoadingAnomaliesData}
           startDate={from}
           endDate={to}
-          narrowDateRange={(score, interval) => {
-            const fromTo = scoreIntervalToDateTime(score, interval);
-            setAbsoluteRangeDatePicker({
-              id: 'global',
-              from: fromTo.from,
-              to: fromTo.to,
-            });
-          }}
+          narrowDateRange={narrowDateRange}
+          indexPatterns={selectedPatterns}
+          jobNameById={jobNameById}
         />
       )}
     </AnomalyTableProvider>

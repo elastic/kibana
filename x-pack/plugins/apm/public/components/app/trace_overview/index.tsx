@@ -4,68 +4,118 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TraceSearchType } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { SearchBar } from '../../shared/search_bar';
-import { TraceList } from './trace_list';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
-import { useTimeRange } from '../../../hooks/use_time_range';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
+import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
+import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
+import { Breadcrumb } from '../breadcrumb';
+import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 
-type TracesAPIResponse = APIReturnType<'GET /internal/apm/traces'>;
-const DEFAULT_RESPONSE: TracesAPIResponse = {
-  items: [],
-};
+type Tab = Required<
+  Required<React.ComponentProps<typeof ApmMainTemplate>>['pageHeader']
+>['tabs'][number];
 
-export function TraceOverview() {
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/traces');
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
+export function TraceOverview({ children }: { children: React.ReactElement }) {
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
+
+  const router = useApmRouter();
+
+  const { query } = useApmParams('/traces');
+
+  const routePath = useApmRoutePath();
+
+  const topTracesLink = router.link('/traces', {
+    query: {
+      comparisonEnabled: query.comparisonEnabled,
+      environment: query.environment,
+      kuery: query.kuery,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      offset: query.offset,
+      refreshInterval: query.refreshInterval,
+      refreshPaused: query.refreshPaused,
+    },
   });
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const title = i18n.translate('xpack.apm.views.traceOverview.title', {
+    defaultMessage: 'Traces',
+  });
 
-  const { status, data = DEFAULT_RESPONSE } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/traces', {
-          params: {
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
-      }
+  const explorerLink = router.link('/traces/explorer/waterfall', {
+    query: {
+      comparisonEnabled: query.comparisonEnabled,
+      environment: query.environment,
+      kuery: query.kuery,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      offset: query.offset,
+      refreshInterval: query.refreshInterval,
+      refreshPaused: query.refreshPaused,
+      query: '',
+      type: TraceSearchType.kql,
+      waterfallItemId: '',
+      traceId: '',
+      transactionId: '',
+      detailTab: TransactionTab.timeline,
+      showCriticalPath: false,
     },
-    [environment, kuery, start, end]
-  );
+  });
+
+  const tabs: Tab[] = isTraceExplorerEnabled
+    ? [
+        {
+          href: topTracesLink,
+          label: i18n.translate('xpack.apm.traceOverview.topTracesTab', {
+            defaultMessage: 'Top traces',
+          }),
+          isSelected: routePath === '/traces',
+        },
+        {
+          href: explorerLink,
+          label: (
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.traceOverview.traceExplorerTab', {
+                  defaultMessage: 'Explorer',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TechnicalPreviewBadge
+                  icon="beaker"
+                  style={{ verticalAlign: 'middle' }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          isSelected: routePath.startsWith('/traces/explorer'),
+        },
+      ]
+    : [];
 
   return (
-    <>
-      <SearchBar />
-
-      {fallbackToTransactions && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <AggregatedTransactionsBadge />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      <TraceList
-        items={data.items}
-        isLoading={status === FETCH_STATUS.LOADING}
-        isFailure={status === FETCH_STATUS.FAILURE}
-      />
-    </>
+    <Breadcrumb href="/traces" title={title}>
+      <ApmMainTemplate
+        pageTitle={title}
+        pageSectionProps={{
+          contentProps: {
+            style: {
+              display: 'flex',
+              flexGrow: 1,
+            },
+          },
+        }}
+        pageHeader={{
+          tabs,
+        }}
+      >
+        {children}
+      </ApmMainTemplate>
+    </Breadcrumb>
   );
 }

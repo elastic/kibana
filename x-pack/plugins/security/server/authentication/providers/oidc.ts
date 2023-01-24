@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type from 'type-detect';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -275,12 +275,13 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.logger.debug('Login has been performed with OpenID Connect response.');
     return AuthenticationResult.redirectTo(stateRedirectURL, {
+      user: this.authenticationInfoToAuthenticatedUser(result.authentication),
+      userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
       state: {
         accessToken: result.access_token,
         refreshToken: result.refresh_token,
         realm: this.realm,
       },
-      user: this.authenticationInfoToAuthenticatedUser(result.authentication),
     });
   }
 

@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { GetAgentStatusResponse } from '../../../fleet/common';
+import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 

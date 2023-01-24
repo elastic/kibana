@@ -7,10 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from 'src/core/public';
-import { ToastInput } from 'src/core/public';
+import { HttpHandler } from '@kbn/core/public';
+import { ToastInput } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { InfraHttpError } from '../types';
 
 export function useHTTPRequest<Response>(
@@ -26,7 +26,7 @@ export function useHTTPRequest<Response>(
   const toast = toastDanger ? toastDanger : kibana.notifications.toasts.danger;
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<InfraHttpError | null>(null);
-  const [request, makeRequest] = useTrackedPromise(
+  const [request, makeRequest] = useTrackedPromise<any, Response>(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {

@@ -5,39 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useContext, useMemo, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
-  EuiPopover,
-  EuiCheckbox,
   EuiDataGridCellValueElementProps,
+  EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
+import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
-import { ElasticSearchHit } from '../../types';
+import type { DataTableRecord } from '../../types';
 
-/**
- * Returning a generated id of a given ES document, since `_id` can be the same
- * when using different indices and shard routing
- */
-export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
-  const routing = doc._routing ? doc._routing : '';
-  return [doc._index, doc._id, routing].join('::');
-};
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
     useContext(DiscoverGridContext);
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const id = useMemo(() => getDocId(doc), [doc]);
-  const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
+  const checked = useMemo(() => selectedDocs.includes(doc.id), [selectedDocs, doc.id]);
+
+  const toggleDocumentSelectionLabel = i18n.translate('discover.grid.selectDoc', {
+    defaultMessage: `Select document '{rowNumber}'`,
+    values: { rowNumber: rowIndex + 1 },
+  });
 
   useEffect(() => {
-    if (expanded && doc && expanded._id === doc._id) {
+    if (expanded && doc && expanded.id === doc.id) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
@@ -50,16 +47,16 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 
   return (
     <EuiCheckbox
-      id={id}
-      label=""
+      id={doc.id}
+      aria-label={toggleDocumentSelectionLabel}
       checked={checked}
-      data-test-subj={`dscGridSelectDoc-${id}`}
+      data-test-subj={`dscGridSelectDoc-${doc.id}`}
       onChange={() => {
         if (checked) {
-          const newSelection = selectedDocs.filter((docId) => docId !== id);
+          const newSelection = selectedDocs.filter((docId) => docId !== doc.id);
           setSelectedDocs(newSelection);
         } else {
-          setSelectedDocs([...selectedDocs, id]);
+          setSelectedDocs([...selectedDocs, doc.id]);
         }
       }}
     />
@@ -74,7 +71,7 @@ export function DiscoverGridDocumentToolbarBtn({
   setSelectedDocs,
 }: {
   isFilterActive: boolean;
-  rows: ElasticSearchHit[];
+  rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
@@ -115,7 +112,11 @@ export function DiscoverGridDocumentToolbarBtn({
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
         textToCopy={
-          rows ? JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row)))) : ''
+          rows
+            ? JSON.stringify(
+                rows.filter((row) => selectedDocs.includes(row.id)).map((row) => row.raw)
+              )
+            : ''
         }
       >
         {(copy) => (
@@ -149,6 +150,11 @@ export function DiscoverGridDocumentToolbarBtn({
     setSelectedDocs,
   ]);
 
+  const toggleSelectionToolbar = useCallback(
+    () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),
+    []
+  );
+
   return (
     <EuiPopover
       closePopover={() => setIsSelectionPopoverOpen(false)}
@@ -159,7 +165,7 @@ export function DiscoverGridDocumentToolbarBtn({
           size="xs"
           color="text"
           iconType="documents"
-          onClick={() => setIsSelectionPopoverOpen(true)}
+          onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocs.length}
           data-test-subj="dscGridSelectionBtn"
           isSelected={isFilterActive}

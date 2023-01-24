@@ -25,9 +25,11 @@ export interface LatencyChartData {
 export function getLatencyChartSelector({
   latencyChart,
   latencyAggregationType,
+  previousPeriodLabel,
 }: {
   latencyChart?: LatencyChartsResponse;
   latencyAggregationType?: string;
+  previousPeriodLabel: string;
 }): Partial<LatencyChartData> {
   if (
     !latencyChart?.currentPeriod.latencyTimeseries ||
@@ -43,6 +45,7 @@ export function getLatencyChartSelector({
     previousPeriod: getPreviousPeriodTimeseries({
       previousPeriod: latencyChart.previousPeriod,
       latencyAggregationType,
+      previousPeriodLabel,
     }),
   };
 }
@@ -50,9 +53,11 @@ export function getLatencyChartSelector({
 function getPreviousPeriodTimeseries({
   previousPeriod,
   latencyAggregationType,
+  previousPeriodLabel,
 }: {
   previousPeriod: LatencyChartsResponse['previousPeriod'];
   latencyAggregationType: string;
+  previousPeriodLabel: string;
 }) {
   let chartType = ChartType.LATENCY_AVG;
   if (latencyAggregationType === 'p95') {
@@ -67,10 +72,7 @@ function getPreviousPeriodTimeseries({
     data: previousPeriod.latencyTimeseries ?? [],
     type: 'area',
     color: previousPeriodColor,
-    title: i18n.translate(
-      'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
-      { defaultMessage: 'Previous period' }
-    ),
+    title: previousPeriodLabel,
   };
 }
 

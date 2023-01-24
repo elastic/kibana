@@ -6,16 +6,17 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '../../../../../src/plugins/data/common';
+import type { Query, TimeRange } from '@kbn/es-query';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 import type { MapEmbeddableType } from './types';
 import type { LazyLoadedMapModules } from '../lazy_load_bundle';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 interface Props {
+  title: string;
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -79,9 +80,9 @@ export class MapComponent extends Component<Props, State> {
         editable: false,
       },
       {
-        id: uuid(),
+        id: uuidv4(),
         attributes: {
-          title: '',
+          title: this.props.title,
           layerListJSON: JSON.stringify([
             mapModules.createBasemapLayerDescriptor(),
             ...this.props.getLayerDescriptors({

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
-import { getExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getAnomalies, AnomaliesSearchParams } from '.';
+import type { ESFilter } from '@kbn/es-types';
+import type { AnomaliesSearchParams } from '.';
+import { getAnomalies } from '.';
 
 const getFiltersFromMock = (mock: jest.Mock) => {
   const [[searchParams]] = mock.mock.calls;
@@ -26,20 +26,20 @@ describe('getAnomalies', () => {
       threshold: 5,
       earliestMs: 1588517231429,
       latestMs: 1588617231429,
-      exceptionItems: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
+      exceptionFilter: undefined,
     };
   });
 
-  it('calls the provided mlAnomalySearch function', () => {
+  it('calls the provided mlAnomalySearch function', async () => {
     const mockMlAnomalySearch = jest.fn();
-    getAnomalies(searchParams, mockMlAnomalySearch);
+    await getAnomalies(searchParams, mockMlAnomalySearch);
 
     expect(mockMlAnomalySearch).toHaveBeenCalled();
   });
 
-  it('passes anomalyThreshold as part of the query', () => {
+  it('passes anomalyThreshold as part of the query', async () => {
     const mockMlAnomalySearch = jest.fn();
-    getAnomalies(searchParams, mockMlAnomalySearch);
+    await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
 
@@ -48,9 +48,9 @@ describe('getAnomalies', () => {
     );
   });
 
-  it('passes time range as part of the query', () => {
+  it('passes time range as part of the query', async () => {
     const mockMlAnomalySearch = jest.fn();
-    getAnomalies(searchParams, mockMlAnomalySearch);
+    await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
 
@@ -69,9 +69,9 @@ describe('getAnomalies', () => {
     );
   });
 
-  it('passes a single jobId as part of the query', () => {
+  it('passes a single jobId as part of the query', async () => {
     const mockMlAnomalySearch = jest.fn();
-    getAnomalies(searchParams, mockMlAnomalySearch);
+    await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
 
@@ -87,10 +87,10 @@ describe('getAnomalies', () => {
     );
   });
 
-  it('passes multiple jobIds as part of the query', () => {
+  it('passes multiple jobIds as part of the query', async () => {
     const mockMlAnomalySearch = jest.fn();
     searchParams.jobIds = ['jobId1', 'jobId2'];
-    getAnomalies(searchParams, mockMlAnomalySearch);
+    await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
     const criteria = getBoolCriteriaFromFilters(filters);
 
@@ -106,9 +106,9 @@ describe('getAnomalies', () => {
     );
   });
 
-  it('ignores anomalies that do not have finalized scores', () => {
+  it('ignores anomalies that do not have finalized scores', async () => {
     const mockMlAnomalySearch = jest.fn();
-    getAnomalies(searchParams, mockMlAnomalySearch);
+    await getAnomalies(searchParams, mockMlAnomalySearch);
     const filters = getFiltersFromMock(mockMlAnomalySearch);
 
     expect(filters).toEqual(

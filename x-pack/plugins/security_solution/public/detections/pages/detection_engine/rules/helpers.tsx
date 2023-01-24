@@ -5,34 +5,39 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
-import {
+import type {
+  Severity,
+  SeverityMapping,
   Threats,
   Type,
-  SeverityMapping,
-  Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
-import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { Rule } from '../../../containers/detection_engine/rules';
 import {
+  transformRuleToAlertAction,
+  transformRuleToAlertResponseAction,
+} from '../../../../../common/detection_engine/transform_actions';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import type {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { DataSourceType } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
@@ -66,35 +71,43 @@ export const getStepsData = ({
 };
 
 export const getActionsStepsData = (
-  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+  rule: Omit<Rule, 'actions'> & {
+    actions: RuleAlertAction[];
+    response_actions?: ResponseAction[];
+  }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [] } = rule;
+  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
+    responseActions: responseActions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
   };
 };
 
+/* eslint-disable complexity */
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? [],
   index: rule.index ?? [],
+  dataViewId: rule.data_view_id,
   threatIndex: rule.threat_index ?? [],
   threatQueryBar: {
     query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
     filters: (rule.threat_filters ?? []) as Filter[],
-    saved_id: undefined,
+    saved_id: null,
   },
   threatMapping: rule.threat_mapping ?? [],
   queryBar: {
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
-    saved_id: rule.saved_id,
+    saved_id: rule.saved_id ?? null,
   },
+  relatedIntegrations: rule.related_integrations ?? [],
+  requiredFields: rule.required_fields ?? [],
   timeline: {
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
@@ -111,7 +124,27 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
         }
       : {}),
   },
+  eqlOptions: {
+    timestampField: rule.timestamp_field,
+    eventCategoryField: rule.event_category_override,
+    tiebreakerField: rule.tiebreaker_field,
+  },
+  dataSourceType: rule.data_view_id ? DataSourceType.DataView : DataSourceType.IndexPatterns,
+  newTermsFields: rule.new_terms_fields ?? [],
+  historyWindowSize: rule.history_window_start
+    ? convertHistoryStartToSize(rule.history_window_start)
+    : '7d',
+  shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
+  groupByFields: rule.alert_suppression?.group_by ?? [],
 });
+
+const convertHistoryStartToSize = (relativeTime: string) => {
+  if (relativeTime.startsWith('now-')) {
+    return relativeTime.substring(4);
+  } else {
+    return relativeTime;
+  }
+};
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const { interval, from } = rule;
@@ -156,6 +189,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     rule_name_override: ruleNameOverride,
     severity_mapping: severityMapping,
     timestamp_override: timestampOverride,
+    timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     references,
     severity,
     false_positives: falsePositives,
@@ -172,6 +206,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
     timestampOverride: timestampOverride ?? '',
+    timestampOverrideFallbackDisabled,
     name,
     description,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -227,29 +262,30 @@ export const determineDetailsValue = (
 export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
   note: rule.note ?? '',
   description: rule.description,
+  setup: rule.setup ?? '',
 });
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
 
-export type PrePackagedRuleStatus =
+export type PrePackagedRuleInstallationStatus =
   | 'ruleInstalled'
   | 'ruleNotInstalled'
   | 'ruleNeedUpdate'
   | 'someRuleUninstall'
   | 'unknown';
 
-export type PrePackagedTimelineStatus =
+export type PrePackagedTimelineInstallationStatus =
   | 'timelinesNotInstalled'
   | 'timelinesInstalled'
   | 'someTimelineUninstall'
   | 'timelineNeedUpdate'
   | 'unknown';
 
-export const getPrePackagedRuleStatus = (
-  rulesInstalled: number | null,
-  rulesNotInstalled: number | null,
-  rulesNotUpdated: number | null
-): PrePackagedRuleStatus => {
+export const getPrePackagedRuleInstallationStatus = (
+  rulesInstalled?: number,
+  rulesNotInstalled?: number,
+  rulesNotUpdated?: number
+): PrePackagedRuleInstallationStatus => {
   if (
     rulesNotInstalled != null &&
     rulesInstalled === 0 &&
@@ -284,11 +320,11 @@ export const getPrePackagedRuleStatus = (
   }
   return 'unknown';
 };
-export const getPrePackagedTimelineStatus = (
-  timelinesInstalled: number | null,
-  timelinesNotInstalled: number | null,
-  timelinesNotUpdated: number | null
-): PrePackagedTimelineStatus => {
+export const getPrePackagedTimelineInstallationStatus = (
+  timelinesInstalled?: number,
+  timelinesNotInstalled?: number,
+  timelinesNotUpdated?: number
+): PrePackagedTimelineInstallationStatus => {
   if (
     timelinesNotInstalled != null &&
     timelinesInstalled === 0 &&
@@ -335,14 +371,45 @@ export const redirectToDetections = (
   hasEncryptionKey === false ||
   needsListsConfiguration;
 
-const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
-  const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+const commonRuleParamsKeys = [
+  'id',
+  'name',
+  'description',
+  'false_positives',
+  'rule_id',
+  'max_signals',
+  'risk_score',
+  'output_index',
+  'references',
+  'severity',
+  'timeline_id',
+  'timeline_title',
+  'threat',
+  'type',
+  'version',
+];
+const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
+const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
+const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
+const getAllRuleParamsKeys = (): string[] => {
+  const allRuleParamsKeys = [
+    ...commonRuleParamsKeys,
+    ...queryRuleParams,
+    ...machineLearningRuleParams,
+    ...thresholdRuleParams,
+  ].sort();
+
+  return Array.from(new Set<string>(allRuleParamsKeys));
+};
+
+const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   switch (ruleType) {
     case 'machine_learning':
-      return ['anomaly_threshold', 'machine_learning_job_id'];
+      return machineLearningRuleParams;
     case 'threshold':
-      return ['threshold', ...queryRuleParams];
+      return thresholdRuleParams;
+    case 'new_terms':
     case 'threat_match':
     case 'query':
     case 'saved_query':
@@ -353,24 +420,6 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
 };
 
 export const getActionMessageRuleParams = (ruleType: Type): string[] => {
-  const commonRuleParamsKeys = [
-    'id',
-    'name',
-    'description',
-    'false_positives',
-    'rule_id',
-    'max_signals',
-    'risk_score',
-    'output_index',
-    'references',
-    'severity',
-    'timeline_id',
-    'timeline_title',
-    'threat',
-    'type',
-    'version',
-  ];
-
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
     ...getRuleSpecificRuleParamKeys(ruleType),
@@ -379,12 +428,7 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariables => {
-  if (!ruleType) {
-    return { state: [], params: [] };
-  }
-  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
-  // Prefixes are being added automatically by the ActionTypeForm
+const transformRuleKeysToActionVariables = (actionMessageRuleParams: string[]): ActionVariables => {
   return {
     state: [{ name: 'signals_count', description: 'state.signals_count' }],
     params: [],
@@ -401,11 +445,22 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
       }),
     ],
   };
+};
+
+export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariables => {
+  if (!ruleType) {
+    return { state: [], params: [] };
+  }
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+
+  return transformRuleKeysToActionVariables(actionMessageRuleParams);
 });
 
-// typed as null not undefined as the initial state for this value is null.
-export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>
-  canUserCRUD != null ? canUserCRUD : true;
+/**
+ * returns action variables available for all rule types
+ */
+export const getAllActionMessageParams = () =>
+  transformRuleKeysToActionVariables(getAllRuleParamsKeys());
 
 export const MaxWidthEuiFlexItem = styled(EuiFlexItem)`
   max-width: 1000px;

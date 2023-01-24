@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
-  formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
-// @ts-expect-error cannot find module or correspondent type declarations
-// The code and types are at separated folders on @kbn/server-route-repository
-// so in order to do targeted imports they must me imported separately, and
-// an error is expected here
-import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
-import { CallApi, callApi } from './call_api';
+import { formatRequest } from '@kbn/server-route-repository';
 import type {
   APMServerRouteRepository,
   APIEndpoint,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../apm/server';
-import { InspectResponse } from '../../../../observability/typings/common';
+} from '@kbn/apm-plugin/server';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { CallApi, callApi } from './call_api';
 import { FetchOptions } from '../../../common/fetch_options';
 
 export type APMClientOptions = Omit<
@@ -73,10 +67,7 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       params?: Partial<Record<string, any>>;
     };
 
-    const { method, pathname } = formatRequest(
-      endpoint,
-      params?.path
-    ) as ReturnType<typeof formatRequestType>;
+    const { method, pathname } = formatRequest(endpoint, params?.path);
 
     return callApi(core, {
       ...options,

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { PresentationUtilPluginStart } from './types';
 import { pluginServices } from './services';
-import { registry } from './services/kibana';
+import { registry } from './services/plugin_services';
 import { registerExpressionsLanguage } from '.';
 
 const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {

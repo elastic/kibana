@@ -7,17 +7,17 @@
 
 import { omit, mean } from 'lodash';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { eventLogClientMock } from '../../../../event_log/server/mocks';
-import { QueryEventsBySavedObjectResult } from '../../../../event_log/server';
-import { SavedObject } from 'kibana/server';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { SavedObject } from '@kbn/core/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
 import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
@@ -40,7 +40,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -92,6 +92,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       status: 'unknown',
       lastExecutionDate: '2020-08-20T19:23:38Z',
       error: null,
+      warning: null,
     },
   },
   references: [],
@@ -127,7 +128,7 @@ describe('getAlertSummary()', () => {
       .advanceTime(10000)
       .addExecute()
       .addRecoveredAlert('alert-previously-active')
-      .addActiveAlert('alert-currently-active', 'action group A')
+      .addActiveAlert('alert-currently-active', 'action group A', true)
       .getEvents();
     const eventsResult = {
       ...AlertSummaryFindEventsResult,
@@ -155,22 +156,22 @@ describe('getAlertSummary()', () => {
         "alerts": Object {
           "alert-currently-active": Object {
             "actionGroupId": "action group A",
-            "actionSubgroup": undefined,
             "activeStartDate": "2019-02-12T21:01:22.479Z",
+            "flapping": true,
             "muted": false,
             "status": "Active",
           },
           "alert-muted-no-activity": Object {
             "actionGroupId": undefined,
-            "actionSubgroup": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": true,
             "status": "OK",
           },
           "alert-previously-active": Object {
             "actionGroupId": undefined,
-            "actionSubgroup": undefined,
             "activeStartDate": undefined,
+            "flapping": false,
             "muted": false,
             "status": "OK",
           },

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
 export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
@@ -2121,7 +2121,7 @@ export const formattedPreviewStrategyResponse = {
                 aggs: {
                   preview: {
                     date_histogram: {
-                      field: 'signal.original_time',
+                      field: '@timestamp',
                       fixed_interval: '2700000ms',
                       min_doc_count: 0,
                       extended_bounds: { min: 1599574984482, max: 1599661384482 },
@@ -2157,7 +2157,7 @@ export const formattedPreviewStrategyResponse = {
                   },
                   {
                     range: {
-                      'signal.original_time': {
+                      '@timestamp': {
                         gte: '2020-09-08T14:23:04.482Z',
                         lte: '2020-09-09T14:23:04.482Z',
                         format: 'strict_date_optional_time',

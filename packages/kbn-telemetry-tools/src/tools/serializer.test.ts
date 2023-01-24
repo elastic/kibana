@@ -8,22 +8,21 @@
 
 import * as ts from 'typescript';
 import * as path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
+import { compilerHost } from './compiler_host';
 
 export function loadFixtureProgram(fixtureName: string) {
   const fixturePath = path.resolve(
-    process.cwd(),
-    'src',
-    'fixtures',
-    'telemetry_collectors',
-    `${fixtureName}.ts`
+    REPO_ROOT,
+    `src/fixtures/telemetry_collectors/${fixtureName}.ts`
   );
   const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
   if (!tsConfig) {
     throw new Error('Could not find a valid tsconfig.json.');
   }
-  const program = ts.createProgram([fixturePath], tsConfig as any);
+  const program = ts.createProgram([fixturePath], tsConfig as any, compilerHost);
   const checker = program.getTypeChecker();
   const sourceFile = program.getSourceFile(fixturePath);
   if (!sourceFile) {
@@ -164,6 +163,15 @@ describe('getDescriptor', () => {
       prop3: { kind: ts.SyntaxKind.StringKeyword, type: 'StringKeyword' },
       prop4: { kind: ts.SyntaxKind.StringLiteral, type: 'StringLiteral' },
       prop5: { kind: ts.SyntaxKind.FirstLiteralToken, type: 'FirstLiteralToken' },
+    });
+  });
+
+  it('serializes RecordStringUnknown', () => {
+    const usageInterface = usageInterfaces.get('RecordStringUnknown')!;
+    const descriptor = getDescriptor(usageInterface, tsProgram);
+    expect(descriptor).toEqual({
+      kind: ts.SyntaxKind.UnknownKeyword,
+      type: 'UnknownKeyword',
     });
   });
 });

@@ -27,7 +27,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/update_package_policy.yaml
+          $ref: ../components/schemas/package_policy_request.yaml
   responses:
     '200':
       description: OK
@@ -45,3 +45,29 @@ put:
               - sucess
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+delete:
+  summary: Package policy - Delete
+  tags: []
+  operationId: delete-package-policy
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+  parameters:
+    - schema:
+        type: string
+      name: packagePolicyId
+      in: path
+      required: true
+    - schema:
+        type: boolean
+      name: force
+      in: query

@@ -13,9 +13,5 @@ export type {
   IndexFieldsStrategyResponse,
   BrowserField,
   BrowserFields,
-} from '../../../../timelines/common';
-export {
-  EMPTY_BROWSER_FIELDS,
-  EMPTY_DOCVALUE_FIELD,
-  EMPTY_INDEX_FIELDS,
-} from '../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+export { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';

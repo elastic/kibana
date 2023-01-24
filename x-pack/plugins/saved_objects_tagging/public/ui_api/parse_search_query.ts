@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { Query } from '@elastic/eui';
-import { SavedObjectsFindOptionsReference } from 'src/core/public';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import {
   ParseSearchQueryOptions,
   SavedObjectsTaggingApiUi,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
 
 export interface BuildParseSearchQueryOptions {
@@ -20,7 +22,10 @@ export interface BuildParseSearchQueryOptions {
 export const buildParseSearchQuery = ({
   cache,
 }: BuildParseSearchQueryOptions): SavedObjectsTaggingApiUi['parseSearchQuery'] => {
-  return (query: string, { tagField = 'tag', useName = true }: ParseSearchQueryOptions = {}) => {
+  return async (
+    query: string,
+    { tagField = 'tag', useName = true }: ParseSearchQueryOptions = {}
+  ) => {
     let parsed: Query;
 
     try {
@@ -29,6 +34,7 @@ export const buildParseSearchQuery = ({
       return {
         searchTerm: query,
         tagReferences: [],
+        tagReferencesToExclude: [],
         valid: false,
       };
     }
@@ -39,12 +45,12 @@ export const buildParseSearchQuery = ({
       return {
         searchTerm: '',
         tagReferences: [],
+        tagReferencesToExclude: [],
         valid: true,
       };
     }
 
     let searchTerm: string = '';
-    let tagReferences: SavedObjectsFindOptionsReference[] = [];
 
     if (parsed.ast.getTermClauses().length) {
       searchTerm = parsed.ast
@@ -52,26 +58,56 @@ export const buildParseSearchQuery = ({
         .map((clause: any) => clause.value)
         .join(' ');
     }
+
+    let tagReferences: SavedObjectsFindOptionsReference[] = [];
+    let tagReferencesToExclude: SavedObjectsFindOptionsReference[] = [];
+
     if (parsed.ast.getFieldClauses(tagField)) {
-      const selectedTags = parsed.ast.getFieldClauses(tagField)[0].value as string[];
-      if (useName) {
-        selectedTags.forEach((tagName) => {
-          const found = cache.getState().find((tag) => tag.name === tagName);
-          if (found) {
-            tagReferences.push({
-              type: 'tag',
-              id: found.id,
-            });
+      // The query can have clauses that either *must* match or *must_not* match
+      // We will retrieve the list of name for both list and convert them to references
+      const { selectedTags, excludedTags } = parsed.ast.getFieldClauses(tagField).reduce(
+        (acc, clause) => {
+          if (clause.match === 'must') {
+            acc.selectedTags = clause.value as string[];
+          } else if (clause.match === 'must_not') {
+            acc.excludedTags = clause.value as string[];
           }
-        });
-      } else {
-        tagReferences = selectedTags.map((tagId) => ({ type: 'tag', id: tagId }));
-      }
+
+          return acc;
+        },
+        { selectedTags: [], excludedTags: [] } as { selectedTags: string[]; excludedTags: string[] }
+      );
+
+      const tagsInCache = await lastValueFrom(
+        cache.getState$({ waitForInitialization: true }).pipe(first())
+      );
+
+      const tagsToReferences = (tagNames: string[]) => {
+        if (useName) {
+          const references: SavedObjectsFindOptionsReference[] = [];
+          tagNames.forEach((tagName) => {
+            const found = tagsInCache.find((tag) => tag.name === tagName);
+            if (found) {
+              references.push({
+                type: 'tag',
+                id: found.id,
+              });
+            }
+          });
+          return references;
+        } else {
+          return tagNames.map((tagId) => ({ type: 'tag', id: tagId }));
+        }
+      };
+
+      tagReferences = tagsToReferences(selectedTags);
+      tagReferencesToExclude = tagsToReferences(excludedTags);
     }
 
     return {
       searchTerm,
       tagReferences,
+      tagReferencesToExclude,
       valid: true,
     };
   };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingPostRoutes } from './post';
@@ -45,7 +45,11 @@ describe('POST role mappings', () => {
       headers,
     });
 
-    const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+    const response = await handler(
+      coreMock.createCustomRequestHandlerContext(mockContext),
+      mockRequest,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ created: true });
 
@@ -91,7 +95,11 @@ describe('POST role mappings', () => {
         headers,
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
 

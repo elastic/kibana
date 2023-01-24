@@ -12,9 +12,9 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RouteValidatorConfig,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
 type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
@@ -40,10 +40,19 @@ interface CaseRouteHandlerArguments<P, Q, B> {
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
+type CaseRouteTags = 'access:casesSuggestUserProfiles';
+
 export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
   path: string;
   params?: RouteValidatorConfig<P, Q, B>;
+  /**
+   * These options control pre-route execution behavior
+   */
   options?: { deprecated?: boolean };
+  /**
+   * These options are passed to the router's options field
+   */
+  routerOptions?: { tags: CaseRouteTags[] };
   handler: (args: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
 }

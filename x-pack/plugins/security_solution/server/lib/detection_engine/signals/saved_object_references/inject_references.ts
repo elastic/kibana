@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import type { RuleParams } from '../../rule_schema';
+import { isMachineLearningParams } from '../utils';
 import { injectExceptionsReferences } from './inject_exceptions_list';
+import { injectDataViewReferences } from './inject_data_view';
 
 /**
  * Injects references and returns the saved object references.
@@ -42,9 +44,22 @@ export const injectReferences = <TParams extends RuleParams>({
     exceptionsList: params.exceptionsList,
     savedObjectReferences,
   });
-  const ruleParamsWithSavedObjectReferences: TParams = {
+
+  let ruleParamsWithSavedObjectReferences: TParams = {
     ...params,
     exceptionsList,
   };
+
+  if (!isMachineLearningParams(params)) {
+    const dataView = injectDataViewReferences({
+      logger,
+      savedObjectReferences,
+    });
+    ruleParamsWithSavedObjectReferences = {
+      ...ruleParamsWithSavedObjectReferences,
+      dataViewId: dataView,
+    };
+  }
+
   return ruleParamsWithSavedObjectReferences;
 };

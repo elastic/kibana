@@ -8,7 +8,7 @@
 import { tap } from 'rxjs/operators';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { IndexPatternsService } from '../../../../../../data/server';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -43,14 +43,15 @@ export abstract class AbstractSearchStrategy {
   ) {
     const requests: any[] = [];
 
-    // User may abort the request without waiting for the results
-    // we need to handle this scenario by aborting underlying server requests
-    const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+    const searchContext = await requestContext.search;
 
     esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
+      // User may abort the request without waiting for the results
+      // we need to handle this scenario by aborting underlying server requests
+      const abortSignal = getRequestAbortedSignal(req.events.aborted$);
       const startTime = Date.now();
       requests.push(
-        requestContext.search
+        searchContext
           .search(
             {
               indexType,
@@ -90,7 +91,7 @@ export abstract class AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     capabilities?: unknown,
     options?: Partial<{
       type: string;

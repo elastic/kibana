@@ -22,5 +22,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./force_start_datafeeds_spaces'));
     loadTestFile(require.resolve('./stop_datafeeds'));
     loadTestFile(require.resolve('./stop_datafeeds_spaces'));
+    loadTestFile(require.resolve('./get_groups'));
+    loadTestFile(require.resolve('./jobs'));
   });
 }

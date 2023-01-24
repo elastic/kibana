@@ -76,8 +76,18 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
   agentPolicies = [],
 }) => {
   const { notifications } = useStartServices();
+
+  const selectPolicyOptions = useMemo(() => {
+    return agentPolicies
+      .filter((agentPolicy) => !agentPolicy.is_managed)
+      .map((agentPolicy) => ({
+        value: agentPolicy.id,
+        text: agentPolicy.name,
+      }));
+  }, [agentPolicies]);
+
   const form = useCreateApiKeyForm(
-    agentPolicies.length > 0 ? agentPolicies[0].id : undefined,
+    selectPolicyOptions.length > 0 ? selectPolicyOptions[0].value : undefined,
     (key: EnrollmentAPIKey) => {
       onClose(key);
       notifications.toasts.addSuccess(
@@ -93,15 +103,6 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
     }
   );
 
-  const selectPolicyOptions = useMemo(() => {
-    return agentPolicies
-      .filter((agentPolicy) => !agentPolicy.is_managed)
-      .map((agentPolicy) => ({
-        value: agentPolicy.id,
-        text: agentPolicy.name,
-      }));
-  }, [agentPolicies]);
-
   const body = (
     <EuiForm>
       <form onSubmit={form.onSubmit}>
@@ -114,6 +115,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
         >
           <EuiFieldText
+            data-test-subj="createEnrollmentTokenNameField"
             name="name"
             autoComplete="off"
             placeholder={i18n.translate('xpack.fleet.newEnrollmentKey.placeholder', {
@@ -129,7 +131,12 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
           {...form.policyIdInput.formRowProps}
         >
-          <EuiSelect required={true} {...form.policyIdInput.props} options={selectPolicyOptions} />
+          <EuiSelect
+            data-test-subj="createEnrollmentTokenSelectField"
+            required={true}
+            {...form.policyIdInput.props}
+            options={selectPolicyOptions}
+          />
         </EuiFormRow>
       </form>
     </EuiForm>
@@ -149,6 +156,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
       confirmButtonText={i18n.translate('xpack.fleet.newEnrollmentKey.submitButton', {
         defaultMessage: 'Create enrollment token',
       })}
+      confirmButtonDisabled={!form.policyIdInput.value}
     >
       {body}
     </EuiConfirmModal>

@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseCallOut } from './callout';
 import {
@@ -19,10 +18,13 @@ import {
   getCaseClosedInfo,
 } from './helpers';
 import * as i18n from './translations';
-import { Case } from '../../../common/ui/types';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { ErrorMessage } from './callout/types';
+import type { CaseConnector, ActionConnector } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { ErrorMessage } from './callout/types';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface UsePushToService {
   caseId: string;
@@ -33,8 +35,6 @@ export interface UsePushToService {
   hasDataToPush: boolean;
   isValidConnector: boolean;
   onEditClick: () => void;
-  updateCase: (newCase: Case) => void;
-  userCanCrud: boolean;
 }
 
 export interface ReturnUsePushToService {
@@ -51,13 +51,13 @@ export const usePushToService = ({
   hasDataToPush,
   isValidConnector,
   onEditClick,
-  updateCase,
-  userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
+  const { permissions } = useCasesContext();
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
-  const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
+  const { isLoading: loadingLicense, data: actionLicense = null } = useGetActionLicense();
   const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
@@ -67,17 +67,17 @@ export const usePushToService = ({
       });
 
       if (theCase != null) {
-        updateCase(theCase);
+        refreshCaseViewPage();
       }
     }
-  }, [caseId, connector, pushCaseToExternalService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, refreshCaseViewPage]);
 
   const errorsMsg = useMemo(() => {
     const errors: ErrorMessage[] = [];
 
     // these message require that the user do some sort of write action as a result of the message, readonly users won't
     // be able to perform such an action so let's not display the error to the user in that situation
-    if (!userCanCrud) {
+    if (!permissions.update) {
       return errors;
     }
 
@@ -115,7 +115,7 @@ export const usePushToService = ({
 
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, userCanCrud]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.update]);
 
   const pushToServiceButton = useMemo(
     () => (
@@ -127,7 +127,7 @@ export const usePushToService = ({
           isLoading ||
           loadingLicense ||
           errorsMsg.length > 0 ||
-          !userCanCrud ||
+          !permissions.push ||
           !isValidConnector ||
           !hasDataToPush
         }
@@ -147,29 +147,26 @@ export const usePushToService = ({
       hasDataToPush,
       isLoading,
       loadingLicense,
-      userCanCrud,
+      permissions.push,
       isValidConnector,
     ]
   );
 
-  const objToReturn = useMemo(
-    () => ({
-      pushButton:
-        errorsMsg.length > 0 || !hasDataToPush ? (
-          <EuiToolTip
-            position="top"
-            title={
-              errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)
-            }
-            content={
-              <p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>
-            }
-          >
-            {pushToServiceButton}
-          </EuiToolTip>
-        ) : (
-          <>{pushToServiceButton}</>
-        ),
+  const objToReturn = useMemo(() => {
+    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.push;
+
+    return {
+      pushButton: hidePushButton ? (
+        <EuiToolTip
+          position="top"
+          title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)}
+          content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
+        >
+          {pushToServiceButton}
+        </EuiToolTip>
+      ) : (
+        <>{pushToServiceButton}</>
+      ),
       pushCallouts:
         errorsMsg.length > 0 ? (
           <CaseCallOut
@@ -179,17 +176,17 @@ export const usePushToService = ({
             onEditClick={onEditClick}
           />
         ) : null,
-    }),
-    [
-      connector.name,
-      connectors.length,
-      errorsMsg,
-      hasDataToPush,
-      hasLicenseError,
-      onEditClick,
-      pushToServiceButton,
-    ]
-  );
+    };
+  }, [
+    connector.name,
+    connectors.length,
+    errorsMsg,
+    hasDataToPush,
+    hasLicenseError,
+    onEditClick,
+    pushToServiceButton,
+    permissions.push,
+  ]);
 
   return objToReturn;
 };

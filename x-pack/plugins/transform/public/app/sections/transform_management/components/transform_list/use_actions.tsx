@@ -52,7 +52,7 @@ export const useActions = ({
           <EditTransformFlyout
             closeFlyout={editAction.closeFlyout}
             config={editAction.config}
-            indexPatternId={editAction.indexPatternId}
+            dataViewId={editAction.dataViewId}
           />
         )}
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}

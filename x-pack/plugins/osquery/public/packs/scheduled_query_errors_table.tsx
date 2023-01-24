@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { stringify } from 'querystring';
 
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { usePackQueryErrors } from './use_pack_query_errors';
-import { SearchHit } from '../../common/search_strategy';
+import type { SearchHit } from '../../common/search_strategy';
 
 const VIEW_IN_LOGS = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewLogsErrorsActionAriaLabel',

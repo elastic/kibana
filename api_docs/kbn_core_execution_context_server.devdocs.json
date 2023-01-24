@@ -1,0 +1,199 @@
+{
+  "id": "@kbn/core-execution-context-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-server",
+        "id": "def-common.ExecutionContextSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionContextSetup",
+        "description": [],
+        "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-execution-context-server",
+            "id": "def-common.ExecutionContextSetup.withContext",
+            "type": "Function",
+            "tags": [],
+            "label": "withContext",
+            "description": [
+              "\nKeeps track of execution context while the passed function is executed.\nData are carried over all async operations spawned by the passed function.\nThe nested calls stack the registered context on top of each other."
+            ],
+            "signature": [
+              "<R>(context: ",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined, fn: (...args: any[]) => R) => R"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-execution-context-server",
+                "id": "def-common.ExecutionContextSetup.withContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-execution-context-server",
+                "id": "def-common.ExecutionContextSetup.withContext.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "(...args: any[]) => R"
+                ],
+                "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-server",
+            "id": "def-common.ExecutionContextSetup.getAsLabels",
+            "type": "Function",
+            "tags": [],
+            "label": "getAsLabels",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Labels"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-execution-context-server",
+        "id": "def-common.IExecutionContextContainer",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionContextContainer",
+        "description": [],
+        "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-execution-context-server",
+            "id": "def-common.IExecutionContextContainer.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-server",
+            "id": "def-common.IExecutionContextContainer.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => Readonly<",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              ">"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-server",
+        "id": "def-common.ExecutionContextStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutionContextStart",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-execution-context-server",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextServerPluginApi",
+            "section": "def-common.ExecutionContextSetup",
+            "text": "ExecutionContextSetup"
+          }
+        ],
+        "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -13,7 +13,7 @@ import {
   processNameSafeVersion,
   entityIDSafeVersion,
 } from '../../../../common/endpoint/models/event';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 /**
  * Based on the ECS category of the event, attempt to provide a more descriptive name
@@ -50,6 +50,18 @@ export function DescriptiveName({ event }: { event: SafeResolverEvent }) {
         values={{
           forwardedIP: String(event.network?.forwarded_ip),
           networkDirection: String(event.network?.direction),
+        }}
+      />
+    );
+  }
+
+  if (event.kibana?.alert?.rule?.name) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.resolver.eventDescription.alertEventNameLabel"
+        defaultMessage="{ ruleName }"
+        values={{
+          ruleName: String(event.kibana?.alert?.rule?.name),
         }}
       />
     );

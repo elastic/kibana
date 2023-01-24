@@ -16,13 +16,15 @@ import {
   TooltipType,
   LegendPositionConfig,
   LayoutDirection,
+  Placement,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
 
-import { useKibana } from '../../../../kibana_react/public';
-import { useActiveCursor } from '../../../../charts/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -34,12 +36,10 @@ import {
 } from '../helpers/panel_utils';
 
 import { colors } from '../helpers/chart_constants';
-import { getCharts } from '../helpers/plugin_services';
+import { getCharts, getFieldFormats } from '../helpers/plugin_services';
 
-import type { Sheet } from '../helpers/timelion_request_handler';
-import type { IInterpreterRenderHandlers } from '../../../../expressions';
+import type { Series, Sheet } from '../helpers/timelion_request_handler';
 import type { TimelionVisDependencies } from '../plugin';
-import type { Series } from '../helpers/timelion_request_handler';
 
 import './timelion_vis.scss';
 
@@ -58,6 +58,8 @@ interface TimelionVisComponentProps {
   onBrushEvent: (rangeFilterParams: RangeFilterParams) => void;
   renderComplete: IInterpreterRenderHandlers['done'];
   ariaLabel?: string;
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
 }
 
 const DefaultYAxis = () => (
@@ -75,7 +77,9 @@ const DefaultYAxis = () => (
 
 const renderYAxis = (series: Series[]) => {
   const yAxisOptions = extractAllYAxis(series);
-
+  const defaultFormatter = (x: unknown) => {
+    return getFieldFormats().getInstance('number').convert(x);
+  };
   const yAxis = yAxisOptions.map((option, index) => (
     <Axis
       groupId={option.groupId}
@@ -83,7 +87,7 @@ const renderYAxis = (series: Series[]) => {
       id={option.id!}
       title={option.title}
       position={option.position}
-      tickFormat={option.tickFormat}
+      tickFormat={option.tickFormat || defaultFormatter}
       gridLine={{
         visible: !index,
       }}
@@ -100,6 +104,8 @@ export const TimelionVisComponent = ({
   renderComplete,
   onBrushEvent,
   ariaLabel,
+  syncTooltips,
+  syncCursor,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -199,7 +205,10 @@ export const TimelionVisComponent = ({
           showLegendExtra={true}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
-          onPointerUpdate={handleCursorUpdate}
+          onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
+          externalPointerEvents={{
+            tooltip: { visible: syncTooltips, placement: Placement.Right },
+          }}
           theme={chartTheme}
           baseTheme={chartBaseTheme}
           tooltip={{
@@ -207,7 +216,6 @@ export const TimelionVisComponent = ({
             headerFormatter: ({ value }) => tickFormat(value),
             type: TooltipType.VerticalCursor,
           }}
-          externalPointerEvents={{ tooltip: { visible: false } }}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
         />

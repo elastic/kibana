@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SessionsView renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  <div
+    data-test-subj="security_solution:sessions_viewer:sessions_view"
+  >
+    <div>
+      <div
+        data-test-subj="security_solution:sessions_viewer:sessions_view:entityType"
+      >
+        sessions
+      </div>
+      <div
+        data-test-subj="security_solution:sessions_viewer:sessions_view:startDate"
+      >
+        2022-03-22T22:10:56.794Z
+      </div>
+      <div
+        data-test-subj="security_solution:sessions_viewer:sessions_view:endDate"
+      >
+        2022-03-21T22:10:56.791Z
+      </div>
+      <div
+        data-test-subj="security_solution:sessions_viewer:sessions_view:timelineId"
+      >
+        hosts-page-sessions-v2
+      </div>
+      <div>
+        Started
+      </div>
+      <div>
+        Executable
+      </div>
+      <div>
+        User
+      </div>
+      <div>
+        Interactive
+      </div>
+      <div>
+        Hostname
+      </div>
+      <div>
+        Type
+      </div>
+      <div>
+        Source IP
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

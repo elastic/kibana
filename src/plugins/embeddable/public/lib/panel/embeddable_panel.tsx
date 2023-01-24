@@ -6,15 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import classNames from 'classnames';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { isPromise } from '@kbn/std';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { MaybePromise } from '@kbn/utility-types';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '../../../../../core/public';
-import { toMountPoint } from '../../../../kibana_react/public';
-import { UsageCollectionStart } from '../../../../usage_collection/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {
@@ -25,13 +33,14 @@ import {
   contextMenuTrigger,
 } from '../triggers';
 import {
-  IEmbeddable,
-  EmbeddableOutput,
-  EmbeddableError,
+  EmbeddableErrorHandler,
   EmbeddableInput,
-} from '../embeddables/i_embeddable';
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../embeddables';
 import { ViewMode } from '../types';
 
+import { EmbeddablePanelError } from './embeddable_panel_error';
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
@@ -40,8 +49,7 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableErrorLabel } from './embeddable_error_label';
-import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
+import { EmbeddableStateTransfer, isSelfStyledEmbeddable } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -66,7 +74,7 @@ export interface EmbeddableContainerContext {
 }
 
 interface Props {
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
 
   /**
    * Ordinal number of the embeddable in the container, used as a
@@ -74,7 +82,7 @@ interface Props {
    */
   index?: number;
 
-  getActions: UiActionsService['getTriggerCompatibleActions'];
+  getActions?: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
   overlays?: CoreStart['overlays'];
@@ -103,8 +111,9 @@ interface State {
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
   loading?: boolean;
-  error?: EmbeddableError;
-  errorEmbeddable?: ErrorEmbeddable;
+  error?: Error;
+  destroyError?(): void;
+  node?: ReactNode;
 }
 
 interface InspectorPanelAction {
@@ -119,17 +128,10 @@ interface BasePanelActions {
   editPanel: EditPanelAction;
 }
 
-const emptyObject = {};
-type EmptyObject = typeof emptyObject;
-
-type PanelUniversalActions =
-  | BasePanelActions
-  | InspectorPanelAction
-  | (BasePanelActions & InspectorPanelAction)
-  | EmptyObject;
+interface PanelUniversalActions extends Partial<InspectorPanelAction>, Partial<BasePanelActions> {}
 
 export class EmbeddablePanel extends React.Component<Props, State> {
-  private embeddableRoot: React.RefObject<HTMLDivElement>;
+  private embeddableRoot = React.createRef<HTMLDivElement>();
   private parentSubscription?: Subscription;
   private subscription: Subscription = new Subscription();
   private mounted: boolean = false;
@@ -152,8 +154,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       badges: [],
       notifications: [],
     };
-
-    this.embeddableRoot = React.createRef();
   }
 
   private async refreshBadges() {
@@ -163,9 +163,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.props.showBadges === false) {
       return;
     }
-    let badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+
+    type BadgeAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
+
+    let badges: BadgeAction[] =
+      ((await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
+        embeddable: this.props.embeddable,
+      })) as BadgeAction[]) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -186,9 +192,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.props.showNotifications === false) {
       return;
     }
-    let notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+
+    type NotificationAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
+
+    let notifications: NotificationAction[] =
+      ((await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
+        embeddable: this.props.embeddable,
+      })) as NotificationAction[]) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -242,9 +254,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
-    if (this.state.errorEmbeddable) {
-      this.state.errorEmbeddable.destroy();
-    }
+
+    this.state.destroyError?.();
     this.props.embeddable.destroy();
   }
 
@@ -271,6 +282,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const title = this.props.embeddable.getTitle();
     const headerId = this.generateId();
+
+    const selfStyledOptions = isSelfStyledEmbeddable(this.props.embeddable)
+      ? this.props.embeddable.getSelfStyledOptions()
+      : undefined;
+
     return (
       <EuiPanel
         className={classes}
@@ -284,7 +300,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         {!this.props.hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
-            hidePanelTitle={this.state.hidePanelTitle}
+            hidePanelTitle={this.state.hidePanelTitle || !!selfStyledOptions?.hideTitle}
             isViewMode={viewOnlyMode}
             customizeTitle={
               'customizePanelTitle' in this.state.universalActions
@@ -300,32 +316,57 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             headerId={headerId}
           />
         )}
-        <EmbeddableErrorLabel error={this.state.error} />
-        <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
+        {this.state.error && (
+          <EuiFlexGroup
+            alignItems="center"
+            className="eui-fullHeight embPanel__error"
+            data-test-subj="embeddableError"
+            justifyContent="center"
+          >
+            <EuiFlexItem>
+              <EmbeddableErrorHandler embeddable={this.props.embeddable} error={this.state.error}>
+                {(error) => (
+                  <EmbeddablePanelError
+                    editPanelAction={this.state.universalActions.editPanel}
+                    embeddable={this.props.embeddable}
+                    error={error}
+                  />
+                )}
+              </EmbeddableErrorHandler>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs}>
+          {this.state.node}
+        </div>
       </EuiPanel>
     );
   }
 
   public componentDidMount() {
-    if (this.embeddableRoot.current) {
-      this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe(
-          (output: EmbeddableOutput) => {
-            this.setState({
-              error: output.error,
-              loading: output.loading,
-            });
-          },
-          (error) => {
-            if (this.embeddableRoot.current) {
-              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
-              errorEmbeddable.render(this.embeddableRoot.current);
-              this.setState({ errorEmbeddable });
-            }
-          }
-        )
-      );
-      this.props.embeddable.render(this.embeddableRoot.current);
+    if (!this.embeddableRoot.current) {
+      return;
+    }
+
+    this.subscription.add(
+      this.props.embeddable.getOutput$().subscribe(
+        (output: EmbeddableOutput) => {
+          this.setState({
+            error: output.error,
+            loading: output.loading,
+          });
+        },
+        (error) => {
+          this.setState({ error });
+        }
+      )
+    );
+
+    const node = this.props.embeddable.render(this.embeddableRoot.current) ?? undefined;
+    if (isPromise(node)) {
+      node.then((resolved) => this.setState({ node: resolved }));
+    } else {
+      this.setState({ node });
     }
   }
 
@@ -405,9 +446,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    let regularActions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+    let regularActions =
+      (await this.props.getActions?.(CONTEXT_MENU_TRIGGER, {
+        embeddable: this.props.embeddable,
+      })) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -423,7 +465,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));
     }
 
-    return await buildContextMenuForActions({
+    const panels = await buildContextMenuForActions({
       actions: sortedActions.map((action) => ({
         action,
         context: { embeddable: this.props.embeddable },
@@ -431,5 +473,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       })),
       closeMenu: this.closeMyContextMenuPanel,
     });
+
+    return {
+      panels,
+      actions: sortedActions,
+    };
   };
 }

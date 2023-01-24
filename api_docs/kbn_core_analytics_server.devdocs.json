@@ -1,0 +1,213 @@
+{
+  "id": "@kbn/core-analytics-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-analytics-server",
+        "id": "def-common.AnalyticsServicePreboot",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServicePreboot",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the preboot phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.OptInConfig",
+            "text": "OptInConfig"
+          },
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounter",
+            "text": "TelemetryCounter"
+          },
+          ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.EventTypeOpts",
+            "text": "EventTypeOpts"
+          },
+          "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IShipper",
+            "text": "IShipper"
+          },
+          ", ShipperConfig>(Shipper: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.ShipperClassConstructor",
+            "text": "ShipperClassConstructor"
+          },
+          "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.RegisterShipperOpts",
+            "text": "RegisterShipperOpts"
+          },
+          " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.ContextProviderOpts",
+            "text": "ContextProviderOpts"
+          },
+          "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+        ],
+        "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-analytics-server",
+        "id": "def-common.AnalyticsServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceSetup",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.OptInConfig",
+            "text": "OptInConfig"
+          },
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounter",
+            "text": "TelemetryCounter"
+          },
+          ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.EventTypeOpts",
+            "text": "EventTypeOpts"
+          },
+          "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IShipper",
+            "text": "IShipper"
+          },
+          ", ShipperConfig>(Shipper: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.ShipperClassConstructor",
+            "text": "ShipperClassConstructor"
+          },
+          "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.RegisterShipperOpts",
+            "text": "RegisterShipperOpts"
+          },
+          " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.ContextProviderOpts",
+            "text": "ContextProviderOpts"
+          },
+          "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+        ],
+        "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-analytics-server",
+        "id": "def-common.AnalyticsServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceStart",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.OptInConfig",
+            "text": "OptInConfig"
+          },
+          ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounter",
+            "text": "TelemetryCounter"
+          },
+          ">; }"
+        ],
+        "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

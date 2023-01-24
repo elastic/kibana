@@ -6,15 +6,21 @@
  */
 
 import RE2 from 're2';
+import { memoize } from 'lodash';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
   IScopedClusterClient,
-} from 'kibana/server';
-import type { SecurityPluginSetup } from '../../../security/server';
-import type { JobType, MlSavedObjectType } from '../../common/types/saved_objects';
+} from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type {
+  JobType,
+  TrainedModelType,
+  SavedObjectResult,
+  MlSavedObjectType,
+} from '../../common/types/saved_objects';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
@@ -42,14 +48,9 @@ export interface TrainedModelJob {
 
 type TrainedModelObjectFilter = { [k in keyof TrainedModelObject]?: string };
 
-export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
+export type MLSavedObjectService = ReturnType<typeof mlSavedObjectServiceFactory>;
 
-type UpdateJobsSpacesResult = Record<
-  string,
-  { success: boolean; type: MlSavedObjectType; error?: any }
->;
-
-export function jobSavedObjectServiceFactory(
+export function mlSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
   spacesEnabled: boolean,
@@ -57,6 +58,11 @@ export function jobSavedObjectServiceFactory(
   client: IScopedClusterClient,
   isMlReady: () => Promise<void>
 ) {
+  const _savedObjectsClientFindMemo = memoize(
+    async <T>(options: SavedObjectsFindOptions) => savedObjectsClient.find<T>(options),
+    (options: SavedObjectsFindOptions) => JSON.stringify(options)
+  );
+
   async function _getJobObjects(
     jobType?: JobType,
     jobId?: string,
@@ -87,8 +93,7 @@ export function jobSavedObjectServiceFactory(
       filter,
     };
 
-    const jobs = await savedObjectsClient.find<JobObject>(options);
-
+    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
     return jobs.saved_objects;
   }
 
@@ -231,7 +236,8 @@ export function jobSavedObjectServiceFactory(
       filter,
     };
 
-    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
+    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
+    return jobs.saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -335,12 +341,13 @@ export function jobSavedObjectServiceFactory(
     jobIds: string[],
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ): Promise<UpdateJobsSpacesResult> {
+  ): Promise<SavedObjectResult> {
+    const type = jobType;
     if (jobIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
 
-    const results: UpdateJobsSpacesResult = {};
+    const results: SavedObjectResult = {};
     const jobs = await _getJobObjects(jobType);
     const jobObjectIdMap = new Map<string, string>();
     const jobObjectsToUpdate: Array<{ type: string; id: string }> = [];
@@ -350,7 +357,7 @@ export function jobSavedObjectServiceFactory(
       if (job === undefined) {
         results[jobId] = {
           success: false,
-          type: ML_JOB_SAVED_OBJECT_TYPE,
+          type,
           error: createJobError(jobId, 'job_id'),
         };
       } else {
@@ -370,13 +377,13 @@ export function jobSavedObjectServiceFactory(
         if (error) {
           results[jobId] = {
             success: false,
-            type: ML_JOB_SAVED_OBJECT_TYPE,
+            type,
             error: getSavedObjectClientError(error),
           };
         } else {
           results[jobId] = {
             success: true,
-            type: ML_JOB_SAVED_OBJECT_TYPE,
+            type,
           };
         }
       });
@@ -387,7 +394,7 @@ export function jobSavedObjectServiceFactory(
         const jobId = jobObjectIdMap.get(objectId)!;
         results[jobId] = {
           success: false,
-          type: ML_JOB_SAVED_OBJECT_TYPE,
+          type,
           error: clientError,
         };
       });
@@ -396,12 +403,20 @@ export function jobSavedObjectServiceFactory(
     return { ...results };
   }
 
-  async function canCreateGlobalJobs(request: KibanaRequest) {
+  async function canCreateGlobalMlSavedObjects(
+    mlSavedObjectType: MlSavedObjectType,
+    request: KibanaRequest
+  ) {
     if (authorization === undefined) {
       return true;
     }
     const { authorizationCheck } = authorizationProvider(authorization);
-    return (await authorizationCheck(request)).canCreateGlobally;
+    const { canCreateJobsGlobally, canCreateTrainedModelsGlobally } = await authorizationCheck(
+      request
+    );
+    return mlSavedObjectType === 'trained-model'
+      ? canCreateTrainedModelsGlobally
+      : canCreateJobsGlobally;
   }
 
   async function getTrainedModelObject(
@@ -453,8 +468,7 @@ export function jobSavedObjectServiceFactory(
       filter,
     };
 
-    const models = await savedObjectsClient.find<TrainedModelObject>(options);
-
+    const models = await _savedObjectsClientFindMemo<TrainedModelObject>(options);
     return models.saved_objects;
   }
 
@@ -628,6 +642,18 @@ export function jobSavedObjectServiceFactory(
     return models.map((o) => o.attributes[idType]);
   }
 
+  async function getAnomalyDetectionJobIds() {
+    return _getIds('anomaly-detector', 'job_id');
+  }
+
+  async function getDataFrameAnalyticsJobIds() {
+    return _getIds('data-frame-analytics', 'job_id');
+  }
+
+  async function getTrainedModelsIds() {
+    return _getModelIds('model_id');
+  }
+
   async function findTrainedModelsObjectForJobs(
     jobIds: string[],
     currentSpaceOnly: boolean = true
@@ -656,7 +682,7 @@ export function jobSavedObjectServiceFactory(
         searchFields,
         filter,
       };
-      return savedObjectsClient.find<TrainedModelObject>(options);
+      return _savedObjectsClientFindMemo<TrainedModelObject>(options);
     });
 
     const finedResult = await Promise.all(searches);
@@ -674,11 +700,12 @@ export function jobSavedObjectServiceFactory(
     modelIds: string[],
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ): Promise<UpdateJobsSpacesResult> {
+  ): Promise<SavedObjectResult> {
+    const type: TrainedModelType = 'trained-model';
     if (modelIds.length === 0 || (spacesToAdd.length === 0 && spacesToRemove.length === 0)) {
       return {};
     }
-    const results: UpdateJobsSpacesResult = {};
+    const results: SavedObjectResult = {};
     const models = await _getTrainedModelObjects();
     const trainedModelObjectIdMap = new Map<string, string>();
     const objectsToUpdate: Array<{ type: string; id: string }> = [];
@@ -688,7 +715,7 @@ export function jobSavedObjectServiceFactory(
       if (model === undefined) {
         results[modelId] = {
           success: false,
-          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          type,
           error: createTrainedModelError(modelId),
         };
       } else {
@@ -707,13 +734,13 @@ export function jobSavedObjectServiceFactory(
         if (error) {
           results[model] = {
             success: false,
-            type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+            type,
             error: getSavedObjectClientError(error),
           };
         } else {
           results[model] = {
             success: true,
-            type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+            type,
           };
         }
       });
@@ -724,7 +751,7 @@ export function jobSavedObjectServiceFactory(
         const modelId = trainedModelObjectIdMap.get(objectId)!;
         results[modelId] = {
           success: false,
-          type: ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          type,
           error: clientError,
         };
       });
@@ -734,6 +761,9 @@ export function jobSavedObjectServiceFactory(
   }
 
   return {
+    getAnomalyDetectionJobIds,
+    getDataFrameAnalyticsJobIds,
+    getTrainedModelsIds,
     getAllJobObjects,
     getJobObject,
     createAnomalyDetectionJob,
@@ -751,7 +781,7 @@ export function jobSavedObjectServiceFactory(
     updateJobsSpaces,
     bulkCreateJobs,
     getAllJobObjectsForAllSpaces,
-    canCreateGlobalJobs,
+    canCreateGlobalMlSavedObjects,
     getTrainedModelObject,
     createTrainedModel,
     bulkCreateTrainedModel,
@@ -774,21 +804,11 @@ export function createJobError(id: string, key: keyof JobObject) {
     reason = `No known datafeed with id '${id}'`;
   }
 
-  return {
-    error: {
-      reason,
-    },
-    status: 404,
-  };
+  return reason;
 }
 
 export function createTrainedModelError(id: string) {
-  return {
-    error: {
-      reason: `No known trained model with id '${id}'`,
-    },
-    status: 404,
-  };
+  return `No known trained model with id '${id}'`;
 }
 
 function createSavedObjectFilter(

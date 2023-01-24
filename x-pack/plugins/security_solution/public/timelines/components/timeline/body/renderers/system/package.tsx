@@ -32,6 +32,8 @@ export const Package = React.memo<Props>(
               isDraggable={isDraggable}
               value={packageName}
               iconType="document"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
@@ -42,6 +44,8 @@ export const Package = React.memo<Props>(
               isDraggable={isDraggable}
               value={packageVersion}
               iconType="document"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
@@ -51,6 +55,8 @@ export const Package = React.memo<Props>(
               field="system.audit.package.summary"
               isDraggable={isDraggable}
               value={packageSummary}
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
         </>

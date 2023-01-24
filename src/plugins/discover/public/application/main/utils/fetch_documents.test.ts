@@ -7,13 +7,15 @@
  */
 import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
-import { RequestAdapter } from '../../../../../inspector';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { IKibanaSearchResponse } from 'src/plugins/data/common';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
-import { fetchTotalHits } from './fetch_total_hits';
+import type { EsHitRecord } from '../../../types';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 const getDeps = () =>
   ({
@@ -30,34 +32,18 @@ describe('test fetchDocuments', () => {
     const hits = [
       { _id: '1', foo: 'bar' },
       { _id: '2', foo: 'baz' },
-    ];
-    savedSearchMock.searchSource.fetch$ = () =>
-      of({ rawResponse: { hits: { hits } } } as unknown as IKibanaSearchResponse<SearchResponse>);
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual(hits);
+    ] as unknown as EsHitRecord[];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    savedSearchMock.searchSource.fetch$ = <T>() =>
+      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).resolves.toEqual(documents);
   });
 
   test('rejects on query failure', () => {
-    savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
+    savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
-    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual({
-      msg: 'Oh noes!',
-    });
-  });
-
-  test('fetch$ is called with execution context containing savedSearch id', async () => {
-    const fetch$Mock = jest.fn().mockReturnValue(
-      of({
-        rawResponse: { hits: { hits: [] } },
-      } as unknown as IKibanaSearchResponse<SearchResponse>)
+    expect(fetchDocuments(savedSearchMock.searchSource, getDeps())).rejects.toEqual(
+      new Error('Oh noes!')
     );
-
-    savedSearchMockWithTimeField.searchSource.fetch$ = fetch$Mock;
-
-    await fetchTotalHits(savedSearchMockWithTimeField.searchSource, getDeps());
-    expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
-      Object {
-        "description": "fetch total hits",
-      }
-    `);
   });
 });

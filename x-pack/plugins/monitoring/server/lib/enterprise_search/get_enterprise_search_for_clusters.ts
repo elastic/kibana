@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Cluster } from '../../types';
-import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
+import { Globals } from '../../static_globals';
+import { Cluster, LegacyRequest } from '../../types';
+import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
 import { EnterpriseSearchMetric } from '../metrics';
+import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
   entSearchAggResponseHandler,
   entSearchUuidsAgg,
 } from './_enterprise_search_stats';
-import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
-import { Globals } from '../../static_globals';
 
 function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const stats = entSearchAggResponseHandler(response);
@@ -27,17 +28,17 @@ function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
 }
 
 export function getEnterpriseSearchForClusters(
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange?: TimeRange }>,
   clusters: Cluster[],
   ccs: string
 ) {
-  const start = req.payload.timeRange.min;
-  const end = req.payload.timeRange.max;
+  const start = req.payload.timeRange?.min;
+  const end = req.payload.timeRange?.max;
   const config = req.server.config;
   const maxBucketSize = config.ui.max_bucket_size;
 
   const indexPatterns = getLegacyIndexPattern({
-    moduleType: 'enterprisesearch',
+    moduleType: 'enterprise_search',
     ccs,
     config: Globals.app.config,
   });

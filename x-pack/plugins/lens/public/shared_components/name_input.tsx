@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { useDebouncedValue } from '../shared_components';
+import { EuiFormRow } from '@elastic/eui';
+import { DebouncedInput } from './debounced_input';
 
 export const NameInput = ({
   value,
@@ -19,12 +19,6 @@ export const NameInput = ({
   onChange: (value: string) => void;
   defaultValue?: string;
 }) => {
-  const { inputValue, handleInputChange, initialValue } = useDebouncedValue({
-    onChange,
-    value,
-    defaultValue,
-  });
-
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
@@ -34,14 +28,13 @@ export const NameInput = ({
       display="columnCompressed"
       fullWidth
     >
-      <EuiFieldText
+      <DebouncedInput
+        fullWidth
         compressed
-        data-test-subj="indexPattern-label-edit"
-        value={inputValue}
-        onChange={(e) => {
-          handleInputChange(e.target.value);
-        }}
-        placeholder={initialValue}
+        data-test-subj="column-label-edit"
+        value={value}
+        onChange={onChange}
+        defaultValue={defaultValue}
       />
     </EuiFormRow>
   );

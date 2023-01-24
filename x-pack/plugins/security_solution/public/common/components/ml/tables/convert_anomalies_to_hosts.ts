@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Anomalies, AnomaliesByHost, Anomaly } from '../types';
+import type { Anomalies, AnomaliesByHost, Anomaly } from '../types';
 import { getHostNameFromInfluencers } from '../influencers/get_host_name_from_influencers';
 
 export const convertAnomaliesToHosts = (
   anomalies: Anomalies | null,
+  jobNameById: Record<string, string | undefined>,
   hostName?: string
 ): AnomaliesByHost[] => {
   if (anomalies == null) {
@@ -17,11 +18,25 @@ export const convertAnomaliesToHosts = (
   } else {
     return anomalies.anomalies.reduce<AnomaliesByHost[]>((accum, item) => {
       if (getHostNameFromEntity(item, hostName)) {
-        return [...accum, { hostName: item.entityValue, anomaly: item }];
+        return [
+          ...accum,
+          {
+            hostName: item.entityValue,
+            jobName: jobNameById[item.jobId] ?? item.jobId,
+            anomaly: item,
+          },
+        ];
       } else {
         const hostNameFromInfluencers = getHostNameFromInfluencers(item.influencers, hostName);
         if (hostNameFromInfluencers != null) {
-          return [...accum, { hostName: hostNameFromInfluencers, anomaly: item }];
+          return [
+            ...accum,
+            {
+              hostName: hostNameFromInfluencers,
+              jobName: jobNameById[item.jobId] ?? item.jobId,
+              anomaly: item,
+            },
+          ];
         } else {
           return accum;
         }

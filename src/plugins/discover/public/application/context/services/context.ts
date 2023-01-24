@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 import type { Filter } from '@kbn/es-query';
-import { DataView, ISearchSource } from 'src/plugins/data/common';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { DataTableRecord } from '../../../types';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -30,8 +30,8 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  * Fetch successor or predecessor documents of a given anchor document
  *
  * @param {SurrDocType} type - `successors` or `predecessors`
- * @param {DataView} indexPattern
- * @param {EsHitRecord} anchor - anchor record
+ * @param {DataView} dataView
+ * @param {DataTableRecord} anchor - anchor record
  * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
  * @param {SortDirection} sortDir - direction of sorting
  * @param {number} size - number of records to retrieve
@@ -41,29 +41,30 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  */
 export async function fetchSurroundingDocs(
   type: SurrDocType,
-  indexPattern: DataView,
-  anchor: EsHitRecord,
+  dataView: DataView,
+  anchor: DataTableRecord,
   tieBreakerField: string,
   sortDir: SortDirection,
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
   useNewFieldsApi?: boolean
-): Promise<EsHitRecordList> {
+): Promise<DataTableRecord[]> {
   if (typeof anchor !== 'object' || anchor === null || !size) {
     return [];
   }
-  const timeField = indexPattern.timeFieldName!;
+  const timeField = dataView.timeFieldName!;
   const searchSource = data.search.searchSource.createEmpty();
-  updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
+  updateSearchSource(searchSource, dataView, filters, Boolean(useNewFieldsApi));
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
+  const anchorRaw = anchor.raw!;
 
-  const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
+  const nanos = dataView.isTimeNanosBased() ? extractNanos(anchorRaw.fields?.[timeField][0]) : '';
   const timeValueMillis =
-    nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
+    nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
 
   const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
-  let documents: EsHitRecordList = [];
+  let documents: DataTableRecord[] = [];
 
   for (const interval of intervals) {
     const remainingSize = size - documents.length;
@@ -92,7 +93,7 @@ export async function fetchSurroundingDocs(
       searchAfter,
       remainingSize,
       nanos,
-      anchor._id
+      anchor.raw._id
     );
 
     documents =
@@ -106,7 +107,7 @@ export async function fetchSurroundingDocs(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  indexPattern: DataView,
+  dataView: DataView,
   filters: Filter[],
   useNewFieldsApi: boolean
 ) {
@@ -116,7 +117,7 @@ export function updateSearchSource(
   }
   return searchSource
     .setParent(undefined)
-    .setField('index', indexPattern)
+    .setField('index', dataView)
     .setField('filter', filters)
     .setField('trackTotalHits', false);
 }

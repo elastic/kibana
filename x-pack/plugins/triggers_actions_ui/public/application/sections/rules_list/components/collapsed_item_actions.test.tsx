@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as React from 'react';
-
+import moment from 'moment';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
@@ -16,11 +16,15 @@ jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();
 const onEditRule = jest.fn();
-const setRulesToDelete = jest.fn();
-const disableRule = jest.fn();
-const enableRule = jest.fn();
-const unmuteRule = jest.fn();
-const muteRule = jest.fn();
+const onDeleteRule = jest.fn();
+const bulkDisableRules = jest.fn();
+const bulkEnableRules = jest.fn();
+const onUpdateAPIKey = jest.fn();
+const snoozeRule = jest.fn();
+const unsnoozeRule = jest.fn();
+const onLoading = jest.fn();
+const onRunRule = jest.fn();
+const onCloneRule = jest.fn();
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {
@@ -86,260 +90,316 @@ describe('CollapsedItemActions', () => {
       item: rule,
       onRuleChanged,
       onEditRule,
-      setRulesToDelete,
-      disableRule,
-      enableRule,
-      unmuteRule,
-      muteRule,
+      onDeleteRule,
+      bulkDisableRules,
+      bulkEnableRules,
+      onUpdateAPIKey,
+      snoozeRule,
+      unsnoozeRule,
+      onLoading,
+      onRunRule,
+      onCloneRule,
     };
   };
 
-  test('renders panel items as disabled', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
-    );
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+  describe('with app context', () => {
+    beforeAll(async () => {
+      await setup(false);
     });
-    expect(
-      wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
-    ).toBeTruthy();
+
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
+
+    test('renders actions correctly when rule type is not editable in this context', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+    });
   });
 
-  test('renders closed popover initially and opens on click with all actions enabled', async () => {
-    await setup();
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-
-    expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="muteButton"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeFalsy();
-
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+  describe('without app context', () => {
+    beforeAll(async () => {
+      await setup();
     });
 
-    expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="muteButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeTruthy();
-
-    expect(
-      wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
-    ).toBeFalsy();
-
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-  });
-
-  test('handles case when rule is unmuted and enabled and mute is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="muteButton"]').simulate('click');
-    await act(async () => {
-      await tick(10);
-      wrapper.update();
-    });
-    expect(muteRule).toHaveBeenCalled();
-  });
-
-  test('handles case when rule is unmuted and enabled and disable is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
-    await act(async () => {
-      await tick(10);
-      wrapper.update();
-    });
-    expect(disableRule).toHaveBeenCalled();
-  });
-
-  test('handles case when rule is muted and enabled and unmute is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ muteAll: true })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="muteButton"]').simulate('click');
-    await act(async () => {
-      await tick(10);
-      wrapper.update();
-    });
-    expect(unmuteRule).toHaveBeenCalled();
-  });
-
-  test('handles case when rule is unmuted and disabled and enable is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ enabled: false })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
-    await act(async () => {
-      await tick(10);
-      wrapper.update();
-    });
-    expect(enableRule).toHaveBeenCalled();
-  });
-
-  test('handles case when edit rule is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="editRule"]').simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    expect(onEditRule).toHaveBeenCalled();
-  });
-
-  test('handles case when delete rule is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="deleteRule"]').simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    expect(setRulesToDelete).toHaveBeenCalled();
-  });
-
-  test('renders actions correctly when rule is disabled', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ enabled: false })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    afterAll(() => {
+      jest.clearAllMocks();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Enable');
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-  });
-
-  test('renders actions correctly when rule is not editable', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
-    expect(
-      wrapper.find(`[data-test-subj="selectActionButton"] button`).prop('disabled')
-    ).toBeTruthy();
-  });
-
-  test('renders actions correctly when rule is not enabled due to license', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ enabledInLicense: false })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    test('renders panel items as disabled', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
+      );
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(
+        wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
+      ).toBeTruthy();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-  });
+    test('renders closed popover initially and opens on click with all actions enabled', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
 
-  test('renders actions correctly when rule is muted', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ muteAll: true })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+      expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="updateApiKey"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="runRule"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="cloneRule"]').exists()).toBeFalsy();
+
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="updateApiKey"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="runRule"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="cloneRule"]').exists()).toBeTruthy();
+
+      expect(
+        wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
+      ).toBeFalsy();
+
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+      expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).text()).toEqual('Snooze');
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+      expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual(
+        'Update API key'
+      );
+      expect(wrapper.find(`[data-test-subj="runRule"] button`).text()).toEqual('Run rule');
+      expect(wrapper.find('[data-test-subj="cloneRule"] button').text()).toEqual('Clone rule');
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Unmute');
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-  });
-
-  test('renders actions correctly when rule type is not editable in this context', async () => {
-    await setup(false);
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    test('handles case when run rule is clicked', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="runRule"]').simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(onRunRule).toHaveBeenCalled();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+    test('handles case when rule is unmuted and enabled and disable is clicked', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
+      await act(async () => {
+        await tick(10);
+        wrapper.update();
+      });
+      expect(bulkDisableRules).toHaveBeenCalled();
+    });
+
+    test('handles case when rule is unmuted and disabled and enable is clicked', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ enabled: false })} />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
+      await act(async () => {
+        await tick(10);
+        wrapper.update();
+      });
+      expect(bulkEnableRules).toHaveBeenCalled();
+    });
+
+    test('handles case when edit rule is clicked', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="editRule"]').simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(onEditRule).toHaveBeenCalled();
+    });
+
+    test('handles case when delete rule is clicked', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="deleteRule"]').simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(onDeleteRule).toHaveBeenCalled();
+    });
+
+    test('renders actions correctly when rule is disabled', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ enabled: false })} />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Enable');
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+    });
+
+    test('renders actions correctly when rule is not editable', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(
+        wrapper.find(`[data-test-subj="selectActionButton"] button`).prop('disabled')
+      ).toBeTruthy();
+    });
+
+    test('renders actions correctly when rule is not enabled due to license', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ enabledInLicense: false })} />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).prop('disabled')).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+    });
+
+    test('renders actions correctly when rule is muted', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ muteAll: true })} />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="snoozeButton"] button').text()).toEqual(
+        'Snoozed indefinitely'
+      );
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+    });
+
+    test('renders snooze text correctly if the rule is snoozed', async () => {
+      jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions
+          {...getPropsWithRule({ isSnoozedUntil: moment('1990-02-01').format() })}
+        />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        jest.runOnlyPendingTimers();
+      });
+      expect(wrapper.find('[data-test-subj="snoozeButton"] button').text()).toEqual(
+        'Snoozed until Feb 1'
+      );
+    });
+
+    test('snooze is disabled for SIEM rules', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions
+          {...getPropsWithRule({
+            consumer: 'siem',
+          })}
+        />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeFalsy();
+    });
+
+    test('clone rule is disabled for SIEM rules', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions
+          {...getPropsWithRule({
+            consumer: 'siem',
+          })}
+        />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      expect(wrapper.find(`[data-test-subj="cloneRule"] button`).prop('disabled')).toBeTruthy();
+    });
+
+    test('handles case when clone rule is clicked', async () => {
+      const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="cloneRule"]').simulate('click');
+      expect(onCloneRule).toHaveBeenCalled();
+    });
   });
 });

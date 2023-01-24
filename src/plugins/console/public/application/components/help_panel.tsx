@@ -140,6 +140,13 @@ export function HelpPanel(props: Props) {
                 defaultMessage="Select the currently selected or the top most term in auto-complete menu"
               />
             </dd>
+            <dt>Ctrl/Cmd + L</dt>
+            <dd>
+              <FormattedMessage
+                id="console.helpPage.keyboardCommands.goToLineNumberDescription"
+                defaultMessage="Go to line number"
+              />
+            </dd>
             <dt>Esc</dt>
             <dd>
               <FormattedMessage

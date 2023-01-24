@@ -9,11 +9,11 @@ import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 import React from 'react';
 import styled from 'styled-components';
 
-import { DescriptionList } from '../../../../../common/utility_types';
-import { Anomaly, NarrowDateRange } from '../types';
+import type { DescriptionList } from '../../../../../common/utility_types';
+import type { Anomaly, NarrowDateRange } from '../types';
 import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';
-import { createInfluencers } from './../influencers/create_influencers';
+import { createInfluencers } from '../influencers/create_influencers';
 import * as i18n from './translations';
 import { ExplorerLink } from '../links/create_explorer_link';
 
@@ -29,7 +29,8 @@ export const createDescriptionList = (
   startDate: string,
   endDate: string,
   interval: string,
-  narrowDateRange: NarrowDateRange
+  narrowDateRange: NarrowDateRange,
+  jobName: string
 ): DescriptionList[] => {
   const descriptionList: DescriptionList[] = [
     {
@@ -50,7 +51,7 @@ export const createDescriptionList = (
       ),
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>{score.jobId}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{jobName}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ExplorerLink
               score={score}

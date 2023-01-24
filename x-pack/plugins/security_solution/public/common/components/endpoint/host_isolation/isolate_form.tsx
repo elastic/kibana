@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, ReactNode, useCallback } from 'react';
+import type { ChangeEventHandler, ReactNode } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,7 +42,7 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
     );
 
     return (
-      <EuiForm>
+      <EuiForm data-test-subj="endpointHostIsolationForm">
         <EuiFormRow fullWidth>
           <EuiText size="s">
             <p>

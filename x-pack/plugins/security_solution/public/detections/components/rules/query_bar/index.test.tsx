@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 
-import { QueryBarDefineRule } from './index';
+import { QueryBarDefineRule } from '.';
 import {
   TestProviders,
   useFormFieldMock,
@@ -16,7 +15,11 @@ import {
 } from '../../../../common/mock';
 import { useGetAllTimeline, getAllTimeline } from '../../../../timelines/containers/all';
 import { mockHistory, Router } from '../../../../common/mock/router';
+import { render, act, fireEvent } from '@testing-library/react';
+import { resolveTimeline } from '../../../../timelines/containers/api';
+import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 
+jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
   return {
@@ -48,6 +51,7 @@ jest.mock('../../../../timelines/containers/all', () => {
 
 describe('QueryBarDefineRule', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
@@ -55,61 +59,87 @@ describe('QueryBarDefineRule', () => {
       totalCount: mockOpenTimelineQueryResults.totalCount,
       refetch: jest.fn(),
     });
+    (resolveTimeline as jest.Mock).mockResolvedValue({
+      data: {
+        timeline: { mockTimeline },
+      },
+    });
   });
 
   it('renders correctly', () => {
-    const Component = () => {
-      const field = useFormFieldMock();
+    const field = useFormFieldMock();
 
-      return (
-        <QueryBarDefineRule
-          browserFields={{}}
-          isLoading={false}
-          indexPattern={{ fields: [], title: 'title' }}
-          onCloseTimelineSearch={jest.fn()}
-          openTimelineSearch={true}
-          dataTestSubj="query-bar-define-rule"
-          idAria="idAria"
-          field={field}
-        />
-      );
-    };
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <Component />
+          <QueryBarDefineRule
+            browserFields={{}}
+            isLoading={false}
+            indexPattern={{ fields: [], title: 'title' }}
+            onCloseTimelineSearch={jest.fn()}
+            openTimelineSearch={true}
+            dataTestSubj="query-bar-define-rule"
+            idAria="idAria"
+            field={field}
+          />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="query-bar-define-rule"]').exists()).toBeTruthy();
+    expect(getByTestId('query-bar-define-rule')).toBeInTheDocument();
   });
 
-  it('renders import query from saved timeline modal actions hidden correctly', () => {
-    const Component = () => {
+  it('renders import query from saved timeline modal actions hidden correctly', async () => {
+    await act(async () => {
       const field = useFormFieldMock();
 
-      return (
-        <QueryBarDefineRule
-          browserFields={{}}
-          isLoading={false}
-          indexPattern={{ fields: [], title: 'title' }}
-          onCloseTimelineSearch={jest.fn()}
-          openTimelineSearch={true}
-          dataTestSubj="query-bar-define-rule"
-          idAria="idAria"
-          field={field}
-        />
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <QueryBarDefineRule
+              browserFields={{}}
+              isLoading={false}
+              indexPattern={{ fields: [], title: 'title' }}
+              onCloseTimelineSearch={jest.fn()}
+              openTimelineSearch={true}
+              dataTestSubj="query-bar-define-rule"
+              idAria="idAria"
+              field={field}
+            />
+          </Router>
+        </TestProviders>
       );
-    };
-    const wrapper = mount(
+
+      expect(queryByTestId('open-duplicate')).not.toBeInTheDocument();
+      expect(queryByTestId('create-from-template')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls onOpenTimeline correctly', async () => {
+    const field = useFormFieldMock();
+    const onOpenTimeline = jest.fn();
+
+    const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <Component />
+          <QueryBarDefineRule
+            browserFields={{}}
+            isLoading={false}
+            indexPattern={{ fields: [], title: 'title' }}
+            onCloseTimelineSearch={jest.fn()}
+            openTimelineSearch={true}
+            dataTestSubj="query-bar-define-rule"
+            idAria="idAria"
+            field={field}
+            onOpenTimeline={onOpenTimeline}
+          />
         </Router>
       </TestProviders>
     );
+    getByTestId('open-timeline-modal').click();
 
-    expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="create-from-template"]').exists()).toBeFalsy();
+    await act(async () => {
+      fireEvent.click(getByTestId('title-10849df0-7b44-11e9-a608-ab3d811609'));
+    });
+    expect(onOpenTimeline).toHaveBeenCalled();
   });
 });

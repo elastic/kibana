@@ -9,8 +9,8 @@
 import path from 'path';
 import { readKeystore } from './read_keystore';
 
-jest.mock('../keystore');
-import { Keystore } from '../keystore';
+jest.mock('.');
+import { Keystore } from '.';
 
 describe('cli/serve/read_keystore', () => {
   beforeEach(() => {

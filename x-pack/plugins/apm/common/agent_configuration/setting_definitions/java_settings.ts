@@ -238,4 +238,95 @@ export const javaSettings: RawSettingDefinition[] = [
     ),
     includeAgents: ['java'],
   },
+
+  {
+    key: 'capture_jmx_metrics',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.captureJmxMetrics.label', {
+      defaultMessage: 'Capture JMX metrics',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureJmxMetrics.description',
+      {
+        defaultMessage:
+          'Report metrics from JMX to the APM Server\n' +
+          '\n' +
+          'Can contain multiple comma separated JMX metric definitions:\n' +
+          '\n' +
+          '`object_name[<JMX object name pattern>] attribute[<JMX attribute>:metric_name=<optional metric name>]`\n' +
+          '\n' +
+          'See the Java agent documentation for more details.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'ignore_exceptions',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.ignoreExceptions.label', {
+      defaultMessage: 'Ignore exceptions',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.ignoreExceptions.description',
+      {
+        defaultMessage:
+          'A list of exceptions that should be ignored and not reported as errors.\n' +
+          'This allows to ignore exceptions thrown in regular control flow that are not actual errors.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'trace_methods',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.traceMethods.label', {
+      defaultMessage: 'Trace methods',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.traceMethods.description',
+      {
+        defaultMessage:
+          'A list of methods for which to create a transaction or span.\n' +
+          '\n' +
+          'If you want to monitor a large number of methods,\n' +
+          'use  `profiling_inferred_spans_enabled`.\n' +
+          '\n' +
+          'This works by instrumenting each matching method to include code that creates a span for the method.\n' +
+          'While creating a span is quite cheap in terms of performance,\n' +
+          'instrumenting a whole code base or a method which is executed in a tight loop leads to significant overhead.\n' +
+          '\n' +
+          'NOTE: Only use wildcards if necessary.\n' +
+          'The more methods you match the more overhead will be caused by the agent.\n' +
+          'Also note that there is a maximum amount of spans per transaction `transaction_max_spans`.\n' +
+          '\n' +
+          'See the Java agent documentation for more details.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'unnest_exceptions',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.unnestExceptions.label', {
+      defaultMessage: 'Unnest exceptions',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.unnestExceptions.description',
+      {
+        defaultMessage:
+          'When reporting exceptions,\n' +
+          'un-nests the exceptions matching the wildcard pattern.\n' +
+          "This can come in handy for Spring's `org.springframework.web.util.NestedServletException`,\n" +
+          'for example.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
 ];

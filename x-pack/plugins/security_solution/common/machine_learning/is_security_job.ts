@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LEGACY_ML_GROUP_ID, ML_GROUP_ID, ML_GROUP_IDS } from '../constants';
+import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../constants';
+import { ML_GROUP_IDS } from '../constants';
 
 export const isSecurityJob = (job: { groups: string[] }): boolean =>
   job.groups.some((group) =>

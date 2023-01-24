@@ -23,6 +23,7 @@ describe('Configuration Statistics Aggregator', () => {
       monitored_aggregated_stats_refresh_rate: 5000,
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug' as const,
         warn_delayed_task_start_in_seconds: 60,
       },
       monitored_stats_running_average_window: 50,
@@ -39,6 +40,10 @@ describe('Configuration Statistics Aggregator', () => {
       },
       unsafe: {
         exclude_task_types: [],
+      },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
       },
     };
 

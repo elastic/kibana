@@ -8,13 +8,16 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiButton } from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
+import {
+  DatasourceMap,
+  FramePublicAPI,
+  UserMessagesGetter,
+  VisualizationMap,
+} from '../../../types';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
 import { WarningsPopover } from './warnings_popover';
@@ -23,17 +26,14 @@ import {
   updateVisualizationState,
   DatasourceStates,
   VisualizationState,
-  updateDatasourceState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
-  enableAutoApply,
-  disableAutoApply,
   selectAutoApplyEnabled,
+  selectStagedRequestWarnings,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
-import { writeToStorage } from '../../../settings_storage';
+import { LensInspector } from '../../../lens_inspector_service';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
@@ -46,6 +46,8 @@ export interface WorkspacePanelWrapperProps {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
+  lensInspector: LensInspector;
+  getUserMessages: UserMessagesGetter;
 }
 
 export function WorkspacePanelWrapper({
@@ -55,13 +57,14 @@ export function WorkspacePanelWrapper({
   visualizationId,
   visualizationMap,
   datasourceMap,
-  datasourceStates,
   isFullscreen,
+  getUserMessages,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const requestWarnings = useLensSelector(selectStagedRequestWarnings);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -78,156 +81,112 @@ export function WorkspacePanelWrapper({
     },
     [dispatchLens, activeVisualization]
   );
-  const setDatasourceState = useCallback(
-    (updater: unknown, datasourceId: string) => {
-      dispatchLens(
-        updateDatasourceState({
-          updater,
-          datasourceId,
-        })
-      );
-    },
-    [dispatchLens]
-  );
-
-  const toggleAutoApply = useCallback(() => {
-    trackUiEvent('toggle_autoapply');
-
-    writeToStorage(
-      new Storage(localStorage),
-      AUTO_APPLY_DISABLED_STORAGE_KEY,
-      String(autoApplyEnabled)
-    );
-    dispatchLens(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
-  }, [dispatchLens, autoApplyEnabled]);
 
   const warningMessages: React.ReactNode[] = [];
-  if (activeVisualization?.getWarningMessages) {
-    warningMessages.push(
-      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
-    );
+
+  warningMessages.push(
+    ...getUserMessages('toolbar', { severity: 'warning' }).map(({ longMessage }) => longMessage)
+  );
+
+  if (requestWarnings) {
+    warningMessages.push(...requestWarnings);
   }
-  Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
-    const datasource = datasourceMap[datasourceId];
-    if (!datasourceState.isLoading && datasource.getWarningMessages) {
-      warningMessages.push(
-        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI, (updater) =>
-          setDatasourceState(updater, datasourceId)
-        ) || [])
-      );
-    }
-  });
   return (
-    <>
-      <div>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="none"
-          direction="row"
-          responsive={false}
-          wrap={true}
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup
-              gutterSize="m"
-              direction="row"
-              responsive={false}
-              wrap={true}
-              justifyContent="spaceBetween"
-              className={classNames('lnsWorkspacePanelWrapper__toolbar', {
-                'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
-              })}
-            >
-              {!isFullscreen && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="m" justifyContent="flexStart">
-                    <EuiFlexItem grow={false}>
-                      <ChartSwitch
-                        data-test-subj="lnsChartSwitcher"
-                        visualizationMap={visualizationMap}
-                        datasourceMap={datasourceMap}
-                        framePublicAPI={framePublicAPI}
-                      />
-                    </EuiFlexItem>
-                    {activeVisualization && activeVisualization.renderToolbar && (
-                      <EuiFlexItem grow={false}>
-                        <NativeRenderer
-                          render={activeVisualization.renderToolbar}
-                          nativeProps={{
-                            frame: framePublicAPI,
-                            state: visualizationState,
-                            setState: setVisualizationState,
-                          }}
-                        />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
+    <EuiPageTemplate
+      direction="column"
+      offset={0}
+      minHeight={0}
+      restrictWidth={false}
+      mainProps={{ component: 'div' } as unknown as {}}
+    >
+      {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
+        <EuiPageTemplate.Section paddingSize="none" color="transparent">
+          <EuiFlexGroup
+            alignItems="flexEnd"
+            gutterSize="s"
+            direction="row"
+            className={classNames('lnsWorkspacePanelWrapper__toolbar', {
+              'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
+            })}
+            responsive={false}
+          >
+            {!isFullscreen && (
               <EuiFlexItem>
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="flexStart"
-                  gutterSize="s"
-                  responsive={false}
-                >
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
                   <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      label={i18n.translate('xpack.lens.editorFrame.autoApply', {
-                        defaultMessage: 'Auto-apply',
-                      })}
-                      checked={autoApplyEnabled}
-                      onChange={toggleAutoApply}
-                      compressed={true}
-                      className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-                      data-test-subj="lensToggleAutoApply"
+                    <ChartSwitch
+                      data-test-subj="lnsChartSwitcher"
+                      visualizationMap={visualizationMap}
+                      datasourceMap={datasourceMap}
+                      framePublicAPI={framePublicAPI}
                     />
                   </EuiFlexItem>
-                  {!autoApplyEnabled && (
+
+                  {activeVisualization && activeVisualization.renderToolbar && (
                     <EuiFlexItem grow={false}>
-                      <div>
-                        <EuiButton
-                          disabled={autoApplyEnabled || changesApplied}
-                          fill
-                          className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-                          iconType="play"
-                          onClick={() => dispatchLens(applyChanges())}
-                          size="s"
-                          data-test-subj="lensApplyChanges"
-                        >
-                          <FormattedMessage
-                            id="xpack.lens.editorFrame.applyChangesLabel"
-                            defaultMessage="Apply"
-                          />
-                        </EuiButton>
-                      </div>
+                      <NativeRenderer
+                        render={activeVisualization.renderToolbar}
+                        nativeProps={{
+                          frame: framePublicAPI,
+                          state: visualizationState,
+                          setState: setVisualizationState,
+                        }}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {warningMessages && warningMessages.length ? (
-              <WarningsPopover>{warningMessages}</WarningsPopover>
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+            )}
 
-      <EuiPageContent
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                {warningMessages?.length ? (
+                  <EuiFlexItem grow={false}>
+                    <WarningsPopover>{warningMessages}</WarningsPopover>
+                  </EuiFlexItem>
+                ) : null}
+
+                {!autoApplyEnabled && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      disabled={autoApplyEnabled || changesApplied}
+                      fill
+                      className={
+                        'lnsWorkspacePanelWrapper__applyButton ' +
+                        DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS
+                      }
+                      iconType="checkInCircleFilled"
+                      onClick={() => dispatchLens(applyChanges())}
+                      size="m"
+                      data-test-subj="lnsApplyChanges__toolbar"
+                      minWidth="auto"
+                    >
+                      <FormattedMessage
+                        id="xpack.lens.editorFrame.applyChangesLabel"
+                        defaultMessage="Apply changes"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageTemplate.Section>
+      )}
+      <EuiPageTemplate.Section
+        grow={true}
+        paddingSize="none"
+        contentProps={{
+          className: 'lnsWorkspacePanelWrapper__content',
+        }}
         className={classNames('lnsWorkspacePanelWrapper', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
         color="transparent"
-        hasBorder={false}
-        hasShadow={false}
-        paddingSize="none"
       >
         <WorkspaceTitle />
         {children}
-      </EuiPageContent>
-    </>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 }

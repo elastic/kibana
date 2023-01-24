@@ -6,180 +6,135 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
-import { SavedDashboardPanel730ToLatest } from '../../common';
-import { injectReferences } from '../../common/saved_dashboard_references';
-
-interface VisualizationPanel extends SavedDashboardPanel730ToLatest {
-  embeddableConfig: {
-    savedVis?: {
-      type?: string;
-    };
-  };
-}
-
-interface LensPanel extends SavedDashboardPanel730ToLatest {
-  embeddableConfig: {
-    attributes?: {
-      visualizationType?: string;
-      state?: {
-        visualization?: {
-          preferredSeriesType?: string;
-        };
-        datasourceStates?: {
-          indexpattern?: {
-            layers: Record<
-              string,
-              {
-                columns: Record<string, { operationType: string }>;
-              }
-            >;
-          };
+import { isEmpty } from 'lodash';
+import { SavedObjectAttributes } from '@kbn/core/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import {
+  type ControlGroupTelemetry,
+  CONTROL_GROUP_TYPE,
+  RawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
+import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SavedDashboardPanel } from '../../common';
+import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
+export interface DashboardCollectorData {
+  panels: {
+    total: number;
+    by_reference: number;
+    by_value: number;
+    by_type: {
+      [key: string]: {
+        total: number;
+        by_reference: number;
+        by_value: number;
+        details: {
+          [key: string]: number;
         };
       };
     };
   };
+  controls: ControlGroupTelemetry;
 }
 
-export interface DashboardCollectorData {
-  panels: number;
-  panelsByValue: number;
-  lensByValue: {
-    [key: string]: number;
-  };
-  visualizationByValue: {
-    [key: string]: number;
-  };
-  embeddable: {
-    [key: string]: number;
-  };
-}
-
-export const getEmptyTelemetryData = (): DashboardCollectorData => ({
-  panels: 0,
-  panelsByValue: 0,
-  lensByValue: {},
-  visualizationByValue: {},
-  embeddable: {},
+export const getEmptyDashboardData = (): DashboardCollectorData => ({
+  panels: {
+    total: 0,
+    by_reference: 0,
+    by_value: 0,
+    by_type: {},
+  },
+  controls: initializeControlGroupTelemetry({}),
 });
 
-type DashboardCollectorFunction = (
-  panels: SavedDashboardPanel730ToLatest[],
-  collectorData: DashboardCollectorData
-) => void;
+export const getEmptyPanelTypeData = () => ({
+  total: 0,
+  by_reference: 0,
+  by_value: 0,
+  details: {},
+});
 
-export const collectDashboardInfo: DashboardCollectorFunction = (panels, collectorData) => {
-  collectorData.panels += panels.length;
-  collectorData.panelsByValue += panels.filter((panel) => panel.id === undefined).length;
-};
-
-export const collectByValueVisualizationInfo: DashboardCollectorFunction = (
-  panels,
-  collectorData
-) => {
-  const byValueVisualizations = panels.filter(
-    (panel) => panel.id === undefined && panel.type === 'visualization'
-  );
-
-  for (const panel of byValueVisualizations) {
-    const visPanel = panel as VisualizationPanel;
-
-    if (
-      visPanel.embeddableConfig.savedVis !== undefined &&
-      visPanel.embeddableConfig.savedVis.type !== undefined
-    ) {
-      const type = visPanel.embeddableConfig.savedVis.type;
-
-      if (!collectorData.visualizationByValue[type]) {
-        collectorData.visualizationByValue[type] = 0;
-      }
-
-      collectorData.visualizationByValue[type] = collectorData.visualizationByValue[type] + 1;
-    }
-  }
-};
-
-export const collectByValueLensInfo: DashboardCollectorFunction = (panels, collectorData) => {
-  const byValueLens = panels.filter((panel) => panel.id === undefined && panel.type === 'lens');
-
-  for (const panel of byValueLens) {
-    const lensPanel = panel as LensPanel;
-
-    if (lensPanel.embeddableConfig.attributes?.visualizationType !== undefined) {
-      let type = lensPanel.embeddableConfig.attributes.visualizationType;
-
-      if (type === 'lnsXY') {
-        type =
-          lensPanel.embeddableConfig.attributes.state?.visualization?.preferredSeriesType || type;
-      }
-
-      if (!collectorData.lensByValue[type]) {
-        collectorData.lensByValue[type] = 0;
-      }
-
-      collectorData.lensByValue[type] = collectorData.lensByValue[type] + 1;
-
-      const hasFormula = Object.values(
-        lensPanel.embeddableConfig.attributes.state?.datasourceStates?.indexpattern?.layers || {}
-      ).some((layer) =>
-        Object.values(layer.columns).some((column) => column.operationType === 'formula')
-      );
-
-      if (hasFormula && !collectorData.lensByValue.formula) {
-        collectorData.lensByValue.formula = 0;
-      }
-      if (hasFormula) {
-        collectorData.lensByValue.formula++;
-      }
-    }
-  }
-};
-
-export const collectForPanels: DashboardCollectorFunction = (panels, collectorData) => {
-  collectDashboardInfo(panels, collectorData);
-  collectByValueVisualizationInfo(panels, collectorData);
-  collectByValueLensInfo(panels, collectorData);
-};
-
-export const collectEmbeddableData = (
-  panels: SavedDashboardPanel730ToLatest[],
+export const collectPanelsByType = (
+  panels: SavedDashboardPanel[],
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {
+  collectorData.panels.total += panels.length;
+
   for (const panel of panels) {
-    collectorData.embeddable = embeddableService.telemetry(
+    const type = panel.type;
+    if (!collectorData.panels.by_type[type]) {
+      collectorData.panels.by_type[type] = getEmptyPanelTypeData();
+    }
+    collectorData.panels.by_type[type].total += 1;
+    if (panel.id === undefined) {
+      collectorData.panels.by_value += 1;
+      collectorData.panels.by_type[type].by_value += 1;
+    } else {
+      collectorData.panels.by_reference += 1;
+      collectorData.panels.by_type[type].by_reference += 1;
+    }
+    // the following "details" need a follow-up that will actually properly consolidate
+    // the data from all embeddables - right now, the only data that is kept is the
+    // telemetry for the **final** embeddable of that type
+    collectorData.panels.by_type[type].details = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
         id: panel.id || '',
         type: panel.type,
       },
-      collectorData.embeddable
+      collectorData.panels.by_type[type].details
     );
   }
 };
 
-export async function collectDashboardTelemetry(
-  savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
-  embeddableService: EmbeddablePersistableStateService
-) {
-  const collectorData = getEmptyTelemetryData();
-  const dashboards = await savedObjectClient.find<SavedObjectAttributes>({
-    type: 'dashboard',
-  });
+export const controlsCollectorFactory =
+  (embeddableService: EmbeddablePersistableStateService) =>
+  (attributes: SavedObjectAttributes, collectorData: DashboardCollectorData) => {
+    const controlGroupAttributes: RawControlGroupAttributes | undefined =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (!isEmpty(controlGroupAttributes)) {
+      collectorData.controls = embeddableService.telemetry(
+        {
+          ...controlGroupAttributes,
+          type: CONTROL_GROUP_TYPE,
+          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+        },
+        collectorData.controls
+      ) as ControlGroupTelemetry;
+    }
 
-  for (const dashboard of dashboards.saved_objects) {
-    const attributes = injectReferences(dashboard, {
-      embeddablePersistableStateService: embeddableService,
+    return collectorData;
+  };
+
+async function getLatestTaskState(taskManager: TaskManagerStartContract) {
+  try {
+    const result = await taskManager.fetch({
+      query: { bool: { filter: { term: { _id: `task:${TASK_ID}` } } } },
     });
-
-    const panels = JSON.parse(
-      attributes.panelsJSON as string
-    ) as unknown as SavedDashboardPanel730ToLatest[];
-
-    collectForPanels(panels, collectorData);
-    collectEmbeddableData(panels, collectorData, embeddableService);
+    return result.docs;
+  } catch (err) {
+    const errMessage = err && err.message ? err.message : err.toString();
+    /*
+        The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the
+        task manager has to wait for all plugins to initialize first. It's fine to ignore it as next time around it will be
+        initialized (or it will throw a different type of error)
+      */
+    if (!errMessage.includes('NotInitialized')) {
+      throw err;
+    }
   }
 
-  return collectorData;
+  return null;
+}
+
+export async function collectDashboardTelemetry(taskManager: TaskManagerStartContract) {
+  const latestTaskState = await getLatestTaskState(taskManager);
+
+  if (latestTaskState !== null) {
+    const state = latestTaskState[0].state as DashboardTelemetryTaskState;
+    return state.telemetry;
+  }
+
+  return getEmptyDashboardData();
 }

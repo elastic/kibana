@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-jest.mock('../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   const CodeEditorMock = (props: any) => (
     <input

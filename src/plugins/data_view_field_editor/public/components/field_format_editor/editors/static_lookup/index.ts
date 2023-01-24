@@ -8,8 +8,10 @@
 
 import { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
+import { StaticLookupFormatEditorFormatParams } from './static_lookup';
 
 export type { StaticLookupFormatEditor } from './static_lookup';
-export const staticLookupFormatEditorFactory: FieldFormatEditorFactory = () =>
-  import('./static_lookup').then((m) => m.StaticLookupFormatEditor);
+export const staticLookupFormatEditorFactory: FieldFormatEditorFactory<
+  StaticLookupFormatEditorFormatParams
+> = () => import('./static_lookup').then((m) => m.StaticLookupFormatEditor);
 staticLookupFormatEditorFactory.formatId = formatId;

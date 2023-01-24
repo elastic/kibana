@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import React, { FC, MouseEventHandler, useRef, useCallback } from 'react';
+import React, { FC, MouseEventHandler, useRef, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Sidebar } from '../../components/sidebar';
-import { Toolbar } from '../../components/toolbar';
+import { CANVAS } from '../../../i18n';
+import { Sidebar } from '../sidebar';
+import { Toolbar } from '../toolbar';
 import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
 import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
-import { CommitFn } from '../../../types';
+import { CanvasWorkpad, CommitFn } from '../../../types';
+import { getUntitledWorkpadLabel } from '../../lib/doc_title';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
 export interface Props {
   deselectElement?: MouseEventHandler;
   isWriteable: boolean;
+  workpad: CanvasWorkpad;
 }
 
-export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable }) => {
+export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable, workpad }) => {
   const interactivePageLayout = useRef<CommitFn | null>(null); // future versions may enable editing on multiple pages => use array then
+  const workpadTitle = useRef<HTMLHeadingElement>(null); // future versions may enable editing on multiple pages => use array then
+
+  // TODO: Remove this focus when https://github.com/elastic/kibana/issues/38980 is addressed
+  useEffect(() => {
+    workpadTitle.current?.focus();
+  }, [workpadTitle]);
 
   const registerLayout = useCallback((newLayout: CommitFn) => {
     if (interactivePageLayout.current !== newLayout) {
@@ -38,19 +47,26 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable }) => {
 
   const commit = interactivePageLayout.current || (() => {});
 
+  const untitledWorkpadLabel = useMemo(() => getUntitledWorkpadLabel(), []);
+
   return (
     <div className="canvasLayout">
       <div className="canvasLayout__rows">
         <div className="canvasLayout__cols">
           <div className="canvasLayout__stage">
             <div className="canvasLayout__stageHeader">
+              <h1
+                id="canvasWorkpadTitle"
+                className="euiScreenReaderOnly"
+                ref={workpadTitle}
+                tabIndex={-1}
+              >{`${CANVAS} - ${workpad.name || untitledWorkpadLabel}`}</h1>
               <WorkpadHeader commit={commit} />
             </div>
 
             <div
               id={CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}
               className={CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}
-              onMouseDown={deselectElement}
             >
               {/* NOTE: canvasWorkpadContainer is used for exporting */}
               <div

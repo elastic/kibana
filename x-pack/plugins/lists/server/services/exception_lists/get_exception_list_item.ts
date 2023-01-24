@@ -12,11 +12,8 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionListItem } from './utils';

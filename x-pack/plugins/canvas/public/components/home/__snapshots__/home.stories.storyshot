@@ -2,7 +2,7 @@
 
 exports[`Storyshots Home Home Page 1`] = `
 <div
-  className="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  className="euiPage euiPageTemplate kbnPageTemplate emotion-euiPage-row-grow"
   style={
     Object {
       "minHeight": 460,
@@ -10,58 +10,104 @@ exports[`Storyshots Home Home Page 1`] = `
   }
 >
   <div
-    className="euiPageBody euiPageBody--borderRadiusNone"
+    className="euiPageBody emotion-euiPageBody"
+    style={Object {}}
   >
     <header
-      className="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--restrictWidth-default euiPageHeader--responsive euiPageHeader--tabsAtBottom euiPageHeader--center"
+      className="euiPageHeader emotion-euiPageHeader-l-border"
     >
       <div
-        className="euiPageHeaderContent"
+        className="euiPageHeaderContent emotion-euiPageHeaderContent-l"
+        style={
+          Object {
+            "maxWidth": "1200px",
+          }
+        }
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
         >
           <div
             className="euiFlexItem"
           >
             <h1
-              className="euiTitle euiTitle--large"
+              className="euiTitle emotion-euiTitle-l"
             >
               Canvas
             </h1>
+            <div
+              className="euiPageHeaderContent__bottom"
+            >
+              <div
+                className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+              />
+              <div
+                className="euiTabs euiTabs--large"
+                role="tablist"
+              >
+                <button
+                  aria-selected={true}
+                  className="euiTab euiTab-isSelected"
+                  disabled={false}
+                  id="myWorkpads"
+                  onClick={[Function]}
+                  role="tab"
+                  type="button"
+                >
+                  <span
+                    className="euiTab__content"
+                  >
+                    My workpads
+                  </span>
+                </button>
+                <button
+                  aria-selected={false}
+                  className="euiTab"
+                  data-test-subj="workpadTemplates"
+                  disabled={false}
+                  id="workpadTemplates"
+                  onClick={[Function]}
+                  role="tab"
+                  type="button"
+                >
+                  <span
+                    className="euiTab__content"
+                  >
+                    Templates
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
             >
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  className="euiButton euiButton--primary euiButton--fill"
+                  className="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                   data-test-subj="create-workpad-button"
                   disabled={false}
                   onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
                   type="button"
                 >
                   <span
-                    className="euiButtonContent euiButton__content"
+                    className="emotion-euiButtonDisplayContent"
                   >
                     <span
-                      className="euiButtonContent__icon"
+                      className="emotion-euiButtonDisplayContent__icon-m"
                       color="inherit"
                       data-euiicon-type="plusInCircleFilled"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                     <span
-                      className="euiButton__text"
+                      className="eui-textTruncate"
                     >
                       Create workpad
                     </span>
@@ -71,57 +117,15 @@ exports[`Storyshots Home Home Page 1`] = `
             </div>
           </div>
         </div>
-        <div
-          className="euiPageHeaderContent__bottom"
-        >
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-          <div
-            className="euiTabs euiTabs--large euiTabs--condensed"
-            role="tablist"
-          >
-            <button
-              aria-selected={true}
-              className="euiTab euiTab-isSelected"
-              disabled={false}
-              id="myWorkpads"
-              onClick={[Function]}
-              role="tab"
-              type="button"
-            >
-              <span
-                className="euiTab__content"
-              >
-                My workpads
-              </span>
-            </button>
-            <button
-              aria-selected={false}
-              className="euiTab"
-              data-test-subj="workpadTemplates"
-              disabled={false}
-              id="workpadTemplates"
-              onClick={[Function]}
-              role="tab"
-              type="button"
-            >
-              <span
-                className="euiTab__content"
-              >
-                Templates
-              </span>
-            </button>
-          </div>
-        </div>
       </div>
     </header>
     <div
-      className="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      className="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone emotion-euiPanel-grow-none-plain"
       role="main"
     >
       <div
-        className="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+        className="euiPageContentBody euiPageContentBody--paddingLarge euiPageContentBody--restrictWidth-default"
+        style={Object {}}
       >
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -135,7 +139,9 @@ exports[`Storyshots Home Home Page 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+              aria-label="Loading"
+              className="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+              role="progressbar"
             />
           </div>
         </div>

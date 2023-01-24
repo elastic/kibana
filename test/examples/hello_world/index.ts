@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('Hello world', function () {
     before(async () => {
-      this.tags('ciGroup2');
       await PageObjects.common.navigateToApp('helloWorld');
     });
 

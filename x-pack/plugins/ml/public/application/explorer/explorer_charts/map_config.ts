@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../../../maps/common';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import { SEVERITY_COLOR_RAMP } from '../../../../common';
 import { AnomaliesTableData } from '../explorer_utils';
 
@@ -36,7 +36,7 @@ function getAnomalyFeatures(
         },
         properties: {
           record_score: Math.floor(anomaly.record_score),
-          [type]: coordinates.map((point: number) => point.toFixed(2)),
+          [type]: coordinates.map((point: number) => Number(point.toFixed(2))),
         },
       });
     }

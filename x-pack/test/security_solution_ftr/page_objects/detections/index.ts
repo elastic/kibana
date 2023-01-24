@@ -8,31 +8,38 @@
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
+const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="events-viewer-panel"] .euiDataGridRow';
+
 export class DetectionsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly headerPageObjects = this.ctx.getPageObject('header');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
 
   async navigateHome(): Promise<void> {
     await this.navigateToDetectionsPage();
   }
 
-  async navigateToAlerts(): Promise<void> {
-    await this.navigateToDetectionsPage('alerts');
+  /**
+   * Navigate to the Alerts list page.
+   * @param searchParams
+   *
+   * @example
+   *
+   * // filter list by alert only for a given host name
+   * navigateToAlerts(`query=(language:kuery,query:'host.hostname: "HOST-abc"')`)
+   */
+  async navigateToAlerts(searchParams: string = ''): Promise<void> {
+    await this.common.navigateToUrlWithBrowserHistory('securitySolution', '/alerts', searchParams, {
+      ensureCurrentUrl: !Boolean(searchParams),
+    });
     await this.headerPageObjects.waitUntilLoadingHasFinished();
   }
 
   async navigateToRules(): Promise<void> {
     await this.navigateToDetectionsPage('rules');
-  }
-
-  async navigateToRuleMonitoring(): Promise<void> {
-    await this.common.clickAndValidate('allRulesTableTab-monitoring', 'monitoring-table');
-  }
-
-  async navigateToExceptionList(): Promise<void> {
-    await this.common.clickAndValidate('allRulesTableTab-exceptions', 'exceptions-table');
   }
 
   async navigateToCreateRule(): Promise<void> {
@@ -149,17 +156,23 @@ export class DetectionsPageObject extends FtrService {
     await this.testSubjects.existOrFail('detectionsAlertsPage');
   }
 
+  /**
+   * Opens the first alert on the Alerts List page for the given host name
+   * @param hostName
+   */
   async openFirstAlertDetailsForHostName(hostName: string): Promise<void> {
     await this.ensureOnAlertsPage();
 
     let foundAndHandled = false;
 
     // Get all event rows
-    const allEvents = await this.testSubjects.findAll('event');
+    const allEvents = await this.testSubjects.findService.allByCssSelector(
+      ALERT_TABLE_ROW_CSS_SELECTOR
+    );
 
     for (const eventRow of allEvents) {
       const hostNameButton = await this.testSubjects.findDescendant(
-        'host-details-button',
+        'formatted-field-host.name',
         eventRow
       );
       const eventRowHostName = (await hostNameButton.getVisibleText()).trim();
@@ -176,6 +189,50 @@ export class DetectionsPageObject extends FtrService {
     if (!foundAndHandled) {
       throw new Error(`no alerts found for host: ${hostName}`);
     }
+  }
+
+  /**
+   * Opens the Response console from the alert Details. Alert details must be already opened/displayed
+   */
+  async openResponseConsoleFromAlertDetails(): Promise<void> {
+    await this.testSubjects.existOrFail('eventDetails');
+    await this.testSubjects.click('take-action-dropdown-btn');
+    await this.testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
+    await this.testSubjects.existOrFail('consolePageOverlay');
+  }
+
+  /**
+   * Clicks the refresh button on the Alerts page and waits for it to complete
+   */
+  async clickRefresh(): Promise<void> {
+    await this.ensureOnAlertsPage();
+    this.testSubjects.click('querySubmitButton');
+
+    // wait for refresh to complete
+    await this.retry.waitFor(
+      'Alerts pages refresh button to be enabled',
+      async (): Promise<boolean> => {
+        const refreshButton = await this.testSubjects.find('querySubmitButton');
+
+        return (await refreshButton.isDisplayed()) && (await refreshButton.isEnabled());
+      }
+    );
+  }
+
+  async waitForListToHaveAlerts(timeoutMs?: number): Promise<void> {
+    await this.retry.waitForWithTimeout(
+      'waiting for alerts to show up on alerts page',
+      timeoutMs ?? this.defaultTimeoutMs,
+      async (): Promise<boolean> => {
+        await this.clickRefresh();
+
+        const allEventRows = await this.testSubjects.findService.allByCssSelector(
+          ALERT_TABLE_ROW_CSS_SELECTOR
+        );
+
+        return Boolean(allEventRows.length);
+      }
+    );
   }
 
   private async navigateToDetectionsPage(path: string = ''): Promise<void> {

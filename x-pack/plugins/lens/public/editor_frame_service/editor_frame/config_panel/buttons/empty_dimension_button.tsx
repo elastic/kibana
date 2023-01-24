@@ -9,47 +9,67 @@ import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 
-import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
-import { LayerDatasourceDropProps } from '../types';
+import {
+  Datasource,
+  VisualizationDimensionGroupConfig,
+  DropType,
+  DatasourceLayers,
+  isOperation,
+  IndexPatternMap,
+  DragDropOperation,
+  Visualization,
+} from '../../../../types';
 import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_targets_utils';
-
-const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
-  defaultMessage: 'Empty dimension',
-});
 
 interface EmptyButtonProps {
   columnId: string;
   onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
+  labels?: {
+    ariaLabel: (label: string) => string;
+    label: JSX.Element | string;
+  };
 }
 
-const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
-  <EuiButtonEmpty
-    className="lnsLayerPanel__triggerText"
-    color="text"
-    size="s"
-    iconType="plusInCircleFilled"
-    contentProps={{
-      className: 'lnsLayerPanel__triggerTextContent',
-    }}
-    aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
+const defaultButtonLabels = {
+  ariaLabel: (l: string) =>
+    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabel', {
       defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
-      values: { groupLabel: group.groupLabel },
-    })}
-    data-test-subj="lns-empty-dimension"
-    onClick={() => {
-      onClick(columnId);
-    }}
-  >
+      values: { groupLabel: l },
+    }),
+  label: (
     <FormattedMessage
       id="xpack.lens.configure.emptyConfig"
       defaultMessage="Add or drag-and-drop a field"
     />
-  </EuiButtonEmpty>
-);
+  ),
+};
+
+const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
+  const { buttonAriaLabel, buttonLabel } = group.labels || {};
+  return (
+    <EuiButtonEmpty
+      className="lnsLayerPanel__triggerText"
+      color="text"
+      size="s"
+      iconType="plusInCircleFilled"
+      contentProps={{
+        className: 'lnsLayerPanel__triggerTextContent',
+      }}
+      aria-label={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      data-test-subj="lns-empty-dimension"
+      onClick={() => {
+        onClick(columnId);
+      }}
+    >
+      {buttonLabel || defaultButtonLabels.label}
+    </EuiButtonEmpty>
+  );
+};
 
 const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
   <EuiButtonEmpty
@@ -60,9 +80,9 @@ const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) =>
     contentProps={{
       className: 'lnsLayerPanel__triggerTextContent',
     }}
-    aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
-      defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
-      values: { groupLabel: group.groupLabel },
+    aria-label={i18n.translate('xpack.lens.indexPattern.suggestedValueAriaLabel', {
+      defaultMessage: 'Suggested value: {value} for {groupLabel}',
+      values: { value: group.suggestedValue?.(), groupLabel: group.groupLabel },
     })}
     data-test-subj="lns-empty-dimension-suggested-value"
     onClick={() => {
@@ -79,93 +99,111 @@ const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) =>
 
 export function EmptyDimensionButton({
   group,
-  groups,
   layerDatasource,
-  layerDatasourceDropProps,
-  layerId,
-  groupIndex,
-  layerIndex,
+  state,
   onClick,
   onDrop,
+  datasourceLayers,
+  indexPatterns,
+  activeVisualization,
+  order,
+  target,
 }: {
-  layerId: string;
-  groupIndex: number;
-  layerIndex: number;
-  onDrop: (
-    droppedItem: DragDropIdentifier,
-    dropTarget: DragDropIdentifier,
-    dropType?: DropType
-  ) => void;
-  onClick: (id: string) => void;
+  order: [2, number, number, number];
   group: VisualizationDimensionGroupConfig;
-  groups: VisualizationDimensionGroupConfig[];
-
-  layerDatasource: Datasource<unknown, unknown>;
-  layerDatasourceDropProps: LayerDatasourceDropProps;
+  layerDatasource?: Datasource<unknown, unknown>;
+  datasourceLayers: DatasourceLayers;
+  state: unknown;
+  onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
+  onClick: (id: string) => void;
+  indexPatterns: IndexPatternMap;
+  activeVisualization: Visualization<unknown, unknown>;
+  target: Omit<DragDropOperation, 'columnId'> & {
+    humanData: {
+      groupLabel: string;
+      position: number;
+      layerNumber: number;
+      label: string;
+    };
+  };
 }) {
   const { dragging } = useContext(DragContext);
 
-  const itemIndex = group.accessors.length;
+  let getDropProps;
+
+  if (dragging) {
+    if (!layerDatasource) {
+      getDropProps = activeVisualization.getDropProps;
+    } else if (
+      isDraggedField(dragging) ||
+      (isOperation(dragging) &&
+        layerDatasource &&
+        datasourceLayers?.[dragging.layerId]?.datasourceId ===
+          datasourceLayers?.[target.layerId]?.datasourceId)
+    ) {
+      getDropProps = layerDatasource.getDropProps;
+    }
+  }
 
   const [newColumnId, setNewColumnId] = useState<string>(generateId());
   useEffect(() => {
     setNewColumnId(generateId());
-  }, [itemIndex]);
+  }, [group.accessors.length]);
 
-  const dropProps = layerDatasource.getDropProps({
-    ...layerDatasourceDropProps,
-    dragging,
-    columnId: newColumnId,
-    filterOperations: group.filterOperations,
-    groupId: group.groupId,
-    dimensionGroups: groups,
-  });
-
-  const dropTypes = dropProps?.dropTypes;
-  const nextLabel = dropProps?.nextLabel;
+  const { dropTypes, nextLabel } = getDropProps?.({
+    state,
+    source: dragging,
+    target: {
+      ...target,
+      columnId: newColumnId,
+    },
+    indexPatterns,
+  }) || { dropTypes: [], nextLabel: '' };
 
   const canDuplicate = !!(
-    dropTypes &&
-    (dropTypes.includes('duplicate_compatible') || dropTypes.includes('duplicate_incompatible'))
+    dropTypes.includes('duplicate_compatible') || dropTypes.includes('duplicate_incompatible')
   );
 
   const value = useMemo(
     () => ({
+      ...target,
       columnId: newColumnId,
-      groupId: group.groupId,
-      layerId,
       id: newColumnId,
       humanData: {
-        label,
-        groupLabel: group.groupLabel,
-        position: itemIndex + 1,
+        ...target.humanData,
         nextLabel: nextLabel || '',
         canDuplicate,
       },
     }),
-    [newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel, canDuplicate]
+    [newColumnId, target, nextLabel, canDuplicate]
   );
 
   const handleOnDrop = React.useCallback(
-    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    (source, selectedDropType) => onDrop(source, value, selectedDropType),
     [value, onDrop]
   );
+
+  const buttonProps: EmptyButtonProps = {
+    columnId: value.columnId,
+    onClick,
+    group,
+  };
 
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         value={value}
-        order={[2, layerIndex, groupIndex, itemIndex]}
+        order={order}
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
         getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           {typeof group.suggestedValue?.() === 'number' ? (
-            <SuggestedValueButton columnId={value.columnId} onClick={onClick} group={group} />
+            <SuggestedValueButton {...buttonProps} />
           ) : (
-            <DefaultEmptyButton columnId={value.columnId} onClick={onClick} group={group} />
+            <DefaultEmptyButton {...buttonProps} />
           )}
         </div>
       </DragDrop>

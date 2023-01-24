@@ -6,7 +6,5 @@
  */
 
 // compile typescript on the fly
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
-
-require('./infer_route_return_types/index.ts');
+require('@kbn/babel-register').install();
+require('./infer_route_return_types');

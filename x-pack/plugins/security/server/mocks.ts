@@ -13,6 +13,7 @@ import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
+import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
@@ -31,12 +32,14 @@ function createSetupMock() {
     privilegeDeprecationsService: {
       getKibanaRolesByFeatureId: jest.fn(),
     },
+    setIsElasticCloudDeployment: jest.fn(),
   };
 }
 
 function createStartMock() {
   const mockAuthz = authorizationMock.create();
   const mockAuthc = authenticationServiceMock.createStart();
+  const mockUserProfiles = userProfileServiceMock.createStart();
   return {
     authc: {
       apiKeys: mockAuthc.apiKeys,
@@ -48,6 +51,11 @@ function createStartMock() {
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
+    },
+    userProfiles: {
+      getCurrent: mockUserProfiles.getCurrent,
+      suggest: mockUserProfiles.suggest,
+      bulkGet: mockUserProfiles.bulkGet,
     },
   };
 }

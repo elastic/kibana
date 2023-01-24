@@ -7,12 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer, GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
-import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
+import {
+  LAYER_WIZARD_CATEGORY,
+  SCALING_TYPES,
+  STYLE_TYPE,
+  VECTOR_STYLES,
+  WIZARD_ID,
+} from '../../../../common/constants';
 import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
 import {
   ESSearchSourceDescriptor,
@@ -35,6 +40,7 @@ export function createDefaultLayerDescriptor(
 }
 
 export const esDocumentsLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.ES_DOCUMENT,
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
@@ -42,13 +48,25 @@ export const esDocumentsLayerWizardConfig: LayerWizard = {
   }),
   icon: DocumentsLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESSearchSourceDescriptor>) => {
+    const onSourceConfigChange = (
+      sourceConfig: Partial<ESSearchSourceDescriptor> | null,
+      isPointsOnly: boolean
+    ) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
       }
 
-      previewLayers([createDefaultLayerDescriptor(sourceConfig, mapColors)]);
+      const layerDescriptor = createDefaultLayerDescriptor(sourceConfig, mapColors);
+      if (isPointsOnly) {
+        layerDescriptor.style.properties[VECTOR_STYLES.LINE_WIDTH] = {
+          type: STYLE_TYPE.STATIC,
+          options: {
+            size: 0,
+          },
+        };
+      }
+      previewLayers([layerDescriptor]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },

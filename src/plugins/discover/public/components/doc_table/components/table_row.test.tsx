@@ -10,19 +10,18 @@ import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
 import { setDocViewsRegistry } from '../../../kibana_services';
-import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
-import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-} from '../../../../../discover/common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { EsHitRecord } from '../../../types';
 
-jest.mock('../lib/row_formatter', () => {
-  const originalModule = jest.requireActual('../lib/row_formatter');
+jest.mock('../utils/row_formatter', () => {
+  const originalModule = jest.requireActual('../utils/row_formatter');
   return {
     ...originalModule,
     formatRow: () => {
@@ -67,7 +66,7 @@ const mockHit = {
     },
   ],
   _source: { message: 'mock_message', bytes: 20 },
-};
+} as unknown as EsHitRecord;
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -76,8 +75,8 @@ describe('Doc table row component', () => {
   const defaultProps = {
     columns: ['_source'],
     filter: mockInlineFilter,
-    indexPattern: indexPatternWithTimefieldMock,
-    row: mockHit,
+    dataView: dataViewWithTimefieldMock,
+    row: buildDataTableRecord(mockHit, dataViewWithTimefieldMock),
     useNewFieldsApi: true,
     filterManager: mockFilterManager,
     addBasePath: (path: string) => path,
@@ -100,6 +99,21 @@ describe('Doc table row component', () => {
     expect(fields.first().text()).toBe('mock_message');
     expect(fields.last().text()).toBe('20');
     expect(fields.length).toBe(3);
+  });
+
+  it('should apply filter when pressed', () => {
+    const component = mountComponent({ ...defaultProps, columns: ['bytes'] });
+
+    const fields = findTestSubject(component, 'docTableField');
+    expect(fields.first().text()).toBe('20');
+
+    const filterInButton = findTestSubject(component, 'docTableCellFilter');
+    filterInButton.simulate('click');
+    expect(mockInlineFilter).toHaveBeenCalledWith(
+      dataViewWithTimefieldMock.getFieldByName('bytes'),
+      20,
+      '+'
+    );
   });
 
   describe('details row', () => {

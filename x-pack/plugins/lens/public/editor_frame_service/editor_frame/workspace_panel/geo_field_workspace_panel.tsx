@@ -6,23 +6,21 @@
  */
 
 import React from 'react';
-import { EuiPageContentBody, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  UiActionsStart,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { GlobeIllustration } from '@kbn/chart-icons';
+import { IndexPattern } from '../../../types';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { DragDrop } from '../../../drag_drop';
-import { GlobeIllustration } from '../../../assets/globe_illustration';
 import { APP_ID } from '../../../../common/constants';
 import './geo_field_workspace_panel.scss';
 
 interface Props {
   fieldType: string;
   fieldName: string;
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   uiActions: UiActionsStart;
 }
 
@@ -40,38 +38,40 @@ const dragDropOrder = [1, 0, 0, 0];
 export function GeoFieldWorkspacePanel(props: Props) {
   function onDrop() {
     props.uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER).exec({
-      indexPatternId: props.indexPatternId,
+      dataViewSpec: props.indexPattern.spec,
       fieldName: props.fieldName,
       originatingApp: APP_ID,
     });
   }
 
   return (
-    <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+    <div className="lnsWorkspacePanelWrapper__pageContentBody">
       <EuiText className="lnsWorkspacePanel__emptyContent" textAlign="center" size="s">
-        <h2>
-          <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
-        </h2>
-        <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
-        <DragDrop
-          className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
-          dataTestSubj="lnsGeoFieldWorkspace"
-          draggable={false}
-          dropTypes={['field_add']}
-          order={dragDropOrder}
-          value={dragDropIdentifier}
-          onDrop={onDrop}
-        >
-          <p>
-            <strong>
-              <FormattedMessage
-                id="xpack.lens.geoFieldWorkspace.dropMessage"
-                defaultMessage="Drop field here to open in Maps"
-              />
-            </strong>
-          </p>
-        </DragDrop>
+        <div>
+          <h2>
+            <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
+          </h2>
+          <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__promptIllustration" />
+          <DragDrop
+            className="lnsVisualizeGeoFieldWorkspacePanel__dragDrop"
+            dataTestSubj="lnsGeoFieldWorkspace"
+            draggable={false}
+            dropTypes={['field_add']}
+            order={dragDropOrder}
+            value={dragDropIdentifier}
+            onDrop={onDrop}
+          >
+            <p>
+              <strong>
+                <FormattedMessage
+                  id="xpack.lens.geoFieldWorkspace.dropMessage"
+                  defaultMessage="Drop field here to open in Maps"
+                />
+              </strong>
+            </p>
+          </DragDrop>
+        </div>
       </EuiText>
-    </EuiPageContentBody>
+    </div>
   );
 }

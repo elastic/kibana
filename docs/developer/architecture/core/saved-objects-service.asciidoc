@@ -32,6 +32,7 @@ wanting to use Saved Objects.
 
 === Server side usage
 
+[[saved-objects-type-registration]]
 ==== Registering a Saved Object type
 Saved object type definitions should be defined in their own `my_plugin/server/saved_objects` directory.
 
@@ -44,7 +45,7 @@ import { SavedObjectsType } from 'src/core/server';
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', // <1>
-  hidden: false,
+  hidden: true,
   namespaceType: 'multiple-isolated', // <2>
   mappings: {
     dynamic: false,
@@ -63,9 +64,9 @@ export const dashboardVisualization: SavedObjectsType = {
   },
 };
 ----
-<1> Since the name of a Saved Object type forms part of the url path for the
+<1> Since the name of a Saved Object type may form part of the URL path for the
 public Saved Objects HTTP API, these should follow our API URL path convention
-and always be written as snake case.
+and always be written in snake case.
 <2> This field determines "space behavior" -- whether these objects can exist in one space, multiple spaces, or all spaces. This value means
 that objects of this type can only exist in a single space. See <<sharing-saved-objects,Sharing Saved Objects>> for more information.
 
@@ -266,6 +267,79 @@ It is critical that you have extensive tests to ensure that migrations behave
 as expected with all possible input documents. Given how simple it is to test
 all the branch conditions in a migration function and the high impact of a bug
 in this code, there's really no reason not to aim for 100% test code coverage.
+
+==== Type visibility
+It is recommended that plugins only expose Saved Object types that are necessary.
+That is so to provide better backward compatibility.
+
+There are two options to register a type: either as completely unexposed to the global Saved Objects HTTP APIs and client or to only expose it to the client but not to the APIs.
+
+===== Hidden types
+
+In case when the type is not hidden, it will be exposed via the global Saved Objects HTTP API.
+That brings the limitation of introducing backward incompatible changes as there might be a service consuming the API.
+
+This is a formal limitation not prohibiting backward incompatible changes in the migrations.
+But in case of such changes on the hidden types, they can be resolved and encapsulated on the intermediate layer in the plugin API.
+
+Hence, the main idea is that all the interactions with the Saved Objects should be done via the plugin API rather than via the Saved Objects HTTP API.
+
+By default, the hidden types will not be accessible in the Saved Objects client.
+To make them accessible, they should be explicitly listed in the `includedHiddenTypes` parameters upon client creation.
+
+[source,typescript]
+----
+import { CoreStart, Plugin } from '@kbn/core/server';
+
+class SomePlugin implements Plugin {
+  // ...
+
+  public start({ savedObjects }: CoreStart) {
+    // ...
+
+    const savedObjectsClient = savedObjects.getScopedClient(
+      request,
+      { includedHiddenTypes: ['dashboard_visualization'] }
+    );
+
+    // ...
+  }
+}
+----
+
+===== Hidden from the HTTP APIs 
+
+When a saved object is registered as hidden from the HTTP APIs, it will remain exposed to the global Saved Objects client:
+
+[source,typescript]
+----
+import { SavedObjectsType } from 'src/core/server';
+
+export const myCustomVisualization: SavedObjectsType = {
+  name: 'my_custom_visualization', // <1>
+  hidden: false,
+  hiddenFromHttpApis: true, // <2>
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    dynamic: false,
+    properties: {
+      description: {
+        type: 'text',
+      },
+      hits: {
+        type: 'integer',
+      },
+    },
+  },
+  migrations: {
+    '1.0.0': migrateMyCustomVisualizationToV1,
+    '2.0.0': migrateMyCustomVisualizationToV2,
+  },
+};
+----
+
+<1> MyCustomVisualization types have their own domain-specific HTTP API's that leverage the global Saved Objects client
+<2> This field determines "hidden from http apis" behavior -- any attempts to use the global Saved Objects HTTP APIs will throw errors
 
 === Client side usage
 

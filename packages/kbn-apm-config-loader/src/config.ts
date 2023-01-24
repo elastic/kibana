@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
+export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
   serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
@@ -111,7 +111,7 @@ export class ApmConfiguration {
   /**
    * Override some config values when specific environment variables are used
    */
-  private getConfigFromEnv(): AgentConfigOptions {
+  private getConfigFromEnv(configFromKibanaConfig: AgentConfigOptions): AgentConfigOptions {
     const config: AgentConfigOptions = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
@@ -124,8 +124,15 @@ export class ApmConfiguration {
       config.contextPropagationOnly = false;
     }
 
-    if (process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV) {
-      config.environment = process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV;
+    if (process.env.ELASTIC_APM_ENVIRONMENT) {
+      config.environment = process.env.ELASTIC_APM_ENVIRONMENT;
+    } else {
+      // We check NODE_ENV in a different way so that, unlike
+      // ELASTIC_APM_ENVIRONMENT, it does not override any explicit value set
+      // in the config file.
+      if (!configFromKibanaConfig.environment && process.env.NODE_ENV) {
+        config.environment = process.env.NODE_ENV;
+      }
     }
 
     if (process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE) {
@@ -134,6 +141,10 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_SERVER_URL) {
       config.serverUrl = process.env.ELASTIC_APM_SERVER_URL;
+    }
+
+    if (process.env.ELASTIC_APM_SECRET_TOKEN) {
+      config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
     }
 
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {
@@ -154,23 +165,6 @@ export class ApmConfiguration {
    */
   private getConfigFromKibanaConfig(): AgentConfigOptions {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
-  }
-
-  /**
-   * Get the configuration from the apm.dev.js file, supersedes config
-   * from the --config file, disabled when running the distributable
-   */
-  private getDevConfig(): AgentConfigOptions {
-    if (this.isDistributable) {
-      return {};
-    }
-
-    try {
-      const apmDevConfigPath = join(this.rootDir, 'config', 'apm.dev.js');
-      return require(apmDevConfigPath);
-    } catch (e) {
-      return {};
-    }
   }
 
   /**
@@ -222,6 +216,9 @@ export class ApmConfiguration {
       return {};
     }
 
+    const isPr =
+      !!process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false';
+
     return {
       globalLabels: {
         branch: process.env.GIT_BRANCH || '',
@@ -229,8 +226,8 @@ export class ApmConfiguration {
         ciBuildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
         ciBuildId: process.env.BUILDKITE_BUILD_ID || '',
         ciBuildJobId: process.env.BUILDKITE_JOB_ID || '',
-        isPr: process.env.BUILDKITE_PULL_REQUEST ? true : false,
-        prId: process.env.BUILDKITE_PULL_REQUEST || '',
+        isPr,
+        prId: isPr ? process.env.BUILDKITE_PULL_REQUEST : '',
       },
     };
   }
@@ -266,12 +263,9 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const config = merge(
-      {},
-      this.getConfigFromKibanaConfig(),
-      this.getDevConfig(),
-      this.getConfigFromEnv()
-    );
+    const configFromKibanaConfig = this.getConfigFromKibanaConfig();
+    const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
+    const config = merge({}, configFromKibanaConfig, configFromEnv);
 
     if (config.active === false && config.contextPropagationOnly !== false) {
       throw new Error(

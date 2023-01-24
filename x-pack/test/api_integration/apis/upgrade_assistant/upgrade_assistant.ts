@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
-  describe.skip('Upgrade Assistant', () => {
+  describe('Upgrade Assistant', function () {
     describe('Reindex operation saved object', () => {
       const dotKibanaIndex = '.kibana';
       const fakeSavedObjectId = 'fakeSavedObjectId';

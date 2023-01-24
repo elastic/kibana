@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, LogMeta } from 'kibana/server';
+import { type Subject, ReplaySubject } from 'rxjs';
+import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import { mappingFromFieldMap } from '../../../../../plugins/rule_registry/common/mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import {
   AlertConsumers,
   ALERT_REASON,
   ALERT_UUID,
-} from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   createLifecycleExecutor,
   WrappedLifecycleRuleState,
-} from '../../../../../plugins/rule_registry/server/utils/create_lifecycle_executor';
+} from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
+import { Dataset, IRuleDataClient, RuleDataService } from '@kbn/rule-registry-plugin/server';
+import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import {
-  Dataset,
-  IRuleDataClient,
-  RuleDataService,
-} from '../../../../../plugins/rule_registry/server';
 import {
   MockRuleParams,
   MockRuleState,
@@ -31,7 +29,6 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../plugins/alerting/server';
 import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,6 +49,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     fatal: fakeLogger,
     log: sinon.stub(),
     get: sinon.stub(),
+    isLevelEnabled: sinon.stub(),
   } as Logger;
 
   const getClusterClient = () => {
@@ -62,9 +60,13 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
   describe.skip('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
+    let pluginStop$: Subject<void>;
+
     before(async () => {
       // First we need to setup the data service. This happens within the
       // Rule Registry plugin as part of the server side setup phase.
+      pluginStop$ = new ReplaySubject(1);
+
       const ruleDataService = new RuleDataService({
         getClusterClient,
         logger,
@@ -72,6 +74,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
+        pluginStop$,
       });
 
       // This initializes the service. This happens immediately after the creation
@@ -106,6 +109,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
 
     after(async () => {
       cleanupRegistryIndices(getService, ruleDataClient);
+      pluginStop$.next();
+      pluginStop$.complete();
     });
 
     it('should work with object fields', async () => {
@@ -158,7 +163,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         });
 
         // Returns the current state of the alert
-        return Promise.resolve(state);
+        return Promise.resolve({ state });
       });
 
       // Create the options with the minimal amount of values to test the lifecycle executor
@@ -187,8 +192,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       >;
 
       // Execute the rule the first time
-      const results = await executor(options);
-      expect(results.wrapped).to.eql({
+      const executorResult = await executor(options);
+      expect(executorResult.state.wrapped).to.eql({
         testObject: {
           host: { name: 'host-01' },
           id: 'host-01',
@@ -200,8 +205,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
 
       // Execute again to ensure that we read the object and write it again with the updated state
-      const nextResults = await executor({ ...options, state: results });
-      expect(nextResults.wrapped).to.eql({
+      const nextExecutorResult = await executor({ ...options, state: executorResult.state });
+      expect(nextExecutorResult.state.wrapped).to.eql({
         testObject: {
           host: { name: 'host-01' },
           id: 'host-01',
@@ -223,7 +228,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
               filter: [
                 {
                   term: {
-                    [ALERT_UUID]: nextResults.trackedAlerts['host-01'].alertUuid,
+                    [ALERT_UUID]: nextExecutorResult.state.trackedAlerts['host-01'].alertUuid,
                   },
                 },
               ],
@@ -234,7 +239,9 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       const source = response.hits.hits[0]._source as any;
 
       // The state in Elasticsearch should match the state returned from the executor
-      expect(source.testObject).to.eql(nextResults.wrapped && nextResults.wrapped.testObject);
+      expect(source.testObject).to.eql(
+        nextExecutorResult.state.wrapped && nextExecutorResult.state.wrapped.testObject
+      );
     });
   });
 }

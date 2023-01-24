@@ -1,0 +1,622 @@
+{
+  "id": "@kbn/datemath",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.parse",
+        "type": "Function",
+        "tags": [],
+        "label": "parse",
+        "description": [],
+        "signature": [
+          "(input: string, options: { roundUp?: boolean | undefined; momentInstance?: typeof moment | undefined; forceNow?: Date | undefined; }) => moment.Moment | undefined"
+        ],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.parse.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.parse.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.parse.$2.roundUp",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "roundUp",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.parse.$2.momentInstance",
+                "type": "Function",
+                "tags": [],
+                "label": "momentInstance",
+                "description": [],
+                "signature": [
+                  "typeof moment | undefined"
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.parse.$2.forceNow",
+                "type": "Object",
+                "tags": [],
+                "label": "forceNow",
+                "description": [],
+                "signature": [
+                  "Date | undefined"
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.Unit",
+        "type": "Type",
+        "tags": [],
+        "label": "Unit",
+        "description": [],
+        "signature": [
+          "\"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"m\" | \"s\" | \"ms\""
+        ],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.units",
+        "type": "Array",
+        "tags": [],
+        "label": "units",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/datemath",
+            "scope": "common",
+            "docId": "kibKbnDatemathPluginApi",
+            "section": "def-common.Unit",
+            "text": "Unit"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.unitsAsc",
+        "type": "Array",
+        "tags": [],
+        "label": "unitsAsc",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/datemath",
+            "scope": "common",
+            "docId": "kibKbnDatemathPluginApi",
+            "section": "def-common.Unit",
+            "text": "Unit"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.unitsDesc",
+        "type": "Array",
+        "tags": [],
+        "label": "unitsDesc",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/datemath",
+            "scope": "common",
+            "docId": "kibKbnDatemathPluginApi",
+            "section": "def-common.Unit",
+            "text": "Unit"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.UnitsMap",
+        "type": "Type",
+        "tags": [],
+        "label": "UnitsMap",
+        "description": [],
+        "signature": [
+          "{ y: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; M: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; w: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; d: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; h: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; m: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; s: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; ms: { weight: number; type: \"fixed\" | \"calendar\" | \"mixed\"; base: number; }; }"
+        ],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/datemath",
+        "id": "def-common.unitsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "unitsMap",
+        "description": [],
+        "path": "packages/kbn-datemath/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.ms",
+            "type": "Object",
+            "tags": [],
+            "label": "ms",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.ms.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.ms.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"fixed\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.ms.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.s",
+            "type": "Object",
+            "tags": [],
+            "label": "s",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.s.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.s.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"fixed\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.s.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.m",
+            "type": "Object",
+            "tags": [],
+            "label": "m",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.m.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.m.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"mixed\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.m.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.h",
+            "type": "Object",
+            "tags": [],
+            "label": "h",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.h.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.h.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"mixed\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.h.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.d",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.d.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.d.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"mixed\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.d.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.w",
+            "type": "Object",
+            "tags": [],
+            "label": "w",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.w.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.w.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"calendar\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.w.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.M",
+            "type": "Object",
+            "tags": [],
+            "label": "M",
+            "description": [],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.M.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.M.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"calendar\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.M.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/datemath",
+            "id": "def-common.unitsMap.y",
+            "type": "Object",
+            "tags": [],
+            "label": "y",
+            "description": [
+              "// q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter"
+            ],
+            "path": "packages/kbn-datemath/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.y.weight",
+                "type": "number",
+                "tags": [],
+                "label": "weight",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.y.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"calendar\""
+                ],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/datemath",
+                "id": "def-common.unitsMap.y.base",
+                "type": "number",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "packages/kbn-datemath/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

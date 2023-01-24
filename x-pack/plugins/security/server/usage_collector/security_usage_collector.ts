@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { ConfigType } from '../config';
@@ -20,6 +20,8 @@ interface Usage {
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
   sessionCleanupInMinutes: number;
+  sessionConcurrentSessionsMaxSessions: number;
+  anonymousCredentialType: string | undefined;
 }
 
 interface Deps {
@@ -122,6 +124,19 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
             'The session cleanup interval that is configured, in minutes (0 if disabled).',
         },
       },
+      sessionConcurrentSessionsMaxSessions: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of the concurrent user sessions (0 if not configured).',
+        },
+      },
+      anonymousCredentialType: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The credential type that is configured for the anonymous authentication provider.',
+        },
+      },
     },
     fetch: () => {
       const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
@@ -136,6 +151,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
           sessionCleanupInMinutes: 0,
+          sessionConcurrentSessionsMaxSessions: 0,
+          anonymousCredentialType: undefined,
         };
       }
 
@@ -152,7 +169,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       ];
       const accessAgreementEnabled =
         allowAccessAgreement &&
-        config.authc.sortedProviders.some((provider) => provider.hasAccessAgreement);
+        (!!config.accessAgreement?.message ||
+          config.authc.sortedProviders.some((provider) => provider.hasAccessAgreement));
 
       const httpAuthSchemes = config.authc.http.schemes.filter((scheme) =>
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
@@ -162,6 +180,26 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
       const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
+      const sessionConcurrentSessionsMaxSessions =
+        config.session.concurrentSessions?.maxSessions ?? 0;
+
+      const anonProviders = config.authc.providers.anonymous ?? ({} as Record<string, any>);
+      const foundProvider = Object.entries(anonProviders).find(
+        ([_, provider]) => !!provider.credentials && provider.enabled
+      );
+
+      const credElasticAnonUser = 'elasticsearch_anonymous_user';
+      const credApiKey = 'api_key';
+      const credUsernamePassword = 'username_password';
+
+      let anonymousCredentialType;
+      if (foundProvider) {
+        if (!!foundProvider[1].credentials.apiKey) anonymousCredentialType = credApiKey;
+        else if (foundProvider[1].credentials === credElasticAnonUser)
+          anonymousCredentialType = credElasticAnonUser;
+        else if (!!foundProvider[1].credentials.username && !!foundProvider[1].credentials.password)
+          anonymousCredentialType = credUsernamePassword;
+      }
 
       return {
         auditLoggingEnabled,
@@ -173,6 +211,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         sessionIdleTimeoutInMinutes,
         sessionLifespanInMinutes,
         sessionCleanupInMinutes,
+        sessionConcurrentSessionsMaxSessions,
+        anonymousCredentialType,
       };
     },
   });

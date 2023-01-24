@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiStepsHorizontal } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
@@ -43,7 +43,7 @@ export const WizardHorizontalSteps: FC<Props> = ({
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
-        defaultMessage: 'Pick fields',
+        defaultMessage: 'Choose fields',
       }),
       ...createStepProps(WIZARD_STEPS.PICK_FIELDS),
     },
@@ -79,8 +79,11 @@ export const WizardHorizontalSteps: FC<Props> = ({
   function createStepProps(step: WIZARD_STEPS) {
     return {
       onClick: () => jumpToStep(step),
-      isSelected: currentStep === step,
-      isComplete: currentStep > step,
+      status: (currentStep === step
+        ? 'selected'
+        : currentStep > step
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: disableSteps || highestStep < step,
     };
   }

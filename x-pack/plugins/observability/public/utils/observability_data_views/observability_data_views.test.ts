@@ -7,7 +7,7 @@
 
 import { dataViewList, ObservabilityDataViews } from './observability_data_views';
 import { mockCore, mockDataView } from '../../components/shared/exploratory_view/rtl_helpers';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 const fieldFormats = {
   'transaction.duration.us': {
@@ -67,10 +67,11 @@ const fieldFormats = {
   },
 };
 
-describe('ObservabilityIndexPatterns', function () {
+describe('ObservabilityDataViews', function () {
   const { dataViews } = mockCore();
   dataViews!.get = jest.fn().mockReturnValue({ title: 'index-*' });
   dataViews!.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
+  dataViews!.create = jest.fn().mockReturnValue({ id: dataViewList.ux });
   dataViews!.updateSavedObject = jest.fn();
 
   it('should return index pattern for app', async function () {
@@ -103,7 +104,8 @@ describe('ObservabilityIndexPatterns', function () {
       fieldFormats,
       id: 'rum_static_index_pattern_id_trace_apm_',
       timeFieldName: '@timestamp',
-      title: '(rum-data-view)*,trace-*,apm-*',
+      title: 'trace-*,apm-*',
+      name: 'User experience (RUM)',
     });
 
     expect(dataViews?.createAndSave).toHaveBeenCalledTimes(1);

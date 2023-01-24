@@ -1,6 +1,5 @@
 {
-  "job_type": "anomaly_detector",
-  "description": "Security: Authentication - looks for an unusually large spike in authentication failure events. This can be due to password spraying, user enumeration or brute force activity and may be a precursor to account takeover or credentialed access.",
+  "description": "Security: Authentication - Looks for an unusually large spike in authentication failure events. This can be due to password spraying, user enumeration, or brute force activity and may be a precursor to account takeover or credentialed access.",
   "groups": [
     "security",
     "authentication"
@@ -25,6 +24,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-security-auth"
+    "created_by": "ml-module-security-auth",
+    "security_app_display_name": "Spike in Failed Logon Events"
   }
 }

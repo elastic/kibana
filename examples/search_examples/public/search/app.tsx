@@ -6,53 +6,55 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
+  EuiCode,
   EuiCodeBlock,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiTitle,
-  EuiText,
+  EuiComboBox,
+  EuiFieldNumber,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiCheckbox,
-  EuiSpacer,
-  EuiCode,
-  EuiComboBox,
   EuiFormLabel,
-  EuiFieldNumber,
+  EuiHorizontalRule,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
   EuiProgress,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-
-import { CoreStart } from '../../../../src/core/public';
-import { mountReactNode } from '../../../../src/core/public/utils';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-
-import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
-
+import { CoreStart } from '@kbn/core/public';
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../src/plugins/data/public';
-import type { DataViewField, DataView } from '../../../../src/plugins/data_views/public';
+} from '@kbn/data-plugin/public';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
+import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import { IMyStrategyResponse } from '../../common/types';
-import { AbortError } from '../../../../src/plugins/kibana_utils/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 function getNumeric(fields?: DataViewField[]) {
@@ -80,13 +82,17 @@ function formatFieldsToComboBox(fields?: DataViewField[]) {
   });
 }
 
+const bucketAggType = 'terms';
+const metricAggType = 'median';
+
 export const SearchExamplesApp = ({
   http,
   notifications,
   navigation,
   data,
+  unifiedSearch,
 }: SearchExamplesAppDeps) => {
-  const { IndexPatternSelect } = data.ui;
+  const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
   const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();
@@ -101,13 +107,15 @@ export const SearchExamplesApp = ({
   const [selectedBucketField, setSelectedBucketField] = useState<
     DataViewField | null | undefined
   >();
-  const [request, setRequest] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentAbortController, setAbortController] = useState<AbortController>();
+  const [request, setRequest] = useState<Record<string, any>>({});
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+  const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
 
   function setResponse(response: IKibanaSearchResponse) {
+    setWarningContents([]);
     setRawResponse(response.rawResponse);
     setLoaded(response.loaded!);
     setTotal(response.total!);
@@ -174,7 +182,7 @@ export const SearchExamplesApp = ({
     }
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-    const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
+    const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
     const req = {
@@ -194,6 +202,8 @@ export const SearchExamplesApp = ({
 
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
+    setRawResponse({});
+    setWarningContents([]);
     setIsLoading(true);
 
     data.search
@@ -207,7 +217,7 @@ export const SearchExamplesApp = ({
           if (isCompleteResponse(res)) {
             setIsLoading(false);
             setResponse(res);
-            const avgResult: number | undefined = res.rawResponse.aggregations
+            const aggResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
               : undefined;
@@ -216,8 +226,8 @@ export const SearchExamplesApp = ({
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total} documents. <br />
-                The average of {selectedNumericField!.name} is{' '}
-                {avgResult ? Math.floor(avgResult) : 0}.
+                The ${metricAggType} of {selectedNumericField!.name} is{' '}
+                {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
                 {isCool ? `Is it Cool? ${isCool}` : undefined}
                 <br />
@@ -229,7 +239,7 @@ export const SearchExamplesApp = ({
             notifications.toasts.addSuccess(
               {
                 title: 'Query result',
-                text: mountReactNode(message),
+                text: toMountPoint(message),
               },
               {
                 toastLifeTimeMs: 300000,
@@ -238,7 +248,7 @@ export const SearchExamplesApp = ({
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
-                text: mountReactNode(res.warning),
+                text: toMountPoint(res.warning),
               });
             }
           } else if (isErrorResponse(res)) {
@@ -248,21 +258,15 @@ export const SearchExamplesApp = ({
         },
         error: (e) => {
           setIsLoading(false);
-          if (e instanceof AbortError) {
-            notifications.toasts.addWarning({
-              title: e.message,
-            });
-          } else {
-            notifications.toasts.addDanger({
-              title: 'Failed to run search',
-              text: e.message,
-            });
-          }
+          data.search.showError(e);
         },
       });
   };
 
-  const doSearchSourceSearch = async (otherBucket: boolean) => {
+  const doSearchSourceSearch = async (
+    otherBucket: boolean,
+    showWarningToastNotifications = true
+  ) => {
     if (!dataView) return;
 
     const query = data.query.queryString.getQuery();
@@ -286,33 +290,64 @@ export const SearchExamplesApp = ({
       const aggDef = [];
       if (selectedBucketField) {
         aggDef.push({
-          type: 'terms',
+          type: bucketAggType,
           schema: 'split',
           params: { field: selectedBucketField.name, size: 2, otherBucket },
         });
       }
       if (selectedNumericField) {
-        aggDef.push({ type: 'avg', params: { field: selectedNumericField.name } });
+        aggDef.push({ type: metricAggType, params: { field: selectedNumericField.name } });
       }
       if (aggDef.length > 0) {
         const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
         searchSource.setField('aggs', ac);
       }
-
       setRequest(searchSource.getSearchRequestBody());
+      setRawResponse({});
+      setWarningContents([]);
       const abortController = new AbortController();
+
+      const inspector: Required<IInspectorInfo> = {
+        adapter: new RequestAdapter(),
+        title: 'Example App Inspector!',
+        id: 'greatest-example-app-inspector',
+        description: 'Use the `description` field for more info about the inspector.',
+      };
+
       setAbortController(abortController);
       setIsLoading(true);
-      const { rawResponse: res } = await searchSource
-        .fetch$({ abortSignal: abortController.signal })
-        .toPromise();
-      setRawResponse(res);
+      const result = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          disableShardFailureWarning: !showWarningToastNotifications,
+          inspector,
+        })
+      );
+      setRawResponse(result.rawResponse);
 
-      const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
+      /* Here is an example of using showWarnings on the search service, using an optional callback to
+       * intercept the warnings before notification warnings are shown.
+       *
+       * Suppressing the shard failure warning notification from appearing by default requires setting
+       * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
+       */
+      if (showWarningToastNotifications) {
+        setWarningContents([]);
+      } else {
+        const warnings: SearchResponseWarning[] = [];
+        data.search.showWarnings(inspector.adapter, (warning) => {
+          warnings.push(warning);
+          return false; // allow search service from showing this warning on its own
+        });
+        // click the warnings tab to see the warnings
+        setWarningContents(warnings);
+      }
+
+      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: mountReactNode(message),
+          text: toMountPoint(message),
         },
         {
           toastLifeTimeMs: 300000,
@@ -320,16 +355,7 @@ export const SearchExamplesApp = ({
       );
     } catch (e) {
       setRawResponse(e.body);
-      if (e instanceof AbortError) {
-        notifications.toasts.addWarning({
-          title: e.message,
-        });
-      } else {
-        notifications.toasts.addDanger({
-          title: 'Failed to run search',
-          text: e.message,
-        });
-      }
+      data.search.showError(e);
     } finally {
       setIsLoading(false);
     }
@@ -387,16 +413,7 @@ export const SearchExamplesApp = ({
         },
         error: (e) => {
           setIsLoading(false);
-          if (e instanceof AbortError) {
-            notifications.toasts.addWarning({
-              title: e.message,
-            });
-          } else {
-            notifications.toasts.addDanger({
-              title: 'Failed to run search',
-              text: e.message,
-            });
-          }
+          data.search.showError(e);
         },
       });
   };
@@ -421,23 +438,17 @@ export const SearchExamplesApp = ({
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      if (e?.name === 'AbortError') {
-        notifications.toasts.addWarning({
-          title: e.message,
-        });
-      } else {
-        notifications.toasts.addDanger({
-          title: 'Failed to run search',
-          text: e.message,
-        });
-      }
+      data.search.showError(e);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
-    doSearchSourceSearch(withOtherBucket);
+  const onSearchSourceClickHandler = (
+    withOtherBucket: boolean,
+    showWarningToastNotifications: boolean
+  ) => {
+    doSearchSourceSearch(withOtherBucket, showWarningToastNotifications);
   };
 
   const reqTabs: EuiTabbedContentTab[] = [
@@ -488,6 +499,35 @@ export const SearchExamplesApp = ({
         </>
       ),
     },
+    {
+      id: 'warnings',
+      name: <EuiText data-test-subj="warningsTab">Warnings</EuiText>,
+      content: (
+        <>
+          {' '}
+          <EuiSpacer />{' '}
+          <EuiText size="xs">
+            {' '}
+            <FormattedMessage
+              id="searchExamples.warningsObject"
+              defaultMessage="Timeout and shard failure warnings for high-level search may be handled in a callback to the showWarnings method on the search service."
+            />{' '}
+          </EuiText>{' '}
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={450}
+            isCopyable
+            data-test-subj="warningsCodeBlock"
+          >
+            {' '}
+            {JSON.stringify(warningContents, null, 2)}{' '}
+          </EuiCodeBlock>{' '}
+        </>
+      ),
+    },
   ];
 
   return (
@@ -532,7 +572,7 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormLabel>Field (bucket)</EuiFormLabel>
+              <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getAggregatableStrings(fields))}
                 selectedOptions={formatFieldToComboBox(selectedBucketField)}
@@ -550,7 +590,7 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormLabel>Numeric Field (metric)</EuiFormLabel>
+              <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getNumeric(fields))}
                 selectedOptions={formatFieldToComboBox(selectedNumericField)}
@@ -583,6 +623,9 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
           </EuiFlexGrid>
+
+          <EuiHorizontalRule />
+
           <EuiFlexGrid columns={2}>
             <EuiFlexItem style={{ width: '40%' }}>
               <EuiSpacer />
@@ -610,7 +653,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(true)}
+                  onClick={() => onSearchSourceClickHandler(true, true)}
                   iconType="play"
                   data-test-subj="searchSourceWithOther"
                 >
@@ -622,12 +665,12 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations with other bucket."
+                    defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
                   />
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(false)}
+                  onClick={() => onSearchSourceClickHandler(false, false)}
                   iconType="play"
                   data-test-subj="searchSourceWithoutOther"
                 >
@@ -639,7 +682,7 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations without other bucket."
+                    defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
                   />
                 </EuiText>
               </EuiText>

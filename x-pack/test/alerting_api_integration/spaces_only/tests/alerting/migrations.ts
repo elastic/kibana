@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
+import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { RawRule, RawAlertAction } from '../../../../../plugins/alerting/server/types';
-import { FILEBEAT_7X_INDICATOR_PATH } from '../../../../../plugins/alerting/server/saved_objects/migrations';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -243,7 +243,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).actions! as RawAlertAction[]).to.eql([
+      expect((hit!._source!.alert! as RawRule).actions! as RawRuleAction[]).to.eql([
         {
           actionRef: 'action_0',
           actionTypeId: 'test.noop',
@@ -398,14 +398,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       // Only the rule that was enabled should be tagged
       expect(responseEnabledBeforeMigration.body._source?.alert?.tags).to.eql([
-        '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
-        '__internal_immutable:false',
         'auto_disabled_8.0',
       ]);
-      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([
-        '__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41',
-        '__internal_immutable:false',
-      ]);
+      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([]);
     });
 
     it('8.2.0 migrates params to mapped_params for specific params properties', async () => {
@@ -421,6 +416,196 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.alert?.mapped_params).to.eql({
         risk_score: 90,
         severity: '80-critical',
+      });
+    });
+
+    it('8.2.0 migrates existing esQuery alerts to contain searchType param', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.params.searchType).to.eql('esQuery');
+    });
+
+    it('8.3.0 removes internal tags in Security Solution rule', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
+        },
+        { meta: true }
+      );
+
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.tags).to.eql(['test-tag-1', 'foo-tag']);
+    });
+
+    it('8.4.1 removes IsSnoozedUntil', async () => {
+      const searchResult = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              term: {
+                _id: 'alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7',
+              },
+            },
+          },
+        },
+        { meta: true }
+      );
+
+      expect(searchResult.statusCode).to.equal(200);
+      const hit = searchResult.body.hits.hits[0];
+      expect((hit!._source!.alert! as RawRule).isSnoozedUntil).to.be(undefined);
+    });
+
+    it('8.5.0 removes runtime and field params from older ES Query rules', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            esQuery: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:c8b39c29-d860-43b6-8817-b8058d80ddbc',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.esQuery).to.eql(
+        JSON.stringify({ query: { match_all: {} } }, null, 4)
+      );
+    });
+
+    it('8.5.0 doesnt reformat ES Query rules that dot have a runtime field on them', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            esQuery: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:62c62b7f-8bf3-4104-a064-6247b7bda44f',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.esQuery).to.eql(
+        '{\n\t"query":\n{\n\t"match_all":\n\t{}\n}\n}'
+      );
+    });
+
+    it('8.5.0 doesnt fail upgrade when an ES Query rule is not parsable', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            esQuery: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:f0d13f4d-35ae-4554-897a-6392e97bb84c',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.esQuery).to.eql('{"query":}');
+    });
+
+    it('8.6.0 migrates executionStatus and monitoring', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:8370ffd2-f2db-49dc-9741-92c657189b9b',
+        },
+        { meta: true }
+      );
+      const alert = response.body._source?.alert;
+
+      expect(alert?.monitoring).to.eql({
+        run: {
+          history: [
+            {
+              duration: 60000,
+              success: true,
+              timestamp: '2022-08-24T19:05:49.817Z',
+            },
+          ],
+          calculated_metrics: {
+            success_ratio: 1,
+            p50: 0,
+            p95: 60000,
+            p99: 60000,
+          },
+          last_run: {
+            timestamp: '2022-08-24T19:05:49.817Z',
+            metrics: {
+              duration: 60000,
+            },
+          },
+        },
+      });
+
+      expect(alert?.lastRun).to.eql({
+        outcome: 'succeeded',
+        outcomeMsg: null,
+        warning: null,
+        alertsCount: {},
+      });
+
+      expect(alert?.nextRun).to.eql(undefined);
+    });
+
+    it('8.6 migrates executionStatus warnings and errors', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:c87707ac-7328-47f7-b212-2cb40a4fc9b9',
+        },
+        { meta: true }
+      );
+
+      const alert = response.body._source?.alert;
+
+      expect(alert?.lastRun?.outcome).to.eql('warning');
+      expect(alert?.lastRun?.warning).to.eql('warning reason');
+      expect(alert?.lastRun?.outcomeMsg).to.eql('warning message');
+    });
+
+    it('8.7.0 adds aggType and groupBy to ES query rules', async () => {
+      const response = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      'alert.alertTypeId': '.es-query',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      response.body.hits.hits.forEach((hit) => {
+        expect((hit?._source?.alert as RawRule)?.params?.aggType).to.eql('count');
+        expect((hit?._source?.alert as RawRule)?.params?.groupBy).to.eql('all');
       });
     });
   });

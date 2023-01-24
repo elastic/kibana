@@ -12,13 +12,14 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { NodeDataDefinition } from 'cytoscape';
 import { ContentsProps } from '.';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ExternalResourcesList = euiStyled.section`
@@ -26,7 +27,8 @@ const ExternalResourcesList = euiStyled.section`
   overflow: auto;
 `;
 
-export function ExternalsListContents({ nodeData }: ContentsProps) {
+export function ExternalsListContents({ elementData }: ContentsProps) {
+  const nodeData = elementData as NodeDataDefinition;
   return (
     <EuiFlexItem>
       <ExternalResourcesList>

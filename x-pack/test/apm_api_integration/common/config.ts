@@ -5,55 +5,42 @@
  * 2.0.
  */
 
+import {
+  ApmUsername,
+  APM_TEST_PASSWORD,
+} from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import { SecurityServiceProvider } from 'test/common/services/security';
-import { Client } from '@elastic/elasticsearch';
-import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
+import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
+import { bootstrapApmSynthtrace } from './bootstrap_apm_synthtrace';
+import {
+  FtrProviderContext,
+  InheritedFtrProviderContext,
+  InheritedServices,
+} from './ftr_provider_context';
 import { RegistryProvider } from './registry';
-import { synthtraceEsClientService } from './synthtrace_es_client_service';
-import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 
 export interface ApmFtrConfig {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  kibanaConfig?: Record<string, string | string[]>;
+  kibanaConfig?: Record<string, any>;
 }
 
-type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
-
-function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
-  return async (context: InheritedFtrProviderContext) => {
-    const security = context.getService('security');
-    const es = context.getService('es');
-    await security.init();
-
-    await createApmUser(security, apmUser, es);
-
-    const url = format({
-      ...kibanaServer,
-      auth: `${apmUser}:${APM_TEST_PASSWORD}`,
-    });
-
-    return supertest(url);
-  };
-}
-
-async function getApmApiClient(
-  kibanaServer: UrlObject,
-  security: SecurityService,
-  apmUser: ApmUser,
-  es: Client
-) {
-  await createApmUser(security, apmUser, es);
-
+async function getApmApiClient({
+  kibanaServer,
+  username,
+}: {
+  kibanaServer: UrlObject;
+  username: ApmUsername;
+}) {
   const url = format({
     ...kibanaServer,
-    auth: `${apmUser}:${APM_TEST_PASSWORD}`,
+    auth: `${username}:${APM_TEST_PASSWORD}`,
   });
 
   return createApmApiClient(supertest(url));
@@ -61,7 +48,37 @@ async function getApmApiClient(
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export function createTestConfig(config: ApmFtrConfig) {
+type ApmApiClientKey =
+  | 'noAccessUser'
+  | 'readUser'
+  | 'writeUser'
+  | 'annotationWriterUser'
+  | 'noMlAccessUser'
+  | 'manageOwnAgentKeysUser'
+  | 'createAndAllAgentKeysUser'
+  | 'monitorClusterAndIndicesUser';
+
+export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+
+export interface CreateTest {
+  testFiles: string[];
+  servers: any;
+  servicesRequiredForTestAnalysis: string[];
+  services: InheritedServices & {
+    apmFtrConfig: () => ApmFtrConfig;
+    registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
+    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
+    ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
+  };
+  junit: { reportName: string };
+  esTestCluster: any;
+  kbnTestServer: any;
+}
+
+export function createTestConfig(
+  config: ApmFtrConfig
+): ({ readConfigFile }: FtrConfigProviderContext) => Promise<CreateTest> {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -69,9 +86,11 @@ export function createTestConfig(config: ApmFtrConfig) {
       require.resolve('../../api_integration/config.ts')
     );
 
-    const services = xPackAPITestsConfig.get('services') as InheritedServices;
+    const services = xPackAPITestsConfig.get('services');
     const servers = xPackAPITestsConfig.get('servers');
-    const kibanaServer = servers.kibana;
+    const kibanaServer = servers.kibana as UrlObject;
+    const kibanaServerUrl = format(kibanaServer);
+    const esServer = servers.elasticsearch as UrlObject;
 
     return {
       testFiles: [require.resolve('../tests')],
@@ -81,55 +100,55 @@ export function createTestConfig(config: ApmFtrConfig) {
         ...services,
         apmFtrConfig: () => config,
         registry: RegistryProvider,
-        synthtraceEsClient: synthtraceEsClientService,
+        synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          return bootstrapApmSynthtrace(context, kibanaServerUrl);
+        },
         apmApiClient: async (context: InheritedFtrProviderContext) => {
-          const security = context.getService('security');
-          const es = context.getService('es');
-          await security.init();
+          const { username, password } = servers.kibana;
+          const esUrl = format(esServer);
+
+          // Creates APM users
+          await createApmUsers({
+            elasticsearch: { node: esUrl, username, password },
+            kibana: { hostname: kibanaServerUrl },
+          });
 
           return {
-            noAccessUser: await getApmApiClient(servers.kibana, security, ApmUser.noAccessUser, es),
-            readUser: await getApmApiClient(servers.kibana, security, ApmUser.apmReadUser, es),
-            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.apmWriteUser, es),
-            annotationWriterUser: await getApmApiClient(
-              servers.kibana,
-              security,
-              ApmUser.apmAnnotationsWriteUser,
-              es
-            ),
-            noMlAccessUser: await getApmApiClient(
-              servers.kibana,
-              security,
-              ApmUser.apmReadUserWithoutMlAccess,
-              es
-            ),
-            manageOwnAgentKeysUser: await getApmApiClient(
-              servers.kibana,
-              security,
-              ApmUser.apmManageOwnAgentKeys,
-              es
-            ),
-            createAndAllAgentKeysUser: await getApmApiClient(
-              servers.kibana,
-              security,
-              ApmUser.apmManageOwnAndCreateAgentKeys,
-              es
-            ),
+            noAccessUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.noAccessUser,
+            }),
+            readUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.viewerUser,
+            }),
+            writeUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.editorUser,
+            }),
+            annotationWriterUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmAnnotationsWriteUser,
+            }),
+            noMlAccessUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmReadUserWithoutMlAccess,
+            }),
+            manageOwnAgentKeysUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmManageOwnAgentKeys,
+            }),
+            createAndAllAgentKeysUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmManageOwnAndCreateAgentKeys,
+            }),
+            monitorClusterAndIndicesUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmMonitorClusterAndIndices,
+            }),
           };
         },
         ml: MachineLearningAPIProvider,
-        // legacy clients
-        legacySupertestAsNoAccessUser: getLegacySupertestClient(kibanaServer, ApmUser.noAccessUser),
-        legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.apmReadUser),
-        legacySupertestAsApmWriteUser: getLegacySupertestClient(kibanaServer, ApmUser.apmWriteUser),
-        legacySupertestAsApmAnnotationsWriteUser: getLegacySupertestClient(
-          kibanaServer,
-          ApmUser.apmAnnotationsWriteUser
-        ),
-        legacySupertestAsApmReadUserWithoutMlAccess: getLegacySupertestClient(
-          kibanaServer,
-          ApmUser.apmReadUserWithoutMlAccess
-        ),
       },
       junit: {
         reportName: `APM API Integration tests (${name})`,

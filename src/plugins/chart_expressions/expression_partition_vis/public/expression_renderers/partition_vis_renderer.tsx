@@ -9,14 +9,23 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ExpressionRenderDefinition } from '../../../../expressions/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import type {
+  Datatable,
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { VisTypePieDependencies } from '../plugin';
-import { withSuspense } from '../../../../presentation_util/public';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
-import { ChartTypes, RenderValue } from '../../common/types';
+import { CellValueAction, GetCompatibleCellValueActions } from '../types';
+import { ChartTypes, PartitionVisParams, RenderValue } from '../../common/types';
 
 export const strings = {
   getDisplayName: () =>
@@ -32,44 +41,97 @@ export const strings = {
 const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
 const PartitionVisComponent = withSuspense(LazyPartitionVisComponent);
 
+const partitionVisRenderer = css({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+});
+
+/**
+ * Retrieves the compatible CELL_VALUE_TRIGGER actions indexed by column
+ **/
+export const getColumnCellValueActions = async (
+  visConfig: PartitionVisParams,
+  visData: Datatable,
+  getCompatibleCellValueActions?: IInterpreterRenderHandlers['getCompatibleCellValueActions']
+) => {
+  if (!Array.isArray(visConfig.dimensions.buckets) || !getCompatibleCellValueActions) {
+    return [];
+  }
+  return Promise.all(
+    visConfig.dimensions.buckets.reduce<Array<Promise<CellValueAction[]>>>((acc, accessor) => {
+      const columnMeta = getColumnByAccessor(accessor, visData.columns)?.meta;
+      if (columnMeta) {
+        acc.push(
+          (getCompatibleCellValueActions as GetCompatibleCellValueActions)([{ columnMeta }])
+        );
+      }
+      return acc;
+    }, [])
+  );
+};
+
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
-) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
+) => ExpressionRenderDefinition<RenderValue> = ({ getStartDeps }) => ({
   name: PARTITION_VIS_RENDERER_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
+  render: async (
+    domNode,
+    { visConfig, visData, visType, syncColors, canNavigateToLens },
+    handlers
+  ) => {
+    const { core, plugins } = getStartDeps();
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
-    const services = await getStartDeps();
-    const palettesRegistry = await palettes.getPalettes();
+    const renderComplete = () => {
+      const executionContext = handlers.getExecutionContext();
+      const containerType = extractContainerType(executionContext);
+      const visualizationType = extractVisualizationType(executionContext);
+
+      if (containerType && visualizationType) {
+        const events = [
+          `render_${visualizationType}_${visType}`,
+          canNavigateToLens ? `render_${visualizationType}_${visType}_convertable` : undefined,
+        ].filter<string>((event): event is string => Boolean(event));
+
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
+      }
+      handlers.done();
+    };
+
+    const [columnCellValueActions, palettesRegistry] = await Promise.all([
+      getColumnCellValueActions(visConfig, visData, handlers.getCompatibleCellValueActions),
+      plugins.charts.palettes.getPalettes(),
+    ]);
 
     render(
       <I18nProvider>
-        <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
-          <div css={{ height: '100%' }}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
+          <div css={partitionVisRenderer}>
             <PartitionVisComponent
-              chartsThemeService={theme}
+              chartsThemeService={plugins.charts.theme}
               palettesRegistry={palettesRegistry}
               visParams={visConfig}
               visData={visData}
               visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={handlers.done}
+              renderComplete={renderComplete}
               fireEvent={handlers.event}
+              interactive={handlers.isInteractive()}
               uiState={handlers.uiState as PersistedState}
-              services={{ data: services.data, fieldFormats: services.fieldFormats }}
+              services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
               syncColors={syncColors}
+              columnCellValueActions={columnCellValueActions}
             />
           </div>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

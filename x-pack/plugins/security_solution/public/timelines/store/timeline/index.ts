@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnyAction, Reducer } from 'redux';
+import type { AnyAction, Reducer } from 'redux';
 import * as timelineActions from './actions';
 import * as timelineSelectors from './selectors';
-import { TimelineState } from './types';
+import type { TimelineState } from './types';
 
 export { timelineActions, timelineSelectors };
 

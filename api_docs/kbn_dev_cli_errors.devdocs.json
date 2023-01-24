@@ -1,0 +1,175 @@
+{
+  "id": "@kbn/dev-cli-errors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dev-cli-errors",
+        "id": "def-common.combineErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "combineErrors",
+        "description": [],
+        "signature": [
+          "(errors: (Error | FailError)[]) => Error"
+        ],
+        "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-errors",
+            "id": "def-common.combineErrors.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "(Error | FailError)[]"
+            ],
+            "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-cli-errors",
+        "id": "def-common.createFailError",
+        "type": "Function",
+        "tags": [],
+        "label": "createFailError",
+        "description": [],
+        "signature": [
+          "(reason: string, options: FailErrorOptions) => FailError"
+        ],
+        "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-errors",
+            "id": "def-common.createFailError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dev-cli-errors",
+            "id": "def-common.createFailError.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "FailErrorOptions"
+            ],
+            "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-cli-errors",
+        "id": "def-common.createFlagError",
+        "type": "Function",
+        "tags": [],
+        "label": "createFlagError",
+        "description": [],
+        "signature": [
+          "(reason: string) => FailError"
+        ],
+        "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-errors",
+            "id": "def-common.createFlagError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-cli-errors",
+        "id": "def-common.isFailError",
+        "type": "Function",
+        "tags": [],
+        "label": "isFailError",
+        "description": [],
+        "signature": [
+          "(error: any) => boolean"
+        ],
+        "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-cli-errors",
+            "id": "def-common.isFailError.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -19,27 +19,27 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
+import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   Capabilities,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
-  IHttpFetchError,
   NotificationsStart,
   ScopedHistory,
-} from 'src/core/public';
-import type { DataViewsContract } from 'src/plugins/data/public';
+} from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import type { KibanaFeature } from '../../../../../features/common';
-import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
@@ -55,6 +55,7 @@ import {
   getExtendedRoleDeprecationNotice,
   prepareRoleClone,
 } from '../../../../common/model';
+import { useCapabilities } from '../../../components/use_capabilities';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
@@ -69,7 +70,7 @@ import { RoleValidator } from './validate_role';
 interface Props {
   action: 'edit' | 'clone';
   roleName?: string;
-  dataViews: DataViewsContract;
+  dataViews?: DataViewsContract;
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -124,7 +125,6 @@ function useIndexPatternsTitles(
         }
 
         fatalErrors.add(err);
-        throw err;
       })
       .then((titles) => setIndexPatternsTitles(titles.filter(Boolean)));
   }, [fatalErrors, dataViews, notifications]);
@@ -141,7 +141,7 @@ function usePrivileges(
   );
   useEffect(() => {
     Promise.all([
-      privilegesAPIClient.getAll({ includeActions: true }),
+      privilegesAPIClient.getAll({ includeActions: true, respectLicenseLevel: false }),
       privilegesAPIClient.getBuiltIn(),
     ]).then(
       ([kibanaPrivileges, builtInESPrivileges]) =>
@@ -289,12 +289,22 @@ export const EditRolePage: FunctionComponent<Props> = ({
   history,
   spacesApiUi,
 }) => {
+  if (!dataViews) {
+    // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
+    // as the login page). That said, it _is_ required for this page to function correctly, so we throw an error here if it's not available.
+    // We don't ever expect Kibana to work correctly if the dataViews plugin is not available (and we don't expect this to happen at all),
+    // so this error edge case is an acceptable tradeoff.
+    throw new Error('The dataViews plugin is required for this page, but it is not available');
+  }
   const backToRoleList = useCallback(() => history.push('/'), [history]);
+  const hasReadOnlyPrivileges = !useCapabilities('roles').save;
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
+  const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
+  const [previousName, setPreviousName] = useState<string>('');
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
@@ -310,12 +320,19 @@ export const EditRolePage: FunctionComponent<Props> = ({
     roleName
   );
 
+  const isEditingExistingRole = !!roleName && action === 'edit';
+
+  useEffect(() => {
+    if (hasReadOnlyPrivileges && !isEditingExistingRole) {
+      backToRoleList();
+    }
+  }, [hasReadOnlyPrivileges, isEditingExistingRole]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!role || !runAsUsers || !indexPatternsTitles || !privileges || !spaces || !features) {
     return null;
   }
 
-  const isEditingExistingRole = !!roleName && action === 'edit';
-  const isRoleReadOnly = checkIfRoleReadOnly(role);
+  const isRoleReadOnly = hasReadOnlyPrivileges || checkIfRoleReadOnly(role);
   const isRoleReserved = checkIfRoleReserved(role);
   const isDeprecatedRole = checkIfRoleDeprecated(role);
 
@@ -326,7 +343,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
-    if (isRoleReserved) {
+    if (isRoleReserved || isRoleReadOnly) {
       titleText = (
         <FormattedMessage
           id="xpack.security.management.editRole.viewingRoleTitle"
@@ -375,6 +392,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
+          data-test-subj={'roleNameFormRow'}
           label={
             <FormattedMessage
               id="xpack.security.management.editRole.roleNameFormRowTitle"
@@ -390,13 +408,18 @@ export const EditRolePage: FunctionComponent<Props> = ({
             ) : undefined
           }
           {...validator.validateRoleName(role)}
+          {...(creatingRoleAlreadyExists
+            ? { error: 'A role with this name already exists.', isInvalid: true }
+            : {})}
         >
           <EuiFieldText
             name={'name'}
             value={role.name || ''}
             onChange={onNameChange}
+            onBlur={onNameBlur}
             data-test-subj={'roleFormNameInput'}
-            readOnly={isRoleReserved || isEditingExistingRole}
+            disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
+            isInvalid={creatingRoleAlreadyExists}
           />
         </EuiFormRow>
       </EuiPanel>
@@ -408,6 +431,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
       ...role,
       name: e.target.value,
     });
+
+  const onNameBlur = (e: FocusEvent<HTMLInputElement>) => {
+    if (!isEditingExistingRole && previousName !== role.name) {
+      setPreviousName(role.name);
+      doesRoleExist().then((roleExists) => {
+        setCreatingRoleAlreadyExists(roleExists);
+      });
+    }
+  };
 
   const getElasticsearchPrivileges = () => {
     return (
@@ -467,10 +499,14 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getReturnToRoleListButton = () => {
     return (
-      <EuiButton {...reactRouterNavigate(history, '')} data-test-subj="roleFormReturnButton">
+      <EuiButton
+        {...reactRouterNavigate(history, '')}
+        iconType="arrowLeft"
+        data-test-subj="roleFormReturnButton"
+      >
         <FormattedMessage
           id="xpack.security.management.editRole.returnToRoleListButtonLabel"
-          defaultMessage="Return to role list"
+          defaultMessage="Back to roles"
         />
       </EuiButton>
     );
@@ -494,7 +530,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         data-test-subj={`roleFormSaveButton`}
         fill
         onClick={saveRole}
-        disabled={isRoleReserved}
+        disabled={isRoleReserved || creatingRoleAlreadyExists}
       >
         {saveText}
       </EuiButton>
@@ -522,8 +558,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role });
+        await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
       } catch (error) {
+        if (!isEditingExistingRole && error?.body?.statusCode === 409) {
+          setCreatingRoleAlreadyExists(true);
+          window.scroll({ top: 0, behavior: 'smooth' });
+          return;
+        }
         notifications.toasts.addDanger(
           error?.body?.message ??
             i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {
@@ -541,6 +582,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
       );
 
       backToRoleList();
+    }
+  };
+
+  const doesRoleExist = async (): Promise<boolean> => {
+    try {
+      await rolesAPIClient.getRole(role.name);
+      return true;
+    } catch (error) {
+      return false;
     }
   };
 

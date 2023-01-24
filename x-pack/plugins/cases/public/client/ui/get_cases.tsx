@@ -8,15 +8,22 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import type { CasesProps } from '../../components/app';
-import { CasesProvider, CasesContextProps } from '../../components/cases_context';
+import type { CasesContextProps } from '../../components/cases_context';
+import { CasesProvider } from '../../components/cases_context';
 
-export type GetCasesProps = CasesProps & CasesContextProps;
+type GetCasesPropsInternal = CasesProps & CasesContextProps;
+export type GetCasesProps = Omit<
+  GetCasesPropsInternal,
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
+>;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
 
 export const getCasesLazy = ({
+  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
-  userCanCrud,
+  permissions,
   basePath,
   onComponentInitialized,
   actionsNavigation,
@@ -27,8 +34,18 @@ export const getCasesLazy = ({
   timelineIntegration,
   features,
   releasePhase,
-}: GetCasesProps) => (
-  <CasesProvider value={{ owner, userCanCrud, basePath, features, releasePhase }}>
+}: GetCasesPropsInternal) => (
+  <CasesProvider
+    value={{
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      permissions,
+      basePath,
+      features,
+      releasePhase,
+    }}
+  >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesRoutesLazy
         onComponentInitialized={onComponentInitialized}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { TaskRunResult } from '../../lib/tasks';
@@ -30,7 +30,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   reporting,
   parentLogger
 ) {
-  const config = reporting.getConfig();
+  const config = reporting.getConfig().get('csv');
   const logger = parentLogger.get('execute-job');
 
   return async function runTask(_jobId, immediateJobParams, context, stream, req) {
@@ -39,9 +39,9 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
       ...immediateJobParams,
     };
 
-    const savedObjectsClient = context.core.savedObjects.client;
-    const uiSettings = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
     const dataPluginStart = await reporting.getDataService();
+    const savedObjectsClient = (await context.core).savedObjects.client;
+    const uiSettings = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
     const [es, searchSourceStart] = await Promise.all([

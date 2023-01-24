@@ -31,12 +31,10 @@ export function defineSecurityCheckupGetStateRoutes({
   router.get(
     { path: '/internal/security/security_checkup/state', validate: false },
     async (context, _request, response) => {
+      const esClient = (await context.core).elasticsearch.client;
       let displayAlert = false;
       if (showInsecureClusterWarning) {
-        displayAlert = await doesClusterHaveUserData(
-          context.core.elasticsearch.client.asInternalUser,
-          logger
-        );
+        displayAlert = await doesClusterHaveUserData(esClient.asInternalUser, logger);
       }
 
       const state: SecurityCheckupState = {

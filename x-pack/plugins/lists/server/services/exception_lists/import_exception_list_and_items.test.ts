@@ -8,7 +8,7 @@
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
-} from '../../../../lists/common/schemas/request/import_exceptions_schema.mock';
+} from '../../../common/schemas/request/import_exceptions_schema.mock';
 import { createExtensionPointStorageMock } from '../extension_points/extension_point_storage.mock';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';
@@ -56,6 +56,7 @@ describe('import_exception_list_and_items', () => {
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
+      generateNewListId: false,
       maxExceptionsImportSize: 10000,
       overwrite: false,
     });
@@ -82,6 +83,7 @@ describe('import_exception_list_and_items', () => {
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
+      generateNewListId: false,
       maxExceptionsImportSize: 10000,
       overwrite: false,
     });
@@ -102,6 +104,7 @@ describe('import_exception_list_and_items', () => {
         getImportExceptionsListSchemaMock('test_list_id'),
         getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
       ]),
+      generateNewListId: false,
       maxExceptionsImportSize: 10000,
       overwrite: false,
     });

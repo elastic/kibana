@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from 'src/plugins/data_views/common';
+import { DataViewsService } from '../common';
 
 export function createIndexPatternsStartMock() {
   const dataViewsServiceFactory = jest.fn().mockResolvedValue({ get: jest.fn() });
   return {
-    indexPatternsServiceFactory: dataViewsServiceFactory,
     dataViewsServiceFactory,
   };
 }
@@ -29,4 +28,5 @@ export const dataViewsService = {
   getDefaultId: jest.fn(),
   updateSavedObject: jest.fn(),
   refreshFields: jest.fn(),
+  getIdsWithTitle: jest.fn(),
 } as unknown as jest.Mocked<DataViewsService>;

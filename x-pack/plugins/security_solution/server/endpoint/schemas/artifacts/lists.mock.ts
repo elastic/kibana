@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WrappedTranslatedExceptionList } from './lists';
+import type { WrappedTranslatedExceptionList } from './lists';
 
 export const getTranslatedExceptionListMock = (): WrappedTranslatedExceptionList => {
   return {

@@ -9,6 +9,8 @@ import React, { FormEvent, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiButton,
+  EuiSwitch,
+  EuiSpacer,
   EuiFilterButton,
   EuiPopover,
   EuiPopoverFooter,
@@ -16,17 +18,18 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { isEqual, map } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FieldValueSelectionProps, ListItem } from './types';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 const Counter = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   background: ${({ theme }) => theme.eui.euiColorLightShade};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const formatOptions = (
@@ -72,13 +75,23 @@ export function FieldValueSelection({
   excludedValue,
   allowExclusions = true,
   compressed = true,
+  useLogicalAND,
+  showLogicalConditionSwitch = false,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
+  const { euiTheme } = useEuiTheme();
+
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
     formatOptions(values, selectedValue, excludedValue, showCount)
   );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const [isLogicalAND, setIsLogicalAND] = useState(useLogicalAND);
+
+  useEffect(() => {
+    setIsLogicalAND(useLogicalAND);
+  }, [useLogicalAND]);
 
   useEffect(() => {
     setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
@@ -143,7 +156,13 @@ export function FieldValueSelection({
       .filter((opt) => opt?.checked === 'off')
       .map(({ label: labelN }) => labelN);
 
-    return isEqual(selectedValue ?? [], currSelected) && isEqual(excludedValue ?? [], currExcluded);
+    const hasFilterSelected = (selectedValue ?? []).length > 0 || (excludedValue ?? []).length > 0;
+
+    return (
+      isEqual(selectedValue ?? [], currSelected) &&
+      isEqual(excludedValue ?? [], currExcluded) &&
+      !(isLogicalAND !== useLogicalAND && hasFilterSelected)
+    );
   };
 
   return (
@@ -190,6 +209,34 @@ export function FieldValueSelection({
                 </EuiText>
               )}
               <EuiPopoverFooter paddingSize="s">
+                {showLogicalConditionSwitch && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <div css={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <EuiSwitch
+                        css={{
+                          flexDirection: 'row-reverse',
+                          gap: euiTheme.size.s,
+                          color: euiTheme.colors.subduedText,
+                        }}
+                        label={i18n.translate(
+                          'xpack.observability.fieldValueSelection.logicalAnd',
+                          {
+                            defaultMessage: 'Use logical AND',
+                          }
+                        )}
+                        data-test-subj="tagsLogicalOperatorSwitch"
+                        checked={Boolean(isLogicalAND)}
+                        compressed={true}
+                        onChange={(e) => {
+                          setIsLogicalAND(e.target.checked);
+                        }}
+                      />
+                    </div>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+
                 <EuiButton
                   aria-label={i18n.translate(
                     'xpack.observability.fieldValueSelection.apply.label',
@@ -206,7 +253,19 @@ export function FieldValueSelection({
                     const selectedValuesN = options.filter((opt) => opt?.checked === 'on');
                     const excludedValuesN = options.filter((opt) => opt?.checked === 'off');
 
-                    onSelectionChange(map(selectedValuesN, 'label'), map(excludedValuesN, 'label'));
+                    if (showLogicalConditionSwitch) {
+                      onSelectionChange(
+                        map(selectedValuesN, 'label'),
+                        map(excludedValuesN, 'label'),
+                        isLogicalAND
+                      );
+                    } else {
+                      onSelectionChange(
+                        map(selectedValuesN, 'label'),
+                        map(excludedValuesN, 'label')
+                      );
+                    }
+
                     setIsPopoverOpen(false);
                     setForceOpen?.(false);
                   }}
@@ -223,6 +282,9 @@ export function FieldValueSelection({
     </Wrapper>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default FieldValueSelection;
 
 const Wrapper = styled.div`
   &&& {

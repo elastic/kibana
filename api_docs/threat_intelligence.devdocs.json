@@ -1,0 +1,634 @@
+{
+  "id": "threatIntelligence",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.getSecuritySolutionDeepLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionDeepLink",
+        "description": [
+          "\nGets the threat intelligence properties of a TI page for deep linking in the security solution."
+        ],
+        "signature": [
+          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\") => TIDeepLink<TId>"
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionDeepLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "threatIntelligencePage",
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "a {@link TIDeepLink }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.getSecuritySolutionLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionLink",
+        "description": [
+          "\nGets the threat intelligence properties of a TI page for navigation in the security solution."
+        ],
+        "signature": [
+          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\") => TILinkItem<TId>"
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "threatIntelligencePage",
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "a {@link TILinkItem }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.getSecuritySolutionNavTab",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionNavTab",
+        "description": [
+          "\nGets the threat intelligence properties of a TI page for navigation in the old security solution navigation."
+        ],
+        "signature": [
+          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\", basePath: string) => TINavTab<TId>"
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionNavTab.$1",
+            "type": "string",
+            "tags": [],
+            "label": "threatIntelligencePage",
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.getSecuritySolutionNavTab.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "the base path for links."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "a {@link TINavTab }"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.SecuritySolutionPluginContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecuritySolutionPluginContext",
+        "description": [
+          "\nMethods exposed from the security solution to the threat intelligence application."
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getFiltersGlobalComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiltersGlobalComponent",
+            "description": [
+              "\nGets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getPageWrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "getPageWrapper",
+            "description": [
+              "\nGets the `PageWrapper` component for embedding a filter bar in the security solution application."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.licenseService",
+            "type": "Object",
+            "tags": [],
+            "label": "licenseService",
+            "description": [
+              "\nGet the user's license to drive the Threat Intelligence plugin's visibility."
+            ],
+            "signature": [
+              "LicenseAware"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.sourcererDataView",
+            "type": "Object",
+            "tags": [],
+            "label": "sourcererDataView",
+            "description": [
+              "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView."
+            ],
+            "signature": [
+              "SourcererDataView"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.securitySolutionStore",
+            "type": "Object",
+            "tags": [],
+            "label": "securitySolutionStore",
+            "description": [
+              "\nSecurity Solution store"
+            ],
+            "signature": [
+              "Store",
+              "<any, ",
+              "AnyAction",
+              ">"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getUseInvestigateInTimeline",
+            "type": "Function",
+            "tags": [],
+            "label": "getUseInvestigateInTimeline",
+            "description": [
+              "\nPass UseInvestigateInTimeline functionality to TI plugin"
+            ],
+            "signature": [
+              "({ dataProviders, from, to, }: ",
+              "UseInvestigateInTimelineProps",
+              ") => () => Promise<void>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.getUseInvestigateInTimeline.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    dataProviders,\n    from,\n    to,\n  }",
+                "description": [],
+                "signature": [
+                  "UseInvestigateInTimelineProps"
+                ],
+                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.useQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "useQuery",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              }
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.useFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "useFilters",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.useGlobalTime",
+            "type": "Function",
+            "tags": [],
+            "label": "useGlobalTime",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.SiemSearchBar",
+            "type": "Function",
+            "tags": [],
+            "label": "SiemSearchBar",
+            "description": [],
+            "signature": [
+              "React.VoidFunctionComponent<any>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.SiemSearchBar.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.SiemSearchBar.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.registerQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "registerQuery",
+            "description": [
+              "\nRegister query in security solution store for tracking and centralized refresh support"
+            ],
+            "signature": [
+              "(query: { id: string; loading: boolean; refetch: VoidFunction; }) => void"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1.loading",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "loading",
+                    "description": [],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.registerQuery.$1.refetch",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "refetch",
+                    "description": [],
+                    "signature": [
+                      "VoidFunction"
+                    ],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "returnComment": [],
+                    "children": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.deregisterQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "deregisterQuery",
+            "description": [
+              "\nDeregister stale query"
+            ],
+            "signature": [
+              "(query: { id: string; }) => void"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "threatIntelligence",
+                "id": "def-public.SecuritySolutionPluginContext.deregisterQuery.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "threatIntelligence",
+                    "id": "def-public.SecuritySolutionPluginContext.deregisterQuery.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.blockList",
+            "type": "Object",
+            "tags": [],
+            "label": "blockList",
+            "description": [],
+            "signature": [
+              "{ exceptionListApiClient: unknown; useSetUrlParams: () => (params: Record<string, string | number | null | undefined>, replace?: boolean | undefined) => void; getFlyoutComponent: () => React.NamedExoticComponent<",
+              "BlockListFlyoutProps",
+              ">; getFormComponent: () => React.NamedExoticComponent<",
+              "BlockListFormProps",
+              ">; }"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.ThreatIntelligencePluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatIntelligencePluginSetup",
+        "description": [],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.ThreatIntelligencePluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatIntelligencePluginStart",
+        "description": [],
+        "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "threatIntelligence",
+            "id": "def-public.ThreatIntelligencePluginStart.getComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getComponent",
+            "description": [],
+            "signature": [
+              "() => (props: { securitySolutionContext: ",
+              {
+                "pluginId": "threatIntelligence",
+                "scope": "public",
+                "docId": "kibThreatIntelligencePluginApi",
+                "section": "def-public.SecuritySolutionPluginContext",
+                "text": "SecuritySolutionPluginContext"
+              },
+              "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.THREAT_INTELLIGENCE_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "THREAT_INTELLIGENCE_BASE_PATH",
+        "description": [
+          "\nBase path for all the pages within the Threat Intelligence plugin."
+        ],
+        "signature": [
+          "\"/threat_intelligence\""
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "threatIntelligence",
+        "id": "def-public.TIPageId",
+        "type": "Type",
+        "tags": [],
+        "label": "TIPageId",
+        "description": [
+          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence-indicators' | 'threat_intelligence-feed';"
+        ],
+        "signature": [
+          "\"threat_intelligence-indicators\""
+        ],
+        "path": "x-pack/plugins/threat_intelligence/public/common/navigation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

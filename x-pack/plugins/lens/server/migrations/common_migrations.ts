@@ -6,13 +6,14 @@
  */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -25,10 +26,18 @@ import {
   VisState716,
   VisState810,
   VisState820,
+  VisState830,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape830,
+  VisStatePre830,
+  XYVisStatePre850,
+  VisState850,
+  LensDocShape850,
+  LensDocShape860,
 } from './types';
-import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, LegacyMetricState } from '../../common';
+import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -104,11 +113,11 @@ export const commonUpdateVisLayerType = (
   const newAttributes = cloneDeep(attributes);
   const visState = (newAttributes as LensDocShape715<VisStatePost715>).state.visualization;
   if ('layerId' in visState) {
-    visState.layerType = layerTypes.DATA;
+    visState.layerType = LayerTypes.DATA;
   }
   if ('layers' in visState) {
     for (const layer of visState.layers) {
-      layer.layerType = layerTypes.DATA;
+      layer.layerType = LayerTypes.DATA;
     }
   }
   return newAttributes as LensDocShape715<VisStatePost715>;
@@ -194,18 +203,94 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
   return newAttributes as LensDocShape810;
 };
 
+export const commonSetLastValueShowArrayValues = (attributes: LensDocShape810): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (
+        column.operationType === 'last_value' &&
+        !(typeof column.params.showArrayValues === 'boolean')
+      ) {
+        column.params.showArrayValues = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
 export const commonEnhanceTableRowHeight = (
   attributes: LensDocShape810<VisState810>
 ): LensDocShape810<VisState820> => {
   if (attributes.visualizationType !== 'lnsDatatable') {
-    return attributes;
+    return attributes as LensDocShape810<VisState820>;
   }
   const visState810 = attributes.state.visualization as VisState810;
   const newAttributes = cloneDeep(attributes);
   const vizState = newAttributes.state.visualization as VisState820;
   vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes as LensDocShape810<VisState820>;
+};
+
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
   return newAttributes;
+};
+
+export const commonLockOldMetricVisSettings = (
+  attributes: LensDocShape810
+): LensDocShape830<VisState830> => {
+  const newAttributes = cloneDeep(attributes);
+  if (newAttributes.visualizationType !== 'lnsMetric') {
+    return newAttributes as LensDocShape830<VisState830>;
+  }
+
+  const visState = newAttributes.state.visualization as LegacyMetricState;
+  visState.textAlign = visState.textAlign ?? 'center';
+  visState.titlePosition = visState.titlePosition ?? 'bottom';
+  visState.size = visState.size ?? 'xl';
+  return newAttributes as LensDocShape830<VisState830>;
+};
+
+export const commonPreserveOldLegendSizeDefault = (
+  attributes: LensDocShape810
+): LensDocShape830<VisState830> => {
+  const newAttributes = cloneDeep(attributes);
+
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
+  if (['lnsXY', 'lnsHeatmap'].includes(newAttributes.visualizationType + '')) {
+    const legendConfig = (newAttributes.state.visualization as { legend: { legendSize: number } })
+      .legend;
+    (legendConfig.legendSize as unknown as string) =
+      pixelsToLegendSize[String(legendConfig.legendSize)];
+  }
+
+  if (newAttributes.visualizationType === 'lnsPie') {
+    const layers = (newAttributes.state.visualization as { layers: Array<{ legendSize: number }> })
+      .layers;
+
+    layers.forEach((layer) => {
+      (layer.legendSize as unknown as string) = pixelsToLegendSize[String(layer.legendSize)];
+    });
+  }
+
+  return newAttributes as LensDocShape830<VisState830>;
 };
 
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
@@ -267,6 +352,27 @@ export const getLensFilterMigrations = (
     },
   }));
 
+export const getLensDataViewMigrations = (
+  dataViewMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(dataViewMigrations, (migrate) => (lensDoc: { attributes: LensDocShape }) => ({
+    ...lensDoc,
+    attributes: {
+      ...lensDoc.attributes,
+      state: {
+        ...lensDoc.attributes.state,
+        adHocDataViews: !lensDoc.attributes.state.adHocDataViews
+          ? undefined
+          : Object.fromEntries(
+              Object.entries(lensDoc.attributes.state.adHocDataViews).map(([id, spec]) => [
+                id,
+                migrate(spec),
+              ])
+            ),
+      },
+    },
+  }));
+
 export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
@@ -296,4 +402,171 @@ export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): L
       })
     );
   return newAttributes as LensDocShape810;
+};
+
+export const commonFixValueLabelsInXY = (
+  attributes: LensDocShape830<VisStatePre830>
+): LensDocShape830<VisState830> => {
+  if (attributes.visualizationType !== 'lnsXY') {
+    return attributes as LensDocShape830<VisState830>;
+  }
+
+  const newAttributes: LensDocShape830<VisStatePre830> = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { valueLabels } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        valueLabels: valueLabels && valueLabels !== 'hide' ? 'show' : valueLabels,
+      },
+    },
+  };
+};
+
+export const commonEnrichAnnotationLayer = (
+  attributes: LensDocShape850<XYVisStatePre850>
+): LensDocShape850<VisState850> => {
+  // Skip the migration heavy part if not XY or it does not contain annotations
+  if (
+    attributes.visualizationType !== 'lnsXY' ||
+    attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
+  ) {
+    return attributes as LensDocShape850<VisState850>;
+  }
+  const newAttributes = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { layers } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        layers: layers.map((l) => {
+          if (l.layerType !== 'annotations') {
+            return l;
+          }
+          return {
+            ...l,
+            annotations: l.annotations.map((a) => ({ ...a, type: 'manual' })),
+            ignoreGlobalFilters: true,
+          };
+        }),
+      },
+    },
+  };
+};
+
+export const commonMigrateMetricIds = (
+  attributes: LensDocShape850<unknown>
+): LensDocShape850<unknown> => {
+  const typeMappings = {
+    lnsMetric: 'lnsLegacyMetric',
+    lnsMetricNew: 'lnsMetric',
+  } as Record<string, string>;
+
+  if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
+    return attributes as LensDocShape850<unknown>;
+  }
+
+  const newAttributes = cloneDeep(attributes);
+  newAttributes.visualizationType = typeMappings[attributes.visualizationType];
+
+  return newAttributes;
+};
+
+export const commonMigrateIndexPatternDatasource = (
+  attributes: LensDocShape850<unknown>
+): LensDocShape860<unknown> => {
+  const newAttrs = {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        formBased: attributes.state.datasourceStates.indexpattern,
+      },
+    },
+  };
+
+  return newAttrs;
+};
+
+export const commonMigratePartitionChartGroups = (
+  attributes: LensDocShape850<{
+    shape: string;
+    layers: Array<{ groups?: string[] }>;
+  }>
+): LensDocShape850<{
+  shape: string;
+  layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+}> => {
+  if (
+    attributes.state.visualization?.layers &&
+    isPartitionShape(attributes.state.visualization.shape)
+  ) {
+    return {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: {
+          ...attributes.state.visualization,
+          layers: attributes.state.visualization.layers.map((l) => {
+            const groups = l.groups;
+
+            if (groups) {
+              delete l.groups;
+              if (attributes.state.visualization.shape === 'mosaic') {
+                return {
+                  ...l,
+                  primaryGroups: [groups[0]],
+                  secondaryGroups: groups.length === 2 ? [groups[1]] : undefined,
+                };
+              }
+              return {
+                ...l,
+                primaryGroups: groups,
+              };
+            }
+            return l;
+          }),
+        },
+      },
+    };
+  }
+  return attributes as LensDocShape850<{
+    shape: string;
+    layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+  }>;
+};
+
+export const commonMigratePartitionMetrics = (attributes: LensDocShape860<unknown>) => {
+  if (attributes.visualizationType !== 'lnsPie') {
+    return attributes as LensDocShape860<unknown>;
+  }
+
+  const partitionAttributes = attributes as LensDocShape860<{
+    shape: string;
+    layers: Array<{ metric: string }>;
+  }>;
+
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      visualization: {
+        ...partitionAttributes.state.visualization,
+        layers: partitionAttributes.state.visualization.layers.map((layer) => ({
+          ...layer,
+          metrics: [layer.metric],
+          metric: undefined,
+        })),
+      },
+    },
+  } as LensDocShape860<{
+    shape: string;
+    layers: Array<{ metrics: string[] }>;
+  }>;
 };

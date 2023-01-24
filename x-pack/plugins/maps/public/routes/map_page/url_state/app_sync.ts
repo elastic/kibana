@@ -7,16 +7,19 @@
 
 import { map } from 'rxjs/operators';
 import { FilterStateStore } from '@kbn/es-query';
-import { connectToQueryState } from '../../../../../../../src/plugins/data/public';
+import { connectToQueryState } from '@kbn/data-plugin/public';
 import {
+  IKbnUrlStateStorage,
   syncState,
   BaseStateContainer,
-} from '../../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import { getData } from '../../../kibana_services';
-import { kbnUrlStateStorage } from '../../../render_app';
 import { AppStateManager } from './app_state_manager';
 
-export function startAppStateSyncing(appStateManager: AppStateManager) {
+export function startAppStateSyncing(
+  appStateManager: AppStateManager,
+  kbnUrlStateStorage: IKbnUrlStateStorage
+) {
   // get appStateContainer
   // sync app filters with app state container from data.query to state container
   const { query } = getData();

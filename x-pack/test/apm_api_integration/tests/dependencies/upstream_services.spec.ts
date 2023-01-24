@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ServiceNode } from '../../../../plugins/apm/common/connections';
+import { ServiceNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateData } from './generate_data';
 
@@ -15,14 +15,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  const backendName = 'elasticsearch';
+  const dependencyName = 'elasticsearch';
 
   async function callApi() {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/backends/upstream_services',
+      endpoint: 'GET /internal/apm/dependencies/upstream_services',
       params: {
         query: {
-          backendName,
+          dependencyName,
           environment: 'production',
           kuery: '',
           numBuckets: 20,
@@ -47,28 +47,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Dependency upstream services',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded', () => {
-        before(async () => {
-          await generateData({ synthtraceEsClient, start, end });
-        });
-        after(() => synthtraceEsClient.clean());
-
-        it('returns a list of upstream services for the dependency', async () => {
-          const { status, body } = await callApi();
-
-          expect(status).to.be(200);
-          expect(body.services.map(({ location }) => (location as ServiceNode).serviceName)).to.eql(
-            ['synth-go']
-          );
-
-          const currentStatsLatencyValues = body.services[0].currentStats.latency.timeseries;
-          expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
-        });
+  registry.when('Dependency upstream services', { config: 'basic', archives: [] }, () => {
+    describe('when data is loaded', () => {
+      before(async () => {
+        await generateData({ synthtraceEsClient, start, end });
       });
-    }
-  );
+      after(() => synthtraceEsClient.clean());
+
+      it('returns a list of upstream services for the dependency', async () => {
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.services.map(({ location }) => (location as ServiceNode).serviceName)).to.eql([
+          'synth-go',
+        ]);
+
+        const currentStatsLatencyValues = body.services[0].currentStats.latency.timeseries;
+        expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
+      });
+    });
+  });
 }

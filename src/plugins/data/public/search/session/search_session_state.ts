@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
-import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
+import { createStateContainer, StateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { SearchSessionSavedObject } from './sessions_client';
 
 /**
@@ -58,12 +58,27 @@ export enum SearchSessionState {
 }
 
 /**
+ * State of the tracked search
+ */
+export enum TrackedSearchState {
+  InProgress = 'inProgress',
+  Completed = 'completed',
+  Errored = 'errored',
+}
+
+export interface TrackedSearch<SearchDescriptor = unknown, SearchMeta extends {} = {}> {
+  state: TrackedSearchState;
+  searchDescriptor: SearchDescriptor;
+  searchMeta: SearchMeta;
+}
+
+/**
  * Internal state of SessionService
  * {@link SearchSessionState} is inferred from this state
  *
  * @private
  */
-export interface SessionStateInternal<SearchDescriptor = unknown> {
+export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta extends {} = {}> {
   /**
    * Current session Id
    * Empty means there is no current active session.
@@ -92,10 +107,9 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   isRestore: boolean;
 
   /**
-   * Set of currently running searches
-   * within a session and any info associated with them
+   * Set of all searches within a session and any info associated with them
    */
-  pendingSearches: SearchDescriptor[];
+  trackedSearches: Array<TrackedSearch<SearchDescriptor, SearchMeta>>;
 
   /**
    * There was at least a single search in this session
@@ -106,6 +120,17 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
    * If user has explicitly canceled search requests
    */
   isCanceled: boolean;
+
+  /**
+   * If session was continued from a different app,
+   * If session continued from a different app, then it is very likely that `trackedSearches`
+   * doesn't have all the search that were included into the session.
+   * Session that was continued can't be saved because we can't guarantee all the searches saved.
+   * This limitation should be fixed in https://github.com/elastic/kibana/issues/121543
+   *
+   * @deprecated - https://github.com/elastic/kibana/issues/121543
+   */
+  isContinued: boolean;
 
   /**
    * Start time of the current session (from browser perspective)
@@ -124,27 +149,34 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
 }
 
 const createSessionDefaultState: <
-  SearchDescriptor = unknown
->() => SessionStateInternal<SearchDescriptor> = () => ({
+  SearchDescriptor = unknown,
+  SearchMeta extends {} = {}
+>() => SessionStateInternal<SearchDescriptor, SearchMeta> = () => ({
   sessionId: undefined,
   appName: undefined,
   isStored: false,
   isRestore: false,
   isCanceled: false,
+  isContinued: false,
   isStarted: false,
-  pendingSearches: [],
+  trackedSearches: [],
 });
 
 export interface SessionPureTransitions<
   SearchDescriptor = unknown,
-  S = SessionStateInternal<SearchDescriptor>
+  SearchMeta extends {} = {},
+  S = SessionStateInternal<SearchDescriptor, SearchMeta>
 > {
   start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
   store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
-  trackSearch: (state: S) => (search: SearchDescriptor) => S;
-  unTrackSearch: (state: S) => (search: SearchDescriptor) => S;
+  trackSearch: (state: S) => (search: SearchDescriptor, meta?: SearchMeta) => S;
+  removeSearch: (state: S) => (search: SearchDescriptor) => S;
+  completeSearch: (state: S) => (search: SearchDescriptor) => S;
+  errorSearch: (state: S) => (search: SearchDescriptor) => S;
+  updateSearchMeta: (state: S) => (search: SearchDescriptor, meta: Partial<SearchMeta>) => S;
+
   cancel: (state: S) => () => S;
   setSearchSessionSavedObject: (
     state: S
@@ -156,7 +188,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
     (state) =>
     ({ appName }) => ({
       ...createSessionDefaultState(),
-      sessionId: uuid.v4(),
+      sessionId: uuidv4(),
       startTime: new Date(),
       appName,
     }),
@@ -177,21 +209,78 @@ export const sessionPureTransitions: SessionPureTransitions = {
       searchSessionSavedObject,
     };
   },
-  trackSearch: (state) => (search) => {
-    if (!state.sessionId) throw new Error("Can't track search. Missing sessionId");
+  trackSearch:
+    (state) =>
+    (search, meta = {}) => {
+      if (!state.sessionId) throw new Error("Can't track search. Missing sessionId");
+      return {
+        ...state,
+        isStarted: true,
+        trackedSearches: state.trackedSearches.concat({
+          state: TrackedSearchState.InProgress,
+          searchDescriptor: search,
+          searchMeta: meta,
+        }),
+        completedTime: undefined,
+      };
+    },
+  removeSearch: (state) => (search) => {
+    const trackedSearches = state.trackedSearches.filter((s) => s.searchDescriptor !== search);
     return {
       ...state,
-      isStarted: true,
-      pendingSearches: state.pendingSearches.concat(search),
-      completedTime: undefined,
+      trackedSearches,
+      completedTime:
+        trackedSearches.filter((s) => s.state !== TrackedSearchState.InProgress).length === 0
+          ? new Date()
+          : state.completedTime,
     };
   },
-  unTrackSearch: (state) => (search) => {
-    const pendingSearches = state.pendingSearches.filter((s) => s !== search);
+  completeSearch: (state) => (search) => {
     return {
       ...state,
-      pendingSearches,
-      completedTime: pendingSearches.length === 0 ? new Date() : state.completedTime,
+      trackedSearches: state.trackedSearches.map((s) => {
+        if (s.searchDescriptor === search) {
+          return {
+            ...s,
+            state: TrackedSearchState.Completed,
+          };
+        }
+
+        return s;
+      }),
+    };
+  },
+  errorSearch: (state) => (search) => {
+    return {
+      ...state,
+      trackedSearches: state.trackedSearches.map((s) => {
+        if (s.searchDescriptor === search) {
+          return {
+            ...s,
+            state: TrackedSearchState.Errored,
+          };
+        }
+
+        return s;
+      }),
+    };
+  },
+  updateSearchMeta: (state) => (search, meta) => {
+    return {
+      ...state,
+      trackedSearches: state.trackedSearches.map((s) => {
+        if (s.searchDescriptor === search) {
+          return {
+            ...s,
+            searchMeta: {
+              ...s.searchMeta,
+              ...meta,
+            },
+          };
+        }
+
+        return s;
+      }),
     };
   },
   cancel: (state) => () => {
@@ -232,14 +321,23 @@ export interface SessionMeta {
   startTime?: Date;
   canceledTime?: Date;
   completedTime?: Date;
+
+  /**
+   * @deprecated - see remarks in {@link SessionStateInternal}
+   */
+  isContinued: boolean;
 }
 
 export interface SessionPureSelectors<
   SearchDescriptor = unknown,
-  S = SessionStateInternal<SearchDescriptor>
+  SearchMeta extends {} = {},
+  S = SessionStateInternal<SearchDescriptor, SearchMeta>
 > {
   getState: (state: S) => () => SearchSessionState;
   getMeta: (state: S) => () => SessionMeta;
+  getSearch: (
+    state: S
+  ) => (search: SearchDescriptor) => TrackedSearch<SearchDescriptor, SearchMeta> | null;
 }
 
 export const sessionPureSelectors: SessionPureSelectors = {
@@ -247,17 +345,22 @@ export const sessionPureSelectors: SessionPureSelectors = {
     if (!state.sessionId) return SearchSessionState.None;
     if (!state.isStarted) return SearchSessionState.None;
     if (state.isCanceled) return SearchSessionState.Canceled;
+
+    const pendingSearches = state.trackedSearches.filter(
+      (s) => s.state === TrackedSearchState.InProgress
+    );
+
     switch (true) {
       case state.isRestore:
-        return state.pendingSearches.length > 0
+        return pendingSearches.length > 0
           ? SearchSessionState.BackgroundLoading
           : SearchSessionState.Restored;
       case state.isStored:
-        return state.pendingSearches.length > 0
+        return pendingSearches.length > 0
           ? SearchSessionState.BackgroundLoading
           : SearchSessionState.BackgroundCompleted;
       default:
-        return state.pendingSearches.length > 0
+        return pendingSearches.length > 0
           ? SearchSessionState.Loading
           : SearchSessionState.Completed;
     }
@@ -272,24 +375,31 @@ export const sessionPureSelectors: SessionPureSelectors = {
       startTime: state.searchSessionSavedObject?.attributes.created
         ? new Date(state.searchSessionSavedObject?.attributes.created)
         : state.startTime,
-      completedTime: state.searchSessionSavedObject?.attributes.completed
-        ? new Date(state.searchSessionSavedObject?.attributes.completed)
-        : state.completedTime,
+      completedTime: state.completedTime,
       canceledTime: state.canceledTime,
+      isContinued: state.isContinued,
     });
+  },
+  getSearch(state) {
+    return (search) => {
+      return state.trackedSearches.find((s) => s.searchDescriptor === search) ?? null;
+    };
   },
 };
 
-export type SessionStateContainer<SearchDescriptor = unknown> = StateContainer<
-  SessionStateInternal<SearchDescriptor>,
-  SessionPureTransitions<SearchDescriptor>,
-  SessionPureSelectors<SearchDescriptor>
+export type SessionStateContainer<
+  SearchDescriptor = unknown,
+  SearchMeta extends {} = {}
+> = StateContainer<
+  SessionStateInternal<SearchDescriptor, SearchMeta>,
+  SessionPureTransitions<SearchDescriptor, SearchMeta>,
+  SessionPureSelectors<SearchDescriptor, SearchMeta>
 >;
 
-export const createSessionStateContainer = <SearchDescriptor = unknown>(
+export const createSessionStateContainer = <SearchDescriptor = unknown, SearchMeta extends {} = {}>(
   { freeze = true }: { freeze: boolean } = { freeze: true }
 ): {
-  stateContainer: SessionStateContainer<SearchDescriptor>;
+  stateContainer: SessionStateContainer<SearchDescriptor, SearchMeta>;
   sessionState$: Observable<SearchSessionState>;
   sessionMeta$: Observable<SessionMeta>;
 } => {
@@ -298,7 +408,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     sessionPureTransitions,
     sessionPureSelectors,
     freeze ? undefined : { freeze: (s) => s }
-  ) as SessionStateContainer<SearchDescriptor>;
+  ) as unknown as SessionStateContainer<SearchDescriptor, SearchMeta>;
 
   const sessionMeta$: Observable<SessionMeta> = stateContainer.state$.pipe(
     map(() => stateContainer.selectors.getMeta()),

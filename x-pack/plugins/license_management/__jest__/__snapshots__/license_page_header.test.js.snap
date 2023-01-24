@@ -1,5 +1,109 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LicenseStatus component should display display warning is expired 1`] = `"<header class=\\"euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center\\"><div class=\\"euiPageHeaderContent\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top\\"><div class=\\"euiFlexItem\\"><h1 class=\\"euiTitle euiTitle--large\\"><span data-euiicon-type=\\"alert\\" color=\\"danger\\" class=\\"euiPageHeaderContent__titleIcon\\"></span><span data-test-subj=\\"licenseText\\">Your Platinum license has expired</span></h1><div class=\\"euiSpacer euiSpacer--l\\"></div><div class=\\"euiText euiText--medium euiText--constrainedWidth\\"><p><span data-test-subj=\\"licenseSubText\\">Your license expired on <strong></strong></span></p></div></div></div></div></header><div class=\\"euiSpacer euiSpacer--l\\"></div>"`;
+exports[`LicenseStatus component should display display warning is expired 1`] = `
+Array [
+  <header
+    class="euiPageHeader emotion-euiPageHeader"
+  >
+    <div
+      class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+    >
+      <div
+        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <h1
+            class="euiTitle emotion-euiTitle-l"
+          >
+            <span
+              class="emotion-euiPageHeaderContent__titleIcon"
+              color="danger"
+              data-euiicon-type="alert"
+            />
+            <span
+              data-test-subj="licenseText"
+            >
+              Your Platinum license has expired
+            </span>
+          </h1>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiText emotion-euiText-constrainedWidth-m"
+          >
+            <p>
+              <span
+                data-test-subj="licenseSubText"
+              >
+                Your license expired on 
+                <strong />
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>,
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />,
+]
+`;
 
-exports[`LicenseStatus component should display normally when license is active 1`] = `"<header class=\\"euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center\\"><div class=\\"euiPageHeaderContent\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top\\"><div class=\\"euiFlexItem\\"><h1 class=\\"euiTitle euiTitle--large\\"><span data-euiicon-type=\\"checkInCircleFilled\\" color=\\"success\\" class=\\"euiPageHeaderContent__titleIcon\\"></span><span data-test-subj=\\"licenseText\\">Your Gold license is active</span></h1><div class=\\"euiSpacer euiSpacer--l\\"></div><div class=\\"euiText euiText--medium euiText--constrainedWidth\\"><p><span data-test-subj=\\"licenseSubText\\">Your license will expire on <strong>October 12, 2099 7:00 PM EST</strong></span></p></div></div></div></div></header><div class=\\"euiSpacer euiSpacer--l\\"></div>"`;
+exports[`LicenseStatus component should display normally when license is active 1`] = `
+Array [
+  <header
+    class="euiPageHeader emotion-euiPageHeader"
+  >
+    <div
+      class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+    >
+      <div
+        class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <h1
+            class="euiTitle emotion-euiTitle-l"
+          >
+            <span
+              class="emotion-euiPageHeaderContent__titleIcon"
+              color="success"
+              data-euiicon-type="checkInCircleFilled"
+            />
+            <span
+              data-test-subj="licenseText"
+            >
+              Your Gold license is active
+            </span>
+          </h1>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiText emotion-euiText-constrainedWidth-m"
+          >
+            <p>
+              <span
+                data-test-subj="licenseSubText"
+              >
+                Your license will expire on 
+                <strong>
+                  October 12, 2099 7:00 PM EST
+                </strong>
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>,
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />,
+]
+`;

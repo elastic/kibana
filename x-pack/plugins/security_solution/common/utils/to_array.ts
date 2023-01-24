@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const toArray = <T = string>(value: T | T[] | null): T[] =>
+export const toArray = <T = string>(value: T | T[] | null | undefined): T[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
+
 export const toStringArray = <T = string>(value: T | T[] | null): string[] => {
   if (Array.isArray(value)) {
     return value.reduce<string[]>((acc, v) => {
@@ -41,6 +42,7 @@ export const toStringArray = <T = string>(value: T | T[] | null): string[] => {
     return [`${value}`];
   }
 };
+
 export const toObjectArrayOfStrings = <T = string>(
   value: T | T[] | null
 ): Array<{

@@ -12,20 +12,22 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import type {
   EsAssetReference,
   InstallablePackage,
   Installation,
   RegistryPackage,
+  ArchivePackage,
   BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../../routes/security';
+import { checkSuperuser } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
-import { installTransform, isTransform } from './elasticsearch/transform/install';
-import { fetchFindLatestPackageOrThrow, getRegistryPackage } from './registry';
+import { installTransforms, isTransform } from './elasticsearch/transform/install';
+import type { FetchFindLatestPackageOptions } from './registry';
+import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 import { ensureInstalledPackage, getInstallation } from './packages';
 
 export type InstalledAssetType = EsAssetReference;
@@ -44,12 +46,15 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
+  fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage>;
 
-  getRegistryPackage(
+  getPackage(
     packageName: string,
     packageVersion: string
-  ): Promise<{ packageInfo: RegistryPackage; paths: string[] }>;
+  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -115,14 +120,21 @@ class PackageClientImpl implements PackageClient {
     });
   }
 
-  public async fetchFindLatestPackage(packageName: string) {
+  public async fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage> {
     await this.#runPreflight();
-    return fetchFindLatestPackageOrThrow(packageName);
+    return fetchFindLatestPackageOrThrow(packageName, options);
   }
 
-  public async getRegistryPackage(packageName: string, packageVersion: string) {
+  public async getPackage(
+    packageName: string,
+    packageVersion: string,
+    options?: Parameters<typeof getPackage>['2']
+  ) {
     await this.#runPreflight();
-    return getRegistryPackage(packageName, packageVersion);
+    return getPackage(packageName, packageVersion, options);
   }
 
   public async reinstallEsAssets(
@@ -146,14 +158,15 @@ class PackageClientImpl implements PackageClient {
     return installedAssets;
   }
 
-  #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    return installTransform(
+  async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
+    const { installedTransforms } = await installTransforms(
       packageInfo,
       paths,
       this.internalEsClient,
       this.internalSoClient,
       this.logger
     );
+    return installedTransforms;
   }
 
   #runPreflight() {

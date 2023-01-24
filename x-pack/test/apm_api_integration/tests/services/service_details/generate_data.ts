@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
-import type { ApmSynthtraceEsClient } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const dataConfig = {
   rate: 10,
@@ -65,15 +65,18 @@ export async function generateData({
   const { name: serviceRunTimeName, version: serviceRunTimeVersion } = runtime;
   const { name: agentName, version: agentVersion } = agent;
 
-  const instance = apm.service(serviceName, 'production', agentName).instance('instance-a');
+  const instance = apm
+    .service({ name: serviceName, environment: 'production', agentName })
+    .instance('instance-a');
 
   const traceEvents = [
     timerange(start, end)
       .interval('30s')
       .rate(rate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .containerId('instance-a')
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .defaults({
             'cloud.provider': provider,
@@ -94,14 +97,13 @@ export async function generateData({
           })
           .duration(transaction.duration)
           .success()
-          .serialize()
       ),
     timerange(start, end)
       .interval('30s')
       .rate(rate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .defaults({
             'cloud.provider': provider,
@@ -122,7 +124,6 @@ export async function generateData({
           })
           .duration(transaction.duration)
           .success()
-          .serialize()
       ),
   ];
 

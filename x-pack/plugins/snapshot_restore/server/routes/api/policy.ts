@@ -23,7 +23,7 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policies'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const managedPolicies = await getManagedPolicyNames(clusterClient.asCurrentUser);
 
@@ -53,7 +53,7 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policy/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -80,7 +80,7 @@ export function registerPolicyRoutes({
   router.post(
     { path: addBasePath('policies'), validate: { body: policySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const policy = req.body as TypeOf<typeof policySchema>;
       const { name } = policy;
@@ -120,7 +120,7 @@ export function registerPolicyRoutes({
       validate: { params: nameParameterSchema, body: policySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const policy = req.body as TypeOf<typeof policySchema>;
 
@@ -147,7 +147,7 @@ export function registerPolicyRoutes({
   router.delete(
     { path: addBasePath('policies/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const policyNames = name.split(',');
 
@@ -178,7 +178,7 @@ export function registerPolicyRoutes({
   router.post(
     { path: addBasePath('policy/{name}/run'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -197,7 +197,7 @@ export function registerPolicyRoutes({
   router.get(
     { path: addBasePath('policies/indices'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       try {
         const response = await clusterClient.asCurrentUser.indices.resolveIndex({
@@ -210,6 +210,7 @@ export function registerPolicyRoutes({
         const body: PolicyIndicesResponse = {
           dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
           indices: resolvedIndicesResponse.indices
+            .filter((index) => !index.attributes.includes('system'))
             .flatMap((index) => (index.data_stream ? [] : index.name))
             .sort(),
         };
@@ -223,11 +224,27 @@ export function registerPolicyRoutes({
     })
   );
 
+  // Get policy feature states
+  router.get(
+    { path: addBasePath('policies/features'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+
+      try {
+        const response = await clusterClient.asCurrentUser.features.getFeatures();
+
+        return res.ok({ body: response });
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
+    })
+  );
+
   // Get retention settings
   router.get(
     { path: addBasePath('policies/retention_settings'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { persistent, transient, defaults } =
         await clusterClient.asCurrentUser.cluster.getSettings({
           filter_path: '**.slm.retention*',
@@ -257,7 +274,7 @@ export function registerPolicyRoutes({
       validate: { body: retentionSettingsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { retentionSchedule } = req.body as TypeOf<typeof retentionSettingsSchema>;
 
       try {
@@ -282,7 +299,7 @@ export function registerPolicyRoutes({
   router.post(
     { path: addBasePath('policies/retention'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const response = await clusterClient.asCurrentUser.slm.executeRetention();
       return res.ok({ body: response });
     })

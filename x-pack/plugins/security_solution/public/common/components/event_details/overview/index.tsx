@@ -10,8 +10,8 @@ import React, { useMemo } from 'react';
 import { chunk, find } from 'lodash/fp';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { BrowserFields } from '../../../containers/source';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../types';
 import { getEnrichedFieldInfo } from '../helpers';
@@ -26,11 +26,11 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { OverviewCardWithActions } from '../overview/overview_card';
-import { StatusPopoverButton } from '../overview/status_popover_button';
-import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
+import { OverviewCardWithActions, OverviewCard } from './overview_card';
+import { StatusPopoverButton } from './status_popover_button';
+import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
-import { isNotNull } from '../../../../../public/timelines/store/timeline/helpers';
+import { isNotNull } from '../../../../timelines/store/timeline/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -43,11 +43,21 @@ interface Props {
   eventId: string;
   handleOnEventClosed: () => void;
   indexName: string;
-  timelineId: string;
+  scopeId: string;
+  isReadOnly?: boolean;
 }
 
 export const Overview = React.memo<Props>(
-  ({ browserFields, contextId, data, eventId, handleOnEventClosed, indexName, timelineId }) => {
+  ({
+    browserFields,
+    contextId,
+    data,
+    eventId,
+    handleOnEventClosed,
+    indexName,
+    scopeId,
+    isReadOnly,
+  }) => {
     const statusData = useMemo(() => {
       const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
       return (
@@ -55,12 +65,12 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const severityData = useMemo(() => {
       const item = find({ field: 'kibana.alert.severity', category: 'kibana' }, data);
@@ -69,12 +79,12 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const riskScoreData = useMemo(() => {
       const item = find({ field: 'kibana.alert.risk_score', category: 'kibana' }, data);
@@ -83,12 +93,12 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const ruleNameData = useMemo(() => {
       const item = find({ field: SIGNAL_RULE_NAME_FIELD_NAME, category: 'kibana' }, data);
@@ -98,78 +108,91 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
           linkValueField,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
-    const signalCard = hasData(statusData) ? (
-      <EuiFlexItem key="status">
-        <OverviewCardWithActions
-          title={SIGNAL_STATUS}
-          enrichedFieldInfo={statusData}
-          contextId={contextId}
-        >
-          <StatusPopoverButton
-            eventId={eventId}
-            contextId={contextId}
+    const signalCard =
+      hasData(statusData) && !isReadOnly ? (
+        <EuiFlexItem key="status">
+          <OverviewCardWithActions
+            title={SIGNAL_STATUS}
             enrichedFieldInfo={statusData}
-            indexName={indexName}
-            timelineId={timelineId}
-            handleOnEventClosed={handleOnEventClosed}
-          />
-        </OverviewCardWithActions>
-      </EuiFlexItem>
-    ) : null;
+            contextId={contextId}
+          >
+            <StatusPopoverButton
+              eventId={eventId}
+              contextId={contextId}
+              enrichedFieldInfo={statusData}
+              indexName={indexName}
+              scopeId={scopeId}
+              handleOnEventClosed={handleOnEventClosed}
+            />
+          </OverviewCardWithActions>
+        </EuiFlexItem>
+      ) : null;
 
     const severityCard = hasData(severityData) ? (
       <EuiFlexItem key="severity">
-        <OverviewCardWithActions
-          title={ALERTS_HEADERS_SEVERITY}
-          enrichedFieldInfo={severityData}
-          contextId={contextId}
-        >
-          <SeverityBadge value={severityData.values[0] as Severity} />
-        </OverviewCardWithActions>
+        {!isReadOnly ? (
+          <OverviewCardWithActions
+            title={ALERTS_HEADERS_SEVERITY}
+            enrichedFieldInfo={severityData}
+            contextId={contextId}
+          >
+            <SeverityBadge value={severityData.values[0] as Severity} />
+          </OverviewCardWithActions>
+        ) : (
+          <OverviewCard title={ALERTS_HEADERS_SEVERITY}>
+            <SeverityBadge value={severityData.values[0] as Severity} />
+          </OverviewCard>
+        )}
       </EuiFlexItem>
     ) : null;
 
     const riskScoreCard = hasData(riskScoreData) ? (
       <EuiFlexItem key="riskScore">
-        <OverviewCardWithActions
-          title={ALERTS_HEADERS_RISK_SCORE}
-          enrichedFieldInfo={riskScoreData}
-          contextId={contextId}
-        >
-          {riskScoreData.values[0]}
-        </OverviewCardWithActions>
+        {!isReadOnly ? (
+          <OverviewCardWithActions
+            title={ALERTS_HEADERS_RISK_SCORE}
+            enrichedFieldInfo={riskScoreData}
+            contextId={contextId}
+            dataTestSubj="riskScore"
+          >
+            {riskScoreData.values[0]}
+          </OverviewCardWithActions>
+        ) : (
+          <OverviewCard title={ALERTS_HEADERS_RISK_SCORE}>{riskScoreData.values[0]}</OverviewCard>
+        )}
       </EuiFlexItem>
     ) : null;
 
-    const ruleNameCard = hasData(ruleNameData) ? (
-      <EuiFlexItem key="ruleName">
-        <OverviewCardWithActions
-          title={ALERTS_HEADERS_RULE}
-          enrichedFieldInfo={ruleNameData}
-          contextId={contextId}
-        >
-          <FormattedFieldValue
+    const ruleNameCard =
+      hasData(ruleNameData) && !isReadOnly ? (
+        <EuiFlexItem key="ruleName">
+          <OverviewCardWithActions
+            title={ALERTS_HEADERS_RULE}
+            enrichedFieldInfo={ruleNameData}
             contextId={contextId}
-            eventId={eventId}
-            value={ruleNameData.values[0]}
-            fieldName={ruleNameData.data.field}
-            linkValue={ruleNameData.linkValue}
-            fieldType={ruleNameData.data.type}
-            fieldFormat={ruleNameData.data.format}
-            isDraggable={false}
-            truncate={false}
-          />
-        </OverviewCardWithActions>
-      </EuiFlexItem>
-    ) : null;
+          >
+            <FormattedFieldValue
+              contextId={contextId}
+              eventId={eventId}
+              value={ruleNameData.values[0]}
+              fieldName={ruleNameData.data.field}
+              linkValue={ruleNameData.linkValue}
+              fieldType={ruleNameData.data.type}
+              fieldFormat={ruleNameData.data.format}
+              isDraggable={false}
+              truncate={false}
+            />
+          </OverviewCardWithActions>
+        </EuiFlexItem>
+      ) : null;
 
     const { width, ref } = useThrottledResizeObserver();
 

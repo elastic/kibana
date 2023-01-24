@@ -11,8 +11,8 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '../../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS } from '../constants';
@@ -59,7 +59,7 @@ export const CreateEditField = withRouter(
 
     const docFieldName = spec?.name || newFieldPlaceholder;
 
-    chrome.docTitle.change([docFieldName, indexPattern.title]);
+    chrome.docTitle.change([docFieldName, indexPattern.getName()]);
 
     const redirectAway = () => {
       history.push(

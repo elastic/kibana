@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb } from 'kibana/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useCallback, useEffect } from 'react';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import { CasesDeepLinkId, ICasesDeepLinkId } from '../../common/navigation';
+import type { ICasesDeepLinkId } from '../../common/navigation';
+import { CasesDeepLinkId } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {

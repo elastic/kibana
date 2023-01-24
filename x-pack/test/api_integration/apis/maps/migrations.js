@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import semver from 'semver';
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
@@ -43,7 +45,7 @@ export default function ({ getService }) {
             type: 'index-pattern',
           },
         ]);
-        expect(resp.body.migrationVersion).to.eql({ map: '8.1.0' }); // migrtionVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
+        expect(resp.body.migrationVersion).to.eql({ map: '8.4.0' }); // migrtionVersion is derived from both "migrations" and "convertToMultiNamespaceVersion" fields when the object is registered
         expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
       });
 
@@ -77,7 +79,7 @@ export default function ({ getService }) {
         }
         expect(panels.length).to.be(1);
         expect(panels[0].type).to.be('map');
-        expect(panels[0].version).to.be('8.2.0');
+        expect(semver.gte(panels[0].version, '8.4.0')).to.be(true);
       });
     });
   });

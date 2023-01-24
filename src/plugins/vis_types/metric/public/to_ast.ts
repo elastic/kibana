@@ -7,16 +7,13 @@
  */
 
 import { get } from 'lodash';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { inter } from '../../../expressions/common';
+import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { inter } from '@kbn/expressions-plugin/common';
 
-import {
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
+import { ColorMode } from '@kbn/charts-plugin/public';
 import { VisParams } from './types';
-import { getStopsWithColorsFromRanges } from './utils';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -30,17 +27,6 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: buildExpression([
-      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
-        id: vis.data.indexPattern!.id!,
-      }),
-    ]),
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: false,
-    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
-  });
-
   const schemas = getVisSchemas(vis, params);
 
   const {
@@ -64,9 +50,11 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     });
   }
 
-  const metricVis = buildExpressionFunction('metricVis', {
+  const hasColorRanges = colorsRange && colorsRange.length > 1;
+
+  const metricVis = buildExpressionFunction('legacyMetricVis', {
     percentageMode,
-    colorMode: metricColorMode,
+    colorMode: hasColorRanges ? metricColorMode : ColorMode.None,
     showLabels: labels?.show ?? false,
   });
 
@@ -75,13 +63,15 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   metricVis.addArgument(
     'font',
     buildExpression(
-      `font family="${inter.value}" 
+      `font family="${inter.value}"
         weight="bold"
         align="center"
         sizeUnit="pt"
         ${style ? `size=${style.fontSize}` : ''}`
     )
   );
+
+  metricVis.addArgument('labelFont', buildExpression(`font size="14" align="center"`));
 
   if (colorsRange && colorsRange.length) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
@@ -102,7 +92,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     metricVis.addArgument('metric', prepareDimension(metric));
   });
 
-  const ast = buildExpression([esaggs, metricVis]);
+  const ast = buildExpression([metricVis]);
 
   return ast.toAst();
 };

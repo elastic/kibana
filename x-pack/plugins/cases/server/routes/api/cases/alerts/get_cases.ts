@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CasesByAlertIDRequest } from '../../../../../common/api';
+import type { CasesByAlertIDRequest } from '../../../../../common/api';
 import { CASE_ALERTS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
@@ -24,7 +24,8 @@ export const getCasesByAlertIdRoute = createCasesRoute({
     try {
       const alertID = request.params.alert_id;
 
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const options = request.query as CasesByAlertIDRequest;
 
       return response.ok({

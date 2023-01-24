@@ -7,7 +7,7 @@
 
 import { find, uniqBy } from 'lodash';
 import { Connection, ConnectionNode } from '../../../common/service_map';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 export function getConnections({
@@ -40,18 +40,18 @@ export function getConnections({
 }
 
 export async function getServiceMapFromTraceIds({
-  setup,
+  apmEventClient,
   traceIds,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   traceIds: string[];
   start: number;
   end: number;
 }) {
   const serviceMapFromTraceIdsScriptResponse =
-    await fetchServicePathsFromTraceIds(setup, traceIds, start, end);
+    await fetchServicePathsFromTraceIds(apmEventClient, traceIds, start, end);
 
   const serviceMapScriptedAggValue =
     serviceMapFromTraceIdsScriptResponse.aggregations?.service_map.value;

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
   deleteModalTitle: i18n.translate(
@@ -104,6 +104,14 @@ export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
       defaultMessage: 'Manage event filters',
     }
   ),
+  emptyUnassignedNoPrivilegesMessage: (policyName: string): string =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.eventFilters.empty.unassigned.noPrivileges.content',
+      {
+        defaultMessage: 'There are currently no event filters assigned to {policyName}',
+        values: { policyName },
+      }
+    ),
   emptyUnexistingTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventFilters.empty.unexisting.title',
     { defaultMessage: 'No event filters exist' }

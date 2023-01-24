@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AGG_TYPE } from '../../../../common/constants';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
@@ -40,6 +40,13 @@ export class PercentileAggField extends AggField implements IESAggField {
     return true;
   }
 
+  getMbFieldName(): string {
+    return this._source.isMvt()
+      ? this.getName() +
+          `.values.${this._percentile}${Number.isInteger(this._percentile) ? '.0' : ''}`
+      : this.getName();
+  }
+
   canValueBeFormatted(): boolean {
     return true;
   }
@@ -57,7 +64,7 @@ export class PercentileAggField extends AggField implements IESAggField {
     }
 
     const suffix = getOrdinalSuffix(this._percentile);
-    return `${this._percentile}${suffix} ${this._source.getAggLabel(
+    return `${this._percentile}${suffix} ${await this._source.getAggLabel(
       this._getAggType(),
       this.getRootName()
     )}`;

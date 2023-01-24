@@ -6,11 +6,11 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -49,6 +49,8 @@ describe('Security UsageCollector', () => {
     sessionIdleTimeoutInMinutes: 480,
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
+    sessionConcurrentSessionsMaxSessions: 0,
+    anonymousCredentialType: undefined,
   };
 
   describe('initialization', () => {
@@ -109,6 +111,8 @@ describe('Security UsageCollector', () => {
       sessionIdleTimeoutInMinutes: 0,
       sessionLifespanInMinutes: 0,
       sessionCleanupInMinutes: 0,
+      sessionConcurrentSessionsMaxSessions: 0,
+      anonymousCredentialType: undefined,
     });
   });
 
@@ -198,6 +202,37 @@ describe('Security UsageCollector', () => {
   });
 
   describe('access agreement', () => {
+    it('reports if the global access agreement message is configured', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          accessAgreement: { message: 'Bar' },
+          authc: {
+            providers: {
+              saml: {
+                saml1: {
+                  realm: 'foo',
+                  order: 1,
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        accessAgreementEnabled: true,
+        enabledAuthProviders: ['saml'],
+      });
+    });
+
     it('reports if the access agreement message is configured for any provider', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
@@ -443,10 +478,15 @@ describe('Security UsageCollector', () => {
 
   describe('session', () => {
     // Note: can't easily test deprecated 'sessionTimeout' value here because of the way that config deprecation renaming works
-    it('reports customized session idleTimeout, lifespan, and cleanupInterval', async () => {
+    it('reports customized session idleTimeout, lifespan, cleanupInterval, and max concurrent sessions', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
-          session: { idleTimeout: '123m', lifespan: '456m', cleanupInterval: '789m' },
+          session: {
+            idleTimeout: '123m',
+            lifespan: '456m',
+            cleanupInterval: '789m',
+            concurrentSessions: { maxSessions: 321 },
+          },
         })
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -462,6 +502,200 @@ describe('Security UsageCollector', () => {
         sessionIdleTimeoutInMinutes: 123,
         sessionLifespanInMinutes: 456,
         sessionCleanupInMinutes: 789,
+        sessionConcurrentSessionsMaxSessions: 321,
+      });
+    });
+  });
+
+  describe('anonymous auth credentials', () => {
+    it('reports anonymous credential of apiKey with id and key as api_key', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 1,
+                  credentials: {
+                    apiKey: { id: 'VuaCfGcBCdbkQm-e5aOx', key: 'ui2lp2axTNmsyakw9tvNnw' },
+                  },
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        enabledAuthProviders: ['anonymous'],
+        anonymousCredentialType: 'api_key',
+      });
+    });
+
+    it('reports anonymous credential of apiKey as api_key', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 1,
+                  credentials: {
+                    apiKey: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw==',
+                  },
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        enabledAuthProviders: ['anonymous'],
+        anonymousCredentialType: 'api_key',
+      });
+    });
+
+    it(`reports anonymous credential of 'elasticsearch_anonymous_user' as elasticsearch_anonymous_user`, async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 1,
+                  credentials: 'elasticsearch_anonymous_user',
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        enabledAuthProviders: ['anonymous'],
+        anonymousCredentialType: 'elasticsearch_anonymous_user',
+      });
+    });
+
+    it('reports anonymous credential of username and password as usernanme_password', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 1,
+                  credentials: {
+                    username: 'anonymous_service_account',
+                    password: 'anonymous_service_account_password',
+                  },
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        enabledAuthProviders: ['anonymous'],
+        anonymousCredentialType: 'username_password',
+      });
+    });
+
+    it('reports lack of anonymous credential as undefined', async () => {
+      const config = createSecurityConfig(ConfigSchema.validate({}));
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        enabledAuthProviders: ['basic'],
+        anonymousCredentialType: undefined,
+      });
+    });
+
+    it('reports the enabled anonymous credential of username and password as usernanme_password', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 1,
+                  enabled: false,
+                  credentials: {
+                    apiKey: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw==',
+                  },
+                },
+                anonymous2: {
+                  order: 2,
+                  credentials: {
+                    username: 'anonymous_service_account',
+                    password: 'anonymous_service_account_password',
+                  },
+                },
+                anonymous3: {
+                  order: 3,
+                  enabled: false,
+                  credentials: {
+                    apiKey: { id: 'VuaCfGcBCdbkQm-e5aOx', key: 'ui2lp2axTNmsyakw9tvNnw' },
+                  },
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        enabledAuthProviders: ['anonymous'],
+        anonymousCredentialType: 'username_password',
       });
     });
   });

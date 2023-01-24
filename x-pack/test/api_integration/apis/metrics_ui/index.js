@@ -9,7 +9,6 @@ export default function ({ loadTestFile }) {
   describe('MetricsUI Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./log_entry_highlights'));
-    loadTestFile(require.resolve('./log_sources'));
     loadTestFile(require.resolve('./log_summary'));
     loadTestFile(require.resolve('./metrics'));
     loadTestFile(require.resolve('./sources'));

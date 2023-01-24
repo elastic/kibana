@@ -3,11 +3,11 @@
 === Test connectors
 
 
-By using Kibana Management UI you can test a newly created Connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
+In *{stack-manage-app} > {connectors-ui}*, you can test a newly created connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
 [role="screenshot"]
 image::user/alerting/images/connector-save-and-test.png[Rule management page with the errors banner]
 
-or by directly opening the proper connector Edit flyout:
+or by directly opening the proper connector edit flyout:
 [role="screenshot"]
 image::user/alerting/images/email-connector-test.png[Rule management page with the errors banner]
 
@@ -15,9 +15,10 @@ image::user/alerting/images/email-connector-test.png[Rule management page with t
 image::user/alerting/images/teams-connector-test.png[Five clauses define the condition to detect]
 
 [float]
-==== experimental[] Troubleshooting Connectors with `kbn-action` tool
+==== experimental[] Troubleshooting connectors with the `kbn-action` tool
 
-Executing an Email action via https://github.com/pmuellr/kbn-action[kbn-action]. In this example, is using a cloud deployment of the stack:
+You can run an email action via https://github.com/pmuellr/kbn-action[kbn-action].
+In this example, it is a Cloud deployment of the {stack}:
 
 [source, txt]
 --------------------------------------------------
@@ -39,11 +40,13 @@ $ kbn-action ls
             "service": null
         },
         "isPreconfigured": false,
+        "isDeprecated": false,
         "referencedByCount": 0
     }
 ]
 --------------------------------------------------
-and then execute this:
+
+You can then run the following test:
 
 [source, txt]
 --------------------------------------------------

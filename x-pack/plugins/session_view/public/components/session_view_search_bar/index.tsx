@@ -4,18 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiSearchBar, EuiPagination } from '@elastic/eui';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { Process } from '../../../common/types/process_tree';
+import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
 
 interface SessionViewSearchBarDeps {
   searchQuery: string;
   setSearchQuery(val: string): void;
-  searchResults: Process[] | null;
-  onProcessSelected(process: Process): void;
+  totalMatches: number;
+  onPrevious: (index: number) => void;
+  onNext: (index: number) => void;
 }
+
+const translatePlaceholder = {
+  placeholder: i18n.translate('xpack.sessionView.searchBar.searchBarKeyPlaceholder', {
+    defaultMessage: 'Find...',
+  }),
+};
+
+const NO_RESULTS = i18n.translate('xpack.sessionView.searchBar.searchBarNoResults', {
+  defaultMessage: 'No results',
+});
 
 /**
  * The main wrapper component for the session view.
@@ -23,10 +34,14 @@ interface SessionViewSearchBarDeps {
 export const SessionViewSearchBar = ({
   searchQuery,
   setSearchQuery,
-  onProcessSelected,
-  searchResults,
+  totalMatches,
+  onPrevious,
+  onNext,
 }: SessionViewSearchBarDeps) => {
-  const styles = useStyles();
+  const showPagination = !!searchQuery && totalMatches !== 0;
+  const noResults = !!searchQuery && totalMatches === 0;
+
+  const styles = useStyles({ hasSearchResults: showPagination });
 
   const [selectedResult, setSelectedResult] = useState(0);
 
@@ -40,28 +55,30 @@ export const SessionViewSearchBar = ({
     }
   };
 
-  useEffect(() => {
-    if (searchResults) {
-      const process = searchResults[selectedResult];
+  const onPageClick = useCallback(
+    (page: number) => {
+      setSelectedResult(page);
 
-      if (process) {
-        onProcessSelected(process);
+      if (page > selectedResult) {
+        onNext(page);
+      } else {
+        onPrevious(page);
       }
-    }
-  }, [searchResults, onProcessSelected, selectedResult]);
-
-  const showPagination = !!searchResults?.length;
+    },
+    [onNext, onPrevious, selectedResult]
+  );
 
   return (
-    <div data-test-subj="sessionView:searchInput" css={{ position: 'relative' }}>
-      <EuiSearchBar query={searchQuery} onChange={onSearch} />
+    <div data-test-subj="sessionView:searchBar" css={styles.searchBar}>
+      <EuiSearchBar query={searchQuery} onChange={onSearch} box={translatePlaceholder} />
+      {noResults && <span css={styles.noResults}>{NO_RESULTS}</span>}
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"
           css={styles.pagination}
-          pageCount={searchResults.length}
+          pageCount={totalMatches}
           activePage={selectedResult}
-          onPageClick={setSelectedResult}
+          onPageClick={onPageClick}
           compressed
         />
       )}

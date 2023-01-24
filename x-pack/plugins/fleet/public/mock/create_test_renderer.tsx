@@ -12,20 +12,27 @@ import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
+import { Router } from 'react-router-dom';
 
-import { themeServiceMock } from 'src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ScopedHistory } from '../../../../../src/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
+
+import { allowedExperimentalValues } from '../../common/experimental_features';
+
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
 import type { UIExtensionsStorage } from '../types';
+import { ExperimentalFeaturesService } from '../services';
 
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
 import { createStartServices } from './fleet_start_services';
 import type { MockedFleetStart, MockedFleetStartServices } from './types';
+
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 /**
@@ -57,18 +64,23 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
   const history = createMemoryHistory({ initialEntries: [basePath] });
+  const mountHistory = new CoreScopedHistory(history, basePath);
+
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
 
   const HookWrapper = memo(({ children }) => {
     return (
       <startServices.i18n.Context>
-        <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+        <Router history={mountHistory}>
+          <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+        </Router>
       </startServices.i18n.Context>
     );
   });
 
   const testRendererMocks: TestRenderer = {
     history,
-    mountHistory: new ScopedHistory(history, basePath),
+    mountHistory,
     startServices,
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
@@ -123,7 +135,10 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   });
   const testRendererMocks: TestRenderer = {
     history: createMemoryHistory(),
-    mountHistory: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
+    mountHistory: new CoreScopedHistory(
+      createMemoryHistory({ initialEntries: [basePath] }),
+      basePath
+    ),
     startServices,
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),

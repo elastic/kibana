@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
@@ -13,7 +13,11 @@ import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
-import { createOrUpdatePreconfiguredOutputs, cleanPreconfiguredOutputs } from './outputs';
+import {
+  createOrUpdatePreconfiguredOutputs,
+  cleanPreconfiguredOutputs,
+  getPreconfiguredOutputFromConfig,
+} from './outputs';
 
 jest.mock('../agent_policy_update');
 jest.mock('../output');
@@ -64,6 +68,31 @@ describe('output preconfiguration', () => {
     });
   });
 
+  it('should generate a preconfigured output if elasticsearch.hosts is set in the config', async () => {
+    expect(
+      getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://elasticsearc:9201'] },
+        },
+      })
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "ca_sha256": undefined,
+          "hosts": Array [
+            "http://elasticsearc:9201",
+          ],
+          "id": "fleet-default-output",
+          "is_default": true,
+          "is_default_monitoring": true,
+          "is_preconfigured": true,
+          "name": "default",
+          "type": "elasticsearch",
+        },
+      ]
+    `);
+  });
+
   it('should create preconfigured output that does not exists', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -75,6 +104,53 @@ describe('output preconfiguration', () => {
         is_default: false,
         is_default_monitoring: false,
         hosts: ['http://test.fr'],
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
+  it('should create a preconfigured output with ca_trusted_fingerprint that does not exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://test.fr'],
+        ca_trusted_fingerprint: 'testfingerprint',
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.create).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ca_trusted_fingerprint: 'testfingerprint',
+      }),
+      expect.anything()
+    );
+    expect(mockedOutputService.update).not.toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
+  it('should create preconfigured logstash output that does not exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'logstash',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['test.fr'],
+        ssl: { certificate: 'test', key: 'test' },
       },
     ]);
 
@@ -160,15 +236,14 @@ describe('output preconfiguration', () => {
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
 
-  it('should not delete default output if preconfigured default output exists and changed', async () => {
+  it('should not update output if preconfigured output exists and did not changed', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
-    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('existing-output-1');
     await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
       {
         id: 'existing-output-1',
-        is_default: true,
+        is_default: false,
         is_default_monitoring: false,
         name: 'Output 1',
         type: 'elasticsearch',
@@ -176,7 +251,6 @@ describe('output preconfiguration', () => {
       },
     ]);
 
-    expect(mockedOutputService.delete).not.toBeCalled();
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();

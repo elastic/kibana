@@ -9,31 +9,35 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsResolveResponse } from 'kibana/server';
-import {
-  CaseResponseRt,
+import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type {
   CaseResponse,
-  CaseResolveResponseRt,
   CaseResolveResponse,
   User,
   AllTagsFindRequest,
+  AllReportersFindRequest,
+  CasesByAlertIDRequest,
+  CasesByAlertId,
+  CaseAttributes,
+  AttachmentTotals,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseResolveResponseRt,
   AllTagsFindRequestRt,
   excess,
   throwErrors,
   AllReportersFindRequestRt,
-  AllReportersFindRequest,
-  CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
-  CasesByAlertId,
   CasesByAlertIdRt,
-  CaseAttributes,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+import type { CaseSavedObject } from '../../common/types';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -59,7 +63,12 @@ export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
 ): Promise<CasesByAlertId> => {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService, attachmentService },
+    logger,
+    authorization,
+    unsecuredSavedObjectsClient,
+  } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -98,6 +107,11 @@ export const getCasesByAlertID = async (
       return [];
     }
 
+    const commentStats = await attachmentService.getCaseCommentStats({
+      unsecuredSavedObjectsClient,
+      caseIds,
+    });
+
     const casesInfo = await caseService.getCases({
       caseIds,
     });
@@ -119,6 +133,10 @@ export const getCasesByAlertID = async (
       validCasesInfo.map((caseInfo) => ({
         id: caseInfo.id,
         title: caseInfo.attributes.title,
+        description: caseInfo.attributes.description,
+        status: caseInfo.attributes.status,
+        createdAt: caseInfo.attributes.created_at,
+        totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
       }))
     );
   } catch (error) {
@@ -131,6 +149,9 @@ export const getCasesByAlertID = async (
     });
   }
 };
+
+const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
+  stats.get(id) ?? { alerts: 0, userComments: 0 };
 
 /**
  * The parameters for retrieving a case
@@ -155,10 +176,14 @@ export const get = async (
   { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
-    const theCase: SavedObject<CaseAttributes> = await caseService.getCase({
+    const theCase: CaseSavedObject = await caseService.getCase({
       id,
     });
 
@@ -205,7 +230,11 @@ export const resolve = async (
   { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const {
@@ -264,7 +293,12 @@ export async function getTags(
   params: AllTagsFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<string[]> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const queryParams = pipe(
@@ -296,7 +330,12 @@ export async function getReporters(
   params: AllReportersFindRequest,
   clientArgs: CasesClientArgs
 ): Promise<User[]> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const queryParams = pipe(

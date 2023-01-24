@@ -5,37 +5,84 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { VisitorBreakdownChart } from '../charts/visitor_breakdown_chart';
+import { EuiLoadingChart } from '@elastic/eui';
+import styled from 'styled-components';
+import {
+  UxLocalUIFilterName,
+  uxLocalUIFilterNames,
+} from '../../../../../common/ux_ui_filter';
+import {
+  VisitorBreakdownChart,
+  VisitorBreakdownMetric,
+} from '../charts/visitor_breakdown_chart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLocalUIFilters } from '../hooks/use_local_uifilters';
+import { getExcludedName } from '../local_uifilters';
+import { useDataView } from '../local_uifilters/use_data_view';
+
+type VisitorBreakdownFieldMap = Record<
+  VisitorBreakdownMetric,
+  UxLocalUIFilterName
+>;
+
+const visitorBreakdownFieldMap: VisitorBreakdownFieldMap = {
+  [VisitorBreakdownMetric.OS_BREAKDOWN]: 'os',
+  [VisitorBreakdownMetric.UA_BREAKDOWN]: 'browser',
+};
+
+const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
+  & {
+    min-height: 100%;
+    min-width: 100%;
+  }
+`;
+
+const vistorBreakdownFilter = {
+  filterNames: uxLocalUIFilterNames.filter((name) =>
+    ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
+  ),
+};
+
+const getInvertedFilterName = (filter: UxLocalUIFilterName, negate: boolean) =>
+  negate ? filter : getExcludedName(filter);
 
 export function VisitorBreakdown() {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();
-
   const { start, end, searchTerm } = urlParams;
+  const { dataView } = useDataView();
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      const { serviceName } = uxUiFilters;
+  const { filters, setFilterValue } = useLocalUIFilters(vistorBreakdownFilter);
 
-      if (start && end && serviceName) {
-        return callApmApi('GET /internal/apm/ux/visitor-breakdown', {
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uxUiFilters),
-              urlQuery: searchTerm,
-            },
-          },
-        });
+  const onFilter = useCallback(
+    (metric: VisitorBreakdownMetric, event: any) => {
+      if (!visitorBreakdownFieldMap[metric]) {
+        return;
       }
-      return Promise.resolve(null);
+
+      const filterValues = event?.data?.map((fdata: any) => fdata.value);
+      const invertedField = getInvertedFilterName(
+        visitorBreakdownFieldMap[metric],
+        event?.negate ?? false
+      );
+      const invertedFieldValues =
+        filters?.find((filter) => filter.name === invertedField)?.value ?? [];
+
+      setFilterValue(
+        invertedField,
+        invertedFieldValues.filter((value) => !filterValues.includes(value))
+      );
+
+      setFilterValue(
+        event?.negate
+          ? getExcludedName(visitorBreakdownFieldMap[metric])
+          : visitorBreakdownFieldMap[metric],
+        filterValues
+      );
     },
-    [end, start, uxUiFilters, searchTerm]
+    [filters, setFilterValue]
   );
 
   return (
@@ -50,20 +97,52 @@ export function VisitorBreakdown() {
             <h4>{I18LABELS.browser}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart
-            options={data?.browsers}
-            loading={status !== 'success'}
-          />
+          {!dataView?.id ? (
+            <EuiLoadingEmbeddable
+              justifyContent="spaceAround"
+              alignItems={'center'}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiLoadingChart size="l" mono />
+              </EuiFlexItem>
+            </EuiLoadingEmbeddable>
+          ) : (
+            <VisitorBreakdownChart
+              dataView={dataView}
+              start={start ?? ''}
+              end={end ?? ''}
+              uiFilters={uxUiFilters}
+              urlQuery={searchTerm}
+              metric={VisitorBreakdownMetric.UA_BREAKDOWN}
+              onFilter={onFilter}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>{I18LABELS.operatingSystem}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <VisitorBreakdownChart
-            options={data?.os}
-            loading={status !== 'success'}
-          />
+          {!dataView?.id ? (
+            <EuiLoadingEmbeddable
+              justifyContent="spaceAround"
+              alignItems={'center'}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiLoadingChart size="l" mono />
+              </EuiFlexItem>
+            </EuiLoadingEmbeddable>
+          ) : (
+            <VisitorBreakdownChart
+              dataView={dataView}
+              start={start ?? ''}
+              end={end ?? ''}
+              uiFilters={uxUiFilters}
+              urlQuery={searchTerm}
+              metric={VisitorBreakdownMetric.OS_BREAKDOWN}
+              onFilter={onFilter}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

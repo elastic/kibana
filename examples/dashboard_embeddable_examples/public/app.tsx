@@ -12,16 +12,16 @@ import { BrowserRouter as Router, Route, RouteComponentProps, withRouter } from 
 
 import {
   EuiPage,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageSideBar,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiSideNav,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import 'brace/mode/json';
-import { AppMountParameters, IUiSettingsClient } from '../../../src/core/public';
-import { DashboardEmbeddableByValue } from './by_value/embeddable';
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
-import { KibanaContextProvider } from '../../../src/plugins/kibana_react/public';
+import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 interface PageDef {
   title: string;
@@ -56,31 +56,19 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
 
 interface Props {
   basename: string;
-  DashboardContainerByValueRenderer: ReturnType<
-    DashboardStart['getDashboardContainerByValueRenderer']
-  >;
   uiSettings: IUiSettingsClient;
 }
 
-const DashboardEmbeddableExplorerApp = ({
-  basename,
-  DashboardContainerByValueRenderer,
-  uiSettings,
-}: Props) => {
+const DashboardEmbeddableExplorerApp = ({ basename, uiSettings }: Props) => {
   const pages: PageDef[] = [
     {
-      title: 'By value dashboard embeddable',
-      id: 'dashboardEmbeddableByValue',
+      title: 'Portable Dashboard basic embeddable example',
+      id: 'portableDashboardEmbeddableBasicExample',
       component: (
-        <DashboardEmbeddableByValue
-          DashboardContainerByValueRenderer={DashboardContainerByValueRenderer}
-        />
+        <EuiTitle>
+          <EuiText>Portable Dashboard embeddable examples coming soon!</EuiText>
+        </EuiTitle>
       ),
-    },
-    {
-      title: 'By ref dashboard embeddable',
-      id: 'dashboardEmbeddableByRef',
-      component: <div>TODO: Not implemented, but coming soon...</div>,
     },
   ];
 

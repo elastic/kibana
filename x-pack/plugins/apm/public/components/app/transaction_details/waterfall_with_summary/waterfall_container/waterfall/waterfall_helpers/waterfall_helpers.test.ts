@@ -18,6 +18,10 @@ import {
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import {
+  WaterfallSpan,
+  WaterfallTransaction,
+} from '../../../../../../../../common/waterfall/typings';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
@@ -128,40 +132,71 @@ describe('waterfall_helpers', () => {
     ];
 
     it('should return full waterfall', () => {
-      const entryTransactionId = 'myTransactionId1';
       const apiResp = {
-        traceDocs: hits,
-        errorDocs,
-        exceedsMax: false,
+        traceItems: {
+          traceDocs: hits,
+          errorDocs,
+          exceedsMax: false,
+          spanLinksCountById: {},
+          traceItemCount: hits.length,
+          maxTraceItems: 5000,
+        },
+        entryTransaction: {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1',
+          },
+          timestamp: { us: 1549324795784006 },
+        } as Transaction,
       };
-      const waterfall = getWaterfall(apiResp, entryTransactionId);
-      const { apiResponse, ...waterfallRest } = waterfall;
+      const waterfall = getWaterfall(apiResp);
 
       expect(waterfall.items.length).toBe(6);
       expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(waterfall.errorItems.length).toBe(1);
       expect(waterfall.getErrorCount('myTransactionId1')).toEqual(1);
-      expect(waterfallRest).toMatchSnapshot();
-      expect(apiResponse).toEqual(apiResp);
     });
 
     it('should return partial waterfall', () => {
-      const entryTransactionId = 'myTransactionId2';
       const apiResp = {
-        traceDocs: hits,
-        errorDocs,
-        exceedsMax: false,
+        traceItems: {
+          traceDocs: hits,
+          errorDocs,
+          exceedsMax: false,
+          spanLinksCountById: {},
+          traceItemCount: hits.length,
+          maxTraceItems: 5000,
+        },
+        entryTransaction: {
+          parent: { id: 'mySpanIdD' },
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: {
+            duration: { us: 8634 },
+            name: 'Api::ProductsController#index',
+            id: 'myTransactionId2',
+            marks: {
+              agent: {
+                domInteractive: 382,
+                domComplete: 383,
+                timeToFirstByte: 14,
+              },
+            },
+          },
+          timestamp: { us: 1549324795823304 },
+        } as unknown as Transaction,
       };
-      const waterfall = getWaterfall(apiResp, entryTransactionId);
-
-      const { apiResponse, ...waterfallRest } = waterfall;
+      const waterfall = getWaterfall(apiResp);
 
       expect(waterfall.items.length).toBe(4);
       expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall.errorItems.length).toBe(0);
       expect(waterfall.getErrorCount('myTransactionId2')).toEqual(0);
-      expect(waterfallRest).toMatchSnapshot();
-      expect(apiResponse).toEqual(apiResp);
     });
     it('should reparent spans', () => {
       const traceItems = [
@@ -230,15 +265,27 @@ describe('waterfall_helpers', () => {
           timestamp: { us: 1549324795785760 },
         } as Span,
       ];
-      const entryTransactionId = 'myTransactionId1';
-      const waterfall = getWaterfall(
-        {
+      const waterfall = getWaterfall({
+        traceItems: {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
+          spanLinksCountById: {},
+          traceItemCount: traceItems.length,
+          maxTraceItems: 5000,
         },
-        entryTransactionId
-      );
+        entryTransaction: {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1',
+          },
+          timestamp: { us: 1549324795784006 },
+        } as Transaction,
+      });
       const getIdAndParentId = (item: IWaterfallItem) => ({
         id: item.id,
         parentId: item.parent?.id,
@@ -336,15 +383,28 @@ describe('waterfall_helpers', () => {
           timestamp: { us: 1549324795785760 },
         } as Span,
       ];
-      const entryTransactionId = 'myTransactionId1';
-      const waterfall = getWaterfall(
-        {
+
+      const waterfall = getWaterfall({
+        traceItems: {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
+          spanLinksCountById: {},
+          traceItemCount: traceItems.length,
+          maxTraceItems: 5000,
         },
-        entryTransactionId
-      );
+        entryTransaction: {
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1',
+          },
+          timestamp: { us: 1549324795784006 },
+        } as Transaction,
+      });
       const getIdAndParentId = (item: IWaterfallItem) => ({
         id: item.id,
         parentId: item.parent?.id,
@@ -404,6 +464,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'span',
@@ -426,6 +490,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'span',
@@ -448,6 +516,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'transaction',
@@ -464,6 +536,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
         {
           docType: 'transaction',
@@ -481,6 +557,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksCount: {
+            linkedChildren: 0,
+            linkedParents: 0,
+          },
         },
       ];
 
@@ -503,7 +583,7 @@ describe('waterfall_helpers', () => {
           doc: {
             transaction: { id: 'a' },
             timestamp: { us: 10 },
-          } as unknown as Transaction,
+          } as unknown as WaterfallTransaction,
         } as IWaterfallSpanOrTransaction,
         {
           docType: 'span',
@@ -515,7 +595,7 @@ describe('waterfall_helpers', () => {
             },
             parent: { id: 'a' },
             timestamp: { us: 20 },
-          } as unknown as Span,
+          } as unknown as WaterfallSpan,
         } as IWaterfallSpanOrTransaction,
       ];
       const childrenByParentId = groupBy(items, (hit) =>

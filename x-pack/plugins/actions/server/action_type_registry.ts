@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
-import { ActionType as CommonActionType } from '../common';
+import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { LicensingPluginSetup } from '../../licensing/server';
 import {
   ExecutorError,
   getActionTypeFeatureUsageName,
@@ -122,20 +122,50 @@ export class ActionTypeRegistry {
         )
       );
     }
+
+    if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
+          defaultMessage:
+            'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
+          values: {
+            connectorTypeId: actionType.id,
+          },
+        })
+      );
+    }
+
+    if (!areValidFeatures(actionType.supportedFeatureIds)) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
+          defaultMessage: 'Invalid feature ids "{ids}" for connector type "{connectorTypeId}".',
+          values: {
+            connectorTypeId: actionType.id,
+            ids: actionType.supportedFeatureIds.join(','),
+          },
+        })
+      );
+    }
+
+    const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
+      actionTypeId: actionType.id,
+      actionTypeMaxAttempts: actionType.maxAttempts,
+    });
+
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        maxAttempts: actionType.maxAttempts || 1,
+        maxAttempts,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }
-          // Don't retry other kinds of errors
-          return false;
+          // Only retry other kinds of errors based on attempts
+          return attempts < maxAttempts;
         },
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, actionType.maxAttempts),
+          this.taskRunnerFactory.create(context, maxAttempts),
       },
     });
     // No need to notify usage on basic action types
@@ -170,16 +200,32 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns a list of registered action types [{ id, name, enabled }]
+   * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
-  public list(): CommonActionType[] {
-    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
-      id: actionTypeId,
-      name: actionType.name,
-      minimumLicenseRequired: actionType.minimumLicenseRequired,
-      enabled: this.isActionTypeEnabled(actionTypeId),
-      enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-      enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-    }));
+  public list(featureId?: string): CommonActionType[] {
+    return Array.from(this.actionTypes)
+      .filter(([_, actionType]) =>
+        featureId ? actionType.supportedFeatureIds.includes(featureId) : true
+      )
+      .map(([actionTypeId, actionType]) => ({
+        id: actionTypeId,
+        name: actionType.name,
+        minimumLicenseRequired: actionType.minimumLicenseRequired,
+        enabled: this.isActionTypeEnabled(actionTypeId),
+        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+        supportedFeatureIds: actionType.supportedFeatureIds,
+      }));
+  }
+
+  /**
+   * Returns the actions configuration utilities
+   */
+  public getUtils(): ActionsConfigurationUtilities {
+    return this.actionsConfigUtils;
+  }
+
+  public getAllTypes(): string[] {
+    return [...this.list().map(({ id }) => id)];
   }
 }

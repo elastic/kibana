@@ -14,13 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
-import { PersistedState } from '../../../../../../visualizations/public';
-import { IInterpreterRenderHandlers } from '../../../../../../expressions/public';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
-import { getPieNames } from './pie_utils';
 import { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
@@ -87,7 +86,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   filter = ({ values: data }: LegendItem, negate: boolean) => {
     this.props.fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data,
         negate,
@@ -160,7 +159,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       if (!data) return [];
       data = data.columns || data.rows || [data];
 
-      labels = type === 'pie' ? getPieNames(data) : this.getSeriesLabels(data);
+      labels = this.getSeriesLabels(data);
     }
 
     this.setFilterableLabels(labels);

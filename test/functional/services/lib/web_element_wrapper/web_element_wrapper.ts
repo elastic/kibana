@@ -10,8 +10,8 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
-import testSubjSelector from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/dev-utils';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import { ToolingLog } from '@kbn/tooling-log';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
@@ -466,6 +466,7 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   public async findByCssSelector(selector: string) {
+    this.logger.debug(`WebElementWrapper.findByCssSelector(${selector})`);
     return await this.retryCall(async function findByCssSelector(wrapper) {
       return wrapper._wrap(
         await wrapper._webElement.findElement(wrapper.By.css(selector)),
@@ -686,17 +687,23 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<void>}
    */
-  public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await this.driver.manage().setTimeouts({ implicit: 1000 });
-    await this.driver.wait(
-      async () => {
-        const found = await this._webElement.findElements(this.By.css(selector));
-        return found.length === 0;
-      },
-      this.timeout,
-      `The element with ${selector} selector was still present after ${this.timeout} sec.`
-    );
-    await this.driver.manage().setTimeouts({ implicit: this.timeout });
+  public async waitForDeletedByCssSelector(
+    selector: string,
+    implicitTimeout = 1000
+  ): Promise<void> {
+    try {
+      await this.driver.manage().setTimeouts({ implicit: implicitTimeout });
+      await this.driver.wait(
+        async () => {
+          const found = await this._webElement.findElements(this.By.css(selector));
+          return found.length === 0;
+        },
+        this.timeout,
+        `The element with ${selector} selector was still present after ${this.timeout} sec.`
+      );
+    } finally {
+      await this.driver.manage().setTimeouts({ implicit: this.timeout });
+    }
   }
 
   /**

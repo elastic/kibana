@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
-import { SavedObjectReference } from 'src/core/types';
+import React from 'react';
+import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
-import { goToSpecifiedPath } from '../../render_app';
+import { TableListView } from '@kbn/content-management-table-list';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
 import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
-  getToasts,
   getCoreChrome,
   getExecutionContext,
   getNavigateToApp,
   getSavedObjectsClient,
-  getSavedObjectsTagging,
-  getSavedObjects,
-  getTheme,
+  getUiSettings,
+  getUsageCollection,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 interface MapItem {
   id: string;
@@ -34,83 +36,59 @@ interface MapItem {
   references?: SavedObjectReference[];
 }
 
-const savedObjectsTagging = getSavedObjectsTagging();
-const searchFilters = savedObjectsTagging
-  ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-  : [];
-
-const tableColumns: Array<EuiBasicTableColumn<any>> = [
-  {
-    field: 'title',
-    name: i18n.translate('xpack.maps.mapListing.titleFieldTitle', {
-      defaultMessage: 'Title',
-    }),
-    sortable: true,
-    render: (field: string, record: MapItem) => (
-      <EuiLink
-        onClick={(e: MouseEvent) => {
-          e.preventDefault();
-          goToSpecifiedPath(getEditPath(record.id));
-        }}
-        data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
-      >
-        {field}
-      </EuiLink>
-    ),
-  },
-  {
-    field: 'description',
-    name: i18n.translate('xpack.maps.mapListing.descriptionFieldTitle', {
-      defaultMessage: 'Description',
-    }),
-    dataType: 'string',
-    sortable: true,
-  },
-];
-if (savedObjectsTagging) {
-  tableColumns.push(savedObjectsTagging.ui.getTableColumnDefinition());
+interface MapUserContent extends UserContentCommonSchema {
+  type: string;
+  attributes: {
+    title: string;
+  };
 }
 
 function navigateToNewMap() {
   const navigateToApp = getNavigateToApp();
+  getUsageCollection()?.reportUiCounter(APP_ID, METRIC_TYPE.CLICK, 'create_maps_vis_editor');
   navigateToApp(APP_ID, {
     path: MAP_PATH,
   });
 }
 
-async function findMaps(searchQuery: string) {
-  let searchTerm = searchQuery;
-  let tagReferences;
+const toTableListViewSavedObject = (
+  savedObject: SimpleSavedObject<MapSavedObjectAttributes>
+): MapUserContent => {
+  return {
+    ...savedObject,
+    updatedAt: savedObject.updatedAt!,
+    attributes: {
+      ...savedObject.attributes,
+      title: savedObject.attributes.title ?? '',
+    },
+  };
+};
 
-  if (savedObjectsTagging) {
-    const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
-      useName: true,
-    });
-    searchTerm = parsed.searchTerm;
-    tagReferences = parsed.tagReferences;
-  }
-
+async function findMaps(
+  searchTerm: string,
+  {
+    references,
+    referencesToExclude,
+  }: {
+    references?: SavedObjectsFindOptionsReference[];
+    referencesToExclude?: SavedObjectsFindOptionsReference[];
+  } = {}
+) {
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
-    perPage: getSavedObjects().settings.getListingLimit(),
+    perPage: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
     page: 1,
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND',
     fields: ['description', 'title'],
-    hasReference: tagReferences,
+    hasReference: references,
+    hasNoReference: referencesToExclude,
   });
 
   return {
     total: resp.total,
-    hits: resp.savedObjects.map((savedObject) => {
-      return {
-        id: savedObject.id,
-        title: savedObject.attributes.title,
-        description: savedObject.attributes.description,
-        references: savedObject.references,
-      };
-    }),
+    hits: resp.savedObjects.map(toTableListViewSavedObject),
   };
 }
 
@@ -121,7 +99,11 @@ async function deleteMaps(items: object[]) {
   await Promise.all(deletions);
 }
 
-export function MapsListView() {
+interface Props {
+  history: ScopedHistory;
+}
+
+export function MapsListView(props: Props) {
   getExecutionContext().set({
     type: 'application',
     page: 'list',
@@ -129,34 +111,30 @@ export function MapsListView() {
   });
 
   const isReadOnly = !getMapsCapabilities().save;
+  const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   getCoreChrome().docTitle.change(getAppTitle());
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
 
   return (
-    <TableListView
+    <TableListView<MapUserContent>
+      id="map"
       headingId="mapsListingPage"
-      rowHeader="title"
       createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
       deleteItems={isReadOnly ? undefined : deleteMaps}
-      tableColumns={tableColumns}
-      listingLimit={getSavedObjects().settings.getListingLimit()}
+      listingLimit={listingLimit}
       initialFilter={''}
-      initialPageSize={getSavedObjects().settings.getPerPage()}
+      initialPageSize={initialPageSize}
       entityName={i18n.translate('xpack.maps.mapListing.entityName', {
         defaultMessage: 'map',
       })}
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      tableCaption={i18n.translate('xpack.maps.mapListing.tableCaption', {
-        defaultMessage: 'Maps',
-      })}
       tableListTitle={getAppTitle()}
-      toastNotifications={getToasts()}
-      searchFilters={searchFilters}
-      theme={getTheme()}
+      onClickTitle={({ id }) => props.history.push(getEditPath(id))}
     />
   );
 }

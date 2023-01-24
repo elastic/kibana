@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, useCallback, useMemo, useState } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSuperSelectOption,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { ConditionEntry, OperatorFieldIds } from '../../../../../../../common/endpoint/types';
+import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
+import { OperatorFieldIds } from '../../../../../../../common/endpoint/types';
 
 import {
   CONDITION_FIELD_DESCRIPTION,
@@ -25,7 +21,7 @@ import {
   ENTRY_PROPERTY_TITLES,
   OPERATOR_TITLES,
 } from '../../translations';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/path_placeholder';
 
 const ConditionEntryCell = memo<{
@@ -46,19 +42,19 @@ ConditionEntryCell.displayName = 'ConditionEntryCell';
 
 export interface ConditionEntryInputProps {
   os: OperatingSystem;
-  entry: ConditionEntry;
+  entry: TrustedAppConditionEntry;
   /** controls if remove button is enabled/disabled */
   isRemoveDisabled?: boolean;
   /** If the labels for each Column in the input row should be shown. Normally set on the first row entry */
   showLabels: boolean;
-  onRemove: (entry: ConditionEntry) => void;
-  onChange: (newEntry: ConditionEntry, oldEntry: ConditionEntry) => void;
+  onRemove: (entry: TrustedAppConditionEntry) => void;
+  onChange: (newEntry: TrustedAppConditionEntry, oldEntry: TrustedAppConditionEntry) => void;
   /**
    * invoked when at least one field in the entry was visited (triggered when `onBlur` DOM event is dispatched)
    * For this component, that will be triggered only when the `value` field is visited, since that is the
    * only one needs user input.
    */
-  onVisited?: (entry: ConditionEntry) => void;
+  onVisited?: (entry: TrustedAppConditionEntry) => void;
   'data-test-subj'?: string;
 }
 
@@ -97,6 +93,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isVisited, setIsVisited] = useState(false);
 
+    const handleVisited = useCallback(() => {
+      onVisited?.(entry);
+
+      if (!isVisited) {
+        setIsVisited(true);
+      }
+    }, [entry, isVisited, onVisited]);
+
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       const getDropdownDisplay = (field: ConditionEntryField) => (
         <>
@@ -112,11 +116,17 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.HASH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.HASH],
           value: ConditionEntryField.HASH,
+          'data-test-subj': getTestId(
+            `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.HASH]}`
+          ),
         },
         {
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.PATH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
+          'data-test-subj': getTestId(
+            `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.PATH]}`
+          ),
         },
         ...(os === OperatingSystem.WINDOWS
           ? [
@@ -124,11 +134,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
                 inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
                 value: ConditionEntryField.SIGNER,
+                'data-test-subj': getTestId(
+                  `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER]}`
+                ),
               },
             ]
           : []),
       ];
-    }, [os]);
+    }, [getTestId, os]);
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),
@@ -136,8 +149,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleFieldUpdate = useCallback(
-      (newField) => onChange({ ...entry, field: newField }, entry),
-      [entry, onChange]
+      (newField) => {
+        onChange({ ...entry, field: newField }, entry);
+
+        if (entry.value) {
+          handleVisited();
+        }
+      },
+      [handleVisited, entry, onChange]
     );
 
     const handleOperatorUpdate = useCallback(
@@ -148,13 +167,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 
     const handleValueOnBlur = useCallback(() => {
-      if (onVisited) {
-        onVisited(entry);
-      }
-      if (!isVisited) {
-        setIsVisited(true);
-      }
-    }, [entry, onVisited, isVisited]);
+      handleVisited();
+    }, [handleVisited]);
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>

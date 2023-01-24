@@ -6,29 +6,32 @@
  * Side Public License, v 1.
  */
 
+import type { PaletteOutput } from '@kbn/coloring';
+import { LayoutDirection, MetricWTrend } from '@elastic/charts';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-  Style,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorMode, CustomPaletteState, PaletteOutput } from '../../../../charts/common';
-import { VisParams, visType, LabelPositionType } from './expression_renderers';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+} from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VisParams, visType } from './expression_renderers';
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export interface MetricArguments {
-  percentageMode: boolean;
-  colorMode: ColorMode;
-  showLabels: boolean;
+  metric: ExpressionValueVisDimension | string;
+  secondaryMetric?: ExpressionValueVisDimension | string;
+  max?: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
+  trendline?: TrendlineResult;
+  subtitle?: string;
+  secondaryPrefix?: string;
+  progressDirection: LayoutDirection;
+  color?: string;
   palette?: PaletteOutput<CustomPaletteState>;
-  font: Style;
-  labelFont: Style;
-  labelPosition: LabelPositionType;
-  metric: Array<ExpressionValueVisDimension | string>;
-  bucket?: ExpressionValueVisDimension | string;
-  colorFullBackground: boolean;
-  autoScale?: boolean;
+  maxCols: number;
+  minTiles?: number;
+  inspectorTableId: string;
 }
 
 export type MetricInput = Datatable;
@@ -44,4 +47,26 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   MetricInput,
   MetricArguments,
   ExpressionValueRender<MetricVisRenderConfig>
+>;
+
+export interface TrendlineArguments {
+  metric: ExpressionValueVisDimension | string;
+  timeField: ExpressionValueVisDimension | string;
+  breakdownBy?: ExpressionValueVisDimension | string;
+  table: Datatable;
+  inspectorTableId: string;
+}
+
+export interface TrendlineResult {
+  type: typeof EXPRESSION_METRIC_TRENDLINE_NAME;
+  trends: Record<string, MetricWTrend['trend']>;
+  inspectorTable: ReturnType<typeof prepareLogTable>;
+  inspectorTableId: string;
+}
+
+export type TrendlineExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_METRIC_TRENDLINE_NAME,
+  Datatable,
+  TrendlineArguments,
+  TrendlineResult
 >;

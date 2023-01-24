@@ -11,7 +11,7 @@ import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from './plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
 interface CreateTestConfigOptions {
@@ -24,12 +24,17 @@ interface CreateTestConfigOptions {
   preconfiguredAlertHistoryEsIndex?: boolean;
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
+  emailDomainsAllowed?: string[];
+  testFiles?: string[];
+  useDedicatedTaskRunner: boolean;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
+  '.opsgenie',
   '.pagerduty',
   '.swimlane',
   '.server-log',
@@ -39,7 +44,11 @@ const enabledActionTypes = [
   '.jira',
   '.resilient',
   '.slack',
+  '.tines',
   '.webhook',
+  '.xmatters',
+  'test.sub-action-connector',
+  'test.sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -49,6 +58,7 @@ const enabledActionTypes = [
   'test.no-attempts-rate-limit',
   'test.throw',
   'test.excluded',
+  'test.capped',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -60,6 +70,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
+    emailDomainsAllowed = undefined,
+    testFiles = undefined,
+    useDedicatedTaskRunner,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -74,10 +87,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
     // Find all folders in ./plugins since we treat all them as plugin folder
-    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter((file) =>
-      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
-    );
+    const pluginDir = path.resolve(__dirname, 'plugins');
+    const pluginPaths = fs
+      .readdirSync(pluginDir)
+      .map((n) => path.resolve(pluginDir, n))
+      .filter((p) => fs.statSync(p));
 
     const proxyPort =
       process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
@@ -130,8 +144,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
+    const emailSettings = emailDomainsAllowed
+      ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
+      : [];
+
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
@@ -150,6 +168,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        useDedicatedTaskRunner,
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
@@ -161,13 +180,19 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
-          '--xpack.alerting.minimumScheduleInterval="1s"',
+          '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          '--xpack.alerting.rules.run.alerts.max=20',
+          `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
+            { id: 'test.capped', max: '1' },
+          ])}`,
+          `--xpack.alerting.enableFrameworkAlerts=true`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
           `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
+          ...emailSettings,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
@@ -175,11 +200,46 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-test-email': {
+              actionTypeId: '.email',
+              name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
             'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
               secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+              },
+            },
+            'my-deprecated-servicenow': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+                usesTableApi: true,
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
+              },
+            },
+            'my-deprecated-servicenow-default': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
               },
             },
             'custom-system-abc-connector': {
@@ -246,10 +306,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...plugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
-          ),
+          ...pluginPaths.map((p) => `--plugin-path=${p}`),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

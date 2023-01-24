@@ -1,0 +1,195 @@
+{
+  "id": "@kbn/core-execution-context-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-server-internal",
+        "id": "def-common.ExecutionContextService",
+        "type": "Class",
+        "tags": [],
+        "label": "ExecutionContextService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-execution-context-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextServerInternalPluginApi",
+            "section": "def-common.ExecutionContextService",
+            "text": "ExecutionContextService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "IExecutionContext",
+          ", ",
+          "IExecutionContext",
+          ">"
+        ],
+        "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-execution-context-server-internal",
+            "id": "def-common.ExecutionContextService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-execution-context-server-internal",
+                "id": "def-common.ExecutionContextService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-server-internal",
+            "id": "def-common.ExecutionContextService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => ",
+              "IExecutionContext"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-server-internal",
+            "id": "def-common.ExecutionContextService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              "IExecutionContext"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-server-internal",
+            "id": "def-common.ExecutionContextService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-server-internal",
+        "id": "def-common.executionContextConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "executionContextConfig",
+        "description": [],
+        "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-execution-context-server-internal",
+            "id": "def-common.executionContextConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-execution-context-server-internal",
+            "id": "def-common.executionContextConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<{ enabled: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean>; }>"
+            ],
+            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

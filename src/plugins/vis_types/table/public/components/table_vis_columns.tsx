@@ -10,7 +10,11 @@ import React from 'react';
 import { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn, DatatableRow, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import {
+  DatatableColumn,
+  DatatableRow,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { FormattedColumns, TableVisUiState } from '../types';
 
 interface FilterCellData {
@@ -30,11 +34,12 @@ export const createGridColumns = (
   rows: DatatableRow[],
   formattedColumns: FormattedColumns,
   columnsWidth: TableVisUiState['colWidth'],
-  fireEvent: IInterpreterRenderHandlers['event']
+  fireEvent: IInterpreterRenderHandlers['event'],
+  closeCellPopover?: Function
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data: [
           {
@@ -55,9 +60,10 @@ export const createGridColumns = (
     const formattedColumn = formattedColumns[col.id];
     const cellActions = formattedColumn.filterable
       ? [
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            // incoming data might change and put the current page out of bounds - check whether row actually exists
+            const rowValue = rows[rowIndex]?.[columnId];
+            if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
             const filterForText = i18n.translate(
@@ -77,24 +83,23 @@ export const createGridColumns = (
             );
 
             return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterForAriaLabel}
-                  data-test-subj="tbvChartCell__filterForCellValue"
-                  onClick={() => {
-                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                    closePopover?.();
-                  }}
-                  iconType="plusInCircle"
-                >
-                  {filterForText}
-                </Component>
-              )
+              <Component
+                aria-label={filterForAriaLabel}
+                data-test-subj="tbvChartCell__filterForCellValue"
+                onClick={() => {
+                  onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
+                  closeCellPopover?.();
+                }}
+                iconType="plusInCircle"
+              >
+                {filterForText}
+              </Component>
             );
           },
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            // incoming data might change and put the current page out of bounds - check whether row actually exists
+            const rowValue = rows[rowIndex]?.[columnId];
+            if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
             const filterOutText = i18n.translate(
@@ -114,18 +119,16 @@ export const createGridColumns = (
             );
 
             return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterOutAriaLabel}
-                  onClick={() => {
-                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                    closePopover?.();
-                  }}
-                  iconType="minusInCircle"
-                >
-                  {filterOutText}
-                </Component>
-              )
+              <Component
+                aria-label={filterOutAriaLabel}
+                onClick={() => {
+                  onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
+                  closeCellPopover?.();
+                }}
+                iconType="minusInCircle"
+              >
+                {filterOutText}
+              </Component>
             );
           },
         ]

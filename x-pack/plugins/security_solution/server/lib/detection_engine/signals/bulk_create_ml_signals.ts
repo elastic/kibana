@@ -8,27 +8,27 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
-import { AnomalyResults, Anomaly } from '../../machine_learning';
-import { BuildRuleMessage } from './rule_messages';
-import { BulkCreate, WrapHits } from './types';
-import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { Anomaly } from '../../machine_learning';
+import type { BulkCreate, WrapHits } from './types';
+import type { CompleteRule, MachineLearningRuleParams } from '../rule_schema';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
+import type { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import { createEnrichEventsFunction } from './enrichments';
 
 interface BulkCreateMlSignalsParams {
-  someResult: AnomalyResults;
+  anomalyHits: Array<estypes.SearchHit<Anomaly>>;
   completeRule: CompleteRule<MachineLearningRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   id: string;
   signalsIndex: string;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
 }
@@ -64,32 +64,30 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
 };
 
 const transformAnomalyResultsToEcs = (
-  results: AnomalyResults
-): estypes.SearchResponse<EcsAnomaly> => {
-  const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
+  results: Array<estypes.SearchHit<Anomaly>>
+): Array<estypes.SearchHit<EcsAnomaly>> => {
+  return results.map(({ _source, ...rest }) => ({
     ...rest,
     _source: transformAnomalyFieldsToEcs(
       // @ts-expect-error @elastic/elasticsearch _source is optional
       _source
     ),
   }));
-
-  // @ts-expect-error Anomaly is not assignable to EcsAnomaly
-  return {
-    ...results,
-    hits: {
-      ...results.hits,
-      hits: transformedHits,
-    },
-  };
 };
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
-  const anomalyResults = params.someResult;
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+  const anomalyResults = params.anomalyHits;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  const wrappedDocs = params.wrapHits(ecsResults.hits.hits, buildReasonMessageForMlAlert);
-  return params.bulkCreate(wrappedDocs);
+  const wrappedDocs = params.wrapHits(ecsResults, buildReasonMessageForMlAlert);
+  return params.bulkCreate(
+    wrappedDocs,
+    undefined,
+    createEnrichEventsFunction({
+      services: params.services,
+      logger: params.ruleExecutionLogger,
+    })
+  );
 };

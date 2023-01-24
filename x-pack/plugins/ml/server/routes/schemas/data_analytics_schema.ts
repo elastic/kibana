@@ -73,6 +73,7 @@ export const analyticsQuerySchema = schema.object({
    * Analytics Query
    */
   excludeGenerated: schema.maybe(schema.boolean()),
+  size: schema.maybe(schema.number()),
 });
 
 export const deleteDataFrameAnalyticsJobSchema = schema.object({

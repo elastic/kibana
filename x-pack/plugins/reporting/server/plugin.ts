@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
-import { ReportingCore } from './';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
@@ -50,17 +56,24 @@ export class ReportingPlugin
       }
     });
 
+    // Usage counter for reporting telemetry
+    const usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
+
     reportingCore.pluginSetup({
       logger: this.logger,
       status,
       basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
+      usageCounter,
+      docLinks: core.docLinks,
       ...plugins,
     });
 
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+
+    // Routes
     registerRoutes(reportingCore, this.logger);
 
     // async background setup

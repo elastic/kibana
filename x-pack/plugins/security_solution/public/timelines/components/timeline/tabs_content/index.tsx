@@ -11,12 +11,9 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  RowRenderer,
-  TimelineTabs,
-  TimelineId,
-  TimelineType,
-} from '../../../../../common/types/timeline';
+import type { SessionViewConfig } from '../../../../../common/types';
+import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -26,7 +23,7 @@ import {
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
-import { CellValueElementProps } from '../cell_rendering';
+import type { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -36,14 +33,17 @@ import {
   getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
+import { useLicense } from '../../../../common/hooks/use_license';
 
-const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisible = false }) => ({
-  style: {
-    display: $isVisible ? 'flex' : 'none',
-  },
-}))<{ $isVisible: boolean }>`
+const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
+  ({ $isVisible = false, isOverflowYScroll = false }) => ({
+    style: {
+      display: $isVisible ? 'flex' : 'none',
+      overflow: isOverflowYScroll ? 'hidden scroll' : 'hidden',
+    },
+  })
+)<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
   flex: 1;
-  overflow: hidden;
 `;
 
 const QueryTabContent = lazy(() => import('../query_tab_content'));
@@ -51,6 +51,7 @@ const EqlTabContent = lazy(() => import('../eql_tab_content'));
 const GraphTabContent = lazy(() => import('../graph_tab_content'));
 const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
+const SessionTabContent = lazy(() => import('../session_tab_content'));
 
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -59,6 +60,7 @@ interface BasicTimelineTab {
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
+  sessionViewConfig?: SessionViewConfig | null;
   timelineDescription: string;
 }
 
@@ -106,6 +108,13 @@ const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => 
 ));
 NotesTab.displayName = 'NotesTab';
 
+const SessionTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+  <Suspense fallback={<EuiLoadingContent lines={10} />}>
+    <SessionTabContent timelineId={timelineId} />
+  </Suspense>
+));
+SessionTab.displayName = 'SessionTab';
+
 const PinnedTab: React.FC<{
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -132,6 +141,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             return <GraphTab timelineId={timelineId} />;
           case TimelineTabs.notes:
             return <NotesTab timelineId={timelineId} />;
+          case TimelineTabs.session:
+            return <SessionTab timelineId={timelineId} />;
           default:
             return null;
         }
@@ -140,7 +151,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     );
 
     const isGraphOrNotesTabs = useMemo(
-      () => [TimelineTabs.graph, TimelineTabs.notes].includes(activeTimelineTab),
+      () =>
+        [TimelineTabs.graph, TimelineTabs.notes, TimelineTabs.session].includes(activeTimelineTab),
       [activeTimelineTab]
     );
 
@@ -185,6 +197,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         )}
         <HideShowContainer
           $isVisible={isGraphOrNotesTabs}
+          isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
           data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
@@ -197,7 +210,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
 
 const CountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const StyledEuiTab = styled(EuiTab)`
@@ -223,6 +236,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineFullScreen,
   timelineType,
   graphEventId,
+  sessionViewConfig,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -247,6 +261,8 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   );
   const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
 
+  const isEnterprisePlus = useLicense().isEnterprise();
+
   const allTimelineNoteIds = useMemo(() => {
     const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
       (acc, v) => [...acc, ...v],
@@ -262,33 +278,36 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     [appNotes, allTimelineNoteIds, timelineDescription]
   );
 
+  const setActiveTab = useCallback(
+    (tab: TimelineTabs) => {
+      dispatch(timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: tab }));
+    },
+    [dispatch, timelineId]
+  );
+
   const setQueryAsActiveTab = useCallback(() => {
-    dispatch(
-      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
-    );
-  }, [dispatch, timelineId]);
+    setActiveTab(TimelineTabs.query);
+  }, [setActiveTab]);
 
   const setEqlAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.eql }));
-  }, [dispatch, timelineId]);
+    setActiveTab(TimelineTabs.eql);
+  }, [setActiveTab]);
 
   const setGraphAsActiveTab = useCallback(() => {
-    dispatch(
-      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
-    );
-  }, [dispatch, timelineId]);
+    setActiveTab(TimelineTabs.graph);
+  }, [setActiveTab]);
 
   const setNotesAsActiveTab = useCallback(() => {
-    dispatch(
-      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
-    );
-  }, [dispatch, timelineId]);
+    setActiveTab(TimelineTabs.notes);
+  }, [setActiveTab]);
 
   const setPinnedAsActiveTab = useCallback(() => {
-    dispatch(
-      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
-    );
-  }, [dispatch, timelineId]);
+    setActiveTab(TimelineTabs.pinned);
+  }, [setActiveTab]);
+
+  const setSessionAsActiveTab = useCallback(() => {
+    setActiveTab(TimelineTabs.session);
+  }, [setActiveTab]);
 
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {
@@ -331,15 +350,26 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             {i18n.ANALYZER_TAB}
           </EuiTab>
+          {isEnterprisePlus && (
+            <EuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.session}`}
+              onClick={setSessionAsActiveTab}
+              isSelected={activeTab === TimelineTabs.session}
+              disabled={sessionViewConfig === null}
+              key={TimelineTabs.session}
+            >
+              {i18n.SESSION_TAB}
+            </EuiTab>
+          )}
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={false}
+            disabled={timelineType === TimelineType.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && (
+            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
               <div>
                 <CountBadge>{numberOfNotes}</CountBadge>
               </div>
@@ -348,11 +378,12 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
+            disabled={timelineType === TimelineType.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
             <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && (
+            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
               <div>
                 <CountBadge>{numberOfPinnedEvents}</CountBadge>
               </div>

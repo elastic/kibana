@@ -9,12 +9,13 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ISearchSource } from 'src/plugins/data/public';
-import { DatatableColumnType } from 'src/plugins/expressions/common';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
-import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
@@ -28,7 +29,8 @@ type PostFlightRequestFn<TAggConfig> = (
   searchSource: ISearchSource,
   inspectorRequestAdapter?: RequestAdapter,
   abortSignal?: AbortSignal,
-  searchSessionId?: string
+  searchSessionId?: string,
+  disableShardFailureWarning?: boolean
 ) => Promise<estypes.SearchResponse<any>>;
 
 export interface AggTypeConfig<
@@ -207,7 +209,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {SerializedFieldFormat}
    */
-  getSerializedFormat: (agg: TAggConfig) => SerializedFieldFormat;
+  getSerializedFormat: <T extends FieldFormatParams>(agg: TAggConfig) => SerializedFieldFormat<T>;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

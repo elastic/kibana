@@ -8,10 +8,14 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { DeprecationsDetails } from 'kibana/server';
+import { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
 import { checkIlmMigrationStatus } from './check_ilm_migration_status';
 
-function deprecationError(title: string, error: Error): DeprecationsDetails[] {
+function deprecationError(
+  title: string,
+  error: Error,
+  docLinks: DocLinksServiceSetup
+): DeprecationsDetails[] {
   if (getErrorStatusCode(error) === 403) {
     return [
       {
@@ -22,7 +26,7 @@ function deprecationError(title: string, error: Error): DeprecationsDetails[] {
           'xpack.reporting.deprecations.reportingRole.forbiddenErrorMessage',
           { defaultMessage: 'You do not have enough permissions to fix this deprecation.' }
         ),
-        documentationUrl: `https://www.elastic.co/guide/en/kibana/current/xpack-security.html#_required_permissions_7`,
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${docLinks.version}/xpack-security.html#_required_permissions_7`,
         correctiveActions: {
           manualSteps: [
             i18n.translate(

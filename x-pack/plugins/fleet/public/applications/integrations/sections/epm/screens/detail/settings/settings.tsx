@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { Observable } from 'rxjs';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
@@ -39,17 +39,19 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
   AUTO_UPGRADE_POLICIES_PACKAGES,
+  SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
 import { InstallButton } from './install_button';
+import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 
 const SettingsTitleCell = styled.td`
-  padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
-  padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
+  padding-right: ${(props) => props.theme.eui.euiSizeXL};
+  padding-bottom: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const NoteLabel = () => (
@@ -97,12 +99,12 @@ interface Props {
 }
 
 export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
-  const { name, title, removable, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
+  const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
@@ -252,7 +254,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs" data-test-subj="installedVersion">
+                      <EuiTitle size="xs" data-test-subj="epmSettings.installedVersionTitle">
                         <span>{installedVersion}</span>
                       </EuiTitle>
                     </td>
@@ -265,7 +267,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs" data-test-subj="latestVersion">
+                      <EuiTitle size="xs" data-test-subj="epmSettings.latestVersionTitle">
                         <span>{latestVersion}</span>
                       </EuiTitle>
                     </td>
@@ -342,9 +344,9 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                   </EuiFlexGroup>
                 </div>
               ) : (
-                removable && (
-                  <>
-                    <div>
+                <>
+                  <EuiFlexGroup direction="column" gutterSize="m">
+                    <EuiFlexItem>
                       <EuiTitle>
                         <h4>
                           <FormattedMessage
@@ -353,56 +355,63 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                           />
                         </h4>
                       </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <p>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageUninstallDescription"
-                          defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FormattedMessage
+                        id="xpack.fleet.integrations.settings.packageUninstallDescription"
+                        defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <div>
+                        <UninstallButton
+                          {...packageInfo}
+                          numOfAssets={numOfAssets}
+                          latestVersion={latestVersion}
+                          disabled={!packagePoliciesData || packageHasUsages}
                         />
-                      </p>
-                    </div>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <p>
-                          <UninstallButton
-                            {...packageInfo}
-                            numOfAssets={numOfAssets}
-                            latestVersion={latestVersion}
-                            disabled={!packagePoliciesData || packageHasUsages}
+                      </div>
+                    </EuiFlexItem>
+                    {packageHasUsages && (
+                      <EuiFlexItem>
+                        <EuiText color="subdued" size="s">
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
+                            defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
+                            values={{
+                              title,
+                              strongNote: <NoteLabel />,
+                            }}
                           />
-                        </p>
+                        </EuiText>
                       </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                )
-              )}
-              {packageHasUsages && removable === true && (
-                <p>
-                  <EuiText color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                      defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
-                      values={{
-                        title,
-                        strongNote: <NoteLabel />,
-                      }}
-                    />
-                  </EuiText>
-                </p>
-              )}
-              {removable === false && (
-                <p>
-                  <EuiText color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
-                      defaultMessage="{strongNote} The {title} integration is a system integration and cannot be removed."
-                      values={{
-                        title,
-                        strongNote: <NoteLabel />,
-                      }}
-                    />
-                  </EuiText>
-                </p>
+                    )}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="l" />
+                  <EuiFlexGroup direction="column" gutterSize="m">
+                    <EuiFlexItem>
+                      <EuiTitle>
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageReinstallTitle"
+                            defaultMessage="Reinstall"
+                          />
+                        </h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FormattedMessage
+                        id="xpack.fleet.integrations.settings.packageReinstallDescription"
+                        defaultMessage="Reinstall Kibana and Elasticsearch assets for this integration."
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <div>
+                        <ReinstallButton {...packageInfo} />
+                      </div>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               )}
             </div>
           )}

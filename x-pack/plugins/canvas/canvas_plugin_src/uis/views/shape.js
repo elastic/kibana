@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAvailableShapes } from '../../../../../../src/plugins/expression_shape/common';
+import { getAvailableShapes } from '@kbn/expression-shape-plugin/common';
 import { ViewStrings } from '../../../i18n';
 
 const { Shape: strings } = ViewStrings;

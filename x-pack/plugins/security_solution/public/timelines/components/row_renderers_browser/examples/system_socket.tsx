@@ -9,7 +9,7 @@ import React from 'react';
 
 import { ACCEPTED_A_CONNECTION_VIA } from '../../timeline/body/renderers/system/translations';
 import { createSocketRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
-import { mockEndgameIpv4ConnectionAcceptEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+import { demoEndgameIpv4ConnectionAcceptEvent } from '../../../../common/demo_data/endgame_ecs/ipv4';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemSocketExampleComponent: React.FC = () => {
@@ -20,10 +20,9 @@ const SystemSocketExampleComponent: React.FC = () => {
   return (
     <>
       {systemSocketRowRenderer.renderRow({
-        browserFields: {},
-        data: mockEndgameIpv4ConnectionAcceptEvent,
+        data: demoEndgameIpv4ConnectionAcceptEvent,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

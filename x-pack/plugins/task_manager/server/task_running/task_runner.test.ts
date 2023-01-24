@@ -9,7 +9,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '../task_running';
+import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '.';
 import {
   TaskEvent,
   asTaskRunEvent,
@@ -18,16 +18,17 @@ import {
   TaskPersistence,
 } from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
-import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
+  calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
@@ -179,6 +180,7 @@ describe('TaskManagerRunner', () => {
           schedule: {
             interval: `${intervalMinutes}m`,
           },
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -198,6 +200,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.retryAt!.getTime()).toEqual(
         instance.startedAt!.getTime() + intervalMinutes * 60 * 1000
       );
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('calculates retryAt by default timout when it exceeds the schedule of a recurring task', async () => {
@@ -211,6 +214,7 @@ describe('TaskManagerRunner', () => {
           schedule: {
             interval: `${intervalSeconds}s`,
           },
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -228,6 +232,7 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.retryAt!.getTime()).toEqual(instance.startedAt!.getTime() + 5 * 60 * 1000);
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('calculates retryAt by timeout if it exceeds the schedule when running a recurring task', async () => {
@@ -242,6 +247,7 @@ describe('TaskManagerRunner', () => {
           schedule: {
             interval: `${intervalSeconds}s`,
           },
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -262,6 +268,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.retryAt!.getTime()).toEqual(
         instance.startedAt!.getTime() + timeoutMinutes * 60 * 1000
       );
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
@@ -271,6 +278,7 @@ describe('TaskManagerRunner', () => {
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
+          enabled: true,
           attempts: initialAttempts,
           schedule: undefined,
         },
@@ -293,9 +301,9 @@ describe('TaskManagerRunner', () => {
       expect(instance.attempts).toEqual(initialAttempts + 1);
       expect(instance.status).toBe('running');
       expect(instance.startedAt!.getTime()).toEqual(Date.now());
-      expect(instance.retryAt!.getTime()).toEqual(
-        minutesFromNow((initialAttempts + 1) * 5).getTime() + timeoutMinutes * 60 * 1000
-      );
+      const expectedRunAt = Date.now() + calculateDelay(initialAttempts + 1);
+      expect(instance.retryAt!.getTime()).toEqual(expectedRunAt + timeoutMinutes * 60 * 1000);
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('uses getRetry (returning date) to set retryAt when defined', async () => {
@@ -309,6 +317,7 @@ describe('TaskManagerRunner', () => {
           id,
           attempts: initialAttempts,
           schedule: undefined,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -331,6 +340,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.retryAt!.getTime()).toEqual(
         new Date(nextRetry.getTime() + timeoutMinutes * 60 * 1000).getTime()
       );
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('it returns false when markTaskAsRunning fails due to VERSION_CONFLICT_STATUS', async () => {
@@ -539,6 +549,7 @@ describe('TaskManagerRunner', () => {
           id,
           attempts: initialAttempts,
           schedule: undefined,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -558,11 +569,12 @@ describe('TaskManagerRunner', () => {
       sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
       const instance = store.update.mock.calls[0][0];
 
-      const attemptDelay = (initialAttempts + 1) * 5 * 60 * 1000;
+      const attemptDelay = calculateDelay(initialAttempts + 1);
       const timeoutDelay = timeoutMinutes * 60 * 1000;
       expect(instance.retryAt!.getTime()).toEqual(
         new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
       );
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('uses getRetry (returning false) to set retryAt when defined', async () => {
@@ -575,6 +587,7 @@ describe('TaskManagerRunner', () => {
           id,
           attempts: initialAttempts,
           schedule: undefined,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -596,6 +609,7 @@ describe('TaskManagerRunner', () => {
 
       expect(instance.retryAt!).toBeNull();
       expect(instance.status).toBe('running');
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('bypasses getRetry (returning false) of a recurring task to set retryAt when defined', async () => {
@@ -609,6 +623,7 @@ describe('TaskManagerRunner', () => {
           attempts: initialAttempts,
           schedule: { interval: '1m' },
           startedAt: new Date(),
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -630,6 +645,7 @@ describe('TaskManagerRunner', () => {
 
       const timeoutDelay = timeoutMinutes * 60 * 1000;
       expect(instance.retryAt!.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
+      expect(instance.enabled).not.toBeDefined();
     });
 
     describe('TaskEvents', () => {
@@ -719,8 +735,8 @@ describe('TaskManagerRunner', () => {
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
-    test('makes calls to APM as expected when task fails', async () => {
-      const { runner } = await readyToRunStageSetup({
+    test('makes calls to APM and logs errors as expected when task fails', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
         instance: {
           params: { a: 'b' },
           state: { hey: 'there' },
@@ -741,6 +757,11 @@ describe('TaskManagerRunner', () => {
         childOf: 'apmTraceparent',
       });
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+      const loggerCall = logger.error.mock.calls[0][0];
+      const loggerMeta = logger.error.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(`"Task bar \\"foo\\" failed: Error: rar"`);
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed']);
+      expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
@@ -776,6 +797,7 @@ describe('TaskManagerRunner', () => {
           attempts: initialAttempts,
           params: { a: 'b' },
           state: { hey: 'there' },
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -795,9 +817,11 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.id).toEqual(id);
-      expect(instance.runAt.getTime()).toEqual(minutesFromNow(initialAttempts * 5).getTime());
+      const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
+      expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
       expect(instance.params).toEqual({ a: 'b' });
       expect(instance.state).toEqual({ hey: 'there' });
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('reschedules tasks that have an schedule', async () => {
@@ -806,6 +830,7 @@ describe('TaskManagerRunner', () => {
           schedule: { interval: '10m' },
           status: TaskStatus.Running,
           startedAt: new Date(),
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -826,6 +851,7 @@ describe('TaskManagerRunner', () => {
 
       expect(instance.runAt.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
       expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('expiration returns time after which timeout will have elapsed from start', async () => {
@@ -946,6 +972,7 @@ describe('TaskManagerRunner', () => {
           schedule: { interval: '20m' },
           status: TaskStatus.Running,
           startedAt: new Date(),
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -963,6 +990,7 @@ describe('TaskManagerRunner', () => {
 
       const instance = store.update.mock.calls[0][0];
       expect(instance.status).toBe('failed');
+      expect(instance.enabled).not.toBeDefined();
 
       expect(onTaskEvent).toHaveBeenCalledWith(
         withAnyTiming(
@@ -1087,6 +1115,7 @@ describe('TaskManagerRunner', () => {
         instance: {
           id,
           attempts: initialAttempts,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -1108,6 +1137,7 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('uses getRetry function (returning true) on error when defined', async () => {
@@ -1119,6 +1149,7 @@ describe('TaskManagerRunner', () => {
         instance: {
           id,
           attempts: initialAttempts,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -1139,8 +1170,9 @@ describe('TaskManagerRunner', () => {
       sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
-      const expectedRunAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
+      const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
       expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('uses getRetry function (returning false) on error when defined', async () => {
@@ -1152,6 +1184,7 @@ describe('TaskManagerRunner', () => {
         instance: {
           id,
           attempts: initialAttempts,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -1173,6 +1206,7 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.status).toBe('failed');
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('bypasses getRetry function (returning false) on error of a recurring task', async () => {
@@ -1186,6 +1220,7 @@ describe('TaskManagerRunner', () => {
           attempts: initialAttempts,
           schedule: { interval: '1m' },
           startedAt: new Date(),
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -1209,6 +1244,7 @@ describe('TaskManagerRunner', () => {
       const nextIntervalDelay = 60000; // 1m
       const expectedRunAt = new Date(Date.now() + nextIntervalDelay);
       expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test('Fails non-recurring task when maxAttempts reached', async () => {
@@ -1219,6 +1255,7 @@ describe('TaskManagerRunner', () => {
           id,
           attempts: initialAttempts,
           schedule: undefined,
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -1241,6 +1278,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.status).toEqual('failed');
       expect(instance.retryAt!).toBeNull();
       expect(instance.runAt.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(instance.enabled).not.toBeDefined();
     });
 
     test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
@@ -1253,6 +1291,7 @@ describe('TaskManagerRunner', () => {
           attempts: initialAttempts,
           schedule: { interval: `${intervalSeconds}s` },
           startedAt: new Date(),
+          enabled: true,
         },
         definitions: {
           bar: {
@@ -1276,6 +1315,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.runAt.getTime()).toEqual(
         new Date(Date.now() + intervalSeconds * 1000).getTime()
       );
+      expect(instance.enabled).not.toBeDefined();
     });
 
     describe('TaskEvents', () => {
@@ -1445,6 +1485,7 @@ describe('TaskManagerRunner', () => {
           instance: {
             id,
             startedAt: new Date(),
+            enabled: true,
           },
           definitions: {
             bar: {
@@ -1463,6 +1504,7 @@ describe('TaskManagerRunner', () => {
 
         const instance = store.update.mock.calls[0][0];
         expect(instance.status).toBe('failed');
+        expect(instance.enabled).not.toBeDefined();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -1517,6 +1559,54 @@ describe('TaskManagerRunner', () => {
         `Skipping reschedule for task bar \"${id}\" due to the task expiring`
       );
     });
+
+    test('Prints debug logs on task start/end', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
+
+    test('Prints debug logs on task start/end even if it throws error', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new Error();
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
   });
 
   interface TestOpts {
@@ -1528,7 +1618,11 @@ describe('TaskManagerRunner', () => {
   function withAnyTiming(taskRun: TaskRun) {
     return {
       ...taskRun,
-      timing: { start: expect.any(Number), stop: expect.any(Number) },
+      timing: {
+        start: expect.any(Number),
+        stop: expect.any(Number),
+        eventLoopBlockMs: expect.any(Number),
+      },
     };
   }
 
@@ -1590,6 +1684,10 @@ describe('TaskManagerRunner', () => {
       onTaskEvent: opts.onTaskEvent,
       executionContext,
       usageCounter,
+      eventLoopDelayConfig: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

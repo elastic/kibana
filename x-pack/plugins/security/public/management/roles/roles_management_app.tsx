@@ -9,14 +9,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Route, Router, useParams } from 'react-router-dom';
 
+import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
-import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../../common/licensing';
 import {
   Breadcrumb,
@@ -24,6 +21,7 @@ import {
   createBreadcrumbsChangeHandler,
 } from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -44,7 +42,7 @@ export const rolesManagementApp = Object.freeze({
       title,
       async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
-          [startServices, { data, features, spaces }],
+          [startServices, { dataViews, features, spaces }],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -108,7 +106,7 @@ export const rolesManagementApp = Object.freeze({
                 license={license}
                 docLinks={docLinks}
                 uiCapabilities={application.capabilities}
-                dataViews={data.dataViews}
+                dataViews={dataViews}
                 history={history}
                 spacesApiUi={spacesApiUi}
               />
@@ -121,6 +119,12 @@ export const rolesManagementApp = Object.freeze({
             <i18nStart.Context>
               <KibanaThemeProvider theme$={theme$}>
                 <Router history={history}>
+                  <ReadonlyBadge
+                    featureId="roles"
+                    tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
+                      defaultMessage: 'Unable to create or edit roles',
+                    })}
+                  />
                   <BreadcrumbsProvider
                     onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
                   >
@@ -130,6 +134,7 @@ export const rolesManagementApp = Object.freeze({
                           notifications={notifications}
                           rolesAPIClient={rolesAPIClient}
                           history={history}
+                          readOnly={!startServices.application.capabilities.roles.save}
                         />
                       </Route>
                       <Route path="/edit/:roleName?">

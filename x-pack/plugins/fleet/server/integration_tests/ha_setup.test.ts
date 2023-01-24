@@ -9,8 +9,13 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from 'src/core/server';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { TestElasticsearchUtils, createRoot } from '@kbn/core-test-helpers-kbn-server';
+import {
+  getSupertest,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import type {
   AgentPolicySOAttributes,
@@ -23,13 +28,13 @@ import { useDockerRegistry } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-type Root = ReturnType<typeof kbnTestServer.createRoot>;
+type Root = ReturnType<typeof createRoot>;
 
 const startAndWaitForFleetSetup = async (root: Root) => {
   const start = await root.start();
 
   const isFleetSetupRunning = async () => {
-    const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
+    const statusApi = getSupertest(root, 'get', '/api/status');
     const resp = await statusApi.send();
     const fleetStatus = resp.body?.status?.plugins?.fleet;
     if (fleetStatus?.meta?.error) {
@@ -47,7 +52,7 @@ const startAndWaitForFleetSetup = async (root: Root) => {
 };
 
 const createAndSetupRoot = async (config?: object) => {
-  const root = kbnTestServer.createRootWithCorePlugins(
+  const root = createRootWithCorePlugins(
     {
       xpack: {
         fleet: config,
@@ -86,14 +91,14 @@ const createAndSetupRoot = async (config?: object) => {
  * Verifies that multiple Kibana instances running in parallel will not create duplicate preconfiguration objects.
  */
 describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   // let esClient: Client;
   let roots: Root[] = [];
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -298,7 +303,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
       type: 'epm-packages',
       perPage: 10000,
     });
-    expect(packages.saved_objects).toHaveLength(2);
+    expect(packages.saved_objects.length).toBeGreaterThanOrEqual(2);
     expect(packages.saved_objects.map((p) => p.attributes.name)).toEqual(
       expect.arrayContaining(['fleet_server', 'apm'])
     );

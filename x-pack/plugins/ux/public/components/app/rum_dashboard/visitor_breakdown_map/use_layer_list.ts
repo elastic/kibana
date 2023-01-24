@@ -15,11 +15,12 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-} from '../../../../../../maps/common';
+} from '@kbn/maps-plugin/common';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
@@ -32,7 +33,6 @@ import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern
 const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
-  indexPatternTitle: 'apm-*',
   term: 'client.geo.country_iso_code',
   metrics: [
     {
@@ -50,7 +50,6 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
-  indexPatternTitle: 'apm-*',
   term: 'client.geo.region_iso_code',
   metrics: [{ type: AGG_TYPE.AVG, field: 'transaction.duration.us' }],
   whereQuery: {
@@ -120,6 +119,18 @@ export function useLayerList() {
           options: { orientation: 0 },
         },
         labelText: { type: STYLE_TYPE.STATIC, options: { value: '' } },
+        labelPosition: {
+          options: {
+            position: LABEL_POSITIONS.CENTER,
+          },
+        },
+        labelZoomRange: {
+          options: {
+            useLayerZoomRange: true,
+            minZoom: 0,
+            maxZoom: 24,
+          },
+        },
         labelColor: {
           type: STYLE_TYPE.STATIC,
           options: { color: '#000000' },

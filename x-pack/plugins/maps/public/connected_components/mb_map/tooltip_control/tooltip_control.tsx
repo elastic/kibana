@@ -7,34 +7,29 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   LngLat,
   Map as MbMap,
-  MapboxGeoJSONFeature,
+  MapGeoJSONFeature,
   MapMouseEvent,
-  Point as MbPoint,
+  MapSourceDataEvent,
+  Point2D,
+  PointLike,
 } from '@kbn/mapbox-gl';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
-import {
-  GEOMETRY_FILTER_ACTION,
-  TooltipFeature,
-  TooltipFeatureAction,
-  TooltipState,
-} from '../../../../common/descriptor_types';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
+import { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
-import { FeatureGeometryFilterForm } from './features_tooltip';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,
-  targetFeature: MapboxGeoJSONFeature
+  targetFeature: MapGeoJSONFeature
 ): [number, number] {
   let popupAnchorLocation: [number, number] = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
   if (targetFeature.geometry.type === 'Point') {
@@ -69,20 +64,65 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
+  updateOpenTooltips: (openTooltips: TooltipState[]) => void;
 }
 
 export class TooltipControl extends Component<Props, {}> {
+  private _isMapRemoved = false;
+
   componentDidMount() {
     this.props.mbMap.on('mouseout', this._onMouseout);
     this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.on('click', this._lockTooltip);
+    this.props.mbMap.on('remove', this._setIsMapRemoved);
+    this.props.mbMap.on('sourcedata', this._onSourceData);
   }
 
   componentWillUnmount() {
     this.props.mbMap.off('mouseout', this._onMouseout);
     this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.off('click', this._lockTooltip);
+    this.props.mbMap.off('remove', this._setIsMapRemoved);
+    this.props.mbMap.off('sourcedata', this._onSourceData);
   }
+
+  _setIsMapRemoved = () => {
+    this._isMapRemoved = true;
+  };
+
+  _onSourceData = (e: MapSourceDataEvent) => {
+    if (
+      e.sourceId &&
+      e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
+      e.dataType === 'source' &&
+      (e.source.type === 'vector' || e.source.type === 'geojson')
+    ) {
+      // map features changed, update tooltip state to match new map state.
+      this._updateOpentooltips();
+    }
+  };
+
+  _updateOpentooltips = _.debounce(() => {
+    if (this.props.openTooltips.length === 0) {
+      return;
+    }
+
+    const openTooltips = this.props.openTooltips
+      .map((tooltipState) => {
+        const mbFeatures = this._getMbFeaturesUnderPointer(
+          this.props.mbMap.project(tooltipState.location)
+        );
+        return {
+          ...tooltipState,
+          features: this._getTooltipFeatures(mbFeatures, tooltipState.isLocked, tooltipState.id),
+        };
+      })
+      .filter((tooltipState) => {
+        return tooltipState.features.length > 0;
+      });
+
+    this.props.updateOpenTooltips(openTooltips);
+  }, 300);
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();
@@ -126,70 +166,8 @@ export class TooltipControl extends Component<Props, {}> {
     }) as IVectorLayer;
   }
 
-  _loadPreIndexedShape = async ({
-    layerId,
-    featureId,
-  }: {
-    layerId: string;
-    featureId?: string | number;
-  }) => {
-    const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer || typeof featureId === 'undefined') {
-      return null;
-    }
-
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return null;
-    }
-
-    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
-  };
-
-  _getFeatureActions({
-    layerId,
-    featureId,
-    tooltipId,
-  }: {
-    layerId: string;
-    featureId?: string | number;
-    tooltipId: string;
-  }): TooltipFeatureAction[] {
-    const actions = [];
-
-    const geometry = this._getFeatureGeometry({ layerId, featureId });
-    const isPolygon =
-      geometry &&
-      (geometry.type === GEO_JSON_TYPE.POLYGON || geometry.type === GEO_JSON_TYPE.MULTI_POLYGON);
-    if (isPolygon && this.props.geoFieldNames.length && this.props.addFilters) {
-      actions.push({
-        label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
-          defaultMessage: 'Filter by geometry',
-        }),
-        id: GEOMETRY_FILTER_ACTION as typeof GEOMETRY_FILTER_ACTION,
-        form: (
-          <FeatureGeometryFilterForm
-            onClose={() => {
-              this.props.closeOnClickTooltip(tooltipId);
-            }}
-            geometry={geometry!}
-            geoFieldNames={this.props.geoFieldNames}
-            addFilters={this.props.addFilters}
-            getFilterActions={this.props.getFilterActions}
-            getActionContext={this.props.getActionContext}
-            loadPreIndexedShape={async () => {
-              return this._loadPreIndexedShape({ layerId, featureId });
-            }}
-          />
-        ),
-      });
-    }
-
-    return actions;
-  }
-
   _getTooltipFeatures(
-    mbFeatures: MapboxGeoJSONFeature[],
+    mbFeatures: MapGeoJSONFeature[],
     isLocked: boolean,
     tooltipId: string
   ): TooltipFeature[] {
@@ -200,30 +178,44 @@ export class TooltipControl extends Component<Props, {}> {
     for (let i = 0; i < mbFeatures.length; i++) {
       const mbFeature = mbFeatures[i];
       const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
-      if (!layer) {
-        break;
+      if (!layer || !layer.canShowTooltip() || layer.areTooltipsDisabled()) {
+        continue;
       }
 
       const featureId = layer.getFeatureId(mbFeature);
+      if (featureId === undefined) {
+        continue;
+      }
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
         const uniqueFeature = uniqueFeatures[j];
         if (featureId === uniqueFeature.id && layerId === uniqueFeature.layerId) {
           match = true;
-          break;
+          continue;
         }
       }
       if (!match) {
-        // "tags" (aka properties) are optional in .mvt tiles.
-        // It's not entirely clear how mapbox-gl handles those.
-        // - As null value (as defined in https://tools.ietf.org/html/rfc7946#section-3.2)
-        // - As undefined value
-        // - As empty object literal
-        // To avoid ambiguity, normalize properties to empty object literal.
-        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
-        const actions: TooltipFeatureAction[] = isLocked
-          ? this._getFeatureActions({ layerId, featureId, tooltipId })
+        const mbProperties = {
+          ...(mbFeature.properties ? mbFeature.properties : {}),
+          ...(mbFeature.state ? mbFeature.state : {}),
+        };
+        const actions = isLocked
+          ? layer.getSource().getFeatureActions({
+              addFilters: this.props.addFilters,
+              featureId: featureId + '',
+              geoFieldNames: this.props.geoFieldNames,
+              getFilterActions: this.props.getFilterActions,
+              getActionContext: this.props.getActionContext,
+              getGeojsonGeometry: () => {
+                const geojsonFeature = layer.getFeatureById(featureId);
+                return geojsonFeature ? geojsonFeature.geometry : null;
+              },
+              mbFeature,
+              onClose: () => {
+                this.props.closeOnClickTooltip(tooltipId);
+              },
+            })
           : [];
 
         const hasActions = isLocked && actions.length;
@@ -259,7 +251,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const isLocked = true;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -273,6 +265,11 @@ export class TooltipControl extends Component<Props, {}> {
   };
 
   _updateHoverTooltipState = _.debounce((e: MapMouseEvent) => {
+    if (this._isMapRemoved) {
+      // ignore debounced events after mbMap.remove is called.
+      return;
+    }
+
     if (this.props.filterModeActive || this.props.hasLockedTooltips || this.props.drawModeActive) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;
@@ -296,7 +293,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
 
     const isLocked = false;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -330,7 +327,7 @@ export class TooltipControl extends Component<Props, {}> {
     });
   }
 
-  _getMbFeaturesUnderPointer(mbLngLatPoint: MbPoint) {
+  _getMbFeaturesUnderPointer(mbLngLatPoint: Point2D) {
     if (!this.props.mbMap) {
       return [];
     }
@@ -346,7 +343,7 @@ export class TooltipControl extends Component<Props, {}> {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING,
       },
-    ] as [MbPoint, MbPoint];
+    ] as [PointLike, PointLike];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbLayerIds,
     });

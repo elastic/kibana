@@ -30,17 +30,16 @@ instead be:
 "@kbn/i18n": "link:../../kibana/packages/kbn-i18n"
 ```
 
-How all of this works is described in more detail in the
-[`@kbn/pm` docs](./kbn-pm#how-it-works).
+then run `yarn kbn bootstrap` from the plugin directory.
 
 ## Creating a new package
 
-Create a new sub-folder. The name of the folder should mirror the `name` in the
-package's `package.json`. E.g. if the name is `@kbn/i18n` the folder name
-should be `kbn-i18n`.
+Run the following command from the root of the Kibana repo:
 
-All new packages should use the `@kbn` namespace, and should be marked with
-`"private": true`.
+```
+node scripts/generate package @kbn/<PACKAGE_NAME> --web --owner @elastic/<TEAM_NAME>
+```
+
 
 ## Unit tests for a package
 

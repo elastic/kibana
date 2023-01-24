@@ -6,12 +6,12 @@
  */
 
 import { merge, omit, chunk, isEmpty } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { IEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { IEvent } from '../../../../plugins/event_log/server';
-import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Event Log public API', () => {
     before(async () => {
@@ -32,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     for (const namespace of [undefined, 'namespace-a']) {
@@ -40,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`namespace: ${namespaceName}`, () => {
         it('should allow querying for events by Saved Object', async () => {
-          const id = uuid.v4();
+          const id = uuidv4();
 
           const expectedEvents = [fakeEvent(namespace, id), fakeEvent(namespace, id)];
 
@@ -60,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should support pagination for events', async () => {
-          const id = uuid.v4();
+          const id = uuidv4();
 
           const expectedEvents = await logFakeEvents(namespace, id, 6);
 
@@ -90,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should support sorting by event end', async () => {
-          const id = uuid.v4();
+          const id = uuidv4();
 
           const expectedEvents = await logFakeEvents(namespace, id, 6);
 
@@ -107,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should support date ranges for events', async () => {
-          const id = uuid.v4();
+          const id = uuidv4();
 
           // write a document that shouldn't be found in the inclusive date range search
           const firstEvent = fakeEvent(namespace, id);
