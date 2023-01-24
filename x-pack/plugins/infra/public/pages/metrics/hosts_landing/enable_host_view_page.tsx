@@ -10,6 +10,7 @@ import { EuiPageTemplate, EuiImage, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsPageTemplate } from '../page_template';
 import hostsLandingBeta from './hosts_landing_beta.svg';
 import { ExperimentalBadge } from '../hosts/components/experimental_badge';
@@ -20,6 +21,13 @@ interface Props {
 
 export const EnableHostViewPage = ({ actions }: Props) => {
   const backgroundColor = useEuiBackgroundColor('subdued');
+
+  useTrackPageview({ app: 'infra_metrics', path: 'hosts_feature_enable_landing_page' });
+  useTrackPageview({
+    app: 'infra_metrics',
+    path: 'hosts_feature_enable_landing_page',
+    delay: 15000,
+  });
 
   return (
     <MetricsPageTemplate isEmptyState>
