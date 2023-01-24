@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
-import { cspRuleMetadataSchemaV840, cspRuleMetadataSchemaV870 } from './csp_rule_metadata';
+import {
+  cspRuleTemplateMetadataSchemaV840,
+  cspRuleTemplateMetadataSchemaV870,
+} from './csp_rule_template_metadata';
 
 export const cspRuleTemplateSchemaV830 = rt.object({
   audit: rt.string(),
@@ -29,12 +32,12 @@ export const cspRuleTemplateSchemaV830 = rt.object({
 
 export const cspRuleTemplateSchemaV840 = rt.object({
   enabled: rt.boolean(),
-  metadata: cspRuleMetadataSchemaV840,
+  metadata: cspRuleTemplateMetadataSchemaV840,
   muted: rt.boolean(),
 });
 
 export const cspRuleTemplateSchemaV870 = rt.object({
-  metadata: cspRuleMetadataSchemaV870,
+  metadata: cspRuleTemplateMetadataSchemaV870,
 });
 
 export type CspRuleTemplateV830 = TypeOf<typeof cspRuleTemplateSchemaV830>;
