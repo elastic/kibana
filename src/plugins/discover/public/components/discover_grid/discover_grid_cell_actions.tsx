@@ -110,8 +110,8 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
     >
-      {i18n.translate('discover.grid.copyButton', {
-        defaultMessage: 'Copy',
+      {i18n.translate('discover.grid.copyCellValueButton', {
+        defaultMessage: 'Copy value',
       })}
     </Component>
   );

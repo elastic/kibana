@@ -133,7 +133,6 @@ function buildEuiGridColumn({
       ],
     },
     cellActions: dataViewField ? buildCellActions(dataViewField, onFilter) : [],
-    visibleCellActions: 3,
   };
 
   if (column.id === dataView.timeFieldName) {

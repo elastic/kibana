@@ -81,7 +81,6 @@ describe('Discover grid columns', function () {
           "id": "extension",
           "isSortable": false,
           "schema": "string",
-          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -129,7 +128,6 @@ describe('Discover grid columns', function () {
           "id": "message",
           "isSortable": false,
           "schema": "string",
-          "visibleCellActions": 3,
         },
       ]
     `);
@@ -199,7 +197,6 @@ describe('Discover grid columns', function () {
           "id": "extension",
           "isSortable": false,
           "schema": "string",
-          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -244,7 +241,6 @@ describe('Discover grid columns', function () {
           "id": "message",
           "isSortable": false,
           "schema": "string",
-          "visibleCellActions": 3,
         },
       ]
     `);
@@ -333,7 +329,6 @@ describe('Discover grid columns', function () {
           "initialWidth": 210,
           "isSortable": true,
           "schema": "datetime",
-          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -383,7 +378,6 @@ describe('Discover grid columns', function () {
           "id": "extension",
           "isSortable": false,
           "schema": "string",
-          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -431,7 +425,6 @@ describe('Discover grid columns', function () {
           "id": "message",
           "isSortable": false,
           "schema": "string",
-          "visibleCellActions": 3,
         },
       ]
     `);
