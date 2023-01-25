@@ -144,6 +144,19 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('has correct transform function selected');
           await transform.wizard.assertSelectedTransformFunction('pivot');
 
+          await transform.testExecution.logTestStep(
+            `sets the date picker to the default '15 minutes ago'`
+          );
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
+          await transform.datePicker.openSuperDatePicker();
+          await transform.datePicker.quickSelect(10, 'y');
+
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
 
