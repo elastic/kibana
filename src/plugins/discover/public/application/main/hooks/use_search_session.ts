@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect } from 'react';
-import { History } from 'history';
+import { useEffect } from 'react';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import {
   createSearchSessionRestorationDataProvider,
   DiscoverStateContainer,
@@ -18,27 +16,14 @@ import { DiscoverServices } from '../../../build_services';
 
 export function useSearchSession({
   services,
-  history,
   stateContainer,
   savedSearch,
 }: {
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-  history: History;
   savedSearch: SavedSearch;
 }) {
   const { data, capabilities } = services;
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = useMemo(
-    () =>
-      new DiscoverSearchSessionManager({
-        history,
-        session: data.search.session,
-      }),
-    [data.search.session, history]
-  );
 
   useEffect(() => {
     data.search.session.enableStorage(
@@ -58,6 +43,4 @@ export function useSearchSession({
       }
     );
   }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
-
-  return searchSessionManager;
 }

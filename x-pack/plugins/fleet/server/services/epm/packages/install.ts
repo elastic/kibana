@@ -15,10 +15,13 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
+
+import { uniqBy } from 'lodash';
 
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
@@ -285,10 +288,12 @@ async function installPackageFromRegistry({
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
+  prerelease = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
-  const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
+  const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
+  let pkgVersion = version;
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
@@ -310,12 +315,22 @@ async function installPackageFromRegistry({
       installType,
     });
 
-    // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
+    const queryLatest = () =>
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
-        prerelease: isPackagePrerelease(pkgVersion), // fetching latest GA version if the package to install is GA, so that it is allowed to install
-      }),
+        prerelease: prerelease === true || isPackagePrerelease(pkgVersion), // fetching latest GA version if the package to install is GA, so that it is allowed to install
+      });
+
+    let latestPkg;
+    // fetching latest package first to set the version
+    if (!pkgVersion) {
+      latestPkg = await queryLatest();
+      pkgVersion = latestPkg.version;
+    }
+
+    // get latest package version and requested version in parallel for performance
+    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
+      latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,
       }),
@@ -576,7 +591,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const bundledPackages = await getBundledPackages();
 
   if (args.installSource === 'registry') {
-    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError } = args;
+    const { pkgkey, force, ignoreConstraints, spaceId, neverIgnoreVerificationError, prerelease } =
+      args;
 
     const matchingBundledPackage = bundledPackages.find(
       (pkg) => Registry.pkgToPkgKey(pkg) === pkgkey
@@ -608,6 +624,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       force,
       neverIgnoreVerificationError,
       ignoreConstraints,
+      prerelease,
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -783,15 +800,10 @@ export const updateEsAssetReferences = async (
     return true;
   });
 
-  const deduplicatedAssets =
-    [...withAssetsRemoved, ...assetsToAdd].reduce((acc, currentAsset) => {
-      const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
-      if (!foundAsset) {
-        return acc.concat([currentAsset]);
-      } else {
-        return acc;
-      }
-    }, [] as EsAssetReference[]) || [];
+  const deduplicatedAssets = uniqBy(
+    [...withAssetsRemoved, ...assetsToAdd],
+    ({ type, id }) => `${type}-${id}`
+  );
 
   const {
     attributes: { installed_es: updatedAssets },
@@ -817,6 +829,49 @@ export const updateEsAssetReferences = async (
     );
 
   return updatedAssets ?? [];
+};
+/**
+ * Utility function for adding assets the installed_es field of a package
+ * uses optimistic concurrency control to prevent missed updates
+ */
+export const optimisticallyAddEsAssetReferences = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  assetsToAdd: EsAssetReference[]
+): Promise<EsAssetReference[]> => {
+  const addEsAssets = async () => {
+    const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+
+    const installedEs = so.attributes.installed_es ?? [];
+
+    const deduplicatedAssets = uniqBy(
+      [...installedEs, ...assetsToAdd],
+      ({ type, id }) => `${type}-${id}`
+    );
+
+    const {
+      attributes: { installed_es: updatedAssets },
+    } = await savedObjectsClient.update<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName,
+      {
+        installed_es: deduplicatedAssets,
+      },
+      {
+        version: so.version,
+      }
+    );
+
+    return updatedAssets ?? [];
+  };
+
+  const onlyRetryConflictErrors = (err: Error) => {
+    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
+      throw err;
+    }
+  };
+
+  return pRetry(addEsAssets, { retries: 10, onFailedAttempt: onlyRetryConflictErrors });
 };
 
 export async function ensurePackagesCompletedInstall(
@@ -896,15 +951,31 @@ export async function installIndexTemplatesAndPipelines({
   // conditions on updating the installed_es field at the same time
   // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
   // cleanup in the case that a single asset fails to install.
-  const newEsReferences = await updateEsAssetReferences(
-    savedObjectsClient,
-    packageInfo.name,
-    esReferences,
-    {
-      assetsToRemove: onlyForDataStreams ? [] : preparedIndexTemplates.assetsToRemove,
-      assetsToAdd: [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd],
-    }
-  );
+  let newEsReferences: EsAssetReference[] = [];
+
+  if (onlyForDataStreams) {
+    // if onlyForDataStreams is present that means we are in create package policy flow
+    // not install flow, meaning we do not have a lock on the installation SO
+    // so we need to use optimistic concurrency control
+    newEsReferences = await optimisticallyAddEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
+    );
+  } else {
+    newEsReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      esReferences,
+      {
+        assetsToRemove: preparedIndexTemplates.assetsToRemove,
+        assetsToAdd: [
+          ...preparedIngestPipelines.assetsToAdd,
+          ...preparedIndexTemplates.assetsToAdd,
+        ],
+      }
+    );
+  }
 
   // Install index templates and ingest pipelines in parallel since they typically take the longest
   const [installedTemplates] = await Promise.all([

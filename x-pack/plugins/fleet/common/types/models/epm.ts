@@ -289,6 +289,8 @@ export interface CategorySummaryItem {
   id: CategoryId;
   title: string;
   count: number;
+  parent_id?: string;
+  parent_title?: string;
 }
 
 export type RequirementsByServiceName = PackageSpecManifest['conditions'];
@@ -357,9 +359,14 @@ export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
+  'index_template.data_stream'?: RegistryDataStreamProperties;
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series';
+}
+
+export interface RegistryDataStreamProperties {
+  hidden?: boolean;
 }
 
 export interface RegistryDataStreamPrivileges {
