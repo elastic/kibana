@@ -9,6 +9,7 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +24,6 @@ import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiContextMenuItemProps,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -381,7 +381,6 @@ const SUMMARY_OF_ALERTS = i18n.translate(
   { defaultMessage: 'Summary of alerts' }
 );
 
-// This code would be cleaner using euiStyled, but importing that pushes this plugin over the bundle size limit
-const SummaryContextMenuOption: React.FC<EuiContextMenuItemProps & { id: string }> = (...props) => (
-  <EuiContextMenuItem style={{ minWidth: '300px' }} {...props} />
-);
+const SummaryContextMenuOption = euiStyled(EuiContextMenuItem)`
+  min-width: 300px;
+`;
