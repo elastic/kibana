@@ -47,11 +47,42 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.kibanaBranch",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaBranch",
+            "description": [
+              "\nThe current Kibana branch. e.g. 'main'"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.kibanaVersion",
             "type": "string",
             "tags": [],
             "label": "kibanaVersion",
-            "description": [],
+            "description": [
+              "\nThe current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.prebuiltRulesPackageVersion",
+            "type": "string",
+            "tags": [],
+            "label": "prebuiltRulesPackageVersion",
+            "description": [
+              "\nFor internal use. Specify which version of the Detection Rules fleet package to install\nwhen upgrading rules. If not provided, the latest compatible package will be installed,\nor if running from a dev environment or -SNAPSHOT build, the latest pre-release package\nwill be used (if fleet is available or not within an airgapped environment).\n\nNote: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`\nhook when navigating to a Security Solution page. The package version specified in\n`fleet_packages.json` in project root will always be installed first on Kibana start if\nthe package is not already installed."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1933,54 +1964,6 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getScopedFleetServices",
-            "type": "Function",
-            "tags": [],
-            "label": "getScopedFleetServices",
-            "description": [],
-            "signature": [
-              "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => ",
-              "EndpointScopedFleetServicesInterface"
-            ],
-            "path": "x-pack/plugins/security_solution/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-server.SecuritySolutionApiRequestHandlerContext.getScopedFleetServices.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "req",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "x-pack/plugins/security_solution/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getQueryRuleAdditionalOptions",
             "type": "Object",
             "tags": [],
@@ -2007,7 +1990,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
           "ExperimentalFeatures",
           "; }"
         ],

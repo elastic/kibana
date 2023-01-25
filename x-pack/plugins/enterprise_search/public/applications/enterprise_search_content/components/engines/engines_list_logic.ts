@@ -28,34 +28,40 @@ import {
 
 import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
 
+interface EuiBasicTableOnChange {
+  page: { index: number };
+}
+
 type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeDeleteEngineModal(): void;
-  deleteError: DeleteEnginesApiLogicActions['apiError'];
+  closeEngineCreate(): void;
   deleteEngine: DeleteEnginesApiLogicActions['makeRequest'];
+  deleteError: DeleteEnginesApiLogicActions['apiError'];
   deleteSuccess: DeleteEnginesApiLogicActions['apiSuccess'];
 
-  fetchEngines({ meta, searchQuery }: { meta: Meta; searchQuery?: string }): {
-    meta: Meta;
-    searchQuery?: string;
-  };
+  fetchEngines(): void;
 
+  onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
   openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
-  onPaginate(pageNumber: number): { pageNumber: number };
+  openEngineCreate(): void;
+  setSearchQuery(searchQuery: string): { searchQuery: string };
 };
 interface EngineListValues {
+  createEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchEngine | null;
   deleteModalEngineName: string;
   deleteStatus: typeof DeleteEngineAPILogic.values.status;
-  isLoading: boolean;
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
+  isLoading: boolean;
   meta: Meta;
   parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
+  searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;
 }
 
@@ -76,15 +82,22 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   },
   actions: {
     closeDeleteEngineModal: true,
-    fetchEngines: ({ meta, searchQuery }) => ({
-      meta,
-      searchQuery,
-    }),
+    closeEngineCreate: true,
+    fetchEngines: true,
+    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
     openDeleteEngineModal: (engine) => ({ engine }),
-    onPaginate: (pageNumber) => ({ pageNumber }),
+    openEngineCreate: true,
+    setSearchQuery: (searchQuery: string) => ({ searchQuery }),
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
+    createEngineFlyoutOpen: [
+      false,
+      {
+        closeEngineCreate: () => false,
+        openEngineCreate: () => true,
+      },
+    ],
     deleteModalEngine: [
       null,
       {
@@ -109,6 +122,16 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
           ...state,
           meta: updateMetaPageIndex(state.meta, pageNumber),
         }),
+        setSearchQuery: (state, { searchQuery }) => ({
+          ...state,
+          searchQuery: searchQuery ? searchQuery : undefined,
+        }),
+      },
+    ],
+    searchQuery: [
+      '',
+      {
+        setSearchQuery: (_, { searchQuery }) => searchQuery,
       },
     ],
   }),
@@ -120,7 +143,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     ],
     isLoading: [
       () => [selectors.status],
-      (status: EngineListValues['status']) => [Status.LOADING].includes(status),
+      (status: EngineListValues['status']) => [Status.LOADING, Status.IDLE].includes(status),
     ],
     results: [() => [selectors.data], (data) => data?.results ?? []],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
@@ -128,10 +151,10 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   listeners: ({ actions, values }) => ({
     deleteSuccess: () => {
       actions.closeDeleteEngineModal();
-      actions.fetchEngines(values.parameters);
+      actions.fetchEngines();
     },
-    fetchEngines: async (input) => {
-      actions.makeRequest(input);
+    fetchEngines: async () => {
+      actions.makeRequest(values.parameters);
     },
   }),
 });

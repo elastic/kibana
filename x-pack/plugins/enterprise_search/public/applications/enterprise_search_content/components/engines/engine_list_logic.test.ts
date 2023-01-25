@@ -18,16 +18,18 @@ import { EnginesListLogic } from './engines_list_logic';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
+  createEngineFlyoutOpen: false,
   data: undefined,
   deleteModalEngine: null,
   deleteModalEngineName: '',
   deleteStatus: Status.IDLE,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
-  isLoading: false,
+  isLoading: true,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
   results: [],
+  searchQuery: '',
   status: Status.IDLE,
 };
 
@@ -71,21 +73,39 @@ describe('EnginesListLogic', () => {
     describe('onPaginate', () => {
       it('updates meta with newPageIndex', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        // test below code when pagination is ready
-        // EnginesListLogic.actions.onPaginate(1);
-        // expect(EnginesListLogic.values).toEqual({
-        //   ...DEFAULT_VALUES,
-        //   meta: {
-        //     ...DEFAULT_META,
-        //     from: 1,
-        //   },
-        //   parameters: {
-        //     meta: {
-        //       ...DEFAULT_META,
-        //       from: 1,
-        //     },
-        //   },
-        // });
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 1 } });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            ...DEFAULT_META,
+            from: 10,
+          },
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+              from: 10,
+            },
+          },
+        });
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 0 } });
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+
+        EnginesListLogic.actions.onPaginate({ page: { index: 3 } });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          meta: {
+            ...DEFAULT_META,
+            from: 30,
+          },
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+              from: 30,
+            },
+          },
+        });
       });
     });
     describe('closeDeleteEngineModal', () => {
@@ -128,6 +148,7 @@ describe('EnginesListLogic', () => {
             meta: newPageMeta,
             // searchQuery: 'k',
           },
+          isLoading: false,
           meta: newPageMeta,
           parameters: {
             meta: newPageMeta,
@@ -177,15 +198,13 @@ describe('EnginesListLogic', () => {
       EnginesListLogic.actions.deleteSuccess({ engineName: results[0].name });
 
       expect(mockFlashMessageHelpers.flashSuccessToast).toHaveBeenCalledTimes(1);
-      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith(
-        EnginesListLogic.values.parameters
-      );
+      expect(EnginesListLogic.actions.fetchEngines).toHaveBeenCalledWith();
       expect(EnginesListLogic.actions.closeDeleteEngineModal).toHaveBeenCalled();
     });
     it('call makeRequest on fetchEngines', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       EnginesListLogic.actions.makeRequest = jest.fn();
-      EnginesListLogic.actions.fetchEngines({ meta: DEFAULT_META });
+      EnginesListLogic.actions.fetchEngines();
       await nextTick();
       expect(EnginesListLogic.actions.makeRequest).toHaveBeenCalledWith({
         meta: DEFAULT_META,
@@ -206,6 +225,7 @@ describe('EnginesListLogic', () => {
             results,
             meta: DEFAULT_META,
           },
+          isLoading: false,
           meta: DEFAULT_META,
           parameters: {
             meta: DEFAULT_META,

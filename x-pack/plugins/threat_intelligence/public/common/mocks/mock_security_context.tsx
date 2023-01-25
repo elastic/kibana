@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { NamedExoticComponent } from 'react';
+import { BlockListFlyoutProps, BlockListFormProps } from '../../types';
 import { SecuritySolutionPluginContext } from '../..';
 
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
@@ -18,7 +19,10 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     ({ children }) =>
       <div>{children}</div>,
   licenseService: {
-    isEnterprise() {
+    isEnterprise(): boolean {
+      return true;
+    },
+    isPlatinumPlus(): boolean {
       return true;
     },
   },
@@ -48,4 +52,11 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
   registerQuery: () => {},
 
   deregisterQuery: () => {},
+
+  blockList: {
+    exceptionListApiClient: {},
+    useSetUrlParams: () => (params, replace) => {},
+    getFlyoutComponent: () => (<div />) as unknown as NamedExoticComponent<BlockListFlyoutProps>,
+    getFormComponent: () => (<div />) as unknown as NamedExoticComponent<BlockListFormProps>,
+  },
 });
