@@ -5,123 +5,126 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
-
 export const getAlertsBySeverityTableAttributes: GetLensAttributes = (
-  stackByField = 'kibana.alert.workflow_status',
+  stackByField = 'kibana.alert.severity',
   extraOptions
-) => ({
-  title: 'alerts-table',
-  description: '',
-  visualizationType: 'lnsDatatable',
-  state: {
-    visualization: {
-      layerId: '51ed355e-6e23-4038-a417-f653a1160370',
-      layerType: 'data',
-      columns: [
-        {
-          columnId: 'a9b43606-7ff7-46ae-a47c-85bed80fab9a',
-        },
-        {
-          columnId: '21cc4a49-3780-4b1a-be28-f02fa5303d24',
-        },
-      ],
-      headerRowHeight: 'custom',
-      headerRowHeightLines: 0.6,
-      rowHeight: 'custom',
-      rowHeightLines: 0.8,
-    },
-    query: {
-      query: '',
-      language: 'kuery',
-    },
-    filters: extraOptions?.filters ? extraOptions.filters : [],
-    datasourceStates: {
-      formBased: {
-        layers: {
-          '51ed355e-6e23-4038-a417-f653a1160370': {
-            columns: {
-              'a9b43606-7ff7-46ae-a47c-85bed80fab9a': {
-                label: 'Filters',
-                dataType: 'string',
-                operationType: 'filters',
-                scale: 'ordinal',
-                isBucketed: true,
-                params: {
-                  filters: [
-                    {
-                      input: {
-                        query: 'kibana.alert.severity: "critical"',
-                        language: 'kuery',
+) => {
+  const layerId = uuidv4();
+  return {
+    title: 'Alerts',
+    description: '',
+    visualizationType: 'lnsDatatable',
+    state: {
+      visualization: {
+        layerId,
+        layerType: 'data',
+        columns: [
+          {
+            columnId: 'a9b43606-7ff7-46ae-a47c-85bed80fab9a',
+          },
+          {
+            columnId: '21cc4a49-3780-4b1a-be28-f02fa5303d24',
+          },
+        ],
+        headerRowHeight: 'custom',
+        headerRowHeightLines: 0.6,
+        rowHeight: 'custom',
+        rowHeightLines: 0.8,
+      },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: extraOptions?.filters ? extraOptions.filters : [],
+      datasourceStates: {
+        formBased: {
+          layers: {
+            [layerId]: {
+              columns: {
+                'a9b43606-7ff7-46ae-a47c-85bed80fab9a': {
+                  label: 'Filters',
+                  dataType: 'string',
+                  operationType: 'filters',
+                  scale: 'ordinal',
+                  isBucketed: true,
+                  params: {
+                    filters: [
+                      {
+                        input: {
+                          query: `${stackByField}: "critical"`,
+                          language: 'kuery',
+                        },
+                        label: 'Critical',
                       },
-                      label: 'Critical',
-                    },
-                    {
-                      label: 'High',
-                      input: {
-                        query: 'kibana.alert.severity : "high" ',
-                        language: 'kuery',
+                      {
+                        label: 'High',
+                        input: {
+                          query: `${stackByField} : "high"`,
+                          language: 'kuery',
+                        },
                       },
-                    },
-                    {
-                      input: {
-                        query: 'kibana.alert.severity: "medium"',
-                        language: 'kuery',
+                      {
+                        input: {
+                          query: `${stackByField}: "medium"`,
+                          language: 'kuery',
+                        },
+                        label: 'Medium',
                       },
-                      label: 'Medium',
-                    },
-                    {
-                      input: {
-                        query: 'kibana.alert.severity : "low" ',
-                        language: 'kuery',
+                      {
+                        input: {
+                          query: `${stackByField} : "low"`,
+                          language: 'kuery',
+                        },
+                        label: 'Low',
                       },
-                      label: 'Low',
-                    },
-                  ],
+                    ],
+                  },
+                },
+                '21cc4a49-3780-4b1a-be28-f02fa5303d24': {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: '___records___',
+                  filter: {
+                    query: '',
+                    language: 'kuery',
+                  },
+                  params: {
+                    emptyAsNull: true,
+                  },
                 },
               },
-              '21cc4a49-3780-4b1a-be28-f02fa5303d24': {
-                label: 'Count of records',
-                dataType: 'number',
-                operationType: 'count',
-                isBucketed: false,
-                scale: 'ratio',
-                sourceField: '___records___',
-                filter: {
-                  query: '',
-                  language: 'kuery',
-                },
-                params: {
-                  emptyAsNull: true,
-                },
-              },
+              columnOrder: [
+                'a9b43606-7ff7-46ae-a47c-85bed80fab9a',
+                '21cc4a49-3780-4b1a-be28-f02fa5303d24',
+              ],
+              sampling: 1,
+              incompleteColumns: {},
             },
-            columnOrder: [
-              'a9b43606-7ff7-46ae-a47c-85bed80fab9a',
-              '21cc4a49-3780-4b1a-be28-f02fa5303d24',
-            ],
-            sampling: 1,
-            incompleteColumns: {},
           },
         },
+        textBased: {
+          layers: {},
+        },
       },
-      textBased: {
-        layers: {},
+      internalReferences: [],
+      adHocDataViews: {},
+    },
+    references: [
+      {
+        type: 'index-pattern',
+        id: '{dataViewId}',
+        name: `indexpattern-datasource-layer-${layerId}`,
       },
-    },
-    internalReferences: [],
-    adHocDataViews: {},
-  },
-  references: [
-    {
-      type: 'index-pattern',
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-51ed355e-6e23-4038-a417-f653a1160370',
-    },
-    {
-      type: 'index-pattern',
-      name: '22752b9b-cfcd-43f0-a6ee-27dd4893edcf',
-      id: '{dataViewId}',
-    },
-  ],
-});
+      {
+        type: 'index-pattern',
+        name: '22752b9b-cfcd-43f0-a6ee-27dd4893edcf',
+        id: '{dataViewId}',
+      },
+    ],
+  };
+};

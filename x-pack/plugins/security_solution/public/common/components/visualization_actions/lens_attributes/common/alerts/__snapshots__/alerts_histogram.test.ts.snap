@@ -162,7 +162,6 @@ Object {
         },
       ],
       "legend": Object {
-        "isInside": true,
         "isVisible": true,
         "position": "right",
       },
@@ -321,7 +320,6 @@ Object {
         },
       ],
       "legend": Object {
-        "isInside": true,
         "isVisible": true,
         "position": "right",
       },

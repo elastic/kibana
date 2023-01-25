@@ -14,7 +14,7 @@ import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -108,6 +108,7 @@ interface AlertsHistogramPanelProps {
   title?: React.ReactNode;
   titleSize?: EuiTitleSize;
   updateDateRange: UpdateDateRange;
+  hideQueryToggle?: boolean;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -145,11 +146,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     titleSize = 'm',
     updateDateRange,
+    hideQueryToggle = false,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
-    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
+    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuidv4()}`, []);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -187,13 +189,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const timerange = useMemo(() => ({ from, to }), [from, to]);
-
-    const extraVisualizationOptions = useMemo(
-      () => ({
-        filters,
-      }),
-      [filters]
-    );
 
     const {
       loading: isLoadingAlerts,
@@ -249,7 +244,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               count: showCountsInLegend ? bucket.doc_count : undefined,
               dataProviderId: escapeDataProviderId(
-                `draggable-legend-item-${uuid.v4()}-${selectedStackByOption}-${bucket.key}`
+                `draggable-legend-item-${uuidv4()}-${selectedStackByOption}-${bucket.key}`
               ),
               field: selectedStackByOption,
               timelineId,
@@ -369,7 +364,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             title={titleText}
             titleSize={titleSize}
             toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
+            toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
@@ -425,7 +420,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               <VisualizationEmbeddable
                 data-test-subj="embeddable-matrix-histogram"
                 extraActions={extraActions}
-                extraOptions={extraVisualizationOptions}
+                extraOptions={{
+                  filters,
+                }}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
                 id={`alerts-histogram-embeddable-${uniqueQueryId}`}

@@ -350,7 +350,7 @@ describe('when isChartEmbeddablesEnabled = true', () => {
       </TestProviders>
     );
 
-    await waitFor(() => expect(screen.getByTestId('lens-embeddable')).toBeInTheDocument());
+    expect(screen.getByTestId('lens-embeddable')).toBeInTheDocument();
   });
 
   it('should skip calling getAlertsRiskQuery', async () => {
@@ -360,6 +360,10 @@ describe('when isChartEmbeddablesEnabled = true', () => {
       </TestProviders>
     );
 
-    await waitFor(() => expect((useQueryAlerts as jest.Mock).mock.calls[0][0].skip).toBeTruthy());
+    expect(useQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: true,
+      })
+    );
   });
 });

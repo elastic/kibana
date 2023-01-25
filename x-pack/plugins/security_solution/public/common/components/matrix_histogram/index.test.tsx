@@ -40,15 +40,16 @@ jest.mock('./utils', () => ({
   getCustomChartData: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../utils/route/use_route_spy', () => ({
-  useRouteSpy: jest.fn().mockReturnValue([
-    {
-      detailName: 'mockHost',
-      pageName: 'hosts',
-      tabName: 'events',
-    },
-  ]),
-}));
+const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
+
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useLocation: () => mockLocation(),
+  };
+});
 
 describe('Matrix Histogram Component', () => {
   let wrapper: ReactWrapper;

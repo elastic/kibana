@@ -56,7 +56,7 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 
 export const ID = 'previewHistogram';
 
-export const CHART_HEIGHT = 150;
+const CHART_HEIGHT = 150;
 
 interface PreviewHistogramProps {
   previewId: string;
@@ -119,6 +119,7 @@ export const PreviewHistogram = ({
 
   const { globalFullScreen } = useGlobalFullScreen();
   const previousPreviewId = usePrevious(previewId);
+  const previewQueryId = `${ID}-${previewId}`;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
@@ -131,13 +132,22 @@ export const PreviewHistogram = ({
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
       setQuery({
-        id: `${ID}-${previewId}`,
+        id: previewQueryId,
         inspect,
         loading: isLoading,
         refetch,
       });
     }
-  }, [setQuery, inspect, isLoading, isInitializing, refetch, previewId, isChartEmbeddablesEnabled]);
+  }, [
+    setQuery,
+    inspect,
+    isLoading,
+    isInitializing,
+    refetch,
+    previewId,
+    isChartEmbeddablesEnabled,
+    previewQueryId,
+  ]);
 
   const barConfig = useMemo(
     (): ChartSeriesConfigs => getHistogramConfig(endDate, startDate, !isEqlRule),
@@ -180,7 +190,7 @@ export const PreviewHistogram = ({
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
             <HeaderSection
-              id={`${ID}-${previewId}`}
+              id={previewQueryId}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
               showInspectButton={!isChartEmbeddablesEnabled}
@@ -195,7 +205,7 @@ export const PreviewHistogram = ({
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getRulePreviewLensAttributes}
                 height={`${CHART_HEIGHT}px`}
-                id={`${ID}-${previewId}-embeddable`}
+                id={`${previewQueryId}-embeddable`}
                 inspectTitle={i18n.QUERY_GRAPH_HITS_TITLE}
                 scopeId={SourcererScopeName.detections}
                 stackByField={ruleType === 'machine_learning' ? 'host.name' : 'event.category'}

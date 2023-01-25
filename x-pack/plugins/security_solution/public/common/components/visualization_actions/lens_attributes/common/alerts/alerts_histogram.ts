@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { GetLensAttributes, LensAttributes } from '../../../types';
+import { v4 as uuidv4 } from 'uuid';
+import type { GetLensAttributes } from '../../../types';
 
 export const getAlertsHistogramLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
   extraOptions
-) =>
-  ({
+) => {
+  const layerId = uuidv4();
+  return {
     title: 'Alerts',
     description: '',
     visualizationType: 'lnsXY',
@@ -21,13 +22,12 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
         legend: {
           isVisible: true,
           position: 'right',
-          isInside: true,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
         layers: [
           {
-            layerId: '0039eb0c-9a1a-4687-ae54-0f4e239bec75',
+            layerId,
             accessors: ['e09e0380-0740-4105-becc-0a4ca12e3944'],
             position: 'top',
             seriesType: 'bar_stacked',
@@ -58,7 +58,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
       datasourceStates: {
         formBased: {
           layers: {
-            '0039eb0c-9a1a-4687-ae54-0f4e239bec75': {
+            [layerId]: {
               columns: {
                 'aac9d7d0-13a3-480a-892b-08207a787926': {
                   label: '@timestamp',
@@ -119,7 +119,8 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = (
       {
         type: 'index-pattern',
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75',
+        name: `indexpattern-datasource-layer-${layerId}`,
       },
     ],
-  } as LensAttributes);
+  };
+};

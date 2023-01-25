@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { GetLensAttributes, LensAttributes } from '../../../types';
+import { v4 as uuidv4 } from 'uuid';
+import type { GetLensAttributes } from '../../../types';
 
 export const getAlertsByStatusAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.workflow_status',
   extraOptions
-) =>
-  ({
+) => {
+  const layerId = uuidv4();
+  return {
     title: 'Alerts',
     description: '',
     visualizationType: 'lnsPie',
@@ -20,7 +21,7 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
         shape: 'donut',
         layers: [
           {
-            layerId: '51ed355e-6e23-4038-a417-f653a1160370',
+            layerId,
             primaryGroups: ['a9b43606-7ff7-46ae-a47c-85bed80fab9a'],
             metrics: ['21cc4a49-3780-4b1a-be28-f02fa5303d24'],
             numberDisplay: 'value',
@@ -66,7 +67,7 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
       datasourceStates: {
         formBased: {
           layers: {
-            '51ed355e-6e23-4038-a417-f653a1160370': {
+            [layerId]: {
               columns: {
                 'a9b43606-7ff7-46ae-a47c-85bed80fab9a': {
                   label: 'Filters',
@@ -143,7 +144,7 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
       {
         type: 'index-pattern',
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-51ed355e-6e23-4038-a417-f653a1160370',
+        name: `indexpattern-datasource-layer-${layerId}`,
       },
       {
         type: 'index-pattern',
@@ -151,4 +152,5 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
         id: '{dataViewId}',
       },
     ],
-  } as LensAttributes);
+  };
+};

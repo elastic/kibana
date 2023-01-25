@@ -17,6 +17,7 @@ import {
   PartitionLayout,
   defaultPartitionValueFormatter,
 } from '@elastic/charts';
+import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
@@ -55,14 +56,21 @@ export interface DonutChartProps {
 export interface DonutChartWrapperProps {
   children?: React.ReactElement;
   dataExists: boolean;
+  donutTextWrapperClassName?: string;
+  donutTextWrapperStyles?: FlattenSimpleInterpolation;
+  isChartEmbeddablesEnabled?: boolean;
   label?: React.ReactElement | string;
   title: React.ReactElement | string | number | null;
-  isChartEmbeddablesEnabled?: boolean;
 }
 
 /* Make this position absolute in order to overlap the text onto the donut */
 export const DonutTextWrapper = styled(EuiFlexGroup)<
-  EuiFlexGroupProps & { $isChartEmbeddablesEnabled?: boolean; $dataExists?: boolean }
+  EuiFlexGroupProps & {
+    $isChartEmbeddablesEnabled?: boolean;
+    $dataExists?: boolean;
+    className?: string;
+    donutTextWrapperStyles?: FlattenSimpleInterpolation;
+  }
 >`
   top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
     $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `34%;`};
@@ -70,6 +78,9 @@ export const DonutTextWrapper = styled(EuiFlexGroup)<
   max-width: 77px;
   position: absolute;
   z-index: 1;
+
+  ${({ className, donutTextWrapperStyles }) =>
+    className && donutTextWrapperStyles ? `&.${className} {${donutTextWrapperStyles}}` : ''}
 `;
 
 export const StyledEuiFlexItem = styled(EuiFlexItem)`
@@ -80,6 +91,8 @@ export const StyledEuiFlexItem = styled(EuiFlexItem)`
 const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   children,
   dataExists,
+  donutTextWrapperClassName,
+  donutTextWrapperStyles,
   isChartEmbeddablesEnabled,
   label,
   title,
@@ -105,7 +118,9 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
           $dataExists={dataExists}
           $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
           alignItems="center"
+          className={donutTextWrapperClassName}
           direction="column"
+          donutTextWrapperStyles={donutTextWrapperStyles}
           gutterSize="none"
           justifyContent="center"
         >

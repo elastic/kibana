@@ -53,6 +53,7 @@ jest.mock('../visualization_actions/lens_embeddable');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => mockHistory,
+  useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
 }));
 
 const FakeStatefulEventsViewer = ({ additionalFilters }: { additionalFilters: JSX.Element }) => (

@@ -180,10 +180,17 @@ export const addSeverityFilter = ({
   return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
+export const NodeBuilderOperators = {
+  and: 'and',
+  or: 'or',
+} as const;
+
+type NodeBuilderOperatorsType = keyof typeof NodeBuilderOperators;
+
 interface FilterField {
   filters?: string | string[];
   field: string;
-  operator: 'and' | 'or';
+  operator: NodeBuilderOperatorsType;
   type?: string;
 }
 
@@ -273,14 +280,17 @@ export const combineAuthorizedAndOwnerFilter = (
 
 /**
  * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined
- * filters and return a KueryNode with the filters and'd together.
+ * filters and return a KueryNode with the filters combined using the specified operator which defaults to and if not defined.
  */
-export function combineFilters(nodes: Array<KueryNode | undefined>): KueryNode | undefined {
+export function combineFilters(
+  nodes: Array<KueryNode | undefined>,
+  operator: NodeBuilderOperatorsType = NodeBuilderOperators.and
+): KueryNode | undefined {
   const filters = nodes.filter((node): node is KueryNode => node !== undefined);
   if (filters.length <= 0) {
     return;
   }
-  return nodeBuilder.and(filters);
+  return nodeBuilder[operator](filters);
 }
 
 /**
@@ -503,6 +513,7 @@ enum SortFieldCase {
   status = 'status',
   title = 'title.keyword',
   severity = 'severity',
+  updatedAt = 'updated_at',
 }
 
 export const convertSortField = (sortField: string | undefined): SortFieldCase => {
@@ -519,6 +530,9 @@ export const convertSortField = (sortField: string | undefined): SortFieldCase =
       return SortFieldCase.title;
     case 'severity':
       return SortFieldCase.severity;
+    case 'updatedAt':
+    case 'updated_at':
+      return SortFieldCase.updatedAt;
     default:
       return SortFieldCase.createdAt;
   }
