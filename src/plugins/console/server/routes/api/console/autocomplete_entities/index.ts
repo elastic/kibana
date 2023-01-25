@@ -6,141 +6,79 @@
  * Side Public License, v 1.
  */
 
-import http from 'http';
-import https from 'https';
-import { Buffer } from 'buffer';
-import Boom from '@hapi/boom';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SemVer } from 'semver';
-import { autoCompleteEntitiesValidationConfig, type SettingsToRetrieve } from './validation_config';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RouteDependencies } from '../../..';
-import { sanitizeHostname } from '../../../../lib/utils';
-import type { ESConfigForProxy } from '../../../../types';
-import { getRequestConfig } from '../proxy/create_handler';
-
-type Config = ESConfigForProxy & { headers: KibanaRequest['headers'] } & { kibanaVersion: SemVer };
+import { autoCompleteEntitiesValidationConfig, type SettingsToRetrieve } from './validation_config';
 
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
 
-const getMappings = async (settings: SettingsToRetrieve, config: Config) => {
+const getMappings = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
   if (settings.fields) {
-    const path = settings.fieldsIndices ? `/${settings.fieldsIndices}/_mapping` : '/_mapping';
-    const mappings = await getEntity(path, config);
+    const mappings = await esClient.asInternalUser.indices.getMapping(
+      settings.fieldsIndices
+        ? {
+            index: settings.fieldsIndices,
+          }
+        : undefined,
+      {
+        maxResponseSize: MAX_RESPONSE_SIZE,
+        maxCompressedResponseSize: MAX_RESPONSE_SIZE,
+      }
+    );
     return mappings;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getAliases = async (settings: SettingsToRetrieve, config: Config) => {
+const getAliases = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
   if (settings.indices) {
-    const aliases = await getEntity('/_alias', config);
+    const aliases = await esClient.asInternalUser.indices.getAlias();
     return aliases;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getDataStreams = async (settings: SettingsToRetrieve, config: Config) => {
+const getDataStreams = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
   if (settings.dataStreams) {
-    const dataStreams = await getEntity('/_data_stream', config);
+    const dataStreams = await esClient.asInternalUser.indices.getDataStream();
     return dataStreams;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getLegacyTemplates = async (settings: SettingsToRetrieve, config: Config) => {
+const getLegacyTemplates = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
   if (settings.templates) {
-    const legacyTemplates = await getEntity('/_template', config);
+    const legacyTemplates = await esClient.asInternalUser.indices.getTemplate();
     return legacyTemplates;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getIndexTemplates = async (settings: SettingsToRetrieve, config: Config) => {
+const getIndexTemplates = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
   if (settings.templates) {
-    const indexTemplates = await getEntity('/_index_template', config);
+    const indexTemplates = await esClient.asInternalUser.indices.getIndexTemplate();
     return indexTemplates;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getComponentTemplates = async (settings: SettingsToRetrieve, config: Config) => {
+const getComponentTemplates = async (
+  settings: SettingsToRetrieve,
+  esClient: IScopedClusterClient
+) => {
   if (settings.templates) {
-    const componentTemplates = await getEntity('/_component_template', config);
+    const componentTemplates = await esClient.asInternalUser.cluster.getComponentTemplate();
     return componentTemplates;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
-};
-
-/**
- * Get the autocomplete suggestions for the given entity.
- * We are using the raw http request in this function to retrieve the entities instead of esClient because
- * the esClient does not handle large responses well. For example, the response size for
- * the mappings can be very large(> 1GB) and the esClient will throw an 'Invalid string length'
- * error when trying to parse the response. By using the raw http request, we can limit the
- * response size and avoid the error.
- * @param path  The path to the entity to retrieve. For example, '/_mapping' or '/_alias'.
- * @param config The configuration for the request.
- * @returns The entity retrieved from Elasticsearch.
- */
-const getEntity = (path: string, config: Config) => {
-  return new Promise((resolve, reject) => {
-    const { hosts, kibanaVersion } = config;
-    for (let idx = 0; idx < hosts.length; idx++) {
-      const host = hosts[idx];
-      const uri = new URL(host + path);
-      const { protocol, hostname, port } = uri;
-      const { headers } = getRequestConfig(config.headers, config, uri.toString(), kibanaVersion);
-      const client = protocol === 'https:' ? https : http;
-      const options = {
-        method: 'GET',
-        headers: { ...headers },
-        host: sanitizeHostname(hostname),
-        port: port === '' ? undefined : parseInt(port, 10),
-        protocol,
-        path: `${path}?pretty=false`, // add pretty=false to compress the response by removing whitespace
-      };
-
-      try {
-        const req = client.request(options, (res) => {
-          const chunks: Buffer[] = [];
-
-          let currentLength = 0;
-
-          res.on('data', (chunk) => {
-            currentLength += Buffer.byteLength(chunk);
-
-            chunks.push(chunk);
-
-            // Destroy the request if the response is too large
-            if (currentLength > MAX_RESPONSE_SIZE) {
-              req.destroy();
-              reject(Boom.badRequest(`Response size is too large for ${path}`));
-            }
-          });
-          res.on('end', () => {
-            const body = Buffer.concat(chunks).toString('utf8');
-            resolve(JSON.parse(body));
-          });
-        });
-        req.on('error', reject);
-        req.end();
-        break;
-      } catch (err) {
-        if (idx === hosts.length - 1) {
-          reject(err);
-        }
-        // Try the next host
-      }
-    }
-  });
 };
 
 export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
@@ -153,23 +91,17 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       validate: autoCompleteEntitiesValidationConfig,
     },
     async (context, request, response) => {
+      const esClient = (await context.core).elasticsearch.client;
       const settings = request.query;
-
-      const legacyConfig = await deps.proxy.readLegacyESConfig();
-      const configWithHeaders = {
-        ...legacyConfig,
-        headers: request.headers,
-        kibanaVersion: deps.kibanaVersion,
-      };
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
-        getMappings(settings, configWithHeaders),
-        getAliases(settings, configWithHeaders),
-        getDataStreams(settings, configWithHeaders),
-        getLegacyTemplates(settings, configWithHeaders),
-        getIndexTemplates(settings, configWithHeaders),
-        getComponentTemplates(settings, configWithHeaders),
+        getMappings(settings, esClient),
+        getAliases(settings, esClient),
+        getDataStreams(settings, esClient),
+        getLegacyTemplates(settings, esClient),
+        getIndexTemplates(settings, esClient),
+        getComponentTemplates(settings, esClient),
       ]);
 
       const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
@@ -181,7 +113,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
           // If the request failed, log the error and return an empty object
           if (result.reason instanceof Error) {
-            deps.log.warn(`Failed to retrieve autocomplete suggestions: ${result.reason.message}`);
+            deps.log.debug(`Failed to retrieve autocomplete suggestions: ${result.reason.message}`);
           }
 
           return {};
