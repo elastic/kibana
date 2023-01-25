@@ -146,7 +146,8 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
     {
       key: 'serverless',
       icon: {
-        type: getServerlessIcon(icons?.serverlessType, theme.darkMode) || 'node',
+        type:
+          getServerlessIcon(icons?.serverlessType, theme.darkMode) || 'node',
       },
       isVisible: !!icons?.serverlessType,
       title: i18n.translate('xpack.apm.serviceIcons.serverless', {

@@ -82,7 +82,10 @@ export function isJRubyAgent(agentName?: string, runtimeName?: string) {
 }
 
 export function isServerlessAgent(cloudProviderAndService?: string) {
-  return isAWSLambdaAgent(cloudProviderAndService) || isAzureFunctionsAgent(cloudProviderAndService);
+  return (
+    isAWSLambdaAgent(cloudProviderAndService) ||
+    isAzureFunctionsAgent(cloudProviderAndService)
+  );
 }
 
 export function isAWSLambdaAgent(cloudProviderAndService?: string) {

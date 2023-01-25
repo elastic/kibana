@@ -44,8 +44,12 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const router = useApmRouter();
-  const { serviceName, fallbackToTransactions, agentName, cloudProviderAndService } =
-    useApmServiceContext();
+  const {
+    serviceName,
+    fallbackToTransactions,
+    agentName,
+    cloudProviderAndService,
+  } = useApmServiceContext();
 
   const {
     query,

@@ -365,8 +365,16 @@ const serviceAgentRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    | { agentName?: undefined; runtimeName?: undefined; cloudProviderAndService?: undefined; }
-    | { agentName: string | undefined; runtimeName: string | undefined; cloudProviderAndService: string | undefined; }
+    | {
+        agentName?: undefined;
+        runtimeName?: undefined;
+        cloudProviderAndService?: undefined;
+      }
+    | {
+        agentName: string | undefined;
+        runtimeName: string | undefined;
+        cloudProviderAndService: string | undefined;
+      }
   > => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

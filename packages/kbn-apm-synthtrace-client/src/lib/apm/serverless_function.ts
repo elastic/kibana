@@ -36,9 +36,10 @@ export function serverlessFunction({
   architecture?: string;
   serverlessType?: string;
 }) {
-  const faasId = serverlessType === 'aws.lambda' ?
-    `arn:aws:lambda:us-west-2:001:function:${functionName}` :
-    `/subscriptions/abcd/resourceGroups/1234/providers/Microsoft.Web/sites/test-function-app/functions/${functionName}`;
+  const faasId =
+    serverlessType === 'aws.lambda'
+      ? `arn:aws:lambda:us-west-2:001:function:${functionName}`
+      : `/subscriptions/abcd/resourceGroups/1234/providers/Microsoft.Web/sites/test-function-app/functions/${functionName}`;
   return new ServerlessFunction({
     'service.name': serviceName || faasId,
     'faas.id': faasId,

@@ -109,8 +109,11 @@ export async function getServiceMetadataIcons({
   let serverlessType: string | undefined;
   if (cloud?.provider === 'aws' && cloud?.service?.name === 'lambda') {
     serverlessType = 'aws.lambda';
-  } else if (cloud?.provider === 'azure' && cloud?.service?.name === 'functions') {
-    serverlessType = 'azure.functions'
+  } else if (
+    cloud?.provider === 'azure' &&
+    cloud?.service?.name === 'functions'
+  ) {
+    serverlessType = 'azure.functions';
   }
 
   return {

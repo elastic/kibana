@@ -179,7 +179,11 @@ export function isMetricsTabHidden({
   if (isAWSLambdaAgent(cloudProviderAndService)) {
     return !isAwsLambdaEnabled;
   }
-  return !agentName || isRumAgentName(agentName) || isServerlessAgent(cloudProviderAndService);
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isServerlessAgent(cloudProviderAndService)
+  );
 }
 
 export function isInfraTabHidden({
@@ -190,7 +194,9 @@ export function isInfraTabHidden({
   cloudProviderAndService?: string;
 }) {
   return (
-    !agentName || isRumAgentName(agentName) || isServerlessAgent(cloudProviderAndService)
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isServerlessAgent(cloudProviderAndService)
   );
 }
 
@@ -333,7 +339,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: isServerlessAgent(cloudProviderAndService) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgent(cloudProviderAndService),
+      hidden:
+        !agentName ||
+        isRumAgentName(agentName) ||
+        isAzureFunctionsAgent(cloudProviderAndService),
     },
     {
       key: 'alerts',

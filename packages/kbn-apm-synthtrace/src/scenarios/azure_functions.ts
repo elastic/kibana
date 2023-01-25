@@ -50,24 +50,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
-
       const awsLambdaEvents = timestamps.generator((timestamp) => {
         return [
-          instanceALambdaDotnet
-            .invocation()
-            .duration(1000)
-            .timestamp(timestamp)
-            .coldStart(true),
-          instanceALambdaDotnet2
-            .invocation()
-            .duration(1000)
-            .timestamp(timestamp)
-            .coldStart(false),
-          instanceALambdaNode2
-            .invocation()
-            .duration(1000)
-            .timestamp(timestamp)
-            .coldStart(false),
+          instanceALambdaDotnet.invocation().duration(1000).timestamp(timestamp).coldStart(true),
+          instanceALambdaDotnet2.invocation().duration(1000).timestamp(timestamp).coldStart(false),
+          instanceALambdaNode2.invocation().duration(1000).timestamp(timestamp).coldStart(false),
         ];
       });
 

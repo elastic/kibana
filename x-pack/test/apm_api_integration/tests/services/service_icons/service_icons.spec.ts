@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('returns correct metadata', () => {
       const { agentName, cloud } = dataConfig;
-      const { provider, serviceName: cloudServiceName, provider: cloudProvider} = cloud;
+      const { provider, serviceName: cloudServiceName, provider: cloudProvider } = cloud;
 
       expect(body.agentName).to.be(agentName);
       expect(body.cloudProvider).to.be(provider);

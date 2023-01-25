@@ -56,7 +56,12 @@ export async function getServiceAgent({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+      _source: [
+        AGENT_NAME,
+        SERVICE_RUNTIME_NAME,
+        CLOUD_PROVIDER,
+        CLOUD_SERVICE_NAME,
+      ],
       query: {
         bool: {
           filter: [
@@ -84,7 +89,7 @@ export async function getServiceAgent({
                 field: CLOUD_SERVICE_NAME,
               },
             },
-        ],
+          ],
         },
       },
       sort: {
@@ -101,7 +106,15 @@ export async function getServiceAgent({
     return {};
   }
 
-  const { agent, service, cloud } = response.hits.hits[0]._source as ServiceAgent;
-  const cloudProviderAndService = cloud?.provider && cloud?.service?.name ? `${cloud?.provider}.${cloud?.service?.name}` : undefined;
-  return { agentName: agent?.name, runtimeName: service?.runtime?.name, cloudProviderAndService: cloudProviderAndService};
+  const { agent, service, cloud } = response.hits.hits[0]
+    ._source as ServiceAgent;
+  const cloudProviderAndService =
+    cloud?.provider && cloud?.service?.name
+      ? `${cloud?.provider}.${cloud?.service?.name}`
+      : undefined;
+  return {
+    agentName: agent?.name,
+    runtimeName: service?.runtime?.name,
+    cloudProviderAndService,
+  };
 }

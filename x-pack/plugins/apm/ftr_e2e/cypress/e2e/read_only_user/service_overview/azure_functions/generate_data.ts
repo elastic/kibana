@@ -25,7 +25,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
     })
     .instance('instance-a');
 
-    const traceEvents = timerange(start, end)
+  const traceEvents = timerange(start, end)
     .interval('1m')
     .rate(rate)
     .generator((timestamp) =>
