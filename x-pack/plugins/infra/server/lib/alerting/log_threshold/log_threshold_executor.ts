@@ -493,7 +493,7 @@ const getReducedGroupByResults = (
   } else {
     for (const groupBucket of results) {
       const groupName = getGroupName(groupBucket.key);
-      const additionalContextHits = groupBucket.filtered_results.additionalContext?.hits?.hits;
+      const additionalContextHits = groupBucket.additionalContext?.hits?.hits;
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,

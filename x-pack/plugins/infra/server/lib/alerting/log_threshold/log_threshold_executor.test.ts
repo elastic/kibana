@@ -565,18 +565,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 10,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-1',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-1',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -588,18 +588,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 2,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-2',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-2',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -611,18 +611,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 20,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-3',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-3',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -706,18 +706,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 10,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-1',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-1',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -730,6 +730,19 @@ describe('Log threshold executor', () => {
             filtered_results: {
               doc_count: 2,
             },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-2',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           {
             key: {
@@ -739,18 +752,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 20,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-3',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-3',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -784,18 +797,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 10,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-1',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-1',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -807,18 +820,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 2,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-2',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-2',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
@@ -830,18 +843,18 @@ describe('Log threshold executor', () => {
             doc_count: 100,
             filtered_results: {
               doc_count: 20,
-              additionalContext: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        host: {
-                          name: 'i-am-a-host-name-3',
-                        },
+            },
+            additionalContext: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      host: {
+                        name: 'i-am-a-host-name-3',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
