@@ -14,11 +14,11 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
+import { isEmpty } from 'lodash';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { MetricItem } from './metric_item';
 import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
-import { isEmpty } from 'lodash';
 
 const valueFormatter = (value: number, suffix = '') => {
   return `${value} ${suffix}`;
