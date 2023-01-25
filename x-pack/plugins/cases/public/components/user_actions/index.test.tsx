@@ -14,7 +14,6 @@ import routeData from 'react-router';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import {
   basicCase,
-  basicPush,
   getUserAction,
   getHostIsolationUserAction,
   hostIsolationComment,
@@ -24,6 +23,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -31,11 +31,11 @@ const updateCase = jest.fn();
 const onShowAlertDetails = jest.fn();
 
 const defaultProps = {
-  caseConnectors: {},
+  caseConnectors: getCaseConnectorsMockResponse(),
   caseUserActions: [],
   userProfiles: new Map(),
   currentUserProfile: undefined,
-  connectors: [],
+  connectors: connectorsMock,
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
@@ -95,29 +95,28 @@ describe(`UserActions`, () => {
   });
 
   it('Renders service now update line with top and bottom when push is required', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({
+      'servicenow-1': { needsToBePushed: true },
+    });
+
     const ourActions = [
-      getUserAction('pushed', 'push_to_service'),
-      getUserAction('comment', Actions.update),
+      getUserAction('pushed', 'push_to_service', {
+        createdAt: '2023-01-17T09:46:29.813Z',
+      }),
     ];
 
     const props = {
       ...defaultProps,
-      caseServices: {
-        '123': {
-          ...basicPush,
-          firstPushIndex: 0,
-          lastPushIndex: 0,
-          commentsToUpdate: [`${ourActions[ourActions.length - 1].commentId}`],
-          hasDataToPush: true,
-        },
-      },
+      caseConnectors,
       caseUserActions: ourActions,
     };
+
     const wrapper = mount(
       <TestProviders>
         <UserActions {...props} />
       </TestProviders>
     );
+
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
       expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(true);
@@ -125,19 +124,15 @@ describe(`UserActions`, () => {
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [getUserAction('pushed', 'push_to_service')];
+    const ourActions = [
+      getUserAction('pushed', 'push_to_service', {
+        createdAt: '2023-01-17T09:46:29.813Z',
+      }),
+    ];
+
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
-      caseServices: {
-        '123': {
-          ...basicPush,
-          firstPushIndex: 0,
-          lastPushIndex: 0,
-          commentsToUpdate: [],
-          hasDataToPush: false,
-        },
-      },
     };
 
     const wrapper = mount(
@@ -150,6 +145,7 @@ describe(`UserActions`, () => {
       expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
     });
   });
+
   it('Outlines comment when update move to link is clicked', async () => {
     const ourActions = [
       getUserAction('comment', Actions.create),

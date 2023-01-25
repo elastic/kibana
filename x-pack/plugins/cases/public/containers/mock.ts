@@ -59,7 +59,7 @@ const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
 const basicClosedAt = '2020-02-21T15:02:57.995Z';
 const basicPushedAt = '2023-01-17T09:46:29.813Z';
-const laterTime = '2020-02-28T15:02:57.995Z';
+const laterTime = '2023-01-18T09:46:29.813Z';
 
 export const elasticUser = {
   fullName: 'Leslie Knope',
@@ -666,6 +666,7 @@ export const getUserAction = (
     case ActionTypes.pushed:
       return {
         ...commonProperties,
+        createdAt: basicPushedAt,
         type: ActionTypes.pushed,
         payload: {
           externalService,

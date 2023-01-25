@@ -49,8 +49,12 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('renders correctly when updating an external service', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
+    const caseConnectors = getCaseConnectorsMockResponse({
+      'servicenow-1': { oldestPushDate: '2023-01-16T09:46:29.813Z' },
+    });
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
+      caseConnectors,
       userAction,
     });
 
@@ -112,7 +116,9 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('does not show the footers if it is not the latest push', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service);
+    const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2020-01-17T09:46:29.813Z',
+    });
 
     const builder = createPushedUserActionBuilder({
       ...builderArgs,

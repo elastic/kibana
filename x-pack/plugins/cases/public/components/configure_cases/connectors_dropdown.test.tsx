@@ -83,7 +83,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <span>
-                My Connector
+                My SN connector
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>,
@@ -108,7 +108,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <span>
-                My Connector 2
+                My Resilient connector
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>,
@@ -183,7 +183,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <span>
-                My Connector
+                My deprecated SN connector
                  (deprecated)
               </span>
             </EuiFlexItem>
@@ -235,7 +235,7 @@ describe('ConnectorsDropdown', () => {
         .find('[data-test-subj="dropdown-connectors"]')
         .first()
         .text()
-        .includes('My Connector, is selected')
+        .includes('My SN connector, is selected')
     ).toBeTruthy();
   });
 

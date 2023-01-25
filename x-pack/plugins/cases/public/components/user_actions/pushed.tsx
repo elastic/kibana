@@ -16,22 +16,36 @@ import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 import type { CaseConnectors } from '../../containers/types';
 
-const isLatestPush = (pushedAt: string, latestPush: string | undefined) => {
-  if (!latestPush) {
+const comparePushDates = (
+  type: 'firstPush' | 'latestPush',
+  pushedAt: string,
+  connectorPushedAt: string | undefined
+) => {
+  if (!connectorPushedAt) {
     return false;
   }
 
   const pushedDate = new Date(pushedAt);
-  const latestPushedDate = new Date(latestPush);
+  const connectorDate = new Date(connectorPushedAt);
 
-  if (isNaN(pushedDate.getTime()) || isNaN(latestPushedDate.getTime())) {
+  if (isNaN(pushedDate.getTime()) || isNaN(connectorDate.getTime())) {
     return false;
   }
 
-  return pushedDate.getTime() >= latestPushedDate.getTime();
+  return type === 'firstPush'
+    ? pushedDate.getTime() <= connectorDate.getTime()
+    : pushedDate.getTime() >= connectorDate.getTime();
 };
 
-const getLabelTitle = (action: UserActionResponse<PushedUserAction>, hasBeenPushed: boolean) => {
+const isLatestPush = (pushedAt: string, latestPush: string | undefined) => {
+  return comparePushDates('latestPush', pushedAt, latestPush);
+};
+
+const isFirstPush = (pushedAt: string, oldestPush: string | undefined) => {
+  return comparePushDates('firstPush', pushedAt, oldestPush);
+};
+
+const getLabelTitle = (action: UserActionResponse<PushedUserAction>, firstPush: boolean) => {
   const externalService = action.payload.externalService;
 
   return (
@@ -42,7 +56,7 @@ const getLabelTitle = (action: UserActionResponse<PushedUserAction>, hasBeenPush
       responsive={false}
     >
       <EuiFlexItem data-test-subj="pushed-label">
-        {`${!hasBeenPushed ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
+        {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
           externalService?.connectorName
         }`}
       </EuiFlexItem>
@@ -104,8 +118,9 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
       return [];
     }
 
+    const firstPush = isFirstPush(userAction.createdAt, connectorInfo.oldestPushDate);
     const footers = getFooters({ userAction: pushedUserAction, connectorInfo });
-    const label = getLabelTitle(pushedUserAction, connectorInfo.hasBeenPushed);
+    const label = getLabelTitle(pushedUserAction, firstPush);
 
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userProfiles,

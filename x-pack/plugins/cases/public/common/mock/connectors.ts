@@ -135,6 +135,7 @@ export const getCaseConnectorsMockResponse = (
         type: connector.actionTypeId,
         fields: null,
         needsToBePushed: false,
+        oldestPushDate: '2023-01-17T09:46:29.813Z',
         latestPushDate: '2023-01-17T09:46:29.813Z',
         hasBeenPushed: true,
         ...overrides[connector.id],

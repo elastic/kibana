@@ -417,7 +417,7 @@ describe('ConfigureCases', () => {
       expect(persistCaseConfigure).toHaveBeenCalledWith({
         connector: {
           id: 'resilient-2',
-          name: 'My Connector 2',
+          name: 'My Resilient connector',
           type: ConnectorTypes.resilient,
           fields: null,
         },
@@ -440,7 +440,7 @@ describe('ConfigureCases', () => {
           ...useCaseConfigureResponse,
           connector: {
             id: 'resilient-2',
-            name: 'My connector 2',
+            name: 'My Resilient connector',
             type: ConnectorTypes.resilient,
             fields: null,
           },
@@ -459,7 +459,7 @@ describe('ConfigureCases', () => {
         wrapper
           .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
           .text()
-      ).toBe('Update My Connector 2');
+      ).toBe('Update My Resilient connector');
     });
   });
 

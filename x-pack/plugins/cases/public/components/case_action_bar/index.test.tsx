@@ -68,21 +68,6 @@ describe('CaseActionBar', () => {
     expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-refresh"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-view-actions"]`).exists()).toBeTruthy();
-    // no loading bar
-    expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeFalsy();
-  });
-
-  it('shows a loading bar when user actions are loaded', async () => {
-    useGetCaseUserActionsMock.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <CaseActionBar {...defaultProps} />
-      </TestProviders>
-    );
-    expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeTruthy();
   });
 
   it('should show correct status', () => {

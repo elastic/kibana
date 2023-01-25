@@ -323,7 +323,7 @@ describe('CaseViewPage', () => {
       expect(updateObject.updateKey).toEqual('connector');
       expect(updateObject.updateValue).toEqual({
         id: 'resilient-2',
-        name: 'My Connector 2',
+        name: 'My Resilient connector',
         type: ConnectorTypes.resilient,
         fields: {
           incidentTypes: null,
@@ -413,7 +413,9 @@ describe('CaseViewPage', () => {
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('has-data-to-push-button')).toHaveTextContent('My Connector 2');
+      expect(result.getByTestId('has-data-to-push-button')).toHaveTextContent(
+        'My Resilient connector'
+      );
     });
   });
 

@@ -43,7 +43,7 @@ describe('usePushToService', () => {
   };
 
   const caseConnectors = getCaseConnectorsMockResponse();
-  const mockConnector = caseConnectors.jira;
+  const mockConnector = caseConnectors['jira-1'];
   const actionLicense = actionLicenses[0];
 
   const defaultArgs = {

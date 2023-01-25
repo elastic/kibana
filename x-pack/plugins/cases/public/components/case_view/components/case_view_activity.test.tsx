@@ -24,8 +24,11 @@ import { usePostPushToService } from '../../../containers/use_post_push_to_servi
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
+import { waitFor } from '@testing-library/dom';
+import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
 jest.mock('../../../containers/use_get_case_user_actions');
 jest.mock('../../../containers/configure/use_connectors');
@@ -37,6 +40,7 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../../containers/use_get_case_connectors');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
@@ -93,13 +97,20 @@ const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 
 describe('Case View Page activity tab', () => {
+  const caseConnectors = getCaseConnectorsMockResponse();
+
   beforeAll(() => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useBulkGetUserProfilesMock.mockReturnValue({ isLoading: false, data: new Map() });
+    useGetCaseConnectorsMock.mockReturnValue({
+      isLoading: false,
+      data: caseConnectors,
+    });
   });
   let appMockRender: AppMockRenderer;
 
@@ -203,7 +214,8 @@ describe('Case View Page activity tab', () => {
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    expect(result.getByTestId('case-view-edit-connector')).toBeInTheDocument();
-    await waitForComponentToUpdate();
+    await waitFor(() => {
+      expect(result.getByTestId('case-view-edit-connector')).toBeInTheDocument();
+    });
   });
 });

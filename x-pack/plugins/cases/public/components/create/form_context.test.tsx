@@ -407,7 +407,7 @@ describe('Create case', () => {
             subcategory: null,
           },
           id: 'servicenow-1',
-          name: 'My Connector',
+          name: 'My SN connector',
           type: '.servicenow',
         },
       });

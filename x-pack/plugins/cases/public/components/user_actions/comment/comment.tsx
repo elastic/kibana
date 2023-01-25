@@ -86,7 +86,7 @@ const getCreateCommentUserAction = ({
   comment: Comment;
 } & Omit<
   UserActionBuilderArgs,
-  'caseServices' | 'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
+  'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
   switch (comment.type) {
     case CommentType.user:
