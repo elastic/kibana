@@ -1823,18 +1823,19 @@ declare global {
   }
 }
 
-const baseNonCountCriterion: Pick<
-  NonCountMetricExpressionParams,
-  'aggType' | 'metric' | 'timeSize' | 'timeUnit'
-> = {
+const baseNonCountCriterion = {
   aggType: Aggregators.AVERAGE,
   metric: 'test.metric.1',
   timeSize: 1,
   timeUnit: 'm',
-};
+  threshold: [0],
+  comparator: Comparator.GT,
+} as NonCountMetricExpressionParams;
 
-const baseCountCriterion: Pick<CountMetricExpressionParams, 'aggType' | 'timeSize' | 'timeUnit'> = {
+const baseCountCriterion = {
   aggType: Aggregators.COUNT,
   timeSize: 1,
   timeUnit: 'm',
-};
+  threshold: [0],
+  comparator: Comparator.GT,
+} as CountMetricExpressionParams;

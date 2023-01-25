@@ -7,15 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { isEmpty } from 'lodash';
+import { isEmpty, isArray } from 'lodash';
 import {
+  Aggregators,
   Comparator,
+  CustomMetricExpressionParams,
   FilterQuery,
   MetricExpressionParams,
   QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
 
 const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
+
+const isCustomMetricExpressionParams = (
+  subject: MetricExpressionParams
+): subject is CustomMetricExpressionParams => {
+  return subject.aggType === Aggregators.CUSTOM && isArray(subject.customMetrics);
+};
 
 export function validateMetricThreshold({
   criteria,
@@ -150,7 +158,7 @@ export function validateMetricThreshold({
       );
     }
 
-    if (c.aggType === 'custom' && c.customMetrics) {
+    if (isCustomMetricExpressionParams(c)) {
       if (c.customMetrics) {
         c.customMetrics.forEach((metric) => {
           const customMetricErrors: { aggType?: string; field?: string } = {};

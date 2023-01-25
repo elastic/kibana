@@ -130,7 +130,7 @@ export interface CustomMetricExpressionParams extends BaseMetricExpressionParams
   aggType: Aggregators.CUSTOM;
   metric: never;
   customMetrics: MetricExpressionCustomMetric[];
-  equation: string;
+  equation?: string;
   label?: string;
 }
 
