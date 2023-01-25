@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
@@ -58,8 +58,13 @@ export const createAddToTimelineAction = ({
       if (dataProviders.length > 0) {
         store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
 
+        let messageValue = '';
+        if (field.value != null) {
+          messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
+        }
+
         notificationsService.toasts.addSuccess({
-          title: ADD_TO_TIMELINE_SUCCESS_TITLE(field.value),
+          title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
         });
       } else {
         notificationsService.toasts.addWarning({
