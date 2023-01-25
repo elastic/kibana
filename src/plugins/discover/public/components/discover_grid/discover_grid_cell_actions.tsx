@@ -86,7 +86,12 @@ export const FilterOutBtn = ({
   );
 };
 
-export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
+export const CopyBtn = ({
+  Component,
+  rowIndex,
+  columnId,
+  withShortLabel,
+}: EuiDataGridColumnCellActionProps & { withShortLabel?: boolean }) => {
   const { valueToStringConverter } = useContext(DiscoverGridContext);
   const { toastNotifications } = useDiscoverServices();
 
@@ -110,19 +115,24 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
     >
-      {i18n.translate('discover.grid.copyClipboardButton', {
-        defaultMessage: 'Copy to clipboard',
-      })}
+      {withShortLabel
+        ? i18n.translate('discover.grid.copyButton', {
+            defaultMessage: 'Copy',
+          })
+        : i18n.translate('discover.grid.copyClipboardButton', {
+            defaultMessage: 'Copy to clipboard',
+          })}
     </Component>
   );
+};
+
+export const CopyBtnShort = (props: EuiDataGridColumnCellActionProps) => {
+  return <CopyBtn {...props} withShortLabel />;
 };
 
 export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterFn) {
   if (field?.type === '_source') {
     return [CopyBtn];
-  } else if (!onFilter || !field.filterable) {
-    return undefined;
   }
-
-  return [FilterInBtn, FilterOutBtn];
+  return [...(onFilter && field.filterable ? [FilterInBtn, FilterOutBtn] : []), CopyBtnShort];
 }
