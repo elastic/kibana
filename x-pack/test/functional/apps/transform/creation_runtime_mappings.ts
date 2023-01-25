@@ -291,6 +291,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setRuntimeMappingsEditorContent(JSON.stringify(runtimeMappings));
           await transform.wizard.applyRuntimeMappings();
 
+          await transform.testExecution.logTestStep('displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(`sets the date picker to '10 Years ago'`);
+          await transform.wizard.setTimeRangeToXAgo(10, 'Years');
+
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
 

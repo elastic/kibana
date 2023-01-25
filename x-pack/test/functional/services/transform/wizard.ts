@@ -80,6 +80,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await testSubjects.existOrFail(selector);
     },
 
+    async assertIndexPreviewEmpty() {
+      await this.assertIndexPreviewExists('empty');
+    },
+
     async assertIndexPreviewLoaded() {
       await this.assertIndexPreviewExists('loaded');
     },
@@ -1079,6 +1083,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         const isErrorToast = await toast.elementHasClass('euiToast--danger');
         expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
       }
+    },
+
+    async setTimeRangeToXAgo(numberFieldUpdate: number, unitFieldUpdate: string) {
+      await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
+      const numberField = await find.byCssSelector('[aria-label="Time value"]');
+      await numberField.clearValueWithKeyboard();
+      await numberField.type(numberFieldUpdate.toString());
+      const unitField = await find.byCssSelector('[aria-label="Time unit"]');
+      await unitField.type(unitFieldUpdate);
+      await find.clickByButtonText('Apply');
+      await (await testSubjects.find('superDatePickerApplyTimeButton')).click();
     },
   };
 }
