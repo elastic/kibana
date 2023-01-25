@@ -26,9 +26,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { PackageClient } from '@kbn/fleet-plugin/server';
-import { createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
-import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
@@ -36,7 +34,6 @@ import { LicenseService } from '../../../../common/license';
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
-  metadataTransformPrefix,
   ENDPOINT_ACTIONS_INDEX,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
@@ -111,31 +108,6 @@ describe('Response actions', () => {
       const startContract = createMockEndpointAppContextServiceStartContract();
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
-      const mockPackageService = createMockPackageService();
-      const mockedPackageClient = mockPackageService.asInternalUser as jest.Mocked<PackageClient>;
-      mockedPackageClient.getInstallation.mockResolvedValue({
-        installed_kibana: [],
-        package_assets: [],
-        es_index_patterns: {},
-        name: '',
-        version: '',
-        install_status: 'installed',
-        install_version: '',
-        install_started_at: '',
-        install_source: 'registry',
-        installed_es: [
-          {
-            id: 'logs-endpoint.events.security',
-            type: ElasticsearchAssetType.indexTemplate,
-          },
-          {
-            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
-            type: ElasticsearchAssetType.transform,
-          },
-        ],
-        keep_policies_up_to_date: false,
-        verification_status: 'unknown',
-      });
 
       licenseEmitter = new Subject();
       licenseService = new LicenseService();
@@ -145,7 +117,6 @@ describe('Response actions', () => {
       endpointAppContextService.start({
         ...startContract,
         licenseService,
-        packageService: mockPackageService,
       });
 
       // add the host isolation route handlers to routerMock

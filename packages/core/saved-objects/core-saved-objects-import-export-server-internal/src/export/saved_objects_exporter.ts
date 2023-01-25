@@ -9,7 +9,7 @@
 import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,

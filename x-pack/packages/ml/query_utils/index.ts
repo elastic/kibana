@@ -6,3 +6,5 @@
  */
 
 export { addExcludeFrozenToQuery } from './src/add_exclude_frozen_to_query';
+export { buildBaseFilterCriteria } from './src/build_base_filter_criteria';
+export { getSafeAggregationName } from './src/get_safe_aggregation_name';
