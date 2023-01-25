@@ -120,7 +120,11 @@ export function logAlerts<
 
     for (const id of activeAlertIds) {
       const { actionGroup } = activeAlerts[id].getScheduledActionOptions() ?? {};
-      const meta = activeAlerts[id].getMeta();
+
+      // meta may contain an `end` date, which should not be used for active alerts
+      const meta = { ...activeAlerts[id].getMeta() };
+      delete meta.end;
+
       const message = `${ruleLogPrefix} active alert: '${id}' in actionGroup: '${actionGroup}'`;
       alertingEventLogger.logAlert({
         action: EVENT_LOG_ACTIONS.activeInstance,
