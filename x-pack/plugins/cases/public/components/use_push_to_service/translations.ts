@@ -78,7 +78,7 @@ export const LINK_CLOUD_DEPLOYMENT = i18n.translate('xpack.cases.caseView.cloudD
 });
 
 export const LINK_ACTIONS_CONFIGURATION = i18n.translate(
-  'xpack.cases.caseView.cloudDeploymentLink',
+  'xpack.cases.caseView.actionsConfigurationLink',
   {
     defaultMessage: 'Alerting and action settings in Kibana',
   }
