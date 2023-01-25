@@ -57,11 +57,11 @@ import {
   caseWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
-  getCaseConnectorsMockResponse,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
+import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

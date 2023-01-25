@@ -185,6 +185,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   handleManageQuote,
   handleOutlineComment,
   actionsNavigation,
+  caseConnectors,
 }) => ({
   build: () => {
     const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
@@ -226,6 +227,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleDeleteComment,
         handleManageQuote,
         actionsNavigation,
+        caseConnectors,
       });
 
       return commentAction;

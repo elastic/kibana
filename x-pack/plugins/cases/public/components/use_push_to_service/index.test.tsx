@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
+import type { CaseConnector } from '../../../common/api';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
+import { actionLicenses } from '../../containers/mock';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
-import * as i18n from './translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 jest.mock('../../containers/use_get_action_license', () => {
   return {
@@ -28,80 +29,60 @@ jest.mock('../../containers/use_get_action_license', () => {
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../case_view/use_on_refresh_case_view_page');
 
 const useFetchActionLicenseMock = useGetActionLicense as jest.Mock;
+const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
 describe('usePushToService', () => {
   const caseId = '12345';
-  const onEditClick = jest.fn();
-  const pushCaseToExternalService = jest.fn();
+  const pushCaseToExternalService = jest.fn().mockReturnValue({});
   const mockPostPush = {
     isLoading: false,
     pushCaseToExternalService,
   };
 
-  const mockConnector = connectorsMock[0];
+  const caseConnectors = getCaseConnectorsMockResponse();
+  const mockConnector = caseConnectors.jira;
   const actionLicense = actionLicenses[0];
-  const caseServices = {
-    '123': {
-      ...basicPush,
-      firstPushIndex: 0,
-      lastPushIndex: 0,
-      commentsToUpdate: [],
-      hasDataToPush: true,
-    },
-  };
 
   const defaultArgs = {
-    actionsErrors: [],
+    caseId,
+    caseStatus: CaseStatuses.open,
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: ConnectorTypes.serviceNowITSM,
-      fields: null,
-    },
-    caseId,
-    caseServices,
-    caseStatus: CaseStatuses.open,
-    configureCasesNavigation: {
-      href: 'href',
-      onClick: jest.fn(),
-    },
-    connectors: connectorsMock,
-    hasDataToPush: true,
-    onEditClick,
+      type: mockConnector.type,
+      fields: mockConnector.fields,
+    } as CaseConnector,
+    caseConnectors,
     isValidConnector: true,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (usePostPushToService as jest.Mock).mockImplementation(() => mockPostPush);
-    useFetchActionLicenseMock.mockImplementation(() => ({
+    usePostPushToServiceMock.mockReturnValue(mockPostPush);
+    useFetchActionLicenseMock.mockReturnValue({
       isLoading: false,
       data: actionLicense,
-    }));
+    });
   });
 
-  it('push case button posts the push with correct args', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () => usePushToService(defaultArgs),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      result.current.pushButton.props.children.props.onClick();
-      expect(pushCaseToExternalService).toBeCalledWith({
-        caseId,
-        connector: {
-          fields: null,
-          id: 'servicenow-1',
-          name: 'My Connector',
-          type: ConnectorTypes.serviceNowITSM,
-        },
-      });
-      expect(result.current.pushCallouts).toBeNull();
+  it('calls pushCaseToExternalService with correct arguments', async () => {
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () => usePushToService(defaultArgs),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
+
+    act(() => {
+      result.current.handlePushToService();
+    });
+
+    expect(pushCaseToExternalService).toBeCalledWith({
+      caseId,
+      connector: defaultArgs.connector,
     });
   });
 
@@ -113,18 +94,18 @@ describe('usePushToService', () => {
         enabledInLicense: false,
       },
     }));
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () => usePushToService(defaultArgs),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('license-error');
-    });
+
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () => usePushToService(defaultArgs),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
+
+    const errorsMsg = result.current.errorsMsg;
+    expect(errorsMsg).toHaveLength(1);
+    expect(errorsMsg[0].id).toEqual('license-error');
+    expect(result.current.hasErrorMessages).toBe(true);
   });
 
   it('Displays message when user does not have case enabled in config', async () => {
@@ -136,167 +117,137 @@ describe('usePushToService', () => {
       },
     }));
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () => usePushToService(defaultArgs),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () => usePushToService(defaultArgs),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
 
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('kibana-config-error');
-    });
+    const errorsMsg = result.current.errorsMsg;
+    expect(errorsMsg).toHaveLength(1);
+    expect(errorsMsg[0].id).toEqual('kibana-config-error');
+    expect(result.current.hasErrorMessages).toBe(true);
   });
 
-  it('Displays message when user does not have any connector configured', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            ...defaultArgs,
-            connectors: [],
-            connector: {
-              id: 'none',
-              name: 'none',
-              type: ConnectorTypes.none,
-              fields: null,
-            },
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
+  it('Displays message when user has select none as connector', async () => {
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () =>
+        usePushToService({
+          ...defaultArgs,
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
 
-      await waitForNextUpdate();
-
-      render(result.current.pushCallouts ?? <></>);
-      // getByText will thrown an error if the element is not found.
-      screen.getByText(i18n.CONFIGURE_CONNECTOR);
-
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-    });
-  });
-
-  it('Displays message when user does have a connector but is configured to none', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            ...defaultArgs,
-            connector: {
-              id: 'none',
-              name: 'none',
-              type: ConnectorTypes.none,
-              fields: null,
-            },
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-
-      await waitForNextUpdate();
-
-      render(result.current.pushCallouts ?? <></>);
-      // getByText will thrown an error if the element is not found.
-      screen.getByText(i18n.CONFIGURE_CONNECTOR);
-
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-    });
+    const errorsMsg = result.current.errorsMsg;
+    expect(errorsMsg).toHaveLength(1);
+    expect(errorsMsg[0].id).toEqual('connector-missing-error');
+    expect(result.current.hasErrorMessages).toBe(true);
   });
 
   it('Displays message when connector is deleted', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            ...defaultArgs,
-            connector: {
-              id: 'not-exist',
-              name: 'not-exist',
-              type: ConnectorTypes.none,
-              fields: null,
-            },
-            isValidConnector: false,
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
-    });
-  });
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () =>
+        usePushToService({
+          ...defaultArgs,
+          connector: {
+            id: 'not-exist',
+            name: 'not-exist',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          isValidConnector: false,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
 
-  it('Displays message when connector is deleted with empty connectors', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            ...defaultArgs,
-            connectors: [],
-            connector: {
-              id: 'not-exist',
-              name: 'not-exist',
-              type: ConnectorTypes.none,
-              fields: null,
-            },
-            isValidConnector: false,
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('connector-deleted-error');
-    });
+    const errorsMsg = result.current.errorsMsg;
+    expect(errorsMsg).toHaveLength(1);
+    expect(errorsMsg[0].id).toEqual('connector-deleted-error');
+    expect(result.current.hasErrorMessages).toBe(true);
   });
 
   it('Displays message when case is closed', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            ...defaultArgs,
-            caseStatus: CaseStatuses.closed,
-          }),
-        {
-          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
-      const errorsMsg = result.current.pushCallouts?.props.messages;
-      expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () =>
+        usePushToService({
+          ...defaultArgs,
+          caseStatus: CaseStatuses.closed,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
+
+    const errorsMsg = result.current.errorsMsg;
+    expect(errorsMsg).toHaveLength(1);
+    expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
+    expect(result.current.hasErrorMessages).toBe(true);
+  });
+
+  it('should not call pushCaseToExternalService when the selected connector is none', async () => {
+    const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () =>
+        usePushToService({
+          ...defaultArgs,
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
+
+    act(() => {
+      result.current.handlePushToService();
+    });
+
+    expect(pushCaseToExternalService).not.toBeCalled();
+  });
+
+  it('refresh case view page after push', async () => {
+    const { result, waitFor } = renderHook<UsePushToService, ReturnUsePushToService>(
+      () => usePushToService(defaultArgs),
+      {
+        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+      }
+    );
+
+    act(() => {
+      result.current.handlePushToService();
+    });
+
+    await waitFor(() => {
+      expect(useRefreshCaseViewPage()).toHaveBeenCalled();
     });
   });
 
-  describe('user does not have write permissions', () => {
-    it('disables the push button when the user does not have push permissions', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(defaultArgs),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
+  describe('user does not have write or push permissions', () => {
+    it('returns correct information about push permissions', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
 
-        const { getByTestId } = render(result.current.pushButton);
-
-        expect(getByTestId('push-to-external-service')).toBeDisabled();
-      });
+      expect(result.current.hasPushPermissions).toBe(false);
     });
 
     it('does not display a message when user does not have a premium license', async () => {
@@ -307,18 +258,18 @@ describe('usePushToService', () => {
           enabledInLicense: false,
         },
       }));
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(defaultArgs),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
-      });
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
+
+      expect(result.current.errorsMsg).toEqual([]);
+      expect(result.current.hasErrorMessages).toBe(false);
     });
 
     it('does not display a message when user does not have case enabled in config', async () => {
@@ -329,137 +280,305 @@ describe('usePushToService', () => {
           enabledInConfig: false,
         },
       }));
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(defaultArgs),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
-      });
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
+
+      expect(result.current.errorsMsg).toEqual([]);
+      expect(result.current.hasErrorMessages).toBe(false);
     });
 
     it('does not display a message when user does not have any connector configured', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () =>
-            usePushToService({
-              ...defaultArgs,
-              connectors: [],
-              connector: {
-                id: 'none',
-                name: 'none',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-            }),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
-      });
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          }),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
+
+      expect(result.current.errorsMsg).toEqual([]);
+      expect(result.current.hasErrorMessages).toBe(false);
     });
 
     it('does not display a message when user does have a connector but is configured to none', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () =>
-            usePushToService({
-              ...defaultArgs,
-              connector: {
-                id: 'none',
-                name: 'none',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-            }),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
-      });
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          }),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
+
+      expect(result.current.errorsMsg).toEqual([]);
+      expect(result.current.hasErrorMessages).toBe(false);
     });
 
     it('does not display a message when connector is deleted', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () =>
-            usePushToService({
-              ...defaultArgs,
-              connector: {
-                id: 'not-exist',
-                name: 'not-exist',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-              isValidConnector: false,
-            }),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
-      });
-    });
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            isValidConnector: false,
+          }),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
 
-    it('does not display a message when connector is deleted with empty connectors', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () =>
-            usePushToService({
-              ...defaultArgs,
-              connectors: [],
-              connector: {
-                id: 'not-exist',
-                name: 'not-exist',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-              isValidConnector: false,
-            }),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
-      });
+      expect(result.current.errorsMsg).toEqual([]);
+      expect(result.current.hasErrorMessages).toBe(false);
     });
 
     it('does not display a message when case is closed', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () =>
-            usePushToService({
-              ...defaultArgs,
-              caseStatus: CaseStatuses.closed,
-            }),
-          {
-            wrapper: ({ children }) => (
-              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
-            ),
-          }
-        );
-        await waitForNextUpdate();
-        expect(result.current.pushCallouts).toBeNull();
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            caseStatus: CaseStatuses.closed,
+          }),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
+
+      expect(result.current.errorsMsg).toEqual([]);
+      expect(result.current.hasErrorMessages).toBe(false);
+    });
+  });
+
+  describe('returned values', () => {
+    it('initial', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      const { handlePushToService, errorsMsg, ...rest } = result.current;
+
+      expect(rest).toEqual({
+        hasBeenPushed: true,
+        hasErrorMessages: false,
+        hasLicenseError: false,
+        hasPushPermissions: true,
+        isLoading: false,
+        needsToBePushed: false,
       });
+    });
+
+    it('isLoading is true when usePostPushToService is loading', async () => {
+      usePostPushToServiceMock.mockReturnValue({ ...mockPostPush, isLoading: true });
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.isLoading).toBe(true);
+    });
+
+    it('isLoading is true when loading license', async () => {
+      useFetchActionLicenseMock.mockReturnValue({
+        isLoading: true,
+        data: actionLicense,
+      });
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.isLoading).toBe(true);
+    });
+
+    it('hasErrorMessages=true if there are error messages', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService({ ...defaultArgs, caseStatus: CaseStatuses.closed }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.hasErrorMessages).toBe(true);
+    });
+
+    it('needsToBePushed=true if the connector needs to be pushed', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            caseConnectors: {
+              ...caseConnectors,
+              [mockConnector.id]: {
+                ...caseConnectors[mockConnector.id],
+                needsToBePushed: true,
+              },
+            },
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.needsToBePushed).toBe(true);
+    });
+
+    it('needsToBePushed=false if the connector does not exist', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            isValidConnector: false,
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.needsToBePushed).toBe(false);
+    });
+
+    it('hasBeenPushed=false if the connector has been pushed', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            caseConnectors: {
+              ...caseConnectors,
+              [mockConnector.id]: {
+                ...caseConnectors[mockConnector.id],
+                hasBeenPushed: false,
+              },
+            },
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.hasBeenPushed).toBe(false);
+    });
+
+    it('hasBeenPushed=false if the connector does not exist', async () => {
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            isValidConnector: false,
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.hasBeenPushed).toBe(false);
+    });
+
+    it('hasPushPermissions=false if it does not have push permission', async () => {
+      useFetchActionLicenseMock.mockReturnValue({
+        isLoading: true,
+        data: actionLicense,
+      });
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => (
+            <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
+          ),
+        }
+      );
+
+      expect(result.current.hasPushPermissions).toBe(false);
+    });
+
+    it('hasLicenseError=false if enabledInLicense=false', async () => {
+      useFetchActionLicenseMock.mockImplementation(() => ({
+        isLoading: false,
+        data: {
+          ...actionLicense,
+          enabledInLicense: false,
+        },
+      }));
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.hasLicenseError).toBe(true);
+    });
+
+    it('hasLicenseError=false if data=undefined', async () => {
+      useFetchActionLicenseMock.mockImplementation(() => ({
+        isLoading: false,
+        data: undefined,
+      }));
+
+      const { result } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () => usePushToService(defaultArgs),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.hasLicenseError).toBe(false);
     });
   });
 });

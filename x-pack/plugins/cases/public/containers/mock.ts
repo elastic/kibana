@@ -29,7 +29,6 @@ import type {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
-  GetCaseConnectorsResponse,
 } from '../../common/api';
 import {
   Actions,
@@ -53,11 +52,13 @@ export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
 export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
+export const pushConnectorId = 'servicenow-1';
 
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
 const basicClosedAt = '2020-02-21T15:02:57.995Z';
+const basicPushedAt = '2023-01-17T09:46:29.813Z';
 const laterTime = '2020-02-28T15:02:57.995Z';
 
 export const elasticUser = {
@@ -370,21 +371,21 @@ export const casesMetrics: CasesMetrics = {
 };
 
 export const basicPush = {
-  connectorId: '123',
+  connectorId: pushConnectorId,
   connectorName: 'connector name',
   externalId: 'external_id',
   externalTitle: 'external title',
   externalUrl: 'basicPush.com',
-  pushedAt: basicUpdatedAt,
+  pushedAt: basicPushedAt,
   pushedBy: elasticUser,
 };
 
 export const pushedCase: Case = {
   ...basicCase,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN Connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   externalService: basicPush,
@@ -539,7 +540,6 @@ export const casesStatusSnake: CasesStatusResponse = {
   count_open_cases: 20,
 };
 
-export const pushConnectorId = '123';
 export const pushSnake = {
   connector_id: pushConnectorId,
   connector_name: 'connector name',
@@ -550,16 +550,16 @@ export const pushSnake = {
 
 export const basicPushSnake = {
   ...pushSnake,
-  pushed_at: basicUpdatedAt,
+  pushed_at: basicPushedAt,
   pushed_by: elasticUserSnake,
 };
 
 export const pushedCaseSnake = {
   ...basicCaseSnake,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN Connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
@@ -608,7 +608,7 @@ export const getUserAction = (
     externalId: 'external_id',
     externalTitle: 'external title',
     externalUrl: 'basicPush.com',
-    pushedAt: basicUpdatedAt,
+    pushedAt: basicPushedAt,
     pushedBy: elasticUser,
   };
 
@@ -947,33 +947,3 @@ export const getPersistableStateAttachment = (
     ...viewObject,
   }),
 });
-
-export const getCaseConnectorsMockResponse = (): GetCaseConnectorsResponse => {
-  return {
-    '13c7d3d0-964b-11ed-92c7-bf5c2f911d31': {
-      name: '04_jira_connector',
-      type: ConnectorTypes.jira,
-      fields: {
-        issueType: '10024',
-        parent: null,
-        priority: 'High',
-      },
-      id: '13c7d3d0-964b-11ed-92c7-bf5c2f911d31',
-      needsToBePushed: false,
-      latestPushDate: '2023-01-17T09:46:29.813Z',
-      hasBeenPushed: true,
-    },
-    '17001b70-964b-11ed-92c7-bf5c2f911d31': {
-      name: '11_ibm_resilient',
-      type: ConnectorTypes.resilient,
-      fields: {
-        incidentTypes: ['17', '7'],
-        severityCode: '5',
-      },
-      id: '17001b70-964b-11ed-92c7-bf5c2f911d31',
-      needsToBePushed: false,
-      latestPushDate: '2023-01-17T09:46:54.064Z',
-      hasBeenPushed: true,
-    },
-  };
-};

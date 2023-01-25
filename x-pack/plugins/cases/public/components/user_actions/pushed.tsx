@@ -93,7 +93,6 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
   userAction,
   userProfiles,
   caseConnectors,
-  index,
   handleOutlineComment,
 }) => ({
   build: () => {

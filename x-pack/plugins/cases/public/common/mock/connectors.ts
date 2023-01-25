@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
+import type {
+  ActionConnector,
+  ActionTypeConnector,
+  GetCaseConnectorsResponse,
+} from '../../../common/api';
 
 export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
-    name: 'My Connector',
+    name: 'My SN connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
     },
@@ -21,7 +25,7 @@ export const connectorsMock: ActionConnector[] = [
   {
     id: 'resilient-2',
     actionTypeId: '.resilient',
-    name: 'My Connector 2',
+    name: 'My Resilient connector',
     config: {
       apiUrl: 'https://test/',
       orgId: '201',
@@ -52,7 +56,7 @@ export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-uses-table-api',
     actionTypeId: '.servicenow',
-    name: 'My Connector',
+    name: 'My deprecated SN connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
       usesTableApi: true,
@@ -118,3 +122,24 @@ export const actionTypesMock: ActionTypeConnector[] = [
     supportedFeatureIds: ['alerting', 'cases'],
   },
 ];
+
+export const getCaseConnectorsMockResponse = (
+  overrides: Record<string, Partial<GetCaseConnectorsResponse[string]>> = {}
+): GetCaseConnectorsResponse => {
+  return connectorsMock.reduce(
+    (acc, connector) => ({
+      ...acc,
+      [connector.id]: {
+        id: connector.id,
+        name: connector.name,
+        type: connector.actionTypeId,
+        fields: null,
+        needsToBePushed: false,
+        latestPushDate: '2023-01-17T09:46:29.813Z',
+        hasBeenPushed: true,
+        ...overrides[connector.id],
+      },
+    }),
+    {}
+  );
+};

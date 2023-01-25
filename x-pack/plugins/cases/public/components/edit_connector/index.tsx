@@ -156,25 +156,38 @@ export const EditConnector = React.memo(
       [fields, dispatch]
     );
 
-    const onError = useCallback(() => {
+    const resetConnector = useCallback(() => {
       setFieldValue('connectorId', selectedConnector);
-      dispatch({
-        type: 'SET_EDIT_CONNECTOR',
-        payload: false,
-      });
-    }, [dispatch, setFieldValue, selectedConnector]);
 
-    const onCancelConnector = useCallback(() => {
-      setFieldValue('connectorId', selectedConnector);
+      dispatch({
+        type: 'SET_CURRENT_CONNECTOR',
+        payload: getConnectorById(caseData.connector.id, allAvailableConnectors),
+      });
+
       dispatch({
         type: 'SET_FIELDS',
         payload: caseFields,
       });
+
       dispatch({
         type: 'SET_EDIT_CONNECTOR',
         payload: false,
       });
-    }, [dispatch, selectedConnector, setFieldValue, caseFields]);
+    }, [
+      allAvailableConnectors,
+      caseData.connector.id,
+      caseFields,
+      selectedConnector,
+      setFieldValue,
+    ]);
+
+    const onError = useCallback(() => {
+      resetConnector();
+    }, [resetConnector]);
+
+    const onCancelConnector = useCallback(() => {
+      resetConnector();
+    }, [resetConnector]);
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
@@ -242,17 +255,16 @@ export const EditConnector = React.memo(
             <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
               <h4>{i18n.CONNECTORS}</h4>
             </EuiFlexItem>
-            <EuiFlexItem data-test-subj="connector-edit" grow={false}>
-              <EuiButtonIcon
-                data-test-subj="connector-edit-button"
-                aria-label={i18n.EDIT_CONNECTOR_ARIA}
-                iconType="pencil"
-                onClick={onEditClick}
-                disabled={
-                  isLoading || editConnector || !hasPushPermissions || !actionsReadCapabilities
-                }
-              />
-            </EuiFlexItem>
+            {!isLoading && !editConnector && hasPushPermissions && actionsReadCapabilities ? (
+              <EuiFlexItem data-test-subj="connector-edit" grow={false}>
+                <EuiButtonIcon
+                  data-test-subj="connector-edit-button"
+                  aria-label={i18n.EDIT_CONNECTOR_ARIA}
+                  iconType="pencil"
+                  onClick={onEditClick}
+                />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
           <EuiFlexGroup data-test-subj="edit-connectors" direction="column" alignItems="stretch">

@@ -26,7 +26,6 @@ import {
   caseUserActions,
   pushedCase,
   tags,
-  getCaseConnectorsMockResponse,
 } from '../mock';
 import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
@@ -41,6 +40,7 @@ import { CaseStatuses } from '../../../common/api';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 export const getCase = async (
   caseId: string,

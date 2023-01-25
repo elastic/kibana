@@ -22,6 +22,7 @@ import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { CaseViewPage } from './case_view_page';
@@ -37,6 +38,7 @@ import type { CaseViewPageProps } from './types';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -46,6 +48,7 @@ jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
+jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -61,6 +64,7 @@ const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
@@ -94,6 +98,7 @@ describe('CaseViewPage', () => {
   const pushCaseToExternalService = jest.fn();
   const data = caseProps.caseData;
   let appMockRenderer: AppMockRenderer;
+  const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeEach(() => {
     mockGetCase();
@@ -102,6 +107,10 @@ describe('CaseViewPage', () => {
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    useGetCaseConnectorsMock.mockReturnValue({
+      isLoading: false,
+      data: caseConnectors,
+    });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
@@ -249,11 +258,11 @@ describe('CaseViewPage', () => {
   });
 
   it('should push updates on button click', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
+    useGetCaseConnectorsMock.mockImplementation(() => ({
+      isLoading: false,
       data: {
-        ...defaultUseGetCaseUserActions.data,
-        hasDataToPush: true,
+        ...caseConnectors,
+        'resilient-2': { ...caseConnectors['resilient-2'], needsToBePushed: true },
       },
     }));
 

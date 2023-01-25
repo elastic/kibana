@@ -123,10 +123,6 @@ describe('CaseView actions', () => {
           {...defaultProps}
           currentExternalIncident={{
             ...basicPush,
-            firstPushIndex: 5,
-            lastPushIndex: 5,
-            commentsToUpdate: [],
-            hasDataToPush: false,
           }}
         />
       </TestProviders>

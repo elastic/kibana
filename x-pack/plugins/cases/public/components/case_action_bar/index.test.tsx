@@ -29,8 +29,6 @@ const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const defaultUseGetCaseUserActions = {
   data: {
     caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    hasDataToPush: false,
     participants: [basicCase.createdBy],
   },
   isLoading: false,

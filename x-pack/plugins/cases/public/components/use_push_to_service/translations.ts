@@ -76,3 +76,10 @@ export const PUSH_DISABLE_BY_LICENSE_TITLE = i18n.translate(
 export const LINK_CLOUD_DEPLOYMENT = i18n.translate('xpack.cases.caseView.cloudDeploymentLink', {
   defaultMessage: 'cloud deployment',
 });
+
+export const LINK_ACTIONS_CONFIGURATION = i18n.translate(
+  'xpack.cases.caseView.cloudDeploymentLink',
+  {
+    defaultMessage: 'Alerting and action settings in Kibana',
+  }
+);
