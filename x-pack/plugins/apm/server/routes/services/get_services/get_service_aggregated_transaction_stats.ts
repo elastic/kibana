@@ -80,6 +80,11 @@ export async function getServiceAggregatedTransactionStats({
                   size: maxNumServices,
                 },
                 aggs: {
+                  overflowCount: {
+                    max: {
+                      field: 'service.aggregation.overflow_count',
+                    },
+                  },
                   transactionType: {
                     terms: {
                       field: TRANSACTION_TYPE,
