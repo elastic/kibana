@@ -1,10 +1,11 @@
 {
-  "id": "ftrSoApis",
+  "id": "ftrApis",
   "owner": {
     "name": "Core",
     "githubTeam": "kibana-core"
   },
   "version": "kibana",
+  "configPath": ["ftr_apis"],
   "server": true,
   "ui": false
 }

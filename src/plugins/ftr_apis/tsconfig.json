@@ -1,11 +1,13 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "isolatedModules": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
   ],
   "exclude": [
     "target/**/*",

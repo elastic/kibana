@@ -7,8 +7,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { FtrSavedObjectsApisPlugin } from './plugin';
+import { FtrApisPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new FtrSavedObjectsApisPlugin(initializerContext);
+  return new FtrApisPlugin(initializerContext);
 }
+
+export { config } from './config';

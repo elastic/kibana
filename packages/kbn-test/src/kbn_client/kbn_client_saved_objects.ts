@@ -7,7 +7,6 @@
  */
 
 import { inspect } from 'util';
-
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { isAxiosResponseError } from '@kbn/dev-utils';
@@ -93,7 +92,7 @@ async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) =
 /**
  * SO client for FTR.
  *
- * @remarks: Can only function when the ftrSoApis test plugin is enabled
+ * @remarks: Leverage the `ftrApis` plugin under the hood.
  */
 export class KbnClientSavedObjects {
   constructor(private readonly log: ToolingLog, private readonly requester: KbnClientRequester) {}

@@ -8,13 +8,20 @@
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
+import type { ConfigType } from './config';
 
-export class FtrSavedObjectsApisPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+export class FtrApisPlugin implements Plugin {
+  private readonly config: ConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ConfigType>();
+  }
 
   public setup({ http, savedObjects }: CoreSetup) {
     const router = http.createRouter();
-    registerRoutes(router);
+    if (!this.config.disableApis) {
+      registerRoutes(router);
+    }
   }
 
   public start() {}

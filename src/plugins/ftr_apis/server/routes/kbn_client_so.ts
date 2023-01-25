@@ -12,7 +12,7 @@ import { listHiddenTypes, catchAndReturnBoomErrors } from './utils';
 
 const KBN_CLIENT_API_PREFIX = '/internal/ftr/kbn_client_so';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerKbnClientSoRoutes = (router: IRouter) => {
   // GET
   router.get(
     {
