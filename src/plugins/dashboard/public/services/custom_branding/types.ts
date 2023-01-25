@@ -11,6 +11,5 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 export interface DashboardCustomBrandingService {
   customBranding: {
     hasCustomBranding$: CustomBrandingStart['hasCustomBranding$'];
-    showPlainSpinner?: boolean;
   };
 }

@@ -8,7 +8,6 @@
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { of } from 'rxjs';
 import { DashboardCustomBrandingService } from './types';
 
 type CustomBrandingServiceFactory = PluginServiceFactory<DashboardCustomBrandingService>;
@@ -18,7 +17,6 @@ export const customBrandingServiceFactory: CustomBrandingServiceFactory = () => 
   return {
     customBranding: {
       hasCustomBranding$: pluginMock.hasCustomBranding$,
-      showPlainSpinner: pluginMock.hasCustomBranding$.subscribe(() => of(true)) ? true : false,
     },
   };
 };

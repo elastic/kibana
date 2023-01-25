@@ -7,7 +7,6 @@
  */
 
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { of } from 'rxjs';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardCustomBrandingService } from './types';
 
@@ -20,11 +19,6 @@ export const customBrandingServiceFactory: CustomBrandingServiceFactory = (custo
   return {
     customBranding: {
       hasCustomBranding$: customBranding.coreStart.customBranding.hasCustomBranding$,
-      showPlainSpinner: customBranding.coreStart.customBranding.hasCustomBranding$.subscribe(() =>
-        of(true)
-      )
-        ? true
-        : false,
     },
   };
 };
