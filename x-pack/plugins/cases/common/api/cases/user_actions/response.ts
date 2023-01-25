@@ -59,7 +59,7 @@ const CaseUserActionBasicWithoutConnectorIdRt = rt.intersection([
   UserActionCommonAttributesRt,
 ]);
 
-const CaseUserActionResponseRt = rt.intersection([
+const CaseUserActionDeprecatedResponseRt = rt.intersection([
   CaseUserActionBasicRt,
   CaseUserActionSavedObjectIdsRt,
 ]);
@@ -72,10 +72,7 @@ const CaseUserActionInjectedAttributesWithoutActionIdRt = rt.intersection([
   CaseUserActionInjectedIdsRt,
 ]);
 
-/**
- * Rename to CaseUserActionResponseRt when the UI is switching to the new user action _find API
- */
-const CaseUserActionResponseWithoutActionIdRt = rt.intersection([
+const CaseUserActionResponseRt = rt.intersection([
   CaseUserActionInjectedAttributesWithoutActionIdRt,
   rt.type({
     id: rt.string,
@@ -85,9 +82,7 @@ const CaseUserActionResponseWithoutActionIdRt = rt.intersection([
 
 export const CaseUserActionAttributesRt = CaseUserActionBasicRt;
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
-export const CaseUserActionsResponseWithoutActionIdRt = rt.array(
-  CaseUserActionResponseWithoutActionIdRt
-);
+export const CaseUserActionsResponseWithoutActionIdRt = rt.array(CaseUserActionResponseRt);
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<

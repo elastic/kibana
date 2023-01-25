@@ -14,6 +14,7 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
+  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 
 import {
@@ -22,7 +23,7 @@ import {
   getActionLicense,
   getCase,
   getCases,
-  getCaseUserActions,
+  findCaseUserActions,
   getTags,
   patchCase,
   updateCases,
@@ -45,16 +46,14 @@ import {
   casesStatus,
   casesSnake,
   cases,
-  caseUserActions,
   pushedCase,
   tags,
-  caseUserActionsSnake,
+  findCaseUserActionsResponse,
+  findCaseUserActionsSnake,
   casesStatusSnake,
   basicCaseId,
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
-  caseUserActionsWithRegisteredAttachments,
-  caseUserActionsWithRegisteredAttachmentsSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -457,29 +456,32 @@ describe('Cases API', () => {
     });
   });
 
-  describe('getCaseUserActions', () => {
+  describe('findCaseUserActions', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(caseUserActionsSnake);
+      fetchMock.mockResolvedValue(findCaseUserActionsSnake);
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await getCaseUserActions(basicCase.id, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions`, {
+      await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          perPage: MAX_DOCS_PER_PAGE,
+        },
       });
     });
 
     it('should return correct response', async () => {
-      const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
-      expect(resp).toEqual(caseUserActions);
+      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(findCaseUserActionsResponse);
     });
 
     it('should not covert to camel case registered attachments', async () => {
-      fetchMock.mockResolvedValue(caseUserActionsWithRegisteredAttachmentsSnake);
-      const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
-      expect(resp).toEqual(caseUserActionsWithRegisteredAttachments);
+      fetchMock.mockResolvedValue(findCaseUserActionsSnake);
+      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(findCaseUserActionsResponse);
     });
   });
 

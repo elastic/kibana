@@ -15,6 +15,7 @@ import type {
   CasesMetrics,
   ExternalReferenceComment,
   PersistableComment,
+  FindCaseUserActions,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -29,6 +30,7 @@ import type {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+  UserActionFindResponse,
 } from '../../common/api';
 import {
   Actions,
@@ -737,6 +739,25 @@ export const caseUserActionsSnake: CaseUserActionsResponse = [
   getUserActionSnake('description', Actions.update),
 ];
 
+export const findCaseUserActionsSnake: UserActionFindResponse = {
+  page: 1,
+  perPage: 1000,
+  total: 20,
+  userActions: [
+    {
+      ...getUserActionSnake('description', Actions.create),
+      id: 'description_id',
+      version: 'WzQ3LDFc',
+    },
+    { ...getUserActionSnake('comment', Actions.create), id: 'comment_id', version: 'WzQ3LDFc' },
+    {
+      ...getUserActionSnake('description', Actions.update),
+      id: 'description_id',
+      version: 'WzQ3LDFc',
+    },
+  ],
+};
+
 export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsResponse = [
   getUserActionSnake('description', Actions.create),
   {
@@ -842,6 +863,17 @@ export const caseUserActions: CaseUserActions[] = [
   getUserAction('comment', Actions.create),
   getUserAction('description', Actions.update),
 ];
+
+export const findCaseUserActionsResponse: FindCaseUserActions = {
+  page: 1,
+  perPage: 1000,
+  total: 20,
+  userActions: [
+    { ...getUserAction('description', Actions.create), id: 'description_id', version: 'WzQ3LDFc' },
+    { ...getUserAction('comment', Actions.create), id: 'comment_id', version: 'WzQ3LDFc' },
+    { ...getUserAction('description', Actions.update), id: 'description_id', version: 'WzQ3LDFc' },
+  ],
+};
 
 export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
   getUserAction('description', Actions.create),
