@@ -33,6 +33,7 @@ import {
 } from './metric_threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
+import { DEFAULT_FLAPPING_SETTINGS, RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -116,6 +117,7 @@ const mockOptions = {
     ruleTypeName: '',
   },
   logger,
+  flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
