@@ -58,10 +58,30 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+
 import type { SecurityAppStore } from './common/store/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
+  /**
+   * The current Kibana branch. e.g. 'main'
+   */
+  readonly kibanaBranch: string;
+  /**
+   * The current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'
+   */
   readonly kibanaVersion: string;
+  /**
+   * For internal use. Specify which version of the Detection Rules fleet package to install
+   * when upgrading rules. If not provided, the latest compatible package will be installed,
+   * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
+   * will be used (if fleet is available or not within an airgapped environment).
+   *
+   * Note: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`
+   * hook when navigating to a Security Solution page. The package version specified in
+   * `fleet_packages.json` in project root will always be installed first on Kibana start if
+   * the package is not already installed.
+   */
+  readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 
@@ -69,6 +89,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.kibanaBranch = initializerContext.env.packageInfo.branch;
+    this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -169,7 +191,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         return renderApp({
           ...params,
-          services: await startServices(params),
+          services,
           store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
@@ -214,7 +236,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    KibanaServices.init({
+      ...core,
+      ...plugins,
+      kibanaBranch: this.kibanaBranch,
+      kibanaVersion: this.kibanaVersion,
+      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+    });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
 

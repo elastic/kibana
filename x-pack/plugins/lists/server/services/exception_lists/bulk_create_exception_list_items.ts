@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -50,7 +50,7 @@ export const bulkCreateExceptionListItems = async ({
         name: item.name,
         os_types: item.os_types,
         tags: item.tags,
-        tie_breaker_id: tieBreaker ?? uuid.v4(),
+        tie_breaker_id: tieBreaker ?? uuidv4(),
         type: item.type,
         updated_by: user,
         version: undefined,

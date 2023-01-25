@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
@@ -99,7 +99,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
             name,
             os_types: osTypes,
             tags,
-            tie_breaker_id: uuid.v4(),
+            tie_breaker_id: uuidv4(),
             type,
             updated_by: user,
             version: undefined,

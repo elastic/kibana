@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
@@ -53,7 +53,7 @@ export const createEndpointList = async ({
         name: ENDPOINT_LIST_NAME,
         os_types: [],
         tags: [],
-        tie_breaker_id: tieBreaker ?? uuid.v4(),
+        tie_breaker_id: tieBreaker ?? uuidv4(),
         type: 'endpoint',
         updated_by: user,
         version,

@@ -84,8 +84,8 @@ describe('CurationsTable', () => {
       expect(tableContent).toContain('mountains, valleys');
 
       expect(tableContent).toContain('Last updated');
-      expect(tableContent).toContain('Jan 1, 1970 12:00 PM');
-      expect(tableContent).toContain('Jan 2, 1970 12:00 PM');
+      expect(tableContent).toContain('Jan 1, 1970 12:00 PM');
+      expect(tableContent).toContain('Jan 2, 1970 12:00 PM');
     });
 
     it('renders queries with curation links and curation suggestion badges', () => {

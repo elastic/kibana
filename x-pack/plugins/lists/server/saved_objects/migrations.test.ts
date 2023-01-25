@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -31,7 +31,7 @@ const DEFAULT_EXCEPTION_LIST_SO: ExceptionListSoSchema = {
   name: 'name',
   os_types: [],
   tags: [],
-  tie_breaker_id: uuid.v4(),
+  tie_breaker_id: uuidv4(),
   type: 'endpoint',
   updated_by: 'user',
   version: undefined,

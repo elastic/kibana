@@ -7,11 +7,29 @@
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
+
+import type { CasesFindRequest } from '../../common/api';
 import type { CasesClient } from '.';
+import type { AttachmentsSubClient } from './attachments/client';
+import type { CasesSubClient } from './cases/client';
+import type { ConfigureSubClient } from './configure/client';
+import type { CasesClientFactory } from './factory';
+import type { MetricsSubClient } from './metrics/client';
+import type { UserActionsSubClient } from './user_actions/client';
+
+import { CaseStatuses } from '../../common';
+import { CaseSeverity } from '../../common/api';
+import { SortFieldCase } from '../../public/containers/types';
+import {
+  createExternalReferenceAttachmentTypeRegistryMock,
+  createPersistableStateAttachmentTypeRegistryMock,
+} from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
   connectorMappingsServiceMock,
@@ -23,16 +41,6 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
 } from '../services/mocks';
-import type { AttachmentsSubClient } from './attachments/client';
-import type { CasesSubClient } from './cases/client';
-import type { ConfigureSubClient } from './configure/client';
-import type { CasesClientFactory } from './factory';
-import type { MetricsSubClient } from './metrics/client';
-import type { UserActionsSubClient } from './user_actions/client';
-import {
-  createExternalReferenceAttachmentTypeRegistryMock,
-  createPersistableStateAttachmentTypeRegistryMock,
-} from '../attachment_framework/mocks';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -83,6 +91,8 @@ type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
 const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
   return {
     getAll: jest.fn(),
+    getConnectors: jest.fn(),
+    find: jest.fn(),
   };
 };
 
@@ -125,6 +135,20 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   return factory as unknown as CasesClientFactoryMock;
 };
 
+type SavedObjectsSerializerMock = jest.Mocked<ISavedObjectsSerializer>;
+
+export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock => {
+  const serializer = serializerMock.create();
+  serializer.generateRawId.mockImplementation(
+    (namespace: string | undefined, type: string, id: string) => {
+      const namespacePrefix = namespace ? `${namespace}:` : '';
+      return `${namespacePrefix}${type}:${id}`;
+    }
+  );
+
+  return serializer;
+};
+
 export const createCasesClientMockArgs = () => {
   return {
     services: {
@@ -158,5 +182,22 @@ export const createCasesClientMockArgs = () => {
         {}
       )
     ),
+    savedObjectsSerializer: createSavedObjectsSerializerMock(),
   };
 };
+
+export const createCasesClientMockFindRequest = (
+  overwrites?: CasesFindRequest
+): CasesFindRequest => ({
+  search: '',
+  searchFields: ['title', 'description'],
+  severity: CaseSeverity.LOW,
+  assignees: [],
+  reporters: [],
+  status: CaseStatuses.open,
+  tags: [],
+  owner: [],
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+  ...overwrites,
+});
