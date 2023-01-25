@@ -513,15 +513,15 @@ export function LayerPanel(
                         const { columnId } = accessorConfig;
 
                         const messages = props.getUserMessages('dimensionTrigger', {
-                          // TODO - support warnings
-                          severity: 'error',
                           dimensionId: columnId,
                         });
 
-                        const hasMessages = Boolean(messages.length);
-                        const messageToDisplay = hasMessages
-                          ? messages[0].shortMessage || messages[0].longMessage
-                          : undefined;
+                        const firstErrorMessage = messages.find(
+                          ({ severity }) => severity === 'error'
+                        );
+                        const firstWarningMessage = messages.find(
+                          ({ severity }) => severity === 'warning'
+                        );
 
                         return (
                           <DraggableDimensionButton
@@ -574,15 +574,15 @@ export function LayerPanel(
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                invalid={
-                                  layerDatasource &&
-                                  !layerDatasource?.isValidColumn(
-                                    layerDatasourceState,
-                                    dataViews.indexPatterns,
-                                    layerId,
-                                    columnId,
-                                    dateRange
-                                  )
+                                errorMessage={
+                                  firstErrorMessage?.longMessage ||
+                                  firstErrorMessage?.shortMessage ||
+                                  undefined
+                                }
+                                warningMessage={
+                                  firstWarningMessage?.longMessage ||
+                                  firstWarningMessage?.shortMessage ||
+                                  undefined
                                 }
                               >
                                 {layerDatasource ? (
@@ -593,9 +593,6 @@ export function LayerPanel(
                                       columnId: accessorConfig.columnId,
                                       groupId: group.groupId,
                                       filterOperations: group.filterOperations,
-                                      hideTooltip,
-                                      invalid: hasMessages,
-                                      invalidMessage: messageToDisplay,
                                       indexPatterns: dataViews.indexPatterns,
                                     }}
                                   />
@@ -605,8 +602,6 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      invalid: hasMessages,
-                                      invalidMessage: messageToDisplay,
                                     })}
                                   </>
                                 )}

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ColorIndicator } from '../color_indicator';
+import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
 import { VisualizationDimensionGroupConfig, AccessorConfig } from '../../../../types';
 
@@ -25,7 +25,8 @@ export function DimensionButton({
   onRemoveClick,
   accessorConfig,
   label,
-  invalid,
+  errorMessage,
+  warningMessage,
 }: {
   group: VisualizationDimensionGroupConfig;
   children: React.ReactElement;
@@ -33,7 +34,8 @@ export function DimensionButton({
   onRemoveClick: (id: string) => void;
   accessorConfig: AccessorConfig;
   label: string;
-  invalid?: boolean;
+  errorMessage: string | React.ReactNode | undefined;
+  warningMessage: string | React.ReactNode | undefined;
 }) {
   return (
     <>
@@ -43,9 +45,15 @@ export function DimensionButton({
         onClick={() => onClick(accessorConfig.columnId)}
         aria-label={triggerLinkA11yText(label)}
         title={triggerLinkA11yText(label)}
-        color={invalid ? 'danger' : undefined}
+        color={errorMessage ? 'danger' : warningMessage ? 'warning' : undefined}
       >
-        <ColorIndicator accessorConfig={accessorConfig}>{children}</ColorIndicator>
+        <DimensionButtonIcon
+          errorMessage={errorMessage}
+          warningMessage={warningMessage}
+          accessorConfig={accessorConfig}
+        >
+          {children}
+        </DimensionButtonIcon>
       </EuiLink>
       <EuiButtonIcon
         className="lnsLayerPanel__dimensionRemove"

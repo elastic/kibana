@@ -233,13 +233,14 @@ export function getTextBasedDatasource({
       });
       return { state: { layers }, savedObjectReferences };
     },
-    isValidColumn(state, indexPatterns, layerId, columnId) {
-      const layer = state.layers[layerId];
-      const column = layer.columns.find((c) => c.columnId === columnId);
-      const indexPattern = indexPatterns[layer.index];
-      if (!column || !indexPattern) return false;
-      return true;
-    },
+    // TODO - make sure this is covered in the user messsages
+    // isValidColumn(state, indexPatterns, layerId, columnId) {
+    //   const layer = state.layers[layerId];
+    //   const column = layer.columns.find((c) => c.columnId === columnId);
+    //   const indexPattern = indexPatterns[layer.index];
+    //   if (!column || !indexPattern) return false;
+    //   return true;
+    // },
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;

@@ -523,12 +523,6 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state, indexPatterns, layerId, columnId, dateRange) => {
-      const layer = state.layers[layerId];
-
-      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId], dateRange);
-    },
-
     renderDimensionTrigger: (
       domElement: Element,
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
@@ -552,13 +546,7 @@ export function getFormBasedDatasource({
                 unifiedSearch,
               }}
             >
-              <DimensionTrigger
-                id={props.columnId}
-                label={formattedLabel}
-                isInvalid={props.invalid}
-                hideTooltip={props.hideTooltip}
-                invalidMessage={props.invalidMessage}
-              />
+              <DimensionTrigger id={props.columnId} label={formattedLabel} />
             </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
@@ -847,8 +835,15 @@ export function getFormBasedDatasource({
       const dimensionErrorMessages = getInvalidDimensionErrorMessages(
         state,
         layerErrorMessages,
-        (layerId, columnId) =>
-          this.isValidColumn(state, frameDatasourceAPI.dataViews.indexPatterns, layerId, columnId)
+        (layerId, columnId) => {
+          const layer = state.layers[layerId];
+          return !isColumnInvalid(
+            layer,
+            columnId,
+            frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
+            frameDatasourceAPI.dateRange
+          );
+        }
       );
 
       const warningMessages = [
