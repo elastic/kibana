@@ -12,6 +12,7 @@ import {
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
 
+import useObservable from 'react-use/lib/useObservable';
 import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
@@ -38,11 +39,15 @@ export const DashboardAppNoDataPage = ({
       },
       application,
       http: { basePath },
+      customBranding: {
+        hasCustomBranding$: customBranding.customBranding.hasCustomBranding$,
+        showPlainSpinner: customBranding.customBranding.hasCustomBranding$,
+      },
     },
     dataViews,
     dataViewEditor,
     customBranding: {
-      hasCustomBranding$: customBranding.customBranding.hasCustomBranding$,
+      showPlainSpinner: useObservable(customBranding.customBranding.hasCustomBranding$),
     },
   };
   return (

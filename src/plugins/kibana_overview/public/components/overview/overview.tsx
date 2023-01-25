@@ -186,6 +186,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         chrome,
         docLinks,
         http,
+        customBranding,
       },
       dataViews: {
         ...dataViews,

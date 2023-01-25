@@ -8,7 +8,7 @@
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { DashboardCustomBrandingService } from './types';
 
 type CustomBrandingServiceFactory = PluginServiceFactory<DashboardCustomBrandingService>;
@@ -18,7 +18,8 @@ export const customBrandingServiceFactory: CustomBrandingServiceFactory = () => 
   return {
     customBranding: {
       hasCustomBranding$: pluginMock.hasCustomBranding$,
-      showPlainSpinner: pluginMock.hasCustomBranding$.subscribe((data) => of(true)) ? true : false,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      showPlainSpinner: useObservable(pluginMock.hasCustomBranding$, false),
     },
   };
 };

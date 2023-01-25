@@ -7,7 +7,7 @@
  */
 
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardCustomBrandingService } from './types';
 
@@ -16,13 +16,15 @@ export type CustomBrandingServiceFactory = KibanaPluginServiceFactory<
   DashboardStartDependencies
 >;
 
-export const customBrandingServiceFactory: CustomBrandingServiceFactory = ({ customBranding }) => {
-  const { hasCustomBranding$ } = customBranding;
-  const showPlainSpinner = customBranding.hasCustomBranding$?.subscribe(() => of(true))
-    ? true
-    : false;
+export const customBrandingServiceFactory: CustomBrandingServiceFactory = (customBranding) => {
   return {
-    hasCustomBranding$,
-    showPlainSpinner,
+    customBranding: {
+      hasCustomBranding$: customBranding.coreStart.customBranding.hasCustomBranding$,
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      showPlainSpinner: useObservable(
+        customBranding.coreStart.customBranding.hasCustomBranding$,
+        false
+      ),
+    },
   };
 };

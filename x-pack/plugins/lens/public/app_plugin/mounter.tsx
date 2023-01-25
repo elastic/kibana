@@ -334,6 +334,7 @@ export async function mountApp(
           coreStart,
           dataViews: data.dataViews,
           dataViewEditor: startDependencies.dataViewEditor,
+          customBranding: coreStart.customBranding,
         };
         return (
           <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
