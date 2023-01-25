@@ -43,6 +43,7 @@
     "@kbn/core-doc-links-browser",
     "@kbn/ui-theme",
     "@kbn/datemath",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",
