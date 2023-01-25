@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('@kbn/ci-stats-shipper-cli');
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-ci-stats-shipper-cli'],
+};
