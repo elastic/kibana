@@ -26,7 +26,7 @@ export const TestDetailsLink = ({
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
 
-  const format = useKibanaDateFormat();
+  const format = useKibanaDateFormat(timestamp);
   const timestampText = (
     <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
       {formatTestRunAt(timestamp, format)}
