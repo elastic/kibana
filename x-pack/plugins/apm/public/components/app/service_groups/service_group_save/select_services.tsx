@@ -113,86 +113,92 @@ export function SelectServices({
   return (
     <Container>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.title', {
-            defaultMessage: 'Select services',
-          })}
-        </EuiModalHeaderTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s">
-          {i18n.translate(
-            'xpack.apm.serviceGroups.selectServicesForm.subtitle',
-            {
-              defaultMessage:
-                'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
-            }
-          )}
-        </EuiText>
-        {kueryValidationMessage && (
-          <EuiText color="danger" size="s">
-            {kueryValidationMessage}
-          </EuiText>
-        )}
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <KueryBar
-              placeholder={i18n.translate(
-                'xpack.apm.serviceGroups.selectServicesForm.kql',
-                { defaultMessage: 'E.g. labels.team: "web"' }
-              )}
-              onSubmit={(value) => {
-                setKuery(value);
-              }}
-              onChange={(value) => {
-                setStagedKuery(value);
-              }}
-              value={kuery}
-              suggestionFilter={(querySuggestion) => {
-                if ('field' in querySuggestion) {
-                  const {
-                    field: {
-                      spec: { name: fieldName },
-                    },
-                  } = querySuggestion;
-
-                  return isSupportedField(fieldName);
-                }
-                return true;
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => {
-                setKuery(stagedKuery);
-              }}
-              iconType={!kuery ? 'search' : 'refresh'}
-              isDisabled={isServiceListPreviewLoading || !stagedKuery}
-            >
-              {!kuery
-                ? i18n.translate(
-                    'xpack.apm.serviceGroups.selectServicesForm.preview',
-                    { defaultMessage: 'Preview' }
-                  )
-                : i18n.translate(
-                    'xpack.apm.serviceGroups.selectServicesForm.refresh',
-                    { defaultMessage: 'Refresh' }
-                  )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {kuery && data?.items && (
-          <EuiText color="success" size="s">
+        <div>
+          <EuiModalHeaderTitle>
             {i18n.translate(
-              'xpack.apm.serviceGroups.selectServicesForm.matchingServiceCount',
+              'xpack.apm.serviceGroups.selectServicesForm.title',
+              {
+                defaultMessage: 'Select services',
+              }
+            )}
+          </EuiModalHeaderTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            {i18n.translate(
+              'xpack.apm.serviceGroups.selectServicesForm.subtitle',
               {
                 defaultMessage:
-                  '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
-                values: { servicesCount: data?.items.length },
+                  'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
               }
             )}
           </EuiText>
-        )}
+          {kueryValidationMessage && (
+            <EuiText color="danger" size="s">
+              {kueryValidationMessage}
+            </EuiText>
+          )}
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <KueryBar
+                placeholder={i18n.translate(
+                  'xpack.apm.serviceGroups.selectServicesForm.kql',
+                  { defaultMessage: 'E.g. labels.team: "web"' }
+                )}
+                onSubmit={(value) => {
+                  setKuery(value);
+                }}
+                onChange={(value) => {
+                  setStagedKuery(value);
+                }}
+                value={kuery}
+                suggestionFilter={(querySuggestion) => {
+                  if ('field' in querySuggestion) {
+                    const {
+                      field: {
+                        spec: { name: fieldName },
+                      },
+                    } = querySuggestion;
+
+                    return isSupportedField(fieldName);
+                  }
+                  return true;
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  setKuery(stagedKuery);
+                }}
+                iconType={!kuery ? 'search' : 'refresh'}
+                isDisabled={isServiceListPreviewLoading || !stagedKuery}
+              >
+                {!kuery
+                  ? i18n.translate(
+                      'xpack.apm.serviceGroups.selectServicesForm.preview',
+                      { defaultMessage: 'Preview' }
+                    )
+                  : i18n.translate(
+                      'xpack.apm.serviceGroups.selectServicesForm.refresh',
+                      { defaultMessage: 'Refresh' }
+                    )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {kuery && data?.items && (
+            <EuiText color="success" size="s">
+              {i18n.translate(
+                'xpack.apm.serviceGroups.selectServicesForm.matchingServiceCount',
+                {
+                  defaultMessage:
+                    '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
+                  values: { servicesCount: data?.items.length },
+                }
+              )}
+            </EuiText>
+          )}
+        </div>
       </EuiModalHeader>
       <EuiModalBody
         style={{
