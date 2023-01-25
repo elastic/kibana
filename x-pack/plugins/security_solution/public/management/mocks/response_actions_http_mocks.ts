@@ -187,6 +187,8 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       return {
         data: {
           created: '2022-10-10T14:57:30.682Z',
+          actionId: 'abc',
+          agentId: '123',
           id: '123',
           mimeType: 'text/plain',
           name: 'test.txt',
