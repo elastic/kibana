@@ -33,7 +33,7 @@ export type MetricExplorerCustomMetricAggregations = Exclude<
   'custom' | 'rate' | 'p95' | 'p99'
 >;
 const metricsExplorerCustomMetricAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.filter(
-  (a) => a !== 'custom'
+  (a) => ['custom', 'rate', 'p95', 'p99'].includes(a) !== false
 ).reduce<Record<MetricExplorerCustomMetricAggregations, null>>(
   (acc, agg) => ({ ...acc, [agg]: null }),
   {} as Record<MetricExplorerCustomMetricAggregations, null>
