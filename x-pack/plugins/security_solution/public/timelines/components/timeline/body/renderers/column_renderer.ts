@@ -8,8 +8,8 @@
 import type React from 'react';
 import type { Filter } from '@kbn/es-query';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import type { Ecs } from '../../../../../../common/ecs';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export interface ColumnRenderer {
