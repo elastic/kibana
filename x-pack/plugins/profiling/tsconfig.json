@@ -20,7 +20,6 @@
     "@kbn/observability-plugin",
     "@kbn/i18n",
     "@kbn/es-types",
-    "@kbn/core-http-browser",
     "@kbn/data-views-plugin",
     "@kbn/charts-plugin",
     "@kbn/typed-react-router-config",
@@ -35,7 +34,13 @@
     "@kbn/core-http-server",
     "@kbn/apm-utils",
     "@kbn/core-elasticsearch-server",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/shared-ux-page-no-data-types",
+    "@kbn/es-errors",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/spaces-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/core-saved-objects-api-server"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
