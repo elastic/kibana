@@ -42,10 +42,10 @@ properties:
     properties:
       cpu_avg:
         type: number
-        description: Average agent CPU usage during the last 5 minute, number between 0-1
+        description: Average agent CPU usage during the last 5 minutes, number between 0-1
       memory_size_byte_avg:
         type: number
-        description: Average agent memory consumption during the last 5 minute
+        description: Average agent memory consumption during the last 5 minutes
 
 required:
   - type
