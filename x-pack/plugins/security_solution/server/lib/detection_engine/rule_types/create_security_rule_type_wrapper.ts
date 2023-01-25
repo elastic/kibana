@@ -12,9 +12,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
-import { isRuleSnoozed } from '@kbn/alerting-plugin/server';
 
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -388,7 +387,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const createdSignalsCount = result.createdSignals.length;
 
-            if (actions.length && !isRuleSnoozed(options.rule)) {
+            if (actions.length) {
               const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
               const toInMs = parseScheduleDates('now')?.format('x');
               const resultsLink = getNotificationResultsLink({

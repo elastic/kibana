@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   TriggersAndActionsUIPublicPluginStart,
   RuleTableItem,
@@ -48,21 +48,12 @@ const mockRule: RuleTableItem = {
 };
 
 export const RulesListNotifyBadgeSandbox = ({ triggersActionsUi }: SandboxProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
   return (
     <div style={{ flex: 1 }}>
       {triggersActionsUi.getRulesListNotifyBadge({
         rule: mockRule,
-        isOpen,
-        isLoading,
-        onClick: () => setIsOpen(!isOpen),
-        onClose: () => setIsOpen(false),
-        onLoading: setIsLoading,
+        isLoading: false,
         onRuleChanged: () => Promise.resolve(),
-        snoozeRule: () => Promise.resolve(),
-        unsnoozeRule: () => Promise.resolve(),
       })}
     </div>
   );
