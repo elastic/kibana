@@ -33,7 +33,7 @@ post:
 #               - $ref: '../components/schemas/run_connector_request_resilient.yaml'
                 - $ref: '../components/schemas/run_connector_request_serverlog.yaml'
 #                - $ref: '../components/schemas/run_connector_request_servicenow.yaml'
-#                - $ref: '../components/schemas/run_connector_request_servicenow_itom.yaml'
+                - $ref: '../components/schemas/run_connector_request_servicenow_itom.yaml'
 #                - $ref: '../components/schemas/run_connector_request_servicenow_sir.yaml'
 #               - $ref: '../components/schemas/run_connector_request_slack.yaml'
 #                - $ref: '../components/schemas/run_connector_request_swimlane.yaml'
@@ -48,6 +48,8 @@ post:
             $ref: '../components/examples/run_jira_connector_request.yaml'
           runServerLogConnectorRequest:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
+          runServiceNowITOMRequest:
+            $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -84,6 +86,8 @@ post:
               $ref: '../components/examples/run_jira_connector_response.yaml'
             runServerLogConnectorResponse:
               $ref: '../components/examples/run_server_log_connector_response.yaml'
+            runServiceNowITOMConnectorResponse:
+              $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:

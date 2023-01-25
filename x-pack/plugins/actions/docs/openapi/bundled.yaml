@@ -397,6 +397,7 @@ paths:
                     - $ref: '#/components/schemas/run_connector_request_jira'
                     - $ref: '#/components/schemas/run_connector_request_opsgenie'
                     - $ref: '#/components/schemas/run_connector_request_serverlog'
+                    - $ref: '#/components/schemas/run_connector_request_servicenow_itom'
             examples:
               runIndexConnectorRequest:
                 $ref: '#/components/examples/run_index_connector_request'
@@ -404,6 +405,8 @@ paths:
                 $ref: '#/components/examples/run_jira_connector_request'
               runServerLogConnectorRequest:
                 $ref: '#/components/examples/run_server_log_connector_request'
+              runServiceNowITOMRequest:
+                $ref: '#/components/examples/run_servicenow_itom_connector_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -440,6 +443,8 @@ paths:
                   $ref: '#/components/examples/run_jira_connector_response'
                 runServerLogConnectorResponse:
                   $ref: '#/components/examples/run_server_log_connector_response'
+                runServiceNowITOMConnectorResponse:
+                  $ref: '#/components/examples/run_servicenow_itom_connector_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -2502,6 +2507,81 @@ components:
         message:
           type: string
           description: The message to log.
+    run_connector_request_servicenow_itom:
+      title: Run ServiceNow ITOM connector parameters
+      description: Test a ServiceNow action.
+      oneOf:
+        - type: object
+          required:
+            - subAction
+          description: ServiceNow ITOM connector properties when `subAction` is `addEvent`.
+          properties:
+            subAction:
+              type: string
+              description: The action to test.
+              enum:
+                - addEvent
+            subActionParams:
+              type: object
+              description: The set of configuration properties for the action.
+              properties:
+                additional_info:
+                  type: string
+                  description: Additional information about the event.
+                description:
+                  type: string
+                  description: The details about the event.
+                event_class:
+                  type: string
+                  description: A specific instance of the source.
+                message_key:
+                  type: string
+                  description: All actions sharing this key are associated with the same ServiceNow alert. The default value is `<rule ID>:<alert instance ID>`.
+                metric_name:
+                  type: string
+                  description: The name of the metric.
+                node:
+                  type: string
+                  description: The host that the event was triggered for.
+                resource:
+                  type: string
+                  description: The name of the resource.
+                severity:
+                  type: string
+                  description: The severity of the event.
+                source:
+                  type: string
+                  description: The name of the event source type.
+                time_of_event:
+                  type: string
+                  description: The time of the event.
+                type:
+                  type: string
+                  description: The type of event.
+        - type: object
+          required:
+            - subAction
+            - subActionParams
+          description: ServiceNow ITOM connector properties when `subAction` is `getChoices`.
+          properties:
+            subAction:
+              type: string
+              description: The action to test.
+              enum:
+                - getChoices
+            subActionParams:
+              type: object
+              description: The set of configuration properties for the action.
+              required:
+                - fields
+              properties:
+                fields:
+                  type: array
+                  description: An array of fields.
+                  items:
+                    type: string
+      discriminator:
+        propertyName: subAction
   examples:
     create_index_connector_request:
       summary: Create an index connector.
@@ -2610,6 +2690,15 @@ components:
         params:
           level: warn
           message: Test warning message.
+    run_servicenow_itom_connector_request:
+      summary: Run a ServiceNow ITOM connector to retrieve the list of choices.
+      value:
+        params:
+          subAction: getChoices
+          subActionParams:
+            fields:
+              - severity
+              - urgency
     run_index_connector_response:
       summary: Response from running an index connector.
       value:
@@ -2653,6 +2742,48 @@ components:
       summary: Response from running a server log connector.
       value:
         connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+        status: ok
+    run_servicenow_itom_connector_response:
+      summary: Response from retrieving the list of choices for a ServiceNow ITOM connector.
+      value:
+        connector_id: 9d9be270-2fd2-11ed-b0e0-87533c532698
+        data:
+          - dependent_value: ''
+            element: severity
+            label: Critical
+            value: 1
+          - dependent_value: ''
+            element: severity
+            label: Major
+            value: 2
+          - dependent_value: ''
+            element: severity
+            label: Minor
+            value: 3
+          - dependent_value: ''
+            element: severity
+            label: Warning
+            value: 4
+          - dependent_value: ''
+            element: severity
+            label: OK
+            value: 5
+          - dependent_value: ''
+            element: severity
+            label: Clear
+            value: 0
+          - dependent_value: ''
+            element: urgency
+            label: 1 - High
+            value: 1
+          - dependent_value: ''
+            element: urgency
+            label: 2 - Medium
+            value: 2
+          - dependent_value: ''
+            element: urgency
+            label: 3 - Low
+            value: 3
         status: ok
 security:
   - basicAuth: []
