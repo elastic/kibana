@@ -8,12 +8,12 @@
 
 import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
+import { of } from 'rxjs';
 
 export const getServicesMock = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
-    // @ts-ignore jest.fn() used to mock an Observable<boolean>
-    customBranding: { hasCustomBranding$: jest.fn(), showPlainSpinner: false },
+    customBranding: { hasCustomBranding$: of(false), showPlainSpinner: false },
     kibanaGuideDocLink: 'Kibana guide',
   };
 
