@@ -73,6 +73,9 @@ const TagsFilterPopoverComponent = ({
       closePopover={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       panelPaddingSize="none"
       repositionOnScroll
+      panelProps={{
+        'data-test-subj': 'tags-filter-popover',
+      }}
     >
       <EuiSelectable
         searchable
