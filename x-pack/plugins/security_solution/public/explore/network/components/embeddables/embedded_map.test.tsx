@@ -102,7 +102,7 @@ describe('EmbeddedMapComponent', () => {
     setQuery.mockClear();
     mockGetStorage.mockReturnValue(true);
     jest.spyOn(redux, 'useSelector').mockReturnValue(mockSelector);
-    mockUseSourcererDataView.mockReturnValue({ selectedPatterns: ['filebeat-*', 'packetbeat-*'] });
+    mockUseSourcererDataView.mockReturnValue({ selectedPatterns: ['filebeat-*', 'auditbeat-*'] });
     mockCreateEmbeddable.mockResolvedValue(embeddableValue);
     mockUseIsFieldInIndexPattern.mockReturnValue(() => true);
   });
