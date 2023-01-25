@@ -281,7 +281,7 @@ export class KbnClientSavedObjects {
             return;
           }
 
-          throw createFailError(`${error.response.status} resp: ${inspect(error.response.data)}`);
+          throw createFailError(`Failed to delete ${inspect(obj)} - ${error.response.status} resp: ${inspect(error.response.data)}`);
         }
 
         throw error;
