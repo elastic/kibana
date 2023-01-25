@@ -112,7 +112,7 @@ import {
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import {
-  filterUserMessages,
+  filterAndSortUserMessages,
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
 
@@ -469,7 +469,7 @@ export class Embeddable
   }
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    return filterUserMessages(
+    return filterAndSortUserMessages(
       [...this._userMessages, ...Object.values(this.additionalUserMessages)],
       locationId,
       filters ?? {}

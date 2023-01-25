@@ -516,13 +516,6 @@ export function LayerPanel(
                           dimensionId: columnId,
                         });
 
-                        const firstErrorMessage = messages.find(
-                          ({ severity }) => severity === 'error'
-                        );
-                        const firstWarningMessage = messages.find(
-                          ({ severity }) => severity === 'warning'
-                        );
-
                         return (
                           <DraggableDimensionButton
                             activeVisualization={activeVisualization}
@@ -574,16 +567,7 @@ export function LayerPanel(
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                errorMessage={
-                                  firstErrorMessage?.longMessage ||
-                                  firstErrorMessage?.shortMessage ||
-                                  undefined
-                                }
-                                warningMessage={
-                                  firstWarningMessage?.longMessage ||
-                                  firstWarningMessage?.shortMessage ||
-                                  undefined
-                                }
+                                message={messages[0]}
                               >
                                 {layerDatasource ? (
                                   <NativeRenderer

@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
-import { VisualizationDimensionGroupConfig, AccessorConfig } from '../../../../types';
+import { VisualizationDimensionGroupConfig, AccessorConfig, UserMessage } from '../../../../types';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('xpack.lens.configure.editConfig', {
@@ -25,8 +25,7 @@ export function DimensionButton({
   onRemoveClick,
   accessorConfig,
   label,
-  errorMessage,
-  warningMessage,
+  message,
 }: {
   group: VisualizationDimensionGroupConfig;
   children: React.ReactElement;
@@ -34,8 +33,7 @@ export function DimensionButton({
   onRemoveClick: (id: string) => void;
   accessorConfig: AccessorConfig;
   label: string;
-  errorMessage: string | React.ReactNode | undefined;
-  warningMessage: string | React.ReactNode | undefined;
+  message: UserMessage | undefined;
 }) {
   return (
     <>
@@ -45,13 +43,15 @@ export function DimensionButton({
         onClick={() => onClick(accessorConfig.columnId)}
         aria-label={triggerLinkA11yText(label)}
         title={triggerLinkA11yText(label)}
-        color={errorMessage ? 'danger' : warningMessage ? 'warning' : undefined}
+        color={
+          message?.severity === 'error'
+            ? 'danger'
+            : message?.severity === 'warning'
+            ? 'warning'
+            : undefined
+        }
       >
-        <DimensionButtonIcon
-          errorMessage={errorMessage}
-          warningMessage={warningMessage}
-          accessorConfig={accessorConfig}
-        >
+        <DimensionButtonIcon message={message} accessorConfig={accessorConfig}>
           {children}
         </DimensionButtonIcon>
       </EuiLink>

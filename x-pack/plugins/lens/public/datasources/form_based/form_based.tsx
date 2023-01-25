@@ -101,7 +101,7 @@ import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
-import { filterUserMessages } from '../../app_plugin/get_application_user_messages';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -1077,8 +1077,9 @@ function getInvalidDimensionErrorMessages(
       const messages: UserMessage[] = [];
       for (const columnId of Object.keys(state.layers[layerId].columns)) {
         if (
-          filterUserMessages(currentErrorMessages, 'dimensionTrigger', { dimensionId: columnId })
-            .length > 0
+          filterAndSortUserMessages(currentErrorMessages, 'dimensionTrigger', {
+            dimensionId: columnId,
+          }).length > 0
         ) {
           // there is already a more specific user message assigned to this column, so no need
           // to add the default "is invalid" messaging

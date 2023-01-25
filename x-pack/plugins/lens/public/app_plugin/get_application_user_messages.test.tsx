@@ -14,7 +14,10 @@ import { shallow } from 'enzyme';
 import { Visualization } from '..';
 import { DataViewsState } from '../state_management';
 import { Datasource, UserMessage } from '../types';
-import { filterUserMessages, getApplicationUserMessages } from './get_application_user_messages';
+import {
+  filterAndSortUserMessages,
+  getApplicationUserMessages,
+} from './get_application_user_messages';
 
 describe('application-level user messages', () => {
   it('should generate error if vis type is not provided', () => {
@@ -251,7 +254,7 @@ describe('filtering user messages', () => {
   ];
 
   it('filters by location', () => {
-    expect(filterUserMessages(userMessages, 'banner', {})).toMatchInlineSnapshot(`
+    expect(filterAndSortUserMessages(userMessages, 'banner', {})).toMatchInlineSnapshot(`
       Array [
         Object {
           "displayLocations": Array [
@@ -267,7 +270,7 @@ describe('filtering user messages', () => {
       ]
     `);
     expect(
-      filterUserMessages(userMessages, 'dimensionTrigger', {
+      filterAndSortUserMessages(userMessages, 'dimensionTrigger', {
         dimensionId: dimensionId1,
       })
     ).toMatchInlineSnapshot(`
@@ -287,7 +290,7 @@ describe('filtering user messages', () => {
       ]
     `);
     expect(
-      filterUserMessages(userMessages, 'dimensionTrigger', {
+      filterAndSortUserMessages(userMessages, 'dimensionTrigger', {
         dimensionId: dimensionId2,
       })
     ).toMatchInlineSnapshot(`
@@ -306,7 +309,7 @@ describe('filtering user messages', () => {
         },
       ]
     `);
-    expect(filterUserMessages(userMessages, ['visualization', 'visualizationInEditor'], {}))
+    expect(filterAndSortUserMessages(userMessages, ['visualization', 'visualizationInEditor'], {}))
       .toMatchInlineSnapshot(`
       Array [
         Object {
@@ -336,8 +339,8 @@ describe('filtering user messages', () => {
   });
 
   it('filters by severity', () => {
-    const warnings = filterUserMessages(userMessages, undefined, { severity: 'warning' });
-    const errors = filterUserMessages(userMessages, undefined, { severity: 'error' });
+    const warnings = filterAndSortUserMessages(userMessages, undefined, { severity: 'warning' });
+    const errors = filterAndSortUserMessages(userMessages, undefined, { severity: 'error' });
 
     expect(warnings.length + errors.length).toBe(userMessages.length);
     expect(warnings.every((message) => message.severity === 'warning'));
@@ -346,7 +349,7 @@ describe('filtering user messages', () => {
 
   it('filters by both', () => {
     expect(
-      filterUserMessages(userMessages, ['visualization', 'visualizationOnEmbeddable'], {
+      filterAndSortUserMessages(userMessages, ['visualization', 'visualizationOnEmbeddable'], {
         severity: 'warning',
       })
     ).toMatchInlineSnapshot(`

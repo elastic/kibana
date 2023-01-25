@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AccessorConfig } from '../../../types';
+import { AccessorConfig, UserMessage } from '../../../types';
 import { IconError, IconWarning } from '../custom_icons';
 
 const baseIconProps = {
@@ -88,28 +88,28 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
 
 export function DimensionButtonIcon({
   accessorConfig,
-  errorMessage,
-  warningMessage,
+  message,
   children,
 }: {
   accessorConfig: AccessorConfig;
-  errorMessage: string | React.ReactNode | undefined;
-  warningMessage: string | React.ReactNode | undefined;
+  message: UserMessage | undefined;
   children: React.ReactChild;
 }) {
   let indicatorIcon = null;
-  if (
-    errorMessage ||
-    warningMessage ||
-    (accessorConfig.triggerIconType && accessorConfig.triggerIconType !== 'none')
-  ) {
+  if (message || (accessorConfig.triggerIconType && accessorConfig.triggerIconType !== 'none')) {
     indicatorIcon = (
-      <EuiToolTip display="block" content={errorMessage ?? warningMessage ?? undefined}>
+      <EuiToolTip
+        display="block"
+        content={message?.longMessage ?? message?.shortMessage ?? undefined}
+      >
         <EuiFlexItem grow={false}>
-          {(errorMessage || warningMessage) && (
-            <EuiIcon {...baseIconProps} type={errorMessage ? IconError : IconWarning} />
+          {message && (
+            <EuiIcon
+              {...baseIconProps}
+              type={message.severity === 'error' ? IconError : IconWarning}
+            />
           )}
-          {!errorMessage && !warningMessage && getIconFromAccessorConfig(accessorConfig)}
+          {!message && getIconFromAccessorConfig(accessorConfig)}
         </EuiFlexItem>
       </EuiToolTip>
     );

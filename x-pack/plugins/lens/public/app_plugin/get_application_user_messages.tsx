@@ -180,7 +180,7 @@ function getMissingIndexPatternsErrors(
   ];
 }
 
-export const filterUserMessages = (
+export const filterAndSortUserMessages = (
   userMessages: UserMessage[],
   locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
   { dimensionId, severity }: UserMessageFilters
@@ -191,7 +191,7 @@ export const filterUserMessages = (
     ? [locationId]
     : [];
 
-  return userMessages.filter((message) => {
+  const filteredMessages = userMessages.filter((message) => {
     if (locationIds.length) {
       const hasMatch = message.displayLocations.some((location) => {
         if (!locationIds.includes(location.id)) {
@@ -216,4 +216,16 @@ export const filterUserMessages = (
 
     return true;
   });
+
+  return filteredMessages.sort(bySeverity);
 };
+
+function bySeverity(a: UserMessage, b: UserMessage) {
+  if (a.severity === 'warning' && b.severity === 'error') {
+    return 1;
+  } else if (a.severity === 'error' && b.severity === 'warning') {
+    return -1;
+  } else {
+    return 0;
+  }
+}
