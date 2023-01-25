@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { dataTableSelectors } from '../../../common/store/data_table';
+import { changeViewMode } from '../../../common/store/data_table/actions';
+import type { ViewSelection } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { changeAlertTableViewMode } from '../../../common/store/alert_table/actions';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../common/components/events_viewer/summary_view_select';
-import { alertTableViewModeSelector } from '../../../common/store/alert_table/selectors';
-import { useAlertTableFilters } from '../../pages/detection_engine/use_alert_table_filters';
+import { useDataTableFilters } from '../../pages/detection_engine/use_alert_table_filters';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
-import type { ViewSelection } from '../../../common/components/events_viewer/summary_view_select';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
 
-export const getPersistentControlsHook = (storage: Storage) => {
+export const getPersistentControlsHook = () => {
   const usePersistentControls = () => {
     const dispatch = useDispatch();
 
-    const getViewMode = alertTableViewModeSelector();
+    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-    const storedTableView = storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY);
-
-    const stateTableView = useShallowEqualSelector((state) => getViewMode(state));
-
-    const tableView = storedTableView ?? stateTableView;
+    const tableView = useShallowEqualSelector(
+      (state) =>
+        (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).viewMode ??
+        tableDefaults.viewMode
+    );
 
     const handleChangeTableView = useCallback(
       (selectedView: ViewSelection) => {
         dispatch(
-          changeAlertTableViewMode({
+          changeViewMode({
+            id: TableId.alertsOnAlertsPage,
             viewMode: selectedView,
           })
         );
@@ -46,7 +46,7 @@ export const getPersistentControlsHook = (storage: Storage) => {
       setShowBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       setShowOnlyThreatIndicatorAlerts,
-    } = useAlertTableFilters();
+    } = useDataTableFilters(TableId.alertsOnAlertsPage);
 
     const additionalFiltersComponent = useMemo(
       () => (

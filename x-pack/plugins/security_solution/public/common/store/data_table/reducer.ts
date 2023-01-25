@@ -31,6 +31,9 @@ import {
   updateSessionViewConfig,
   setTableUpdatedAt,
   updateTotalCount,
+  changeViewMode,
+  updateShowBuildingBlockAlertsFilter,
+  updateShowThreatIndicatorAlertsFilter,
 } from './actions';
 
 import {
@@ -266,6 +269,42 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       [id]: {
         ...state.tableById[id],
         totalCount,
+      },
+    },
+  }))
+  .case(changeViewMode, (state, { id, viewMode }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        viewMode,
+      },
+    },
+  }))
+  .case(updateShowBuildingBlockAlertsFilter, (state, { id, showBuildingBlockAlerts }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        additionalFilters: {
+          ...state.tableById[id].additionalFilters,
+          showBuildingBlockAlerts,
+        },
+      },
+    },
+  }))
+  .case(updateShowThreatIndicatorAlertsFilter, (state, { id, showOnlyThreatIndicatorAlerts }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        additionalFilters: {
+          ...state.tableById[id].additionalFilters,
+          showOnlyThreatIndicatorAlerts,
+        },
       },
     },
   }))

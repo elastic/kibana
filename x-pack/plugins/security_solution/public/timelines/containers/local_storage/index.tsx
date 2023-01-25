@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
 import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -119,6 +120,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
     return {
       ...acc,
       [tableId]: {
+        ...tableDefaults,
         ...tableModel,
         ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
           ? { sort: [tableModel.sort] }

@@ -72,8 +72,8 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
-import { useAlertTableFilters } from './use_alert_table_filters';
 import { AlertsTableComponent } from '../../components/alerts_table';
+import { useDataTableFilters } from './use_alert_table_filters';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -129,12 +129,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
-  const {
-    showBuildingBlockAlerts,
-    setShowBuildingBlockAlerts,
-    showOnlyThreatIndicatorAlerts,
-    setShowOnlyThreatIndicatorAlerts,
-  } = useAlertTableFilters();
+  const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+    TableId.alertsOnAlertsPage
+  );
 
   const loading = userInfoLoading || listsConfigLoading;
   const {
@@ -203,20 +200,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       ...(detectionPageFilters ?? []),
     ],
     [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
-  );
-
-  const onShowBuildingBlockAlertsChangedCallback = useCallback(
-    (newShowBuildingBlockAlerts: boolean) => {
-      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
-    },
-    [setShowBuildingBlockAlerts]
-  );
-
-  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
-    (newShowOnlyThreatIndicatorAlerts: boolean) => {
-      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
-    },
-    [setShowOnlyThreatIndicatorAlerts]
   );
 
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();

@@ -16,6 +16,7 @@ import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/publ
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { dataTableActions } from '../../../common/store/data_table';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
@@ -29,15 +30,10 @@ import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
-import { alertTableViewModeSelector } from '../../../common/store/alert_table/selectors';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TableId } from '../../../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  VIEW_SELECTION,
-  ALERTS_TABLE_VIEW_SELECTION_KEY,
-} from '../../../common/components/events_viewer/summary_view_select';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getColumns } from '../../configurations/security_solution_detections';
 import { getColumnHeaders } from '../../../common/components/data_table/column_headers/helpers';
@@ -119,6 +115,14 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return [...inputFilters, ...(globalFilters ?? []), ...(timeRangeFilter ?? [])];
   }, [inputFilters, globalFilters, timeRangeFilter]);
 
+  const {
+    dataTable: {
+      graphEventId, // If truthy, the graph viewer (Resolver) is showing
+      sessionViewConfig,
+      viewMode: tableView,
+    } = eventsDefaultModel,
+  } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
+
   const boolQueryDSL = buildQueryFromFilters(allFilters, undefined);
 
   const getGlobalQuery = useCallback(
@@ -147,14 +151,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     startDate: from,
     endDate: to,
   });
-
-  const getViewMode = alertTableViewModeSelector();
-
-  const storedTableView = storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY);
-
-  const stateTableView = useShallowEqualSelector((state) => getViewMode(state));
-
-  const tableView = storedTableView ?? stateTableView;
 
   const gridStyle = useMemo(
     () =>
@@ -235,13 +231,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       })
     );
   }, [dispatch, tableId]);
-
-  const {
-    dataTable: {
-      graphEventId, // If truthy, the graph viewer (Resolver) is showing
-      sessionViewConfig,
-    } = eventsDefaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const AlertTable = useMemo(
     () => triggersActionsUi.getAlertsStateTable(alertStateProps),

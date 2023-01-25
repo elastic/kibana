@@ -6,6 +6,7 @@
  */
 
 import * as runtimeTypes from 'io-ts';
+import type { VIEW_SELECTION } from '../../constants';
 
 export enum Direction {
   asc = 'asc',
@@ -46,4 +47,9 @@ const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.rulePreview),
   runtimeTypes.literal(TableId.kubernetesPageSessions),
 ]);
+
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
+
+export type ViewSelectionTypes = keyof typeof VIEW_SELECTION;
+
+export type ViewSelection = typeof VIEW_SELECTION[ViewSelectionTypes];

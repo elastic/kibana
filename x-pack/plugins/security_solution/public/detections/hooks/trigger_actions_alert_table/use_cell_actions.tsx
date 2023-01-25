@@ -12,15 +12,16 @@ import type {
 } from '@elastic/eui';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { get } from 'lodash';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { VIEW_SELECTION } from '../../../../common/constants';
+import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 import type { ColumnHeaderOptions } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../common/lib/cell_actions/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import type { Ecs } from '../../../../common/ecs';
-import { VIEW_SELECTION } from '../../../common/components/events_viewer/summary_view_select';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { alertTableViewModeSelector } from '../../../common/store/alert_table/selectors';
 
 export const useCellActions = ({
   columns,
@@ -37,8 +38,10 @@ export const useCellActions = ({
   pageSize: number;
 }) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
-  const viewModeSelector = alertTableViewModeSelector();
-  const viewMode = useShallowEqualSelector((state) => viewModeSelector(state));
+
+  const {
+    dataTable: { viewMode },
+  } = useShallowEqualSelector((state) => eventsViewerSelector(state, TableId.alertsOnAlertsPage));
 
   if (viewMode === VIEW_SELECTION.eventRenderedView) {
     return { cellActions: [] };

@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import type { SessionViewConfig } from '../../../../common/types/session_view';
 import type { ExpandedDetailType } from '../../../../common/types/detail_panel';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
-import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
+import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../../../common/types';
 import type { InitialyzeDataTableSettings, DataTablePersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/data-table');
@@ -126,3 +126,18 @@ export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
 export const updateTotalCount = actionCreator<{ id: string; totalCount: number }>(
   'UPDATE_TOTAL_COUNT'
 );
+
+export const changeViewMode = actionCreator<{
+  id: string;
+  viewMode: ViewSelection;
+}>('CHANGE_ALERT_TABLE_VIEW_MODE');
+
+export const updateShowBuildingBlockAlertsFilter = actionCreator<{
+  id: string;
+  showBuildingBlockAlerts: boolean;
+}>('UPDATE_BUILDING_BLOCK_ALERTS_FILTER');
+
+export const updateShowThreatIndicatorAlertsFilter = actionCreator<{
+  id: string;
+  showOnlyThreatIndicatorAlerts: boolean;
+}>('UPDATE_SHOW_THREAT_INDICATOR_ALERTS_FILTER');
