@@ -22,14 +22,14 @@ const comparePushDates = (
   connectorPushedAt: string | undefined
 ) => {
   if (!connectorPushedAt) {
-    return false;
+    return type === 'firstPush' ? true : false;
   }
 
   const pushedDate = new Date(pushedAt);
   const connectorDate = new Date(connectorPushedAt);
 
   if (isNaN(pushedDate.getTime()) || isNaN(connectorDate.getTime())) {
-    return false;
+    return type === 'firstPush' ? true : false;
   }
 
   return type === 'firstPush'

@@ -47,6 +47,27 @@ describe('createPushedUserActionBuilder ', () => {
     );
   });
 
+  it('renders correctly if oldestPushDate is not defined', async () => {
+    const userAction = getUserAction('pushed', Actions.push_to_service);
+    const caseConnectors = getCaseConnectorsMockResponse({
+      'servicenow-1': { oldestPushDate: undefined },
+    });
+    const builder = createPushedUserActionBuilder({
+      ...builderArgs,
+      caseConnectors,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('pushed as new incident connector name')).toBeInTheDocument();
+  });
+
   it('renders correctly when updating an external service', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
     const caseConnectors = getCaseConnectorsMockResponse({
@@ -122,6 +143,36 @@ describe('createPushedUserActionBuilder ', () => {
 
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.queryByText('Already pushed to My SN connector incident')
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText('Requires update to My SN connector incident')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not show the footers if latestPushDate is not defined', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({
+      'servicenow-1': { needsToBePushed: true, latestPushDate: undefined },
+    });
+    const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2023-01-17T09:46:29.813Z',
+    });
+
+    const builder = createPushedUserActionBuilder({
+      ...builderArgs,
+      caseConnectors,
       userAction,
     });
 
