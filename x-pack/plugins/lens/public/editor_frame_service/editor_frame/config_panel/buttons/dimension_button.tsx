@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
@@ -55,23 +55,26 @@ export function DimensionButton({
           {children}
         </DimensionButtonIcon>
       </EuiLink>
-      <EuiButtonIcon
+      <EuiButtonEmpty
+        size="s"
         className="lnsLayerPanel__dimensionRemove"
         data-test-subj="indexPattern-dimension-remove"
-        iconType="cross"
-        iconSize="s"
-        size="s"
-        color="danger"
-        aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-          defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel: group.groupLabel },
-        })}
-        title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-          defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel: group.groupLabel },
-        })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
-      />
+      >
+        <EuiIcon
+          type="trash"
+          size="s"
+          color="subdued"
+          aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+            defaultMessage: 'Remove configuration from "{groupLabel}"',
+            values: { groupLabel: group.groupLabel },
+          })}
+          title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+            defaultMessage: 'Remove configuration from "{groupLabel}"',
+            values: { groupLabel: group.groupLabel },
+          })}
+        />
+      </EuiButtonEmpty>
       <PaletteIndicator accessorConfig={accessorConfig} />
     </>
   );
