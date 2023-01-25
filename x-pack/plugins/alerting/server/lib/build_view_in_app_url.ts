@@ -8,41 +8,41 @@
 import { Logger } from '@kbn/core/server';
 import { SanitizedRule, RuleTypeParams } from '../../common';
 
-export interface GetViewInAppUrlFnOpts<Params extends RuleTypeParams> {
+export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Omit<SanitizedRule<Params>, 'viewInAppRelativeUrl'>;
 }
-export type GetViewInAppUrlFn<Params extends RuleTypeParams> = (
-  opts: GetViewInAppUrlFnOpts<Params>
+export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
+  opts: GetViewInAppRelativeUrlFnOpts<Params>
 ) => string;
 
 export interface BuildViewInAppRelativeUrlOpts<Params extends RuleTypeParams> {
-  getViewInAppUrl: GetViewInAppUrlFn<Params> | undefined;
-  opts: GetViewInAppUrlFnOpts<Params>;
+  getViewInAppRelativeUrl: GetViewInAppRelativeUrlFn<Params> | undefined;
+  opts: GetViewInAppRelativeUrlFnOpts<Params>;
 }
 
 export function buildViewInAppRelativeUrl<Params extends RuleTypeParams>({
-  getViewInAppUrl,
+  getViewInAppRelativeUrl,
   opts,
 }: BuildViewInAppRelativeUrlOpts<Params>) {
-  if (!getViewInAppUrl) {
+  if (!getViewInAppRelativeUrl) {
     return;
   }
 
-  return getViewInAppUrl(opts);
+  return getViewInAppRelativeUrl(opts);
 }
 
 export interface BuildViewInAppUrlOpts<Params extends RuleTypeParams> {
   kibanaBaseUrl: string | undefined;
   spaceId: string | undefined;
-  getViewInAppUrl: GetViewInAppUrlFn<Params> | undefined;
-  opts: GetViewInAppUrlFnOpts<Params>;
+  getViewInAppRelativeUrl: GetViewInAppRelativeUrlFn<Params> | undefined;
+  opts: GetViewInAppRelativeUrlFnOpts<Params>;
   logger: Logger;
 }
 
 export function buildViewInAppUrl<Params extends RuleTypeParams>({
   kibanaBaseUrl,
   spaceId,
-  getViewInAppUrl,
+  getViewInAppRelativeUrl,
   opts,
   logger,
 }: BuildViewInAppUrlOpts<Params>): string | undefined {
@@ -50,7 +50,7 @@ export function buildViewInAppUrl<Params extends RuleTypeParams>({
     return;
   }
 
-  const relativeUrl = buildViewInAppRelativeUrl<Params>({ getViewInAppUrl, opts });
+  const relativeUrl = buildViewInAppRelativeUrl<Params>({ getViewInAppRelativeUrl, opts });
 
   if (!relativeUrl) {
     return;

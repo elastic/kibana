@@ -227,7 +227,7 @@ export class ExecutionHandler<
                 viewInAppUrl: buildViewInAppUrl({
                   kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                   spaceId,
-                  getViewInAppUrl: this.ruleType.getViewInAppUrl,
+                  getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
                   opts: { rule: this.rule },
                   logger: this.logger,
                 }),
@@ -280,7 +280,7 @@ export class ExecutionHandler<
                 viewInAppUrl: buildViewInAppUrl({
                   kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                   spaceId,
-                  getViewInAppUrl: this.ruleType.getViewInAppUrl,
+                  getViewInAppRelativeUrl: this.ruleType.getViewInAppRelativeUrl,
                   opts: { rule: this.rule },
                   logger: this.logger,
                 }),

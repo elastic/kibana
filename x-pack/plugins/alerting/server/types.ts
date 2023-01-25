@@ -51,7 +51,7 @@ import {
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
-import { GetViewInAppUrlFn } from './lib';
+import { GetViewInAppRelativeUrlFn } from './lib';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -217,7 +217,7 @@ export interface RuleType<
    * automatically make recovery determination. Defaults to true.
    */
   autoRecoverAlerts?: boolean;
-  getViewInAppUrl?: GetViewInAppUrlFn<Params>;
+  getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
