@@ -16,7 +16,7 @@ import type { SemVer } from 'semver';
 import type { RouteDependencies } from '../../..';
 import { sanitizeHostname } from '../../../../lib/utils';
 import type { ESConfigForProxy } from '../../../../types';
-import { getRequestConfig } from '../proxy/create_handler';
+import { getRequestConfig, getProxyHeaders } from '../proxy/create_handler';
 
 interface SettingsToRetrieve {
   indices: boolean;
@@ -25,7 +25,7 @@ interface SettingsToRetrieve {
   dataStreams: boolean;
 }
 
-type Config = ESConfigForProxy & { headers: KibanaRequest['headers'] } & { kibanaVersion: SemVer };
+type Config = ESConfigForProxy & { request: KibanaRequest } & { kibanaVersion: SemVer };
 
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
@@ -103,15 +103,32 @@ const getEntity = (path: string, config: Config) => {
       const host = hosts[idx];
       const uri = new URL(host + path);
       const { protocol, hostname, port } = uri;
-      const { headers } = getRequestConfig(config.headers, config, uri.toString(), kibanaVersion);
+      const { headers, agent } = getRequestConfig(config.request.headers, config, uri.toString(), kibanaVersion);
+      const proxyHeaders = getProxyHeaders(config.request);
       const client = protocol === 'https:' ? https : http;
+
+      const requestHeaders = {
+        ...headers,
+        ...proxyHeaders,
+      }
+
+      const hasHostHeader = Object.keys(requestHeaders).some((key) => key.toLowerCase() === 'host');
+      if (!hasHostHeader) {
+        requestHeaders['host'] = hostname;
+      }
+
       const options = {
         method: 'GET',
-        headers: { ...headers },
+        headers: {
+          ...requestHeaders,
+          'content-type': 'application/json',
+          'transfer-encoding': 'chunked',
+        },
         host: sanitizeHostname(hostname),
         port: port === '' ? undefined : parseInt(port, 10),
         protocol,
         path: `${path}?pretty=false`, // add pretty=false to compress the response by removing whitespace
+        agent,
       };
 
       try {
@@ -173,7 +190,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       const legacyConfig = await deps.proxy.readLegacyESConfig();
       const configWithHeaders = {
         ...legacyConfig,
-        headers: request.headers,
+        request,
         kibanaVersion: deps.kibanaVersion,
       };
 
