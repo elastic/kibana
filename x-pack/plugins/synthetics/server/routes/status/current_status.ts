@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { intersection } from 'lodash';
 import datemath, { Unit } from '@kbn/datemath';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -19,7 +20,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { ConfigKey } from '../../../common/runtime_types';
-import { QuerySchema, MonitorsQuery } from '../common';
+import { QuerySchema, MonitorsQuery, getMonitorFilters } from '../common';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -46,7 +47,7 @@ export async function getStatus(
   syntheticsMonitorClient: SyntheticsMonitorClient,
   params: MonitorsQuery
 ) {
-  const { query } = params;
+  const { query, locations: queryLocations } = params;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
@@ -54,9 +55,14 @@ export async function getStatus(
    * latest ping for all enabled monitors.
    */
 
+  const filtersStr = getMonitorFilters({
+    ...params,
+    serviceLocations: syntheticsMonitorClient.syntheticsService.locations,
+  });
   const allMonitors = await getAllMonitors({
     soClient,
     search: query ? `${query}*` : undefined,
+    filter: filtersStr,
     fields: [
       ConfigKey.ENABLED,
       ConfigKey.LOCATIONS,
@@ -76,9 +82,16 @@ export async function getStatus(
     projectMonitorsCount,
   } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
 
+  // Account for locations filter
+  const queryLocationsArray =
+    queryLocations && !Array.isArray(queryLocations) ? [queryLocations] : queryLocations;
+  const listOfLocationAfterFilter = queryLocationsArray
+    ? intersection(listOfLocations, queryLocationsArray)
+    : listOfLocations;
+
   const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
-    listOfLocations,
+    listOfLocationAfterFilter,
     { from: maxPeriod, to: 'now' },
     enabledIds,
     monitorLocationMap

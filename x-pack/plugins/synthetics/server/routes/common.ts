@@ -155,7 +155,7 @@ const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: str
   if (Array.isArray(locations)) {
     return locations
       .map((loc) => findLocationItem(loc, serviceLocations)?.id ?? '')
-      .filter((val) => !val);
+      .filter((val) => !!val);
   }
 
   return findLocationItem(locations, serviceLocations)?.id ?? '';

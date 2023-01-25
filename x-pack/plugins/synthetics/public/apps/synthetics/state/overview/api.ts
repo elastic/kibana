@@ -34,7 +34,7 @@ function toMonitorOverviewQueryArgs(
     locations: pageState.locations,
     projects: pageState.projects,
     schedules: pageState.schedules,
-    monitorType: pageState.monitorTypes,
+    monitorTypes: pageState.monitorTypes,
     sortField: pageState.sortField,
     sortOrder: pageState.sortOrder,
     searchFields: [],

@@ -7,7 +7,12 @@
 
 import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-plugin/public';
-import { getSyntheticsFilterKeyForLabel, SyntheticsFilterItem } from './filter_labels';
+import {
+  getSyntheticsFilterDisplayValues,
+  getSyntheticsFilterKeyForLabel,
+  SyntheticsFilterItem,
+  valueToLabelWithEmptyCount,
+} from './filter_labels';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 
 export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {
@@ -19,9 +24,16 @@ export const FilterButton = ({ filter }: { filter: SyntheticsFilterItem }) => {
 
   const urlParams = useGetUrlParams();
 
+  // Transform the values to readable labels (if any) so that selected values are checked on filter dropdown
+  const selectedValueLabels = getSyntheticsFilterDisplayValues(
+    (urlParams[field] || []).map(valueToLabelWithEmptyCount),
+    field,
+    []
+  ).map(({ label: selectedValueLabel }) => selectedValueLabel);
+
   return (
     <FieldValueSelection
-      selectedValue={urlParams[field] || []}
+      selectedValue={selectedValueLabels}
       singleSelection={false}
       label={label}
       values={

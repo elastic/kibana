@@ -73,6 +73,11 @@ export function getSyntheticsFilterKeyForLabel(value: string, field: SyntheticsF
   }
 }
 
+export const valueToLabelWithEmptyCount = (value: string): LabelWithCountValue => ({
+  label: value,
+  count: 0,
+});
+
 const monitorTypeKeyLabelMap: Record<DataStream, string> = {
   [DataStream.BROWSER]: 'Journey / Page',
   [DataStream.HTTP]: 'HTTP',
