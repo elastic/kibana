@@ -14,7 +14,7 @@ import { createTestSpaces, deleteTestSpaces, createData, deleteData } from './te
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
 
-  describe('DELETE /api/saved_objects_tagging/tags/{id}', () => {
+  describe('DELETE /internal/ftr/kbn_client_so/{type}/{id}', () => {
     before(async () => {
       await createTestSpaces(ftrContext);
     });
@@ -44,19 +44,17 @@ export default function (ftrContext: FtrProviderContext) {
           expect(body).to.eql({
             statusCode: 403,
             error: 'Forbidden',
-            message: 'Unable to delete tag',
+            message: 'Forbidden',
           });
         },
       },
     };
 
     const expectedResults: Record<string, User[]> = {
-      authorized: [
-        USERS.SUPERUSER,
+      authorized: [USERS.SUPERUSER],
+      unauthorized: [
         USERS.DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_WRITE_USER,
-      ],
-      unauthorized: [
         USERS.DEFAULT_SPACE_READ_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
@@ -73,7 +71,7 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .delete(`/api/saved_objects_tagging/tags/default-space-tag-1`)
+          .delete(`/internal/ftr/kbn_client_so/visualization/vis-area-1`)
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);

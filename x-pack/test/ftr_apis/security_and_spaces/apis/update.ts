@@ -14,7 +14,7 @@ import { createTestSpaces, deleteTestSpaces, createData, deleteData } from './te
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
 
-  describe('POST /api/saved_objects_tagging/tags/{id}', () => {
+  describe('PUT /internal/ftr/kbn_client_so/{type}/{id}', () => {
     before(async () => {
       await createTestSpaces(ftrContext);
     });
@@ -35,14 +35,7 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body).to.eql({
-            tag: {
-              id: body.tag.id,
-              name: 'Updated title',
-              description: 'I just updated that',
-              color: '#009000',
-            },
-          });
+          expect(body.attributes.name).to.eql('Updated title');
         },
       },
       unauthorized: {
@@ -51,19 +44,17 @@ export default function (ftrContext: FtrProviderContext) {
           expect(body).to.eql({
             statusCode: 403,
             error: 'Forbidden',
-            message: 'Unable to update tag',
+            message: 'Forbidden',
           });
         },
       },
     };
 
     const expectedResults: Record<string, User[]> = {
-      authorized: [
-        USERS.SUPERUSER,
+      authorized: [USERS.SUPERUSER],
+      unauthorized: [
         USERS.DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_WRITE_USER,
-      ],
-      unauthorized: [
         USERS.DEFAULT_SPACE_READ_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
@@ -80,11 +71,9 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .post(`/api/saved_objects_tagging/tags/default-space-tag-1`)
+          .put(`/internal/ftr/kbn_client_so/tag/tag-1`)
           .send({
-            name: 'Updated title',
-            description: 'I just updated that',
-            color: '#009000',
+            attributes: { name: 'Updated title' },
           })
           .auth(username, password)
           .expect(httpCode)

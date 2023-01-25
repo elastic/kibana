@@ -14,7 +14,7 @@ import { createTestSpaces, deleteTestSpaces, createData, deleteData } from './te
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
 
-  describe('POST /internal/saved_objects_tagging/tags/_bulk_delete', () => {
+  describe('POST /internal/ftr/kbn_client_so/_bulk_delete', () => {
     before(async () => {
       await createTestSpaces(ftrContext);
     });
@@ -35,7 +35,7 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body).to.eql({});
+          expect(body.statuses.length).to.eql(1);
         },
       },
       unauthorized: {
@@ -44,19 +44,17 @@ export default function (ftrContext: FtrProviderContext) {
           expect(body).to.eql({
             statusCode: 403,
             error: 'Forbidden',
-            message: 'Unable to delete tag',
+            message: 'Forbidden',
           });
         },
       },
     };
 
     const expectedResults: Record<string, User[]> = {
-      authorized: [
-        USERS.SUPERUSER,
+      authorized: [USERS.SUPERUSER],
+      unauthorized: [
         USERS.DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_WRITE_USER,
-      ],
-      unauthorized: [
         USERS.DEFAULT_SPACE_READ_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
@@ -72,10 +70,8 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .post(`/internal/saved_objects_tagging/tags/_bulk_delete`)
-          .send({
-            ids: ['default-space-tag-1', 'default-space-tag-2'],
-          })
+          .post(`/internal/ftr/kbn_client_so/_bulk_delete`)
+          .send([{ type: 'tag', id: 'tag-1' }])
           .auth(username, password)
           .expect(httpCode)
           .then(expectResponse);

@@ -14,7 +14,7 @@ import { createData, createTestSpaces, deleteData, deleteTestSpaces } from './te
 export default function (ftrContext: FtrProviderContext) {
   const supertest = ftrContext.getService('supertestWithoutAuth');
 
-  describe('GET /internal/saved_objects_tagging/tags/_find', () => {
+  describe('GET /internal/ftr/kbn_client_so/_find', () => {
     before(async () => {
       await createTestSpaces(ftrContext);
     });
@@ -35,27 +35,7 @@ export default function (ftrContext: FtrProviderContext) {
       authorized: {
         httpCode: 200,
         expectResponse: ({ body }) => {
-          expect(body).to.eql({
-            tags: [
-              {
-                id: 'default-space-tag-2',
-                name: 'tag-2',
-                description: 'Tag 2 in default space',
-                color: '#77CC11',
-                relationCount: 0,
-              },
-            ],
-            total: 1,
-          });
-        },
-      },
-      noResults: {
-        httpCode: 200,
-        expectResponse: ({ body }) => {
-          expect(body).to.eql({
-            tags: [],
-            total: 0,
-          });
+          expect(body.saved_objects.length).to.be.greaterThan(0);
         },
       },
       unauthorized: {
@@ -63,15 +43,15 @@ export default function (ftrContext: FtrProviderContext) {
         expectResponse: ({ body }) => {
           expect(body).to.eql({
             error: 'Forbidden',
-            message: 'unauthorized',
+            message: 'Forbidden',
             statusCode: 403,
           });
         },
       },
     };
     const expectedResults: Record<string, User[]> = {
-      authorized: [
-        USERS.SUPERUSER,
+      authorized: [USERS.SUPERUSER],
+      unauthorized: [
         USERS.DEFAULT_SPACE_READ_USER,
         USERS.DEFAULT_SPACE_SO_MANAGEMENT_WRITE_USER,
         USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER,
@@ -79,9 +59,9 @@ export default function (ftrContext: FtrProviderContext) {
         USERS.DEFAULT_SPACE_DASHBOARD_READ_USER,
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
+        USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER,
+        USERS.NOT_A_KIBANA_USER,
       ],
-      noResults: [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
-      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (
@@ -90,9 +70,9 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .get(`/internal/saved_objects_tagging/tags/_find`)
+          .get(`/internal/ftr/kbn_client_so/_find`)
           .query({
-            search: '2',
+            type: 'tag',
           })
           .auth(username, password)
           .expect(httpCode)
