@@ -237,6 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -250,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
@@ -300,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -349,6 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const monitor of successfulMonitors) {
           const journeyId = monitor.id;
+          const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(API_URLS.SYNTHETICS_MONITORS)
             .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
@@ -362,7 +364,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
-              is_tls_enabled: false,
+              is_tls_enabled: isTLSEnabled,
             },
             config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
@@ -398,7 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-            'ssl.verification_mode': 'full',
+            'ssl.verification_mode': isTLSEnabled ? 'strict' : 'full',
             'ssl.key': '',
             'ssl.key_passphrase': '',
             tags: Array.isArray(monitor.tags) ? monitor.tags : monitor.tags?.split(','),
@@ -1755,7 +1757,7 @@ export default function ({ getService }: FtrProviderContext) {
               data_stream: { type: 'synthetics', dataset: 'http' },
               release: 'experimental',
               vars: {
-                __ui: { value: '{"is_tls_enabled":false}', type: 'yaml' },
+                __ui: { value: '{"is_tls_enabled":true}', type: 'yaml' },
                 enabled: { value: false, type: 'bool' },
                 type: { value: 'http', type: 'text' },
                 name: { value: 'My Monitor 3', type: 'text' },
@@ -1784,7 +1786,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'ssl.certificate': { value: null, type: 'yaml' },
                 'ssl.key': { value: null, type: 'yaml' },
                 'ssl.key_passphrase': { value: null, type: 'text' },
-                'ssl.verification_mode': { value: 'full', type: 'text' },
+                'ssl.verification_mode': { value: 'strict', type: 'text' },
                 'ssl.supported_protocols': {
                   value: '["TLSv1.1","TLSv1.2","TLSv1.3"]',
                   type: 'yaml',
@@ -1808,7 +1810,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               id: `synthetics/http-http-${id}-${testPolicyId}`,
               compiled_stream: {
-                __ui: { is_tls_enabled: false },
+                __ui: { is_tls_enabled: true },
                 type: 'http',
                 name: 'My Monitor 3',
                 id,
@@ -1825,7 +1827,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.request.headers': { 'Content-Type': 'application/x-www-form-urlencoded' },
                 'check.response.status': ['200'],
                 'check.response.body.positive': ['Saved', 'saved'],
-                'ssl.verification_mode': 'full',
+                'ssl.verification_mode': 'strict',
                 'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
                 processors: [
                   { add_observer_metadata: { geo: { name: 'Test private location 0' } } },
