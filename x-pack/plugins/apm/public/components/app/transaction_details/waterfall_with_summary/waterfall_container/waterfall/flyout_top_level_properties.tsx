@@ -16,7 +16,7 @@ import { LatencyAggregationType } from '../../../../../../../common/latency_aggr
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../../../shared/links/apm/transaction_detail_link';
-import { ServiceLink } from '../../../../../shared/service_link';
+import { ServiceLink } from '../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 
 interface Props {

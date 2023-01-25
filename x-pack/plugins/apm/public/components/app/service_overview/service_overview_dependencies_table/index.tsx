@@ -18,7 +18,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DependencyLink } from '../../../shared/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
-import { ServiceLink } from '../../../shared/service_link';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;

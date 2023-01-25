@@ -46,7 +46,7 @@ import {
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { ServiceLink } from '../../../shared/service_link';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =

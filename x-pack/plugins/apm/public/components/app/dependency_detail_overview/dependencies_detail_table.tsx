@@ -12,7 +12,7 @@ import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { DependenciesTable } from '../../shared/dependencies_table';
-import { ServiceLink } from '../../shared/service_link';
+import { ServiceLink } from '../../shared/links/apm/service_link';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

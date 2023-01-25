@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
-import React from 'react';
-import { TypeOf } from '@kbn/typed-react-router-config';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { TruncateWithTooltip } from './truncate_with_tooltip';
-import { truncate, unit } from '../../utils/style';
-import { useApmRouter } from '../../hooks/use_apm_router';
-import { AgentIcon } from './agent_icon';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { ApmRoutes } from '../routing/apm_route_config';
-import { isMobileAgentName } from '../../../common/agent_name';
-import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { PopoverTooltip } from './popover_tooltip';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import React from 'react';
+import { isMobileAgentName } from '../../../../../../common/agent_name';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
+import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
+import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { truncate, unit } from '../../../../../utils/style';
+import { ApmRoutes } from '../../../../routing/apm_route_config';
+import { AgentIcon } from '../../../agent_icon';
+import { PopoverTooltip } from '../../../popover_tooltip';
+import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
+import {
+  OTHER_SERVICE_NAME,
+  ServiceMaxGroupsMessage,
+} from './service_max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -38,8 +35,6 @@ interface ServiceLinkProps {
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
 }
-
-export const OTHER_SERVICE_NAME = '_other';
 
 export function ServiceLink({
   agentName,
@@ -60,24 +55,21 @@ export function ServiceLink({
             grow={false}
             style={{ fontStyle: 'italic', fontSize: '1rem' }}
           >
-            _other
+            {i18n.translate('xpack.apm.serviceLink.otherBucketName', {
+              defaultMessage: 'Remaining Services',
+            })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <PopoverTooltip
             ariaLabel={i18n.translate('xpack.apm.serviceLink.tooltip', {
-              defaultMessage: 'Max service groups reached',
+              defaultMessage:
+                'Number of services instrumented has reached the current capacity of the APM server',
             })}
             iconType="alert"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <FormattedMessage
-                defaultMessage="The maximum number of unique services has been reached. Please increase {codeBlock} in APM Server."
-                id="xpack.apm.serviceLink.tooltip.message"
-                values={{
-                  codeBlock: <EuiCode>aggregation.service.max_groups</EuiCode>,
-                }}
-              />
+              <ServiceMaxGroupsMessage remainingServices={1} />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>
