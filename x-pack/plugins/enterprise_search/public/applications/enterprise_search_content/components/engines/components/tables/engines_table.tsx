@@ -85,7 +85,6 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.indices', {
         defaultMessage: 'Indices',
       }),
-      width: '300px',
       align: 'right',
 
       render: (indices: string[], engine) => (

@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { Status } from '../../../../../common/types/api';
+
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
 import { healthColorsMap } from '../../../shared/constants/health_colors';
@@ -34,15 +36,24 @@ import { SEARCH_INDEX_PATH } from '../../routes';
 import { IngestionMethod } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
 
+import { EngineError } from '../engine/engine_error';
+
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 
 export const EngineListIndicesFlyout: React.FC = () => {
-  const { fetchEngineData, fetchEngineName, isFetchEngineLoading, isFetchEngineFlyoutVisible } =
-    useValues(EnginesListFlyoutLogic);
+  const {
+    fetchEngineData,
+    fetchEngineName,
+    isFetchEngineLoading,
+    isFetchEngineFlyoutVisible,
+    fetchEngineApiStatus,
+    fetchEngineApiError,
+  } = useValues(EnginesListFlyoutLogic);
   const { closeFetchIndicesFlyout } = useActions(EnginesListFlyoutLogic);
 
   if (!fetchEngineData) return null;
   const { indices } = fetchEngineData;
+  const engineFetchError = fetchEngineApiStatus === Status.ERROR ? true : false;
 
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
     {
@@ -111,6 +122,7 @@ export const EngineListIndicesFlyout: React.FC = () => {
       width: '15%',
     },
   ];
+
   if (isFetchEngineFlyoutVisible) {
     return (
       <EuiFlyout ownFocus aria-labelledby="enginesListFlyout" onClose={closeFetchIndicesFlyout}>
@@ -135,7 +147,11 @@ export const EngineListIndicesFlyout: React.FC = () => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EuiBasicTable items={indices} columns={columns} loading={isFetchEngineLoading} />
+          {engineFetchError ? (
+            <EngineError error={fetchEngineApiError} />
+          ) : (
+            <EuiBasicTable items={indices} columns={columns} loading={isFetchEngineLoading} />
+          )}
         </EuiFlyoutBody>
       </EuiFlyout>
     );

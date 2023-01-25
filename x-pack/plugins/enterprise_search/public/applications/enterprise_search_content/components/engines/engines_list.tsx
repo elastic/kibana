@@ -15,12 +15,10 @@ import { EuiButton, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import { Status } from '../../../../../common/types/api';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 
 import { DataPanel } from '../../../shared/data_panel/data_panel';
 
-import { EngineError } from '../engine/engine_error';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
@@ -51,7 +49,6 @@ export const EnginesList: React.FC = () => {
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
 
   const { meta, results, isLoading } = useValues(EnginesListLogic);
-  const { fetchEngineApiError, fetchEngineApiStatus } = useValues(EnginesListFlyoutLogic);
 
   const [searchQuery, setSearchValue] = useState('');
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
@@ -63,26 +60,6 @@ export const EnginesList: React.FC = () => {
     });
   }, [meta.from, meta.size, throttledSearchQuery]);
 
-  if (fetchEngineApiStatus === Status.ERROR) {
-    return (
-      <EnterpriseSearchContentPageTemplate
-        isEmptyState
-        pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
-            defaultMessage: 'Engines',
-          }),
-        ]}
-        pageHeader={{
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
-            defaultMessage: 'Engines',
-          }),
-          rightSideItems: [],
-        }}
-        pageViewTelemetry="Engines"
-        emptyState={<EngineError error={fetchEngineApiError} />}
-      />
-    );
-  }
   return (
     <>
       <DeleteEngineModal />
