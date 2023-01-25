@@ -159,30 +159,28 @@ export function validateMetricThreshold({
     }
 
     if (isCustomMetricExpressionParams(c)) {
-      if (c.customMetrics) {
-        c.customMetrics.forEach((metric) => {
-          const customMetricErrors: { aggType?: string; field?: string } = {};
-          if (!metric.aggType) {
-            customMetricErrors.aggType = i18n.translate(
-              'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
-              {
-                defaultMessage: 'Aggregation is required',
-              }
-            );
-          }
-          if (metric.aggType !== 'count' && !metric.field) {
-            customMetricErrors.field = i18n.translate(
-              'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
-              {
-                defaultMessage: 'Field is required',
-              }
-            );
-          }
-          if (!isEmpty(customMetricErrors)) {
-            errors[id].customMetrics[metric.name] = customMetricErrors;
-          }
-        });
-      }
+      c.customMetrics.forEach((metric) => {
+        const customMetricErrors: { aggType?: string; field?: string } = {};
+        if (!metric.aggType) {
+          customMetricErrors.aggType = i18n.translate(
+            'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
+            {
+              defaultMessage: 'Aggregation is required',
+            }
+          );
+        }
+        if (metric.aggType !== 'count' && !metric.field) {
+          customMetricErrors.field = i18n.translate(
+            'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
+            {
+              defaultMessage: 'Field is required',
+            }
+          );
+        }
+        if (!isEmpty(customMetricErrors)) {
+          errors[id].customMetrics[metric.name] = customMetricErrors;
+        }
+      });
 
       if (c.equation && c.equation.match(EQUATION_REGEX)) {
         errors[id].equation = i18n.translate(
@@ -198,5 +196,4 @@ export function validateMetricThreshold({
 
   return validationResult;
 }
-
 const isNumber = (value: unknown): value is number => typeof value === 'number';
