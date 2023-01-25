@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { bulkRemoveIfExist } from './bulk_remove_if_exist';
 import { taskStoreMock } from '../task_store.mock';
 
 describe('removeIfExists', () => {
-  const ids = [uuid.v4(), uuid.v4()];
+  const ids = [uuidv4(), uuidv4()];
 
   test('removes the tasks by its IDs', async () => {
     const ts = taskStoreMock.create({});
@@ -34,7 +34,7 @@ describe('removeIfExists', () => {
   test('throws if any other error is caused by task removal', async () => {
     const ts = taskStoreMock.create({});
 
-    const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid.v4());
+    const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuidv4());
     ts.bulkRemove.mockRejectedValue(error);
 
     expect(bulkRemoveIfExist(ts, ids)).rejects.toBe(error);
