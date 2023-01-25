@@ -11,9 +11,7 @@
           "exists": {
             "field": "source.ip"
           }
-        }
-      ],
-      "must": [
+        },
         {
           "term": {
             "event.category": "authentication"
