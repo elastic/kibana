@@ -205,7 +205,7 @@ function InternalAlertsPage() {
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
                 showExpandToDetails={false}
-                showAlertStatusWithFlapping={true}
+                showAlertStatusWithFlapping
                 pageSize={ALERTS_PER_PAGE}
               />
             )}

@@ -7,8 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiBadgeProps, useEuiTheme } from '@elastic/eui';
-import { LIGHT_THEME } from '@elastic/charts';
+import { EuiBadge, EuiBadgeProps, euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 import { AlertStatus, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
 export interface AlertLifecycleStatusBadgeProps {
@@ -46,19 +45,23 @@ interface BadgeProps {
   };
 }
 
-const getBadgeProps = (alertStatus: AlertStatus, flapping: boolean | undefined): BadgeProps => {
+const getBadgeProps = (
+  alertStatus: AlertStatus,
+  flapping: boolean | undefined,
+  colors: string[]
+): BadgeProps => {
   // Prefer recovered over flapping
   if (alertStatus === ALERT_STATUS_RECOVERED) {
     return {
       label: RECOVERED_LABEL,
-      color: LIGHT_THEME.colors.vizColors[1],
+      color: colors[1],
     };
   }
 
   if (flapping) {
     return {
       label: FLAPPING_LABEL,
-      color: LIGHT_THEME.colors.vizColors[2],
+      color: colors[2],
       iconProps: {
         iconType: 'visGauge',
         iconSide: 'right',
@@ -68,7 +71,7 @@ const getBadgeProps = (alertStatus: AlertStatus, flapping: boolean | undefined):
 
   return {
     label: ACTIVE_LABEL,
-    color: LIGHT_THEME.colors.vizColors[2],
+    color: colors[2],
   };
 };
 
@@ -82,6 +85,7 @@ const castFlapping = (flapping: boolean | string | undefined) => {
 export const AlertLifecycleStatusBadge = memo((props: AlertLifecycleStatusBadgeProps) => {
   const { alertStatus, flapping } = props;
 
+  const colors = euiPaletteColorBlind();
   const theme = useEuiTheme();
 
   const badgeStyle = useMemo(
@@ -93,7 +97,7 @@ export const AlertLifecycleStatusBadge = memo((props: AlertLifecycleStatusBadgeP
 
   const castedFlapping = castFlapping(flapping);
 
-  const { label, color, iconProps } = getBadgeProps(alertStatus, castedFlapping);
+  const { label, color, iconProps } = getBadgeProps(alertStatus, castedFlapping, colors);
 
   return (
     <EuiBadge
