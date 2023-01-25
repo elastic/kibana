@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
-import { CUSTOM_METRIC_I18N, DOCUMENT_COUNT_I18N } from '../../common/messages';
+import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
@@ -107,7 +107,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
                 : criterion.aggType === 'custom' && criterion.label
                 ? criterion.label
                 : criterion.aggType === 'custom'
-                ? CUSTOM_METRIC_I18N
+                ? CUSTOM_EQUATION_I18N
                 : criterion.metric,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),

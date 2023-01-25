@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
-import { i18n } from '@kbn/i18n';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
@@ -36,6 +35,7 @@ import {
   getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
+import { CUSTOM_EQUATION } from '../i18n_strings';
 
 interface Props {
   expression: MetricExpression;
@@ -69,11 +69,7 @@ export const ExpressionChart: React.FC<Props> = ({
   };
 
   if (metric.aggregation === 'custom') {
-    metric.label =
-      expression.label ||
-      i18n.translate('xpack.infra.metrics.alertFlyout.previewChart.customEquation.label', {
-        defaultMessage: 'Custom equation',
-      });
+    metric.label = expression.label || CUSTOM_EQUATION;
   }
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {

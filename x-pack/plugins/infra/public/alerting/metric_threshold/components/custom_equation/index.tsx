@@ -16,7 +16,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { omit, range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/http_api';
 import {
   Aggregators,
@@ -27,6 +26,12 @@ import { MetricExpression } from '../../types';
 import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
 import { MetricRowWithCount } from './metric_row_with_count';
+import {
+  CUSTOM_EQUATION,
+  EQUATION_HELP_MESSAGE,
+  LABEL_HELP_MESSAGE,
+  LABEL_LABEL,
+} from '../../i18n_strings';
 
 interface Props {
   onChange: (expression: MetricExpression) => void;
@@ -172,10 +177,7 @@ export const CustomEquationEditor: React.FC<Props> = ({
           <EuiFormRow
             label="Equation"
             fullWidth
-            helpText={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.equationHelpMessage',
-              { defaultMessage: 'Supports basic math expressions' }
-            )}
+            helpText={EQUATION_HELP_MESSAGE}
             isInvalid={errors.equation != null}
             error={[errors.equation]}
           >
@@ -193,28 +195,12 @@ export const CustomEquationEditor: React.FC<Props> = ({
       <EuiSpacer size={'s'} />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.labelLabel',
-              { defaultMessage: 'Label (optional)' }
-            )}
-            fullWidth
-            helpText={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.labelHelpMessage',
-              {
-                defaultMessage:
-                  'Custom label will show on the alert chart and in reason/alert title',
-              }
-            )}
-          >
+          <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
             <EuiFieldText
               compressed
               fullWidth
               value={label}
-              placeholder={i18n.translate(
-                'xpack.infra.metrics.alertFlyout.customEquationEditor.equationPlaceHolder',
-                { defaultMessage: 'Custom equation' }
-              )}
+              placeholder={CUSTOM_EQUATION}
               onChange={handleLabelChange}
             />
           </EuiFormRow>

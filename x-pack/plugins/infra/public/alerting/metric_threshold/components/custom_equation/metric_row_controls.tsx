@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { DELETE_LABEL } from '../../i18n_strings';
 
 interface MetricRowControlProps {
   onDelete: () => void;
@@ -23,10 +23,7 @@ export const MetricRowControls: React.FC<MetricRowControlProps> = ({ onDelete, d
           style={{ marginBottom: '0.2em' }}
           onClick={onDelete}
           disabled={disableDelete}
-          title={i18n.translate(
-            'xpack.infra.metrics.alertFlyout.customEquationEditor.deleteRowButton',
-            { defaultMessage: 'Delete' }
-          )}
+          title={DELETE_LABEL}
         />
       </EuiFlexItem>
     </>

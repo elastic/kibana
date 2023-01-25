@@ -20,10 +20,10 @@ export const DOCUMENT_COUNT_I18N = i18n.translate(
   }
 );
 
-export const CUSTOM_METRIC_I18N = i18n.translate(
-  'xpack.infra.metrics.alerting.threshold.customMetric',
+export const CUSTOM_EQUATION_I18N = i18n.translate(
+  'xpack.infra.metrics.alerting.threshold.customEquation',
   {
-    defaultMessage: 'Custom metric',
+    defaultMessage: 'Custom equation',
   }
 );
 

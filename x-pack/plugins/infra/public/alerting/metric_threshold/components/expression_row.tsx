@@ -32,6 +32,7 @@ import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_p
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
+import { CUSTOM_EQUATION } from '../i18n_strings';
 
 const customComparators = {
   ...builtInComparators,
@@ -459,9 +460,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number', 'histogram'],
   },
   custom: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.custom', {
-      defaultMessage: 'Custom equation',
-    }),
+    text: CUSTOM_EQUATION,
     fieldRequired: false,
     value: AGGREGATION_TYPES.CUSTOM,
     validNormalizedTypes: ['number', 'histogram'],
