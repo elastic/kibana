@@ -48,7 +48,7 @@ export const buildHostsTableColumns = ({
 
   return [
     {
-      name: i18n.translate('xpack.infra.hostsTable.nameColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.nameColumnHeader', {
         defaultMessage: 'Name',
       }),
       field: 'title',
@@ -72,7 +72,7 @@ export const buildHostsTableColumns = ({
       ),
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.operatingSystemColumnHeader', {
         defaultMessage: 'Operating System',
       }),
       field: 'os',
@@ -80,7 +80,7 @@ export const buildHostsTableColumns = ({
       render: (os: string) => <EuiText size="s">{os}</EuiText>,
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.numberOfCpusColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.numberOfCpusColumnHeader', {
         defaultMessage: '# of CPUs',
       }),
       field: 'cpuCores',
@@ -91,7 +91,7 @@ export const buildHostsTableColumns = ({
       align: 'right',
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.diskLatencyColumnHeader', {
         defaultMessage: 'Disk Latency (avg.)',
       }),
       field: 'diskLatency.avg',
@@ -100,7 +100,7 @@ export const buildHostsTableColumns = ({
       align: 'right',
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.averageTxColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.averageTxColumnHeader', {
         defaultMessage: 'TX (avg.)',
       }),
       field: 'tx.avg',
@@ -109,7 +109,7 @@ export const buildHostsTableColumns = ({
       align: 'right',
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.averageRxColumnHeader', {
         defaultMessage: 'RX (avg.)',
       }),
       field: 'rx.avg',
@@ -118,7 +118,7 @@ export const buildHostsTableColumns = ({
       align: 'right',
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.averageMemoryTotalColumnHeader', {
         defaultMessage: 'Memory total (avg.)',
       }),
       field: 'memoryTotal.avg',
@@ -127,7 +127,7 @@ export const buildHostsTableColumns = ({
       align: 'right',
     },
     {
-      name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {
+      name: i18n.translate('xpack.infra.hostsViewPage.table.averageMemoryUsageColumnHeader', {
         defaultMessage: 'Memory usage (avg.)',
       }),
       field: 'memory.avg',
