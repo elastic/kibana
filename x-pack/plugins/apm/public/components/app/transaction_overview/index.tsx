@@ -41,7 +41,7 @@ export function TransactionOverview() {
   if (!transactionTypeFromUrl && transactionType) {
     replace(history, { query: { transactionType } });
   }
-  
+
   const isServerless = isServerlessAgent(cloudProviderAndService);
 
   return (
