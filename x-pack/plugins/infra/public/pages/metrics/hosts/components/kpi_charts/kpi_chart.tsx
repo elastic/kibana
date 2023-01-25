@@ -47,7 +47,7 @@ interface Props extends ChartBaseProps {
 
 const MIN_HEIGHT = 150;
 
-export const MetricsChart = ({
+export const KPIChart = ({
   color,
   extra,
   id,
@@ -109,16 +109,16 @@ export const MetricsChart = ({
           content={toolTip}
           anchorClassName="eui-fullWidth"
         >
-          <ChartStyled size={{ height: MIN_HEIGHT }}>
+          <KPIChartStyled size={{ height: MIN_HEIGHT }}>
             <Metric id={id} data={[[metricsData]]} />
-          </ChartStyled>
+          </KPIChartStyled>
         </EuiToolTip>
       )}
     </EuiPanel>
   );
 };
 
-const ChartStyled = styled(Chart)`
+const KPIChartStyled = styled(Chart)`
   .echMetric {
     border-radius: 5px;
   }
