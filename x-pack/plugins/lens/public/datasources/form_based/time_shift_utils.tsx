@@ -24,10 +24,13 @@ import type { FramePublicAPI, IndexPattern } from '../../types';
 import type { FieldBasedOperationErrorMessage } from './operations/definitions';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
-  return isAbsoluteTimeShift(timeShiftString.trim())
-    ? parseAbsoluteTimeShift(timeShiftString, { from: dateRange.fromDate, to: dateRange.toDate })
-        .value
-    : parseTimeShift(timeShiftString);
+  if (isAbsoluteTimeShift(timeShiftString.trim())) {
+    return parseAbsoluteTimeShift(timeShiftString, {
+      from: dateRange.fromDate,
+      to: dateRange.toDate,
+    }).value;
+  }
+  return parseTimeShift(timeShiftString);
 }
 
 export const timeShiftOptions = [
@@ -143,7 +146,6 @@ export function getDateHistogramInterval(
 
 export function getLayerTimeShiftChecks({
   interval: dateHistogramInterval,
-  hasDateHistogram,
   canShift,
 }: ReturnType<typeof getDateHistogramInterval>) {
   return {
@@ -165,9 +167,7 @@ export function getLayerTimeShiftChecks({
       );
     },
     isInvalid: (parsedValue: ReturnType<typeof parseTimeShiftWrapper>) => {
-      return Boolean(
-        parsedValue === 'invalid' || (hasDateHistogram && parsedValue && parsedValue === 'previous')
-      );
+      return Boolean(parsedValue === 'invalid');
     },
   };
 }
@@ -347,10 +347,15 @@ function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBa
 export function resolveTimeShift(
   timeShift: string | undefined,
   dateRange: DateRange,
-  targetBars: number
+  targetBars: number,
+  hasDateHistogram: boolean = false
 ) {
   if (timeShift && isAbsoluteTimeShift(timeShift)) {
     return roundAbsoluteInterval(timeShift, dateRange, targetBars);
+  }
+  // Translate a relative "previous" shift into an absolute endAt(<current range start timestamp>)
+  if (timeShift && hasDateHistogram && timeShift === 'previous') {
+    return roundAbsoluteInterval(`endAt(${dateRange.fromDate})`, dateRange, targetBars);
   }
   return timeShift;
 }

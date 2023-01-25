@@ -77,8 +77,7 @@ Array [
             href="fake/url"
             style={
               Object {
-                "textAlign": "center",
-                "width": "100%",
+                "display": "block",
               }
             }
           >

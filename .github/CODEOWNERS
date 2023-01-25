@@ -896,10 +896,12 @@ packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-cases-components @elastic/response-ops
+packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 packages/kbn-chart-icons @elastic/kibana-visualizations
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
+packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-coloring @elastic/kibana-visualizations
 packages/kbn-config @elastic/kibana-core
@@ -908,7 +910,7 @@ packages/kbn-config-schema @elastic/kibana-core
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-cypress-config @elastic/kibana-operations
-packages/kbn-datemath @elastic/kibana-app-services
+packages/kbn-datemath @elastic/kibana-data-discovery
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
@@ -920,7 +922,7 @@ packages/kbn-ecs @elastic/kibana-core
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations
 packages/kbn-es-errors @elastic/kibana-core
-packages/kbn-es-query @elastic/kibana-app-services
+packages/kbn-es-query @elastic/kibana-data-discovery
 packages/kbn-es-types @elastic/kibana-core @elastic/apm-ui
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
@@ -928,7 +930,7 @@ packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-expect @elastic/kibana-operations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations
-packages/kbn-field-types @elastic/kibana-app-services
+packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-flot-charts @elastic/kibana-operations
 packages/kbn-ftr-common-functional-services @elastic/kibana-operations
@@ -968,7 +970,7 @@ packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
-packages/kbn-react-field @elastic/kibana-app-services
+packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-info @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
@@ -980,6 +982,7 @@ packages/kbn-rison @elastic/kibana-operations
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
+packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
@@ -1016,6 +1019,7 @@ packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/apm-ui
+packages/kbn-ui-actions-browser @elastic/appex-sharedux
 packages/kbn-ui-framework @elastic/kibana-design
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations

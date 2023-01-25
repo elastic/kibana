@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
 import type { RequestHandler, Logger } from '@kbn/core/server';
@@ -229,7 +229,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     caseIDs = [...new Set(caseIDs)];
 
     // create an Action ID and dispatch it to ES & Fleet Server
-    const actionID = uuid.v4();
+    const actionID = uuidv4();
 
     let fleetActionIndexResult;
     let logsEndpointActionsResult;
