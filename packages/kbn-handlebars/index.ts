@@ -426,9 +426,10 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private processDecorators(program: hbs.AST.Program, prog: Handlebars.TemplateDelegate) {
     if (!this.processedDecoratorsForProgram.has(program)) {
       this.processedDecoratorsForProgram.add(program);
+      const props = {};
       for (const node of program.body) {
         if (isDecorator(node)) {
-          prog = this.processDecorator(node, prog);
+          prog = this.processDecorator(node, prog, props);
         }
       }
     }
@@ -438,9 +439,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   private processDecorator(
     decorator: hbs.AST.DecoratorBlock | hbs.AST.Decorator,
-    prog: Handlebars.TemplateDelegate
+    prog: Handlebars.TemplateDelegate,
+    props: Record<string, any>
   ) {
-    const props = {};
     const options = this.setupDecoratorOptions(decorator);
 
     const result = this.container.lookupProperty<DecoratorFunction>(
