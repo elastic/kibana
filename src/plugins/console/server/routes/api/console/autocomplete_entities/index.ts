@@ -103,18 +103,23 @@ const getEntity = (path: string, config: Config) => {
       const host = hosts[idx];
       const uri = new URL(host + path);
       const { protocol, hostname, port } = uri;
-      const { headers, agent } = getRequestConfig(config.request.headers, config, uri.toString(), kibanaVersion);
+      const { headers, agent } = getRequestConfig(
+        config.request.headers,
+        config,
+        uri.toString(),
+        kibanaVersion
+      );
       const proxyHeaders = getProxyHeaders(config.request);
       const client = protocol === 'https:' ? https : http;
 
       const requestHeaders = {
         ...headers,
         ...proxyHeaders,
-      }
+      };
 
       const hasHostHeader = Object.keys(requestHeaders).some((key) => key.toLowerCase() === 'host');
       if (!hasHostHeader) {
-        requestHeaders['host'] = hostname;
+        requestHeaders.host = hostname;
       }
 
       const options = {
