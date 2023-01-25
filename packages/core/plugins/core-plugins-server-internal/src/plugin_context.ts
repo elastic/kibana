@@ -198,6 +198,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: (fetchFn) => {
         deps.customBranding.register(plugin.name, fetchFn);
       },
+      getBrandingFor: deps.customBranding.getBrandingFor,
     },
     docLinks: deps.docLinks,
     elasticsearch: {

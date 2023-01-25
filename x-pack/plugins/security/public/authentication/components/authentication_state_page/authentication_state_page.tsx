@@ -7,12 +7,13 @@
 
 import './authentication_state_page.scss';
 
-import { EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiImage, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
   className?: string;
   title: React.ReactNode;
+  logo?: string;
 }
 
 export const AuthenticationStatePage: React.FC<Props> = (props) => (
@@ -21,7 +22,11 @@ export const AuthenticationStatePage: React.FC<Props> = (props) => (
       <div className="secAuthenticationStatePage__content eui-textCenter">
         <EuiSpacer size="xxl" />
         <span className="secAuthenticationStatePage__logo">
-          <EuiIcon type="logoElastic" size="xxl" />
+          {props.logo ? (
+            <EuiImage src={props.logo} size={40} alt={'logo'} />
+          ) : (
+            <EuiIcon type="logoElastic" size="xxl" />
+          )}
         </span>
         <EuiTitle size="l" className="secAuthenticationStatePage__title">
           <h1>{props.title}</h1>

@@ -12,6 +12,7 @@ import type { Observable, Subscription } from 'rxjs';
 
 import type {
   CapabilitiesSetup,
+  CustomBrandingSetup,
   HttpServiceSetup,
   IClusterClient,
   KibanaRequest,
@@ -64,6 +65,7 @@ interface AuthorizationServiceSetupParams {
   kibanaIndexName: string;
   getSpacesService(): SpacesService | undefined;
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+  customBranding: CustomBrandingSetup;
 }
 
 interface AuthorizationServiceStartParams {
@@ -117,6 +119,7 @@ export class AuthorizationService {
     kibanaIndexName,
     getSpacesService,
     getCurrentUser,
+    customBranding,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
@@ -176,8 +179,9 @@ export class AuthorizationService {
     initAPIAuthorization(http, authz, loggers.get('api-authorization'));
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
-    http.registerOnPreResponse((request, preResponse, toolkit) => {
+    http.registerOnPreResponse(async (request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
+        const customBrandingValue = await customBranding.getBrandingFor(request, true);
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToString(
           <ResetSessionPage
@@ -186,6 +190,7 @@ export class AuthorizationService {
             logoutUrl={http.basePath.prepend(
               `/api/security/logout?${querystring.stringify({ next })}`
             )}
+            customBranding={customBrandingValue}
           />
         );
 

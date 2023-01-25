@@ -64,6 +64,6 @@ export class CustomBrandingService {
     if (!this.pluginName || this.pluginName !== 'customBranding' || !this.fetchFn) {
       return {};
     }
-    return this.fetchFn!(request, unauthenticated);
+    return this.fetchFn!(request, Boolean(unauthenticated));
   };
 }

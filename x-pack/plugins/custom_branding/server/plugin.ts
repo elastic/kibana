@@ -54,7 +54,7 @@ export class CustomBrandingPlugin implements Plugin {
 
     const fetchFn = async (
       request: KibanaRequest,
-      unauthenticated?: boolean
+      unauthenticated: boolean
     ): Promise<CustomBranding> => {
       if (!this.isValidLicense) {
         return {};

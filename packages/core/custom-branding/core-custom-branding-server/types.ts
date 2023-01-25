@@ -15,10 +15,11 @@ export interface CustomBrandingStart {}
 
 export type CustomBrandingFetchFn = (
   request: KibanaRequest,
-  unauthenticated?: boolean
+  unauthenticated: boolean
 ) => MaybePromise<CustomBranding>;
 
 /** @public */
 export interface CustomBrandingSetup {
   register: (fetchFn: CustomBrandingFetchFn) => void;
+  getBrandingFor: (request: KibanaRequest, unauthenticated?: boolean) => Promise<CustomBranding>;
 }
