@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         comparator: Comparator.GT_OR_EQ,
         aggType: Aggregators.SUM,
         metric: 'value',
-      },
+      } as NonCountMetricExpressionParams,
     ],
   };
 
