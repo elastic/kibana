@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiLink } from '@elastic/eui';
@@ -18,15 +18,13 @@ import { EnableHostViewPage } from './enable_host_view_page';
 export const HostsLandingPage = () => {
   const kibana = useKibana();
   const canEditAdvancedSettings = kibana.services.application?.capabilities.advancedSettings.save;
-  const [isHostViewEnabled, setIsHostViewEnabled] = useState<boolean | undefined>(undefined);
+  const [isHostViewEnabled, setIsHostViewEnabled] = useState<boolean | undefined>(
+    kibana.services.uiSettings?.get(enableInfrastructureHostsView)
+  );
 
   const ROLE = i18n.translate('xpack.infra.hostsViewPage.landing.role', {
     defaultMessage: 'role',
   });
-
-  useEffect(() => {
-    setIsHostViewEnabled(kibana.services.uiSettings?.get(enableInfrastructureHostsView));
-  }, [isHostViewEnabled, kibana.services.uiSettings]);
 
   if (isHostViewEnabled) {
     return <HostsPage />;
