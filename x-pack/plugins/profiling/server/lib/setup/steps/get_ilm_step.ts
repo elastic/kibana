@@ -6,7 +6,7 @@
  */
 
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
-import ilmProfiling from './ilm-profiling.json';
+import ilmProfiling from './ilm_profiling.json';
 
 const LIFECYCLE_POLICY_NAME = 'profiling';
 

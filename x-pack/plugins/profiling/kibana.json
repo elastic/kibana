@@ -21,7 +21,8 @@
     "dataViews",
     "charts",
     "spaces",
-    "cloud"
+    "cloud",
+    "fleet"
   ],
   "optionalPlugins": [],
   "configPath": [

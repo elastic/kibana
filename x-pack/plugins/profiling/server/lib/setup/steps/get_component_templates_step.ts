@@ -6,11 +6,11 @@
  */
 import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
-import componentTemplateProfilingIlm from './component-template-profiling-ilm.json';
-import componentTemplateProfilingEvents from './component-template-profiling-events.json';
-import componentTemplateProfilingExecutables from './component-template-profiling-executables.json';
-import componentTemplateProfilingStackframes from './component-template-profiling-stackframes.json';
-import componentTemplateProfilingStacktraces from './component-template-profiling-stacktraces.json';
+import componentTemplateProfilingIlm from './component_template_profiling_ilm.json';
+import componentTemplateProfilingEvents from './component_template_profiling_events.json';
+import componentTemplateProfilingExecutables from './component_template_profiling_executables.json';
+import componentTemplateProfilingStackframes from './component_template_profiling_stackframes.json';
+import componentTemplateProfilingStacktraces from './component_template_profiling_stacktraces.json';
 
 export enum ProfilingComponentTemplateName {
   Ilm = 'profiling-ilm',
