@@ -6,33 +6,35 @@
  */
 
 import {
+  EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiCallOut,
   EuiText,
-  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { joinByKey } from '../../../../common/utils/join_by_key';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { SearchBar } from '../../shared/search_bar';
-import { ServiceList } from './service_list';
-import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { joinByKey } from '../../../../common/utils/join_by_key';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import {
+  OTHER_SERVICE_NAME,
+  ServiceMaxGroupsMessage,
+} from '../../shared/links/apm/service_link/service_max_groups_message';
+import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { SearchBar } from '../../shared/search_bar';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
-import { OTHER_SERVICE_NAME } from '../../shared/service_link';
 
 const initialData = {
   requestId: '',
@@ -311,15 +313,16 @@ export function ServiceInventory() {
         title={i18n.translate(
           'xpack.apm.serviceList.ui.limit.warning.calloutTitle',
           {
-            defaultMessage: 'Too many unique service names',
+            defaultMessage:
+              'Number of services exceed the allowed maximum that are displayed (1,000)',
           }
         )}
-        color="danger"
+        color="warning"
         iconType="alert"
       >
         <EuiText size="s">
           <FormattedMessage
-            defaultMessage="Service name limit exceeded. Try narrowing down your results using the query bar"
+            defaultMessage="Max. number of services that can be viewed in Kibana has been reached. Try narrowing down results by using the query bar or consider using service groups."
             id="xpack.apm.serviceList.ui.limit.warning.calloutDescription"
           />
         </EuiText>
@@ -333,20 +336,15 @@ export function ServiceInventory() {
         title={i18n.translate(
           'xpack.apm.serviceList.apmServer.limit.warning.calloutTitle',
           {
-            defaultMessage: 'The limit to the number of services reached',
+            defaultMessage:
+              'Number of services instrumented has reached the current capacity of the APM server',
           }
         )}
-        color="danger"
+        color="warning"
         iconType="alert"
       >
         <EuiText size="s">
-          <FormattedMessage
-            defaultMessage="The maximum number of unique services has been reached. Please increase {codeBlock} in APM Server."
-            id="xpack.apm.serviceList.apmServer.limit.warning.calloutDescription"
-            values={{
-              codeBlock: <EuiCode>aggregation.service.max_groups</EuiCode>,
-            }}
-          />
+          <ServiceMaxGroupsMessage remainingServices={2} />
         </EuiText>
       </EuiCallOut>
     </EuiFlexItem>
