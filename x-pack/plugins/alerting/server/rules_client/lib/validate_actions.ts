@@ -8,15 +8,16 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RawRule } from '../../types';
+import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertActionOptionalUuid } from '../types';
 import { RulesClientContext } from '../types';
+import { parseDuration } from '../../lib';
 
 export async function validateActions<U extends NormalizedAlertActionOptionalUuid>(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle'> & { actions: U[] }
+  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & { actions: U[] }
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
@@ -90,5 +91,27 @@ export async function validateActions<U extends NormalizedAlertActionOptionalUui
         })
       );
     }
+  }
+
+  // check for actions throttled shorter than the rule schedule
+  const scheduleInterval = parseDuration(data.schedule.interval);
+  const actionsWithInvalidThrottles = actions.filter(
+    (action) =>
+      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
+      parseDuration(action.frequency.throttle!) < scheduleInterval
+  );
+  if (actionsWithInvalidThrottles.length) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
+        defaultMessage:
+          'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
+        values: {
+          scheduleIntervalText: data.schedule.interval,
+          groups: actionsWithInvalidThrottles
+            .map((a) => `${a.group} (${a.frequency?.throttle})`)
+            .join(', '),
+        },
+      })
+    );
   }
 }

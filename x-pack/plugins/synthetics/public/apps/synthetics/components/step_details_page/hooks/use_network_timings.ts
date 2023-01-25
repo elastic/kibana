@@ -18,6 +18,7 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-plugin/common';
+import { CONTENT_SIZE_LABEL } from './use_network_timings_prev';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
@@ -61,6 +62,9 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
           ...runTimeMappings,
           'synthetics.payload.is_navigation_request': {
             type: 'boolean',
+          },
+          'synthetics.payload.transfer_size': {
+            type: 'long',
           },
         },
         query: {
@@ -121,6 +125,11 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
               field: SYNTHETICS_TOTAL_TIMINGS,
             },
           },
+          transferSize: {
+            sum: {
+              field: 'synthetics.payload.transfer_size',
+            },
+          },
         },
       },
     },
@@ -138,10 +147,15 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
     wait: aggs?.wait.value ?? 0,
     blocked: aggs?.blocked.value ?? 0,
     ssl: aggs?.ssl.value ?? 0,
+    transferSize: aggs?.transferSize.value ?? 0,
   };
 
   return {
     timings,
+    transferSize: {
+      value: timings.transferSize,
+      label: CONTENT_SIZE_LABEL,
+    },
     timingsWithLabels: [
       {
         value: timings.dns,
