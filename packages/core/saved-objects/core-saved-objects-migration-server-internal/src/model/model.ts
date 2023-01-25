@@ -448,14 +448,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.legacyIndex) {
-        // we are performing a migration from a legacy state (< 7.14)
-        // in this scenario we do NOT skip reindexing
-        return {
-          ...stateP,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-        };
-      } else if (
+      if (
         // source exists
         Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
         // ...and mappings are unchanged
