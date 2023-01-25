@@ -74,7 +74,10 @@ export const OptionsListPopoverActionBar = ({
               <EuiToolTip
                 content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}
               >
-                <EuiBadge className="optionsList__cardinalityBadge">
+                <EuiBadge
+                  data-test-subj="optionsList-cardinality-badge"
+                  className="optionsList__cardinalityBadge"
+                >
                   {totalCardinality.toLocaleString()}
                 </EuiBadge>
               </EuiToolTip>

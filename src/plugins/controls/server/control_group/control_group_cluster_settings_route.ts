@@ -21,15 +21,21 @@ export const setupControlGroupClusterSettingsRoute = ({ http }: CoreSetup) => {
     async (context, _, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const allowExpensiveQueries =
-          get(
-            await esClient.cluster.getSettings({
-              include_defaults: true,
-              filter_path: '**.allow_expensive_queries',
-            }),
-            'transient.search.allow_expensive_queries'
-          ) === 'true';
-        return response.ok({ body: { allowExpensiveQueries } });
+        const allowExpensiveQueries = get(
+          await esClient.cluster.getSettings({
+            include_defaults: true,
+            filter_path: '**.allow_expensive_queries',
+          }),
+          'transient.search.allow_expensive_queries'
+        );
+        return response.ok({
+          body: {
+            // by default, the allowExpensiveQueries cluster setting is undefined; so, we need to assume
+            // it's true in that case, since that's the way other applications (such as the dashboard listing
+            // page) handle this.
+            allowExpensiveQueries: allowExpensiveQueries ? allowExpensiveQueries === true : true,
+          },
+        });
       } catch (e) {
         const kbnErr = getKbnServerError(e);
         return reportServerError(response, kbnErr);

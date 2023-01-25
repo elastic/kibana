@@ -41,10 +41,6 @@ import { getDefaultComponentState, optionsListReducers } from '../options_list_r
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import {
-  OptionsListFailureResponse,
-  OptionsListSuccessResponse,
-} from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,

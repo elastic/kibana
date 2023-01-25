@@ -9,18 +9,17 @@
 import React, { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPopoverTitle } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 
+import { pluginServices } from '../../services';
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
+import { OptionsListPopoverTitle } from './options_list_popover_title';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
-import { pluginServices } from '../../services';
 
 export interface OptionsListPopoverProps {
   width: number;
@@ -41,6 +40,11 @@ export const OptionsListPopover = ({
     typeof optionsListReducers
   >();
 
+  // Controls Services Context
+  const {
+    optionsList: { getAllowExpensiveQueries },
+  } = pluginServices.getServices();
+
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const availableOptions = select((state) => state.componentState.availableOptions);
@@ -49,16 +53,10 @@ export const OptionsListPopover = ({
   const hideActionBar = select((state) => state.explicitInput.hideActionBar);
   const hideFooter = select((state) => state.explicitInput.hideFooter);
   const fieldName = select((state) => state.explicitInput.fieldName);
-  const title = select((state) => state.explicitInput.title);
   const id = select((state) => state.explicitInput.id);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [allowExpensiveQueries, setAllowExpensiveQueries] = useState(false);
-
-  // Controls Services Context
-  const {
-    optionsList: { getAllowExpensiveQueries },
-  } = pluginServices.getServices();
 
   useEffect(() => {
     const waitForAllowExpensiveQueries = async () => {
@@ -76,29 +74,7 @@ export const OptionsListPopover = ({
         data-test-subj={`optionsList-control-popover`}
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-            {!allowExpensiveQueries && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  aria-label="Warning"
-                  type="alert"
-                  color="warning"
-                  content={
-                    <FormattedMessage
-                      id="controls.optionsList.popover.allowExpensiveQueriesWarning"
-                      defaultMessage="{allowExpensiveQueriesSetting} is off, so some features have been disabled."
-                      values={{
-                        allowExpensiveQueriesSetting: <code>search.allow_expensive_queries</code>,
-                      }}
-                    />
-                  }
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+        <OptionsListPopoverTitle allowExpensiveQueries={allowExpensiveQueries} />
 
         {field?.type !== 'boolean' && !hideActionBar && (
           <OptionsListPopoverActionBar

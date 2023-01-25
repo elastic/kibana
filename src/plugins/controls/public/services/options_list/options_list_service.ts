@@ -16,7 +16,6 @@ import {
   OptionsListRequest,
   OptionsListResponse,
   OptionsListRequestBody,
-  OptionsListSuccessResponse,
   OptionsListFailureResponse,
 } from '../../../common/options_list/types';
 import { ControlsHTTPService } from '../http/types';
@@ -137,7 +136,6 @@ class OptionsListService implements ControlsOptionsListService {
 export interface OptionsListServiceRequiredServices {
   data: ControlsDataService;
   http: ControlsHTTPService;
-  elasticsearch: CoreStart['elasticsearch'];
 }
 
 export type OptionsListServiceFactory = KibanaPluginServiceFactory<
