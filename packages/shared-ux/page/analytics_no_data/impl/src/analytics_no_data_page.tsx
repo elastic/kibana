@@ -8,7 +8,7 @@
 import React from 'react';
 import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
 
-import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { useServices } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 
@@ -25,15 +25,13 @@ export const AnalyticsNoDataPage = ({
 
   const { hasCustomBranding$ } = customBranding;
 
-  const showPlainSpinner = hasCustomBranding$.subscribe((data: boolean) => of(data)) ? true : false;
-
   return (
     <Component
       {...{
         onDataViewCreated,
         allowAdHocDataView,
         kibanaGuideDocLink,
-        showPlainSpinner,
+        showPlainSpinner: useObservable(hasCustomBranding$) ?? false,
       }}
     />
   );

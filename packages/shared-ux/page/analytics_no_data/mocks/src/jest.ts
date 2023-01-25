@@ -12,6 +12,7 @@ import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-d
 export const getServicesMock = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
+    // @ts-ignore jest.fn() used to mock an Observable<boolean>
     customBranding: { hasCustomBranding$: jest.fn(), showPlainSpinner: false },
     kibanaGuideDocLink: 'Kibana guide',
   };
