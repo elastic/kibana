@@ -16,10 +16,10 @@ interface Props {
 }
 export const ExperimentalBadge = ({ iconType, tooltipPosition }: Props) => (
   <EuiBetaBadge
-    label={i18n.translate('xpack.infra.hostsPage.experimentalBadgeLabel', {
+    label={i18n.translate('xpack.infra.hostsViewPage.experimentalBadgeLabel', {
       defaultMessage: 'Technical preview',
     })}
-    tooltipContent={i18n.translate('xpack.infra.hostsPage.experimentalBadgeDescription', {
+    tooltipContent={i18n.translate('xpack.infra.hostsViewPage.experimentalBadgeDescription', {
       defaultMessage:
         'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
     })}

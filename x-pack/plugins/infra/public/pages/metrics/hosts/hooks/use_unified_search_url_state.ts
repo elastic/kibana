@@ -73,8 +73,9 @@ const reducer = (state: HostsState, action: Action): HostsState => {
 };
 
 export const useHostsUrlState = () => {
+  const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
   const [urlState, setUrlState] = useUrlState<HostsState>({
-    defaultState: INITIAL_HOSTS_STATE,
+    defaultState: { ...INITIAL_HOSTS_STATE, dateRange: getTime() },
     decodeUrlState,
     encodeUrlState,
     urlStateKey: '_a',
@@ -82,8 +83,6 @@ export const useHostsUrlState = () => {
   });
 
   const [state, dispatch] = useReducer(reducer, urlState);
-
-  const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
 
   const getRangeInTimestamp = useCallback(({ from, to }: TimeRange) => {
     const fromTS = DateMath.parse(from)?.valueOf() ?? CALCULATED_DATE_RANGE_FROM;

@@ -49,7 +49,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('hostsView-metricsTrend');
     },
 
-    async getMetricsTrendTilesCount() {
+    async getChartsContainer() {
+      return testSubjects.find('hostsView-metricChart');
+    },
+
+    async getAllMetricsTrendTiles() {
       const container = await this.getMetricsTrendContainer();
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
     },
@@ -59,6 +63,21 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const element = await container.findByTestSubject(`hostsView-metricsTrend-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return await div.getAttribute('title');
+    },
+
+    async getAllMetricsCharts() {
+      const container = await this.getChartsContainer();
+      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
+    },
+
+    async getOpenInLensOption() {
+      const metricCharts = await this.getAllMetricsCharts();
+      const chart = metricCharts[0];
+      await chart.moveMouseTo();
+      const button = await testSubjects.findDescendant('embeddablePanelToggleMenuIcon', chart);
+      await button.click();
+      await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
+      return testSubjects.existOrFail('embeddablePanelAction-openInLens');
     },
   };
 }
