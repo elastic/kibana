@@ -11,6 +11,7 @@ import {
   Aggregators,
   Comparator,
   CountMetricExpressionParams,
+  CustomMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
 import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
@@ -121,6 +122,73 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 20895,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                bucketKey: { groupBy0: '*' },
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+              },
+            },
+          ]);
+        });
+        it('should alert with custom metric that is a document ratio', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.CUSTOM,
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '(A / B) * 100',
+                label: 'apache2 error ratio',
+              } as CustomMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'custom',
+                metric: 'apache2 error ratio',
+                label: 'apache2 error ratio',
+                customMetrics: [
+                  { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
+                  { name: 'B', aggType: 'count' },
+                ],
+                equation: '(A / B) * 100',
+                currentValue: 36.195262024407754,
                 timestamp: '2021-10-19T00:53:59.997Z',
                 shouldFire: true,
                 shouldWarn: false,
