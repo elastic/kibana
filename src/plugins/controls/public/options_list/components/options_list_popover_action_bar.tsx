@@ -17,11 +17,9 @@ import {
   EuiToolTip,
   EuiBadge,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 interface OptionsListPopoverProps {
@@ -35,20 +33,12 @@ export const OptionsListPopoverActionBar = ({
   updateSearchString,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { clearSelections },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const totalCardinality = select((state) => state.componentState.totalCardinality);
-  const searchString = select((state) => state.componentState.searchString);
-
-  const hideSort = select((state) => state.explicitInput.hideSort);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
+  const searchString = optionsList.select((state) => state.componentState.searchString);
+  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
 
   return (
     <div className="optionsList__actions">
@@ -129,7 +119,7 @@ export const OptionsListPopoverActionBar = ({
                 size="s"
                 color="danger"
                 iconType="eraser"
-                onClick={() => dispatch(clearSelections({}))}
+                onClick={() => optionsList.dispatch.clearSelections({})}
                 data-test-subj="optionsList-control-clear-all-selections"
                 aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
               />

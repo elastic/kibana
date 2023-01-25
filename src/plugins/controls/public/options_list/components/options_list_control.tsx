@@ -12,12 +12,10 @@ import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListStrings } from './options_list_strings';
 import { OptionsListPopover } from './options_list_popover';
-import { optionsListReducers } from '../options_list_reducers';
-import { OptionsListReduxState } from '../types';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
 
@@ -25,29 +23,19 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const resizeRef = useRef(null);
+  const optionsList = useOptionsList();
   const dimensions = useResizeObserver(resizeRef.current);
 
-  // Redux embeddable Context
-  const {
-    useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString },
-    useEmbeddableSelector: select,
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
-
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const validSelections = select((state) => state.componentState.validSelections);
-
-  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = select((state) => state.explicitInput.existsSelected);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
-  const singleSelect = select((state) => state.explicitInput.singleSelect);
-  const fieldName = select((state) => state.explicitInput.fieldName);
-  const exclude = select((state) => state.explicitInput.exclude);
-  const id = select((state) => state.explicitInput.id);
-
-  const loading = select((state) => state.output.loading);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const validSelections = optionsList.select((state) => state.componentState.validSelections);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const controlStyle = optionsList.select((state) => state.explicitInput.controlStyle);
+  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const exclude = optionsList.select((state) => state.explicitInput.exclude);
+  const loading = optionsList.select((state) => state.output.loading);
+  const id = optionsList.select((state) => state.explicitInput.id);
 
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
@@ -63,16 +51,16 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   // remove all other selections if this control is single select
   useEffect(() => {
     if (singleSelect && selectedOptions && selectedOptions?.length > 1) {
-      dispatch(replaceSelection(selectedOptions[0]));
+      optionsList.dispatch.replaceSelection(selectedOptions[0]);
     }
-  }, [selectedOptions, singleSelect, dispatch, replaceSelection]);
+  }, [selectedOptions, singleSelect, optionsList.dispatch]);
 
   const updateSearchString = useCallback(
     (newSearchString: string) => {
       typeaheadSubject.next(newSearchString);
-      dispatch(setSearchString(newSearchString));
+      optionsList.dispatch.setSearchString(newSearchString);
     },
-    [typeaheadSubject, dispatch, setSearchString]
+    [typeaheadSubject, optionsList.dispatch]
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {

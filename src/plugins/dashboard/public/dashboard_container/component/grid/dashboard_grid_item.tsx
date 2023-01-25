@@ -17,8 +17,8 @@ import {
 } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { useDashboardContainer } from '../use_dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 

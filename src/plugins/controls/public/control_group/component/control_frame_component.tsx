@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiFormControlLayout,
@@ -20,18 +21,15 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupReduxState } from '../types';
+
 import { pluginServices } from '../../services';
+import { TIME_SLIDER_CONTROL } from '../../../common';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { TIME_SLIDER_CONTROL } from '../../../common';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlGroupContainer } from '..';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 
 interface ControlFrameErrorProps {
   error: Error;
@@ -87,14 +85,9 @@ export const ControlFrame = ({
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [fatalError, setFatalError] = useState<Error>();
 
-  const { useEmbeddableSelector: select, embeddableInstance: controlGroup } =
-    useReduxEmbeddableContext<
-      ControlGroupReduxState,
-      typeof controlGroupReducers,
-      ControlGroupContainer
-    >();
+  const controlGroup = useControlGroupContainer();
 
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
 
   // Controls Services Context
   const {

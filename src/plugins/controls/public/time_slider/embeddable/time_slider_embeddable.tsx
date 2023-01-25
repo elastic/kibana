@@ -13,7 +13,7 @@ import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { TIME_SLIDER_CONTROL } from '../..';
@@ -37,6 +37,20 @@ import {
 } from '../time_utils';
 import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
+export const TimeSliderControlContext = createContext<TimeSliderControlEmbeddable | null>(null);
+export const useTimeSlider = (): TimeSliderControlEmbeddable => {
+  const timeSlider = useContext<TimeSliderControlEmbeddable | null>(TimeSliderControlContext);
+  if (timeSlider == null) {
+    throw new Error('useTimeSlider must be used inside TimeSliderControlContext.');
+  }
+  return timeSlider!;
+};
+
+type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
+  TimeSliderReduxState,
+  typeof timeSliderReducers
+>;
+
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
   ControlOutput
@@ -47,6 +61,14 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private inputSubscription: Subscription;
   private node?: HTMLElement;
 
+  // state management
+  public select: TimeSliderReduxEmbeddableTools['select'];
+  public getState: TimeSliderReduxEmbeddableTools['getState'];
+  public dispatch: TimeSliderReduxEmbeddableTools['dispatch'];
+  public onStateChange: TimeSliderReduxEmbeddableTools['onStateChange'];
+
+  private cleanupStateTools: () => void;
+
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
   private prevTimeRange: TimeRange | undefined;
@@ -55,11 +77,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     timesliceEndAsPercentageOfTimeRange?: number;
   };
   private readonly waitForControlOutputConsumersToLoad$;
-
-  private reduxEmbeddableTools: ReduxEmbeddableTools<
-    TimeSliderReduxState,
-    typeof timeSliderReducers
-  >;
 
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
@@ -85,7 +102,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       timeRangeBounds[TO_INDEX],
       this.getTimezone()
     );
-    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
     >({
@@ -98,6 +115,12 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         timeRangeBounds,
       },
     });
+
+    this.select = reduxEmbeddableTools.select;
+    this.getState = reduxEmbeddableTools.getState;
+    this.dispatch = reduxEmbeddableTools.dispatch;
+    this.onStateChange = reduxEmbeddableTools.onStateChange;
+    this.cleanupStateTools = reduxEmbeddableTools.cleanup;
 
     this.inputSubscription = this.getInput$().subscribe(() => this.onInputChange());
 
@@ -125,7 +148,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   public destroy = () => {
     super.destroy();
-    this.reduxEmbeddableTools.cleanup();
+    this.cleanupStateTools();
     if (this.inputSubscription) {
       this.inputSubscription.unsubscribe();
     }
@@ -136,7 +159,6 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
       this.prevTimesliceAsPercentage ?? {};
 
-    const { actions, dispatch } = this.reduxEmbeddableTools;
     if (
       timesliceStartAsPercentageOfTimeRange !== input.timesliceStartAsPercentageOfTimeRange ||
       timesliceEndAsPercentageOfTimeRange !== input.timesliceEndAsPercentageOfTimeRange
@@ -149,8 +171,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       ) {
         // If no selections have been saved into the timeslider, then both `timesliceStartAsPercentageOfTimeRange`
         // and `timesliceEndAsPercentageOfTimeRange` will be undefined - so, need to reset component state to match
-        dispatch(actions.publishValue({ value: undefined }));
-        dispatch(actions.setValue({ value: undefined }));
+        this.dispatch.publishValue({ value: undefined });
+        this.dispatch.setValue({ value: undefined });
       } else {
         // Otherwise, need to call `syncWithTimeRange` so that the component state value can be calculated and set
         this.syncWithTimeRange();
@@ -158,31 +180,26 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     } else if (input.timeRange && !_.isEqual(input.timeRange, this.prevTimeRange)) {
       const nextBounds = this.timeRangeToBounds(input.timeRange);
       const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], this.getTimezone());
-      dispatch(
-        actions.setTimeRangeBounds({
-          ...getStepSize(ticks),
-          ticks,
-          timeRangeBounds: nextBounds,
-        })
-      );
+      this.dispatch.setTimeRangeBounds({
+        ...getStepSize(ticks),
+        ticks,
+        timeRangeBounds: nextBounds,
+      });
       this.syncWithTimeRange();
     }
   }
 
   private syncWithTimeRange() {
     this.prevTimeRange = this.getInput().timeRange;
-    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
-    const stepSize = getState().componentState.stepSize;
-    const timesliceStartAsPercentageOfTimeRange =
-      getState().explicitInput.timesliceStartAsPercentageOfTimeRange;
-    const timesliceEndAsPercentageOfTimeRange =
-      getState().explicitInput.timesliceEndAsPercentageOfTimeRange;
+    const stepSize = this.getState().componentState.stepSize;
+    const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+      this.getState().explicitInput;
 
     if (
       timesliceStartAsPercentageOfTimeRange !== undefined &&
       timesliceEndAsPercentageOfTimeRange !== undefined
     ) {
-      const timeRangeBounds = getState().componentState.timeRangeBounds;
+      const timeRangeBounds = this.getState().componentState.timeRangeBounds;
       const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
       const from = timeRangeBounds[FROM_INDEX] + timesliceStartAsPercentageOfTimeRange * timeRange;
       const to = timeRangeBounds[FROM_INDEX] + timesliceEndAsPercentageOfTimeRange * timeRange;
@@ -190,8 +207,8 @@ export class TimeSliderControlEmbeddable extends Embeddable<
         roundDownToNextStepSizeFactor(from, stepSize),
         roundUpToNextStepSizeFactor(to, stepSize),
       ] as [number, number];
-      dispatch(actions.publishValue({ value }));
-      dispatch(actions.setValue({ value }));
+      this.dispatch.publishValue({ value });
+      this.dispatch.setValue({ value });
       this.onRangeChange(value[TO_INDEX] - value[FROM_INDEX]);
     }
   }
@@ -208,16 +225,14 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   }
 
   private debouncedPublishChange = _.debounce((value?: [number, number]) => {
-    const { actions, dispatch } = this.reduxEmbeddableTools;
-    dispatch(actions.publishValue({ value }));
+    this.dispatch.publishValue({ value });
   }, 500);
 
   private getTimeSliceAsPercentageOfTimeRange(value?: [number, number]) {
-    const { getState } = this.reduxEmbeddableTools;
     let timesliceStartAsPercentageOfTimeRange: number | undefined;
     let timesliceEndAsPercentageOfTimeRange: number | undefined;
     if (value) {
-      const timeRangeBounds = getState().componentState.timeRangeBounds;
+      const timeRangeBounds = this.getState().componentState.timeRangeBounds;
       const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
       timesliceStartAsPercentageOfTimeRange =
         (value[FROM_INDEX] - timeRangeBounds[FROM_INDEX]) / timeRange;
@@ -232,39 +247,29 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   }
 
   private onTimesliceChange = (value?: [number, number]) => {
-    const { actions, dispatch } = this.reduxEmbeddableTools;
-
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
       this.getTimeSliceAsPercentageOfTimeRange(value);
-    dispatch(
-      actions.setValueAsPercentageOfTimeRange({
-        timesliceStartAsPercentageOfTimeRange,
-        timesliceEndAsPercentageOfTimeRange,
-      })
-    );
-    dispatch(actions.setValue({ value }));
+    this.dispatch.setValueAsPercentageOfTimeRange({
+      timesliceStartAsPercentageOfTimeRange,
+      timesliceEndAsPercentageOfTimeRange,
+    });
+    this.dispatch.setValue({ value });
     this.debouncedPublishChange(value);
   };
 
   private onRangeChange = (range?: number) => {
-    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
-    const timeRangeBounds = getState().componentState.timeRangeBounds;
+    const timeRangeBounds = this.getState().componentState.timeRangeBounds;
     const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
-    dispatch(
-      actions.setRange({
-        range: range !== undefined && range < timeRange ? range : undefined,
-      })
-    );
+    this.dispatch.setRange({
+      range: range !== undefined && range < timeRange ? range : undefined,
+    });
   };
 
   private onNext = () => {
-    const { getState } = this.reduxEmbeddableTools;
-    const value = getState().componentState.value;
-    const range = getState().componentState.range;
-    const ticks = getState().componentState.ticks;
-    const isAnchored = getIsAnchored(getState());
+    const { value, range, ticks } = this.getState().componentState;
+    const isAnchored = getIsAnchored(this.getState());
     const tickRange = ticks[1].value - ticks[0].value;
-    const timeRangeBounds = getRoundedTimeRangeBounds(getState());
+    const timeRangeBounds = getRoundedTimeRangeBounds(this.getState());
 
     if (isAnchored) {
       if (value === undefined || value[TO_INDEX] >= timeRangeBounds[TO_INDEX]) {
@@ -304,13 +309,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   };
 
   private onPrevious = () => {
-    const { getState } = this.reduxEmbeddableTools;
-    const value = getState().componentState.value;
-    const range = getState().componentState.range;
-    const ticks = getState().componentState.ticks;
-    const isAnchored = getIsAnchored(getState());
+    const { value, range, ticks } = this.getState().componentState;
+    const isAnchored = getIsAnchored(this.getState());
     const tickRange = ticks[1].value - ticks[0].value;
-    const timeRangeBounds = getRoundedTimeRangeBounds(getState());
+    const timeRangeBounds = getRoundedTimeRangeBounds(this.getState());
 
     if (isAnchored) {
       const prevTick = value
@@ -347,10 +349,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   };
 
   private formatDate = (epoch: number) => {
-    const { getState } = this.reduxEmbeddableTools;
     return moment
       .tz(epoch, getMomentTimezone(this.getTimezone()))
-      .format(getState().componentState.format);
+      .format(this.getState().componentState.format);
   };
 
   public render = (node: HTMLElement) => {
@@ -358,12 +359,9 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-
-    const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
-
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <TimeSliderControlReduxWrapper>
+        <TimeSliderControlContext.Provider value={this}>
           <TimeSlider
             formatDate={this.formatDate}
             onChange={(value?: [number, number]) => {
@@ -372,22 +370,21 @@ export class TimeSliderControlEmbeddable extends Embeddable<
               this.onRangeChange(range);
             }}
           />
-        </TimeSliderControlReduxWrapper>
+        </TimeSliderControlContext.Provider>
       </KibanaThemeProvider>,
       node
     );
   };
 
   public renderPrepend() {
-    const { Wrapper: TimeSliderControlReduxWrapper } = this.reduxEmbeddableTools;
     return (
-      <TimeSliderControlReduxWrapper>
+      <TimeSliderControlContext.Provider value={this}>
         <TimeSliderPrepend
           onNext={this.onNext}
           onPrevious={this.onPrevious}
           waitForControlOutputConsumersToLoad$={this.waitForControlOutputConsumersToLoad$}
         />
-      </TimeSliderControlReduxWrapper>
+      </TimeSliderControlContext.Provider>
     );
   }
 

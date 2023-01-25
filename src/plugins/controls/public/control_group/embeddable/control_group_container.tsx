@@ -7,7 +7,7 @@
  */
 
 import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
@@ -54,6 +54,20 @@ export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
   flyoutRef = newRef;
 };
 
+export const ControlGroupContainerContext = createContext<ControlGroupContainer | null>(null);
+export const useControlGroupContainer = (): ControlGroupContainer => {
+  const controlGroup = useContext<ControlGroupContainer | null>(ControlGroupContainerContext);
+  if (controlGroup == null) {
+    throw new Error('useControlGroupContainer must be used inside ControlGroupContainerContext.');
+  }
+  return controlGroup!;
+};
+
+type ControlGroupReduxEmbeddableTools = ReduxEmbeddableTools<
+  ControlGroupReduxState,
+  typeof controlGroupReducers
+>;
+
 export class ControlGroupContainer extends Container<
   ControlInput,
   ControlGroupInput,
@@ -70,66 +84,16 @@ export class ControlGroupContainer extends Container<
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
 
-  private reduxEmbeddableTools: ReduxEmbeddableTools<
-    ControlGroupReduxState,
-    typeof controlGroupReducers
-  >;
+  // state management
+  public select: ControlGroupReduxEmbeddableTools['select'];
+  public getState: ControlGroupReduxEmbeddableTools['getState'];
+  public dispatch: ControlGroupReduxEmbeddableTools['dispatch'];
+  public onStateChange: ControlGroupReduxEmbeddableTools['onStateChange'];
+
+  private cleanupStateTools: () => void;
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
-
-  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
-    this.lastUsedDataViewId = lastUsedDataViewId;
-  };
-
-  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
-    this.relevantDataViewId = newRelevantDataViewId;
-  };
-
-  public getMostRelevantDataViewId = () => {
-    return this.lastUsedDataViewId ?? this.relevantDataViewId;
-  };
-
-  public getReduxEmbeddableTools = () => {
-    return this.reduxEmbeddableTools;
-  };
-
-  public closeAllFlyouts() {
-    flyoutRef?.close();
-    flyoutRef = undefined;
-  }
-
-  public async addDataControlFromField(controlProps: AddDataControlProps) {
-    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public addOptionsListControl(controlProps: AddOptionsListControlProps) {
-    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
-    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public addTimeSliderControl() {
-    const panelState = getTimeSliderPanelState(this.getInput());
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public openAddDataControlFlyout = openAddDataControlFlyout;
-
-  public getEditControlGroupButton = (closePopover: () => void) => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
-
-    return (
-      <ControlsServicesProvider>
-        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
-      </ControlsServicesProvider>
-    );
-  };
 
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
@@ -149,13 +113,19 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       ControlGroupReduxState,
       typeof controlGroupReducers
     >({
       embeddable: this,
       reducers: controlGroupReducers,
     });
+
+    this.select = reduxEmbeddableTools.select;
+    this.getState = reduxEmbeddableTools.getState;
+    this.dispatch = reduxEmbeddableTools.dispatch;
+    this.cleanupStateTools = reduxEmbeddableTools.cleanup;
+    this.onStateChange = reduxEmbeddableTools.onStateChange;
 
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
@@ -204,6 +174,55 @@ export class ControlGroupContainer extends Container<
      */
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+    );
+  };
+
+  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
+    this.lastUsedDataViewId = lastUsedDataViewId;
+  };
+
+  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
+    this.relevantDataViewId = newRelevantDataViewId;
+  };
+
+  public getMostRelevantDataViewId = () => {
+    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+  };
+
+  public closeAllFlyouts() {
+    flyoutRef?.close();
+    flyoutRef = undefined;
+  }
+
+  public async addDataControlFromField(controlProps: AddDataControlProps) {
+    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addOptionsListControl(controlProps: AddOptionsListControlProps) {
+    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
+    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addTimeSliderControl() {
+    const panelState = getTimeSliderPanelState(this.getInput());
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public openAddDataControlFlyout = openAddDataControlFlyout;
+
+  public getEditControlGroupButton = (closePopover: () => void) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
+    return (
+      <ControlsServicesProvider>
+        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
+      </ControlsServicesProvider>
     );
   };
 
@@ -341,13 +360,12 @@ export class ControlGroupContainer extends Container<
     }
     this.domNode = dom;
     const ControlsServicesProvider = pluginServices.getContextProvider();
-    const { Wrapper: ControlGroupReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <ControlsServicesProvider>
-          <ControlGroupReduxWrapper>
+          <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />
-          </ControlGroupReduxWrapper>
+          </ControlGroupContainerContext.Provider>
         </ControlsServicesProvider>
       </KibanaThemeProvider>,
       dom
@@ -358,7 +376,7 @@ export class ControlGroupContainer extends Container<
     super.destroy();
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
-    this.reduxEmbeddableTools.cleanup();
+    this.cleanupStateTools();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 }

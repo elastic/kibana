@@ -30,29 +30,17 @@ import {
 } from '@dnd-kit/core';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { ControlGroupReduxState } from '../types';
-import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 
 export const ControlGroup = () => {
-  // Redux embeddable container Context
-  const reduxContext = useReduxEmbeddableContext<
-    ControlGroupReduxState,
-    typeof controlGroupReducers
-  >();
-  const {
-    actions: { setControlOrders },
-    useEmbeddableSelector: select,
-    useEmbeddableDispatch,
-  } = reduxContext;
-  const dispatch = useEmbeddableDispatch();
+  const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const panels = controlGroup.select((state) => state.explicitInput.panels);
+  const viewMode = controlGroup.select((state) => state.explicitInput.viewMode);
+  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -83,7 +71,9 @@ export const ControlGroup = () => {
       const overIndex = idsInOrder.indexOf(over.id);
       if (draggingIndex !== overIndex) {
         const newIndex = overIndex;
-        dispatch(setControlOrders({ ids: arrayMove([...idsInOrder], draggingIndex, newIndex) }));
+        controlGroup.dispatch.setControlOrders({
+          ids: arrayMove([...idsInOrder], draggingIndex, newIndex),
+        });
       }
     }
     setDraggingId(null);

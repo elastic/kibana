@@ -13,8 +13,6 @@ import React, { useEffect, useRef } from 'react';
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupReduxState } from '../types';
 import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -24,8 +22,7 @@ import {
   DataControlInput,
   ControlEmbeddable,
 } from '../../types';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
+import { setFlyoutRef, useControlGroupContainer } from '../embeddable/control_group_container';
 
 interface EditControlResult {
   type: string;
@@ -39,22 +36,10 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     controls: { getControlFactory },
     theme: { theme$ },
   } = pluginServices.getServices();
-  // Redux embeddable container Context
-  const reduxContext = useReduxEmbeddableContext<
-    ControlGroupReduxState,
-    typeof controlGroupReducers,
-    ControlGroupContainer
-  >();
-  const {
-    embeddableInstance: controlGroup,
-    actions: { setControlWidth, setControlGrow },
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
-  } = reduxContext;
-  const dispatch = useEmbeddableDispatch();
+  const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
+  const panels = controlGroup.select((state) => state.explicitInput.panels);
 
   // keep up to date ref of latest panel state for comparison when closing editor.
   const latestPanelState = useRef(panels[embeddableId]);
@@ -96,7 +81,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           buttonColor: 'danger',
         }).then((confirmed) => {
           if (confirmed) {
-            dispatch(setControlWidth({ width: panel.width, embeddableId }));
+            controlGroup.dispatch.setControlWidth({ width: panel.width, embeddableId });
             reject();
             ref.close();
           }
@@ -137,9 +122,9 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
               updateWidth={(newWidth) =>
-                dispatch(setControlWidth({ width: newWidth, embeddableId }))
+                controlGroup.dispatch.setControlWidth({ width: newWidth, embeddableId })
               }
-              updateGrow={(grow) => dispatch(setControlGrow({ grow, embeddableId }))}
+              updateGrow={(grow) => controlGroup.dispatch.setControlGrow({ grow, embeddableId })}
               onTypeEditorChange={(partialInput) => {
                 inputToReturn = { ...inputToReturn, ...partialInput };
               }}

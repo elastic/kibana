@@ -14,19 +14,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { compareFilters } from '@kbn/es-query';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import {
-  ControlGroupInput,
-  ControlGroupOutput,
-  ControlGroupReduxState,
-  CONTROL_GROUP_TYPE,
-} from './types';
 import { pluginServices } from '../services';
 import { getDefaultControlGroupInput } from '../../common';
-import { controlGroupReducers } from './state/control_group_reducers';
 import { controlGroupInputBuilder } from './control_group_input_builder';
 import { ControlGroupContainer } from './embeddable/control_group_container';
+import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from './types';
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];
@@ -103,9 +96,6 @@ export const ControlGroupRenderer = ({
 
   return <div ref={controlGroupRef} />;
 };
-
-export const useControlGroupContainerContext = () =>
-  useReduxEmbeddableContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

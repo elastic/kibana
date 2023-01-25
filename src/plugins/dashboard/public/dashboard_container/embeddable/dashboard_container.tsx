@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Subject, Subscription } from 'rxjs';
 
@@ -48,7 +48,6 @@ import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
-import { DashboardContainerContext } from '../component/use_dashboard_container';
 import { dashboardContainerReducers } from './state/dashboard_container_reducers';
 import { startDiffingDashboardState } from './state/diffing/dashboard_diffing_integration';
 import { DASHBOARD_LOADED_EVENT, DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
@@ -75,6 +74,15 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof dashboardContainerReducers
 >;
 
+export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
+export const useDashboardContainer = (): DashboardContainer => {
+  const dashboard = useContext<DashboardContainer | null>(DashboardContainerContext);
+  if (dashboard == null) {
+    throw new Error('useDashboardContainer must be used inside DashboardContainerContext.');
+  }
+  return dashboard!;
+};
+
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -86,6 +94,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public subscriptions: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
+
+  // cleanup
+  public stopSyncingWithUnifiedSearch?: () => void;
+  private cleanupStateTools: () => void;
 
   // performance monitoring
   private dashboardCreationStartTime?: number;
@@ -255,9 +267,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // ------------------------------------------------------------------------------------------------------
   // Cleanup
   // ------------------------------------------------------------------------------------------------------
-  public stopSyncingWithUnifiedSearch?: () => void;
-  private cleanupStateTools: () => void;
-
   public destroy() {
     super.destroy();
     this.cleanupStateTools();

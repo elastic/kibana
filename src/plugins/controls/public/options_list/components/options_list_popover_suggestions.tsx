@@ -9,14 +9,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiLoadingSpinner, EuiSelectable, EuiSpacer } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 interface OptionsListPopoverSuggestionsProps {
   isLoading: boolean;
@@ -27,23 +25,16 @@ export const OptionsListPopoverSuggestions = ({
   isLoading,
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { replaceSelection, deselectOption, selectOption, selectExists },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const availableOptions = select((state) => state.componentState.availableOptions);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
 
-  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = select((state) => state.explicitInput.existsSelected);
-  const singleSelect = select((state) => state.explicitInput.singleSelect);
-  const hideExists = select((state) => state.explicitInput.hideExists);
-  const fieldName = select((state) => state.explicitInput.fieldName);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -123,13 +114,13 @@ export const OptionsListPopoverSuggestions = ({
         const key = changedOption.key ?? changedOption.label;
         // the order of these checks matters, so be careful if rearranging them
         if (key === 'exists-option') {
-          dispatch(selectExists(!Boolean(existsSelected)));
+          optionsList.dispatch.selectExists(!Boolean(existsSelected));
         } else if (showOnlySelected || selectedOptionsSet.has(key)) {
-          dispatch(deselectOption(key));
+          optionsList.dispatch.deselectOption(key);
         } else if (singleSelect) {
-          dispatch(replaceSelection(key));
+          optionsList.dispatch.replaceSelection(key);
         } else {
-          dispatch(selectOption(key));
+          optionsList.dispatch.selectOption(key);
         }
       }}
     >

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
@@ -15,8 +15,6 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription, lastValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import {
   compareFilters,
   buildRangeFilter,
@@ -27,6 +25,8 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -36,11 +36,11 @@ import {
   RANGE_SLIDER_CONTROL,
 } from '../..';
 import { pluginServices } from '../../services';
-import { RangeSliderControl } from '../components/range_slider_control';
-import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
 import { ControlsDataService } from '../../services/data/types';
+import { RangeSliderControl } from '../components/range_slider_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
+import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -65,6 +65,20 @@ interface RangeSliderDataFetchProps {
 const fieldMissingError = (fieldName: string) =>
   new Error(`field ${fieldName} not found in index pattern`);
 
+export const RangeSliderControlContext = createContext<RangeSliderEmbeddable | null>(null);
+export const useRangeSlider = (): RangeSliderEmbeddable => {
+  const rangeSlider = useContext<RangeSliderEmbeddable | null>(RangeSliderControlContext);
+  if (rangeSlider == null) {
+    throw new Error('useRangeSlider must be used inside RangeSliderControlContext.');
+  }
+  return rangeSlider!;
+};
+
+type RangeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
+  RangeSliderReduxState,
+  typeof rangeSliderReducers
+>;
+
 export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput, ControlOutput> {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
@@ -80,10 +94,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private dataView?: DataView;
   private field?: DataViewField;
 
-  private reduxEmbeddableTools: ReduxEmbeddableTools<
-    RangeSliderReduxState,
-    typeof rangeSliderReducers
-  >;
+  // state management
+  public select: RangeSliderReduxEmbeddableTools['select'];
+  public getState: RangeSliderReduxEmbeddableTools['getState'];
+  public dispatch: RangeSliderReduxEmbeddableTools['dispatch'];
+  public onStateChange: RangeSliderReduxEmbeddableTools['onStateChange'];
+
+  private cleanupStateTools: () => void;
 
   constructor(
     reduxEmbeddablePackage: ReduxEmbeddablePackage,
@@ -96,7 +113,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
-    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
       RangeSliderReduxState,
       typeof rangeSliderReducers
     >({
@@ -104,6 +121,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       reducers: rangeSliderReducers,
       initialComponentState: getDefaultComponentState(),
     });
+    this.select = reduxEmbeddableTools.select;
+    this.getState = reduxEmbeddableTools.getState;
+    this.dispatch = reduxEmbeddableTools.dispatch;
+    this.onStateChange = reduxEmbeddableTools.onStateChange;
+    this.cleanupStateTools = reduxEmbeddableTools.cleanup;
 
     this.initialize();
   }
@@ -158,13 +180,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     field?: DataViewField;
   }> => {
     const {
-      getState,
-      dispatch,
-      actions: { setField, setDataViewId },
-    } = this.reduxEmbeddableTools;
-    const {
       explicitInput: { dataViewId, fieldName },
-    } = getState();
+    } = this.getState();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
@@ -179,7 +196,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
           );
         }
 
-        dispatch(setDataViewId(this.dataView.id));
+        this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
         this.onFatalError(e);
       }
@@ -198,19 +215,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         );
       }
 
-      dispatch(setField(this.field?.toSpec()));
+      this.dispatch.setField(this.field?.toSpec());
     }
 
     return { dataView: this.dataView, field: this.field! };
   };
 
   private runRangeSliderQuery = async () => {
-    const {
-      dispatch,
-      actions: { setLoading, publishFilters, setMinMax },
-    } = this.reduxEmbeddableTools;
-
-    dispatch(setLoading(true));
+    this.dispatch.setLoading(true);
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
@@ -226,8 +238,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     if (!field) {
       batch(() => {
-        dispatch(setLoading(false));
-        dispatch(publishFilters([]));
+        this.dispatch.setLoading(false);
+        this.dispatch.publishFilters([]);
       });
       throw fieldMissingError(fieldName);
     }
@@ -258,12 +270,10 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       query,
     });
 
-    dispatch(
-      setMinMax({
-        min: `${min ?? ''}`,
-        max: `${max ?? ''}`,
-      })
-    );
+    this.dispatch.setMinMax({
+      min: `${min ?? ''}`,
+      max: `${max ?? ''}`,
+    });
 
     // build filter with new min/max
     await this.buildFilter();
@@ -324,11 +334,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   private buildFilter = async () => {
     const {
-      dispatch,
-      getState,
-      actions: { setLoading, setIsInvalid, setDataViewId, publishFilters },
-    } = this.reduxEmbeddableTools;
-    const {
       componentState: { min: availableMin, max: availableMax },
       explicitInput: {
         query,
@@ -337,7 +342,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         ignoreParentSettings,
         value: [selectedMin, selectedMax] = ['', ''],
       },
-    } = getState();
+    } = this.getState();
 
     const hasData = !isEmpty(availableMin) && !isEmpty(availableMax);
     const hasLowerSelection = !isEmpty(selectedMin);
@@ -349,10 +354,10 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     if (!hasData || !hasEitherSelection) {
       batch(() => {
-        dispatch(setLoading(false));
-        dispatch(setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection));
-        dispatch(setDataViewId(dataView.id));
-        dispatch(publishFilters([]));
+        this.dispatch.setLoading(false);
+        this.dispatch.setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection);
+        this.dispatch.setDataViewId(dataView.id);
+        this.dispatch.publishFilters([]);
       });
       return;
     }
@@ -404,20 +409,20 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
       if (!docCount) {
         batch(() => {
-          dispatch(setLoading(false));
-          dispatch(setIsInvalid(true));
-          dispatch(setDataViewId(dataView.id));
-          dispatch(publishFilters([]));
+          this.dispatch.setLoading(false);
+          this.dispatch.setIsInvalid(true);
+          this.dispatch.setDataViewId(dataView.id);
+          this.dispatch.publishFilters([]);
         });
         return;
       }
     }
 
     batch(() => {
-      dispatch(setLoading(false));
-      dispatch(setIsInvalid(false));
-      dispatch(setDataViewId(dataView.id));
-      dispatch(publishFilters([rangeFilter]));
+      this.dispatch.setLoading(false);
+      this.dispatch.setIsInvalid(false);
+      this.dispatch.setDataViewId(dataView.id);
+      this.dispatch.publishFilters([rangeFilter]);
     });
   };
 
@@ -427,23 +432,22 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   public destroy = () => {
     super.destroy();
+    this.cleanupStateTools();
     this.subscriptions.unsubscribe();
-    this.reduxEmbeddableTools.cleanup();
   };
 
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
-    const { Wrapper: RangeSliderReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
     const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <ControlsServicesProvider>
-          <RangeSliderReduxWrapper>
+          <RangeSliderControlContext.Provider value={this}>
             <RangeSliderControl />
-          </RangeSliderReduxWrapper>
+          </RangeSliderControlContext.Provider>
         </ControlsServicesProvider>
       </KibanaThemeProvider>,
       node

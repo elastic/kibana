@@ -14,13 +14,13 @@ The Presentation Utility Plugin is a set of common, shared components and toolki
 
 ## Plugin Services Toolkit
 
-While Kibana provides a `useKibana` hook for use in a plugin, the number of services it provides is very large.  This presents a set of difficulties:
+While Kibana provides a `useKibana` hook for use in a plugin, the number of services it provides is very large. This presents a set of difficulties:
 
 - a direct dependency upon the Kibana environment;
 - a requirement to mock the full Kibana environment when testing or using Storybook;
 - a lack of knowledge as to what services are being consumed at any given time.
 
-To mitigate these difficulties, the Presentation Team creates services within the plugin that then consume Kibana-provided (or other) services.  This is a toolkit for creating simple services within a plugin.
+To mitigate these difficulties, the Presentation Team creates services within the plugin that then consume Kibana-provided (or other) services. This is a toolkit for creating simple services within a plugin.
 
 ### Overview
 
@@ -59,7 +59,7 @@ This definition will be used in the toolkit to ensure services are complete and 
 
 ### Plugin Services
 
-The `PluginServices` class hosts a registry of service providers from which a plugin can access its services.  It uses the service definition as a generic.
+The `PluginServices` class hosts a registry of service providers from which a plugin can access its services. It uses the service definition as a generic.
 
 ```ts
 export const pluginServices = new PluginServices<PresentationUtilServices>();
@@ -71,7 +71,7 @@ Once created, it simply requires a `PluginServiceRegistry` to be started and set
 
 ### Service Provider Registry
 
-Each environment in which components are used requires a `PluginServiceRegistry` to specify how the providers are started.  For example, simple stubs of services require no parameters to start, (so the `StartParameters` generic remains unspecified)
+Each environment in which components are used requires a `PluginServiceRegistry` to specify how the providers are started. For example, simple stubs of services require no parameters to start, (so the `StartParameters` generic remains unspecified)
 
 <DocAccordion buttonContent="Stubbed Service Registry Example" initialIsOpen>
 ```ts
@@ -105,11 +105,11 @@ export const serviceRegistry = new PluginServiceRegistry<
 
 ### Service Provider
 
-A `PluginServiceProvider` is a container for a Service Factory that is responsible for starting, stopping and providing a service implementation.  A Service Provider doesn't change, rather the factory and the relevant `StartParameters` change.
+A `PluginServiceProvider` is a container for a Service Factory that is responsible for starting, stopping and providing a service implementation. A Service Provider doesn't change, rather the factory and the relevant `StartParameters` change.
 
 ### Service Factories
 
-A Service Factory is nothing more than a function that uses `StartParameters` to return a set of functions that conforms to a portion of the `Services` specification.  For each service, a factory is provided for each environment.
+A Service Factory is nothing more than a function that uses `StartParameters` to return a set of functions that conforms to a portion of the `Services` specification. For each service, a factory is provided for each environment.
 
 Given a service definition:
 
@@ -127,7 +127,9 @@ type FooServiceFactory = PluginServiceFactory<PresentationFooService>;
 
 export const fooServiceFactory: FooServiceFactory = () => ({
   getFoo: () => 'bar',
-  setFoo: (bar) => { console.log(`${bar} set!`)},
+  setFoo: (bar) => {
+    console.log(`${bar} set!`);
+  },
 });
 ```
 
@@ -162,14 +164,15 @@ Once your services and providers are defined, and you have at least one set of f
 import { pluginServices } from './services';
 import { registry } from './services/kibana';
 
-  public start(
-    coreStart: CoreStart,
-    startPlugins: StartDeps
-  ): Promise<PresentationUtilPluginStart> {
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
-    return {};
-  }
-```
+public start(
+coreStart: CoreStart,
+startPlugins: StartDeps
+): Promise<PresentationUtilPluginStart> {
+pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+return {};
+}
+
+````
 </DocAccordion>
 
 and wrap your root React component with the `PluginServices` context:
@@ -187,7 +190,8 @@ return(
     </WhateverElse>
   </I18nContext>
 )
-```
+````
+
 </DocAccordion>
 
 and then, consume your services using provided hooks in a component:
@@ -202,16 +206,17 @@ export function MyComponent() {
   // Retrieve all context hooks from `PluginServices`, destructuring for the one we're using
   const { foo } = pluginServices.getHooks();
 
-  // Use the `useContext` hook to access the API.
-  const { getFoo } = foo.useService();
+// Use the `useContext` hook to access the API.
+const { getFoo } = foo.useService();
 
-  // ...
+// ...
 }
-```
+
+````
 </DocAccordion>
 
 ## Redux Embeddables
-The Redux Embeddables system allows embeddable authors to interact with their embeddables in a standardized way using Redux toolkit. This wrapper abstracts away store and slice creation, embeddable input sync, and context creation. To use this system, a developer can wrap their components in the ReduxEmbeddableWrapper, supplying only an object of reducers.
+The Redux Embeddables system allows embeddable authors to interact with their embeddables in a standardized way using Redux toolkit. This wrapper abstracts away store and slice creation, and embeddable input sync. To use this system, a developer can use CreateReduxEmbeddableTools in the constructor of their embeddable, supplying a collection of reducers.
 
 ### Reducers
 The reducer object expected by the ReduxEmbeddableWrapper is the same type as the reducers expected by [Redux Toolkit's CreateSlice](https://redux-toolkit.js.org/api/createslice).
@@ -229,78 +234,26 @@ export const myEmbeddableReducers = {
     state.specialBoolean = action.payload;
   }
 }
-    
-```
-</DocAccordion>
 
-### Lazy Component and Types
-Because the ReduxEmbeddableWrapper is a lazy component, it also must be unwrapped with the `withSuspense` component from Presentation Util. When you await this component, you must also pass in the type information so that the redux store and actions are properly typed.
- 
- <DocAccordion buttonContent="Awaiting LazyReduxEmbeddableWrapper" initialIsOpen>
-  ```ts
-  // my_embeddable.tsx
+````
 
-  import {
-    withSuspense,
-    LazyReduxEmbeddableWrapper,
-    ReduxEmbeddableWrapperPropsWithChildren,
-  } from '../../../../presentation_util/public';
-
-  export interface MyEmbeddableInput {
-    specialBoolean: boolean
-  }
-
-  const MyEmbeddableReduxWrapper = withSuspense<
-    ReduxEmbeddableWrapperPropsWithChildren<MyEmbeddableInput>
-  >(LazyReduxEmbeddableWrapper);
-      
-  ```
-</DocAccordion>
-
-The ReduxEmbeddableWrapper should be used inside of embeddable classes, and should wrap all components under the embeddable in the render function.
-
-<DocAccordion buttonContent="Wrapping Embeddable Render" initialIsOpen>
-  ```ts
-  // my_embeddable.tsx
-
-  public render(dom: HTMLElement) {
-    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
-    this.domNode = dom;
-    ReactDOM.render(
-        <MyEmbeddableReduxWrapper embeddable={this} reducers={myEmbeddableReducers}>
-          <MyEmbeddableComponent />
-        </MyEmbeddableReduxWrapper>,
-      dom
-    );
-  }
-  ```
 </DocAccordion>
 
 ### Accessing Actions and State
 
-From components under the embeddable, actions, containerActions, and the current state of the redux store are accessed via the ReduxEmbeddableContext. This context requires the input type and the type of the reducers, and will return the appropriately typed actions, a hook for dispatching actions, a selector to get the current redux state, and a suite of `containerActions` if the embeddable is a Container.
+From components under the embeddable, actions, containerActions, and the current state of the redux store are accessed via the embeddable instance. You can pass the embeddable instance down as a prop, or use a context.
 
 <DocAccordion buttonContent="Accessing Redux Embeddable Context" initialIsOpen>
   ```ts
   // my_embeddable_component.tsx
-  import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 
-  const {
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
-    actions: { setSpecialBoolean },
-  } = useReduxEmbeddableContext<
-    MyEmbeddableInput,
-    typeof myEmbeddableReducers
-  >();
+// current state
+const { specialBoolean } = embeddableInstance.select((state) => state);
 
-  const dispatch = useEmbeddableDispatch();
+// change specialBoolean after 5 seconds
+setTimeout(() => embeddableInstance.dispatch.setSpecialBoolean(false), 5000);
 
-  // current state
-  const { specialBoolean } = useEmbeddableSelector((state) => state);
-
-  // change specialBoolean after 5 seconds
-  setTimeout(() => dispatch(setSpecialBoolean(false)), 5000);
-  ```
+```
 </DocAccordion>
 
+```
