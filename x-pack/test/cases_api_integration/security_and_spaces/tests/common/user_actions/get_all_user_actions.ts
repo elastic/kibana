@@ -22,7 +22,6 @@ import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  getCaseUserActions,
   superUserSpace1Auth,
   deleteCases,
   createComment,
@@ -30,6 +29,7 @@ import {
   deleteComment,
   extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -49,6 +49,23 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('get_all_user_actions', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+    });
+
+    it('populates the action_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].action_id).not.to.be(undefined);
+      expect(userActions[0]).not.to.have.property('id');
+    });
+
+    it('populates the case_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].case_id).not.to.be(undefined);
     });
 
     it('creates a create case user action when a case is created', async () => {

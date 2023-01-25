@@ -101,7 +101,9 @@ export async function generateMobileData({
                 .span({
                   spanName: 'onCreate',
                   spanType: 'app',
-                  spanSubtype: 'internal',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
                 })
                 .duration(50)
                 .success()

@@ -50,6 +50,7 @@ import {
   RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { FieldMap } from '../common/alert_schema/field_maps/types';
 import { GetViewInAppUrlFn } from './lib';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -159,6 +160,11 @@ export interface SummarizedAlerts {
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface IRuleTypeAlerts {
+  context: string;
+  namespace?: string;
+  fieldMap: FieldMap;
+}
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -205,6 +211,12 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  alerts?: IRuleTypeAlerts;
+  /**
+   * Determines whether framework should
+   * automatically make recovery determination. Defaults to true.
+   */
+  autoRecoverAlerts?: boolean;
   getViewInAppUrl?: GetViewInAppUrlFn<Params>;
 }
 export type UntypedRuleType = RuleType<

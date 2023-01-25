@@ -18,20 +18,22 @@ import {
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { AlertStateInfo } from './alert_state_info';
 import { ACTIVE_ALERT_LABEL, ALL_ALERT_LABEL, RECOVERED_ALERT_LABEL } from './constants';
-import { Alert } from '../../../../../hooks/use_load_alert_summary';
+import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
+  chartThemes: ChartThemes;
   recoveredAlertCount: number;
   recoveredAlerts: Alert[];
-  timeRangeTitle: JSX.Element | string;
+  timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
 }
 
 export const AlertsSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
+  chartThemes,
   recoveredAlertCount,
   recoveredAlerts,
   timeRangeTitle,
@@ -91,6 +93,7 @@ export const AlertsSummaryWidgetCompact = ({
                 data-test-subj="activeAlerts"
               >
                 <AlertStateInfo
+                  chartThemes={chartThemes}
                   count={activeAlertCount}
                   data={activeAlerts}
                   dataTestSubj="activeAlerts"
@@ -110,6 +113,7 @@ export const AlertsSummaryWidgetCompact = ({
                 data-test-subj="recoveredAlerts"
               >
                 <AlertStateInfo
+                  chartThemes={chartThemes}
                   count={recoveredAlertCount}
                   data={recoveredAlerts}
                   dataTestSubj="recoveredAlerts"

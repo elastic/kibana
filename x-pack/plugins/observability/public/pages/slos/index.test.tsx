@@ -8,28 +8,43 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import { ConfigSchema } from '../../plugin';
-import { Subset } from '../../typings';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
+import { useKibana } from '../../utils/kibana_react';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useLicense } from '../../hooks/use_license';
 import { SlosPage } from '.';
 import { emptySloList, sloList } from '../../data/slo';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import type { ConfigSchema } from '../../plugin';
+import type { Subset } from '../../typings';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
-jest.mock('../../hooks/slo/use_fetch_slo_list');
+
+jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('../../hooks/use_license');
+jest.mock('../../hooks/slo/use_fetch_slo_list');
 
-const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-
-jest.mock('../../utils/kibana_react', () => ({
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
-}));
-
+const useKibanaMock = useKibana as jest.Mock;
+const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
+
+const mockNavigate = jest.fn();
+
+const mockKibana = () => {
+  useKibanaMock.mockReturnValue({
+    services: {
+      application: { navigateToUrl: mockNavigate },
+      http: {
+        basePath: {
+          prepend: jest.fn(),
+        },
+      },
+    },
+  });
+};
 
 const config: Subset<ConfigSchema> = {
   unsafe: {
@@ -40,38 +55,62 @@ const config: Subset<ConfigSchema> = {
 describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockKibana();
   });
 
-  it('renders the not found page when the feature flag is not enabled', async () => {
-    useFetchSloListMock.mockReturnValue({ loading: false, sloList: emptySloList });
+  describe('when the feature flag is not enabled', () => {
+    it('renders the not found page ', async () => {
+      useFetchSloListMock.mockReturnValue({ loading: false, sloList: emptySloList });
+      useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
-    render(<SlosPage />, { unsafe: { slo: { enabled: false } } });
+      render(<SlosPage />, { unsafe: { slo: { enabled: false } } });
 
-    expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
+      expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
+    });
   });
 
   describe('when the feature flag is enabled', () => {
-    it('renders nothing when the API is loading', async () => {
-      useFetchSloListMock.mockReturnValue({ loading: true, sloList: emptySloList });
+    describe('when the incorrect license is found', () => {
+      it('renders the welcome prompt with subscription buttons', async () => {
+        useFetchSloListMock.mockReturnValue({ loading: false, sloList: emptySloList });
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
 
-      const { container } = render(<SlosPage />, config);
+        render(<SlosPage />, config);
 
-      expect(container).toBeEmptyDOMElement();
+        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+        expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
+        expect(screen.queryByTestId('slosPageWelcomePromptSignupForLicenseButton')).toBeTruthy();
+      });
     });
 
-    it('renders the SLOs Welcome Prompt when the API has finished loading and there are no results', async () => {
-      useFetchSloListMock.mockReturnValue({ loading: false, sloList: emptySloList });
-      render(<SlosPage />, config);
+    describe('when the correct license is found', () => {
+      it('renders nothing when the API is loading', async () => {
+        useFetchSloListMock.mockReturnValue({ loading: true, sloList: emptySloList });
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
-      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
-    });
+        const { container } = render(<SlosPage />, config);
 
-    it('renders the SLOs page when the API has finished loading and there are results', async () => {
-      useFetchSloListMock.mockReturnValue({ loading: false, sloList });
-      render(<SlosPage />, config);
+        expect(container).toBeEmptyDOMElement();
+      });
 
-      expect(screen.queryByTestId('slosPage')).toBeTruthy();
-      expect(screen.queryByTestId('sloList')).toBeTruthy();
+      it('renders the SLOs Welcome Prompt when the API has finished loading and there are no results', async () => {
+        useFetchSloListMock.mockReturnValue({ loading: false, sloList: emptySloList });
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+        render(<SlosPage />, config);
+
+        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+      });
+
+      it('renders the SLOs page when the API has finished loading and there are results', async () => {
+        useFetchSloListMock.mockReturnValue({ loading: false, sloList });
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+        render(<SlosPage />, config);
+
+        expect(screen.queryByTestId('slosPage')).toBeTruthy();
+        expect(screen.queryByTestId('sloList')).toBeTruthy();
+      });
     });
   });
 });
