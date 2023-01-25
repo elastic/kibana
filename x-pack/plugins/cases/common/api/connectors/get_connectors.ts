@@ -16,8 +16,8 @@ const CaseConnectorPushInfoRt = rt.intersection([
   }),
   rt.partial(
     rt.type({
-      latestPushDate: rt.string,
-      oldestPushDate: rt.string,
+      latestUserActionPushDate: rt.string,
+      oldestUserActionPushDate: rt.string,
       externalService: CaseExternalServiceBasicRt,
     }).props
   ),

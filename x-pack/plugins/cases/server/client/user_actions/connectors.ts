@@ -276,8 +276,8 @@ const createConnectorInfoResult = ({
           needsToBePushed,
           hasBeenPushed: hasBeenPushed(enrichedPushInfo),
           externalService: enrichedPushInfo?.externalService,
-          latestPushDate: enrichedPushInfo?.latestPushDate.toISOString(),
-          oldestPushDate: enrichedPushInfo?.oldestPushDate.toISOString(),
+          latestUserActionPushDate: enrichedPushInfo?.latestPushDate.toISOString(),
+          oldestUserActionPushDate: enrichedPushInfo?.oldestPushDate.toISOString(),
         },
       };
     }
