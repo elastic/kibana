@@ -30,7 +30,7 @@ interface GuideCardConstants {
 export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.appSearch.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.appSearch.title', {
       defaultMessage: 'Build an application on top of Elasticsearch',
     }),
     guideId: 'search',
@@ -39,7 +39,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.websiteSearch.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
       defaultMessage: 'Add search to my website',
     }),
     guideId: 'search',
@@ -48,7 +48,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.databaseSearch.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title', {
       defaultMessage: 'Search across databases and business systems',
     }),
     guideId: 'search',
@@ -57,7 +57,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.logsObservability.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.logsObservability.title', {
       defaultMessage: 'Collect and analyze my logs',
     }),
     navigateTo: {
@@ -69,7 +69,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.apmObservability.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.apmObservability.title', {
       defaultMessage: 'Monitor my application performance (APM / tracing)',
     }),
     navigateTo: {
@@ -81,7 +81,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.hostsObservability.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title', {
       defaultMessage: 'Monitor my host metrics',
     }),
     navigateTo: {
@@ -94,7 +94,7 @@ export const guideCards: GuideCardConstants[] = [
   {
     solution: 'observability',
     title: i18n.translate(
-      'home.guidedOnboarding.gettingStarted.cards.kubernetesObservability.title',
+      'guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title',
       {
         defaultMessage: 'Monitor kubernetes clusters',
       }
@@ -105,7 +105,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.siemSecurity.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title', {
       defaultMessage: 'Detect threats in my data with SIEM',
     }),
     guideId: 'siem',
@@ -114,7 +114,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.hostsSecurity.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title', {
       defaultMessage: 'Secure my hosts with endpoint security',
     }),
     navigateTo: {
@@ -126,7 +126,7 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
-    title: i18n.translate('home.guidedOnboarding.gettingStarted.cards.cloudSecurity.title', {
+    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title', {
       defaultMessage: 'Secure my cloud assets with posture management',
     }),
     navigateTo: {
