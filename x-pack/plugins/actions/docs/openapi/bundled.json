@@ -3847,7 +3847,10 @@
               }
             }
           }
-        ]
+        ],
+        "discriminator": {
+          "propertyName": "subAction"
+        }
       },
       "run_connector_request_servicenow_sir": {
         "title": "Run ServiceNow SecOps connector parameters",

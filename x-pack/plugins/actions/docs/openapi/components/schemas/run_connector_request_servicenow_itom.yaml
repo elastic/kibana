@@ -70,3 +70,5 @@ oneOf:
             description: An array of fields.
             items:
               type: string
+discriminator:
+  propertyName: subAction

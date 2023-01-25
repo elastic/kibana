@@ -2711,6 +2711,8 @@ components:
                   description: An array of fields.
                   items:
                     type: string
+      discriminator:
+        propertyName: subAction
     run_connector_request_servicenow_sir:
       title: Run ServiceNow SecOps connector parameters
       description: Test ServiceNow security incidents.
