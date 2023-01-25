@@ -11,7 +11,7 @@ You can configure `xpack.ingestManager` settings in your `kibana.yml`.
 By default, {ingest-manager} is not enabled. You need to
 enable it. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
-See the {ingest-guide}/index.html[Ingest Management] docs for more information.
+See the {fleet-guide}/index.html[Ingest Management] docs for more information.
 
 [[general-ingest-manager-settings-kb]]
 ==== General {ingest-manager} settings
