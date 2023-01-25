@@ -135,34 +135,19 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   describe('activateGuide', () => {
-    it('activates a new guide', async () => {
-      // mock the get config request
-      httpClient.get.mockResolvedValueOnce({
-        config: testGuideConfig,
+    it('activates a guide by id', async () => {
+      // mock the response of the activate route
+      httpClient.post.mockResolvedValueOnce({
+        pluginState: mockPluginStateInProgress,
       });
       apiService.setup(httpClient, true);
 
       await apiService.activateGuide(testGuideId);
 
-      expect(httpClient.put).toHaveBeenCalledTimes(1);
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({
-          status: 'in_progress',
-          guide: { ...testGuideStep1ActiveState, status: 'not_started' },
-        }),
-      });
-    });
-
-    it('reactivates a guide that has already been started', async () => {
-      await apiService.activateGuide(testGuideId, testGuideStep1ActiveState);
-
-      expect(httpClient.put).toHaveBeenCalledTimes(1);
-      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({
-          status: 'in_progress',
-          guide: testGuideStep1ActiveState,
-        }),
-      });
+      expect(httpClient.post).toHaveBeenCalledTimes(1);
+      expect(httpClient.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/guides/activate/${testGuideId}`
+      );
     });
   });
 

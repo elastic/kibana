@@ -29,7 +29,7 @@ const cardCss = css`
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
-interface GuideCardsProps {
+export interface GuideCardsProps {
   isLoading: boolean;
   activateGuide: (guideId: GuideId) => Promise<void>;
   navigateToApp: ApplicationStart['navigateToApp'];

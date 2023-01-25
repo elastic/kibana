@@ -9,31 +9,19 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { GuideCard, GuideCardProps } from './guide_card';
+import { GuideCards, GuideCardsProps } from './guide_cards';
 
-const defaultProps: GuideCardProps = {
-  useCase: 'search',
-  guides: [],
+const defaultProps: GuideCardsProps = {
+  isLoading: false,
   activateGuide: jest.fn(),
-  isDarkTheme: false,
-  addBasePath: jest.fn(),
+  navigateToApp: jest.fn(),
+  activeFilter: 'all',
 };
 
-describe('guide card', () => {
+describe('guide cards', () => {
   describe('snapshots', () => {
-    test('should render use case card component for search', async () => {
-      const component = await shallow(<GuideCard {...defaultProps} useCase="search" />);
-
-      expect(component).toMatchSnapshot();
-    });
-    test('should render use case card component for kubernetes', async () => {
-      const component = await shallow(<GuideCard {...defaultProps} useCase="kubernetes" />);
-
-      expect(component).toMatchSnapshot();
-    });
-    test('should render use case card component for siem', async () => {
-      const component = await shallow(<GuideCard {...defaultProps} useCase="siem" />);
-
+    test('should render all cards', async () => {
+      const component = await shallow(<GuideCards {...defaultProps} />);
       expect(component).toMatchSnapshot();
     });
   });

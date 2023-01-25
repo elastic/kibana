@@ -204,7 +204,6 @@ export class ApiService implements GuidedOnboardingApi {
       );
       this.isLoading$.next(false);
       // update the guide state in the plugin state observable
-      console.log({ state: response.pluginState });
       this.pluginState$.next(response.pluginState);
       this.isGuidePanelOpen$.next(true);
       return response;
