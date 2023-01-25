@@ -63,7 +63,7 @@ export async function getServicesItems({
 
     const [
       transactionStats,
-      { serviceGroups, maxServiceGroupsExceeded },
+      { services, maxServiceGroupsExceeded },
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
@@ -94,7 +94,7 @@ export async function getServicesItems({
       items:
         mergeServiceStats({
           transactionStats,
-          servicesFromErrorAndMetricDocuments: serviceGroups,
+          servicesFromErrorAndMetricDocuments: services,
           healthStatuses,
           alertCounts,
         }) ?? [],

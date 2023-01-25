@@ -11,6 +11,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SERVICE_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
   TRANSACTION_DURATION_SUMMARY,
   TRANSACTION_FAILURE_COUNT,
@@ -82,7 +83,7 @@ export async function getServiceAggregatedTransactionStats({
                 aggs: {
                   overflowCount: {
                     max: {
-                      field: 'service.aggregation.overflow_count',
+                      field: SERVICE_OVERFLOW_COUNT,
                     },
                   },
                   transactionType: {

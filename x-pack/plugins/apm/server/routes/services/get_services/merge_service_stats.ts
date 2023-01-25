@@ -21,7 +21,7 @@ export function mergeServiceStats({
   transactionStats: Awaited<ReturnType<typeof getServiceTransactionStats>>;
   servicesFromErrorAndMetricDocuments: Awaited<
     ReturnType<typeof getServicesFromErrorAndMetricDocuments>
-  >['serviceGroups'];
+  >['services'];
   healthStatuses: Awaited<ReturnType<typeof getHealthStatuses>>;
   alertCounts: Awaited<ReturnType<typeof getServicesAlerts>>;
 }) {

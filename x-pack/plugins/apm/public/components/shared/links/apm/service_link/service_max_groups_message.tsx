@@ -26,7 +26,7 @@ export function ServiceMaxGroupsMessage({
   return (
     <FormattedMessage
       defaultMessage="Number of services that have been instrumented has reached the current max. capacity that can be handled by the APM server. There are at least {remainingServices, plural, one {1 service} other {# services}} missing in this list. Please increase the memory allocated to APM server."
-      id="xpack.apm.transactionDetail.maxGroups.message"
+      id="xpack.apm.serviceDetail.maxGroups.message"
       values={{
         remainingServices,
       }}

@@ -88,7 +88,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   );
 
   return {
-    serviceGroups:
+    services:
       response.aggregations?.sample.services.buckets.map((bucket) => {
         return {
           serviceName: bucket.key as string,
