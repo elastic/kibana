@@ -178,13 +178,53 @@ describe('ImportDataModal', () => {
     expect(exceptionCheckbox.checked).toBeFalsy();
   });
 
-  // TODO: might change after the UX feedback
+  test('should import file, with warnings but no action_connectors_success_count', async () => {
+    const importWithWarning = jest.fn().mockReturnValue({
+      ...importData(),
+      action_connectors_warnings: [
+        { message: 'message', actionPath: 'path', buttonLabel: 'buttonLabel' },
+      ],
+      action_connectors_success_count: 0,
+    });
+    const wrapper = render(
+      <ImportDataModalComponent
+        showModal={true}
+        closeModal={closeModal}
+        importComplete={importComplete}
+        checkBoxLabel="checkBoxLabel"
+        description="description"
+        errorMessage={jest.fn()}
+        failedDetailed={jest.fn()}
+        importData={importWithWarning}
+        showCheckBox={true}
+        submitBtnText="submitBtnText"
+        subtitle="subtitle"
+        successMessage={jest.fn((totalCount) => 'successMessage')}
+        title="title"
+      />
+    );
+    const { queryByTestId } = wrapper;
+    await waitFor(() => {
+      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
+        target: { files: [file] },
+      });
+    });
+    await waitFor(() => {
+      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
+    });
+    expect(wrapper).toMatchSnapshot();
+    expect(queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
+    expect(importWithWarning).toHaveBeenCalled();
+    expect(closeModal).toHaveBeenCalled();
+    expect(importComplete).toHaveBeenCalled();
+  });
   test('should import file, with warnings', async () => {
     const importWithWarning = jest.fn().mockReturnValue({
       ...importData(),
       action_connectors_warnings: [
         { message: 'message', actionPath: 'path', buttonLabel: 'buttonLabel' },
       ],
+      action_connectors_success_count: 1,
     });
     const wrapper = render(
       <ImportDataModalComponent
@@ -215,7 +255,7 @@ describe('ImportDataModal', () => {
     expect(wrapper).toMatchSnapshot();
     expect(queryByTestId('actionConnectorsWarningsCallOut')).toBeInTheDocument();
     expect(importWithWarning).toHaveBeenCalled();
+    expect(importComplete).toHaveBeenCalled();
     expect(closeModal).not.toHaveBeenCalled();
-    expect(importComplete).not.toHaveBeenCalled();
   });
 });

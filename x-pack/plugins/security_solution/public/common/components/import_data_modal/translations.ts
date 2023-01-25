@@ -45,3 +45,29 @@ export const IMPORT_FAILED = (totalExceptions: number) =>
         'Failed to import {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}',
     }
   );
+
+export const ACTION_CONNECTORS_WARNING_TITLE = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningTitle',
+    {
+      values: { totalConnectors },
+      defaultMessage: '{totalConnectors} connector imported',
+    }
+  );
+
+export const ACTION_CONNECTORS_WARNING_MESSAGE = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningMessage',
+    {
+      values: { totalConnectors },
+      defaultMessage:
+        '{totalConnectors} {totalConnectors, plural, =1 {connector has} other {connectors have}} sensitive information that requires updates, review in ',
+    }
+  );
+
+export const ACTION_CONNECTORS_WARNING_LINK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningLink',
+  {
+    defaultMessage: 'connectors',
+  }
+);
