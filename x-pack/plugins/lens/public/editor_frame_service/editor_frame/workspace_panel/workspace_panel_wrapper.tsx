@@ -20,7 +20,7 @@ import {
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
-import { WarningsPopover } from './warnings_popover';
+import { MessagesPopover } from './warnings_popover';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -30,7 +30,6 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
-  selectStagedRequestWarnings,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -64,7 +63,6 @@ export function WorkspacePanelWrapper({
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
-  const requestWarnings = useLensSelector(selectStagedRequestWarnings);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -82,13 +80,8 @@ export function WorkspacePanelWrapper({
     [dispatchLens, activeVisualization]
   );
 
-  const warningMessages: React.ReactNode[] = [];
+  const userMessages = getUserMessages('toolbar');
 
-  warningMessages.push(...getUserMessages('toolbar').map(({ longMessage }) => longMessage));
-
-  if (requestWarnings) {
-    warningMessages.push(...requestWarnings);
-  }
   return (
     <EuiPageTemplate
       direction="column"
@@ -97,7 +90,7 @@ export function WorkspacePanelWrapper({
       restrictWidth={false}
       mainProps={{ component: 'div' } as unknown as {}}
     >
-      {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
+      {!(isFullscreen && (autoApplyEnabled || userMessages?.length)) && (
         <EuiPageTemplate.Section paddingSize="none" color="transparent">
           <EuiFlexGroup
             alignItems="flexEnd"
@@ -138,9 +131,9 @@ export function WorkspacePanelWrapper({
 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                {warningMessages?.length ? (
+                {userMessages?.length ? (
                   <EuiFlexItem grow={false}>
-                    <WarningsPopover>{warningMessages}</WarningsPopover>
+                    <MessagesPopover messages={userMessages} />
                   </EuiFlexItem>
                 ) : null}
 
