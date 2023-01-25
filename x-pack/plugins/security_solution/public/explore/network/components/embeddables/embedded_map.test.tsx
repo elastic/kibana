@@ -58,9 +58,9 @@ const mockGetStorage = jest.fn();
 const mockSetStorage = jest.fn();
 const setQuery: jest.Mock = jest.fn();
 const filebeatDataView = { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' };
-const auditbeatDataView = { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' };
+const packetbeatDataView = { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'packetbeat-*' };
 const mockSelector = {
-  kibanaDataViews: [filebeatDataView, auditbeatDataView],
+  kibanaDataViews: [filebeatDataView, packetbeatDataView],
 };
 const embeddableValue = {
   destroyed: false,
@@ -215,9 +215,9 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('On rerender with new selected patterns, selects existing Kibana data views that match any selected index pattern', async () => {
-    mockUseSourcererDataView
-      .mockReturnValueOnce({ selectedPatterns: ['filebeat-*', 'packetbeat-*'] })
-      .mockReturnValue({ selectedPatterns: ['filebeat-*', 'auditbeat-*'] });
+    mockUseSourcererDataView.mockReturnValue({
+      selectedPatterns: ['filebeat-*', 'auditbeat-*'],
+    });
     const { rerender } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
@@ -227,6 +227,9 @@ describe('EmbeddedMapComponent', () => {
       const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
       expect(dataViewArg).toEqual([filebeatDataView]);
     });
+    mockUseSourcererDataView.mockReturnValue({
+      selectedPatterns: ['filebeat-*', 'packetbeat-*'],
+    });
     rerender(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
@@ -235,7 +238,7 @@ describe('EmbeddedMapComponent', () => {
     await waitFor(() => {
       // data view is updated with the returned embeddable.setLayerList callback, which is passesd getLayerList(dataViews)
       const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][0];
-      expect(dataViewArg).toEqual([filebeatDataView, auditbeatDataView]);
+      expect(dataViewArg).toEqual([filebeatDataView, packetbeatDataView]);
     });
   });
 });

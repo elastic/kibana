@@ -6,6 +6,7 @@
  */
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsFieldInIndexPattern } from '.';
+import { renderHook } from '@testing-library/react-hooks';
 
 jest.mock('../../../common/lib/kibana');
 const mockUseKibana = useKibana as jest.Mock;
@@ -25,7 +26,9 @@ describe('useIsFieldInIndexPattern', () => {
     jest.clearAllMocks();
   });
   it('returns false when no fields in field list exist in the index pattern', async () => {
-    const isFieldInIndexPattern = useIsFieldInIndexPattern();
+    const {
+      result: { current: isFieldInIndexPattern },
+    } = renderHook(useIsFieldInIndexPattern);
     const res = await isFieldInIndexPattern('index-pattern-*', ['fields.list']);
     expect(res).toEqual(false);
   });
@@ -40,7 +43,9 @@ describe('useIsFieldInIndexPattern', () => {
         },
       },
     });
-    const isFieldInIndexPattern = useIsFieldInIndexPattern();
+    const {
+      result: { current: isFieldInIndexPattern },
+    } = renderHook(useIsFieldInIndexPattern);
     const res = await isFieldInIndexPattern('index-pattern-*', ['fields.list', 'another']);
     expect(res).toEqual(false);
   });
@@ -55,7 +60,9 @@ describe('useIsFieldInIndexPattern', () => {
         },
       },
     });
-    const isFieldInIndexPattern = useIsFieldInIndexPattern();
+    const {
+      result: { current: isFieldInIndexPattern },
+    } = renderHook(useIsFieldInIndexPattern);
     const res = await isFieldInIndexPattern('index-pattern-*', ['fields.list']);
     expect(res).toEqual(true);
   });
