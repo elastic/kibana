@@ -31,10 +31,10 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="connector-card-loading" />}
       {!isLoading && (
-        <EuiFlexGroup direction="column" alignItems="stretch">
+        <EuiFlexGroup direction="column" alignItems="stretch" data-test-subj="connector-card">
           <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
-              <EuiText size="s">
+              <EuiText size="s" data-test-subj="connector-card-title">
                 <strong>{title}</strong>
               </EuiText>
             </EuiFlexItem>
@@ -42,7 +42,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
               <EuiIcon size="xl" type={getConnectorIcon(triggersActionsUi, connectorType)} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="connector-card-details">
             {listItems.length > 0 &&
               listItems.map((item, i) => (
                 <EuiText size="xs" data-test-subj="card-list-item" key={`${item.title}-${i}`}>
