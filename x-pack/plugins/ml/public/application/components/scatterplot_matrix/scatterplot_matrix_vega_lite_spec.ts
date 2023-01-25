@@ -29,8 +29,10 @@ export const COLOR_SELECTION = euiPaletteColorBlind()[2];
 export const COLOR_RANGE_OUTLIER = [euiPaletteColorBlind()[1], euiPaletteColorBlind()[2]];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
+const CUSTOM_VIS_FIELDS_PATH = 'fields';
 
 export const getColorSpec = (
+  forCustomVisLink: boolean,
   euiTheme: typeof euiThemeLight,
   escapedOutlierScoreField?: string,
   color?: string,
@@ -58,7 +60,9 @@ export const getColorSpec = (
     return {
       condition: {
         selection: USER_SELECTION,
-        field: getEscapedVegaFieldName(color ?? '00FF00'),
+        field: `${forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''}${getEscapedVegaFieldName(
+          color ?? '00FF00'
+        )}`,
         type: legendType,
         scale: {
           range:
@@ -76,6 +80,7 @@ export const getColorSpec = (
 };
 
 const getVegaSpecLayer = (
+  forCustomVisLink: boolean,
   isBackground: boolean,
   values: VegaValue[],
   colorSpec: any,
@@ -117,7 +122,8 @@ const getVegaSpecLayer = (
       };
 
   return {
-    data: { values: [...values] },
+    // Don't need to add static data for custom vis links
+    ...(forCustomVisLink ? {} : { data: { values: [...values] } }),
     mark: {
       ...(outliers && dynamicSize
         ? {
@@ -133,7 +139,9 @@ const getVegaSpecLayer = (
       ? {
           transform: [
             {
-              calculate: `datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff`,
+              calculate: `datum${
+                forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
+              }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff`,
               as: 'is_outlier',
             },
           ],
@@ -154,7 +162,9 @@ const getVegaSpecLayer = (
             opacity: {
               condition: {
                 value: 1,
-                test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+                test: `(datum${
+                  forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
+                }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
               },
               value: 0.5,
             },
@@ -162,19 +172,27 @@ const getVegaSpecLayer = (
         : {}),
       ...(outliers
         ? {
-            order: { field: escapedOutlierScoreField },
+            order: {
+              field: `${
+                forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+              }${escapedOutlierScoreField}`,
+            },
             size: {
               ...(!dynamicSize
                 ? {
                     condition: {
                       value: 40,
-                      test: `(datum['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
+                      test: `(datum${
+                        forCustomVisLink ? `.${CUSTOM_VIS_FIELDS_PATH}` : ''
+                      }['${escapedOutlierScoreField}'] >= mlOutlierScoreThreshold.cutoff)`,
                     },
                     value: 8,
                   }
                 : {
                     type: LEGEND_TYPES.QUANTITATIVE,
-                    field: escapedOutlierScoreField,
+                    field: `${
+                      forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+                    }${escapedOutlierScoreField}`,
                     scale: {
                       type: 'linear',
                       range: [8, 200],
@@ -197,7 +215,14 @@ const getVegaSpecLayer = (
       tooltip: [
         ...(color !== undefined
           ? // @ts-ignore
-            [{ type: colorSpec.condition.type, field: getEscapedVegaFieldName(color) }]
+            [
+              {
+                type: colorSpec.condition.type,
+                field: `${
+                  forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+                }${getEscapedVegaFieldName(color)}`,
+              },
+            ]
           : []),
         ...vegaColumns.map((d) => ({
           type: LEGEND_TYPES.QUANTITATIVE,
@@ -207,7 +232,9 @@ const getVegaSpecLayer = (
           ? [
               {
                 type: LEGEND_TYPES.QUANTITATIVE,
-                field: escapedOutlierScoreField,
+                field: `${
+                  forCustomVisLink ? `${CUSTOM_VIS_FIELDS_PATH}.` : ''
+                }${escapedOutlierScoreField}`,
                 format: '.3f',
               },
             ]
@@ -215,21 +242,22 @@ const getVegaSpecLayer = (
       ],
     },
     ...(isBackground ? {} : selection),
-    width: SCATTERPLOT_SIZE,
-    height: SCATTERPLOT_SIZE,
+    ...(forCustomVisLink ? {} : { width: SCATTERPLOT_SIZE }),
+    ...(forCustomVisLink ? {} : { height: SCATTERPLOT_SIZE }),
   };
 };
 
 // Escapes the characters .[] in field names with double backslashes
 // since VEGA treats dots/brackets in field names as nested values.
 // See https://vega.github.io/vega-lite/docs/field.html for details.
-function getEscapedVegaFieldName(fieldName: string) {
-  return fieldName.replace(/([\.|\[|\]])/g, '\\$1');
+function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
+  return `${prependString}${fieldName.replace(/([\.|\[|\]])/g, '\\$1')}`;
 }
 
 type VegaValue = Record<string, string | number>;
 
 export const getScatterplotMatrixVegaLiteSpec = (
+  forCustomVisLink: boolean,
   values: VegaValue[],
   backgroundValues: VegaValue[],
   columns: string[],
@@ -240,12 +268,15 @@ export const getScatterplotMatrixVegaLiteSpec = (
   dynamicSize?: boolean
 ): TopLevelSpec => {
   const vegaValues = values;
-  const vegaColumns = columns.map(getEscapedVegaFieldName);
+  const vegaColumns = columns.map((column) =>
+    getEscapedVegaFieldName(column, forCustomVisLink ? 'fields.' : '')
+  );
   const outliers = resultsField !== undefined;
 
   const escapedOutlierScoreField = `${resultsField}\\.${OUTLIER_SCORE_FIELD}`;
 
   const colorSpec = getColorSpec(
+    forCustomVisLink,
     euiTheme,
     resultsField && escapedOutlierScoreField,
     color,
@@ -282,6 +313,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
     spec: {
       layer: [
         getVegaSpecLayer(
+          forCustomVisLink,
           false,
           vegaValues,
           colorSpec,
@@ -298,6 +330,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
   if (backgroundValues.length) {
     schema.spec.layer.unshift(
       getVegaSpecLayer(
+        forCustomVisLink,
         true,
         backgroundValues,
         colorSpec,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState, FC } from 'react';
-
+import React, { useMemo, useEffect, useState, FC, useCallback } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import rison from '@kbn/rison';
 
 import {
   EuiCallOut,
@@ -17,12 +17,14 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { Query } from '@kbn/data-plugin/common/query';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
@@ -31,7 +33,7 @@ import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import { getCombinedRuntimeMappings } from '../data_grid';
 
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 import { useCurrentEuiTheme } from '../color_range_legend';
@@ -101,6 +103,7 @@ export interface ScatterplotMatrixProps {
   searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
   indexPattern?: DataView;
+  query?: Query;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
@@ -112,9 +115,13 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   searchQuery,
   runtimeMappings,
   indexPattern,
+  query,
 }) => {
   const { esSearch } = useMlApiContext();
-
+  const kibana = useMlKibana();
+  const {
+    services: { application, data },
+  } = kibana;
   // dynamicSize is optionally used for outlier charts where the scatterplot marks
   // are sized according to outlier_score
   const [dynamicSize, setDynamicSize] = useState<boolean>(false);
@@ -141,6 +148,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   const [splom, setSplom] = useState<
     { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
+
+  const { euiTheme } = useCurrentEuiTheme();
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(
@@ -172,7 +181,77 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     setDynamicSize(!dynamicSize);
   };
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const getCustomVisualizationLink = useCallback(() => {
+    const { columns } = splom!;
+    const outlierScoreField =
+      resultsField !== undefined ? `${resultsField}.${OUTLIER_SCORE_FIELD}` : undefined;
+    const vegaSpec = getScatterplotMatrixVegaLiteSpec(
+      true,
+      [],
+      [],
+      columns,
+      euiTheme,
+      resultsField,
+      color,
+      legendType,
+      dynamicSize
+    );
+
+    vegaSpec.$schema = 'https://vega.github.io/schema/vega-lite/v5.json';
+    vegaSpec.title = `Scatterplot matrix for ${index}`;
+
+    const fieldsToFetch = [
+      ...columns,
+      // Add outlier_score field in fetch if it's available so custom visualization can use it
+      ...(outlierScoreField ? [outlierScoreField] : []),
+      // Add field to color code by in fetch so custom visualization can use it -  usually for classfication jobs
+      ...(color ? [color] : []),
+    ];
+
+    vegaSpec.data = {
+      url: {
+        '%context%': true,
+        ...(indexPattern?.timeFieldName
+          ? { ['%timefield%']: `${indexPattern?.timeFieldName}` }
+          : {}),
+        index,
+        body: {
+          fields: fieldsToFetch,
+          size: 1000,
+          _source: false,
+        },
+      },
+      format: { property: 'hits.hits' },
+    };
+
+    const globalState = encodeURIComponent(
+      rison.encode({
+        filters: data.query.filterManager.getFilters(),
+        refreshInterval: data.query.timefilter.timefilter.getRefreshInterval(),
+        time: data.query.timefilter.timefilter.getTime(),
+      })
+    );
+
+    const appState = encodeURIComponent(
+      rison.encode({
+        filters: [],
+        linked: false,
+        query,
+        uiState: {},
+        vis: {
+          aggs: [],
+          params: {
+            spec: JSON.stringify(vegaSpec, null, 2),
+          },
+        },
+      })
+    );
+
+    const basePath = `/create?type=vega&_g=${globalState}&_a=${appState}`;
+
+    return { path: basePath };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [splom]);
 
   useEffect(() => {
     if (fields.length === 0) {
@@ -316,6 +395,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     const { items, backgroundItems, columns } = splom;
 
     return getScatterplotMatrixVegaLiteSpec(
+      false,
       items,
       backgroundItems,
       columns,
@@ -442,6 +522,28 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
             )}
+            {splom ? (
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  onClick={async () => {
+                    const customVisLink = getCustomVisualizationLink();
+                    await application.navigateToApp('visualize#', {
+                      path: customVisLink.path,
+                      openInNewTab: true,
+                    });
+                  }}
+                  data-test-subj="mlSplomoExploreInCustomVisualizationLink"
+                >
+                  <EuiIconTip
+                    content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
+                      defaultMessage: 'Explore scatterplot charts in custom visualization',
+                    })}
+                    type="visVega"
+                    size="l"
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
 
           {splom.messages.length > 0 && (
