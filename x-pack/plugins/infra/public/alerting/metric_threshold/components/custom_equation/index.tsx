@@ -17,6 +17,7 @@ import { omit, range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/http_api';
 import {
   Aggregators,
   CustomMetricAggTypes,
@@ -103,7 +104,7 @@ export const CustomEquationEditor: React.FC<Props> = ({
 
   const disableAdd = useMemo(() => customMetrics?.length === 26, [customMetrics]);
 
-  const filteredAggregationTypes = omit(aggregationTypes, ['custom', 'rate', 'p99', 'p95']);
+  const filteredAggregationTypes = omit(aggregationTypes, OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS);
 
   const metricRows = customMetrics?.map((row) => {
     const disableDelete = customMetrics?.length === 1;
