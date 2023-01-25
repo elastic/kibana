@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { createFilter } from '../helpers';
@@ -44,7 +44,7 @@ export const createFilterInAction = ({
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) && field.name != null && field.value != null,
     execute: async ({ field }) => {
-      const makeFilter = (currentVal: string | null | undefined) =>
+      const makeFilter = (currentVal?: string[] | string | null) =>
         currentVal?.length === 0
           ? createFilter(field.name, undefined)
           : createFilter(field.name, currentVal);

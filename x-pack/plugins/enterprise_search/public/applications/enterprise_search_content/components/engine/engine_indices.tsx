@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
+import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -32,13 +33,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineViewLogic } from './engine_view_logic';
-
-const healthColorsMap = {
-  green: 'success',
-  red: 'danger',
-  unavailable: '',
-  yellow: 'warning',
-};
 
 export const EngineIndices: React.FC = () => {
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
@@ -74,7 +68,7 @@ export const EngineIndices: React.FC = () => {
       }),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
-          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          <EuiIcon type="dot" color={indexHealthToHealthColor(health)} />
           &nbsp;{health ?? '-'}
         </span>
       ),
