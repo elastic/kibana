@@ -23,6 +23,8 @@ import { useHistory } from 'react-router-dom';
 import {
   isMobileAgentName,
   isRumAgentName,
+  isAWSLambdaAgent,
+  isAzureFunctionsAgent,
   isServerlessAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -167,33 +169,33 @@ function TemplateWithContext({
 
 export function isMetricsTabHidden({
   agentName,
-  runtimeName,
+  cloudProviderAndService,
   isAwsLambdaEnabled,
 }: {
   agentName?: string;
-  runtimeName?: string;
+  cloudProviderAndService?: string;
   isAwsLambdaEnabled?: boolean;
 }) {
-  if (isServerlessAgent(runtimeName)) {
+  if (isAWSLambdaAgent(cloudProviderAndService)) {
     return !isAwsLambdaEnabled;
   }
-  return !agentName || isRumAgentName(agentName);
+  return !agentName || isRumAgentName(agentName) || isServerlessAgent(cloudProviderAndService);
 }
 
 export function isInfraTabHidden({
   agentName,
-  runtimeName,
+  cloudProviderAndService,
 }: {
   agentName?: string;
-  runtimeName?: string;
+  cloudProviderAndService?: string;
 }) {
   return (
-    !agentName || isRumAgentName(agentName) || isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(cloudProviderAndService)
   );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName, runtimeName } = useApmServiceContext();
+  const { agentName, cloudProviderAndService } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
@@ -288,12 +290,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgent(runtimeName) && (
+      append: isServerlessAgent(cloudProviderAndService) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
       hidden: isMetricsTabHidden({
         agentName,
-        runtimeName,
+        cloudProviderAndService,
         isAwsLambdaEnabled,
       }),
     },
@@ -307,7 +309,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      hidden: isInfraTabHidden({ agentName, runtimeName }),
+      hidden: isInfraTabHidden({ agentName, cloudProviderAndService }),
     },
     {
       key: 'service-map',
@@ -328,10 +330,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgent(runtimeName) && (
+      append: isServerlessAgent(cloudProviderAndService) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden: !agentName || isRumAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgent(cloudProviderAndService),
     },
     {
       key: 'alerts',

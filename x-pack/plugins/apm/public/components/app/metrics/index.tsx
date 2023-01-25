@@ -9,7 +9,7 @@ import React from 'react';
 import {
   isJavaAgentName,
   isJRubyAgent,
-  isServerlessAgent,
+  isAWSLambdaAgent,
 } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
@@ -17,17 +17,17 @@ import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
-  const { agentName, runtimeName } = useApmServiceContext();
-  const isServerless = isServerlessAgent(runtimeName);
+  const { agentName, runtimeName, cloudProviderAndService } = useApmServiceContext();
+  const isAWSLambda = isAWSLambdaAgent(cloudProviderAndService);
 
   if (
-    !isServerless &&
+    !isAWSLambda &&
     (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
   ) {
     return <JvmMetricsOverview />;
   }
 
-  if (isServerless) {
+  if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
 

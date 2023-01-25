@@ -24,6 +24,7 @@ import { FETCH_STATUS } from '../../hooks/use_fetcher';
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
+  cloudProviderAndService?: string;
   transactionType?: string;
   transactionTypes: string[];
   runtimeName?: string;
@@ -59,6 +60,7 @@ export function ApmServiceContextProvider({
   const {
     agentName,
     runtimeName,
+    cloudProviderAndService,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -88,6 +90,7 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
+        cloudProviderAndService,
         transactionType: currentTransactionType,
         transactionTypes,
         runtimeName,

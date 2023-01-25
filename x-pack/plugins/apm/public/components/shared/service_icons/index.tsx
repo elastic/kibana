@@ -12,6 +12,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getAgentIcon } from '../agent_icon/get_agent_icon';
+import { getServerlessIcon } from '../agent_icon/get_serverless_icon';
 import { CloudDetails } from './cloud_details';
 import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
@@ -28,6 +29,12 @@ const cloudIcons: Record<string, string> = {
   gcp: 'logoGCP',
   aws: 'logoAWS',
   azure: 'logoAzure',
+};
+
+const serverlessTitles: Record<string, string> = {
+  'aws.lambda': 'AWS Lambda',
+  'azure.functions': 'Azure Functions',
+  default: 'Serverless',
 };
 
 export function getCloudIcon(provider?: string) {
@@ -139,11 +146,11 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
     {
       key: 'serverless',
       icon: {
-        type: getAgentIcon(icons?.serverlessType, theme.darkMode) || 'node',
+        type: getServerlessIcon(icons?.serverlessType, theme.darkMode) || 'node',
       },
       isVisible: !!icons?.serverlessType,
       title: i18n.translate('xpack.apm.serviceIcons.serverless', {
-        defaultMessage: 'Serverless',
+        defaultMessage: serverlessTitles[icons?.serverlessType || 'default'],
       }),
       component: <ServerlessDetails serverless={details?.serverless} />,
     },

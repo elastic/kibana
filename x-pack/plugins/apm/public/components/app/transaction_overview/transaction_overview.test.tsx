@@ -56,6 +56,7 @@ function setup({
     .mockReturnValue({
       agentName: 'nodejs',
       runtimeName: 'node',
+      cloudProviderAndService: undefined,
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });

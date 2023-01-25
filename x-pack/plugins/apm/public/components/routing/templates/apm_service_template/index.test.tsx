@@ -14,7 +14,8 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { runtimeName: 'aws_lambda' },
+        { cloudProviderAndService: 'aws.lambda' },
+        { cloudProviderAndService: 'azure.functions' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeTruthy();
@@ -47,8 +48,8 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-
-        { runtimeName: 'aws_lambda' },
+        { cloudProviderAndService: 'aws.lambda' },
+        { cloudProviderAndService: 'azure.functions' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isInfraTabHidden(input)).toBeTruthy();

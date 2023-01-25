@@ -44,7 +44,7 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const router = useApmRouter();
-  const { serviceName, fallbackToTransactions, agentName, runtimeName } =
+  const { serviceName, fallbackToTransactions, agentName, cloudProviderAndService } =
     useApmServiceContext();
 
   const {
@@ -54,7 +54,7 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const isRumAgent = isRumAgentName(agentName);
-  const isServerless = isServerlessAgent(runtimeName);
+  const isServerless = isServerlessAgent(cloudProviderAndService);
 
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
     path: {

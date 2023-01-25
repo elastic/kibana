@@ -81,8 +81,16 @@ export function isJRubyAgent(agentName?: string, runtimeName?: string) {
   return agentName === 'ruby' && runtimeName?.toLowerCase() === 'jruby';
 }
 
-export function isServerlessAgent(runtimeName?: string) {
-  return runtimeName?.toLowerCase().startsWith('aws_lambda');
+export function isServerlessAgent(cloudProviderAndService?: string) {
+  return isAWSLambdaAgent(cloudProviderAndService) || isAzureFunctionsAgent(cloudProviderAndService);
+}
+
+export function isAWSLambdaAgent(cloudProviderAndService?: string) {
+  return cloudProviderAndService?.toLowerCase().startsWith('aws_lambda');
+}
+
+export function isAzureFunctionsAgent(cloudProviderAndService?: string) {
+  return cloudProviderAndService?.toLowerCase() === 'azure.functions';
 }
 
 export function isAndroidAgentName(agentName?: string) {

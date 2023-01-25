@@ -12,6 +12,8 @@ import {
   isAndroidAgentName,
   isMobileAgentName,
   isServerlessAgent,
+  isAWSLambdaAgent,
+  isAzureFunctionsAgent,
 } from './agent_name';
 
 describe('agent name helpers', () => {
@@ -146,27 +148,67 @@ describe('agent name helpers', () => {
   });
 
   describe('isServerlessAgent', () => {
-    describe('when the runtime name is AWS_LAMBDA', () => {
+    describe('when the cloudProviderAndService is aws.lambda', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('AWS_LAMBDA')).toEqual(true);
+        expect(isServerlessAgent('aws.lambda')).toEqual(true);
       });
     });
 
-    describe('when the runtime name is aws_lambda', () => {
+    describe('when the cloudProviderAndService is AWS.Lambda', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('aws_lambda')).toEqual(true);
+        expect(isServerlessAgent('AWS.Lambda')).toEqual(true);
       });
     });
 
-    describe('when the runtime name is aws_lambda_test', () => {
+    describe('when the cloudProviderAndService is azure.functions', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('aws_lambda_test')).toEqual(true);
+        expect(isServerlessAgent('azure.functions')).toEqual(true);
       });
     });
 
-    describe('when the runtime name is something else', () => {
+    describe('when the cloudProviderAndService is something else', () => {
       it('returns false', () => {
-        expect(isServerlessAgent('not_aws_lambda')).toEqual(false);
+        expect(isServerlessAgent('aws.ec2')).toEqual(false);
+      });
+    });
+  });
+
+  describe('isAWSLambdaAgent', () => {
+    describe('when the cloudProviderAndService is aws.lambda', () => {
+      it('returns true', () => {
+        expect(isAWSLambdaAgent('aws.lambda')).toEqual(true);
+      });
+    });
+
+    describe('when the cloudProviderAndService is AWS.Lambda', () => {
+      it('returns true', () => {
+        expect(isAWSLambdaAgent('AWS.Lambda')).toEqual(true);
+      });
+    });
+
+    describe('when the cloudProviderAndService is something else', () => {
+      it('returns false', () => {
+        expect(isAWSLambdaAgent('azure.functions')).toEqual(false);
+      });
+    });
+  });
+
+  describe('isAzureFunctionsAgent', () => {
+    describe('when the cloudProviderAndService is azure.functions', () => {
+      it('returns true', () => {
+        expect(isAzureFunctionsAgent('azure.functions')).toEqual(true);
+      });
+    });
+
+    describe('when the cloudProviderAndService is Azure.Functions', () => {
+      it('returns true', () => {
+        expect(isAzureFunctionsAgent('Azure.Functions')).toEqual(true);
+      });
+    });
+
+    describe('when the cloudProviderAndService is something else', () => {
+      it('returns false', () => {
+        expect(isAzureFunctionsAgent('aws.lambda')).toEqual(false);
       });
     });
   });

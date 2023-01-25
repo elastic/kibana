@@ -10,6 +10,7 @@ import { useFetcher } from '../../hooks/use_fetcher';
 const INITIAL_STATE = {
   agentName: undefined,
   runtimeName: undefined,
+  cloudProviderAndService: undefined,
 };
 
 export function useServiceAgentFetcher({
