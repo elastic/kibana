@@ -477,11 +477,13 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
+    hideActionBar: true,
   },
   {
     title: 'Severity',
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
+    hideActionBar: true,
   },
   {
     title: 'User',
