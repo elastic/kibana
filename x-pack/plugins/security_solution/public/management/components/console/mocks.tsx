@@ -261,7 +261,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
 
 export const ArgumentSelectorComponentMock = memo<
   CommandArgumentValueSelectorProps<{ selection: string }>
->(({ value, valueText, onChange, argName, argInstance }) => {
+>(({ value, valueText, onChange, argName, argIndex }) => {
   useEffect(() => {
     if (!value) {
       onChange({ valueText: 'foo selected', value: { selection: 'foo' } });
@@ -269,7 +269,7 @@ export const ArgumentSelectorComponentMock = memo<
   }, [onChange, value]);
 
   return (
-    <span data-test-subj="argSelectorValueText">{`${argName}[${argInstance}]: ${valueText}`}</span>
+    <span data-test-subj="argSelectorValueText">{`${argName}[${argIndex}]: ${valueText}`}</span>
   );
 });
 ArgumentSelectorComponentMock.displayName = 'ArgumentSelectorComponentMock';

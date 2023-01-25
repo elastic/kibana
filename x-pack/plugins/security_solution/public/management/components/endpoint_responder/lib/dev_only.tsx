@@ -95,7 +95,7 @@ export const getUploadCommand = ({
 
 const ArgumentSelectorComponentTest = memo<
   CommandArgumentValueSelectorProps<{ selection: string }>
->(({ value, valueText, onChange, argInstance, argName }) => {
+>(({ value, valueText, onChange, argIndex, argName }) => {
   useEffect(() => {
     if (!value) {
       onChange({ valueText: 'foo selected', value: { selection: 'foo' } });
@@ -103,7 +103,7 @@ const ArgumentSelectorComponentTest = memo<
   }, [onChange, value]);
 
   return (
-    <span data-test-subj="argSelectorValueText">{`${argName}[${argInstance}]: ${valueText}`}</span>
+    <span data-test-subj="argSelectorValueText">{`${argName}[${argIndex}]: ${valueText}`}</span>
   );
 });
 ArgumentSelectorComponentTest.displayName = 'ArgumentSelectorComponentTest';

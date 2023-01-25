@@ -17,7 +17,7 @@ interface InputCharacter {
   renderValue: ReactNode;
   isArgSelector: boolean;
   argName: string;
-  argInstance: number; // zero based
+  argIndex: number; // zero based
   argState: undefined | ArgSelectorState;
 }
 
@@ -27,7 +27,7 @@ const createInputCharacter = (overrides: Partial<InputCharacter> = {}): InputCha
     renderValue: null,
     isArgSelector: false,
     argName: '',
-    argInstance: 0,
+    argIndex: 0,
     argState: undefined,
     ...overrides,
   };
@@ -97,7 +97,7 @@ export class EnteredInput {
       for (const [argName, argDef] of Object.entries(enteredCommand.argsWithValueSelectors)) {
         // If the argument has been used, then replace it with the Arguments Selector
         if (parsedInput.hasArg(argName)) {
-          let argInstance = 0;
+          let argIndex = 0;
 
           // Loop through the input pieces (left and right side of cursor) looking for the Argument name
           for (const { input, items } of inputPieces) {
@@ -110,20 +110,20 @@ export class EnteredInput {
                 { length: argChrLength },
                 createInputCharacter
               );
-              const argState = enteredCommand.argState[argName]?.at(argInstance);
+              const argState = enteredCommand.argState[argName]?.at(argIndex);
 
               replaceValues[0] = createInputCharacter({
                 value: argNameMatch,
                 renderValue: (
                   <ArgumentSelectorWrapper
                     argName={argName}
-                    argInstance={argInstance}
+                    argIndex={argIndex}
                     argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
                   />
                 ),
                 isArgSelector: true,
                 argName,
-                argInstance: argInstance++,
+                argIndex: argIndex++,
                 argState,
               });
 
@@ -177,10 +177,10 @@ export class EnteredInput {
       let argStateWasAdjusted = false;
       const newArgState = { ...this.argState };
 
-      for (const { argName, argInstance, isArgSelector } of argStateList) {
-        if (isArgSelector && newArgState[argName]?.at(argInstance)) {
+      for (const { argName, argIndex, isArgSelector } of argStateList) {
+        if (isArgSelector && newArgState[argName]?.at(argIndex)) {
           newArgState[argName] = newArgState[argName].filter((_, index) => {
-            return index !== argInstance;
+            return index !== argIndex;
           });
           argStateWasAdjusted = true;
         }

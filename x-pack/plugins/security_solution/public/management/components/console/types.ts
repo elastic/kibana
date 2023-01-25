@@ -236,10 +236,10 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
   argName: string;
 
   /**
-   * The instance of the argument in the current command. This is a zero-based number indicating
+   * The index (zero based) of the argument in the current command. This is a zero-based number indicating
    * which instance of the argument is being rendered.
    */
-  argInstance: number;
+  argIndex: number;
 
   /**
    * A store for the Argument Selector. Should be used for any component state that needs to be
