@@ -73,6 +73,7 @@ describe('Policy Config helpers', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 
       const windowsEvents: typeof defaultPolicy.windows.events = {
+        credential_access: false,
         dll_and_driver_load: false,
         dns: false,
         file: false,
@@ -120,6 +121,7 @@ describe('Policy Config helpers', () => {
 export const eventsOnlyPolicy: PolicyConfig = {
   windows: {
     events: {
+      credential_access: true,
       dll_and_driver_load: true,
       dns: true,
       file: true,
