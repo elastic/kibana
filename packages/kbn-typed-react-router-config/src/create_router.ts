@@ -110,10 +110,13 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
       throw new Error(errorMessage);
     }
 
+    const hasExactMatch = matches.some((match) => match.match.isExact);
+
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {
       const route = routesByReactRouterConfig.get(matchedRoute.route);
 
-      if (route?.params) {
+      // Only validates the params when exact match has been found, otherwise a 404 page should be show
+      if (hasExactMatch && route?.params) {
         const decoded = deepExactRt(route.params).decode(
           merge({}, route.defaults ?? {}, {
             path: matchedRoute.match.params,
@@ -131,6 +134,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
             params: decoded.right,
           },
           route,
+          hasExactMatch,
         };
       }
 
@@ -143,6 +147,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
           },
         },
         route,
+        hasExactMatch,
       };
     });
   };
@@ -179,7 +184,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
     const validation = validationType.decode(paramsWithRouteDefaults);
 
     if (isLeft(validation)) {
-      throw new Error(PathReporter.report(validation).join('\n'));
+      // throw new Error(PathReporter.report(validation).join('\n'));
     }
 
     return qs.stringifyUrl(

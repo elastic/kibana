@@ -10,20 +10,27 @@ import { OutletContextProvider } from './outlet';
 import { RouteMatch } from './types';
 
 const CurrentRouteContext = createContext<
-  { match: RouteMatch; element: React.ReactElement } | undefined
+  | {
+      match: RouteMatch;
+      element: React.ReactElement;
+      hasExactMatch: boolean;
+    }
+  | undefined
 >(undefined);
 
 export const CurrentRouteContextProvider = ({
   match,
   element,
+  hasExactMatch,
   children,
 }: {
   match: RouteMatch;
   element: React.ReactElement;
+  hasExactMatch: boolean;
   children: React.ReactElement;
 }) => {
   return (
-    <CurrentRouteContext.Provider value={{ match, element }}>
+    <CurrentRouteContext.Provider value={{ match, element, hasExactMatch }}>
       <OutletContextProvider element={element}>{children}</OutletContextProvider>
     </CurrentRouteContext.Provider>
   );
