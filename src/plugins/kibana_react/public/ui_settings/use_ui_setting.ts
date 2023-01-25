@@ -90,10 +90,10 @@ export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] 
  * Usage:
  *
  * ```js
- * const [customBranding, setCustomBranding] = useUiSetting$('customBranding:pageTitle');
+ * const [customBranding, setCustomBranding] = useGlobalUiSetting$('customBranding:pageTitle');
  * ```
  */
-export const useGlobalUiSetting = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
+export const useGlobalUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
   const { services } = useKibana();
 
   if (typeof services.settings !== 'object') {
