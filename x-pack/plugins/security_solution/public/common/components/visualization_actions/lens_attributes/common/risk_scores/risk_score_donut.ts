@@ -8,12 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 
+const internalReferenceIdMapping: Record<string, string> = { host: uuidv4(), user: uuidv4() };
+
 export const getRiskScoreDonutAttributes: GetLensAttributes = (
-  stackByField,
+  stackByField = 'host',
   extraOptions = { spaceId: 'default' }
 ) => {
   const layerId = uuidv4();
-  const internalReferenceId = uuidv4();
+  const internalReferenceId = internalReferenceIdMapping[stackByField];
   return {
     title: `${stackByField} risk donut`,
     description: '',
@@ -28,13 +30,13 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (
             metrics: ['75179122-96fc-40e1-93b4-8e9310af5f06'],
             numberDisplay: 'value',
             categoryDisplay: 'hide',
-            legendDisplay: 'hide',
+            legendDisplay: 'show',
             nestedLegend: true,
             layerType: 'data',
-            legendSize: 'small',
-            legendPosition: 'right',
+            legendSize: 'medium',
+            legendPosition: 'left',
             percentDecimals: 2,
-            emptySizeRatio: 0.8,
+            emptySizeRatio: 0.82,
           },
         ],
       },

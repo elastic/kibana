@@ -32,7 +32,7 @@ export const BreakdownLegend = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText css={{ whiteSpace: 'nowrap' }} size="s">
-                {formatMillisecond(value)}
+                {formatMillisecond(value, {})}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
