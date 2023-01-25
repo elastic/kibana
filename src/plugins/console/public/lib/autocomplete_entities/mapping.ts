@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -104,6 +105,13 @@ export class Mapping implements BaseMapping {
    */
   public perIndexTypes: Record<string, object> = {};
 
+  private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
+
+  /**
+   * Indicates if mapping fetching is in progress.
+   */
+  public readonly isLoading$ = this._isLoading$.asObservable();
+
   /**
    * Map of the currently loading mappings for index patterns specified by a user.
    * @private
@@ -155,8 +163,12 @@ export class Mapping implements BaseMapping {
 
         autoCompleteContext.asyncResultsState!.results = new Promise<ResultTerm[]>(
           (resolve, reject) => {
+            this._isLoading$.next(true);
+
             this.fetchMappings(indices as string)
               .then((mapping) => {
+                this._isLoading$.next(false);
+
                 autoCompleteContext.asyncResultsState!.isLoading = false;
                 autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
 
@@ -168,6 +180,7 @@ export class Mapping implements BaseMapping {
               .catch((error) => {
                 // eslint-disable-next-line no-console
                 console.error(error);
+                this._isLoading$.next(false);
               });
           }
         );
