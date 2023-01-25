@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * This file is adapted from: https://code-room.io/libs/monaco-editor/esm/vs/basic-languages/markdown/markdown.js
+ * License: https://github.com/microsoft/monaco-languages/blob/master/LICENSE.md
+ */
 import { monaco } from '@kbn/monaco';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
