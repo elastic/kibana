@@ -7,13 +7,13 @@
 
 import { isEqual } from 'lodash';
 
-import type { SavedObject } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  CaseUserActionResponse,
   GetCaseConnectorsResponse,
   CaseConnector,
+  CaseUserActionInjectedAttributesWithoutActionId,
 } from '../../../common/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/api';
 import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
@@ -69,7 +69,7 @@ const checkConnectorsAuthorization = async ({
   authorization,
 }: {
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionResponse>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
   authorization: PublicMethodsOf<Authorization>;
 }) => {
   const entities: OwnerEntity[] = latestUserAction
@@ -111,7 +111,7 @@ const getConnectorsInfo = async ({
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionResponse>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
   logger: CasesClientArgs['logger'];
@@ -194,7 +194,7 @@ const isDateValid = (date: Date): boolean => {
 };
 
 const getConnectorInfoFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionResponse> | undefined
+  savedObject: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined
 ): CaseConnector | undefined => {
   if (
     savedObject != null &&
@@ -214,7 +214,7 @@ const createConnectorInfoResult = ({
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
-  latestUserAction?: SavedObject<CaseUserActionResponse>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
   const actionConnectorsMap = new Map(
