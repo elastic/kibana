@@ -75,11 +75,13 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
+          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -120,11 +122,14 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
+          "visibleCellActions": 3,
         },
       ]
     `);
@@ -188,11 +193,13 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
+          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -230,11 +237,14 @@ describe('Discover grid columns', function () {
             "showMoveLeft": false,
             "showMoveRight": false,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
+          "visibleCellActions": 3,
         },
       ]
     `);
@@ -298,6 +308,7 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "display": <div
             aria-label="timestamp - this field represents the time that events occurred."
@@ -322,6 +333,7 @@ describe('Discover grid columns', function () {
           "initialWidth": 210,
           "isSortable": true,
           "schema": "datetime",
+          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -365,11 +377,13 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
           "isSortable": false,
           "schema": "string",
+          "visibleCellActions": 3,
         },
         Object {
           "actions": Object {
@@ -410,11 +424,14 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
           "schema": "string",
+          "visibleCellActions": 3,
         },
       ]
     `);
