@@ -12,8 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { findTestSubject, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api';
+import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api.service';
 
 import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
@@ -21,8 +20,6 @@ import { KEY_ENABLE_WELCOME } from '../home';
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();
 const mockApplication = applicationServiceMock.createStartContract();
-const mockSettingsUI = uiSettingsServiceMock.createSetupContract();
-mockSettingsUI.get.mockReturnValue(false);
 const mockHttp = httpServiceMock.createStartContract();
 const mockApiService = new ApiService();
 mockApiService.setup(mockHttp, true);
@@ -33,8 +30,6 @@ jest.mock('../../kibana_services', () => ({
     chrome: mockChrome,
     application: mockApplication,
     trackUiMetric: jest.fn(),
-    uiSettings: mockSettingsUI,
-    http: mockHttp,
     guidedOnboardingService: mockApiService,
   }),
 }));

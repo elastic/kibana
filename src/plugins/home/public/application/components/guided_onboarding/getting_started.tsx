@@ -7,28 +7,16 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import {EuiButton, EuiLink, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideState, GuideId, GuideCardUseCase } from '@kbn/guided-onboarding';
-import { GuideCard, InfrastructureLinkCard } from '@kbn/guided-onboarding';
+import type { GuideFilterValues, GuideId, GuideState } from '@kbn/guided-onboarding';
 
+import { GuideCards, GuideFilters } from '@kbn/guided-onboarding';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -40,18 +28,18 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: 'Select a guide to help you make the most of your data.',
+  defaultMessage: `Select an option below and we'll help you get started`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
   defaultMessage: `I’d like to do something else (skip)`,
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings, cloud } =
-    getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  const [filter, setFilter] = useState<GuideFilterValues>('all');
   const history = useHistory();
 
   useEffect(() => {
@@ -114,11 +102,12 @@ export const GettingStarted = () => {
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
 
-  const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = useCallback(
-    async (useCase: GuideCardUseCase, guideState?: GuideState) => {
+    async (guideId: GuideId, guideState?: GuideState) => {
       try {
-        await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+        setIsLoading(true);
+        await guidedOnboardingService?.activateGuide(guideId, guideState);
+        setIsLoading(false);
       } catch (err) {
         getServices().toastNotifications.addDanger({
           title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
@@ -126,6 +115,7 @@ export const GettingStarted = () => {
           }),
           text: err.message,
         });
+        setIsLoading(false);
       }
     },
     [guidedOnboardingService]
@@ -200,34 +190,15 @@ export const GettingStarted = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
-        <EuiFlexGrid columns={4} gutterSize="l">
-          {['search', 'kubernetes', 'infrastructure', 'siem'].map((useCase) => {
-            if (useCase === 'infrastructure') {
-              return (
-                <EuiFlexItem key={`linkCard-${useCase}`}>
-                  <InfrastructureLinkCard
-                    navigateToApp={application.navigateToApp}
-                    isDarkTheme={isDarkTheme}
-                    addBasePath={http.basePath.prepend}
-                  />
-                </EuiFlexItem>
-              );
-            }
-            return (
-              <EuiFlexItem key={`guideCard-${useCase}`}>
-                <GuideCard
-                  useCase={useCase as GuideCardUseCase}
-                  guides={guidesState}
-                  activateGuide={activateGuide}
-                  isDarkTheme={isDarkTheme}
-                  addBasePath={http.basePath.prepend}
-                />
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGrid>
-        <EuiSpacer />
-        <EuiHorizontalRule />
+        <GuideFilters activeFilter={filter} setActiveFilter={setFilter} />
+        <EuiSpacer size="xxl" />
+        <GuideCards
+          activateGuide={activateGuide}
+          navigateToApp={application.navigateToApp}
+          isLoading={isLoading}
+          activeFilter={filter}
+          guidesState={guidesState}
+        />
         <EuiSpacer />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}

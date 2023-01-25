@@ -18,7 +18,7 @@ import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 
 import type { PluginState } from '../../common';
 import { API_BASE_PATH } from '../../common';
-import { apiService } from '../services/api';
+import { apiService } from '../services/api.service';
 import type { GuidedOnboardingApi } from '../types';
 import {
   testGuideStep1ActiveState,
