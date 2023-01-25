@@ -96,7 +96,7 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title',
       {
-        defaultMessage: 'Monitor kubernetes clusters',
+        defaultMessage: 'Monitor Kubernetes clusters',
       }
     ),
     guideId: 'kubernetes',
