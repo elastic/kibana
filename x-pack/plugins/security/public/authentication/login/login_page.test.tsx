@@ -82,7 +82,7 @@ describe('LoginPage', () => {
 
     it('renders with custom branding', async () => {
       const coreStartMock = coreMock.createStart();
-      customBrandingMock.customBranding$ = of({ logo: 'logo', pageTitle: 'My App' });
+      customBrandingMock.customBranding$ = of({ logo: 'logo' });
       httpMock.get.mockResolvedValue(createLoginState());
 
       const wrapper = shallow(

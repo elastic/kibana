@@ -186,13 +186,9 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
   }
   title={
     <FormattedMessage
-      defaultMessage="Cookies are required to log in to {pageTitle}"
+      defaultMessage="Cookies are required to log in to Elastic"
       id="xpack.security.loginPage.requiresCookiesTitle"
-      values={
-        Object {
-          "pageTitle": "My App",
-        }
-      }
+      values={Object {}}
     />
   }
 />
@@ -341,13 +337,9 @@ exports[`LoginPage page renders as expected 1`] = `
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to {pageTitle}"
+            defaultMessage="Welcome to Elastic"
             id="xpack.security.loginPage.welcomeTitle"
-            values={
-              Object {
-                "pageTitle": "Elastic",
-              }
-            }
+            values={Object {}}
           />
         </h1>
       </EuiTitle>
@@ -420,11 +412,10 @@ exports[`LoginPage page renders with custom branding 1`] = `
       <span
         className="loginWelcome__logo"
       >
-        <img
+        <EuiImage
           alt="logo"
-          height="40"
+          size={40}
           src="logo"
-          width="40"
         />
       </span>
       <EuiTitle
@@ -434,13 +425,9 @@ exports[`LoginPage page renders with custom branding 1`] = `
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to {pageTitle}"
+            defaultMessage="Welcome to Elastic"
             id="xpack.security.loginPage.welcomeTitle"
-            values={
-              Object {
-                "pageTitle": "My App",
-              }
-            }
+            values={Object {}}
           />
         </h1>
       </EuiTitle>

@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiImage,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -141,11 +142,10 @@ export class LoginPage extends Component<Props, State> {
 
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
-      <img src={customLogo} width="40" height="40" alt="logo" />
+      <EuiImage src={customLogo} size={40} alt="logo" />
     ) : (
       <EuiIcon type="logoElastic" size="xxl" />
     );
-    const pageTitle = this.state.customBranding?.pageTitle || 'Elastic';
     return (
       <div className="loginWelcome login-form">
         <header className="loginWelcome__header">
@@ -156,8 +156,7 @@ export class LoginPage extends Component<Props, State> {
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
-                  defaultMessage="Welcome to {pageTitle}"
-                  values={{ pageTitle }}
+                  defaultMessage="Welcome to Elastic"
                 />
               </h1>
             </EuiTitle>
@@ -171,7 +170,6 @@ export class LoginPage extends Component<Props, State> {
                 ...loginState,
                 isSecureConnection,
                 isCookiesEnabled,
-                pageTitle,
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -187,11 +185,9 @@ export class LoginPage extends Component<Props, State> {
     isCookiesEnabled,
     selector,
     loginHelp,
-    pageTitle,
   }: LoginState & {
     isSecureConnection: boolean;
     isCookiesEnabled: boolean;
-    pageTitle: string;
   }) => {
     const isLoginExplicitlyDisabled = selector.providers.length === 0;
     if (isLoginExplicitlyDisabled) {
@@ -273,8 +269,7 @@ export class LoginPage extends Component<Props, State> {
           title={
             <FormattedMessage
               id="xpack.security.loginPage.requiresCookiesTitle"
-              defaultMessage="Cookies are required to log in to {pageTitle}"
-              values={{ pageTitle }}
+              defaultMessage="Cookies are required to log in to Elastic"
             />
           }
           message={
@@ -345,14 +340,7 @@ export class LoginPage extends Component<Props, State> {
     }
 
     const { searchParams } = new URL(window.location.href);
-    const loggedOutMessage = i18n.translate('xpack.security.login.loggedOutDescription', {
-      defaultMessage: 'You have logged out of {pageTitle}.',
-      values: { pageTitle },
-    });
-    loginFormMessages['LOGGED_OUT' as LogoutReason] = {
-      type: LoginFormMessageType.Info,
-      content: loggedOutMessage,
-    };
+
     return (
       <LoginForm
         http={this.props.http}
