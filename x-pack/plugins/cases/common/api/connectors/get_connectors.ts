@@ -14,13 +14,11 @@ const CaseConnectorPushInfoRt = rt.intersection([
     needsToBePushed: rt.boolean,
     hasBeenPushed: rt.boolean,
   }),
-  rt.partial(
-    rt.type({
-      latestUserActionPushDate: rt.string,
-      oldestUserActionPushDate: rt.string,
-      externalService: CaseExternalServiceBasicRt,
-    }).props
-  ),
+  rt.partial({
+    latestUserActionPushDate: rt.string,
+    oldestUserActionPushDate: rt.string,
+    externalService: CaseExternalServiceBasicRt,
+  }),
 ]);
 
 export const GetCaseConnectorsResponseRt = rt.record(

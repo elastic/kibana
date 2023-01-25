@@ -8,12 +8,6 @@
 import * as rt from 'io-ts';
 
 import type { ActionType } from '@kbn/actions-plugin/common';
-/**
- * ActionResult type from the common folder is outdated.
- * The type from server is not exported properly so we
- * disable the linting for the moment
- */
-
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
