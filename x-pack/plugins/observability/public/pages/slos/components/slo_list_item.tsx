@@ -12,9 +12,9 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -63,10 +63,6 @@ export function SloListItem({
     setIsActionsPopoverOpen(false);
   };
 
-  const handleNavigate = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
-  };
-
   const handleDeleteCancel = () => {
     setDeleteConfirmationModalOpen(false);
     setIsDeleting(false);
@@ -91,7 +87,7 @@ export function SloListItem({
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
-                  <EuiLink onClick={handleNavigate}>{slo.name}</EuiLink>
+                  <EuiText size="s">{slo.name}</EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} />
               </EuiFlexGroup>
