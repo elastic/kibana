@@ -6,12 +6,12 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
+const layerId = uuidv4();
 
 export const getAlertsHistogramLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
   extraOptions
 ) => {
-  const layerId = uuidv4();
   return {
     title: 'Alerts',
     description: '',

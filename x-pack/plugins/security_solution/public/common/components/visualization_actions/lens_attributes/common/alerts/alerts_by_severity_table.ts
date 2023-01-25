@@ -7,11 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
+const layerId = uuidv4();
+
 export const getAlertsBySeverityTableAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.severity',
   extraOptions
 ) => {
-  const layerId = uuidv4();
   return {
     title: 'Alerts',
     description: '',

@@ -7,12 +7,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 
+const layerId = uuidv4();
+const internalReferenceId = uuidv4();
+
 export const getRulePreviewLensAttributes: GetLensAttributes = (
   stackByField = 'event.category',
   extraOptions
 ) => {
-  const layerId = uuidv4();
-  const internalReferenceId = uuidv4();
   return {
     title: 'Rule preview',
     description: '',

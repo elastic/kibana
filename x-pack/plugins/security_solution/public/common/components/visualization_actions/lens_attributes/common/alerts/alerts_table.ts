@@ -7,11 +7,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 
+const layerId = uuidv4();
+
 export const getAlertsTableLensAttributes: GetLensAttributes = (
   stackByField = 'kibana.alert.rule.name',
   extraOptions
 ) => {
-  const layerId = uuidv4();
   return {
     title: 'Alerts',
     description: '',
@@ -35,10 +36,6 @@ export const getAlertsTableLensAttributes: GetLensAttributes = (
         ],
         layerId,
         layerType: 'data',
-        paging: {
-          size: 10,
-          enabled: true,
-        },
       },
       query: {
         query: '',

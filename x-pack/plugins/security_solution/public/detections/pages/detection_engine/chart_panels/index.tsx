@@ -137,7 +137,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
             updateCommonStackBy1(DEFAULT_STACK_BY_FIELD1);
           }
         },
-        order: 0,
+        order: 5,
       },
     ],
     [onReset, updateCommonStackBy0, updateCommonStackBy1]
