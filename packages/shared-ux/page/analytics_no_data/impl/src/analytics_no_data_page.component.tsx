@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
-import { Observable, of } from 'rxjs';
 
 /**
  * Props for the pure component.
@@ -20,8 +19,8 @@ export interface Props {
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
-  /** if set to true means Kibana is customly branded */
-  hasCustomBranding$: Observable<boolean>;
+  /** if the kibana instance is customly branded */
+  showPlainSpinner: boolean;
 }
 
 const solution = i18n.translate('sharedUXPackages.noDataConfig.analytics', {
@@ -50,7 +49,7 @@ export const AnalyticsNoDataPage = ({
   kibanaGuideDocLink,
   onDataViewCreated,
   allowAdHocDataView,
-  hasCustomBranding$,
+  showPlainSpinner,
 }: Props) => {
   const noDataConfig = {
     solution,
@@ -65,8 +64,6 @@ export const AnalyticsNoDataPage = ({
     },
     docsLink: kibanaGuideDocLink,
   };
-
-  const showPlainSpinner = hasCustomBranding$.subscribe((data: boolean) => of(data)) ? true : false;
 
   return (
     <KibanaNoDataPage

@@ -46,13 +46,12 @@ const NoDataComponent = ({
   dataViews,
   dataViewEditor,
   onDataViewCreated,
-  customBranding,
 }: NoDataComponentProps) => {
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
-    customBranding,
+    customBranding: core.customBranding,
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
