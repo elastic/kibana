@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,

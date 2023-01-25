@@ -364,6 +364,7 @@ export async function mountApp(
             contextOriginatingApp={originatingApp}
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
+            coreStart={coreStart}
           />
         </Provider>
       );

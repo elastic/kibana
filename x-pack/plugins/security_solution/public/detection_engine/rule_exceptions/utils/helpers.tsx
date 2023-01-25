@@ -34,11 +34,10 @@ import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-
 import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
+import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
-import type { Ecs } from '../../../../common/ecs';
-import type { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
 import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
