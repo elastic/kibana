@@ -7,7 +7,7 @@
 
 import React, { Fragment, Component } from 'react';
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -44,7 +44,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
   private _isMounted?: boolean;
   state: State = {
     fields: [],
-    metricsEditorKey: uuid(),
+    metricsEditorKey: uuidv4(),
   };
 
   componentDidMount() {
@@ -110,7 +110,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
     // Metrics editor persists metrics in state.
     // Reset metricsEditorKey to force new instance and new internal state with latest metrics
-    this.setState({ metricsEditorKey: uuid() });
+    this.setState({ metricsEditorKey: uuidv4() });
   };
 
   _onRequestTypeSelect = (requestType: RENDER_AS) => {
