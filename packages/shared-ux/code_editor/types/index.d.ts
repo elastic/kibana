@@ -15,7 +15,7 @@ export interface Props {
   height?: string | number;
 
   /** ID of the editor language */
-  languageId: string;
+  languageId: enum;
 
   /** Value of the editor */
   value: string;
