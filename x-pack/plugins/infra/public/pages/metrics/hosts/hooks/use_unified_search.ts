@@ -14,7 +14,18 @@ import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_unified_search_url_state';
+import { useHostsUrlState, INITIAL_DATE_RANGE, HostsState } from './use_unified_search_url_state';
+
+const buildQuerySubmittedPayload = (hostState: HostsState) => {
+  const { panelFilters, filters, dateRange, query: queryObj } = hostState;
+
+  return {
+    control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
+    filters: filters.map((filter) => JSON.stringify(filter)),
+    interval: `interval(from:${dateRange.from},to:${dateRange.to})`,
+    query: queryObj.query,
+  };
+};
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
@@ -22,6 +33,7 @@ export const useUnifiedSearch = () => {
   const { services } = useKibana<InfraClientStartDeps>();
   const {
     data: { query: queryManager },
+    telemetry,
   } = services;
 
   useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, {
@@ -61,6 +73,11 @@ export const useUnifiedSearch = () => {
       timeSubscription.unsubscribe();
     };
   });
+
+  // Track telemetry event on query/filter/date changes
+  useEffect(() => {
+    telemetry.reportHostsViewQuerySubmitted(buildQuerySubmittedPayload(state));
+  }, [state, telemetry]);
 
   const onSubmit = useCallback(
     (data?: {

@@ -18,7 +18,7 @@ const configSchema = schema.object({
     schema.maybe(schema.string())
   ),
   eventTypesAllowlist: schema.arrayOf(schema.string(), {
-    defaultValue: ['Loaded Kibana'],
+    defaultValue: ['Loaded Kibana', 'Hosts View Query Submitted', 'Host Entry Clicked'],
   }),
 });
 
