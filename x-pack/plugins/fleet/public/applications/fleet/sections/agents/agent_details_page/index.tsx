@@ -32,7 +32,6 @@ import {
   AgentLogs,
   AgentDetailsActionMenu,
   AgentDetailsContent,
-  AgentDashboardLink,
   AgentDiagnosticsTab,
 } from './components';
 
@@ -131,9 +130,6 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <AgentDashboardLink agent={agentData?.item} agentPolicy={agentPolicyData?.item} />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </>
       ) : undefined,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import React, { type FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -485,7 +485,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
           {progressPercentComplete !== undefined && isBatchTransform && (
-            <Fragment>
+            <>
               <EuiSpacer size="m" />
               <EuiText size="xs">
                 <strong>
@@ -508,10 +508,10 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   <EuiText size="xs">{progressPercentComplete}%</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </Fragment>
+            </>
           )}
           {created && (
-            <Fragment>
+            <>
               <EuiHorizontalRule />
               <EuiFlexGroup gutterSize="l">
                 <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
@@ -566,7 +566,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </Fragment>
+            </>
           )}
         </EuiForm>
         {alertFlyoutVisible ? (
