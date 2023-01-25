@@ -26745,7 +26745,6 @@
     "xpack.securitySolution.console.commandValidation.exclusiveOr": "此命令只支持以下参数之一：{argNames}",
     "xpack.securitySolution.console.commandValidation.invalidArgValue": "无效的参数值：{argName}。{error}",
     "xpack.securitySolution.console.commandValidation.missingRequiredArg": "缺少所需参数：{argName}",
-    "xpack.securitySolution.console.commandValidation.mustHaveArgs": "缺少所需参数：{requiredArgs}",
     "xpack.securitySolution.console.commandValidation.unknownArgument": "此命令不支持以下 {command} {countOfInvalidArgs, plural, other {参数}}：{unknownArgs}",
     "xpack.securitySolution.console.commandValidation.unsupportedArg": "不支持的参数：{argName}",
     "xpack.securitySolution.console.sidePanel.helpDescription": "使用添加 ({icon}) 按钮将响应操作填充到文本栏。在必要时添加其他参数或注释。",
