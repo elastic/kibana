@@ -265,7 +265,7 @@ export class KbnClientSavedObjects {
     let deleted = 0;
     let missing = 0;
 
-    await concurrently(20, options.objects, async (obj) => {
+    await concurrently(10, options.objects, async (obj) => {
       try {
         await this.requester.request({
           method: 'DELETE',
