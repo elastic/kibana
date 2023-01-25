@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { EuiAccordion, EuiSuperSelectProps } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
+import { EuiSuperSelectProps } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Rule, RuleAction, GenericValidationResult } from '../../../types';
+import { RuleAction } from '../../../types';
 import { ActionNotifyWhen } from './action_notify_when';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-  RuleNotifyWhen,
-} from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
   DEFAULT_FREQUENCY_WITH_SUMMARY,
-} from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+} from '../../../common/constants';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
