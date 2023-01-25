@@ -87,7 +87,7 @@ describe('AgentDashboardLink', () => {
     expect(result.getByRole('button').hasAttribute('disabled')).toBeTruthy();
   });
 
-  it('should not enable the button if elastic_agent package is installed and policy do not have monitoring enabled', async () => {
+  it('should link to the agent policy settings tab if logs and metrics are not enabled for that policy', async () => {
     mockedUseGetPackageInfoByKey.mockReturnValue({
       isLoading: false,
       data: {
@@ -107,14 +107,15 @@ describe('AgentDashboardLink', () => {
         }
         agentPolicy={
           {
+            id: 'policy123',
             monitoring_enabled: [],
           } as unknown as AgentPolicy
         }
       />
     );
 
-    expect(result.queryByRole('link')).toBeNull();
-    expect(result.queryByRole('button')).not.toBeNull();
-    expect(result.getByRole('button').hasAttribute('disabled')).toBeTruthy();
+    const link = result.queryByRole('link');
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
 });

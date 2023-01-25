@@ -4762,6 +4762,22 @@
             "path": "packages/kbn-es-query/src/kuery/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.KueryQueryOptions.caseInsensitive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "caseInsensitive",
+            "description": [
+              "\nWhether term-level queries should be treated as case-insensitive or not. For example, `agent.keyword: foobar` won't\nmatch a value of \"FooBar\" unless this parameter is `true`.\n(See https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-term-query.html#term-field-params)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

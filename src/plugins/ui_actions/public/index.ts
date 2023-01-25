@@ -22,7 +22,7 @@ export { buildContextMenuForActions } from './context_menu';
 export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
-} from './util';
+} from '@kbn/ui-actions-browser';
 export type { Trigger, RowClickContext } from './triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,

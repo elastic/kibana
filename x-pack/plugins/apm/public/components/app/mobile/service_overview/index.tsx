@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +39,6 @@ import { MostUsedChart } from './most_used_chart';
 import { LatencyMap } from './latency_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
@@ -50,7 +50,7 @@ import { MobileStats } from './stats';
 export const chartHeight = 288;
 
 export function MobileServiceOverview() {
-  const { serviceName, fallbackToTransactions } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
   const embeddableFilters = useFiltersForEmbeddableCharts();
 
@@ -65,6 +65,7 @@ export function MobileServiceOverview() {
       osVersion,
       appVersion,
       netConnectionType,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
@@ -142,11 +143,6 @@ export function MobileServiceOverview() {
             </EuiCallOut>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <MobileStats
               start={start}
@@ -163,24 +159,46 @@ export function MobileServiceOverview() {
                     end={end}
                     kuery={kueryWithMobileFilters}
                     filters={embeddableFilters}
+                    comparisonEnabled={comparisonEnabled}
                   />
                 </EuiPanel>
               </EuiFlexItem>
 
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsedTitle',
-                          {
-                            defaultMessage: 'Most used',
-                          }
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
+                  <EuiFlexGroup
+                    justifyContent="spaceBetween"
+                    alignItems="center"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.mostUsedTitle',
+                            {
+                              defaultMessage: 'Top 5 most used',
+                            }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {comparisonEnabled && (
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.apm.comparison.not.support',
+                            {
+                              defaultMessage: 'Comparison is not supported',
+                            }
+                          )}
+                          size="m"
+                          type="alert"
+                          color="warning"
+                        />
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
                   <EuiFlexGroup direction={rowDirection} gutterSize="s">
                     {/* Device */}
                     <EuiFlexItem>
