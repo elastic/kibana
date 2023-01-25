@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -75,19 +76,21 @@ export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> =
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       <EuiPanel
         className="eui-yScroll"
-        style={{ maxHeight: '40vh' }}
+        css={css`
+          max-height: 40vh;
+          max-width: 500px;
+        `}
         color="transparent"
         paddingSize="s"
       >
         <EuiBasicTable<SyntaxExample>
           id="querySyntaxBasicTableId"
-          style={{ width: 500 }}
           tableCaption={title}
           items={items}
           compressed={true}
           rowHeader="label"
           columns={columns}
-          responsive={false}
+          responsive
         />
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">

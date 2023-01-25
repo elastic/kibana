@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiEmptyPrompt, EuiButton, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,7 @@ interface NoResultsSuggestionProps {
 
 export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.memo(
   ({ dataView, isTimeBased, onDisableFilters }) => {
+    const { euiTheme } = useEuiTheme();
     const services = useDiscoverServices();
     const { data, uiSettings, timefilter } = services;
     const { query, filters } = useQuerySubscriber({ data });
@@ -39,11 +41,8 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
       (isOfQueryType(query) && !!query?.query) || (!!query && isOfAggregateQueryType(query));
     const hasFilters = hasActiveFilter(filters);
 
-    const {
-      isLoading,
-      range: occurrencesRange,
-      refetch,
-    } = useFetchOccurrencesRange({
+    const [isExtending, setIsExtending] = useState<boolean>(false);
+    const { range: occurrencesRange, refetch } = useFetchOccurrencesRange({
       dataView,
       query,
       filters,
@@ -53,13 +52,16 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
       },
     });
 
-    const expandTimeRange = async () => {
+    const extendTimeRange = async () => {
+      setIsExtending(true);
       const range = await refetch();
       if (range?.from && range?.to) {
         timefilter.setTime({
           from: range.from,
           to: range.to,
         });
+      } else {
+        setIsExtending(false);
       }
     };
 
@@ -73,7 +75,11 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
           defaultMessage="Here are some things to try:"
         />
         <EuiSpacer size="xs" />
-        <ul>
+        <ul
+          css={css`
+            display: inline-block;
+          `}
+        >
           {isTimeBased && (
             <li>
               <NoResultsSuggestionWhenTimeRange />
@@ -112,22 +118,28 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = React.me
         }
         body={body}
         actions={
-          typeof occurrencesRange === 'undefined' ? (
-            <EuiLoadingSpinner />
-          ) : canExtendTimeRange ? (
-            <EuiButton
-              color="primary"
-              fill
-              onClick={expandTimeRange}
-              isLoading={isLoading}
-              data-test-subj="discoverNoResultsViewAllMatches"
-            >
-              <FormattedMessage
-                id="discover.noResults.suggestion.viewAllMatchesButtonText"
-                defaultMessage="View all matches"
-              />
-            </EuiButton>
-          ) : undefined
+          <div
+            css={css`
+              min-block-size: ${euiTheme.size.xxl};
+            `}
+          >
+            {typeof occurrencesRange === 'undefined' ? (
+              <EuiLoadingSpinner />
+            ) : canExtendTimeRange ? (
+              <EuiButton
+                color="primary"
+                fill
+                onClick={extendTimeRange}
+                isLoading={isExtending}
+                data-test-subj="discoverNoResultsViewAllMatches"
+              >
+                <FormattedMessage
+                  id="discover.noResults.suggestion.viewAllMatchesButtonText"
+                  defaultMessage="View all matches"
+                />
+              </EuiButton>
+            ) : null}
+          </div>
         }
       />
     );

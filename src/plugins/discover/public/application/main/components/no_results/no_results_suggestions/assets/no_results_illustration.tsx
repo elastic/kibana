@@ -13,7 +13,7 @@ export const NoResultsIllustration = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="290"
-    height="206.14"
+    height="213.01"
     fill="none"
     viewBox="0 0 226 166"
   >

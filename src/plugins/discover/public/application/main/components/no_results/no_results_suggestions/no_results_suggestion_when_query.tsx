@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink } from '@elastic/eui';
@@ -168,13 +169,22 @@ export const NoResultsSuggestionWhenQuery: React.FC<NoResultsSuggestionWhenQuery
 
   return (
     <>
-      <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        wrap={false}
+        css={css`
+          display: inline-flex;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiText data-test-subj="discoverNoResultsAdjustSearch">
             {examplesMeta ? (
               <FormattedMessage
                 id="discover.noResults.suggestion.adjustYourQueryWithExamplesText"
-                defaultMessage="Try a different query syntax"
+                defaultMessage="Try a different query"
               />
             ) : (
               <FormattedMessage
