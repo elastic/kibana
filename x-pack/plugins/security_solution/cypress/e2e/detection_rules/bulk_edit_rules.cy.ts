@@ -290,12 +290,6 @@ describe('Detection rules, bulk edit', () => {
       // check if only pre-populated tags exist in the tags filter
       checkTagsInTagsFilter(prePopulatedTags);
 
-      cy.get(EUI_FILTER_SELECT_ITEM)
-        .should('have.length', prePopulatedTags.length)
-        .each(($el, index) => {
-          cy.wrap($el).should('have.text', prePopulatedTags[index]);
-        });
-
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
       // open add tags form and add 2 new tags
