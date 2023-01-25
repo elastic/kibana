@@ -9,6 +9,8 @@
 import Boom from '@hapi/boom';
 import type { ISavedObjectTypeRegistry, RequestHandlerWrapper } from '@kbn/core/server';
 
+export const KBN_CLIENT_API_PREFIX = '/internal/ftr/kbn_client_so';
+
 export const listHiddenTypes = (registry: ISavedObjectTypeRegistry): string[] => {
   return registry
     .getAllTypes()
