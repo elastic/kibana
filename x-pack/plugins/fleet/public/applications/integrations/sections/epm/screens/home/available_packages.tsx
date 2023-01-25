@@ -181,7 +181,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
-export const AvailablePackages: React.FC<{}> = ({}) => {
+export const AvailablePackages: React.FC<{
+  setPrereleaseEnabled: (isEnabled: boolean) => void;
+}> = ({ setPrereleaseEnabled }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -304,6 +306,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
         onChange={setPreference}
         onPrereleaseEnabledChange={(isEnabled) => {
           setPrereleaseIntegrationsEnabled(isEnabled);
+          setPrereleaseEnabled(isEnabled);
         }}
       />
     </EuiFlexItem>,
