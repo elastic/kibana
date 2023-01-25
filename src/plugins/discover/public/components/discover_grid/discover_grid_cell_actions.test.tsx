@@ -30,7 +30,13 @@ jest.mock('../../hooks/use_discover_services', () => {
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { FilterInBtn, FilterOutBtn, buildCellActions, CopyBtn } from './discover_grid_cell_actions';
+import {
+  FilterInBtn,
+  FilterOutBtn,
+  buildCellActions,
+  CopyBtn,
+  CopyBtnShort,
+} from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EuiButton } from '@elastic/eui';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
@@ -38,7 +44,21 @@ import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
-    expect(buildCellActions({ name: 'foo', filterable: false } as DataViewField)).toBeUndefined();
+    expect(buildCellActions({ name: 'foo', filterable: false } as DataViewField)).toEqual([
+      CopyBtnShort,
+    ]);
+  });
+
+  it('should show filter actions for filterable fields', async () => {
+    expect(buildCellActions({ name: 'foo', filterable: true } as DataViewField, jest.fn())).toEqual(
+      [FilterInBtn, FilterOutBtn, CopyBtnShort]
+    );
+  });
+
+  it('should show Copy action for _source field', async () => {
+    expect(
+      buildCellActions({ name: '_source', type: '_source', filterable: false } as DataViewField)
+    ).toEqual([CopyBtn]);
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
