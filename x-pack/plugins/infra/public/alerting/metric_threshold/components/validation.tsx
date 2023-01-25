@@ -187,7 +187,7 @@ export function validateMetricThreshold({
           'xpack.infra.metrics.alertFlyout.error.equation.invalidCharacters',
           {
             defaultMessage:
-              'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, = ',
+              'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
           }
         );
       }
