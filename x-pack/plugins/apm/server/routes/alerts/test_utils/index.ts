@@ -80,6 +80,11 @@ export const createRuleTypeMocks = () => {
           ruleTypeName: 'ruleTypeName',
         },
         startedAt: new Date(),
+        flappingSettings: {
+          enabled: true,
+          lookBackWindow: 20,
+          statusChangeThreshold: 4,
+        },
       });
     },
   };
