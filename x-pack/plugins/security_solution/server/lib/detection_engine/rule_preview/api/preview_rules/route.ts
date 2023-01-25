@@ -13,9 +13,10 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  RulesSettingsFlapping,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { parseDuration, DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
@@ -263,6 +264,7 @@ export const previewRulesRoute = async (
               startedAt: startedAt.toDate(),
               state: statePreview,
               logger,
+              flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
             })) as { state: TState });
 
             const errors = loggedStatusChanges
