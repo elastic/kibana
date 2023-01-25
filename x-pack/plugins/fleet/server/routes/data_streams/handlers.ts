@@ -16,6 +16,9 @@ import { dataStreamService } from '../../services/data_streams';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 
+const MANAGED_BY = 'fleet';
+const LEGACY_MANAGED_BY = 'ingest-manager';
+
 interface ESDataStreamInfo {
   name: string;
   timestamp_field: {
@@ -58,7 +61,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     // See https://github.com/elastic/elastic-agent/issues/654
 
     const filteredDataStreamsInfo = dataStreamsInfo.filter(
-      (ds) => ds?._meta?.managed_by === 'fleet' || ds?._meta?.managed_by === 'ingest-manager'
+      (ds) => ds?._meta?.managed_by === MANAGED_BY || ds?._meta?.managed_by === LEGACY_MANAGED_BY
     );
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(filteredDataStreamsInfo, 'name');
