@@ -124,7 +124,6 @@ export class APMEventClient {
       isCalledWithInternalUser: false,
       debug: this.debug,
       request: this.request,
-      requestType,
       operationName,
       requestParams: params,
       cb: () => {

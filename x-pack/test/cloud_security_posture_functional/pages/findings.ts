@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule', ruleName1)).to.be(true);
+        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
 
       it('remove filter', async () => {
@@ -102,8 +102,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery(ruleName1);
         await queryBar.submitQuery();
 
-        expect(await table.hasColumnValue('Rule', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule', ruleName2)).to.be(false);
+        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await table.hasColumnValue('Rule Name', ruleName2)).to.be(false);
 
         await queryBar.setQuery('');
         await queryBar.submitQuery();
@@ -114,18 +114,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Table Filters', () => {
       it('add cell value filter', async () => {
-        await table.addCellFilter('Rule', ruleName1, false);
+        await table.addCellFilter('Rule Name', ruleName1, false);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule', ruleName1)).to.be(true);
+        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
 
       it('add negated cell value filter', async () => {
-        await table.addCellFilter('Rule', ruleName1, true);
+        await table.addCellFilter('Rule Name', ruleName1, true);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1, true, false, true)).to.be(true);
-        expect(await table.hasColumnValue('Rule', ruleName1)).to.be(false);
-        expect(await table.hasColumnValue('Rule', ruleName2)).to.be(true);
+        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(false);
+        expect(await table.hasColumnValue('Rule Name', ruleName2)).to.be(true);
 
         await filterBar.removeFilter('rule.name');
       });
@@ -147,8 +147,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const testCases: TestCase[] = [
           ['CIS Section', 'asc', sortByAlphabeticalOrder],
           ['CIS Section', 'desc', sortByAlphabeticalOrder],
-          ['Cluster ID', 'asc', compareStringByLexicographicOrder],
-          ['Cluster ID', 'desc', compareStringByLexicographicOrder],
+          ['Resource ID', 'asc', compareStringByLexicographicOrder],
+          ['Resource ID', 'desc', compareStringByLexicographicOrder],
           ['Resource Name', 'asc', sortByAlphabeticalOrder],
           ['Resource Name', 'desc', sortByAlphabeticalOrder],
           ['Resource Type', 'asc', sortByAlphabeticalOrder],
