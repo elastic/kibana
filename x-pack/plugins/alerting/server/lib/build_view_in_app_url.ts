@@ -15,22 +15,6 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppRelativeUrlFnOpts<Params>
 ) => string;
 
-export interface BuildViewInAppRelativeUrlOpts<Params extends RuleTypeParams> {
-  getViewInAppRelativeUrl: GetViewInAppRelativeUrlFn<Params> | undefined;
-  opts: GetViewInAppRelativeUrlFnOpts<Params>;
-}
-
-export function buildViewInAppRelativeUrl<Params extends RuleTypeParams>({
-  getViewInAppRelativeUrl,
-  opts,
-}: BuildViewInAppRelativeUrlOpts<Params>) {
-  if (!getViewInAppRelativeUrl) {
-    return;
-  }
-
-  return getViewInAppRelativeUrl(opts);
-}
-
 export interface BuildViewInAppUrlOpts<Params extends RuleTypeParams> {
   kibanaBaseUrl: string | undefined;
   spaceId: string | undefined;
@@ -46,15 +30,11 @@ export function buildViewInAppUrl<Params extends RuleTypeParams>({
   opts,
   logger,
 }: BuildViewInAppUrlOpts<Params>): string | undefined {
-  if (!kibanaBaseUrl) {
+  if (!kibanaBaseUrl || !getViewInAppRelativeUrl) {
     return;
   }
 
-  const relativeUrl = buildViewInAppRelativeUrl<Params>({ getViewInAppRelativeUrl, opts });
-
-  if (!relativeUrl) {
-    return;
-  }
+  const relativeUrl = getViewInAppRelativeUrl(opts);
 
   try {
     const viewInAppUrl = new URL(

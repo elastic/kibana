@@ -19,7 +19,6 @@ import {
 import {
   ruleExecutionStatusFromRaw,
   convertMonitoringFromRawAndVerify,
-  buildViewInAppRelativeUrl,
   getRuleSnoozeEndTime,
 } from '../../lib';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
@@ -155,10 +154,9 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
 
   // Need the `rule` object to build a URL
   if (!excludeFromPublicApi) {
-    const viewInAppRelativeUrl = buildViewInAppRelativeUrl({
-      opts: { rule: rule as Rule<Params> },
-      getViewInAppRelativeUrl: ruleType.getViewInAppRelativeUrl,
-    });
+    const viewInAppRelativeUrl =
+      ruleType.getViewInAppRelativeUrl &&
+      ruleType.getViewInAppRelativeUrl({ rule: rule as Rule<Params> });
     if (viewInAppRelativeUrl) {
       rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
     }

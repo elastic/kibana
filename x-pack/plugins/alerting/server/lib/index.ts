@@ -43,10 +43,9 @@ export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
 export { getAlertsForNotification } from './get_alerts_for_notification';
 export { trimRecoveredAlerts } from './trim_recovered_alerts';
-export { buildViewInAppUrl, buildViewInAppRelativeUrl } from './build_view_in_app_url';
+export { buildViewInAppUrl } from './build_view_in_app_url';
 export type {
   GetViewInAppRelativeUrlFnOpts,
   GetViewInAppRelativeUrlFn,
   BuildViewInAppUrlOpts,
-  BuildViewInAppRelativeUrlOpts,
 } from './build_view_in_app_url';
