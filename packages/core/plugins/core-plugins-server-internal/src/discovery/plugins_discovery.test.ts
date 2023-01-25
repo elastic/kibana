@@ -28,6 +28,7 @@ import { PluginType } from '@kbn/core-base-common';
 const KIBANA_ROOT = process.cwd();
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),
+  getPackages: jest.fn().mockReturnValue([]),
   getPluginPackagesFilter: jest.fn().mockReturnValue(() => true),
 }));
 
@@ -579,6 +580,7 @@ describe('plugins discovery system', () => {
       const bar = getMockPackage('bar');
       coreContext.env = {
         ...env,
+        pluginSearchPaths: [],
         repoPackages: [foo, bar],
       };
       const filterFn = jest.fn((p: Package) => p === foo);
@@ -600,7 +602,7 @@ describe('plugins discovery system', () => {
         {
           examples: false,
           oss: false,
-          parentDirs: [pluginDir()],
+          parentDirs: [],
           paths: [],
         },
       ]);
