@@ -268,6 +268,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           hideExclude: true,
           hideSort: true,
           hidePanelTitles: true,
+          placeholder: '',
           // option List controls will handle an invalid dataview
           // & display an appropriate message
           dataViewId: dataViewId ?? '',
