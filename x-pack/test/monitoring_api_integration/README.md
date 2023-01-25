@@ -33,8 +33,12 @@ This means that whenever the test suite would execute against the latest version
 of packages it would be too late, as in already available to users.
 
 ### Validating a new package version
+**IMPORTANT: this validation should be done before merging the new package version.
+A more tightly coupled test step will be considered as a next step (ie run the impacted
+test suite as CI step in the integrations package).**
+
 - Get the locally built package from `<integrations-repo>/build/packages/<package>-<version>.zip`; or
-- Download the package zip at `<package-registry-url>/epr/<package>/<package>-<version>.zip`
+- Download the package zip from local registry `<package-registry-url>/epr/<package>/<package>-<version>.zip`
 - Add the zipped package of the new version under `./fixtures/packages` and remove the previous version
 - Update the package version in `./packages.ts`
 - Create draft PR with the change to run against CI; or

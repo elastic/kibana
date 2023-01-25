@@ -1,0 +1,154 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getRiskScoreDonutAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [],
+  "state": Object {
+    "adHocDataViews": Object {
+      "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "ml_host_risk_score_latest_mockSpaceId",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "timeFieldName": "@timestamp",
+        "title": "ml_host_risk_score_latest_mockSpaceId",
+      },
+    },
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
+            "columnOrder": Array [
+              "a2e8541a-c22f-4e43-8a12-caa33edc5de0",
+              "75179122-96fc-40e1-93b4-8e9310af5f06",
+            ],
+            "columns": Object {
+              "75179122-96fc-40e1-93b4-8e9310af5f06": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "a2e8541a-c22f-4e43-8a12-caa33edc5de0": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Filters",
+                "operationType": "filters",
+                "params": Object {
+                  "filters": Array [
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "host.risk.calculated_level : \\"Unknown\\"",
+                      },
+                      "label": "Unknown",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "host.risk.calculated_level : \\"Low\\"",
+                      },
+                      "label": "Low",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "host.risk.calculated_level : \\"Moderiate\\"",
+                      },
+                      "label": "Moderiate",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "host.risk.calculated_level : \\"High\\"",
+                      },
+                      "label": "High",
+                    },
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "host.risk.calculated_level : \\"Critical\\"",
+                      },
+                      "label": "Critical",
+                    },
+                  ],
+                },
+                "scale": "ordinal",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "indexpattern-datasource-layer-d594baeb-5eca-480c-8885-ba79eaf41372",
+        "type": "index-pattern",
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "layers": Array [
+        Object {
+          "categoryDisplay": "hide",
+          "emptySizeRatio": 0.82,
+          "layerId": "d594baeb-5eca-480c-8885-ba79eaf41372",
+          "layerType": "data",
+          "legendDisplay": "show",
+          "legendPosition": "left",
+          "legendSize": "medium",
+          "metrics": Array [
+            "75179122-96fc-40e1-93b4-8e9310af5f06",
+          ],
+          "nestedLegend": true,
+          "numberDisplay": "value",
+          "percentDecimals": 2,
+          "primaryGroups": Array [
+            "a2e8541a-c22f-4e43-8a12-caa33edc5de0",
+          ],
+        },
+      ],
+      "shape": "donut",
+    },
+  },
+  "title": "host risk donut",
+  "visualizationType": "lnsPie",
+}
+`;

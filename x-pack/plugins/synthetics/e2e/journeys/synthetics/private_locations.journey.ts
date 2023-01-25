@@ -8,6 +8,7 @@
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import {
   addTestMonitor,
   cleanPrivateLocations,
@@ -17,6 +18,8 @@ import {
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   page.setDefaultTimeout(2 * 30000);

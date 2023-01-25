@@ -166,6 +166,40 @@
           },
           {
             "parentPluginId": "@kbn/import-resolver",
+            "id": "def-common.ImportResolver.getPackageManifestForPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getPackageManifestForPath",
+            "description": [],
+            "signature": [
+              "(path: string) => ",
+              "KibanaPackageManifest",
+              " | undefined"
+            ],
+            "path": "packages/kbn-import-resolver/src/import_resolver.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/import-resolver",
+                "id": "def-common.ImportResolver.getPackageManifestForPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-import-resolver/src/import_resolver.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/import-resolver",
             "id": "def-common.ImportResolver.getAbsolutePackageDir",
             "type": "Function",
             "tags": [],
@@ -215,12 +249,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/eslint-plugin-imports",
-                "path": "packages/kbn-eslint-plugin-imports/src/rules/uniform_imports.ts"
-              },
-              {
                 "plugin": "@kbn/repo-source-classifier",
                 "path": "packages/kbn-repo-source-classifier/src/repo_path.ts"
+              },
+              {
+                "plugin": "@kbn/eslint-plugin-imports",
+                "path": "packages/kbn-eslint-plugin-imports/src/rules/uniform_imports.ts"
               },
               {
                 "plugin": "@kbn/find-used-node-modules",

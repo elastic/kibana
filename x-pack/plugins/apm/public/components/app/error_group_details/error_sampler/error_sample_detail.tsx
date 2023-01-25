@@ -145,6 +145,7 @@ export function ErrorSampleDetails({
   const status = error.http?.response?.status_code;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
+  const isUnhandled = error.error.exception?.[0].handled === false;
 
   const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
@@ -293,6 +294,13 @@ export function ErrorSampleDetails({
               >
                 <EuiBadge color="hollow">{serviceVersion}</EuiBadge>
               </EuiToolTip>
+            ) : null,
+            isUnhandled ? (
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
+                  defaultMessage: 'Unhandled',
+                })}
+              </EuiBadge>
             ) : null,
           ]}
         />

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
 import type { FilterItemObj } from '../../public/common/components/filter_group/types';
 
 export const formatPageFilterSearchParam = (filters: FilterItemObj[]) => {
-  const modifiedFilters = filters.map((filter) => ({
+  return filters.map((filter) => ({
     title: filter.title ?? filter.fieldName,
     selectedOptions: filter.selectedOptions ?? [],
     fieldName: filter.fieldName,
     existsSelected: filter.existsSelected ?? false,
     exclude: filter.exclude ?? false,
   }));
-  return rison.encode(modifiedFilters);
 };

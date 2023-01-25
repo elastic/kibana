@@ -33,18 +33,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const toasts = getService('toasts');
 
-  const SOURCE_DATA_INDEX = 'search-source-alert';
-  const OUTPUT_DATA_INDEX = 'search-source-alert-output';
+  const SOURCE_DATA_VIEW = 'search-source-alert';
+  const OUTPUT_DATA_VIEW = 'search-source-alert-output';
   const ACTION_TYPE_ID = '.index';
   const RULE_NAME = 'test-search-source-alert';
+  const ADHOC_RULE_NAME = 'test-adhoc-alert';
   let sourceDataViewId: string;
-  let sourceAdHocDataViewId: string;
   let outputDataViewId: string;
   let connectorId: string;
 
   const createSourceIndex = () =>
     es.index({
-      index: SOURCE_DATA_INDEX,
+      index: SOURCE_DATA_VIEW,
       body: {
         settings: { number_of_shards: 1 },
         mappings: {
@@ -58,13 +58,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const generateNewDocs = async (docsNumber: number) => {
     const mockMessages = Array.from({ length: docsNumber }, (_, i) => `msg-${i}`);
-    const dateNow = new Date().toISOString();
+    const dateNow = new Date();
+    const dateToSet = new Date(dateNow);
+    dateToSet.setMinutes(dateNow.getMinutes() - 10);
     for await (const message of mockMessages) {
       es.transport.request({
-        path: `/${SOURCE_DATA_INDEX}/_doc`,
+        path: `/${SOURCE_DATA_VIEW}/_doc`,
         method: 'POST',
         body: {
-          '@timestamp': dateNow,
+          '@timestamp': dateToSet.toISOString(),
           message,
         },
       });
@@ -73,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const createOutputDataIndex = () =>
     es.index({
-      index: OUTPUT_DATA_INDEX,
+      index: OUTPUT_DATA_VIEW,
       body: {
         settings: {
           number_of_shards: 1,
@@ -139,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       .send({
         name: 'search-source-alert-test-connector',
         connector_type_id: ACTION_TYPE_ID,
-        config: { index: OUTPUT_DATA_INDEX },
+        config: { index: OUTPUT_DATA_VIEW },
         secrets: {},
       })
       .expect(200);
@@ -157,7 +159,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return ruleName === alertName;
     });
     await testSubjects.click('thresholdPopover');
-    await testSubjects.setValue('alertThresholdInput', '3');
+    await testSubjects.setValue('alertThresholdInput', '1');
+
+    await testSubjects.click('forLastExpression');
+    await testSubjects.setValue('timeWindowSizeNumber', '30');
+
     await retry.waitFor('actions accordion to exist', async () => {
       await testSubjects.click('.index-alerting-ActionTypeSelectOption');
       return await testSubjects.exists('alertActionAccordion-0');
@@ -200,14 +206,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return link;
   };
 
-  const openAlertResults = async (ruleName: string, dataViewId?: string) => {
+  const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
 
-    await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
+    await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
 
-    const [{ id: alertId }] = await getAlertsByName(ruleName);
+    let alertId: string;
+    if (type === 'name') {
+      const [{ id }] = await getAlertsByName(value);
+      alertId = id;
+    } else {
+      alertId = value;
+    }
+
     await filterBar.addFilter({ field: 'alert_id', operation: 'is', value: alertId });
     await PageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -218,11 +231,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const baseUrl = deployment.getHostPort();
     await browser.navigateTo(baseUrl + link);
     await PageObjects.discover.waitUntilSearchingHasFinished();
-
-    await retry.waitFor('navigate to discover', async () => {
-      const currentDataViewId = await PageObjects.discover.getCurrentDataViewId();
-      return dataViewId ? currentDataViewId === dataViewId : true;
-    });
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
@@ -236,6 +244,66 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
     await alertRule.click();
     await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const clickViewInApp = async (ruleName: string) => {
+    // navigate to discover using view in app link
+    await openAlertRuleInManagement(ruleName);
+    await testSubjects.click('ruleDetails-viewInApp');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const checkInitialRuleParamsState = async (dataView: string, isViewInApp = false) => {
+    if (isViewInApp) {
+      expect(await toasts.getToastCount()).to.be(0);
+    } else {
+      expect(await toasts.getToastCount()).to.be(1);
+      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
+        true
+      );
+    }
+    expect(await filterBar.getFilterCount()).to.be(0);
+    expect(await queryBar.getQueryString()).to.equal('');
+    const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+    const { valid } = await PageObjects.discover.validateDataViewReffsEquality();
+    expect(valid).to.equal(true);
+    expect(selectedDataView).to.be.equal(dataView);
+    expect(await dataGrid.getDocCount()).to.be(5);
+  };
+
+  const checkUpdatedRuleParamsState = async () => {
+    expect(await toasts.getToastCount()).to.be(0);
+    const queryString = await queryBar.getQueryString();
+    const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
+    expect(queryString).to.be.equal('message:msg-1');
+    expect(hasFilter).to.be.equal(true);
+    expect(await dataGrid.getDocCount()).to.be(1);
+  };
+
+  const checkInitialDataViewState = async (dataView: string) => {
+    // validate prev field filter
+    await testSubjects.existOrFail(`field-message-showDetails`); // still exists
+
+    // validate prev title
+    await PageObjects.discover.clickIndexPatternActions();
+    await testSubjects.click('indexPattern-manage-field');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const titleElem = await testSubjects.find('currentIndexPatternTitle');
+    expect(await titleElem.getVisibleText()).to.equal(dataView);
+  };
+
+  const checkUpdatedDataViewState = async (dataView: string) => {
+    // validate updated field filter
+    await testSubjects.missingOrFail(`field-message-showDetails`);
+
+    // validate updated title
+    await PageObjects.discover.clickIndexPatternActions();
+    await testSubjects.click('indexPattern-manage-field');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    const titleElem = await testSubjects.find('currentIndexPatternTitle');
+    expect(await titleElem.getVisibleText()).to.equal(dataView);
   };
 
   describe('Search source Alert', () => {
@@ -256,11 +324,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      deleteIndexes([OUTPUT_DATA_INDEX, SOURCE_DATA_INDEX]);
+      deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
+      const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
+      await deleteAlerts([adhocRuleId]);
       await deleteDataView(outputDataViewId);
       await deleteConnector(connectorId);
-      const alertsToDelete = await getAlertsByName('test');
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
       await security.testUser.restoreDefaults();
     });
 
@@ -272,8 +340,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
 
       log.debug('create data views');
-      const sourceDataViewResponse = await createDataView(SOURCE_DATA_INDEX);
-      const outputDataViewResponse = await createDataView(OUTPUT_DATA_INDEX);
+      const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
+      const outputDataViewResponse = await createDataView(OUTPUT_DATA_VIEW);
 
       sourceDataViewId = sourceDataViewResponse.body.data_view.id;
       outputDataViewId = outputDataViewResponse.body.data_view.id;
@@ -282,7 +350,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show time field validation error', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.selectIndexPattern(SOURCE_DATA_INDEX);
+      await PageObjects.discover.selectIndexPattern(SOURCE_DATA_VIEW);
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
       await openDiscoverAlertFlyout();
@@ -295,6 +363,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await input.type('search-source-alert-o*');
       await testSubjects.click('explore-matching-indices-button');
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === 'DATA VIEW\nsearch-source-alert-o*';
+      });
+
       await testSubjects.click('saveRuleButton');
 
       const errorElem = await testSubjects.find('esQueryAlertExpressionError');
@@ -305,9 +378,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to alert results via view in app link', async () => {
       await testSubjects.click('selectDataViewExpression');
       await testSubjects.click('indexPattern-switcher--input');
+      if (await testSubjects.exists('clearSearchButton')) {
+        await testSubjects.click('clearSearchButton');
+      }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="${SOURCE_DATA_INDEX}"]`
+        `[title="${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 
@@ -319,59 +395,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ruleDetails-viewInApp');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('navigate to discover', async () => {
-        const currentDataViewId = await PageObjects.discover.getCurrentDataViewId();
-        return sourceDataViewId ? currentDataViewId === sourceDataViewId : true;
-      });
-
-      expect(await dataGrid.getDocCount()).to.be(5);
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
-      await openAlertResults(RULE_NAME, sourceDataViewId);
-
-      expect(await toasts.getToastCount()).to.be.equal(1);
-      const content = await toasts.getToastContent(1);
-      expect(content).to.equal(
-        `Displayed documents may vary\nThe displayed documents might differ from the documents that triggered the alert. Some documents might have been added or deleted.`
-      );
-
-      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-      expect(selectedDataView).to.be.equal('search-source-alert');
-
-      expect(await dataGrid.getDocCount()).to.be(5);
+      await openAlertResults(RULE_NAME);
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
 
-    it('should display warning about updated alert rule', async () => {
+    it('should display prev rule state after params update on clicking prev generated link', async () => {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
+      await retry.waitFor('filters modal to become hidden', async () => {
+        return !(await testSubjects.exists('saveFilter'));
+      });
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');
       await testSubjects.click('saveEditedRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await openAlertResults(RULE_NAME, sourceDataViewId);
-
-      const queryString = await queryBar.getQueryString();
-      const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
-      expect(queryString).to.be.equal('message:msg-1');
-      expect(hasFilter).to.be.equal(true);
-
-      expect(await toasts.getToastCount()).to.be.equal(1);
-      const content = await toasts.getToastContent(1);
-      expect(content).to.equal(
-        `Alert rule has changed\nThe displayed documents might not match the documents that triggered the alert because the rule configuration changed.`
-      );
-
-      expect(await dataGrid.getDocCount()).to.be(1);
+      await openAlertResults(RULE_NAME);
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });
 
-    it('should display warning about recently updated data view', async () => {
+    it('should display actual state after rule params update on clicking viewInApp link', async () => {
+      await clickViewInApp(RULE_NAME);
+
+      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      expect(selectedDataView).to.be.equal(SOURCE_DATA_VIEW);
+
+      await checkUpdatedRuleParamsState();
+    });
+
+    it('should display prev data view state after update on clicking prev generated link', async () => {
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
         `/kibana/dataViews/dataView/${sourceDataViewId}`,
@@ -379,49 +440,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      // add source filter
       await testSubjects.click('tab-sourceFilters');
       await testSubjects.click('fieldFilterInput');
-
-      const input = await find.activeElement();
-      await input.type('message');
+      const filtersInput = await find.activeElement();
+      await filtersInput.type('message');
       await testSubjects.click('addFieldFilterButton');
 
-      await openAlertResults(RULE_NAME, sourceDataViewId);
+      // change title
+      await testSubjects.click('editIndexPatternButton');
+      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+      await testSubjects.click('saveIndexPatternButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await toasts.getToastCount()).to.be(2);
-      const firstContent = await toasts.getToastContent(1);
-      expect(firstContent).to.equal(
-        `Data View has changed\nData view has been updated after the last update of the alert rule.`
-      );
-      const secondContent = await toasts.getToastContent(2);
-      expect(secondContent).to.equal(
-        `Alert rule has changed\nThe displayed documents might not match the documents that triggered the alert because the rule configuration changed.`
-      );
-
-      expect(await dataGrid.getDocCount()).to.be(1);
-    });
-
-    it('should display not found index error', async () => {
-      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_INDEX);
-
-      await deleteDataView(sourceDataViewId);
-
-      // rty to open alert results after index deletion
       await openAlertResults(RULE_NAME);
 
-      expect(await toasts.getToastCount()).to.be(1);
-      const firstContent = await toasts.getToastContent(1);
-      expect(firstContent).to.equal(
-        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
-      );
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialDataViewState(SOURCE_DATA_VIEW);
     });
 
-    it('should navigate to alert results via view in app link using adhoc data view', async () => {
+    it('should display actual data view state after update on clicking viewInApp link', async () => {
+      await clickViewInApp(RULE_NAME);
+      await checkUpdatedRuleParamsState();
+      await checkUpdatedDataViewState('search-s*');
+    });
+
+    it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.createAdHocDataView('search-source-', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
-
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
 
       // create an alert
@@ -429,16 +483,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('saveRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      sourceAdHocDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
+      await openAlertResults(ADHOC_RULE_NAME);
+
+      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      expect(selectedDataView).to.be.equal('search-source-*');
+
+      const documentCell = await dataGrid.getCellElement(0, 3);
+      const firstRowContent = await documentCell.getVisibleText();
+      expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
+
+      expect(await dataGrid.getDocCount()).to.be(5);
+    });
+
+    it('should navigate to alert results via view in app link using adhoc data view', async () => {
       // navigate to discover using view in app link
-      await openAlertRuleInManagement('test-adhoc-alert');
-      await testSubjects.click('ruleDetails-viewInApp');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitFor('navigate to discover', async () => {
-        const currentDataViewId = await PageObjects.discover.getCurrentDataViewId();
-        return currentDataViewId === sourceAdHocDataViewId;
-      });
+      await clickViewInApp(ADHOC_RULE_NAME);
 
       const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
       expect(selectedDataView).to.be.equal('search-source-*');
@@ -448,18 +508,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
     });
 
-    it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
-      await openAlertResults('test-adhoc-alert', sourceAdHocDataViewId);
+    it('should display results after data view removal on clicking prev generated link', async () => {
+      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+      await deleteDataView(sourceDataViewId);
+
+      await openAlertResults(RULE_NAME);
+
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialDataViewState(SOURCE_DATA_VIEW);
+    });
+
+    it('should not display results after data view removal on clicking viewInApp link', async () => {
+      await clickViewInApp(RULE_NAME);
 
       expect(await toasts.getToastCount()).to.be.equal(1);
       const content = await toasts.getToastContent(1);
       expect(content).to.equal(
-        `Displayed documents may vary\nThe displayed documents might differ from the documents that triggered the alert. Some documents might have been added or deleted.`
+        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );
-      expect(await dataGrid.getDocCount()).to.be(5);
+    });
 
-      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-      expect(selectedDataView).to.be.equal('search-source-*');
+    it('should display results after rule removal on following generated link', async () => {
+      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+      const [{ id: firstAlertId }] = await getAlertsByName(RULE_NAME);
+      await deleteAlerts([firstAlertId]);
+
+      await openAlertResults(firstAlertId, 'id');
+
+      await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
+      await checkInitialDataViewState(SOURCE_DATA_VIEW);
     });
   });
 }

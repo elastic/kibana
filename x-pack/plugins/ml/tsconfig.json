@@ -13,6 +13,10 @@
     "public/**/*.json",
     "server/**/*.json"
   ],
+  "exclude": [
+    "target/**/*",
+    "server/routes/apidoc_scripts/**",
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
@@ -65,11 +69,15 @@
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
-    "@kbn/repo-info",
     "@kbn/ml-url-state",
     "@kbn/ml-nested-property",
+    "@kbn/ml-local-storage",
+    "@kbn/ml-date-picker",
+    "@kbn/ml-is-defined",
+    "@kbn/ml-query-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-field",
+    "@kbn/unified-field-list-plugin",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
 }

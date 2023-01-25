@@ -6,6 +6,7 @@
  */
 
 import { Journey } from '@kbn/journeys';
+import { v4 as uuidv4 } from 'uuid';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
@@ -13,7 +14,33 @@ export const journey = new Journey({
     'x-pack/performance/kbn_archives/flights_no_map_dashboard',
     'x-pack/performance/kbn_archives/logs_no_map_dashboard',
   ],
-}).step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards`));
-  await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
-});
+})
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  })
+  .step('Search dashboards', async ({ page, inputDelays }) => {
+    await page.type('[data-test-subj="tableListSearchBox"]', 'Web', {
+      delay: inputDelays.TYPING,
+    });
+    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  })
+  .step('Delete dashboard', async ({ page }) => {
+    await page.click('[data-test-subj="checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b"]');
+    await page.click('[data-test-subj="deleteSelectedItems"]');
+    await page.click('[data-test-subj="confirmModalConfirmButton"]');
+    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  })
+  .step('Add  dashboard', async ({ page, inputDelays }) => {
+    await page.click('[data-test-subj="newItemButton"]');
+    await page.click('[data-test-subj="dashboardSaveMenuItem"]');
+    await page.type('[data-test-subj="savedObjectTitle"]', `foobar dashboard ${uuidv4()}`, {
+      delay: inputDelays.TYPING,
+    });
+    await page.click('[data-test-subj="confirmSaveSavedObjectButton"]');
+    await page.locator('[data-test-subj="saveDashboardSuccess"]');
+  })
+  .step('Return to dashboard list', async ({ page }) => {
+    await page.click('[data-test-subj="breadcrumb dashboardListingBreadcrumb first"]');
+    await page.waitForSelector(`[data-test-subj="table-is-ready"]`);
+  });

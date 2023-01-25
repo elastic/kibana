@@ -8,8 +8,8 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ToastsStart } from '@kbn/core/public';
 import type { ValueToStringConverter } from '../types';
-import { DiscoverServices } from '../build_services';
 import { convertNameToString } from './convert_value_to_string';
 
 const WARNING_FOR_FORMULAS = i18n.translate(
@@ -25,16 +25,14 @@ const COPY_FAILED_ERROR_MESSAGE = i18n.translate('discover.grid.copyFailedErrorT
 export const copyValueToClipboard = ({
   rowIndex,
   columnId,
-  services,
+  toastNotifications,
   valueToStringConverter,
 }: {
   rowIndex: number;
   columnId: string;
-  services: DiscoverServices;
+  toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
 }): string | null => {
-  const { toastNotifications } = services;
-
   const result = valueToStringConverter(rowIndex, columnId);
   const valueFormatted = result.formattedString;
 
@@ -69,17 +67,16 @@ export const copyValueToClipboard = ({
 export const copyColumnValuesToClipboard = async ({
   columnId,
   columnDisplayName,
-  services,
+  toastNotifications,
   valueToStringConverter,
   rowsCount,
 }: {
   columnId: string;
   columnDisplayName: string;
-  services: DiscoverServices;
+  toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
 }): Promise<string | null> => {
-  const { toastNotifications } = services;
   const nameFormattedResult = convertNameToString(columnDisplayName);
   let withFormula = nameFormattedResult.withFormula;
 
@@ -129,13 +126,11 @@ export const copyColumnValuesToClipboard = async ({
 
 export const copyColumnNameToClipboard = ({
   columnDisplayName,
-  services,
+  toastNotifications,
 }: {
   columnDisplayName: string;
-  services: DiscoverServices;
+  toastNotifications: ToastsStart;
 }): string | null => {
-  const { toastNotifications } = services;
-
   const nameFormattedResult = convertNameToString(columnDisplayName);
   const textToCopy = nameFormattedResult.formattedString;
   const copied = copyToClipboard(textToCopy);

@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -28,7 +29,6 @@ import {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
-import { addExcludeFrozenToQuery } from '../../../../../../common/util/query_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -103,6 +103,13 @@ export class JobCreator {
 
   public get type(): JOB_TYPE {
     return this._type;
+  }
+
+  public get dataView(): DataView {
+    return this._indexPattern;
+  }
+  public get dataViewId(): string | undefined {
+    return this._indexPattern.id;
   }
 
   public get indexPatternTitle(): string {

@@ -109,6 +109,7 @@ export interface DocLinks {
   };
   readonly enterpriseSearch: {
     readonly apiKeys: string;
+    readonly behavioralAnalyticsEvents: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
@@ -460,7 +461,6 @@ export interface DocLinks {
     readonly netIntroduction: string;
     readonly netNest: string;
     readonly netSingleNode: string;
-    readonly perlGuide: string;
     readonly phpGuide: string;
     readonly phpConnecting: string;
     readonly phpInstallation: string;

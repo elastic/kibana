@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -25,13 +25,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const security = getPageObject('security');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
 
   describe('View case', () => {
     describe('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('edits a case title from the case view page', async () => {
-        const newTitle = `test-${uuid.v4()}`;
+        const newTitle = `test-${uuidv4()}`;
 
         await testSubjects.click('editable-title-edit-icon');
         await testSubjects.setValue('editable-title-input-field', newTitle);
@@ -63,7 +64,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds a tag to a case', async () => {
-        const tag = uuid.v4();
+        const tag = uuidv4();
         await testSubjects.click('tag-list-edit-button');
         await comboBox.setCustom('comboBoxInput', tag);
         await testSubjects.click('edit-tags-submit');
@@ -211,7 +212,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
 
-        it('persists new comment when case is closed the close case button', async () => {
+        it('persists new comment when case is closed through the close case button', async () => {
           const commentArea = await find.byCssSelector(
             '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
           );
@@ -268,6 +269,82 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
+        });
+
+        it('shows unsaved comment message when page is refreshed', async () => {
+          const commentArea = await find.byCssSelector(
+            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+          );
+          await commentArea.focus();
+          await commentArea.type('Test comment from automation');
+
+          await testSubjects.click('submit-comment');
+
+          await header.waitUntilLoadingHasFinished();
+
+          const propertyActions = await find.allByCssSelector(
+            '[data-test-subj*="property-actions-ellipses"]'
+          );
+
+          propertyActions[propertyActions.length - 1].click();
+
+          await header.waitUntilLoadingHasFinished();
+
+          const editAction = await find.byCssSelector(
+            '[data-test-subj*="property-actions-pencil"]'
+          );
+
+          await header.waitUntilLoadingHasFinished();
+
+          await editAction.click();
+
+          const editCommentTextArea = await find.byCssSelector(
+            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+          );
+
+          await header.waitUntilLoadingHasFinished();
+
+          await editCommentTextArea.focus();
+          await editCommentTextArea.type('Edited comment');
+
+          await browser.refresh();
+
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail('user-action-comment-unsaved-draft');
+        });
+
+        it('shows unsaved description message when page is refreshed', async () => {
+          const propertyActions = await find.allByCssSelector(
+            '[data-test-subj*="property-actions-ellipses"]'
+          );
+
+          propertyActions[1].click();
+
+          await header.waitUntilLoadingHasFinished();
+
+          const editAction = await find.byCssSelector(
+            '[data-test-subj*="property-actions-pencil"]'
+          );
+
+          await header.waitUntilLoadingHasFinished();
+
+          await editAction.click();
+
+          const editCommentTextArea = await find.byCssSelector(
+            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+          );
+
+          await header.waitUntilLoadingHasFinished();
+
+          await editCommentTextArea.focus();
+          await editCommentTextArea.type('Edited description');
+
+          await browser.refresh();
+
+          await header.waitUntilLoadingHasFinished();
+
+          await testSubjects.existOrFail('description-unsaved-draft');
         });
       });
     });

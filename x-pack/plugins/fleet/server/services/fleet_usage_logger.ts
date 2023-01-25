@@ -39,7 +39,7 @@ export async function registerFleetUsageLogger(
             } catch (error) {
               appContextService
                 .getLogger()
-                .warn('Error occurred while fetching fleet usage: ' + error);
+                .debug('Error occurred while fetching fleet usage: ' + error);
             }
           },
 
@@ -56,12 +56,25 @@ export async function startFleetUsageLogger(taskManager: TaskManagerStartContrac
   if (!isInfoLogLevelEnabled) {
     return;
   }
-  appContextService.getLogger().info(`Task ${TASK_ID} scheduled with interval 5m`);
+  const interval = isDebugLogLevelEnabled ? '5m' : '15m';
+
+  // Re-schedule the task if interval changed
+  const task = await taskManager?.get(TASK_ID).catch((err) => {
+    if (err.output.statusCode === 404) {
+      return null;
+    }
+
+    throw err;
+  });
+  if (task?.schedule?.interval !== interval) {
+    await taskManager?.removeIfExists(TASK_ID);
+  }
+  appContextService.getLogger().info(`Task ${TASK_ID} scheduled with interval ${interval}`);
   await taskManager?.ensureScheduled({
     id: TASK_ID,
     taskType: TASK_TYPE,
     schedule: {
-      interval: isDebugLogLevelEnabled ? '5m' : '15m',
+      interval,
     },
     scope: ['fleet'],
     state: {},

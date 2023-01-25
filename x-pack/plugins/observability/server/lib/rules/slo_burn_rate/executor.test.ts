@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ElasticsearchClientMock,
@@ -27,12 +27,14 @@ import {
 import { FIRED_ACTION, getRuleExecutor } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
-  AlertStates,
-  BurnRateAlertContext,
   BurnRateAlertState,
+  BurnRateAlertContext,
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
+  AlertStates,
 } from './types';
 
 const commonEsResponse = {
@@ -92,6 +94,8 @@ describe('BurnRateRuleExecutor', () => {
       getAlertStartedDate: jest.fn(),
       getAlertUuid: jest.fn(),
       getAlertByAlertUuid: jest.fn(),
+      share: {} as SharePluginStart,
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
   });
 
@@ -253,7 +257,7 @@ describe('BurnRateRuleExecutor', () => {
 
 function someRuleParams(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleParams {
   return {
-    sloId: uuid(),
+    sloId: uuidv4(),
     burnRateThreshold: 2,
     maxBurnRateThreshold: 720,
     longWindow: { value: 1, unit: 'h' },

@@ -11,8 +11,8 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
-import { VIEW_MODE } from '../../../components/view_mode_toggle';
 
 export interface AppState {
   /**

@@ -7,6 +7,7 @@
 
 import { journey, step, before, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { monitorDetailsPageProvider } from '../../../page_objects/uptime/monitor_details';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';
@@ -14,6 +15,8 @@ const dateRangeEnd = '2019-09-11T19:40:08.078Z';
 const monitorId = '0000-intermittent';
 
 journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) => {
+  recordVideo(page);
+
   const monitorDetails = monitorDetailsPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   before(async () => {

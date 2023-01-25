@@ -6,10 +6,18 @@
  */
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Filter } from '@kbn/es-query';
+
 import type { InputsModelId } from '../../store/inputs/constants';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
-export type GetLensAttributes = (stackByField?: string) => LensAttributes;
+export type GetLensAttributes = (
+  stackByField?: string,
+  alertsOptions?: ExtraOptions
+) => LensAttributes;
 
 export interface VisualizationActionsProps {
   className?: string;
@@ -26,15 +34,29 @@ export interface VisualizationActionsProps {
   title: React.ReactNode;
 }
 
+export interface EmbeddableData {
+  requests: string[];
+  responses: string[];
+  isLoading: boolean;
+}
+
+export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
+
 export interface LensEmbeddableComponentProps {
+  applyGlobalQueriesAndFilters?: boolean;
+  extraActions?: Action[];
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   height?: string;
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: string;
-  lensAttributes: LensAttributes;
+  lensAttributes?: LensAttributes;
+  onLoad?: OnEmbeddableLoaded;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
+  width?: string;
 }
 
 export enum RequestStatus {
@@ -73,4 +95,19 @@ export interface RequestStatistic {
 export interface Response {
   json?: { rawResponse?: object };
   time?: number;
+}
+
+export interface ExtraOptions {
+  breakdownField?: string;
+  filters?: Filter[];
+  ruleId?: string;
+  spaceId?: string;
+  status?: Status;
+}
+
+export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
+  donutTextWrapperClassName?: string;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
+  isDonut?: boolean;
+  label?: string;
 }

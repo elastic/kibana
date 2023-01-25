@@ -32,3 +32,10 @@ export const MULTIPLE_ALERTS = (totalAlerts: number): string =>
 export const ATTACHMENT = i18n.translate('xpack.cases.userActions.attachment', {
   defaultMessage: 'Attachment',
 });
+
+export const UNSAVED_DRAFT_COMMENT = i18n.translate(
+  'xpack.cases.userActions.comment.unsavedDraftComment',
+  {
+    defaultMessage: 'You have unsaved edits for this comment',
+  }
+);

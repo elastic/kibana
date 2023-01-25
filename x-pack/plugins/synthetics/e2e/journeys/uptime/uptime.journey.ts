@@ -7,8 +7,11 @@
 
 import { journey, step, before } from '@elastic/synthetics';
 import { byTestId, waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 
 journey('uptime', ({ page, params }) => {
+  recordVideo(page);
+
   before(async () => {
     await waitForLoadingToFinish({ page });
   });

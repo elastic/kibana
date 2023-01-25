@@ -12,10 +12,9 @@ import { KibanaSavedObjectType } from '../../../common/types';
 import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultFleetErrorHandler } from '../../errors';
+import { dataStreamService } from '../../services/data_streams';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
-
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
 interface ESDataStreamInfo {
   name: string;
@@ -49,13 +48,9 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
   try {
     // Get matching data streams, their stats, and package SOs
-    const [
-      { data_streams: dataStreamsInfo },
-      { data_streams: dataStreamStats },
-      packageSavedObjects,
-    ] = await Promise.all([
-      esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
+    const [dataStreamsInfo, dataStreamStats, packageSavedObjects] = await Promise.all([
+      dataStreamService.getAllFleetDataStreams(esClient),
+      dataStreamService.getAllFleetDataStreamsStats(esClient),
       getPackageSavedObjects(savedObjects.client),
     ]);
 

@@ -20,8 +20,8 @@ import { of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { VIEW_MODE } from '../components/view_mode_toggle';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { VIEW_MODE } from '../../common/constants';
 
 let discoverComponent: ReactWrapper;
 
