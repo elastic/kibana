@@ -8,15 +8,14 @@
     ]
   },
   "include": [
-    "**/*.ts"
-  ],
-  "kbn_references": [
-    "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
-    "@kbn/plugin-discovery",
-    "@kbn/repo-info",
+    "**/*.ts",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ci-stats-reporter",
+    "@kbn/dev-cli-errors",
+    "@kbn/dev-cli-runner",
   ]
 }
