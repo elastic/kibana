@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -51,7 +51,7 @@ export const getRiskScoreColumns = (
                 type: 'keyword',
               }}
               triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
-              mode={CellActionsMode.ALWAYS_VISIBLE}
+              mode={CellActionsMode.INLINE}
               visibleCellActions={2}
               disabledActions={[SHOW_TOP_N_ACTION_ID, FILTER_IN_ACTION_ID, FILTER_OUT_ACTION_ID]}
             />
@@ -66,7 +66,7 @@ export const getRiskScoreColumns = (
                 type: 'keyword',
               }}
               triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
-              mode={CellActionsMode.ALWAYS_VISIBLE}
+              mode={CellActionsMode.INLINE}
               disabledActions={[SHOW_TOP_N_ACTION_ID, FILTER_IN_ACTION_ID, FILTER_OUT_ACTION_ID]}
             />
           </>

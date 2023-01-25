@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { EnrichedFieldInfo } from '../types';
 import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
@@ -95,7 +95,7 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
             type: enrichedFieldInfo.data.type,
           }}
           triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
-          mode={CellActionsMode.ALWAYS_VISIBLE}
+          mode={CellActionsMode.INLINE}
           metadata={{ scopeId: contextId }}
           visibleCellActions={3}
         />

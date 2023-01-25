@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { CellActions, CellActionsMode } from '@kbn/ui-actions-plugin/public';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
@@ -48,7 +48,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
             type: data.type,
           }}
           triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
-          mode={CellActionsMode.ALWAYS_VISIBLE}
+          mode={CellActionsMode.INLINE}
           visibleCellActions={3}
           metadata={{ scopeId }}
         />
