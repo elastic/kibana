@@ -15,7 +15,8 @@ import {
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
-  rewriteActions,
+  rewriteActionsReq,
+  rewriteActionsRes,
   actionsSchemaUpdate,
   rewriteRuleLastRun,
 } from './lib';
@@ -44,12 +45,13 @@ const bodySchema = schema.object({
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, ...rest } = result.data;
+  const { notify_when: notifyWhen, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
+      actions: rewriteActionsReq(actions),
     },
   };
 };
@@ -96,14 +98,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-          frequency,
-          uuid,
-        })),
+        actions: rewriteActionsRes(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
@@ -134,7 +129,6 @@ export const updateRuleRoute = (
                 id,
                 data: {
                   ...rule,
-                  actions: rewriteActions(rule.actions),
                   notify_when: rule.notify_when as RuleNotifyWhenType,
                 },
               })

@@ -38,7 +38,7 @@ describe('cloneRule', () => {
           message: 'alert ',
         },
         frequency: {
-          notifyWhen: 'onActionGroupChange',
+          notify_when: 'onActionGroupChange',
           throttle: null,
           summary: false,
         },
