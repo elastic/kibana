@@ -82,7 +82,7 @@ export const GuideCards = ({
         };
         const isHighlighted = activeFilter === 'all' || activeFilter === card.solution;
         const isComplete = guideState && guideState.status === 'complete';
-        const progress = getProgressLabel(guideState);
+        const progress = isComplete ? undefined : getProgressLabel(guideState);
         return (
           <EuiFlexItem key={index} grow={false}>
             <EuiCard
