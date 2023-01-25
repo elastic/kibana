@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: '/my-index-000001/_doc',
         method: 'POST',
         body: {
-          '@timestamp': Date.now(),
+          '@timestamp': new Date().toISOString(),
           a: 'GET /search HTTP/1.1 200 1070000',
         },
       });
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: '/my-index-000002/_doc',
         method: 'POST',
         body: {
-          '@timestamp': Date.now(),
+          '@timestamp': new Date().toISOString(),
           b: 'GET /search HTTP/1.1 200 1070000',
         },
       });
