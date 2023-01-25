@@ -171,7 +171,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should load 5 metrics trend tiles', async () => {
-          const hosts = await pageObjects.infraHostsView.getMetricsTrendTilesCount();
+          const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();
           expect(hosts.length).to.equal(5);
         });
 
