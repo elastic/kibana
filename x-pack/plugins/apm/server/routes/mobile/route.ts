@@ -120,15 +120,8 @@ const mobileLocationStatsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const {
-      kuery,
-      environment,
-      start,
-      end,
-      locationField,
-      offset,
-      transactionType,
-    } = params.query;
+    const { kuery, environment, start, end, locationField, offset } =
+      params.query;
 
     const locationStats = await getMobileLocationStatsPeriods({
       kuery,
@@ -139,7 +132,6 @@ const mobileLocationStatsRoute = createApmServerRoute({
       apmEventClient,
       locationField,
       offset,
-      transactionType,
     });
 
     return locationStats;
