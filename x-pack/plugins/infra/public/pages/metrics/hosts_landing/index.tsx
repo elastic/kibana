@@ -22,8 +22,8 @@ export const HostsLandingPage = () => {
     kibana.services.uiSettings?.get(enableInfrastructureHostsView)
   );
 
-  const ROLE = i18n.translate('xpack.infra.hostsViewPage.landing.role', {
-    defaultMessage: 'role',
+  const LEARN_MORE = i18n.translate('xpack.infra.hostsViewPage.landing.learnMore', {
+    defaultMessage: 'Learn more',
   });
 
   if (isHostViewEnabled) {
@@ -68,7 +68,7 @@ export const HostsLandingPage = () => {
           <p>
             <FormattedMessage
               id="xpack.infra.hostsViewPage.landing.calloutRoleClarificationWithDocsLink"
-              defaultMessage="They will need a {docsLink} with Kibana > Management > Advanced Settings > All permissions."
+              defaultMessage="They will need a role with access to Advanced settings in Kibana. {docsLink}"
               values={{
                 docsLink: (
                   <EuiLink
@@ -76,7 +76,7 @@ export const HostsLandingPage = () => {
                     data-test-subj="hostsView-role-docs-link"
                     href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges"
                   >
-                    {ROLE}
+                    {LEARN_MORE}
                   </EuiLink>
                 ),
               }}
