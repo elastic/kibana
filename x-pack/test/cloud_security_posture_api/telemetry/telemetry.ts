@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
 import { data } from './data';
+import type { FtrProviderContext } from '../ftr_provider_context';
+
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 const mappingComponentTemplate = 'logs-cloud_security_posture.findings@package';
 
@@ -98,13 +99,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true });
-
-      //   await index.remove();
     });
 
     it('includes only KSPM findings', async () => {
       await index.add(data.kspmFindings);
-      //   await sleep(3000);
+
       retry.try(async () => {
         const {
           body: [{ stats: apiResponse }],
@@ -162,7 +161,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('includes only CSPM findings', async () => {
       await index.add(data.cspmFindings);
 
-      //   await sleep(3000);
       retry.try(async () => {
         const {
           body: [{ stats: apiResponse }],
@@ -293,7 +291,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('includes only old version KSPM findings (no posture_type field)', async () => {
       await index.add(data.kspmFindingsNoPostureType);
 
-      //   await sleep(3000);
       retry.try(async () => {
         const {
           body: [{ stats: apiResponse }],
@@ -349,11 +346,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('includes CSPM findings and old version of KSPM findings (no posture_type field)', async () => {
+    it('includes only old version KSPM findings (no posture_type field) and CSPM', async () => {
       await index.add(data.kspmFindingsNoPostureType);
       await index.add(data.cspmFindings);
 
-      //   await sleep(3000);
       retry.try(async () => {
         const {
           body: [{ stats: apiResponse }],

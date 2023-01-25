@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
-// import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -16,12 +14,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xpackFunctionalConfig.getAll(),
-    // pageObjects,
-    // testFiles: [resolve(__dirname, './pages')],
-    testFiles: [resolve(__dirname, './telemetry/telemetry.ts')],
-    // testFiles: [require.resolve('./telemetry/telemetry.ts')],
+    testFiles: [require.resolve('./telemetry/telemetry.ts')],
     junit: {
-      reportName: 'X-Pack Cloud Security Posture Functional Tests',
+      reportName: 'X-Pack Cloud Security Posture API Tests',
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
