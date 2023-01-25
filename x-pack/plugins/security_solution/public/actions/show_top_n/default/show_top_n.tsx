@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
@@ -69,10 +69,12 @@ export const createShowTopNAction = ({
       field.value != null &&
       !UNSUPPORTED_FIELD_TYPES.includes(field.type),
     execute: async (context) => {
+      const node = context.extraContentNodeRef?.current;
+
+      if (!node) return;
+
       const onClose = () => {
-        if (context.extraContentNodeRef.current !== null) {
-          unmountComponentAtNode(context.extraContentNodeRef.current);
-        }
+        unmountComponentAtNode(node);
       };
 
       const element = (
@@ -92,7 +94,7 @@ export const createShowTopNAction = ({
         </KibanaContextProvider>
       );
 
-      ReactDOM.render(element, context.extraContentNodeRef.current);
+      ReactDOM.render(element, node);
     },
   });
 };

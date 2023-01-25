@@ -42,7 +42,7 @@ describe('createRule', () => {
           },
           connector_type_id: '.server-log',
           frequency: {
-            notifyWhen: 'onActionGroupChange',
+            notify_when: 'onActionGroupChange',
             throttle: null,
             summary: false,
           },

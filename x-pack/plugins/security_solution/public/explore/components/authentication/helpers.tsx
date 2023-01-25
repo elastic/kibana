@@ -11,7 +11,7 @@ import React from 'react';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type { Columns, ItemsPerRow } from '../paginated_table';
-import { getRowItemDraggables } from '../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../common/components/tables/helpers';
 
 import * as i18n from './translations';
 import {
@@ -99,11 +99,10 @@ const LAST_SUCCESSFUL_SOURCE_COLUMN: Columns<AuthenticationsEdges, Authenticatio
   truncateText: false,
   mobileOptions: { show: true },
   render: ({ node }) =>
-    getRowItemDraggables({
-      rowItems: node.lastSuccess?.source?.ip || null,
-      isAggregatable: true,
+    getRowItemsWithActions({
+      values: node.lastSuccess?.source?.ip || null,
+      fieldName: 'source.ip',
       fieldType: 'ip',
-      attrName: 'source.ip',
       idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
       render: (item) => <NetworkDetailsLink ip={item} />,
     }),
@@ -113,11 +112,10 @@ const LAST_SUCCESSFUL_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenti
   truncateText: false,
   mobileOptions: { show: true },
   render: ({ node }) =>
-    getRowItemDraggables({
-      rowItems: node.lastSuccess?.host?.name ?? null,
-      isAggregatable: true,
+    getRowItemsWithActions({
+      values: node.lastSuccess?.host?.name ?? null,
+      fieldName: 'host.name',
       fieldType: 'keyword',
-      attrName: 'host.name',
       idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
     }),
@@ -138,11 +136,10 @@ const LAST_FAILED_SOURCE_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEd
   truncateText: false,
   mobileOptions: { show: true },
   render: ({ node }) =>
-    getRowItemDraggables({
-      rowItems: node.lastFailure?.source?.ip || null,
-      isAggregatable: true,
+    getRowItemsWithActions({
+      values: node.lastFailure?.source?.ip || null,
+      fieldName: 'source.ip',
       fieldType: 'ip',
-      attrName: 'source.ip',
       idPrefix: `authentications-table-${node._id}-lastFailureSource`,
       render: (item) => <NetworkDetailsLink ip={item} />,
     }),
@@ -152,13 +149,12 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
   truncateText: false,
   mobileOptions: { show: true },
   render: ({ node }) =>
-    getRowItemDraggables({
-      rowItems: node.lastFailure?.host?.name || null,
-      attrName: 'host.name',
+    getRowItemsWithActions({
+      values: node.lastFailure?.host?.name || null,
+      fieldName: 'host.name',
+      fieldType: 'keyword',
       idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
-      isAggregatable: true,
-      fieldType: 'ip',
     }),
 };
 
@@ -167,12 +163,11 @@ const USER_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   truncateText: false,
   mobileOptions: { show: true },
   render: ({ node }) =>
-    getRowItemDraggables({
-      rowItems: node.stackedValue,
-      attrName: 'user.name',
-      isAggregatable: true,
-      fieldType: 'keyword',
+    getRowItemsWithActions({
+      values: node.stackedValue,
+      fieldName: 'user.name',
       idPrefix: `authentications-table-${node._id}-userName`,
+      fieldType: 'keyword',
       render: (item) => <UserDetailsLink userName={item} />,
     }),
 };
@@ -182,12 +177,11 @@ const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   truncateText: false,
   mobileOptions: { show: true },
   render: ({ node }) =>
-    getRowItemDraggables({
-      rowItems: node.stackedValue,
-      attrName: 'host.name',
-      isAggregatable: true,
-      fieldType: 'keyword',
+    getRowItemsWithActions({
+      values: node.stackedValue,
+      fieldName: 'host.name',
       idPrefix: `authentications-table-${node._id}-hostName`,
+      fieldType: 'keyword',
       render: (item) => <HostDetailsLink hostName={item} />,
     }),
 };
