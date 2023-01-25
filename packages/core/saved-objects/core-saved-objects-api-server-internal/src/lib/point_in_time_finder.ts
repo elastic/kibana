@@ -75,7 +75,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     await this.open();
 
     let lastResultsCount: number;
-    let lastHitSortValue: estypes.Id[] | undefined;
+    let lastHitSortValue: estypes.SortResults | undefined;
     do {
       const results = await this.findNext({
         findOptions: this.#findOptions,
@@ -142,7 +142,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
   }: {
     findOptions: SavedObjectsFindOptions;
     id?: string;
-    searchAfter?: estypes.Id[];
+    searchAfter?: estypes.SortResults;
   }) {
     try {
       return await this.#client.find<T, A>(
@@ -167,7 +167,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     }
   }
 
-  private getLastHitSortValue(res: SavedObjectsFindResponse): estypes.Id[] | undefined {
+  private getLastHitSortValue(res: SavedObjectsFindResponse): estypes.SortResults | undefined {
     if (res.saved_objects.length < 1) {
       return undefined;
     }
