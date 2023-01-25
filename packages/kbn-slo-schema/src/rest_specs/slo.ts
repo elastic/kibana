@@ -75,6 +75,7 @@ const sloResponseSchema = t.type({
   objective: objectiveSchema,
   revision: t.number,
   settings: settingsSchema,
+  enabled: t.boolean,
   createdAt: dateType,
   updatedAt: dateType,
 });
@@ -101,6 +102,10 @@ const updateSLOParamsSchema = t.type({
   }),
 });
 
+const manageSLOParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+});
+
 const updateSLOResponseSchema = sloResponseSchema;
 
 const findSLOResponseSchema = t.type({
@@ -121,6 +126,8 @@ type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Par
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
+
+type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
 
 type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
@@ -144,6 +151,7 @@ export {
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
+  manageSLOParamsSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
@@ -160,6 +168,7 @@ export type {
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
   HistoricalSummaryResponse,
+  ManageSLOParams,
   SLOResponse,
   SLOWithSummaryResponse,
   UpdateSLOInput,
