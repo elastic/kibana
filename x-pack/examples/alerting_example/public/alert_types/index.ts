@@ -14,7 +14,7 @@ export function registerNavigation(alerting: AlertingSetup) {
   // register default navigation
   alerting.registerDefaultNavigation(
     ALERTING_EXAMPLE_APP_ID,
-    (rule: SanitizedRule) => `/app/AlertingExample/rule/${rule.id}`
+    (rule: SanitizedRule) => `/app/${ALERTING_EXAMPLE_APP_ID}/rule/${rule.id}`
   );
 
   registerPeopleInSpaceNavigation(alerting);

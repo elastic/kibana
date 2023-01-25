@@ -82,6 +82,6 @@ export const alertType: RuleType<
   },
   producer: ALERTING_EXAMPLE_APP_ID,
   getViewInAppUrl({ rule }) {
-    return `/app/AlertingExample/astros/${rule.id}`;
+    return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
   },
 };
