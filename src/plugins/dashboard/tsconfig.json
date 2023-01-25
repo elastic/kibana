@@ -51,7 +51,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/task-manager-plugin",
     "@kbn/core-execution-context-common",
-    "@kbn/core-custom-branding-browser-internal",
+    "@kbn/core-custom-branding-browser",
+    "@kbn/core-custom-branding-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
