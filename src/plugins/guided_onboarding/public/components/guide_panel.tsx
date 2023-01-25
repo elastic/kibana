@@ -29,7 +29,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import { ApplicationStart, NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
@@ -46,6 +46,7 @@ interface GuidePanelProps {
   api: GuidedOnboardingApi;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 const getProgress = (state?: GuideState): number => {
@@ -95,7 +96,7 @@ const errorSection = (
   />
 );
 
-export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
+export const GuidePanel = ({ api, application, notifications, uiSettings }: GuidePanelProps) => {
   const { euiTheme } = useEuiTheme();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);
@@ -103,7 +104,8 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const styles = getGuidePanelStyles(euiTheme);
+  const isDarkTheme = uiSettings.get('theme:darkMode');
+  const styles = getGuidePanelStyles({ euiTheme, isDarkTheme });
 
   const toggleGuide = () => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
