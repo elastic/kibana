@@ -19,7 +19,6 @@
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-analytics-no-data-mocks",
-    "@kbn/core-custom-branding-browser-internal",
   ],
   "exclude": [
     "target/**/*",
