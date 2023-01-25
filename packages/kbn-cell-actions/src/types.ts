@@ -70,6 +70,10 @@ export interface CellActionsProps {
    */
   visibleCellActions?: number;
   /**
+   * List of Actions ids that shouldn't be displayed inside cell actions.
+   */
+  disabledActions?: string[];
+  /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
    * This data is sent directly to actions.

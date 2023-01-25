@@ -8,19 +8,20 @@
 
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { makeAction, makeActionContext } from '../mocks/helpers';
+import { makeAction } from '../mocks/helpers';
 import { InlineActions } from './inline_actions';
-import { CellActionsProvider } from '../context/cell_actions_context';
+import { CellActionExecutionContext } from '../types';
+import { CellActionsProvider } from '../context';
 
 describe('InlineActions', () => {
-  const actionContext = makeActionContext();
-
+  const actionContext = { trigger: { id: 'triggerId' } } as CellActionExecutionContext;
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);
     const getActions = () => getActionsPromise;
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <InlineActions
+          disabledActions={[]}
           visibleCellActions={5}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -47,6 +48,7 @@ describe('InlineActions', () => {
     const { queryAllByRole } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <InlineActions
+          disabledActions={[]}
           visibleCellActions={5}
           actionContext={actionContext}
           showActionTooltips={false}
@@ -59,5 +61,32 @@ describe('InlineActions', () => {
     });
 
     expect(queryAllByRole('button').length).toBe(5);
+  });
+
+  it("does not render actions defined on 'disabledActions' prop", async () => {
+    const getActionsPromise = Promise.resolve([
+      makeAction('action-1'),
+      makeAction('action-2'),
+      makeAction('action-3'),
+    ]);
+    const getActions = () => getActionsPromise;
+    const { queryByLabelText } = render(
+      <CellActionsProvider getTriggerCompatibleActions={getActions}>
+        <InlineActions
+          disabledActions={['action-2']}
+          visibleCellActions={5}
+          actionContext={actionContext}
+          showActionTooltips={false}
+        />
+      </CellActionsProvider>
+    );
+
+    await act(async () => {
+      await getActionsPromise;
+    });
+
+    expect(queryByLabelText('action-1')).toBeInTheDocument();
+    expect(queryByLabelText('action-2')).not.toBeInTheDocument();
+    expect(queryByLabelText('action-3')).toBeInTheDocument();
   });
 });

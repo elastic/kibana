@@ -18,6 +18,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   mode,
   showActionTooltips = true,
   visibleCellActions = 3,
+  disabledActions = [],
   metadata,
 }) => {
   const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
@@ -43,6 +44,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
+          disabledActions={disabledActions}
         >
           {children}
         </HoverActionsPopover>
@@ -59,6 +61,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
         actionContext={actionContext}
         showActionTooltips={showActionTooltips}
         visibleCellActions={visibleCellActions}
+        disabledActions={disabledActions}
       />
       <div ref={extraContentNodeRef} />
     </div>

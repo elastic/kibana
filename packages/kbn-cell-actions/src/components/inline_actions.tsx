@@ -18,18 +18,22 @@ interface InlineActionsProps {
   actionContext: CellActionExecutionContext;
   showActionTooltips: boolean;
   visibleCellActions: number;
+  disabledActions: string[];
 }
 
 export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
   showActionTooltips,
   visibleCellActions,
+  disabledActions,
 }) => {
   const { value: allActions } = useLoadActions(actionContext);
-  const { extraActions, visibleActions } = usePartitionActions(
-    allActions ?? [],
-    visibleCellActions
+  const filteredActions = useMemo(
+    () => (allActions ?? []).filter(({ id }) => !disabledActions?.includes(id)),
+    [allActions, disabledActions]
   );
+  const { extraActions, visibleActions } = usePartitionActions(filteredActions, visibleCellActions);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopOver = useCallback(() => setIsPopoverOpen(false), []);
