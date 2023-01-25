@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import { shallow } from 'enzyme';
 
 import '../../../mock/match_media';
-import { DraggableScoreComponent } from './draggable_score';
+import { ScoreComponent } from './score';
 import { mockAnomalies } from '../mock';
 
 describe('draggable_score', () => {
@@ -21,16 +21,12 @@ describe('draggable_score', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <DraggableScoreComponent id="some-id" index={0} score={anomalies.anomalies[0]} />
-    );
+    const wrapper = shallow(<ScoreComponent index={0} score={anomalies.anomalies[0]} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('renders correctly against snapshot when the index is not included', () => {
-    const wrapper = shallow(
-      <DraggableScoreComponent id="some-id" score={anomalies.anomalies[0]} />
-    );
+    const wrapper = shallow(<ScoreComponent score={anomalies.anomalies[0]} />);
     expect(wrapper).toMatchSnapshot();
   });
 });
