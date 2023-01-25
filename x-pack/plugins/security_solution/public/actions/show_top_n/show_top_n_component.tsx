@@ -30,7 +30,7 @@ export const TopNAction = ({
   const userCasesPermissions = useGetUserCasesPermissions();
   const CasesContext = casesService.ui.getCasesContext();
 
-  if (!context.nodeRef.current) return null;
+  if (!context.nodeRef?.current) return null;
 
   return (
     <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>

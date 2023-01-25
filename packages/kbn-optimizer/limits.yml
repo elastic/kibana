@@ -124,7 +124,7 @@ pageLoadAssetSize:
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
-  triggersActionsUi: 119000
+  triggersActionsUi: 120000
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedFieldList: 65500
@@ -147,6 +147,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 31800
+  visTypeXy: 46868
   visualizations: 90000
   watcher: 43598

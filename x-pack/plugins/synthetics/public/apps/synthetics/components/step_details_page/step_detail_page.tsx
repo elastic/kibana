@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
 import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
@@ -50,6 +51,7 @@ export const StepDetailPage = () => {
 
   return (
     <>
+      <ErrorCallOut step={activeStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
@@ -89,7 +91,7 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem grow={1}>
                 <ObjectWeightList />
               </EuiFlexItem>

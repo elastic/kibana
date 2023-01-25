@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { EcsEventOutcome } from '@kbn/ecs';
+import type { SavedObject } from '../..';
 
 /**
  * The PerformAuthorizationParams interface contains settings for checking
