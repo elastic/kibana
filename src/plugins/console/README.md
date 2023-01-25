@@ -261,13 +261,13 @@ A list of variables is defined in the  `parametrizedComponentFactories` function
 Use these variables with curly braces, for example `{indices}`, `{types}`, `{id}`, `{username}`, `{template}`, `{nodes}` etc.
 
 
-### Architecture changes
+### Architecture changes in 8.3 release (timeline: 07-04-2022 - 19-06-2022)
 One of the main changes in architecture is refactoring the retrieval of autocomplete suggestions. Console used to send a separate request to ES for each autocomplete entity (mappings, aliases, templates, data-streams etc) to retrieve the autocomplete suggestions via the original [hand-rolled ES proxy](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/routes/api/console/proxy/create_handler.ts). This had a few drawbacks:
 - The number of requests was dependent on the number of autocomplete entities, which was not scalable and could cause performance issues
 - It added unnecessary dependencies on the ES proxy
 - We risked fetching an enormous response payload for users who have a large number of mappings.
 
-To address these issues, we created a specific [route](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/routes/api/console/autocomplete_entities/index.ts) in the Kibana server to retrieve all autocomplete entities in one request and send it to the client. For more details, see [#130633](https://github.com/elastic/kibana/pull/130633).
+To address these issues, we created a specific [route](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/routes/api/console/autocomplete_entities/index.ts) in the Kibana server to retrieve all autocomplete entities in one request and send it to the client. The response for mappings capped to 10MB to avoid sending a huge payload. The client-side code was refactored to use the new response format. For more details, see [#130633](https://github.com/elastic/kibana/pull/130633).
 
 Another change is replacing jQuery with the core http client to communicate with the Kibana server. Console used a custom jQuery ajax [function](https://github.com/elastic/kibana/blob/8.0/src/plugins/console/public/lib/es/es.ts) to send requests to the Kibana server to have lower-level control over the requests, specifically controls like `crossDomain: true`. This is no longer needed since we are using the core http client. For more details, see [#127867](https://github.com/elastic/kibana/pull/127867).
 
