@@ -11,6 +11,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { CasesFindRequest, User } from '../../common/api';
@@ -54,6 +55,7 @@ export interface CasesClientArgs {
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
   readonly spaceId: string;
+  readonly savedObjectsSerializer: ISavedObjectsSerializer;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 

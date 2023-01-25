@@ -145,6 +145,7 @@ export class CasesClientFactory {
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      savedObjectsSerializer,
     });
   }
 
