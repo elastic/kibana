@@ -35,7 +35,7 @@ export const EnableHostViewPage = ({ actions }: Props) => {
         data-test-subj="hostsLandingPage"
         title={
           <h2>
-            {i18n.translate('xpack.infra.hostsLandingPage.introTitle', {
+            {i18n.translate('xpack.infra.hostsViewPage.landing.introTitle', {
               defaultMessage: 'Introducing: Host Analysis',
             })}
           </h2>
@@ -49,7 +49,7 @@ export const EnableHostViewPage = ({ actions }: Props) => {
             <ExperimentalBadge />
             <EuiSpacer />
             <p>
-              {i18n.translate('xpack.infra.hostsLandingPage.introMessage', {
+              {i18n.translate('xpack.infra.hostsViewPage.landing.introMessage', {
                 defaultMessage: `Introducing our new 'Hosts' feature, now available in technical preview!
                 With this powerful tool, you can easily view and analyse your hosts and identify any
                 issues so you address them quickly. Get a detailed view of metrics for your hosts, see
@@ -58,7 +58,7 @@ export const EnableHostViewPage = ({ actions }: Props) => {
               })}
             </p>
             <p>
-              {i18n.translate('xpack.infra.hostsLandingPage.tryTheFeatureMessage', {
+              {i18n.translate('xpack.infra.hostsViewPage.landing.tryTheFeatureMessage', {
                 defaultMessage: `This is an early version of the feature and we would love your feedback as we continue
                 to develop and improve it. To access the feature, simply enable below. Don't miss
                 out on this powerful new addition to our platform - try it out today!`,

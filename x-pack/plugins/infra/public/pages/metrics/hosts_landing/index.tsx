@@ -20,7 +20,7 @@ export const HostsLandingPage = () => {
   const canEditAdvancedSettings = kibana.services.application?.capabilities.advancedSettings.save;
   const [isHostViewEnabled, setIsHostViewEnabled] = useState<boolean | undefined>(undefined);
 
-  const ROLE = i18n.translate('xpack.infra.hostsLandingPage.role', {
+  const ROLE = i18n.translate('xpack.infra.hostsViewPage.landing.role', {
     defaultMessage: 'role',
   });
 
@@ -45,7 +45,7 @@ export const HostsLandingPage = () => {
               setIsHostViewEnabled(true);
             }}
           >
-            {i18n.translate('xpack.infra.hostsLandingPage.enableHostsView', {
+            {i18n.translate('xpack.infra.hostsViewPage.landing.enableHostsView', {
               defaultMessage: 'Enable hosts view',
             })}
           </EuiButton>
@@ -60,7 +60,7 @@ export const HostsLandingPage = () => {
         <EuiCallOut data-test-subj="hostView-no-enable-access" size="s" color="warning">
           <p>
             {i18n.translate(
-              'xpack.infra.hostsLandingPage.calloutReachOutToYourKibanaAdministrator',
+              'xpack.infra.hostsViewPage.landing.calloutReachOutToYourKibanaAdministrator',
               {
                 defaultMessage: `Your user role doesn’t have sufficient privileges to enable this feature - please 
                 reach out to your Kibana Administrator and ask them to visit this page to enable this feature.`,
@@ -69,7 +69,7 @@ export const HostsLandingPage = () => {
           </p>
           <p>
             <FormattedMessage
-              id="xpack.infra.hostsLandingPage.calloutRoleClarificationWithDocsLink"
+              id="xpack.infra.hostsViewPage.landing.calloutRoleClarificationWithDocsLink"
               defaultMessage="They will need a {docsLink} with Kibana > Management > Advanced Settings > All permissions."
               values={{
                 docsLink: (
