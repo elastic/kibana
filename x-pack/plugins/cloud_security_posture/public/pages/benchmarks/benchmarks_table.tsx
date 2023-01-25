@@ -97,7 +97,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
     render: (field: PackagePolicy) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
@@ -111,7 +110,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.MONITORING,
     render: (field: PackagePolicy) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
