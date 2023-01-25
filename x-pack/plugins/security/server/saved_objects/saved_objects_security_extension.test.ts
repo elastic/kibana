@@ -4231,6 +4231,41 @@ describe(`#authorizeOpenPointInTime`, () => {
   });
 });
 
+describe(`#auditClosePointInTime`, () => {
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  test(`adds audit event`, async () => {
+    const { securityExtension, auditLogger } = setup();
+    securityExtension.auditClosePointInTime();
+
+    expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as close PIT calls the addAudit method directly
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      error: undefined,
+      event: {
+        action: AuditAction.CLOSE_POINT_IN_TIME,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['deletion'],
+      },
+      kibana: {
+        add_to_spaces: undefined,
+        delete_from_spaces: undefined,
+        saved_object: undefined,
+      },
+      message: `User is closing point-in-time saved objects`,
+    });
+  });
+});
+
 describe('#authorizeAndRedactMultiNamespaceReferences', () => {
   const namespace = 'x';
 

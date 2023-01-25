@@ -686,31 +686,6 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace,
         objects: [obj1, obj2],
       });
-      // const expectedActions = new Set([SecurityAction.CHECK_CONFLICTS]);
-      // const expectedSpaces = new Set([namespace]);
-      // const expectedTypes = new Set([obj1.type, obj2.type]);
-      // const expectedEnforceMap = new Map<string, Set<string>>();
-      // expectedEnforceMap.set(obj1.type, new Set([namespace]));
-      // expectedEnforceMap.set(obj2.type, new Set([namespace]));
-
-      // const {
-      //   actions: actualActions,
-      //   spaces: actualSpaces,
-      //   types: actualTypes,
-      //   enforceMap: actualEnforceMap,
-      //   options: actualOptions,
-      //   auditOptions: actualAuditOptions,
-      // } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      // expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
-      // expect(actualOptions).toBeUndefined();
-      // expect(actualAuditOptions).toEqual({
-      //   bypassOnSuccess: true,
-      //   bypassOnFailure: true,
-      // });
     });
   });
 
@@ -787,14 +762,10 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    test(`adds audit event`, async () => {
+    test(`calls auditClosePointInTime`, async () => {
       await repository.closePointInTime(id);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.CLOSE_POINT_IN_TIME,
-        outcome: 'unknown',
-      });
+      expect(mockSecurityExt.auditClosePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.auditClosePointInTime).toHaveBeenCalledWith();
     });
   });
 

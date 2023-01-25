@@ -2579,10 +2579,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const { disableExtensions } = internalOptions;
 
     if (!disableExtensions && this._securityExtension) {
-      this._securityExtension.addAuditEvent({
-        action: AuditAction.CLOSE_POINT_IN_TIME,
-        outcome: 'unknown',
-      });
+      this._securityExtension.auditClosePointInTime();
     }
 
     return await this.client.closePointInTime({

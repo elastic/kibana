@@ -504,6 +504,8 @@ export interface ISavedObjectsSecurityExtension {
     params: AuthorizeOpenPointInTimeParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
+  auditClosePointInTime: () => void;
+
   /**
    * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
    * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
