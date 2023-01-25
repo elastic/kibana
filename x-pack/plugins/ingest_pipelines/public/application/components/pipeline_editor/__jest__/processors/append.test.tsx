@@ -105,6 +105,7 @@ describe('Processor: Append', () => {
       find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
       component.update();
     });
+    form.toggleEuiSwitch('allowDuplicatesSwitch.input');
 
     form.toggleEuiSwitch('ignoreFailureSwitch.input');
     // Save the field with new changes
@@ -115,6 +116,35 @@ describe('Processor: Append', () => {
       field: 'field_1',
       ignore_failure: true,
       value: ['Some_Value'],
+    });
+  });
+
+  test('should allow to set media_type when value is a template snippet', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      exists,
+    } = testBed;
+
+    // Add "field" value (required)
+    form.setInputValue('fieldNameField.input', 'sample_field');
+
+    // Shouldn't be able to set media_type if value is not a template string
+    form.setInputValue('valueFieldInput', 'sample_value');
+    expect(exists('mediaTypeSelectorField')).toBe(false);
+
+    // Set value to a template snippet and media_type to a non-default value
+    form.setInputValue('valueFieldInput', '{{{sample_value}}}');
+    form.setSelectValue('mediaTypeSelectorField', 'text/plain');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    expect(processors[0][APPEND_TYPE]).toEqual({
+      field: 'sample_field',
+      value: '{{{sample_value}}}',
+      media_type: 'text/plain',
     });
   });
 });
