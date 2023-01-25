@@ -878,8 +878,6 @@ describe('The metric threshold alert type', () => {
       expect(reasons[1]).toContain('Alert when >= 3');
       expect(reasons[0]).toContain('in the last 1 min');
       expect(reasons[1]).toContain('in the last 1 min');
-      expect(reasons[0]).toContain('for all hosts');
-      expect(reasons[1]).toContain('for all hosts');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -1659,9 +1657,7 @@ describe('The metric threshold alert type', () => {
 
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toBe(
-        'test.metric.1 is 2.5 in the last 1 min for all hosts. Alert when > 2.49.'
-      );
+      expect(action.reason).toBe('test.metric.1 is 2.5 in the last 1 min. Alert when > 2.49.');
     });
 
     test('reports expected warning values to the action context for percentage metric', async () => {
@@ -1675,9 +1671,7 @@ describe('The metric threshold alert type', () => {
 
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toBe(
-        'system.cpu.user.pct is 82% in the last 1 min for all hosts. Alert when > 81%.'
-      );
+      expect(action.reason).toBe('system.cpu.user.pct is 82% in the last 1 min. Alert when > 81%.');
     });
   });
 });
