@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
+import { keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import type { DataViewBase } from '@kbn/es-query';
-import { Subscription } from 'rxjs';
 
-import type {
-  BrowserField,
-  BrowserFields,
-  IndexField,
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '@kbn/timelines-plugin/common';
+import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useQuery } from '@tanstack/react-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { getDataViewStateFromIndexFields } from './use_data_view';
 
 export type { BrowserField, BrowserFields };
 
@@ -102,86 +94,40 @@ export const useFetchIndex = (
   strategy: string = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const previousIndexesName = useRef<string[]>([]);
-  const [isLoading, setLoading] = useState(false);
-
-  const [state, setState] = useState<FetchIndexReturn>({
-    browserFields: DEFAULT_BROWSER_FIELDS,
-    indexes: indexNames,
-    indexExists: true,
-    indexPatterns: DEFAULT_INDEX_PATTERNS,
-  });
   const { addError, addWarning } = useAppToasts();
-
-  const indexFieldsSearch = useCallback(
-    (iNames) => {
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-        searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
-            {
-              abortSignal: abortCtrl.current.signal,
-              strategy,
-            }
-          )
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                Promise.resolve().then(() => {
-                  ReactDOM.unstable_batchedUpdates(() => {
-                    const stringifyIndices = response.indicesExist.sort().join();
-
-                    previousIndexesName.current = response.indicesExist;
-                    const { browserFields } = getDataViewStateFromIndexFields(
-                      stringifyIndices,
-                      response.indexFields
-                    );
-                    setLoading(false);
-                    setState({
-                      browserFields,
-                      indexes: response.indicesExist,
-                      indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
-                    });
-
-                    searchSubscription$.current.unsubscribe();
-                  });
-                });
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_BEAT_FIELDS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
+  const query = useQuery<DataView>(
+    ['createInMemoryDataView'],
+    async (): Promise<DataView> => {
+      return data.dataViews.create({ title: indexNames.join(','), allowNoIndex: true });
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState, strategy]
+    {
+      select: (res): FetchIndexReturn => {
+        if (isCompleteResponse(res)) {
+          return {
+            browserFields: res.fields,
+            indexes: indexNames,
+            indexExists: true,
+            indexPatterns: res,
+          };
+        } else if (isErrorResponse(res)) {
+          addWarning(i18n.ERROR_BEAT_FIELDS);
+        }
+      },
+      onError: (err) => {
+        addError(err, {
+          title: i18n.FAIL_BEAT_FIELDS,
+        });
+      },
+    }
   );
 
-  useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
-      indexFieldsSearch(indexNames);
-    }
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
-
-  return [isLoading, state];
+  return [
+    query.isLoading,
+    query.data ?? {
+      browserFields: DEFAULT_BROWSER_FIELDS,
+      indexes: indexNames,
+      indexExists: true,
+      indexPatterns: DEFAULT_INDEX_PATTERNS,
+    },
+  ];
 };
