@@ -26,6 +26,19 @@ export function registerEnginesRoutes({
     enterpriseSearchRequestHandler.createRequest({ path: '/api/engines' })
   );
 
+  router.post(
+    {
+      path: '/internal/enterprise_search/engines',
+      validate: {
+        body: schema.object({
+          indices: schema.arrayOf(schema.string()),
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines' })
+  );
+
   router.get(
     {
       path: '/internal/enterprise_search/engines/{engine_name}',
