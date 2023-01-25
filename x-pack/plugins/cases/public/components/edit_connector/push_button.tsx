@@ -46,6 +46,7 @@ const PushButtonComponent: React.FC<PushButtonProps> = ({
       position="top"
       title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connectorName)}
       content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
+      data-test-subj="push-button-tooltip"
     >
       {button}
     </EuiToolTip>

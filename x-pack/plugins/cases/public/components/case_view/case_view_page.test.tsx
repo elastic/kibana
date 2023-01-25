@@ -400,13 +400,6 @@ describe('CaseViewPage', () => {
 
   it('should show the correct connector name on the push button', async () => {
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
-      data: {
-        ...defaultUseGetCaseUserActions.data,
-        hasDataToPush: true,
-      },
-    }));
 
     const result = appMockRenderer.render(
       <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
