@@ -142,7 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(parsedUrl.host).to.be('www.elastic.co');
         expect(parsedUrl.pathname).to.be('/guide/en/kibana/current/kibana-privileges.html');
         expect(landingPageDisabled).to.contain(
-          'Your user learnMore doesn’t have sufficient privileges to enable this feature'
+          'Your user role doesn’t have sufficient privileges to enable this feature'
         );
       });
     });
