@@ -47,8 +47,7 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-
- const { closeEngineCreate, fetchEngines, onPaginate, openDeleteEngineModal, setSearchQuery } =
+  const { closeEngineCreate, fetchEngines, onPaginate, openDeleteEngineModal, setSearchQuery } =
     useActions(EnginesListLogic);
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
   const { isLoading, meta, results, createEngineFlyoutOpen, searchQuery } =
@@ -67,7 +66,6 @@ export const EnginesList: React.FC = () => {
       <EngineListIndicesFlyout />
       {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
       <EnterpriseSearchEnginesPageTemplate
-
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
             defaultMessage: 'Engines',
