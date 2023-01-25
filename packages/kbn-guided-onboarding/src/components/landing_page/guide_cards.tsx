@@ -118,7 +118,7 @@ export const GuideCards = ({
                           {i18n.translate(
                             'guidedOnboardingPackage.gettingStarted.cards.completeLabel',
                             {
-                              defaultMessage: 'Guide Complete',
+                              defaultMessage: 'Guide complete',
                             }
                           )}
                         </small>
