@@ -15,6 +15,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   SERVICE_TARGET_TYPE,
+  METRICSET_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -22,10 +23,11 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
+import { Maybe } from '../../../typings/common';
 
 export interface HttpRequestsTimeseries {
-  currentPeriod: Coordinate[];
-  previousPeriod: Coordinate[];
+  currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
+  previousPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
 }
 interface Props {
   apmEventClient: APMEventClient;
@@ -60,6 +62,12 @@ async function getHttpRequestsTimeseries({
     minBucketSize: 60,
   });
 
+  const aggs = {
+    requests: {
+      filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
+    },
+  };
+
   const response = await apmEventClient.search('get_http_requests_chart', {
     apm: { events: [ProcessorEvent.metric] },
     body: {
@@ -69,6 +77,7 @@ async function getHttpRequestsTimeseries({
         bool: {
           filter: [
             { exists: { field: SERVICE_TARGET_TYPE } },
+            ...termQuery(METRICSET_NAME, 'service_destination'),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
@@ -85,27 +94,28 @@ async function getHttpRequestsTimeseries({
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
-          aggs: {
-            requests: {
-              filter: { term: { [SERVICE_TARGET_TYPE]: 'http' } },
-            },
-          },
+          aggs,
         },
+        ...aggs,
       },
     },
   });
 
-  return (
+  const timeseries =
     response?.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key,
-        y: bucket.doc_count ?? 0,
+        y: bucket.requests.doc_count,
       };
-    }) ?? []
-  );
+    }) ?? [];
+
+  return {
+    timeseries,
+    value: response.aggregations?.requests?.doc_count,
+  };
 }
 
-export async function getHttpRequestsChart({
+export async function getMobileHttpRequests({
   kuery,
   apmEventClient,
   serviceName,
@@ -136,7 +146,7 @@ export async function getHttpRequestsChart({
         end,
         offset,
       })
-    : [];
+    : { timeseries: [], value: null };
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,
@@ -145,9 +155,12 @@ export async function getHttpRequestsChart({
 
   return {
     currentPeriod,
-    previousPeriod: offsetPreviousPeriodCoordinates({
-      currentPeriodTimeseries: currentPeriod,
-      previousPeriodTimeseries: previousPeriod,
-    }),
+    previousPeriod: {
+      timeseries: offsetPreviousPeriodCoordinates({
+        currentPeriodTimeseries: currentPeriod.timeseries,
+        previousPeriodTimeseries: previousPeriod.timeseries,
+      }),
+      value: previousPeriod?.value,
+    },
   };
 }
