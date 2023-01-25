@@ -69,6 +69,7 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
     title: transferSize.label,
     description: (
       <ThresholdIndicator
+        loading={loading}
         current={transferSize.value}
         previous={transferSizePrev.value}
         currentFormatted={formatBytes(transferSize.value ?? 0)}
