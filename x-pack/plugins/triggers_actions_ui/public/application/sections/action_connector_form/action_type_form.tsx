@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState, useCallback } from 'react';
+import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,6 +31,7 @@ import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
+  parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
 import { betaBadgeProps } from './beta_badge_props';
 import {
@@ -65,6 +66,7 @@ export type ActionTypeFormProps = {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideNotifyWhen?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -102,6 +104,7 @@ export const ActionTypeForm = ({
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
   hideNotifyWhen = false,
+  minimumThrottleInterval,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -123,6 +126,10 @@ export const ActionTypeForm = ({
   const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
     actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
   );
+  const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
+    -1,
+    's',
+  ];
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -137,6 +144,25 @@ export const ActionTypeForm = ({
 
     return defaultParams;
   };
+
+  const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
+    try {
+      if (!actionThrottle) return [false, false];
+      const throttleUnitDuration = parseDuration(`1${actionThrottleUnit}`);
+      const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
+      const boundedThrottle =
+        throttleUnitDuration > minThrottleUnitDuration
+          ? actionThrottle
+          : Math.max(actionThrottle, minimumActionThrottle);
+      const boundedThrottleUnit =
+        parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
+          ? actionThrottleUnit
+          : minimumActionThrottleUnit;
+      return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
+    } catch (e) {
+      return [false, false];
+    }
+  }, [minimumActionThrottle, minimumActionThrottleUnit, actionThrottle, actionThrottleUnit]);
 
   useEffect(() => {
     (async () => {
@@ -177,13 +203,6 @@ export const ActionTypeForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
-
-  // useEffect(() => {
-  //   if (!actionItem.frequency) {
-  //     setActionFrequency(DEFAULT_FREQUENCY, index);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [actionItem.frequency]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -232,6 +251,8 @@ export const ActionTypeForm = ({
         },
         [setActionFrequencyProperty, index]
       )}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
     />
   );
 
@@ -254,7 +275,6 @@ export const ActionTypeForm = ({
     <>
       {showSelectActionGroup && (
         <>
-          <EuiSpacer size="xs" />
           <EuiSuperSelect
             prepend={
               <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
@@ -279,6 +299,7 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
+          {!hideNotifyWhen && <EuiSpacer size="xs" />}
         </>
       )}
       {!hideNotifyWhen && actionNotifyWhen}
