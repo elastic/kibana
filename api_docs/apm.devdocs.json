@@ -931,7 +931,7 @@
             "text": "APMRouteHandlerResources"
           },
           ", ",
-          "MobileStats",
+          "MobilePeriodStats",
           ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\": ",
