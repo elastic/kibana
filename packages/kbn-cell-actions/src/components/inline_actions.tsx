@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
@@ -43,7 +44,12 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   );
 
   return (
-    <span data-test-subj="inlineActions">
+    <EuiFlexGroup
+      alignItems="flexStart"
+      gutterSize="none"
+      data-test-subj="inlineActions"
+      className={`inlineActions ${isPopoverOpen ? 'inlineActions-popoverOpen' : ''}`}
+    >
       {visibleActions.map((action, index) => (
         <ActionItem
           key={`action-item-${index}`}
@@ -61,6 +67,6 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
           isOpen={isPopoverOpen}
         />
       ) : null}
-    </span>
+    </EuiFlexGroup>
   );
 };
