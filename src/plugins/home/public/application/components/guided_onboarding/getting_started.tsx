@@ -37,7 +37,7 @@ const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelect
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: `Select an option below and we'll help you get started`,
+  defaultMessage: `Select an option and we'll help you get started.`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
   defaultMessage: `I’d like to do something else (skip)`,
