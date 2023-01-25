@@ -147,6 +147,7 @@
     "@kbn/core-execution-context-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-custom-branding-browser",
+    "@kbn/core-custom-branding-server",
   ],
   "exclude": [
     "target/**/*",
