@@ -765,6 +765,7 @@
     "@kbn/ci-stats-core": "link:packages/kbn-ci-stats-core",
     "@kbn/ci-stats-performance-metrics": "link:packages/kbn-ci-stats-performance-metrics",
     "@kbn/ci-stats-reporter": "link:packages/kbn-ci-stats-reporter",
+    "@kbn/ci-stats-shipper-cli": "link:packages/kbn-ci-stats-shipper-cli",
     "@kbn/cli-dev-mode": "link:packages/kbn-cli-dev-mode",
     "@kbn/core-test-helpers-kbn-server": "link:packages/core/test-helpers/core-test-helpers-kbn-server",
     "@kbn/cypress-config": "link:packages/kbn-cypress-config",

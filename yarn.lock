@@ -2849,6 +2849,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ci-stats-shipper-cli@link:packages/kbn-ci-stats-shipper-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
@@ -3816,7 +3820,6 @@
 "@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
   version "0.0.0"
   uid ""
-
 
 "@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
   version "0.0.0"
