@@ -17,7 +17,7 @@ import {
   QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
 
-const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
+export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 const isCustomMetricExpressionParams = (
   subject: MetricExpressionParams
