@@ -392,45 +392,21 @@ paths:
                 - params
               properties:
                 params:
-                  type: object
-                  properties:
-                    documents:
-                      type: array
-                      description: The documents to index in JSON format. This property is required only for index connectors.
-                      items:
-                        type: object
-                        additionalProperties: true
-                    level:
-                      type: string
-                      description: The log level of the message. This property is applicable only to server log connectors.
-                      enum:
-                        - debug
-                        - error
-                        - fatal
-                        - info
-                        - trace
-                        - warn
-                    message:
-                      type: string
-                      description: The message to log. This property is required only for server log connectors.
-                    subAction:
-                      type: string
-                      description: The action to test.
-                      enum:
-                        - addEvent
-                        - createAlert
-                        - closeAlert
-                        - fieldsByIssueType
-                        - getChoices
-                        - getFields
-                        - getIncident
-                        - issue
-                        - issues
-                        - issueTypes
-                        - pushToService
-                    subActionParams:
-                      type: object
-                      additionalProperties: true
+                  oneOf:
+                    - $ref: '#/components/schemas/run_connector_params_documents'
+                    - $ref: '#/components/schemas/run_connector_params_level_message'
+                    - $ref: '#/components/schemas/run_connector_params_subactions'
+            examples:
+              runIndexConnectorRequest:
+                $ref: '#/components/examples/run_index_connector_request'
+              runJiraConnectorRequest:
+                $ref: '#/components/examples/run_jira_connector_request'
+              runServerLogConnectorRequest:
+                $ref: '#/components/examples/run_server_log_connector_request'
+              runServiceNowITOMConnectorRequest:
+                $ref: '#/components/examples/run_servicenow_itom_connector_request'
+              runSwimlaneConnectorRequest:
+                $ref: '#/components/examples/run_swimlane_connector_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2191,6 +2167,64 @@ components:
         - cases
         - uptime
         - siem
+    run_connector_params_documents:
+      title: Run index connector parameters
+      description: Test an action that indexes a document into Elasticsearch.
+      type: object
+      required:
+        - documents
+      properties:
+        documents:
+          type: array
+          description: The documents to index in JSON format.
+          items:
+            type: object
+            additionalProperties: true
+    run_connector_params_level_message:
+      title: Run server log connector parameters
+      description: Test an action that writes an entry to the Kibana server log.
+      type: object
+      required:
+        - message
+      properties:
+        level:
+          type: string
+          description: The log level of the message.
+          enum:
+            - debug
+            - error
+            - fatal
+            - info
+            - trace
+            - warn
+          default: info
+        message:
+          type: string
+          description: The message to log.
+    run_connector_params_subactions:
+      title: Run connector subactions
+      description: Test an actions that require subactions and subaction parameters.
+      type: object
+      required:
+        - subAction
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - addEvent
+            - createAlert
+            - closeAlert
+            - fieldsByIssueType
+            - getChoices
+            - getFields
+            - getIncident
+            - issue
+            - issues
+            - issueTypes
+            - pushToService
+        subActionParams:
+          type: object
   examples:
     create_index_connector_request:
       summary: Create an index connector.
@@ -2280,6 +2314,47 @@ components:
           supported_feature_ids:
             - alerting
             - uptime
+    run_index_connector_request:
+      summary: Run an index connector.
+      value:
+        params:
+          documents:
+            - id: my_doc_id
+              name: my_doc_name
+              message: hello, world
+    run_jira_connector_request:
+      summary: Run a Jira connector to retrieve the list of issue types.
+      value:
+        params:
+          subAction: issueTypes
+    run_server_log_connector_request:
+      summary: Run a server log connector.
+      value:
+        params:
+          level: warn
+          message: Test warning message.
+    run_servicenow_itom_connector_request:
+      summary: Run a ServiceNow ITOM connector to retrieve the list of choices.
+      value:
+        params:
+          subAction: getChoices
+          subActionParams:
+            fields:
+              - severity
+              - urgency
+    run_swimlane_connector_request:
+      summary: Run a Swimlane connector to create an incident.
+      value:
+        params:
+          subAction: pushToService
+          subActionParams:
+            comments:
+              - commentId: 1
+                comment: A comment about the incident.
+            incident:
+              caseId: '1000'
+              caseName: Case name
+              description: Description of the incident.
     run_index_connector_response:
       summary: Response from running an index connector.
       value:

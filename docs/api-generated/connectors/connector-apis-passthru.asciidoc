@@ -531,6 +531,9 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getConnector_404_response"><code>getConnector_404_response</code> - </a></li>
     <li><a href="#runConnector_200_response"><code>runConnector_200_response</code> - </a></li>
     <li><a href="#runConnector_200_response_data"><code>runConnector_200_response_data</code> - </a></li>
+    <li><a href="#run_connector_params_documents"><code>run_connector_params_documents</code> - Run index connector parameters</a></li>
+    <li><a href="#run_connector_params_level_message"><code>run_connector_params_level_message</code> - Run server log connector parameters</a></li>
+    <li><a href="#run_connector_params_subactions"><code>run_connector_params_subactions</code> - Run connector subactions</a></li>
     <li><a href="#secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a></li>
     <li><a href="#secrets_properties_jira"><code>secrets_properties_jira</code> - Connector secrets properties for a Jira connector</a></li>
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
@@ -698,15 +701,15 @@ Any modifications made to this file will be overwritten.
     <h3><a name="Run_connector_request_body_properties_params"><code>Run_connector_request_body_properties_params</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">documents (optional)</div><div class="param-desc"><span class="param-type"><a href="#map">array[map[String, oas_any_type_not_mapped]]</a></span> The documents to index in JSON format. This property is required only for index connectors. </div>
-<div class="param">level (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The log level of the message. This property is applicable only to server log connectors. </div>
+      <div class="param">documents </div><div class="param-desc"><span class="param-type"><a href="#map">array[map[String, oas_any_type_not_mapped]]</a></span> The documents to index in JSON format. </div>
+<div class="param">level (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The log level of the message. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">debug</div><div class="param-enum">error</div><div class="param-enum">fatal</div><div class="param-enum">info</div><div class="param-enum">trace</div><div class="param-enum">warn</div>
-<div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The message to log. This property is required only for server log connectors. </div>
-<div class="param">subAction (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The action to test. </div>
+<div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The message to log. </div>
+<div class="param">subAction </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The action to test. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">addEvent</div><div class="param-enum">createAlert</div><div class="param-enum">closeAlert</div><div class="param-enum">fieldsByIssueType</div><div class="param-enum">getChoices</div><div class="param-enum">getFields</div><div class="param-enum">getIncident</div><div class="param-enum">issue</div><div class="param-enum">issues</div><div class="param-enum">issueTypes</div><div class="param-enum">pushToService</div>
-<div class="param">subActionParams (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
+<div class="param">subActionParams (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1326,6 +1329,33 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="run_connector_params_documents"><code>run_connector_params_documents</code> - Run index connector parameters</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Test an action that indexes a document into Elasticsearch.</div>
+    <div class="field-items">
+      <div class="param">documents </div><div class="param-desc"><span class="param-type"><a href="#map">array[map[String, oas_any_type_not_mapped]]</a></span> The documents to index in JSON format. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="run_connector_params_level_message"><code>run_connector_params_level_message</code> - Run server log connector parameters</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Test an action that writes an entry to the Kibana server log.</div>
+    <div class="field-items">
+      <div class="param">level (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The log level of the message. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">debug</div><div class="param-enum">error</div><div class="param-enum">fatal</div><div class="param-enum">info</div><div class="param-enum">trace</div><div class="param-enum">warn</div>
+<div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The message to log. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="run_connector_params_subactions"><code>run_connector_params_subactions</code> - Run connector subactions</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Test an actions that require subactions and subaction parameters.</div>
+    <div class="field-items">
+      <div class="param">subAction </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The action to test. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">addEvent</div><div class="param-enum">createAlert</div><div class="param-enum">closeAlert</div><div class="param-enum">fieldsByIssueType</div><div class="param-enum">getChoices</div><div class="param-enum">getFields</div><div class="param-enum">getIncident</div><div class="param-enum">issue</div><div class="param-enum">issues</div><div class="param-enum">issueTypes</div><div class="param-enum">pushToService</div>
+<div class="param">subActionParams (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a> <a class="up" href="#__Models">Up</a></h3>

@@ -1,0 +1,24 @@
+title: Run connector subactions
+description: Test an actions that require subactions and subaction parameters.
+type: object
+required:
+  - subAction
+properties: 
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - addEvent
+      - createAlert
+      - closeAlert
+      - fieldsByIssueType
+      - getChoices
+      - getFields
+      - getIncident
+      - issue
+      - issues
+      - issueTypes
+      - pushToService
+  subActionParams:
+    type: object
+      

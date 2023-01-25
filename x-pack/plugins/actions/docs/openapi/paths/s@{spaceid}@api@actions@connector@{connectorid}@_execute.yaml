@@ -23,45 +23,10 @@ post:
             - params
           properties:
             params:
-              type: object
-              properties:
-                documents:
-                  type: array
-                  description: The documents to index in JSON format. This property is required only for index connectors.
-                  items:
-                    type: object
-                    additionalProperties: true
-                level:
-                  type: string
-                  description: The log level of the message. This property is applicable only to server log connectors.
-                  enum:
-                    - debug
-                    - error
-                    - fatal
-                    - info
-                    - trace
-                    - warn
-                message:
-                  type: string
-                  description: The message to log. This property is required only for server log connectors.
-                subAction:
-                  type: string
-                  description: The action to test.
-                  enum:
-                    - addEvent
-                    - createAlert
-                    - closeAlert
-                    - fieldsByIssueType
-                    - getChoices
-                    - getFields
-                    - getIncident
-                    - issue
-                    - issues
-                    - issueTypes
-                    - pushToService
-                subActionParams:
-                  type: object
-                  additionalProperties: true
+              oneOf:
+                - $ref: '../components/schemas/run_connector_params_documents.yaml'
+                - $ref: '../components/schemas/run_connector_params_level_message.yaml'
+                - $ref: '../components/schemas/run_connector_params_subactions.yaml'
 #              anyOf:
 #               - $ref: '../components/schemas/run_connector_request_cases_webhook.yaml'
 #                - $ref: '../components/schemas/run_connector_request_email.yaml'
@@ -80,17 +45,17 @@ post:
 #               - $ref: '../components/schemas/run_connector_request_tines.yaml'
 #               - $ref: '../components/schemas/run_connector_request_webhook.yaml'
 #               - $ref: '../components/schemas/run_connector_request_xmatters.yaml'
-#        examples:
-#          runIndexConnectorRequest:
-#            $ref: '../components/examples/run_index_connector_request.yaml'
-#          runJiraConnectorRequest:
-#            $ref: '../components/examples/run_jira_connector_request.yaml'
-#          runServerLogConnectorRequest:
-#            $ref: '../components/examples/run_server_log_connector_request.yaml'
-#          runServiceNowITOMConnectorRequest:
-#            $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
-#          runSwimlaneConnectorRequest:
-#            $ref: '../components/examples/run_swimlane_connector_request.yaml'
+        examples:
+          runIndexConnectorRequest:
+            $ref: '../components/examples/run_index_connector_request.yaml'
+          runJiraConnectorRequest:
+            $ref: '../components/examples/run_jira_connector_request.yaml'
+          runServerLogConnectorRequest:
+            $ref: '../components/examples/run_server_log_connector_request.yaml'
+          runServiceNowITOMConnectorRequest:
+            $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
+          runSwimlaneConnectorRequest:
+            $ref: '../components/examples/run_swimlane_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
