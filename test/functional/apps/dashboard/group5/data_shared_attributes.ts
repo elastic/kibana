@@ -126,8 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // TODO re-enable when https://github.com/elastic/kibana/pull/149078 has merged
-    it.skip('data-shared-item title should update a saved search when using a custom panel title', async () => {
+    it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       await PageObjects.dashboard.switchToEditMode();
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
       const el = await dashboardPanelActions.getPanelHeading('Rendering Test: saved search');
