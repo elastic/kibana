@@ -167,7 +167,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     }),
     description: i18n.translate(
       'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.description',
-      { defaultMessage: 'Allows a user to perform the isolate and release response actions.' }
+      { defaultMessage: 'Allows a user to perform the "isolate" and "release" response actions.' }
     ),
     privilegeGroups: [
       {
@@ -203,7 +203,7 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
       'xpack.securitySolution.featureRegistry.subFeatures.processOperations.description',
       {
         defaultMessage:
-          'Allows a user to perform process-related response actions in the response console. This includes the processes, kill-process, and suspend-process actions.',
+          'Allows a user to perform process-related response actions in the response console. This includes the "processes", "kill-process", and "suspend-process" actions.',
       }
     ),
     privilegeGroups: [
