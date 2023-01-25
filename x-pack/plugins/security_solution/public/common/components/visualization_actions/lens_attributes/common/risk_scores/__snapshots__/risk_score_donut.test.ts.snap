@@ -128,12 +128,12 @@ Object {
       "layers": Array [
         Object {
           "categoryDisplay": "hide",
-          "emptySizeRatio": 0.8,
+          "emptySizeRatio": 0.82,
           "layerId": "d594baeb-5eca-480c-8885-ba79eaf41372",
           "layerType": "data",
-          "legendDisplay": "hide",
-          "legendPosition": "right",
-          "legendSize": "small",
+          "legendDisplay": "show",
+          "legendPosition": "left",
+          "legendSize": "medium",
           "metrics": Array [
             "75179122-96fc-40e1-93b4-8e9310af5f06",
           ],
