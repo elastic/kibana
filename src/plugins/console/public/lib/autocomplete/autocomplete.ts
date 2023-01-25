@@ -1201,7 +1201,8 @@ export default function ({
   function getCompletions(
     position: Position,
     prefix: string,
-    callback: (e: Error | null, result: ResultTerm[] | null) => void
+    callback: (e: Error | null, result: ResultTerm[] | null) => void,
+    setAnnotationCallback: (text: string) => void
   ) {
     try {
       const context = getAutoCompleteContext(editor, position);
@@ -1217,9 +1218,12 @@ export default function ({
 
         if (context.asyncResultsState) {
           // TODO indicate mappings fetching is in progress
+          setAnnotationCallback('Fetching fields');
+
           context.asyncResultsState.results.then((r) => {
             const asyncSuggestions = getSuggestions(getTerms(context, r));
             callback(null, asyncSuggestions);
+            setAnnotationCallback('');
           });
         }
       }

@@ -412,7 +412,23 @@ export class LegacyCoreEditor implements CoreEditor {
             lineNumber: pos.row + 1,
             column: pos.column + 1,
           };
-          autocompleter(position, prefix, callback);
+
+          const setAnnotationCallback = (text: string) => {
+            const annotations = DO_NOT_USE_2.getAnnotations();
+            DO_NOT_USE_2.setAnnotations([
+              ...annotations,
+              text
+                ? {
+                    text,
+                    row: pos.row,
+                    column: pos.column,
+                    type: 'warning',
+                  }
+                : null,
+            ]);
+          };
+
+          autocompleter(position, prefix, callback, setAnnotationCallback);
         },
       },
     ]);

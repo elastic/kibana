@@ -23,7 +23,8 @@ export type EditorEvent =
 export type AutoCompleterFunction = (
   pos: Position,
   prefix: string,
-  callback: (...args: unknown[]) => void
+  callback: (...args: unknown[]) => void,
+  setAnnotationCallback: (text: string) => void
 ) => void;
 
 export interface Position {
