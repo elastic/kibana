@@ -23,8 +23,10 @@ import { EnginesListLogic, EnginesListActions } from '../engines/engines_list_lo
 import { EngineNameLogic } from './engine_name_logic';
 
 export interface EngineViewActions {
+  closeDeleteEngineModal(): void;
   deleteSuccess: EnginesListActions['deleteSuccess'];
   fetchEngine: FetchEngineApiLogicActions['makeRequest'];
+  openDeleteEngineModal(): void;
 }
 
 export interface EngineViewValues {
@@ -32,6 +34,7 @@ export interface EngineViewValues {
   engineName: typeof EngineNameLogic.values.engineName;
   fetchEngineApiError?: typeof FetchEngineApiLogic.values.error;
   fetchEngineApiStatus: typeof FetchEngineApiLogic.values.status;
+  isDeleteModalVisible: boolean;
   isLoadingEngine: boolean;
 }
 
@@ -50,12 +53,26 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
     ],
   },
-  listeners: () => ({
+  actions: {
+    closeDeleteEngineModal: true,
+    openDeleteEngineModal: true,
+  },
+  listeners: ({ actions }) => ({
     deleteSuccess: () => {
+      actions.closeDeleteEngineModal();
       KibanaLogic.values.navigateToUrl(ENGINES_PATH);
     },
   }),
   path: ['enterprise_search', 'content', 'engine_view_logic'],
+  reducers: () => ({
+    isDeleteModalVisible: [
+      false,
+      {
+        closeDeleteEngineModal: () => false,
+        openDeleteEngineModal: () => true,
+      },
+    ],
+  }),
   selectors: ({ selectors }) => ({
     isLoadingEngine: [
       () => [selectors.fetchEngineApiStatus, selectors.engineData],

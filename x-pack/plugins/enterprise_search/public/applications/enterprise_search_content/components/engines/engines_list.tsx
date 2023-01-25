@@ -42,8 +42,10 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-  const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
-  const { meta, results, isLoading } = useValues(EnginesListLogic);
+  const { fetchEngines, onPaginate, openDeleteEngineModal, closeDeleteEngineModal } =
+    useActions(EnginesListLogic);
+  const { meta, results, isLoading, deleteModalEngineName, isDeleteModalVisible } =
+    useValues(EnginesListLogic);
   const [searchQuery, setSearchValue] = useState('');
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
@@ -56,7 +58,9 @@ export const EnginesList: React.FC = () => {
 
   return (
     <>
-      <DeleteEngineModal />
+      {isDeleteModalVisible ? (
+        <DeleteEngineModal engineName={deleteModalEngineName} onClose={closeDeleteEngineModal} />
+      ) : null}
       <EnterpriseSearchContentPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {

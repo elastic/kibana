@@ -21,6 +21,7 @@ const DEFAULT_VALUES: EngineViewValues = {
   engineName: 'my-test-engine',
   fetchEngineApiError: undefined,
   fetchEngineApiStatus: Status.IDLE,
+  isDeleteModalVisible: false,
   isLoadingEngine: true,
 };
 

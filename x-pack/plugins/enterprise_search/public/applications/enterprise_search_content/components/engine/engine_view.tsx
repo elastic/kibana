@@ -25,9 +25,14 @@ import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
 
 export const EngineView: React.FC = () => {
-  const { fetchEngine } = useActions(EngineViewLogic);
-  const { engineName, fetchEngineApiError, fetchEngineApiStatus, isLoadingEngine } =
-    useValues(EngineViewLogic);
+  const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
+  const {
+    engineName,
+    fetchEngineApiError,
+    fetchEngineApiStatus,
+    isDeleteModalVisible,
+    isLoadingEngine,
+  } = useValues(EngineViewLogic);
   const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
@@ -55,24 +60,27 @@ export const EngineView: React.FC = () => {
   }
 
   return (
-    <Switch>
-      <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
-      <Route // TODO: remove this route when all engine view routes are implemented, replace with a 404 route
-        render={() => (
-          <EnterpriseSearchEnginesPageTemplate
-            pageChrome={[engineName]}
-            pageViewTelemetry={tabId}
-            pageHeader={{
-              pageTitle: tabId,
-              rightSideItems: [<EngineViewHeaderActions />],
-            }}
-            engineName={engineName}
-            isLoading={isLoadingEngine}
-          >
-            <DeleteEngineModal />
-          </EnterpriseSearchEnginesPageTemplate>
-        )}
-      />
-    </Switch>
+    <>
+      {isDeleteModalVisible ? (
+        <DeleteEngineModal engineName={engineName} onClose={closeDeleteEngineModal} />
+      ) : null}
+      <Switch>
+        <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
+        <Route // TODO: remove this route when all engine view routes are implemented, replace with a 404 route
+          render={() => (
+            <EnterpriseSearchEnginesPageTemplate
+              pageChrome={[engineName]}
+              pageViewTelemetry={tabId}
+              pageHeader={{
+                pageTitle: tabId,
+                rightSideItems: [<EngineViewHeaderActions />],
+              }}
+              engineName={engineName}
+              isLoading={isLoadingEngine}
+            />
+          )}
+        />
+      </Switch>
+    </>
   );
 };

@@ -13,14 +13,12 @@ import { EuiPopover, EuiButtonIcon, EuiText, EuiContextMenu, EuiIcon } from '@el
 
 import { i18n } from '@kbn/i18n';
 
-import { EnginesListLogic } from '../engines/engines_list_logic';
-
 import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineViewHeaderActions: React.FC = () => {
   const { engineData } = useValues(EngineViewLogic);
 
-  const { openDeleteEngineModal } = useActions(EnginesListLogic);
+  const { openDeleteEngineModal } = useActions(EngineViewLogic);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const toggleActionsPopover = () => setIsActionsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
@@ -38,6 +36,8 @@ export const EngineViewHeaderActions: React.FC = () => {
               }
             )}
             onClick={toggleActionsPopover}
+            size="m"
+            iconSize="m"
             iconType="boxesVertical"
           />
         }
@@ -65,7 +65,7 @@ export const EngineViewHeaderActions: React.FC = () => {
                   ),
                   onClick: () => {
                     if (engineData) {
-                      openDeleteEngineModal(engineData);
+                      openDeleteEngineModal();
                     }
                   },
                   size: 's',
