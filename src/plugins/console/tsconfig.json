@@ -29,7 +29,7 @@
     "@kbn/config-schema",
     "@kbn/core-http-router-server-internal",
     "@kbn/web-worker-stub",
-    "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
