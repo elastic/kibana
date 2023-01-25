@@ -71,9 +71,11 @@ export const Instructions = (props: InstructionProps) => {
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
-    fleetStatus.isReady &&
-    (isFleetServerPolicySelected ||
-      (!isFleetServerUnhealthy && fleetServers.length > 0 && (fleetServerHosts?.length ?? 0) > 0));
+    isFleetServerPolicySelected ||
+    (fleetStatus.isReady &&
+      !isFleetServerUnhealthy &&
+      fleetServers.length > 0 &&
+      (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
     !isFleetServerPolicySelected &&
