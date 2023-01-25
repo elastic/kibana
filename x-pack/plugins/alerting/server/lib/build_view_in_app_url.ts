@@ -16,13 +16,11 @@ export type GetViewInAppUrlFn<Params extends RuleTypeParams> = (
 ) => string;
 
 export interface BuildViewInAppRelativeUrlOpts<Params extends RuleTypeParams> {
-  spaceId: string | undefined;
   getViewInAppUrl: GetViewInAppUrlFn<Params> | undefined;
   opts: GetViewInAppUrlFnOpts<Params>;
 }
 
 export function buildViewInAppRelativeUrl<Params extends RuleTypeParams>({
-  spaceId,
   getViewInAppUrl,
   opts,
 }: BuildViewInAppRelativeUrlOpts<Params>) {
@@ -30,7 +28,7 @@ export function buildViewInAppRelativeUrl<Params extends RuleTypeParams>({
     return;
   }
 
-  return `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${getViewInAppUrl(opts)}`;
+  return getViewInAppUrl(opts);
 }
 
 export interface BuildViewInAppUrlOpts<Params extends RuleTypeParams> {
@@ -52,14 +50,16 @@ export function buildViewInAppUrl<Params extends RuleTypeParams>({
     return;
   }
 
-  const relativeUrl = buildViewInAppRelativeUrl<Params>({ spaceId, getViewInAppUrl, opts });
+  const relativeUrl = buildViewInAppRelativeUrl<Params>({ getViewInAppUrl, opts });
 
   if (!relativeUrl) {
     return;
   }
 
   try {
-    const viewInAppUrl = new URL(relativeUrl, kibanaBaseUrl);
+    const viewInAppUrl = new URL(
+      `${kibanaBaseUrl}${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativeUrl}`
+    );
     return viewInAppUrl.toString();
   } catch (e) {
     logger.debug(
