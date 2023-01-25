@@ -27,6 +27,7 @@ import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { OptionsListReduxState } from '../types';
 import { pluginServices } from '../../services';
@@ -423,11 +424,21 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.runOptionsListQuery();
   };
 
+  public onFatalError = (e: Error) => {
+    const {
+      dispatch,
+      actions: { setPopoverOpen },
+    } = this.reduxEmbeddableTools;
+    dispatch(setPopoverOpen(false));
+    super.onFatalError(e);
+  };
+
   public destroy = () => {
     super.destroy();
     this.abortController?.abort();
     this.subscriptions.unsubscribe();
     this.reduxEmbeddableTools.cleanup();
+    if (this.node) ReactDOM.unmountComponentAtNode(this.node);
   };
 
   public render = (node: HTMLElement) => {
@@ -437,14 +448,16 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const { Wrapper: OptionsListReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <OptionsListReduxWrapper>
-          <OptionsListControl
-            typeaheadSubject={this.typeaheadSubject}
-            loadMoreSubject={this.loadMoreSubject}
-          />
-        </OptionsListReduxWrapper>
-      </KibanaThemeProvider>,
+      <I18nProvider>
+        <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+          <OptionsListReduxWrapper>
+            <OptionsListControl
+              typeaheadSubject={this.typeaheadSubject}
+              loadMoreSubject={this.loadMoreSubject}
+            />
+          </OptionsListReduxWrapper>
+        </KibanaThemeProvider>
+      </I18nProvider>,
       node
     );
   };

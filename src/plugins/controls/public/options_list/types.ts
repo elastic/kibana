@@ -22,6 +22,7 @@ interface SearchString {
 
 // Component state is only used by public components.
 export interface OptionsListComponentState {
+  popoverOpen: boolean;
   field?: FieldSpec;
   totalCardinality?: number;
   availableOptions?: OptionsListSuggestions;

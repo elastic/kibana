@@ -10,6 +10,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
@@ -41,17 +43,23 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
     <EuiText className="errorEmbeddableCompact__button" size="xs">
-      <EuiLink
-        className="eui-textTruncate"
-        color="subdued"
-        onClick={() => setPopoverOpen((open) => !open)}
-      >
-        <EuiIcon type="alert" color="danger" />
-        <FormattedMessage
-          id="controls.frame.error.message"
-          defaultMessage="An error has occurred. Read more"
-        />
-      </EuiLink>
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="danger" />{' '}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiLink
+            className="eui-textTruncate"
+            color="subdued"
+            onClick={() => setPopoverOpen((open) => !open)}
+          >
+            <FormattedMessage
+              id="controls.frame.error.message"
+              defaultMessage="An error has occurred. Read more"
+            />
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiText>
   );
 

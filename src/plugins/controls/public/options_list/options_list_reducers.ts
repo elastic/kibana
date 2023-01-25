@@ -19,6 +19,7 @@ import {
 } from '../../common/options_list/suggestions_sorting';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
+  popoverOpen: false,
   searchString: { value: '', valid: true },
 });
 
@@ -40,6 +41,9 @@ export const optionsListReducers = {
     ) {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
+  },
+  setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    state.componentState.popoverOpen = action.payload;
   },
   setSort: (
     state: WritableDraft<OptionsListReduxState>,

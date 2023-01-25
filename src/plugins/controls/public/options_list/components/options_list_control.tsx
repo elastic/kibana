@@ -28,15 +28,13 @@ export const OptionsListControl = ({
   typeaheadSubject: Subject<string>;
   loadMoreSubject: Subject<number>;
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const resizeRef = useRef(null);
   const dimensions = useResizeObserver(resizeRef.current);
 
   // Redux embeddable Context
   const {
     useEmbeddableDispatch,
-    actions: { replaceSelection, setSearchString },
+    actions: { replaceSelection, setSearchString, setPopoverOpen },
     useEmbeddableSelector: select,
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
@@ -44,6 +42,7 @@ export const OptionsListControl = ({
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const validSelections = select((state) => state.componentState.validSelections);
+  const isPopoverOpen = select((state) => state.componentState.popoverOpen);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
   const existsSelected = select((state) => state.explicitInput.existsSelected);
@@ -56,6 +55,12 @@ export const OptionsListControl = ({
   const placeholder = select((state) => state.explicitInput.placeholder);
 
   const loading = select((state) => state.output.loading);
+
+  useEffect(() => {
+    return () => {
+      dispatch(setPopoverOpen(false)); // on unmount, close the popover
+    };
+  }, [dispatch, setPopoverOpen]);
 
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
@@ -136,7 +141,7 @@ export const OptionsListControl = ({
           'optionsList--filterBtnPlaceholder': !hasSelections,
         })}
         data-test-subj={`optionsList-control-${id}`}
-        onClick={() => setIsPopoverOpen((openState) => !openState)}
+        onClick={() => dispatch(setPopoverOpen(!isPopoverOpen))}
         isSelected={isPopoverOpen}
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
@@ -162,7 +167,7 @@ export const OptionsListControl = ({
         panelPaddingSize="none"
         anchorPosition="downCenter"
         className="optionsList__popoverOverride"
-        closePopover={() => setIsPopoverOpen(false)}
+        closePopover={() => dispatch(setPopoverOpen(false))}
         anchorClassName="optionsList__anchorOverride"
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
