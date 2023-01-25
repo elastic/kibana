@@ -6608,7 +6608,15 @@
         "label": "AsApiContract",
         "description": [],
         "signature": [
-          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T[K]> : T[K]; }"
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,

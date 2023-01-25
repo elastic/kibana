@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import copy from 'copy-to-clipboard';
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public/cell_actions/components/cell_actions';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from '../constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -24,7 +24,15 @@ export const createCopyToClipboardAction = ({ order }: { order?: number }) =>
     isCompatible: async (context) => context.field.name != null && context.field.value != null,
     execute: async ({ field }) => {
       const { notifications } = KibanaServices.get();
-      const text = `${field.name}: "${field.value}"`;
+
+      let textValue: undefined | string;
+      if (field.value != null) {
+        textValue = Array.isArray(field.value)
+          ? field.value.map((value) => `"${value}"`).join(', ')
+          : `"${field.value}"`;
+      }
+      const text = textValue ? `${field.name}: ${textValue}` : field.name;
+
       const isSuccess = copy(text, { debug: true });
 
       if (isSuccess) {
