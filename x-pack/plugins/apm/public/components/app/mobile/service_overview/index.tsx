@@ -39,7 +39,6 @@ import { MostUsedChart } from './most_used_chart';
 import { LatencyMap } from './latency_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
@@ -51,7 +50,7 @@ import { MobileStats } from './stats';
 export const chartHeight = 288;
 
 export function MobileServiceOverview() {
-  const { serviceName, fallbackToTransactions } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
   const embeddableFilters = useFiltersForEmbeddableCharts();
 
@@ -144,11 +143,6 @@ export function MobileServiceOverview() {
             </EuiCallOut>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <MobileStats
               start={start}
