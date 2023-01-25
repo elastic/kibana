@@ -7,8 +7,13 @@
  */
 
 import { parse } from 'query-string';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SemVer } from 'semver';
+import type { ProxyConfigCollection } from '../../../../lib';
 import type { RouteDependencies } from '../../..';
+import type { ESConfigForProxy } from '../../../../types';
+import { getEntity } from './get_entity';
+
 interface SettingsToRetrieve {
   indices: boolean;
   fields: boolean;
@@ -16,64 +21,58 @@ interface SettingsToRetrieve {
   dataStreams: boolean;
 }
 
-const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
-// Limit the response size to 10MB, because the response can be very large and sending it to the client
-// can cause the browser to hang.
+export type Config = ESConfigForProxy & { request: KibanaRequest } & { kibanaVersion: SemVer } & {
+  proxyConfigCollection?: ProxyConfigCollection;
+};
 
-const getMappings = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
+const getMappings = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.fields) {
-    const mappings = await esClient.asInternalUser.indices.getMapping(undefined, {
-      maxResponseSize: MAX_RESPONSE_SIZE,
-      maxCompressedResponseSize: MAX_RESPONSE_SIZE,
-    });
+    const mappings = await getEntity('/_mapping', config);
     return mappings;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getAliases = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
+const getAliases = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.indices) {
-    const aliases = await esClient.asInternalUser.indices.getAlias();
+    const aliases = await getEntity('/_alias', config);
     return aliases;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getDataStreams = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
+const getDataStreams = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.dataStreams) {
-    const dataStreams = await esClient.asInternalUser.indices.getDataStream();
+    const dataStreams = await getEntity('/_data_stream', config);
     return dataStreams;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getLegacyTemplates = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
+const getLegacyTemplates = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.templates) {
-    const legacyTemplates = await esClient.asInternalUser.indices.getTemplate();
+    const legacyTemplates = await getEntity('/_template', config);
     return legacyTemplates;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getIndexTemplates = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
+const getIndexTemplates = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.templates) {
-    const indexTemplates = await esClient.asInternalUser.indices.getIndexTemplate();
+    const indexTemplates = await getEntity('/_index_template', config);
     return indexTemplates;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
 };
 
-const getComponentTemplates = async (
-  settings: SettingsToRetrieve,
-  esClient: IScopedClusterClient
-) => {
+const getComponentTemplates = async (settings: SettingsToRetrieve, config: Config) => {
   if (settings.templates) {
-    const componentTemplates = await esClient.asInternalUser.cluster.getComponentTemplate();
+    const componentTemplates = await getEntity('/_component_template', config);
     return componentTemplates;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
@@ -90,7 +89,6 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       validate: false,
     },
     async (context, request, response) => {
-      const esClient = (await context.core).elasticsearch.client;
       const settings = parse(request.url.search, {
         parseBooleans: true,
       }) as unknown as SettingsToRetrieve;
@@ -102,14 +100,22 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
         });
       }
 
+      const legacyConfig = await deps.proxy.readLegacyESConfig();
+      const config = {
+        ...legacyConfig,
+        request,
+        kibanaVersion: deps.kibanaVersion,
+        proxyConfigCollection: deps.proxy.proxyConfigCollection,
+      };
+
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
-        getMappings(settings, esClient),
-        getAliases(settings, esClient),
-        getDataStreams(settings, esClient),
-        getLegacyTemplates(settings, esClient),
-        getIndexTemplates(settings, esClient),
-        getComponentTemplates(settings, esClient),
+        getMappings(settings, config),
+        getAliases(settings, config),
+        getDataStreams(settings, config),
+        getLegacyTemplates(settings, config),
+        getIndexTemplates(settings, config),
+        getComponentTemplates(settings, config),
       ]);
 
       const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =

@@ -15,6 +15,7 @@ import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import type { OutgoingHttpHeaders } from 'http';
 import { ESConfigForProxy } from '../../../../types';
 import {
   getElasticsearchProxyConfig,
@@ -49,7 +50,12 @@ export function getRequestConfig(
   uri: string,
   kibanaVersion: SemVer,
   proxyConfigCollection?: ProxyConfigCollection
-): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
+): {
+  agent: Agent;
+  timeout: number;
+  headers: OutgoingHttpHeaders;
+  rejectUnauthorized?: boolean;
+} {
   const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
 
@@ -70,7 +76,7 @@ export function getRequestConfig(
   };
 }
 
-function getProxyHeaders(req: KibanaRequest) {
+export function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
