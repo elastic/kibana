@@ -507,7 +507,7 @@
     "compare-versions": "3.5.1",
     "constate": "^3.3.2",
     "copy-to-clipboard": "^3.0.8",
-    "core-js": "^3.27.1",
+    "core-js": "^3.27.2",
     "cronstrue": "^1.51.0",
     "cuid": "^2.1.8",
     "cytoscape": "^3.10.0",
