@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { OptionsListRequest, OptionsListResponse } from '../../../common/options_list/types';
+import {
+  OptionsListFailureResponse,
+  OptionsListRequest,
+  OptionsListResponse,
+} from '../../../common/options_list/types';
 
 export interface ControlsOptionsListService {
   runOptionsListRequest: (
@@ -14,6 +18,8 @@ export interface ControlsOptionsListService {
     abortSignal: AbortSignal
   ) => Promise<OptionsListResponse>;
   clearOptionsListCache: () => void;
+  optionsListResponseWasFailure: (
+    response: OptionsListResponse
+  ) => response is OptionsListFailureResponse;
   getAllowExpensiveQueries: () => Promise<boolean>;
-  optionsListResponseWasSuccessful: (response: OptionsListResponse) => boolean;
 }

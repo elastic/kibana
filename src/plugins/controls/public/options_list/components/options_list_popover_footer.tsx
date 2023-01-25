@@ -53,6 +53,7 @@ export const OptionsListPopoverFooter = ({
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
+  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const exclude = select((state) => state.explicitInput.exclude);
 
   return (
@@ -69,25 +70,27 @@ export const OptionsListPopoverFooter = ({
           </div>
         )}
         <EuiFlexGroup
-          justifyContent="spaceBetween"
+          justifyContent={hideExclude ? 'flexEnd' : 'spaceBetween'}
           alignItems="center"
           responsive={false}
           css={css`
             padding: ${useEuiPaddingSize('s')};
           `}
         >
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-              options={aggregationToggleButtons}
-              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) =>
-                dispatch(setExclude(optionId === 'optionsList__excludeResults'))
-              }
-              buttonSize="compressed"
-              data-test-subj="optionsList__includeExcludeButtonGroup"
-            />
-          </EuiFlexItem>
+          {!hideExclude && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+                options={aggregationToggleButtons}
+                idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+                onChange={(optionId) =>
+                  dispatch(setExclude(optionId === 'optionsList__excludeResults'))
+                }
+                buttonSize="compressed"
+                data-test-subj="optionsList__includeExcludeButtonGroup"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false}>
               <EuiFlexItem grow={false}>

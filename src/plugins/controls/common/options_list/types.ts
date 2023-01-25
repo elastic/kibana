@@ -20,10 +20,11 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
+  hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  hideFooter?: boolean;
   hideSort?: boolean;
-  hideActionBar?: boolean;
   exclude?: boolean;
   placeholder?: string;
 }

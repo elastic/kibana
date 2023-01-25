@@ -46,8 +46,8 @@ export const OptionsListPopover = ({
   const availableOptions = select((state) => state.componentState.availableOptions);
   const field = select((state) => state.componentState.field);
 
-  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const hideActionBar = select((state) => state.explicitInput.hideActionBar);
+  const hideFooter = select((state) => state.explicitInput.hideFooter);
   const fieldName = select((state) => state.explicitInput.fieldName);
   const title = select((state) => state.explicitInput.title);
   const id = select((state) => state.explicitInput.id);
@@ -72,7 +72,7 @@ export const OptionsListPopover = ({
     <>
       <div
         id={`control-popover-${id}`}
-        style={{ width: width > 300 ? width : undefined }}
+        style={{ width, minWidth: 300 }}
         data-test-subj={`optionsList-control-popover`}
         aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
@@ -120,7 +120,7 @@ export const OptionsListPopover = ({
             <OptionsListPopoverInvalidSelections />
           )}
         </div>
-        {!hideExclude && (
+        {!hideFooter && (
           <OptionsListPopoverFooter
             isLoading={isLoading}
             showOnlySelected={showOnlySelected}

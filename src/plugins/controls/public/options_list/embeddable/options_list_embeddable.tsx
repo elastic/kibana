@@ -327,20 +327,17 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         },
         this.abortController.signal
       );
-      if (!this.optionsListService.optionsListResponseWasSuccessful(response)) {
-        const error = (response as OptionsListFailureResponse).error;
-        if (error === 'aborted') {
+      if (this.optionsListService.optionsListResponseWasFailure(response)) {
+        if (response.error === 'aborted') {
           // This prevents an aborted request (which can happen, for example, when a user types a search string too quickly)
           // from prematurely setting loading to `false` and updating the suggestions to show "No results"
           return;
         }
-        dispatch(setLoading(false));
-        this.onFatalError(error);
+        this.onFatalError(response.error);
         return;
       }
 
-      const { suggestions, invalidSelections, totalCardinality } =
-        response as OptionsListSuccessResponse;
+      const { suggestions, invalidSelections, totalCardinality } = response;
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
@@ -427,9 +424,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   public onFatalError = (e: Error) => {
     const {
       dispatch,
-      actions: { setPopoverOpen },
+      actions: { setPopoverOpen, setLoading },
     } = this.reduxEmbeddableTools;
-    dispatch(setPopoverOpen(false));
+    batch(() => {
+      dispatch(setLoading(false));
+      dispatch(setPopoverOpen(false));
+    });
     super.onFatalError(e);
   };
 
