@@ -22133,7 +22133,6 @@
     "xpack.ml.newJob.wizard.editJsonButton": "编辑 JSON",
     "xpack.ml.newJob.wizard.estimateModelMemoryError": "无法计算模型内存限制",
     "xpack.ml.newJob.wizard.extraStep.categorizationJob.categorizationPerPartitionFieldLabel": "分区字段",
-    "xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel": "启用按分区分类",
     "xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel": "显示警告时停止",
     "xpack.ml.newJob.wizard.jobCreatorTitle.advanced": "高级",
     "xpack.ml.newJob.wizard.jobCreatorTitle.categorization": "归类",
