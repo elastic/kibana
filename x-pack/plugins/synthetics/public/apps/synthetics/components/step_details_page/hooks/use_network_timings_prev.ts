@@ -63,6 +63,9 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
           'synthetics.payload.is_navigation_request': {
             type: 'boolean',
           },
+          'synthetics.payload.transfer_size': {
+            type: 'long',
+          },
         },
         query: {
           bool: {
@@ -154,6 +157,12 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
               percents: [50],
             },
           },
+          transferSize: {
+            percentiles: {
+              field: 'synthetics.payload.transfer_size',
+              percents: [50],
+            },
+          },
         },
       },
     },
@@ -171,11 +180,16 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
     wait: aggs?.wait.values['50.0'] ?? 0,
     blocked: aggs?.blocked.values['50.0'] ?? 0,
     ssl: aggs?.ssl.values['50.0'] ?? 0,
+    transferSize: aggs?.transferSize.values['50.0'] ?? 0,
   };
 
   return {
     loading,
     timings,
+    transferSizePrev: {
+      value: timings.transferSize,
+      label: CONTENT_SIZE_LABEL,
+    },
     timingsWithLabels: [
       {
         value: timings.dns,
@@ -230,4 +244,8 @@ const SYNTHETICS_SEND_TIMINGS_LABEL = i18n.translate('xpack.synthetics.send', {
 });
 const SYNTHETICS_RECEIVE_TIMINGS_LABEL = i18n.translate('xpack.synthetics.receive', {
   defaultMessage: 'Receive',
+});
+
+export const CONTENT_SIZE_LABEL = i18n.translate('xpack.synthetics.contentSize', {
+  defaultMessage: 'Content Size',
 });

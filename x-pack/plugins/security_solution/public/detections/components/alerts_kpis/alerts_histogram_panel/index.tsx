@@ -108,6 +108,7 @@ interface AlertsHistogramPanelProps {
   title?: React.ReactNode;
   titleSize?: EuiTitleSize;
   updateDateRange: UpdateDateRange;
+  hideQueryToggle?: boolean;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -145,6 +146,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     titleSize = 'm',
     updateDateRange,
+    hideQueryToggle = false,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
@@ -362,7 +364,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             title={titleText}
             titleSize={titleSize}
             toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
+            toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}

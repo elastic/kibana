@@ -60,6 +60,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     subtitle?: string | GetSubTitle;
     scopeId?: string;
     title: string | GetTitle;
+    hideQueryToggle?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -72,6 +73,7 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = '150px';
 
+// eslint-disable-next-line complexity
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
@@ -105,6 +107,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   titleSize,
   yTickFormatter,
   skip,
+  hideQueryToggle = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -153,6 +156,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     },
     [defaultStackByOption, stackByOptions]
   );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(id);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -263,7 +267,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             title={titleWithStackByField}
             titleSize={titleSize}
             toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
+            toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
             showInspectButton={showInspectButton && !isChartEmbeddablesEnabled}

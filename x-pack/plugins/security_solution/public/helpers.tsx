@@ -20,10 +20,13 @@ import {
   CASES_FEATURE_ID,
   CASES_PATH,
   EXCEPTIONS_PATH,
+  HOSTS_PATH,
   LANDING_PATH,
+  NETWORK_PATH,
   RULES_PATH,
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
+  USERS_PATH,
 } from '../common/constants';
 import type {
   FactoryQueryTypes,
