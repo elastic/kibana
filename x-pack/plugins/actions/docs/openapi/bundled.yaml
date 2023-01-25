@@ -392,7 +392,7 @@ paths:
                 - params
               properties:
                 params:
-                  oneOf:
+                  anyOf:
                     - $ref: '#/components/schemas/run_connector_request_index'
                     - $ref: '#/components/schemas/run_connector_request_jira'
                     - $ref: '#/components/schemas/run_connector_request_opsgenie'
@@ -3036,7 +3036,7 @@ components:
               - commentId: 1
                 comment: A comment about the incident.
             incident:
-              caseId: 1000
+              caseId: '1000'
               caseName: Case name
               description: Description of the incident.
     run_index_connector_response:

@@ -23,7 +23,7 @@ post:
             - params
           properties:
             params:
-              oneOf:
+              anyOf:
 #               - $ref: '../components/schemas/run_connector_request_cases_webhook.yaml'
 #                - $ref: '../components/schemas/run_connector_request_email.yaml'
                 - $ref: '../components/schemas/run_connector_request_index.yaml'  

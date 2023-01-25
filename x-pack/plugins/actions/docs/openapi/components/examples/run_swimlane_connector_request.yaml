@@ -7,6 +7,6 @@ value:
         - commentId: 1
           comment: A comment about the incident.
       incident:
-        caseId: 1000
+        caseId: "1000"
         caseName: Case name
         description: Description of the incident.
