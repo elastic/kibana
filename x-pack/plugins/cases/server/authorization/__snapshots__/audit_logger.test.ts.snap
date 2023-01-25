@@ -1,5 +1,89 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_comment_bulk_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-comments",
+    },
+  },
+  "message": "Failed attempt to access cases-comments [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_comment_bulk_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a comments as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_comment_bulk_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-comments",
+    },
+  },
+  "message": "User has accessed cases-comments [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetAttachments" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_comment_bulk_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a comments as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetCases" with an error and entity 1`] = `
 Object {
   "error": Object {
@@ -81,90 +165,6 @@ Object {
     ],
   },
   "message": "User has accessed a cases as any owners",
-}
-`;
-
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetComments" with an error and entity 1`] = `
-Object {
-  "error": Object {
-    "code": "Error",
-    "message": "an error",
-  },
-  "event": Object {
-    "action": "case_comment_bulk_get",
-    "category": Array [
-      "database",
-    ],
-    "outcome": "failure",
-    "type": Array [
-      "access",
-    ],
-  },
-  "kibana": Object {
-    "saved_object": Object {
-      "id": "1",
-      "type": "cases-comments",
-    },
-  },
-  "message": "Failed attempt to access cases-comments [id=1] as owner \\"awesome\\"",
-}
-`;
-
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetComments" with an error but no entity 1`] = `
-Object {
-  "error": Object {
-    "code": "Error",
-    "message": "an error",
-  },
-  "event": Object {
-    "action": "case_comment_bulk_get",
-    "category": Array [
-      "database",
-    ],
-    "outcome": "failure",
-    "type": Array [
-      "access",
-    ],
-  },
-  "message": "Failed attempt to access a comments as any owners",
-}
-`;
-
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetComments" without an error but with an entity 1`] = `
-Object {
-  "event": Object {
-    "action": "case_comment_bulk_get",
-    "category": Array [
-      "database",
-    ],
-    "outcome": "success",
-    "type": Array [
-      "access",
-    ],
-  },
-  "kibana": Object {
-    "saved_object": Object {
-      "id": "5",
-      "type": "cases-comments",
-    },
-  },
-  "message": "User has accessed cases-comments [id=5] as owner \\"super\\"",
-}
-`;
-
-exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkGetComments" without an error or entity 1`] = `
-Object {
-  "event": Object {
-    "action": "case_comment_bulk_get",
-    "category": Array [
-      "database",
-    ],
-    "outcome": "success",
-    "type": Array [
-      "access",
-    ],
-  },
-  "message": "User has accessed a comments as any owners",
 }
 `;
 
