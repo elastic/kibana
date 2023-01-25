@@ -287,9 +287,10 @@ export function buildComponentTemplates(params: {
     experimentalDataStreamFeature?.features.doc_value_only_other === true;
 
   if (isDocValueOnlyNumericEnabled || isDocValueOnlyOtherEnabled) {
-    forEachMappings(mappings.properties, (mappingProp) =>
+    forEachMappings(mappings.properties, (mappingProp, name) =>
       applyDocOnlyValueToMapping(
         mappingProp,
+        name,
         experimentalDataStreamFeature,
         isDocValueOnlyNumericEnabled,
         isDocValueOnlyOtherEnabled

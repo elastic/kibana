@@ -163,6 +163,9 @@ describe('experimental_datastream_features', () => {
                   name: {
                     type: 'keyword',
                   },
+                  '@timestamp': {
+                    type: 'date',
+                  },
                 },
               },
             },
@@ -262,6 +265,34 @@ describe('experimental_datastream_features', () => {
                   name: {
                     type: 'keyword',
                     index: false,
+                  },
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should not set index:false on @timestamp field', async () => {
+      const packagePolicy = getNewTestPackagePolicy({
+        isSyntheticSourceEnabled: false,
+        isTSDBEnabled: false,
+        isDocValueOnlyNumeric: false,
+        isDocValueOnlyOther: true,
+      });
+
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+
+      expect(esClient.cluster.getComponentTemplate).toHaveBeenCalled();
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            template: expect.objectContaining({
+              mappings: expect.objectContaining({
+                properties: expect.objectContaining({
+                  '@timestamp': {
+                    type: 'date',
                   },
                 }),
               }),

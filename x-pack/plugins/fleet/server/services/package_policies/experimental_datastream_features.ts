@@ -109,9 +109,10 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     let mappingsProperties = componentTemplate.template.mappings?.properties;
     if (isDocValueOnlyNumericChanged || isDocValueOnlyOtherChanged) {
-      forEachMappings(mappings?.properties ?? {}, (mappingProp) =>
+      forEachMappings(mappings?.properties ?? {}, (mappingProp, name) =>
         applyDocOnlyValueToMapping(
           mappingProp,
+          name,
           featureMapEntry,
           isDocValueOnlyNumericChanged,
           isDocValueOnlyOtherChanged

@@ -14,20 +14,21 @@ import type { ExperimentalDataStreamFeature } from '../../common/types';
 
 export const forEachMappings = (
   mappingProperties: Record<PropertyName, MappingProperty>,
-  process: (prop: MappingProperty) => void
+  process: (prop: MappingProperty, name: string) => void
 ) => {
   Object.keys(mappingProperties).forEach((mapping) => {
     const property = mappingProperties[mapping] as any;
     if (property.properties) {
       forEachMappings(property.properties, process);
     } else {
-      process(property);
+      process(property, mapping);
     }
   });
 };
 
 export const applyDocOnlyValueToMapping = (
   mappingProp: MappingProperty,
+  name: string,
   featureMap: ExperimentalDataStreamFeature,
   isDocValueOnlyNumericChanged: boolean,
   isDocValueOnlyOtherChanged: boolean
@@ -49,8 +50,12 @@ export const applyDocOnlyValueToMapping = (
     updateMapping(mapping, featureMap.features.doc_value_only_numeric);
   }
 
-  const otherSupportedTypes = ['date', 'boolean', 'ip', 'geo_point', 'keyword'];
-  if (isDocValueOnlyOtherChanged && otherSupportedTypes.includes(mapping.type ?? '')) {
+  const otherSupportedTypes = ['date', 'date_nanos', 'boolean', 'ip', 'geo_point', 'keyword'];
+  if (
+    isDocValueOnlyOtherChanged &&
+    name !== '@timestamp' &&
+    otherSupportedTypes.includes(mapping.type ?? '')
+  ) {
     updateMapping(mapping, featureMap.features.doc_value_only_other);
   }
 };
