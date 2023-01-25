@@ -673,7 +673,16 @@
                         "$ref": "#/components/schemas/run_connector_request_serverlog"
                       },
                       {
+                        "$ref": "#/components/schemas/run_connector_request_servicenow"
+                      },
+                      {
                         "$ref": "#/components/schemas/run_connector_request_servicenow_itom"
+                      },
+                      {
+                        "$ref": "#/components/schemas/run_connector_request_servicenow_sir"
+                      },
+                      {
+                        "$ref": "#/components/schemas/run_connector_request_swimlane"
                       }
                     ]
                   }
@@ -689,8 +698,11 @@
                 "runServerLogConnectorRequest": {
                   "$ref": "#/components/examples/run_server_log_connector_request"
                 },
-                "runServiceNowITOMRequest": {
+                "runServiceNowITOMConnectorRequest": {
                   "$ref": "#/components/examples/run_servicenow_itom_connector_request"
+                },
+                "runSwimlaneConnectorRequest": {
+                  "$ref": "#/components/examples/run_swimlane_connector_request"
                 }
               }
             }
@@ -750,6 +762,9 @@
                   },
                   "runServiceNowITOMConnectorResponse": {
                     "$ref": "#/components/examples/run_servicenow_itom_connector_response"
+                  },
+                  "runSwimlaneConnectorResponse": {
+                    "$ref": "#/components/examples/run_swimlane_connector_response"
                   }
                 }
               }
@@ -3549,9 +3564,189 @@
           }
         }
       },
+      "run_connector_request_servicenow": {
+        "title": "Run ServiceNow ITSM connector parameters",
+        "description": "Test ServiceNow incidents.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "subAction",
+              "subActionParams"
+            ],
+            "description": "ServiceNow ITSM connector properties when `subAction` is `getChoices`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "getChoices"
+                ]
+              },
+              "subActionParams": {
+                "type": "object",
+                "description": "The set of configuration properties for the action.",
+                "required": [
+                  "fields"
+                ],
+                "properties": {
+                  "fields": {
+                    "type": "array",
+                    "description": "An array of fields.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "subAction"
+            ],
+            "description": "ServiceNow ITSM connector properties when `subAction` is `getFields`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "getFields"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "subAction",
+              "subActionParams"
+            ],
+            "description": "ServiceNow ITSM connector properties when `subAction` is `getIncident`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "getIncident"
+                ]
+              },
+              "subActionParams": {
+                "type": "object",
+                "description": "The set of configuration properties for the action.",
+                "required": [
+                  "externalId"
+                ],
+                "properties": {
+                  "externalId": {
+                    "type": "string",
+                    "description": "The ServiceNow ITSM issue identifier."
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "subAction",
+              "subActionParams"
+            ],
+            "description": "ServiceNow ITSM connector properties when `subAction` is `pushToService`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "pushToService"
+                ]
+              },
+              "subActionParams": {
+                "type": "object",
+                "description": "The set of configuration properties for the action.",
+                "required": [
+                  "incident"
+                ],
+                "properties": {
+                  "comments": {
+                    "type": "array",
+                    "description": "Additional information that is sent to ServiceNow ITSM.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "comment": {
+                          "type": "string",
+                          "description": "A comment related to the incident. For example, describe how to troubleshoot the issue."
+                        },
+                        "commentId": {
+                          "type": "integer",
+                          "description": "A unique identifier for the comment."
+                        }
+                      }
+                    }
+                  },
+                  "incident": {
+                    "type": "object",
+                    "required": [
+                      "short_description"
+                    ],
+                    "description": "Information necessary to create or update a ServiceNow ITSM incident.",
+                    "properties": {
+                      "category": {
+                        "type": "string",
+                        "description": "The category of the incident."
+                      },
+                      "correlation_display": {
+                        "type": "string",
+                        "description": "A descriptive label of the alert for correlation purposes in ServiceNow."
+                      },
+                      "correlation_id": {
+                        "type": "string",
+                        "description": "The correlation identifier for the security incident. Connectors using the same correlation ID are associated with the same ServiceNow incident. This value determines whether a new ServiceNow incident is created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the correlation ID value in ServiceNow. The maximum character length for this value is 100 characters. NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that ServiceNow creates a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, ServiceNow creates and continually updates a single incident record for the alert.\n"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "The details about the incident."
+                      },
+                      "externalId": {
+                        "type": "string",
+                        "description": "The ServiceNow ITSM issue identifier. If present, the incident is updated. Otherwise, a new incident is created."
+                      },
+                      "impact": {
+                        "type": "string",
+                        "description": "The impact in ServiceNow ITSM."
+                      },
+                      "severity": {
+                        "type": "string",
+                        "description": "The severity of the incident."
+                      },
+                      "short_description": {
+                        "type": "string",
+                        "description": "A short description for the incident, used for searching the contents of the knowledge base."
+                      },
+                      "subcategory": {
+                        "type": "string",
+                        "description": "The subcategory in ServiceNow ITSM."
+                      },
+                      "urgency": {
+                        "type": "string",
+                        "description": "The urgency in ServiceNow ITSM."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "discriminator": {
+          "propertyName": "subAction"
+        }
+      },
       "run_connector_request_servicenow_itom": {
         "title": "Run ServiceNow ITOM connector parameters",
-        "description": "Test a ServiceNow action.",
+        "description": "Test ServiceNow events.",
         "oneOf": [
           {
             "type": "object",
@@ -3652,9 +3847,306 @@
               }
             }
           }
+        ]
+      },
+      "run_connector_request_servicenow_sir": {
+        "title": "Run ServiceNow SecOps connector parameters",
+        "description": "Test ServiceNow security incidents.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "subAction",
+              "subActionParams"
+            ],
+            "description": "ServiceNow SecOps connector properties when `subAction` is `getChoices`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "getChoices"
+                ]
+              },
+              "subActionParams": {
+                "type": "object",
+                "description": "The set of configuration properties for the action.",
+                "required": [
+                  "fields"
+                ],
+                "properties": {
+                  "fields": {
+                    "type": "array",
+                    "description": "An array of fields.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "subAction"
+            ],
+            "description": "ServiceNow SecOps connector properties when `subAction` is `getFields`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "getFields"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "subAction",
+              "subActionParams"
+            ],
+            "description": "ServiceNow SecOps connector properties when `subAction` is `getIncident`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "getIncident"
+                ]
+              },
+              "subActionParams": {
+                "type": "object",
+                "description": "The set of configuration properties for the action.",
+                "required": [
+                  "externalId"
+                ],
+                "properties": {
+                  "externalId": {
+                    "type": "string",
+                    "description": "The ServiceNow SecOps issue identifier."
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "subAction",
+              "subActionParams"
+            ],
+            "description": "ServiceNow SecOps connector properties when `subAction` is `pushToService`.",
+            "properties": {
+              "subAction": {
+                "type": "string",
+                "description": "The action to test.",
+                "enum": [
+                  "pushToService"
+                ]
+              },
+              "subActionParams": {
+                "type": "object",
+                "description": "The set of configuration properties for the action.",
+                "required": [
+                  "incident"
+                ],
+                "properties": {
+                  "comments": {
+                    "type": "array",
+                    "description": "Additional information that is sent to ServiceNow SecOps.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "comment": {
+                          "type": "string",
+                          "description": "A comment related to the incident. For example, describe how to troubleshoot the issue."
+                        },
+                        "commentId": {
+                          "type": "integer",
+                          "description": "A unique identifier for the comment."
+                        }
+                      }
+                    }
+                  },
+                  "incident": {
+                    "type": "object",
+                    "required": [
+                      "short_description"
+                    ],
+                    "description": "Information necessary to create or update a ServiceNow SecOps incident.",
+                    "properties": {
+                      "category": {
+                        "type": "string",
+                        "description": "The category of the incident."
+                      },
+                      "correlation_display": {
+                        "type": "string",
+                        "description": "A descriptive label of the alert for correlation purposes in ServiceNow."
+                      },
+                      "correlation_id": {
+                        "type": "string",
+                        "description": "The correlation identifier for the security incident. Connectors using the same correlation ID are associated with the same ServiceNow incident. This value determines whether a new ServiceNow incident is created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the correlation ID value in ServiceNow. The maximum character length for this value is 100 characters. NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that ServiceNow creates a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, ServiceNow creates and continually updates a single incident record for the alert.\n"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "The details about the incident."
+                      },
+                      "dest_ip": {
+                        "description": "A list of destination IP addresses related to the security incident. The IPs are added as observables to the security incident.",
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "externalId": {
+                        "type": "string",
+                        "description": "The ServiceNow SecOps issue identifier. If present, the incident is updated. Otherwise, a new incident is created."
+                      },
+                      "malware_hash": {
+                        "description": "A list of malware hashes related to the security incident. The hashes are added as observables to the security incident.",
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "malware_url": {
+                        "type": "string",
+                        "description": "A list of malware URLs related to the security incident. The URLs are added as observables to the security incident.",
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "priority": {
+                        "type": "string",
+                        "description": "The priority in ServiceNow."
+                      },
+                      "short_description": {
+                        "type": "string",
+                        "description": "A short description for the incident, used for searching the contents of the knowledge base."
+                      },
+                      "source_ip": {
+                        "description": "A list of source IP addresses related to the security incident. The IPs are added as observables to the security incident.",
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "subcategory": {
+                        "type": "string",
+                        "description": "The subcategory of the incident."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         ],
         "discriminator": {
           "propertyName": "subAction"
+        }
+      },
+      "run_connector_request_swimlane": {
+        "title": "Run Swimlane connector parameters",
+        "description": "Test actions involving Swimlane records.",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "pushToService"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "description": "The set of configuration properties for the action.",
+            "properties": {
+              "comments": {
+                "type": "array",
+                "description": "Additional information that is setnt to Swimlane",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "comment": {
+                      "type": "string",
+                      "description": "A comment related to the incident. For example, describe how to troubleshoot the issue."
+                    },
+                    "commentId": {
+                      "type": "integer",
+                      "description": "A unique identifier for the comment."
+                    }
+                  }
+                }
+              },
+              "incident": {
+                "type": "object",
+                "description": "Information necessary to create or update a Swimlane incident.",
+                "properties": {
+                  "alertId": {
+                    "type": "string",
+                    "description": "The alert identifier."
+                  },
+                  "caseId": {
+                    "type": "string",
+                    "description": "The case identifier for the incident."
+                  },
+                  "caseName": {
+                    "type": "string",
+                    "description": "The case name for the incident."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description of the incident."
+                  },
+                  "ruleName": {
+                    "type": "string",
+                    "description": "The rule name."
+                  },
+                  "severity": {
+                    "type": "string",
+                    "description": "The severity of the incident."
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -3821,6 +4313,27 @@
           }
         }
       },
+      "run_swimlane_connector_request": {
+        "summary": "Run a Swimlane connector to create an incident.",
+        "value": {
+          "params": {
+            "subAction": "pushToService",
+            "subActionParams": {
+              "comments": [
+                {
+                  "commentId": 1,
+                  "comment": "A comment about the incident."
+                }
+              ],
+              "incident": {
+                "caseId": 1000,
+                "caseName": "Case name",
+                "description": "Description of the incident."
+              }
+            }
+          }
+        }
+      },
       "run_index_connector_response": {
         "summary": "Response from running an index connector.",
         "value": {
@@ -3950,6 +4463,25 @@
               "value": 3
             }
           ],
+          "status": "ok"
+        }
+      },
+      "run_swimlane_connector_response": {
+        "summary": "Response from creating a Swimlane incident.",
+        "value": {
+          "connector_id": "a4746470-2f94-11ed-b0e0-87533c532698",
+          "data": {
+            "id": "aKPmBHWzmdRQtx6Mx",
+            "title": "TEST-457",
+            "url": "https://elastic.swimlane.url.us/record/aNcL2xniGHGpa2AHb/aKPmBHWzmdRQtx6Mx",
+            "pushedDate": "2022-09-08T16:52:27.866Z",
+            "comments": [
+              {
+                "commentId": 1,
+                "pushedDate": "2022-09-08T16:52:27.865Z"
+              }
+            ]
+          },
           "status": "ok"
         }
       }

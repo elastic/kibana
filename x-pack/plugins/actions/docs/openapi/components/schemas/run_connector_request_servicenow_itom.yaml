@@ -1,5 +1,5 @@
 title: Run ServiceNow ITOM connector parameters
-description: Test a ServiceNow action.
+description: Test ServiceNow events.
 oneOf:
   - type: object
     required:
@@ -70,5 +70,3 @@ oneOf:
             description: An array of fields.
             items:
               type: string
-discriminator:
-  propertyName: subAction
