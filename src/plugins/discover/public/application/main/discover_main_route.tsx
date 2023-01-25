@@ -264,6 +264,7 @@ export function DiscoverMainRoute(props: Props) {
         },
       },
       dataViewEditor,
+      customBranding: core.customBranding,
     };
 
     return (
