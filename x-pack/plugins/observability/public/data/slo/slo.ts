@@ -52,6 +52,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  enabled: true,
   createdAt: now,
   updatedAt: now,
 };
