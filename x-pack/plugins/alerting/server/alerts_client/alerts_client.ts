@@ -28,7 +28,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { chunk, compact, keys } from 'lodash';
+import { chunk, compact, flatMap, keys } from 'lodash';
 import { Alert } from '../../common/alert_schema/schemas/alert_schema';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { PublicAlertFactory } from '../alert/create_alert_factory';
@@ -121,8 +121,10 @@ export class AlertsClient<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
   private reportedAlerts: Record<string, ReportedAlert & AlertData> = {};
-  private fetchedAlerts: Record<string, Alert & AlertData> = {};
-  private fetchedAlertIndices: Record<string, string> = {};
+  private fetchedAlerts: {
+    indices: Record<string, string>;
+    data: Record<string, Alert & AlertData>;
+  };
 
   constructor(
     private readonly options: AlertsClientParams<
@@ -132,6 +134,7 @@ export class AlertsClient<
       RecoveryActionGroupId
     >
   ) {
+    this.fetchedAlerts = { indices: {}, data: {} };
     this.alertsFactory = this.options.legacyAlertsClient.getExecutorServices();
   }
 
@@ -191,14 +194,14 @@ export class AlertsClient<
       for (const hit of results.flat()) {
         const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
         const alertUuid = alertHit[ALERT_UUID];
+        // TODO - in legacy indices, ALERT_ID is stored in ALERT_INSTANCE_ID
         const alertId = alertHit[ALERT_ID];
-        // in legacy indices, ALERT_ID is stored in ALERT_INSTANCE_ID
 
         // Keep track of existing alert document so we can copy over data if alert is ongoing
-        this.fetchedAlerts[alertId] = alertHit;
+        this.fetchedAlerts.data[alertId] = alertHit;
 
         // Keep track of index so we can update the correct document
-        this.fetchedAlertIndices[alertUuid] = hit._index;
+        this.fetchedAlerts.indices[alertUuid] = hit._index;
       }
     } catch (err) {
       this.options.logger.error(`Error searching for active alerts by UUID - ${err.message}`);
@@ -207,6 +210,9 @@ export class AlertsClient<
 
   public create(alert: ReportedAlert & AlertData) {
     const alertId = alert[ALERT_ID];
+
+    // TODO - calculate context & state from reported alert
+
     // Create a legacy alert using the AlertsFactory interface
     this.alertsFactory
       .create(alert[ALERT_ID])
@@ -217,6 +223,7 @@ export class AlertsClient<
         >
       );
 
+    // Save the reported alert data
     this.reportedAlerts[alertId] = alert;
   }
 
@@ -251,11 +258,15 @@ export class AlertsClient<
     const activeAlertsToIndex: Alert[] = [];
     for (const id of keys(alertsToReturn)) {
       activeAlertsToIndex.push({
+        // Copy current rule data, including current execution UUID
         ...this.rule,
-        [ALERT_ACTION_GROUP]: alertsToReturn[id].meta?.lastScheduledActions?.group!,
+
+        // Copy data from reported alert
+        ...(this.reportedAlerts[id] ? { ...this.reportedAlerts[id] } : {}),
         [ALERT_ID]: id,
+
+        // Copy data from LegacyAlert meta and state
         [ALERT_UUID]: alertsToReturn[id].meta?.uuid!,
-        [ALERT_STATUS]: 'active',
         ...(alertsToReturn[id].state?.start
           ? { [ALERT_START]: alertsToReturn[id].state?.start! }
           : {}),
@@ -264,6 +275,8 @@ export class AlertsClient<
           : {}),
         [ALERT_FLAPPING]: alertsToReturn[id].meta?.flapping,
         [ALERT_FLAPPING_HISTORY]: alertsToReturn[id].meta?.flappingHistory,
+
+        [ALERT_STATUS]: 'active',
         [TIMESTAMP]: currentTime, // TODO - should this be task.startedAt?
       } as Alert);
     }
@@ -271,11 +284,12 @@ export class AlertsClient<
     const recoveredAlertsToIndex: Alert[] = [];
     for (const id of keys(recoveredAlertsToReturn)) {
       recoveredAlertsToIndex.push({
+        // Copy current rule data, including current execution UUID
         ...this.rule,
-        [ALERT_ACTION_GROUP]: recoveredAlertsToReturn[id].meta?.lastScheduledActions?.group!,
         [ALERT_ID]: id,
+
+        // Copy data from LegacyAlert meta and state
         [ALERT_UUID]: recoveredAlertsToReturn[id].meta?.uuid!,
-        [ALERT_STATUS]: 'active',
         ...(recoveredAlertsToReturn[id].state?.start
           ? { [ALERT_START]: recoveredAlertsToReturn[id].state?.start! }
           : {}),
@@ -287,29 +301,29 @@ export class AlertsClient<
           : {}),
         [ALERT_FLAPPING]: recoveredAlertsToReturn[id].meta?.flapping,
         [ALERT_FLAPPING_HISTORY]: recoveredAlertsToReturn[id].meta?.flappingHistory,
+
+        [ALERT_STATUS]: 'recovered',
         [TIMESTAMP]: currentTime, // TODO - should this be task.startedAt?
       } as Alert);
     }
 
-    console.log(
-      `alerts to write ${JSON.stringify([...activeAlertsToIndex, ...recoveredAlertsToIndex])}`
-    );
-
-    // await esClient.bulk({
-    //   refresh: 'wait_for',
-    //   body: [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert) => [
-    //     {
-    //       index: {
-    //         _id: alert[ALERT_UUID],
-    //         // If we know the concrete index for this alert, specify it
-    //         ...(this.trackedAlertIndices[alert[ALERT_UUID]]
-    //           ? { _index: this.trackedAlertIndices[alert[ALERT_UUID]], require_alias: false }
-    //           : {}),
-    //       },
-    //     },
-    //     alert,
-    //   ]),
-    // });
+    await esClient.bulk({
+      refresh: 'wait_for',
+      body: flatMap(
+        [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert) => [
+          {
+            index: {
+              _id: alert[ALERT_UUID],
+              // If we know the concrete index for this alert, specify it
+              ...(this.fetchedAlerts.indices[alert[ALERT_UUID]]
+                ? { _index: this.fetchedAlerts.indices[alert[ALERT_UUID]], require_alias: false }
+                : {}),
+            },
+          },
+          alert,
+        ])
+      ),
+    });
 
     return { alertsToReturn, recoveredAlertsToReturn };
   }

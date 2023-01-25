@@ -72,7 +72,6 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 
 const AlertRequiredSchema = rt.type({
   '@timestamp': schemaDate,
-  'kibana.alert.action_group': schemaString,
   'kibana.alert.id': schemaString,
   'kibana.alert.rule.category': schemaString,
   'kibana.alert.rule.consumer': schemaString,
@@ -85,6 +84,7 @@ const AlertRequiredSchema = rt.type({
   'kibana.space_ids': schemaStringArray,
 });
 const AlertOptionalSchema = rt.partial({
+  'kibana.alert.action_group': schemaString,
   'kibana.alert.duration.us': schemaStringOrNumber,
   'kibana.alert.end': schemaDate,
   'kibana.alert.flapping': schemaBoolean,

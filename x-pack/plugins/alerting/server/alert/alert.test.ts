@@ -9,6 +9,10 @@ import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 
+jest.mock('uuid', () => ({
+  v4: () => 'UUID1',
+}));
+
 let clock: sinon.SinonFakeTimers;
 
 beforeAll(() => {
@@ -21,6 +25,20 @@ describe('getId()', () => {
   test('correctly sets id in constructor', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
     expect(alert.getId()).toEqual('1');
+  });
+});
+
+describe('getUuid()', () => {
+  test('correctly sets uuid in constructor if defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { uuid: 'abc' },
+    });
+    expect(alert.getUuid()).toEqual('abc');
+  });
+
+  test('correctly sets uuid in construcgtor if not defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getUuid()).toEqual('UUID1');
   });
 });
 
@@ -293,7 +311,7 @@ describe('replaceState()', () => {
 describe('updateLastScheduledActions()', () => {
   test('replaces previous lastScheduledActions', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: {},
+      meta: { uuid: 'abc' },
     });
     alert.updateLastScheduledActions('default');
     expect(alert.toJSON()).toEqual({
@@ -304,13 +322,14 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
         flappingHistory: [],
+        uuid: 'abc',
       },
     });
   });
 
   test('replaces previous lastScheduledActions with a scheduled action', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: {},
+      meta: { uuid: 'abc' },
     });
     alert.updateLastScheduledActions('default', 'actionId1');
     expect(alert.toJSON()).toEqual({
@@ -324,6 +343,7 @@ describe('updateLastScheduledActions()', () => {
             actionId1: { date: new Date().toISOString() },
           },
         },
+        uuid: 'abc',
       },
     });
   });
@@ -415,11 +435,12 @@ describe('toJSON', () => {
           flappingHistory: [false, true],
           flapping: false,
           pendingRecoveredCount: 2,
+          uuid: 'UUID1',
         },
       }
     );
     expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false,"pendingRecoveredCount":2}}'
+      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false,"pendingRecoveredCount":2,"uuid":"UUID1"}}'
     );
   });
 });
@@ -446,7 +467,12 @@ describe('toRaw', () => {
 
   test('returns unserialised underlying partial meta if recovered is true', () => {
     const raw = {
-      state: { foo: true },
+      state: {
+        foo: true,
+        duration: '172800000000000',
+        end: '1970-01-01T00:00:00.000Z',
+        start: '1969-12-30T00:00:00.000Z',
+      },
       meta: {
         lastScheduledActions: {
           date: new Date(),
@@ -464,6 +490,11 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+      },
+      state: {
+        duration: '172800000000000',
+        end: '1970-01-01T00:00:00.000Z',
+        start: '1969-12-30T00:00:00.000Z',
       },
     });
   });
@@ -485,6 +516,7 @@ describe('setFlappingHistory', () => {
           "flappingHistory": Array [
             false,
           ],
+          "uuid": "UUID1",
         },
         "state": Object {},
       }
@@ -516,6 +548,7 @@ describe('setFlapping', () => {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "uuid": "UUID1",
         },
         "state": Object {},
       }

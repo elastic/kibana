@@ -18,6 +18,7 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import {
   ActionsCompletion,
   ThrottledActions,
+  RuleAlertData,
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
@@ -50,7 +51,8 @@ const ruleType: NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
-  'recovered'
+  'recovered',
+  RuleAlertData
 > = {
   id: 'test',
   name: 'Test',

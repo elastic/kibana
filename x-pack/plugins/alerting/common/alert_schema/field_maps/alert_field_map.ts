@@ -112,7 +112,7 @@ export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [ALERT_REASON]: {
     type: 'keyword',

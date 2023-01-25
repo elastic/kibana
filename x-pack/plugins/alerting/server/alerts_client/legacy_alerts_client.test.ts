@@ -214,7 +214,6 @@ describe('Legacy Alerts Client', () => {
         date: new Date('1969-12-30T00:00:00.000Z'),
       });
 
-      expect(trackedAlerts.recovered['2'].getUuid()).not.toBeDefined();
       expect(trackedAlerts.recovered['2'].getState()).toEqual({
         start: '1969-12-30T00:00:00.000Z',
         duration: '23423523',
@@ -479,6 +478,7 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [true, true, false, false, false],
                 pendingRecoveredCount: 0,
+                uuid: 'UUID1',
               },
               state: {
                 duration: '172800000000000',
@@ -490,6 +490,7 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [false],
                 pendingRecoveredCount: 0,
+                uuid: 'UUID1',
               },
               state: {
                 duration: '59160000000000',
@@ -782,11 +783,21 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [true, true, false, false, true],
               },
+              state: {
+                duration: '172800000000000',
+                end: '1970-01-01T00:00:00.000Z',
+                start: '1969-12-30T00:00:00.000Z',
+              },
             },
             '2': {
               meta: {
                 flapping: false,
                 flappingHistory: [true],
+              },
+              state: {
+                duration: '59160000000000',
+                end: '1970-01-01T00:00:00.000Z',
+                start: '1969-12-31T07:34:00.000Z',
               },
             },
           },
@@ -913,11 +924,21 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [true, true, false, false, true],
               },
+              state: {
+                duration: '172800000000000',
+                end: '1970-01-01T00:00:00.000Z',
+                start: '1969-12-30T00:00:00.000Z',
+              },
             },
             '2': {
               meta: {
                 flapping: false,
                 flappingHistory: [true],
+              },
+              state: {
+                duration: '59160000000000',
+                end: '1970-01-01T00:00:00.000Z',
+                start: '1969-12-31T07:34:00.000Z',
               },
             },
           },
@@ -1067,6 +1088,7 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [true, true, false, false, false],
                 pendingRecoveredCount: 0,
+                uuid: 'UUID1',
               },
               state: {
                 duration: '172800000000000',
@@ -1078,6 +1100,7 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [false],
                 pendingRecoveredCount: 0,
+                uuid: 'UUID1',
               },
               state: {
                 duration: '59160000000000',
@@ -1089,6 +1112,7 @@ describe('Legacy Alerts Client', () => {
                 flapping: false,
                 flappingHistory: [false, false],
                 pendingRecoveredCount: 0,
+                uuid: 'UUID1',
               },
               state: {
                 duration: '32700000000000',
@@ -1219,6 +1243,7 @@ describe('Legacy Alerts Client', () => {
             flapping: false,
             flappingHistory: [true, true, false, false, false],
             pendingRecoveredCount: 0,
+            uuid: 'UUID1',
           },
           state: {
             duration: '172800000000000',
@@ -1230,6 +1255,7 @@ describe('Legacy Alerts Client', () => {
             flapping: false,
             flappingHistory: [false],
             pendingRecoveredCount: 0,
+            uuid: 'UUID1',
           },
           state: {
             duration: '59160000000000',
@@ -1320,6 +1346,11 @@ describe('Legacy Alerts Client', () => {
           meta: {
             flapping: true,
             flappingHistory: [...flapping, true].slice(1),
+          },
+          state: {
+            duration: '172800000000000',
+            end: '1970-01-01T00:00:00.000Z',
+            start: '1969-12-30T00:00:00.000Z',
           },
         },
       });
