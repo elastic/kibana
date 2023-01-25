@@ -144,10 +144,10 @@ export function MobileStats({
         defaultMessage: 'HTTP requests',
       }),
       icon: getIcon('kubernetesPod'),
-      value: data?.currentPeriod.requests?.value ?? NaN,
+      value: data?.currentPeriod?.requests?.value ?? NaN,
       extra: getComparisonValueFormatter(data?.previousPeriod.requests?.value),
       valueFormatter: (value: number) => valueFormatter(value),
-      trend: data?.currentPeriod.requests.timeseries,
+      trend: data?.currentPeriod?.requests?.timeseries,
       trendShape: MetricTrendShape.Area,
     },
   ];
