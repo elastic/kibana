@@ -32,9 +32,12 @@ const cloudIcons: Record<string, string> = {
 };
 
 const serverlessTitles: Record<string, string> = {
-  'aws.lambda': 'AWS Lambda',
-  'azure.functions': 'Azure Functions',
-  default: 'Serverless',
+  'aws.lambda': i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
+    defaultMessage: 'AWS Lambda',
+  }),
+  'azure.functions': i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
+    defaultMessage: 'Azure Functions',
+  }),
 };
 
 export function getCloudIcon(provider?: string) {
@@ -150,11 +153,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
           getServerlessIcon(icons?.serverlessType, theme.darkMode) || 'node',
       },
       isVisible: !!icons?.serverlessType,
-      title: i18n.translate('xpack.apm.serviceIcons.serverless', {
-        defaultMessage: `${
-          serverlessTitles[icons?.serverlessType || 'default']
-        }`,
-      }),
+      title: serverlessTitles[icons?.serverlessType] || 'Serverless',
       component: <ServerlessDetails serverless={details?.serverless} />,
     },
     {
