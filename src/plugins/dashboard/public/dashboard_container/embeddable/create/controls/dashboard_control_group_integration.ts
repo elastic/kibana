@@ -7,8 +7,8 @@
  */
 
 import { isEqual } from 'lodash';
+import { Observable } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { Observable, Subscription } from 'rxjs';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
 
@@ -36,10 +36,8 @@ type DashboardControlGroupCommonKeys = keyof Pick<
   'filters' | 'lastReloadRequestTime' | 'timeRange' | 'query'
 >;
 
-export async function startSyncingDashboardControlGroup(this: DashboardContainer) {
+export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
-  const subscriptions = new Subscription();
-
   const isControlGroupInputEqual = () =>
     persistableControlGroupInputIsEqual(
       this.controlGroup!.getInput(),
@@ -53,7 +51,7 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
     chainingSystem: deepEqual,
     ignoreParentSettings: deepEqual,
   };
-  subscriptions.add(
+  this.subscriptions.add(
     this.controlGroup
       .getInput$()
       .pipe(
@@ -86,7 +84,7 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
   };
 
   // pass down any pieces of input needed to refetch or force refetch data for the controls
-  subscriptions.add(
+  this.subscriptions.add(
     (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(
         distinctUntilChanged((a, b) =>
@@ -109,7 +107,7 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
   );
 
   // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
-  subscriptions.add(
+  this.subscriptions.add(
     (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
       .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
       .subscribe(() => {
@@ -126,7 +124,7 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
   );
 
   // when control group outputs filters, force a refresh!
-  subscriptions.add(
+  this.subscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -138,7 +136,7 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
       .subscribe(() => this.updateInput({ lastReloadRequestTime: Date.now() }))
   );
 
-  subscriptions.add(
+  this.subscriptions.add(
     this.controlGroup
       .getOutput$()
       .pipe(
@@ -152,7 +150,7 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
   );
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
-  subscriptions.add(
+  this.subscriptions.add(
     this.getAnyChildOutputChange$().subscribe(() => {
       if (!this.controlGroup) {
         return;
@@ -168,12 +166,6 @@ export async function startSyncingDashboardControlGroup(this: DashboardContainer
       this.controlGroup.anyControlOutputConsumerLoading$.next(false);
     })
   );
-
-  return {
-    stopSyncingWithControlGroup: () => {
-      subscriptions.unsubscribe();
-    },
-  };
 }
 
 export const combineDashboardFiltersWithControlGroupFilters = (

@@ -18,7 +18,7 @@ import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { useDashboardContainer } from '../use_dashboard_container';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { getPanelLayoutsAreEqual } from '../../embeddable/state/diffing/dashboard_diffing_utils';
@@ -119,7 +119,7 @@ const getDefaultPerformanceTracker: () => DashboardRenderPerformanceTracker = ()
 });
 
 export const DashboardGrid = () => {
-  const { embeddableInstance: dashboard } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   const panels = dashboard.select((state) => state.explicitInput.panels);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);

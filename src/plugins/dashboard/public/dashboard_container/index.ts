@@ -13,3 +13,5 @@ export {
   type DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
 } from './embeddable/dashboard_container_factory';
+
+export { DashboardRenderer, type DashboardAPI } from './dashboard_renderer';

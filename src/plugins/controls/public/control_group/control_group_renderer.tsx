@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { pluginServices } from '../services';
-import { getDefaultControlGroupInput } from '../../common';
 import {
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
   CONTROL_GROUP_TYPE,
 } from './types';
-import { ControlGroupContainer } from './embeddable/control_group_container';
+import { pluginServices } from '../services';
+import { getDefaultControlGroupInput } from '../../common';
 import { controlGroupReducers } from './state/control_group_reducers';
 import { controlGroupInputBuilder } from './control_group_input_builder';
+import { ControlGroupContainer } from './embeddable/control_group_container';
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];

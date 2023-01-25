@@ -16,7 +16,6 @@ import {
 } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
 import { EmbeddableInput, EmbeddableOutput, Embeddable } from '@kbn/embeddable-plugin/public';
-import { PropsWithChildren } from 'react';
 
 export interface ReduxEmbeddableSyncSettings<
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
@@ -51,9 +50,9 @@ export type ReduxEmbeddableSelect<
 ) => Selected;
 
 /**
- * The Redux Embeddable Dispatcher is a collection of functions which dispatch actions to the correct store.
+ * The Redux Embeddable Setters are a collection of functions which dispatch actions to the correct store.
  */
-export type ReduxEmbeddableDispatch<
+export type ReduxEmbeddableSetters<
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
   ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
 > = {
@@ -63,26 +62,18 @@ export type ReduxEmbeddableDispatch<
 };
 
 /**
- * The return type from setupReduxEmbeddable. Contains a wrapper which comes with the store provider and provides the context to react components,
- * but also returns the context object to allow the embeddable class to interact with the redux store.
+ * The return type from createReduxEmbeddableTools. Contains tools to get state, select state for react components,
+ * set state, and react to state changes.
  */
 export interface ReduxEmbeddableTools<
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
   ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
 > {
   cleanup: () => void;
-  Wrapper: React.FC<PropsWithChildren<{}>>;
-  store: EnhancedStore<ReduxEmbeddableStateType, AnyAction>;
+  select: ReduxEmbeddableSelect<ReduxEmbeddableStateType>;
   getState: EnhancedStore<ReduxEmbeddableStateType>['getState'];
   onStateChange: EnhancedStore<ReduxEmbeddableStateType>['subscribe'];
-
-  // TODO remove these, as they've been eclipsed by the new dispatch and select types
-  dispatch: EnhancedStore<ReduxEmbeddableStateType>['dispatch'];
-  actions: ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType>['actions'];
-
-  // Here are the new types
-  dispatchActions: ReduxEmbeddableDispatch<ReduxEmbeddableStateType, ReducerType>;
-  select: ReduxEmbeddableSelect<ReduxEmbeddableStateType>;
+  dispatch: ReduxEmbeddableSetters<ReduxEmbeddableStateType, ReducerType>;
 }
 
 /**

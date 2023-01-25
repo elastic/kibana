@@ -14,7 +14,11 @@ export {
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
 } from './dashboard_constants';
-export { DASHBOARD_CONTAINER_TYPE } from './dashboard_container';
+export {
+  type DashboardAPI,
+  DashboardRenderer,
+  DASHBOARD_CONTAINER_TYPE,
+} from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
 export {

@@ -8,7 +8,15 @@
 
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -28,14 +36,13 @@ import {
   removeSearchSessionIdFromURL,
   createSessionRestorationDataProvider,
 } from './url/search_sessions_integration';
+import { DashboardAPI, DashboardRenderer } from '..';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import type { DashboardContainer } from '../dashboard_container';
 import { type DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
-import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 
@@ -45,6 +52,16 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
 }
+
+export const DashboardAPIContext = createContext<DashboardAPI | null>(null);
+
+export const useDashboardAPI = (): DashboardAPI => {
+  const api = useContext<DashboardAPI | null>(DashboardAPIContext);
+  if (api == null) {
+    throw new Error('useDashboardAPI must be used inside DashboardAPIContext');
+  }
+  return api!;
+};
 
 export function DashboardApp({
   savedDashboardId,
@@ -56,10 +73,7 @@ export function DashboardApp({
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
-
-  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>(
-    undefined
-  );
+  const dashboardAPI = useRef<DashboardAPI>(null);
 
   /**
    * Unpack & set up dashboard services
@@ -163,25 +177,16 @@ export function DashboardApp({
   ]);
 
   /**
-   * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the
-   * dashboard's redux state.
-   */
-  const DashboardReduxWrapper = useMemo(
-    () => dashboardContainer?.DashboardReduxWrapper,
-    [dashboardContainer]
-  );
-
-  /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
-    if (!dashboardContainer) return;
+    if (!dashboardAPI.current) return;
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
-      dashboardContainer,
+      dashboardAPI: dashboardAPI.current,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardContainer, kbnUrlStateStorage]);
+  }, [dashboardAPI, kbnUrlStateStorage]);
 
   return (
     <>
@@ -190,17 +195,17 @@ export function DashboardApp({
       )}
       {!showNoDataPage && (
         <>
-          {DashboardReduxWrapper && (
-            <DashboardReduxWrapper>
+          {dashboardAPI.current && (
+            <DashboardAPIContext.Provider value={dashboardAPI.current}>
               <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
-            </DashboardReduxWrapper>
+            </DashboardAPIContext.Provider>
           )}
 
           {getLegacyConflictWarning?.()}
-          <DashboardContainerRenderer
+          <DashboardRenderer
+            ref={dashboardAPI}
             savedObjectId={savedDashboardId}
             getCreationOptions={getCreationOptions}
-            onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
           />
         </>
       )}

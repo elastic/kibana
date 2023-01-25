@@ -39,7 +39,6 @@ export {
 } from './components';
 
 export {
-  useReduxEmbeddableContext,
   lazyLoadReduxEmbeddablePackage,
   cleanFiltersForSerialize,
   type ReduxEmbeddableState,

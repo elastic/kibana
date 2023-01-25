@@ -17,8 +17,8 @@ import {
 } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
+import { useDashboardContainer } from '../use_dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -55,7 +55,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const {
       embeddable: { EmbeddablePanel: PanelComponent },
     } = pluginServices.getServices();
-    const { embeddableInstance: container } = useDashboardContainerContext();
+    const container = useDashboardContainer();
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -133,7 +133,7 @@ export const DashboardGridItem: FC<Props> = (props: Props) => {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
 
-  const { embeddableInstance: dashboard } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
   const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');

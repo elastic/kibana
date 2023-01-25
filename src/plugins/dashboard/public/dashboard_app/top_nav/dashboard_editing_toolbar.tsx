@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import React, { useCallback } from 'react';
+
 import {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -16,16 +15,18 @@ import {
   QuickButtonProps,
   SolutionToolbar,
 } from '@kbn/presentation-util-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import React from 'react';
-import { useCallback } from 'react';
-import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
-import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
-import { pluginServices } from '../../services/plugin_services';
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+
 import { EditorMenu } from './editor_menu';
+import { useDashboardAPI } from '../dashboard_app';
+import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
 export function DashboardEditingToolbar() {
   const {
@@ -37,7 +38,7 @@ export function DashboardEditingToolbar() {
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
 
-  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
+  const dashboard = useDashboardAPI();
 
   const stateTransferService = getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
@@ -103,10 +104,7 @@ export function DashboardEditingToolbar() {
         return;
       }
 
-      const newEmbeddable = await dashboardContainer.addNewEmbeddable(
-        embeddableFactory.type,
-        explicitInput
-      );
+      const newEmbeddable = await dashboard.addNewEmbeddable(embeddableFactory.type, explicitInput);
 
       if (newEmbeddable) {
         toasts.addSuccess({
@@ -115,7 +113,7 @@ export function DashboardEditingToolbar() {
         });
       }
     },
-    [trackUiMetric, dashboardContainer, toasts]
+    [trackUiMetric, dashboard, toasts]
   );
 
   const getVisTypeQuickButton = (quickButtonForType: typeof quickButtonVisTypes[0]) => {
@@ -169,12 +167,12 @@ export function DashboardEditingToolbar() {
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
     <AddFromLibraryButton
-      onClick={() => dashboardContainer.addFromLibrary()}
+      onClick={() => dashboard.addFromLibrary()}
       data-test-subj="dashboardAddPanelButton"
     />,
   ];
-  if (dashboardContainer.controlGroup) {
-    extraButtons.push(<ControlsToolbarButton controlGroup={dashboardContainer.controlGroup} />);
+  if (dashboard.controlGroup) {
+    extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
   }
 
   return (

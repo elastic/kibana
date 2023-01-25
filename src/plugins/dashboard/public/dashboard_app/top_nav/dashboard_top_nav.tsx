@@ -25,13 +25,13 @@ import {
   unsavedChangesBadgeStrings,
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
@@ -68,7 +68,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
-  const { embeddableInstance: dashboard } = useDashboardContainerContext();
+  const dashboard = useDashboardAPI();
   const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);

@@ -10,10 +10,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { useDashboardContainerContext } from '../../../dashboard_container_renderer';
+import { useDashboardContainer } from '../../../component/use_dashboard_container';
 
 export const DashboardOptions = () => {
-  const { embeddableInstance: dashboard } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
   const syncColors = dashboard.select((state) => state.explicitInput.syncColors);

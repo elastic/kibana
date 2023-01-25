@@ -48,6 +48,7 @@ import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { DashboardReduxState, DashboardRenderPerformanceStats } from '../types';
+import { DashboardContainerContext } from '../component/use_dashboard_container';
 import { dashboardContainerReducers } from './state/dashboard_container_reducers';
 import { startDiffingDashboardState } from './state/diffing/dashboard_diffing_integration';
 import { DASHBOARD_LOADED_EVENT, DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
@@ -80,14 +81,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // state management
   public select: DashboardReduxEmbeddableTools['select'];
   public getState: DashboardReduxEmbeddableTools['getState'];
-  public dispatch: DashboardReduxEmbeddableTools['dispatchActions'];
+  public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
 
-  // TODO remove this
-  public DashboardReduxWrapper: DashboardReduxEmbeddableTools['Wrapper'];
-
   public subscriptions: Subscription = new Subscription();
-
   public controlGroup?: ControlGroupContainer;
 
   // performance monitoring
@@ -160,12 +157,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.onStateChange = reduxTools.onStateChange;
     this.cleanupStateTools = reduxTools.cleanup;
-    this.dispatch = reduxTools.dispatchActions;
     this.getState = reduxTools.getState;
+    this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
-
-    // TODO remove this
-    this.DashboardReduxWrapper = reduxTools.Wrapper;
   }
 
   public getDashboardSavedObjectId() {
@@ -213,9 +207,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: this.chrome }}>
           <KibanaThemeProvider theme$={this.theme$}>
-            <this.DashboardReduxWrapper>
+            <DashboardContainerContext.Provider value={this}>
               <DashboardViewport />
-            </this.DashboardReduxWrapper>
+            </DashboardContainerContext.Provider>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
       </I18nProvider>,
@@ -263,12 +257,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // ------------------------------------------------------------------------------------------------------
   public stopSyncingWithUnifiedSearch?: () => void;
   private cleanupStateTools: () => void;
-  private onDestroyControlGroup?: () => void;
 
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
-    this.onDestroyControlGroup?.();
+    this.controlGroup?.destroy();
     this.subscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);

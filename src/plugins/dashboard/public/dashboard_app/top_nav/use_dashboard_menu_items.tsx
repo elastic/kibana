@@ -14,13 +14,13 @@ import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { DashboardRedirect } from '../types';
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 
 export const useDashboardMenuItems = ({
   redirectTo,
@@ -46,7 +46,7 @@ export const useDashboardMenuItems = ({
   /**
    * Unpack dashboard state from redux
    */
-  const { embeddableInstance: dashboard } = useDashboardContainerContext();
+  const dashboard = useDashboardAPI();
 
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);

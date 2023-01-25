@@ -13,8 +13,8 @@ import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
+import { useDashboardContainer } from '../use_dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 
 export const DashboardViewport = () => {
   const {
@@ -22,7 +22,7 @@ export const DashboardViewport = () => {
   } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
-  const { embeddableInstance: dashboard } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   /**
    * Render Control group

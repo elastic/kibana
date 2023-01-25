@@ -8,8 +8,6 @@
 
 import { ReduxEmbeddablePackage } from './types';
 
-export { useReduxEmbeddableContext } from './use_redux_embeddable_context';
-
 export type { ReduxEmbeddableState, ReduxEmbeddableTools, ReduxEmbeddablePackage } from './types';
 export { cleanFiltersForSerialize } from './clean_redux_embeddable_state';
 
