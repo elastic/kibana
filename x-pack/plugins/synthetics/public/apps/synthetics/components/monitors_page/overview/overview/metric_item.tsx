@@ -12,7 +12,6 @@ import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { ManualTestRunProgress } from './manual_run_progress';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
@@ -23,6 +22,7 @@ import {
   manualTestRunInProgressSelector,
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
+import { MetricItemIcon } from './metric_item_icon';
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -113,7 +113,7 @@ export const MetricItem = ({
               data={[
                 [
                   {
-                    icon: () => <ManualTestRunProgress configId={monitor.configId} />,
+                    icon: () => <MetricItemIcon configId={monitor.configId} />,
                     title: monitor.name,
                     subtitle: locationName,
                     value: averageDuration,
