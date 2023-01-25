@@ -22,8 +22,11 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-common",
     "@kbn/monaco",
     "@kbn/config-schema",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-custom-branding-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -136,6 +136,7 @@ type TestSubject =
   | 'localeField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'policyNameField.input'
   | 'messageField.input'
   | 'mockCodeEditor'
   | 'pathField.input'

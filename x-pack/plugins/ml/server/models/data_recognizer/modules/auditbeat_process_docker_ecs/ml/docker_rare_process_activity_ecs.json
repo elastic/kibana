@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Auditbeat: Detect rare process executions in docker containers (ECS)",
   "groups": ["auditd"],
   "analysis_config": {

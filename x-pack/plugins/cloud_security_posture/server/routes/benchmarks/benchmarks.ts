@@ -115,7 +115,8 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
 
         const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
           cspContext.agentService,
-          agentPolicies
+          agentPolicies,
+          cspContext.logger
         );
 
         const benchmarks = await createBenchmarks(

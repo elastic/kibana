@@ -75,6 +75,7 @@ interface DeleteCaseArgs extends GetCaseArgs, IndexRefresh {}
 
 interface GetCasesArgs {
   caseIds: string[];
+  fields?: string[];
 }
 
 interface FindCommentsArgs {
@@ -361,11 +362,12 @@ export class CasesService {
 
   public async getCases({
     caseIds,
+    fields,
   }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
       const cases = await this.unsecuredSavedObjectsClient.bulkGet<ESCaseAttributes>(
-        caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
+        caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId, fields }))
       );
       return transformBulkResponseToExternalModel(cases);
     } catch (error) {
@@ -564,11 +566,16 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);
+
+      transformedAttributes.attributes.total_alerts = -1;
+      transformedAttributes.attributes.total_comments = -1;
+
       const createdCase = await this.unsecuredSavedObjectsClient.create<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
         { id, references: transformedAttributes.referenceHandler.build(), refresh }
       );
+
       return transformSavedObjectToExternalModel(createdCase);
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);

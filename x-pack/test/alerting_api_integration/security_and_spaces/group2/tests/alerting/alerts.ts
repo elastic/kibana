@@ -11,11 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
@@ -34,7 +33,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/148092
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);

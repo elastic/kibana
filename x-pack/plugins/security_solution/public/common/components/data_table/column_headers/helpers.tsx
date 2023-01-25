@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
@@ -151,14 +152,55 @@ export const getSchema = (type: string | undefined): BUILT_IN_SCHEMA | undefined
   }
 };
 
+const eventRenderedViewColumns: ColumnHeaderOptions[] = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: '@timestamp',
+    displayAsText: i18n.translate(
+      'xpack.securitySolution.EventRenderedView.timestampTitle.column',
+      {
+        defaultMessage: 'Timestamp',
+      }
+    ),
+    initialWidth: DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH + 50,
+    actions: false,
+    isExpandable: false,
+    isResizable: false,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    displayAsText: i18n.translate('xpack.securitySolution.EventRenderedView.ruleTitle.column', {
+      defaultMessage: 'Rule',
+    }),
+    id: 'kibana.alert.rule.name',
+    initialWidth: DEFAULT_TABLE_COLUMN_MIN_WIDTH + 50,
+    linkField: 'kibana.alert.rule.uuid',
+    actions: false,
+    isExpandable: false,
+    isResizable: false,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'eventSummary',
+    displayAsText: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
+      defaultMessage: 'Event Summary',
+    }),
+    actions: false,
+    isExpandable: false,
+    isResizable: false,
+  },
+];
+
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
-  browserFields: BrowserFields
+  browserFields: BrowserFields,
+  isEventRenderedView?: boolean
 ): ColumnHeaderOptions[] => {
   const browserFieldByName = getAllFieldsByName(browserFields);
-  return headers
-    ? headers.map((header) => {
+  const headersToMap = isEventRenderedView ? eventRenderedViewColumns : headers;
+  return headersToMap
+    ? headersToMap.map((header) => {
         const browserField: Partial<BrowserField> | undefined = browserFieldByName[header.id];
 
         // augment the header with metadata from browserFields:

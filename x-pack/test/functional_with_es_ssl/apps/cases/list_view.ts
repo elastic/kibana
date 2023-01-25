@@ -306,6 +306,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * There is no easy way to clear the filtering.
          * Refreshing the page seems to be easier.
          */
+        await browser.clearLocalStorage();
         await cases.navigation.navigateToApp();
       });
 
@@ -390,6 +391,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+      });
+
+      it('persists status filters', async () => {
+        await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
+      });
+
+      it('persists severity filters', async () => {
+        await cases.casesTable.changeSeverity(CaseSeverity.MEDIUM, 0);
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
+        await browser.refresh();
+        await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
       describe('assignees filtering', () => {
@@ -534,7 +549,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Severity', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/148468
+      // FLAKY: https://github.com/elastic/kibana/issues/148469
+      describe.skip('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();

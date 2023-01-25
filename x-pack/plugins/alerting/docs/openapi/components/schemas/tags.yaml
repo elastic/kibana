@@ -1,0 +1,5 @@
+type: array
+description: The tags for the rule.
+items:
+  type: string
+default: []

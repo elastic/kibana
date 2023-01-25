@@ -25,6 +25,7 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
+import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
   Rule,
@@ -49,6 +50,7 @@ import {
   RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { FieldMap } from '../common/alert_schema/field_maps/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -57,6 +59,7 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
+  getRulesSettingsClient: () => RulesSettingsClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -123,7 +126,7 @@ export type ExecutorType<
   ActionGroupIds extends string = never
 > = (
   options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => Promise<State | void>;
+) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
@@ -156,6 +159,11 @@ export interface SummarizedAlerts {
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface IRuleTypeAlerts {
+  context: string;
+  namespace?: string;
+  fieldMap: FieldMap;
+}
 
 export interface RuleType<
   Params extends RuleTypeParams = never,
@@ -202,6 +210,12 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   getSummarizedAlerts?: GetSummarizedAlertsFn;
+  alerts?: IRuleTypeAlerts;
+  /**
+   * Determines whether framework should
+   * automatically make recovery determination. Defaults to true.
+   */
+  autoRecoverAlerts?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -290,6 +304,7 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  running?: boolean | null;
 }
 
 export interface AlertingPlugin {
@@ -318,6 +333,9 @@ export interface InvalidatePendingApiKey {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
+export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerActions } from './register';
+export { registerUIActions as registerActions } from './register';
