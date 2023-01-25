@@ -38,9 +38,6 @@ export interface KibanaDependencies {
       hasUserDataView: () => Promise<boolean>;
     };
   };
-  customBranding: {
-    showPlainSpinner?: boolean;
-  };
 }
 /**
  * An interface containing a collection of Kibana plugins and services required to

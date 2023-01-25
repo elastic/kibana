@@ -44,9 +44,6 @@ export const DashboardAppNoDataPage = ({
     },
     dataViews,
     dataViewEditor,
-    customBranding: {
-      hasCustomBranding: customBranding.customBranding.hasCustomBranding$,
-    },
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
