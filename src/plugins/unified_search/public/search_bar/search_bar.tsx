@@ -99,51 +99,54 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
   SearchBarInjectedDeps;
 
-function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
-  customSubmitButton,
-  dateRangeFrom,
-  dateRangeTo,
-  dataTestSubj,
-  dataViewPickerComponentProps,
-  displayStyle,
-  fillSubmitButton,
-  filters,
-  hiddenFilterPanelOptions,
-  iconType,
-  indexPatterns,
-  indicateNoData,
-  isClearable,
-  isDisabled,
-  isLoading,
-  isRefreshPaused,
-  isScreenshotMode,
-  nonKqlMode,
-  placeholder,
-  query,
-  refreshInterval,
-  savedQuery,
-  screenTitle,
-  showAutoRefreshOnly = false,
-  showDatePicker = true,
-  showFilterBar = true,
-  showSaveQuery,
-  showSubmitButton = true,
-  showQueryInput,
-  showQueryMenu = true,
-  submitButtonStyle,
-  suggestionsSize,
-  textBasedLanguageModeErrors,
-  timeHistory,
-  onClearSavedQuery,
-  onFiltersUpdated,
-  onQueryChange,
-  onQuerySubmit,
-  onRefresh,
-  onRefreshChange,
-  onSaved,
-  onSavedQueryUpdated,
-  onTextBasedSavedAndExit,
-}: SearchBarProps<QT>) {
+function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>(
+  props: SearchBarProps<QT>
+) {
+  const {
+    customSubmitButton,
+    dateRangeFrom,
+    dateRangeTo,
+    dataTestSubj,
+    dataViewPickerComponentProps,
+    displayStyle,
+    fillSubmitButton,
+    filters,
+    hiddenFilterPanelOptions,
+    iconType,
+    indexPatterns,
+    indicateNoData,
+    isClearable,
+    isDisabled,
+    isLoading,
+    isRefreshPaused,
+    isScreenshotMode,
+    nonKqlMode,
+    placeholder,
+    query,
+    refreshInterval,
+    savedQuery,
+    screenTitle,
+    showAutoRefreshOnly = false,
+    showDatePicker = true,
+    showFilterBar = true,
+    showSaveQuery,
+    showSubmitButton = true,
+    showQueryInput,
+    showQueryMenu = true,
+    submitButtonStyle,
+    suggestionsSize,
+    textBasedLanguageModeErrors,
+    timeHistory,
+    onClearSavedQuery,
+    onFiltersUpdated,
+    onQueryChange,
+    onQuerySubmit,
+    onRefresh,
+    onRefreshChange,
+    onSaved,
+    onSavedQueryUpdated,
+    onTextBasedSavedAndExit,
+  } = props;
   const {
     appName,
     data: {
@@ -175,32 +178,59 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
     dateRangeTo ?? 'now'
   );
   const [stateOpenQueryBarMenu, setStateOpenQueryBarMenu] = useState(false);
+  // Needed to do complicated state comparisons...
+  const [stateProps, setStateProps] = useState(props);
 
   useEffect(() => {
-    if (!query) {
-      if (stateQuery) {
-        setStateQuery(undefined);
+    if (!isEqual(stateProps, props)) {
+      if (!query) {
+        if (stateQuery) {
+          setStateQuery(undefined);
+        }
       }
-    }
 
-    if (query) {
-      // 'query' is a Query
-      if (isOfQueryType(query)) {
-        if (isOfQueryType(stateQuery)) {
-          if (stateQuery?.language !== query?.language) {
-            setStateQuery({ query: '', language: query.language });
+      if (query) {
+        // 'query' is a Query
+        if (isOfQueryType(query)) {
+          if (isOfQueryType(stateQuery)) {
+            if (query.query !== stateQuery?.query) {
+              setStateQuery({ query: query.query, language: query.language });
+            }
+
+            if (stateQuery?.language !== query?.language) {
+              setStateQuery({ query: '', language: query.language });
+            }
+          }
+        }
+
+        // 'query' is an AggregateQuery
+        if (!isOfQueryType(query)) {
+          if (!isEqual(query, stateQuery)) {
+            setStateQuery({ ...query });
           }
         }
       }
 
-      // 'query' is an AggregateQuery
-      if (!isOfQueryType(query)) {
-        if (!isEqual(query, stateQuery)) {
-          setStateQuery({ ...query });
-        }
+      if (dateRangeFrom !== stateProps.dateRangeFrom) {
+        setStateDateRangeFrom(dateRangeFrom);
       }
+
+      if (dateRangeTo !== stateProps.dateRangeTo) {
+        setStateDateRangeTo(dateRangeTo);
+      }
+
+      setStateProps(props);
     }
-  }, [query, stateQuery]);
+  }, [
+    dateRangeFrom,
+    dateRangeTo,
+    props,
+    query,
+    stateDateRangeFrom,
+    stateDateRangeTo,
+    stateProps,
+    stateQuery,
+  ]);
 
   const timeRangeForSuggestionsOverride = showDatePicker ? undefined : false;
 
@@ -363,8 +393,6 @@ function SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query>({
   const handleCloseQueryBarMenu = () => setStateOpenQueryBarMenu(false);
 
   const toggleFilterBarMenuPopover = (open: boolean) => setStateOpenQueryBarMenu(open);
-
-  console.log('stateQuery', stateQuery);
 
   return (
     <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
