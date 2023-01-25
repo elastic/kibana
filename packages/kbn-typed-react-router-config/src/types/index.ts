@@ -48,6 +48,7 @@ export interface RouteMatch<TRoute extends Route = Route> {
       : {};
   };
   hasExactMatch: boolean;
+  errorMessage?: string;
 }
 
 type ToRouteMatch<TRoutes extends Route[]> = TRoutes extends [Route]

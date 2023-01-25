@@ -23,6 +23,7 @@ export function RouteRenderer() {
           match={match}
           element={prev}
           hasExactMatch={match.hasExactMatch}
+          errorMessage={match.errorMessage}
         >
           {element}
         </CurrentRouteContextProvider>

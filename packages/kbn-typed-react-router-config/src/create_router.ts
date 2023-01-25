@@ -125,7 +125,15 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
         );
 
         if (isLeft(decoded)) {
-          throw new Error(PathReporter.report(decoded).join('\n'));
+          return {
+            match: {
+              ...matchedRoute.match,
+              params: matchedRoute.match.params,
+            },
+            route,
+            hasExactMatch,
+            errorMessage: PathReporter.report(decoded).join('\n'),
+          };
         }
 
         return {

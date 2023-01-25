@@ -14,6 +14,7 @@ const CurrentRouteContext = createContext<
       match: RouteMatch;
       element: React.ReactElement;
       hasExactMatch: boolean;
+      errorMessage?: string;
     }
   | undefined
 >(undefined);
@@ -22,15 +23,17 @@ export const CurrentRouteContextProvider = ({
   match,
   element,
   hasExactMatch,
+  errorMessage,
   children,
 }: {
   match: RouteMatch;
   element: React.ReactElement;
   hasExactMatch: boolean;
+  errorMessage?: string;
   children: React.ReactElement;
 }) => {
   return (
-    <CurrentRouteContext.Provider value={{ match, element, hasExactMatch }}>
+    <CurrentRouteContext.Provider value={{ match, element, hasExactMatch, errorMessage }}>
       <OutletContextProvider element={element}>{children}</OutletContextProvider>
     </CurrentRouteContext.Provider>
   );
