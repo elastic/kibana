@@ -98,8 +98,8 @@ Object {
               >
                 <input
                   class="euiCheckbox__input"
-                  data-test-subj="import-data-modal-checkbox-label"
-                  id="import-data-modal-checkbox-label"
+                  data-test-subj="importDataModalCheckboxLabel"
+                  id="importDataModalCheckboxLabel"
                   type="checkbox"
                 />
                 <div
@@ -107,7 +107,7 @@ Object {
                 />
                 <label
                   class="euiCheckbox__label"
-                  for="import-data-modal-checkbox-label"
+                  for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
                 </label>
@@ -359,8 +359,8 @@ Object {
               >
                 <input
                   class="euiCheckbox__input"
-                  data-test-subj="import-data-modal-checkbox-label"
-                  id="import-data-modal-checkbox-label"
+                  data-test-subj="importDataModalCheckboxLabel"
+                  id="importDataModalCheckboxLabel"
                   type="checkbox"
                 />
                 <div
@@ -368,7 +368,7 @@ Object {
                 />
                 <label
                   class="euiCheckbox__label"
-                  for="import-data-modal-checkbox-label"
+                  for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
                 </label>
@@ -581,8 +581,8 @@ Object {
               >
                 <input
                   class="euiCheckbox__input"
-                  data-test-subj="import-data-modal-checkbox-label"
-                  id="import-data-modal-checkbox-label"
+                  data-test-subj="importDataModalCheckboxLabel"
+                  id="importDataModalCheckboxLabel"
                   type="checkbox"
                 />
                 <div
@@ -590,7 +590,7 @@ Object {
                 />
                 <label
                   class="euiCheckbox__label"
-                  for="import-data-modal-checkbox-label"
+                  for="importDataModalCheckboxLabel"
                 >
                   checkBoxLabel
                 </label>

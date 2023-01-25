@@ -100,17 +100,22 @@ describe('ImportDataModal', () => {
         successMessage={jest.fn((totalCount) => 'successMessage')}
         title="title"
         showExceptionsCheckBox={true}
+        showActionConnectorsCheckBox={true}
       />
     );
     const overwriteCheckbox: HTMLInputElement = queryByTestId(
-      'import-data-modal-checkbox-label'
+      'importDataModalCheckboxLabel'
     ) as HTMLInputElement;
     const exceptionCheckbox: HTMLInputElement = queryByTestId(
-      'import-data-modal-exceptions-checkbox-label'
+      'importDataModalExceptionsCheckboxLabel'
+    ) as HTMLInputElement;
+    const connectorsCheckbox: HTMLInputElement = queryByTestId(
+      'importDataModalActionConnectorsCheckbox'
     ) as HTMLInputElement;
 
     await waitFor(() => fireEvent.click(overwriteCheckbox));
     await waitFor(() => fireEvent.click(exceptionCheckbox));
+    await waitFor(() => fireEvent.click(connectorsCheckbox));
 
     await waitFor(() =>
       fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
@@ -119,6 +124,7 @@ describe('ImportDataModal', () => {
     );
     expect(overwriteCheckbox.checked).toBeTruthy();
     expect(exceptionCheckbox.checked).toBeTruthy();
+    expect(connectorsCheckbox.checked).toBeTruthy();
 
     await waitFor(() => {
       fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
@@ -128,6 +134,7 @@ describe('ImportDataModal', () => {
 
     expect(overwriteCheckbox.checked).toBeFalsy();
     expect(exceptionCheckbox.checked).toBeFalsy();
+    expect(connectorsCheckbox.checked).toBeFalsy();
   });
   test('should uncheck the selected checkboxes after closing the Flyout', async () => {
     const { queryByTestId, getAllByRole } = render(
@@ -146,20 +153,25 @@ describe('ImportDataModal', () => {
         successMessage={jest.fn((totalCount) => 'successMessage')}
         title="title"
         showExceptionsCheckBox={true}
+        showActionConnectorsCheckBox={true}
       />
     );
 
     const closeButton = getAllByRole('button')[0];
 
     const overwriteCheckbox: HTMLInputElement = queryByTestId(
-      'import-data-modal-checkbox-label'
+      'importDataModalCheckboxLabel'
     ) as HTMLInputElement;
     const exceptionCheckbox: HTMLInputElement = queryByTestId(
-      'import-data-modal-exceptions-checkbox-label'
+      'importDataModalExceptionsCheckboxLabel'
+    ) as HTMLInputElement;
+    const connectorsCheckbox: HTMLInputElement = queryByTestId(
+      'importDataModalActionConnectorsCheckbox'
     ) as HTMLInputElement;
 
     await waitFor(() => fireEvent.click(overwriteCheckbox));
     await waitFor(() => fireEvent.click(exceptionCheckbox));
+    await waitFor(() => fireEvent.click(connectorsCheckbox));
 
     await waitFor(() =>
       fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
@@ -176,6 +188,7 @@ describe('ImportDataModal', () => {
 
     expect(overwriteCheckbox.checked).toBeFalsy();
     expect(exceptionCheckbox.checked).toBeFalsy();
+    expect(connectorsCheckbox.checked).toBeFalsy();
   });
 
   test('should import file, with warnings but no action_connectors_success_count', async () => {

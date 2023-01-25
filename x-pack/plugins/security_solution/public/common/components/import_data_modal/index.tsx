@@ -208,16 +208,16 @@ export const ImportDataModalComponent = ({
             {showCheckBox && (
               <>
                 <EuiCheckbox
-                  data-test-subj="import-data-modal-checkbox-label"
-                  id="import-data-modal-checkbox-label"
+                  data-test-subj="importDataModalCheckboxLabel"
+                  id="importDataModalCheckboxLabel"
                   label={checkBoxLabel}
                   checked={overwrite}
                   onChange={handleCheckboxClick}
                 />
                 {showExceptionsCheckBox && (
                   <EuiCheckbox
-                    data-test-subj="import-data-modal-exceptions-checkbox-label"
-                    id="import-data-modal-exceptions-checkbox-label"
+                    data-test-subj="importDataModalExceptionsCheckboxLabel"
+                    id="importDataModalExceptionsCheckboxLabel"
                     label={i18n.OVERWRITE_EXCEPTIONS_LABEL}
                     checked={overwriteExceptions}
                     onChange={handleExceptionsCheckboxClick}
