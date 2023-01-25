@@ -58,7 +58,14 @@ export class AutocompleteListener implements ESQLParserListener {
   private parentContext: number | undefined;
 
   private get fields() {
-    return this.tables.length > 1
+    let varLength = 0;
+    this.tables.map((varTable) => {
+      const filteredTable = varTable.filter(Boolean);
+      if (filteredTable.length) {
+        varLength++;
+      }
+    });
+    return varLength > 1
       ? buildConstantsDefinitions(this.tables.at(-2)!)
       : [DynamicAutocompleteItem.FieldIdentifier];
   }
