@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { isEmpty } from 'lodash';
 import {
   AlertInstanceMeta,
@@ -48,14 +47,12 @@ export class Alert<
   private state: State;
   private context: Context;
   private readonly id: string;
-  private readonly uuid: string;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
-    this.meta.uuid = this.uuid = meta.uuid ?? uuidv4();
 
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
@@ -67,7 +64,12 @@ export class Alert<
   }
 
   getUuid() {
-    return this.uuid;
+    return this.meta.uuid;
+  }
+
+  setUuid(uuid: string) {
+    this.meta.uuid = uuid;
+    return this;
   }
 
   hasScheduledActions() {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { cloneDeep } from 'lodash';
 import { Alert } from '../alert';
@@ -104,11 +105,17 @@ function processAlertsHelper<
         if (!existingAlertIds.has(id)) {
           newAlerts[id] = alerts[id];
           const state = newAlerts[id].getState();
-          newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+          newAlerts[id]
+            .setUuid(uuidv4())
+            .replaceState({ ...state, start: currentTime, duration: '0' });
 
           if (setFlapping) {
             if (previouslyRecoveredAlertsIds.has(id)) {
               // this alert has flapped from recovered to active
+              // reuse previous UUID if defined
+              if (previouslyRecoveredAlerts[id].getUuid()) {
+                newAlerts[id].setUuid(previouslyRecoveredAlerts[id].getUuid()!);
+              }
               newAlerts[id].setFlappingHistory(previouslyRecoveredAlerts[id].getFlappingHistory());
               previouslyRecoveredAlertsIds.delete(id);
             }
@@ -234,7 +241,9 @@ function processAlertsLimitReached<
         newAlerts[id] = alerts[id];
         // if this alert was not active in the previous run, we need to inject start time into the alert state
         const state = newAlerts[id].getState();
-        newAlerts[id].replaceState({ ...state, start: currentTime, duration: '0' });
+        newAlerts[id]
+          .setUuid(uuidv4())
+          .replaceState({ ...state, start: currentTime, duration: '0' });
 
         if (setFlapping) {
           if (previouslyRecoveredAlertsIds.has(id)) {

@@ -30,11 +30,11 @@ import {
 import { type Alert } from '../../common';
 import { RecoveredActionGroup } from '../types';
 import { AlertsClient, AlertsClientParams } from './alerts_client';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { LegacyAlertsClient } from './legacy_alerts_client';
+import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Alert as LegacyAlert } from '../alert/alert';
 
 jest.mock('uuid', () => ({
   v4: () => 'UUID1',
@@ -42,8 +42,7 @@ jest.mock('uuid', () => ({
 
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-const alertingEventLogger = alertingEventLoggerMock.create();
-const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
+const legacyAlertsClient = legacyAlertsClientMock.create();
 
 const previousRuleExecutionUuid = 'abc';
 const currentRuleExecutionUuid = 'xyz';
@@ -66,17 +65,11 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   },
 };
 
-const legacyAlertsClient = new LegacyAlertsClient({ logger, maxAlerts: 10, ruleType });
-legacyAlertsClient.initialize({ ruleLabel });
-
-const defaultAlertsClientParams: AlertsClientParams = {
+const defaultAlertsClientParams: AlertsClientParams<{}, {}, 'default', 'recovered'> = {
   logger,
-  maxAlerts: 10,
   elasticsearchClientPromise: Promise.resolve(clusterClient),
-  resourceInstallationPromise: Promise.resolve(true),
   ruleType,
-  eventLogger: alertingEventLogger,
-  legacyAlertsClient: new LegacyAlertsClient({ logger, maxAlerts: 10, ruleType }),
+  legacyAlertsClient,
 };
 
 const ruleData = {
@@ -86,6 +79,9 @@ const ruleData = {
   name: 'test-rule',
   tags: [],
   spaceId: 'default',
+  parameters: {
+    foo: 'bar',
+  },
 };
 
 const generateAlert = (overrides = {}): Alert => {
@@ -112,8 +108,24 @@ const generateAlert = (overrides = {}): Alert => {
   } as Alert;
 };
 
+const generateSearchResponse = (alerts: Alert[], total: number): SearchResponse<Alert> => {
+  return {
+    hits: {
+      hits: alerts.map((alert) => ({
+        _id: alert[ALERT_UUID],
+        _index: '.alerts-test-default-000001',
+        _source: alert,
+      })),
+      total: { relation: 'eq', value: total },
+    },
+    took: 0,
+    timed_out: false,
+    _shards: { failed: 0, successful: 0, total: 0, skipped: 0 },
+  };
+};
+
 describe('Alerts Client', () => {
-  let alertsClient: AlertsClient<{}>;
+  let alertsClient: AlertsClient<{}, {}, {}, 'default', 'recovered'>;
 
   let clock: sinon.SinonFakeTimers;
 
@@ -125,30 +137,94 @@ describe('Alerts Client', () => {
     clock.reset();
     jest.resetAllMocks();
     alertsClient = new AlertsClient(defaultAlertsClientParams);
+    expect(legacyAlertsClient.getExecutorServices).toHaveBeenCalled();
   });
 
   afterAll(() => clock.restore());
 
   describe('initialize()', () => {
-    test('should log warning and return if resources were not installed correctly', async () => {
-      alertsClient = new AlertsClient({
-        ...defaultAlertsClientParams,
-        resourceInstallationPromise: Promise.resolve(false),
+    test('should query for alerts when tracked alert UUIDs are available', async () => {
+      const trackedAlert1 = new LegacyAlert<{}, {}>('1', {
+        meta: { uuid: 'UUID1' },
+      });
+      const trackedAlert2 = new LegacyAlert<{}, {}>('2', {
+        meta: { uuid: 'UUID2' },
+      });
+      clusterClient.search.mockResponse(
+        generateSearchResponse(
+          [
+            generateAlert({
+              [ALERT_ID]: '1',
+              [ALERT_UUID]: 'UUID1',
+            }),
+            generateAlert({
+              [ALERT_ID]: '2',
+              [ALERT_UUID]: 'UUID2',
+            }),
+          ],
+          2
+        )
+      );
+      legacyAlertsClient.getTrackedAlerts.mockReturnValueOnce({
+        active: {
+          '1': trackedAlert1,
+          '2': trackedAlert2,
+        },
+        recovered: {},
       });
       await alertsClient.initialize({ rule: ruleData });
 
-      expect(logger.warn).toHaveBeenCalledWith(
-        `test:1: 'test-rule': Something went wrong installing resources for context test`
-      );
+      expect(clusterClient.search).toHaveBeenCalledTimes(1);
+      expect(clusterClient.search).toHaveBeenCalledWith({
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { 'kibana.alert.rule.uuid': '1' } },
+                { terms: { 'kibana.alert.uuid': ['UUID1', 'UUID2'] } },
+              ],
+            },
+          },
+          size: 2,
+        },
+        index: '.alerts-test-default-*',
+      });
+    });
+
+    test('should log error and return if query throws error', async () => {
+      const trackedAlert1 = new LegacyAlert<{}, {}>('1', {
+        meta: { uuid: 'UUID1' },
+      });
+      const trackedAlert2 = new LegacyAlert<{}, {}>('1', {
+        meta: { uuid: 'UUID2' },
+      });
+      clusterClient.search.mockImplementation(() => {
+        throw new Error('fail');
+      });
+      legacyAlertsClient.getTrackedAlerts.mockReturnValueOnce({
+        active: {
+          '1': trackedAlert1,
+          '2': trackedAlert2,
+        },
+        recovered: {},
+      });
+      await alertsClient.initialize({ rule: ruleData });
+
+      expect(clusterClient.search).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(`Error searching for active alerts by UUID - fail`);
     });
   });
 
   describe('create()', () => {
     beforeEach(async () => {
+      legacyAlertsClient.getTrackedAlerts.mockReturnValueOnce({
+        active: {},
+        recovered: {},
+      });
       await alertsClient.initialize({ rule: ruleData });
     });
 
-    test('should allow creating alerts', () => {
+    test('should proxy alert creation through alert factory', () => {
       alertsClient.create({
         [ALERT_ACTION_GROUP]: 'default',
         [ALERT_ID]: 'TEST_ALERT_3',

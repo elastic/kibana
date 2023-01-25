@@ -28,10 +28,9 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { keys } from 'lodash';
+import { chunk, compact, keys } from 'lodash';
 import { Alert } from '../../common/alert_schema/schemas/alert_schema';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { PublicAlertFactory } from '../alert/create_alert_factory';
 import {
   AlertInstanceContext,
@@ -41,6 +40,10 @@ import {
 } from '../types';
 import { IAlertsClient, LegacyAlertsClient, ProcessAndLogAlertsOpts } from './legacy_alerts_client';
 import { Alert as LegacyAlert } from '../alert/alert';
+import { getIndexTemplateAndPattern } from '../alerts_service/types';
+
+// Term queries can take up to 10,000 terms
+const CHUNK_SIZE = 10000;
 
 export type ReportedAlert = Pick<Alert, typeof ALERT_ACTION_GROUP | typeof ALERT_ID> &
   Partial<Omit<Alert, typeof ALERT_ACTION_GROUP | typeof ALERT_ID>>;
@@ -53,9 +56,7 @@ export interface AlertsClientParams<
 > {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
-  maxAlerts: number;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  eventLogger: AlertingEventLogger;
   legacyAlertsClient: LegacyAlertsClient<
     LegacyState,
     LegacyContext,
@@ -114,13 +115,14 @@ export class AlertsClient<
 > implements IAlertsClient<LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>
 {
   private rule: AlertRuleSchema | null = null;
-  private ruleLogPrefix: string;
   private alertsFactory: PublicAlertFactory<
     LegacyState,
     LegacyContext,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
   private reportedAlerts: Record<string, ReportedAlert & AlertData> = {};
+  private fetchedAlerts: Record<string, Alert & AlertData> = {};
+  private fetchedAlertIndices: Record<string, string> = {};
 
   constructor(
     private readonly options: AlertsClientParams<
@@ -130,16 +132,82 @@ export class AlertsClient<
       RecoveryActionGroupId
     >
   ) {
-    this.ruleLogPrefix = `${this.options.ruleType.id}`;
     this.alertsFactory = this.options.legacyAlertsClient.getExecutorServices();
   }
 
   public async initialize({ rule }: InitializeOpts) {
     this.setRuleData(rule);
+
+    const context = this.options.ruleType.alerts?.context;
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const indexTemplateAndPattern = getIndexTemplateAndPattern(context!);
+
+    // Get tracked alert UUIDs to query for
+    const trackedAlerts = this.options.legacyAlertsClient.getTrackedAlerts();
+    const uuidsToFetch: string[] = compact(
+      keys(trackedAlerts.active).map((activeAlertId: string) =>
+        trackedAlerts.active[activeAlertId].getUuid()
+      )
+    );
+
+    if (!uuidsToFetch.length) {
+      return;
+    }
+
+    const queryByUuid = async (uuids: string[]) => {
+      const {
+        hits: { hits },
+      } = await esClient.search<Alert & AlertData>({
+        index: indexTemplateAndPattern.pattern, // also do legacy indices
+        body: {
+          size: uuids.length,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    [ALERT_RULE_UUID]: rule.id,
+                  },
+                },
+                {
+                  terms: {
+                    [ALERT_UUID]: uuids,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      return hits;
+    };
+
+    try {
+      const results = await Promise.all(
+        chunk(uuidsToFetch, CHUNK_SIZE).map((uuidChunk: string[]) => queryByUuid(uuidChunk))
+      );
+
+      for (const hit of results.flat()) {
+        const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
+        const alertUuid = alertHit[ALERT_UUID];
+        const alertId = alertHit[ALERT_ID];
+        // in legacy indices, ALERT_ID is stored in ALERT_INSTANCE_ID
+
+        // Keep track of existing alert document so we can copy over data if alert is ongoing
+        this.fetchedAlerts[alertId] = alertHit;
+
+        // Keep track of index so we can update the correct document
+        this.fetchedAlertIndices[alertUuid] = hit._index;
+      }
+    } catch (err) {
+      this.options.logger.error(`Error searching for active alerts by UUID - ${err.message}`);
+    }
   }
 
   public create(alert: ReportedAlert & AlertData) {
     const alertId = alert[ALERT_ID];
+    // Create a legacy alert using the AlertsFactory interface
     this.alertsFactory
       .create(alert[ALERT_ID])
       .scheduleActions(
@@ -285,6 +353,5 @@ export class AlertsClient<
       [ALERT_RULE_PARAMETERS]: rule.parameters,
       [SPACE_IDS]: [rule.spaceId],
     };
-    this.ruleLogPrefix = `${this.options.ruleType.id}:${rule.id}: '${rule.name}'`;
   }
 }

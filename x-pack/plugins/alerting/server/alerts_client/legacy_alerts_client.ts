@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep, keys, merge } from 'lodash';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
@@ -24,6 +24,7 @@ import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
 import {
+  RuleTypeState,
   AlertInstanceContext,
   AlertInstanceState,
   RawAlertInstance,
@@ -57,6 +58,11 @@ export interface IAlertsClient<
   }>;
 }
 
+interface TrackedAlertsWithUuid {
+  alertId: string;
+  alertUuid: string;
+}
+
 interface ConstructorOpts {
   logger: Logger;
   maxAlerts: number;
@@ -64,13 +70,7 @@ interface ConstructorOpts {
   ruleLabel: string;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
-  trackedAlertsFromState: Record<
-    string,
-    {
-      alertId: string;
-      alertUuid: string;
-    }
-  >;
+  ruleTypeState: RuleTypeState;
 }
 
 export class LegacyAlertsClient<
@@ -102,6 +102,7 @@ export class LegacyAlertsClient<
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
+
   constructor(private readonly options: ConstructorOpts) {
     this.processedAlerts = {
       new: {},
@@ -111,27 +112,32 @@ export class LegacyAlertsClient<
     };
     this.ruleLogPrefix = options.ruleLabel;
 
-    for (const id in options.activeAlertsFromState) {
-      if (options.activeAlertsFromState.hasOwnProperty(id)) {
-        // Look for this alert in the tracked alerts and copy over UUID if it exists
-        const uuid = options.trackedAlertsFromState[id]
-          ? options.trackedAlertsFromState[id].alertUuid
-          : undefined;
+    // Tracked alerts are managed by the rule registry lifecycle executor
+    // and contain alert UUIDs that we want to maintain for existing
+    // active alerts
+    const trackedAlerts =
+      (options.ruleTypeState?.trackedAlerts as Record<string, TrackedAlertsWithUuid>) ?? {};
 
-        this.trackedAlerts.active[id] = new Alert<State, Context>(id, {
-          ...options.activeAlertsFromState[id],
-          meta: { ...options.activeAlertsFromState[id].meta, uuid },
-        });
-      }
+    for (const id of keys(options.activeAlertsFromState)) {
+      // Use UUID if it exists, otherwise look for this alert in the tracked alerts and copy over UUID if it exists
+      const existingUuid = options.activeAlertsFromState[id]?.meta?.uuid;
+      const uuid = existingUuid
+        ? existingUuid
+        : trackedAlerts[id]
+        ? trackedAlerts[id].alertUuid
+        : undefined;
+
+      this.trackedAlerts.active[id] = new Alert<State, Context>(id, {
+        ...options.activeAlertsFromState[id],
+        meta: { ...options.activeAlertsFromState[id].meta, uuid },
+      });
     }
 
-    for (const id in options.recoveredAlertsFromState) {
-      if (options.recoveredAlertsFromState.hasOwnProperty(id)) {
-        this.trackedAlerts.recovered[id] = new Alert<State, Context>(
-          id,
-          options.recoveredAlertsFromState[id]
-        );
-      }
+    for (const id of keys(options.recoveredAlertsFromState)) {
+      this.trackedAlerts.recovered[id] = new Alert<State, Context>(
+        id,
+        options.recoveredAlertsFromState[id]
+      );
     }
 
     // Legacy alerts client creates a copy of the active tracked alerts
@@ -150,6 +156,10 @@ export class LegacyAlertsClient<
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
+  }
+
+  public getTrackedAlerts() {
+    return this.trackedAlerts;
   }
 
   public processAndLogAlerts({

@@ -12,12 +12,10 @@ import { AlertsService, MAX_INSTALLATION_RETRIES } from './alerts_service';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
 import { AlertsClient } from '../alerts_client/alerts_client';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mock';
 
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-const alertingEventLogger = alertingEventLoggerMock.create();
 const legacyAlertsClient = legacyAlertsClientMock.create();
 
 jest.mock('../alerts_client/alerts_client');
@@ -822,16 +820,12 @@ describe('Alerts Service', () => {
     test('should create and return AlertsClient if initialized is true and rule type has alerts definition', async () => {
       await alertsService.createAlertsClient({
         ruleType: TestRuleType,
-        maxAlerts: 1000,
-        eventLogger: alertingEventLogger,
         legacyAlertsClient,
       });
       expect(AlertsClient).toHaveBeenCalledWith({
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         ruleType: TestRuleType,
-        maxAlerts: 1000,
-        eventLogger: alertingEventLogger,
         legacyAlertsClient,
       });
     });
@@ -849,8 +843,6 @@ describe('Alerts Service', () => {
       expect(
         await alertsService.createAlertsClient({
           ruleType: TestRuleType,
-          maxAlerts: 1000,
-          eventLogger: alertingEventLogger,
           legacyAlertsClient,
         })
       ).toBeNull();
@@ -860,8 +852,6 @@ describe('Alerts Service', () => {
       expect(
         await alertsService.createAlertsClient({
           ruleType: { ...TestRuleType, alerts: undefined },
-          maxAlerts: 1000,
-          eventLogger: alertingEventLogger,
           legacyAlertsClient,
         })
       ).toBeNull();
@@ -875,8 +865,6 @@ describe('Alerts Service', () => {
       expect(await alertsService.isContextInitialized('another-test')).toEqual(false);
       await alertsService.createAlertsClient({
         ruleType: AnotherTestRuleType,
-        maxAlerts: 1000,
-        eventLogger: alertingEventLogger,
         legacyAlertsClient,
       });
 
@@ -886,8 +874,6 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         ruleType: AnotherTestRuleType,
-        maxAlerts: 1000,
-        eventLogger: alertingEventLogger,
         legacyAlertsClient,
       });
       expect(logger.debug).toHaveBeenCalledWith(
@@ -906,8 +892,6 @@ describe('Alerts Service', () => {
       for (let i = 0; i < MAX_INSTALLATION_RETRIES; i++) {
         await alertsService.createAlertsClient({
           ruleType: AnotherTestRuleType,
-          maxAlerts: 1000,
-          eventLogger: alertingEventLogger,
           legacyAlertsClient,
         });
         expect(await alertsService.isContextInitialized('another-test')).toEqual(false);
@@ -920,8 +904,6 @@ describe('Alerts Service', () => {
 
       await alertsService.createAlertsClient({
         ruleType: AnotherTestRuleType,
-        maxAlerts: 1000,
-        eventLogger: alertingEventLogger,
         legacyAlertsClient,
       });
       expect(await alertsService.isContextInitialized('another-test')).toEqual(false);

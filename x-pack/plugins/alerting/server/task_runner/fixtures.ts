@@ -348,6 +348,7 @@ export const generateAlertInstance = (
       flappingHistory,
       flapping: false,
       pendingRecoveredCount: 0,
+      uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
     },
     state: {
       bar: false,

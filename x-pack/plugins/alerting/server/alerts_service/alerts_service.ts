@@ -30,7 +30,6 @@ import {
   ResourceInstallationHelper,
 } from './create_resource_installation_helper';
 import { AlertsClient } from '../alerts_client/alerts_client';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -56,8 +55,6 @@ interface CreateAlertsClientParams<
   RecoveryActionGroupId extends string
 > {
   ruleType: UntypedNormalizedRuleType;
-  maxAlerts: number;
-  eventLogger: AlertingEventLogger;
   legacyAlertsClient: LegacyAlertsClient<
     LegacyState,
     LegacyContext,
@@ -235,8 +232,6 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       ruleType: opts.ruleType,
-      maxAlerts: opts.maxAlerts,
-      eventLogger: opts.eventLogger,
       legacyAlertsClient: opts.legacyAlertsClient,
     });
   }

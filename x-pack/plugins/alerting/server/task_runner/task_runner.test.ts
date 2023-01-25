@@ -2623,6 +2623,7 @@ describe('Task Runner', () => {
               flappingHistory: [true],
               flapping: false,
               pendingRecoveredCount: 0,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
             state: {
               duration: '0',
@@ -2789,6 +2790,7 @@ describe('Task Runner', () => {
               flappingHistory: [true],
               flapping: false,
               pendingRecoveredCount: 0,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
             state: {
               duration: '0',
@@ -2804,6 +2806,7 @@ describe('Task Runner', () => {
               flappingHistory: [true],
               flapping: false,
               pendingRecoveredCount: 0,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
             state: {
               duration: '0',

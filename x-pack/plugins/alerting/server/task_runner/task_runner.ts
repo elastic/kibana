@@ -258,7 +258,6 @@ export class TaskRunner<
         alertRecoveredInstances: alertRecoveredRawInstances = {},
         alertTypeState: ruleTypeState = {},
         previousStartedAt,
-        previousExecutionUuid,
       },
     } = this.taskInstance;
 
@@ -269,6 +268,8 @@ export class TaskRunner<
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
+    // LegacyAlertsClient handles all alert processing for alerts
+    // created using the AlertFactory
     const legacyAlertsClient = new LegacyAlertsClient<
       State,
       Context,
@@ -281,11 +282,17 @@ export class TaskRunner<
       ruleLabel,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
-      trackedAlertsFromState: ruleTypeState?.trackedAlerts ?? {},
+      ruleTypeState,
     });
 
+    // Create AlertsClient framework alerts are enabled and
+    // if rule type has registered an alerts context with the
+    // framework. The AlertsClient will handle reading and
+    // writing from alerts-as-data indices and eventually
+    // we will want to migrate all the processing of alerts out
+    // of the LegacyAlertsClient and into the AlertsClient.
     const alertsClient =
-      this.context.alertsService?.createAlertsClient<
+      (await this.context.alertsService?.createAlertsClient<
         AlertData,
         State,
         Context,
@@ -293,11 +300,10 @@ export class TaskRunner<
         RecoveryActionGroupId
       >({
         ruleType: ruleType as UntypedNormalizedRuleType,
-        maxAlerts: this.maxAlerts,
-        eventLogger: this.alertingEventLogger,
         legacyAlertsClient,
-      }) ?? null;
-    alertsClient?.initialize({
+      })) ?? null;
+
+    await alertsClient?.initialize({
       rule: {
         id: rule.id,
         name: rule.name,

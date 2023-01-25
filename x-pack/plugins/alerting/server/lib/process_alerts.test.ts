@@ -11,6 +11,10 @@ import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
 
+jest.mock('uuid', () => ({
+  v4: () => 'UUID1',
+}));
+
 describe('processAlerts', () => {
   let clock: sinon.SinonFakeTimers;
 
@@ -110,6 +114,47 @@ describe('processAlerts', () => {
 
       expect(newAlert1State.end).not.toBeDefined();
       expect(newAlert2State.end).not.toBeDefined();
+    });
+
+    test('sets uuid in new alert meta', () => {
+      const newAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const newAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+
+      const existingAlerts = {
+        '3': existingAlert1,
+        '4': existingAlert2,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        '1': newAlert1,
+        '2': newAlert2,
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
+
+      expect(newAlert1.getUuid()).not.toBeDefined();
+      expect(newAlert2.getUuid()).not.toBeDefined();
+
+      const { newAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        setFlapping: false,
+      });
+
+      expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
+
+      expect(newAlert1.getUuid()).toBeDefined();
+      expect(newAlert2.getUuid()).toBeDefined();
     });
   });
 
@@ -364,6 +409,61 @@ describe('processAlerts', () => {
       expect(previouslyRecoveredAlert1State.end).not.toBeDefined();
       expect(previouslyRecoveredAlert2State.end).not.toBeDefined();
     });
+
+    test('carries over existing active alert UUID if defined', () => {
+      const previouslyRecoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const previouslyRecoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const existingAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+      const existingAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('4');
+
+      previouslyRecoveredAlert1.setUuid('aaaaaaa');
+      previouslyRecoveredAlert2.setUuid('zzzzzzz');
+
+      existingAlert1.setUuid('abcdefg');
+      existingAlert2.setUuid('xyz1234');
+
+      const existingAlerts = {
+        '3': existingAlert1,
+        '4': existingAlert2,
+      };
+
+      const previouslyRecoveredAlerts = {
+        '1': previouslyRecoveredAlert1,
+        '2': previouslyRecoveredAlert2,
+      };
+
+      const updatedAlerts = {
+        ...cloneDeep(existingAlerts),
+        ...cloneDeep(previouslyRecoveredAlerts),
+      };
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['2'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['3'].scheduleActions('default' as never, { foo: '1' });
+      updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
+
+      expect(updatedAlerts['1'].getState()).toStrictEqual({});
+      expect(updatedAlerts['2'].getState()).toStrictEqual({});
+
+      const { activeAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts,
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        setFlapping: true,
+      });
+
+      expect(
+        Object.keys(activeAlerts).map((id) => ({ [id]: activeAlerts[id].getFlappingHistory() }))
+      ).toEqual([{ '1': [true] }, { '2': [true] }, { '3': [false] }, { '4': [false] }]);
+
+      expect(activeAlerts['1'].getUuid()).toEqual('aaaaaaa');
+      expect(activeAlerts['2'].getUuid()).toEqual('zzzzzzz');
+      expect(activeAlerts['3'].getUuid()).toEqual('abcdefg');
+      expect(activeAlerts['4'].getUuid()).toEqual('xyz1234');
+    });
   });
 
   describe('recoveredAlerts', () => {
@@ -528,6 +628,44 @@ describe('processAlerts', () => {
       });
 
       expect(recoveredAlerts).toEqual(updatedAlerts);
+    });
+
+    test('carries over existing active alert UUID if defined', () => {
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const recoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const recoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+      const existingAlerts = {
+        '1': activeAlert,
+        '2': recoveredAlert1,
+        '3': recoveredAlert2,
+      };
+      existingAlerts['1'].setUuid('1234567');
+      existingAlerts['2']
+        .setUuid('abcdefg')
+        .replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
+      existingAlerts['3']
+        .setUuid('xyz1234')
+        .replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
+
+      const updatedAlerts = cloneDeep(existingAlerts);
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+
+      const { recoveredAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: true,
+        setFlapping: false,
+      });
+
+      expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
+
+      expect(recoveredAlerts['2'].getUuid()).toEqual('abcdefg');
+      expect(recoveredAlerts['3'].getUuid()).toEqual('xyz1234');
     });
 
     test('should skip recovery calculations if autoRecoverAlerts = false', () => {
@@ -740,6 +878,7 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 true,
               ],
+              "uuid": "UUID1",
             },
             "state": Object {
               "duration": "0",
@@ -755,6 +894,7 @@ describe('processAlerts', () => {
               "flappingHistory": Array [
                 true,
               ],
+              "uuid": "UUID1",
             },
             "state": Object {
               "duration": "0",
@@ -829,6 +969,7 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "uuid": "UUID1",
             },
             "state": Object {
               "duration": "0",
@@ -845,6 +986,7 @@ describe('processAlerts', () => {
                 false,
                 true,
               ],
+              "uuid": "UUID1",
             },
             "state": Object {
               "duration": "0",
@@ -958,6 +1100,7 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [],
+              "uuid": "UUID1",
             },
             "state": Object {
               "duration": "0",
@@ -979,6 +1122,7 @@ describe('processAlerts', () => {
           "1": Object {
             "meta": Object {
               "flappingHistory": Array [],
+              "uuid": "UUID1",
             },
             "state": Object {
               "duration": "0",
@@ -1073,6 +1217,7 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1088,6 +1233,7 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1127,6 +1273,7 @@ describe('processAlerts', () => {
                   false,
                   true,
                 ],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1138,6 +1285,7 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1154,6 +1302,7 @@ describe('processAlerts', () => {
                   false,
                   true,
                 ],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1165,6 +1314,7 @@ describe('processAlerts', () => {
                 "flappingHistory": Array [
                   true,
                 ],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1209,6 +1359,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",
@@ -1222,6 +1373,7 @@ describe('processAlerts', () => {
             "2": Object {
               "meta": Object {
                 "flappingHistory": Array [],
+                "uuid": "UUID1",
               },
               "state": Object {
                 "duration": "0",

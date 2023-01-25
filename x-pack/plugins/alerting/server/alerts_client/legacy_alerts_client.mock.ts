@@ -9,6 +9,7 @@ const createLegacyAlertsClientMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
       processAndLogAlerts: jest.fn(),
+      getTrackedAlerts: jest.fn(),
       getProcessedAlerts: jest.fn(),
       getAlertsToSerialize: jest.fn(),
       hasReachedAlertLimit: jest.fn(),
