@@ -1,13 +1,8 @@
 name: "CodeQL"
 
 on:
-  # TODO: Remove 'push' and 'pull_request' before merging PR (we can't affort to wait two hours for this to run for every PR and every push)
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   schedule:
-    - cron: '27 21 * * 0' # At 21:27 every Sunday
+    - cron: '27 21 * * *' # At 21:27 every day
 
 jobs:
   analyze:
