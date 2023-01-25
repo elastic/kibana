@@ -15,6 +15,7 @@ export {
   LEGACY_DASHBOARD_APP_ID,
 } from './dashboard_constants';
 export { DASHBOARD_CONTAINER_TYPE } from './dashboard_container';
+export type { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
 export {
