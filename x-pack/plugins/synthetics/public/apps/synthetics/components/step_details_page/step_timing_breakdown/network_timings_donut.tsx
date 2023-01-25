@@ -58,7 +58,7 @@ export const NetworkTimingsDonut = () => {
           data={networkTimings.timingsWithLabels}
           layout={PartitionLayout.sunburst}
           valueAccessor={(d: Datum) => d?.value}
-          valueFormatter={(d: number) => formatMillisecond(d)}
+          valueFormatter={(d: number) => formatMillisecond(d, {})}
           layers={[
             {
               groupByRollup: (d: Datum) => d.label,
