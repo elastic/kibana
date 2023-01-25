@@ -45,7 +45,6 @@
     "@kbn/es-errors",
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/web-worker-stub",
