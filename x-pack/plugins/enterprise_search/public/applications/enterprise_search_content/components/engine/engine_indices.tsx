@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -20,8 +20,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSelectable,
   EuiIcon,
   EuiInMemoryTable,
+  EuiFormRow,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -40,9 +42,15 @@ import { ingestionMethodToText } from '../../utils/indices';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineIndicesLogic } from './engine_indices_logic';
-import { EngineViewLogic } from './engine_view_logic';
 
 export const AddNewIndicesFlyout: React.FC = ({ onClose }) => {
+  const { searchIndices, setIndicesToAdd, submitIndicesToAdd } = useActions(EngineIndicesLogic);
+  const { indicesOptions /* isLoadingIndices */ } = useValues(EngineIndicesLogic);
+
+  useEffect(() => {
+    searchIndices();
+  }, []);
+
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
@@ -56,12 +64,35 @@ export const AddNewIndicesFlyout: React.FC = ({ onClose }) => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <pre>AddNewIndicesFlyout</pre>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.selectableLabel',
+            { defaultMessage: 'Select searchable indices' }
+          )}
+        >
+          <EuiSelectable
+            searchable
+            options={indicesOptions}
+            onChange={(options) => {
+              const toAdd = options.filter((o) => o.checked === 'on').map((o) => o.label);
+              setIndicesToAdd(toAdd);
+            }}
+            searchProps={{ onChange: searchIndices }}
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plusInCircle">
+            <EuiButton fill iconType="plusInCircle" onClick={submitIndicesToAdd}>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.submitButton',
                 { defaultMessage: 'Add selected' }
@@ -69,7 +100,7 @@ export const AddNewIndicesFlyout: React.FC = ({ onClose }) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left">
+            <EuiButtonEmpty flush="left" onClick={onClose}>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.cancelButton',
                 { defaultMessage: 'Cancel' }
@@ -83,17 +114,16 @@ export const AddNewIndicesFlyout: React.FC = ({ onClose }) => {
 };
 
 export const EngineIndices: React.FC = () => {
-  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { engineData } = useValues(EngineIndicesLogic);
+  const { engineData, engineName, isLoadingEngine } = useValues(EngineIndicesLogic);
   const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
   const [addIndicesFlyoutOpen, setAddIndicesFlyoutOpen] = useState<boolean>(false);
-  const openAddIndicesFlyoutOpen = useCallback(
+  const openAddIndicesFlyout = useCallback(
     () => setAddIndicesFlyoutOpen(true),
     [setAddIndicesFlyoutOpen]
   );
-  const closeAddIndicesFlyoutOpen = useCallback(
+  const closeAddIndicesFlyout = useCallback(
     () => setAddIndicesFlyoutOpen(false),
     [setAddIndicesFlyoutOpen]
   );
@@ -232,7 +262,7 @@ export const EngineIndices: React.FC = () => {
             data-test-subj="engine-add-new-indices-btn"
             iconType="plusInCircle"
             fill
-            onClick={openAddIndicesFlyoutOpen}
+            onClick={openAddIndicesFlyout}
           >
             {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
               defaultMessage: 'Add new indices',
@@ -294,7 +324,7 @@ export const EngineIndices: React.FC = () => {
             </EuiText>
           </EuiConfirmModal>
         )}
-        {addIndicesFlyoutOpen && <AddNewIndicesFlyout onClose={closeAddIndicesFlyoutOpen} />}
+        {addIndicesFlyoutOpen && <AddNewIndicesFlyout onClose={closeAddIndicesFlyout} />}
       </>
     </EnterpriseSearchEnginesPageTemplate>
   );
