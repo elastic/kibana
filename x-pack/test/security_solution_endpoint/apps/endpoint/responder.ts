@@ -26,6 +26,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const detectionsTestService = getService('detections');
   const log = getService('log');
 
+  // The Alerts Rule seems to run every 5 minutes when there are no failures. This timeout ensures
+  // that we wait long enough for them to show up.
+  const MAX_WAIT_FOR_ALERTS_TIMEOUT = 60_000 * 10;
+
   const performResponderSanityChecks = async () => {
     // Show the Action log
     await pageObjects.responder.openActionLogFlyout();
@@ -76,8 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/142148
-  describe.skip('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -117,8 +120,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/140546
-    describe.skip('from timeline', () => {
+    describe('from timeline', () => {
       let timeline: TimelineResponse;
 
       before(async () => {
@@ -144,9 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
-          // The Alerts rules seems to run every 5 minutes, so we wait here a max
-          // of 6 minutes to ensure it runs and completes and alerts are available.
-          60_000 * 6
+          MAX_WAIT_FOR_ALERTS_TIMEOUT
         );
 
         await pageObjects.timeline.navigateToTimelineList();
@@ -188,9 +188,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
-          // The Alerts rules seems to run every 5 minutes, so we wait here a max
-          // of 6 minutes to ensure it runs and completes and alerts are available.
-          60_000 * 6
+          MAX_WAIT_FOR_ALERTS_TIMEOUT
         );
       });
 
