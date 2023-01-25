@@ -42,7 +42,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
         logo: 'logoObservability',
         action: {
           elasticAgent: {
-            title: i18n.translate('xpack.apm.profiling.noDataConfig.action.title', {
+            title: i18n.translate('xpack.profiling.noDataConfig.action.title', {
               defaultMessage:
                 '[Placeholder] Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
             }),
@@ -67,10 +67,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 isLoading={postSetupLoading}
               >
                 {!postSetupLoading
-                  ? i18n.translate('xpack.apm.profiling.noDataConfig.action.buttonLabel', {
+                  ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
                       defaultMessage: 'Setup Universal Profiling',
                     })
-                  : i18n.translate('xpack.apm.profiling.noDataConfig.action.buttonLoadingLabel', {
+                  : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
                       defaultMessage: 'Setting up Universal Profiling...',
                     })}
               </EuiButton>

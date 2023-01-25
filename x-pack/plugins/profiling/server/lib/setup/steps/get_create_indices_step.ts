@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingSourceField } from '@elastic/elasticsearch/lib/api/types';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 import { catchResourceAlreadyExistsException } from './catch_resource_already_exists_exception';
 
@@ -115,7 +116,7 @@ export function getCreateIndicesStep({
           mappings: {
             _source: {
               mode: 'synthetic',
-            },
+            } as MappingSourceField,
             properties: {
               'ecs.version': {
                 type: 'keyword',
@@ -150,7 +151,7 @@ export function getCreateIndicesStep({
           mappings: {
             _source: {
               mode: 'synthetic',
-            },
+            } as MappingSourceField,
             properties: {
               'ecs.version': {
                 type: 'keyword',
