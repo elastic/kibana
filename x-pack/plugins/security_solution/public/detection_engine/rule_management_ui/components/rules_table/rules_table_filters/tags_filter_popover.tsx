@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
@@ -50,6 +50,17 @@ const TagsFilterPopoverComponent = ({
     setSelectableOptions(newOptions);
     toggleSelectedGroup(changedOption.label, selectedTags, onSelectedTagsChanged);
   };
+
+  useEffect(() => {
+    const selectedTagsSet = new Set(selectedTags);
+    const newSelectableOptions: EuiSelectableOption[] = sortedTags.map((label) => ({
+      label,
+      checked: selectedTagsSet.has(label) ? 'on' : undefined,
+    }));
+
+    setSelectableOptions(newSelectableOptions);
+  }, [sortedTags, selectedTags]);
+
   const triggerButton = (
     <EuiFilterButton
       grow
