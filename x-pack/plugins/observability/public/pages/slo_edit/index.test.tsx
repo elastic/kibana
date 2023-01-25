@@ -368,7 +368,7 @@ describe('SLO Edit Page', () => {
                 "2f17deb0-725a-11ed-ab7c-4bb641cfc57e",
                 Object {
                   "budgetingMethod": "occurrences",
-                  "description": "irrelevant",
+                  "description": "some description useful",
                   "indicator": Object {
                     "params": Object {
                       "filter": "baz: foo and bar > 2",
@@ -378,7 +378,7 @@ describe('SLO Edit Page', () => {
                     },
                     "type": "sli.kql.custom",
                   },
-                  "name": "irrelevant",
+                  "name": "super important level service",
                   "objective": Object {
                     "target": 0.98,
                   },

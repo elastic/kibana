@@ -11,11 +11,14 @@ import { screen } from '@testing-library/react';
 import { render } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useLicense } from '../../hooks/use_license';
 import { SlosPage } from '.';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -26,10 +29,12 @@ jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/slo/use_fetch_slo_list');
+jest.mock('../../hooks/slo/use_fetch_historical_summary');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
+const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 
 const mockNavigate = jest.fn();
 
@@ -37,6 +42,7 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       application: { navigateToUrl: mockNavigate },
+      charts: chartPluginMock.createSetupContract(),
       http: {
         basePath: {
           prepend: jest.fn(),
@@ -105,6 +111,10 @@ describe('SLOs Page', () => {
       it('renders the SLOs page when the API has finished loading and there are results', async () => {
         useFetchSloListMock.mockReturnValue({ loading: false, sloList });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          loading: false,
+          data: historicalSummaryData,
+        });
 
         render(<SlosPage />, config);
 

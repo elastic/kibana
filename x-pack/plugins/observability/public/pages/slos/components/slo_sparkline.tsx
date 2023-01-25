@@ -6,11 +6,11 @@
  */
 
 import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elastic/charts';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+import { useKibana } from '../../../utils/kibana_react';
+
 import { ObservabilityAppServices } from '../../../application/types';
 
 interface Data {
@@ -29,12 +29,12 @@ export interface Props {
 }
 
 export function SloSparkline({ chart, data, id, loading, state }: Props) {
-  const { charts } = useKibana<ObservabilityAppServices>().services;
-  const { euiTheme } = useEuiTheme();
+  const charts = useKibana<ObservabilityAppServices>().services.charts;
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
+  const { euiTheme } = useEuiTheme();
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
