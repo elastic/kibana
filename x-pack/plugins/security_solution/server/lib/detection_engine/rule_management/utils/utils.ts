@@ -19,12 +19,13 @@ import type { RuleExecutionSummary } from '../../../../../common/detection_engin
 import type {
   AlertSuppression,
   RuleResponse,
+  AlertSuppressionCamel,
 } from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
 import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
-import type { AlertSuppressionCamel, RuleAlertType, RuleParams } from '../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
