@@ -28,7 +28,11 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
-import { AppState, getDiscoverAppStateContainer } from './discover_app_state_container';
+import {
+  AppState,
+  DiscoverAppStateContainer,
+  getDiscoverAppStateContainer,
+} from './discover_app_state_container';
 import {
   getInternalStateContainer,
   InternalStateContainer,
@@ -65,7 +69,7 @@ export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
    */
-  appState: ReduxLikeStateContainer<AppState>;
+  appState: DiscoverAppStateContainer;
   /**
    * Internal state that's used at several places in the UI
    */
