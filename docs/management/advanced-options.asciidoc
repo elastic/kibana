@@ -146,8 +146,7 @@ Enables you to use {es} indices in *TSVB* visualizations.
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
-Allows a wildcard (*) as the first character in a query clause. Only applies
-when experimental query features are enabled in the query bar. To disallow
+Allows a wildcard (*) as the first character in a query clause. To disallow
 leading wildcards in Lucene queries, use `query:queryString:options`.
 
 [[query-querystring-options]]`query:queryString:options`::
