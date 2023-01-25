@@ -170,11 +170,23 @@ export const EventSchema = schema.maybe(
               id: ecsString(),
               type: ecsString(),
               type_id: ecsString(),
+              space_agnostic: ecsBoolean(),
             })
           )
         ),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
+        action: schema.maybe(
+          schema.object({
+            name: ecsString(),
+            id: ecsString(),
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+              })
+            ),
+          })
+        ),
       })
     ),
   })
