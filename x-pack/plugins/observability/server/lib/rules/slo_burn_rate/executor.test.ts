@@ -36,6 +36,7 @@ import {
   BurnRateRuleParams,
   AlertStates,
 } from './types';
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
 
 const commonEsResponse = {
   took: 100,
@@ -118,6 +119,11 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -142,6 +148,11 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -166,6 +177,11 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -195,6 +211,11 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).toBeCalledWith({
@@ -242,6 +263,11 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();

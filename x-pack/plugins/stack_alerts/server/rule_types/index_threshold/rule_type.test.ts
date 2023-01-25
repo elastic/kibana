@@ -16,6 +16,7 @@ import { Params } from './rule_type_params';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -217,6 +218,11 @@ describe('ruleType', () => {
         notifyWhen: null,
       },
       logger,
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
@@ -280,6 +286,11 @@ describe('ruleType', () => {
         notifyWhen: null,
       },
       logger,
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -343,6 +354,11 @@ describe('ruleType', () => {
         notifyWhen: null,
       },
       logger,
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -405,6 +421,11 @@ describe('ruleType', () => {
         notifyWhen: null,
       },
       logger,
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      } as RulesSettingsFlapping,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(
