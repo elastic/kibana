@@ -55,7 +55,9 @@ Review the following information about the {kib} 8.6.1 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
+// tag::notable-breaking-changes[]
 There are no breaking changes in {kib} 8.6.1.
+// end::notable-breaking-changes[]
 
 {kibana-ref-all}/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0[8.5.0] | {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
 
@@ -140,7 +142,6 @@ This known issue only impacts the Observability Rules page. To work around this 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.6.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 [discrete]
 [[breaking-143081]]
 .Changes the `histogram:maxBars` default setting
@@ -156,7 +157,6 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 . Scroll or search for *histogram:maxBars*.
 . Enter `100`, then click *Save changes*.
 ====
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 
