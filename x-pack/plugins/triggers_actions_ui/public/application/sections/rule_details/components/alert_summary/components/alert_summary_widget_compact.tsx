@@ -6,20 +6,12 @@
  */
 
 import React, { MouseEvent } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { AlertStatus } from '@kbn/rule-data-utils';
 import { AlertCounts } from './alert_counts';
-import { WIDGET_TITLE } from './constants';
+import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
 import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetCompactProps {
@@ -39,7 +31,6 @@ export const AlertsSummaryWidgetCompact = ({
   timeRangeTitle,
   onClick,
 }: AlertsSummaryWidgetCompactProps) => {
-  const { euiTheme } = useEuiTheme();
   const chartTheme = [
     theme,
     EUI_SPARKLINE_THEME_PARTIAL,
@@ -108,7 +99,7 @@ export const AlertsSummaryWidgetCompact = ({
                   lineSeriesStyle={{
                     line: {
                       strokeWidth: 2,
-                      stroke: euiTheme.colors.primaryText,
+                      stroke: ALL_ALERT_COLOR,
                     },
                   }}
                   curve={CurveType.CURVE_MONOTONE_X}

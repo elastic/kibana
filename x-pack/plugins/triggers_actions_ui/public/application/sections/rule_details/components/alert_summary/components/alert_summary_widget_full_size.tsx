@@ -10,7 +10,7 @@ import React from 'react';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AlertCounts } from './alert_counts';
-import { TOOLTIP_DATE_FORMAT } from './constants';
+import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartThemes } from '../types';
 
 export interface AlertsSummaryWidgetFullSizeProps {
@@ -79,7 +79,7 @@ export const AlertsSummaryWidgetFullSize = ({
           yScaleType={ScaleType.Linear}
           xAccessor="key"
           yAccessors={['doc_count']}
-          color={[baseTheme.colors.vizColors[1]]}
+          color={[ALL_ALERT_COLOR]}
           data={activeAlerts}
           lineSeriesStyle={{
             line: {
