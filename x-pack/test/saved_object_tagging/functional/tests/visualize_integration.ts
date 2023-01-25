@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
     'visualize',
