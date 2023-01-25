@@ -118,6 +118,9 @@ const getEntity = (path: string, config: Config) => {
       };
 
       const hasHostHeader = Object.keys(requestHeaders).some((key) => key.toLowerCase() === 'host');
+      // if the host header is not set, then set it to the hostname. This is needed because the
+      // request will fail if the host header is not set and it is used to determine the node to
+      // send the request to in a multi-node cluster.
       if (!hasHostHeader) {
         requestHeaders.host = hostname;
       }
@@ -193,7 +196,7 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       }
 
       const legacyConfig = await deps.proxy.readLegacyESConfig();
-      const configWithHeaders = {
+      const config = {
         ...legacyConfig,
         request,
         kibanaVersion: deps.kibanaVersion,
@@ -201,12 +204,12 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
-        getMappings(settings, configWithHeaders),
-        getAliases(settings, configWithHeaders),
-        getDataStreams(settings, configWithHeaders),
-        getLegacyTemplates(settings, configWithHeaders),
-        getIndexTemplates(settings, configWithHeaders),
-        getComponentTemplates(settings, configWithHeaders),
+        getMappings(settings, config),
+        getAliases(settings, config),
+        getDataStreams(settings, config),
+        getLegacyTemplates(settings, config),
+        getIndexTemplates(settings, config),
+        getComponentTemplates(settings, config),
       ]);
 
       const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
