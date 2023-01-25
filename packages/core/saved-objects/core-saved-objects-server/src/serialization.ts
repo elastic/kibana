@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectReference } from '..';
 
 /**
@@ -78,7 +77,7 @@ export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;
   namespaces?: string[];
-  migrationVersion?: SavedObjectsMigrationVersion;
+  migrationVersion?: string;
   updated_at?: string;
   created_at?: string;
   references?: SavedObjectReference[];
@@ -98,7 +97,7 @@ interface SavedObjectDoc<T = unknown> {
   type: string;
   namespace?: string;
   namespaces?: string[];
-  migrationVersion?: SavedObjectsMigrationVersion;
+  migrationVersion?: string;
   coreMigrationVersion?: string;
   version?: string;
   updated_at?: string;

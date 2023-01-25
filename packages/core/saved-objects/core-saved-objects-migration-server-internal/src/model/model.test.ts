@@ -2430,7 +2430,7 @@ describe('migrations v2 model', () => {
           },
         },
         // and a second part with the object _source
-        { type: 'a', a: { name: `HOI ${_id}!` }, migrationVersion: {}, references: [] },
+        { type: 'a', a: { name: `HOI ${_id}!` }, references: [] },
         // these two parts are then serialized to NDJSON by esClient and sent over with POST _bulk
       ];
 

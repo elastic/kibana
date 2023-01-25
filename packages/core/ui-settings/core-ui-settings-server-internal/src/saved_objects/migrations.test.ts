@@ -28,7 +28,6 @@ describe('ui_settings 7.9.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     expect(migration(doc)).toEqual({
       type: 'config',
@@ -40,7 +39,6 @@ describe('ui_settings 7.9.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
 });
@@ -71,7 +69,6 @@ describe('ui_settings 7.12.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     const migrated = migration(doc);
     expect(JSON.parse(migrated.attributes['timepicker:quickRanges'])).toEqual([migratedQuickRange]);
@@ -88,7 +85,6 @@ describe('ui_settings 7.12.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     const migrated = migration(doc);
     expect(migrated).toEqual(doc);
@@ -113,7 +109,6 @@ describe('ui_settings 7.13.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     expect(migration(doc)).toEqual({
       type: 'config',
@@ -124,7 +119,6 @@ describe('ui_settings 7.13.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
 });
@@ -149,7 +143,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     expect(migration(doc)).toEqual({
       type: 'config',
@@ -159,7 +152,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
   test('removes telemetry:optIn and xPackMonitoring:allowReport from ui_settings', () => {
@@ -173,7 +165,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     expect(migration(doc)).toEqual({
       type: 'config',
@@ -183,7 +174,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
   test('removes custom theme:version setting', () => {
@@ -196,7 +186,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
 
     expect(migration(doc)).toEqual({
@@ -207,7 +196,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
 
@@ -221,7 +209,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
 
     expect(migration(doc)).toEqual({
@@ -232,7 +219,6 @@ describe('ui_settings 8.0.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
 });
@@ -267,7 +253,6 @@ describe('ui_settings 8.1.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
     const migrated = migration(doc);
     expect(migrated.attributes.buildNum).toBe(9007199254740991);
@@ -300,7 +285,6 @@ describe('ui_settings 8.1.0 migrations', () => {
       },
       references: [],
       updated_at: '2022-01-19T11:26:54.645Z',
-      migrationVersion: {},
     };
     const migrated = migration(doc);
     expect(migrated.attributes.buildNum).toBe(9007199254740991);
@@ -330,7 +314,6 @@ describe('ui_settings 8.5.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
 
     expect(migration(doc)).toEqual({
@@ -341,7 +324,6 @@ describe('ui_settings 8.5.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
 });
@@ -365,7 +347,6 @@ describe('ui_settings 8.7.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     };
 
     expect(migration(doc)).toEqual({
@@ -376,7 +357,6 @@ describe('ui_settings 8.7.0 migrations', () => {
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
-      migrationVersion: {},
     });
   });
 });

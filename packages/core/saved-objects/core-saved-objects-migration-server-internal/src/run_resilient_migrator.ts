@@ -9,7 +9,6 @@
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,
@@ -19,7 +18,7 @@ import type {
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';
-import { createInitialState } from './initial_state';
+import { SavedObjectsMigrationVersion, createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 
 /**

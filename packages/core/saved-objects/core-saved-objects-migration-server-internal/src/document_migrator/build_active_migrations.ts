@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type ActiveMigrations, type Transform, type TypeTransforms, TransformType } from './types';
 import { getReferenceTransforms, getConversionTransforms } from './internal_transforms';
+import { migrations as coreMigrationsMap } from './migrations';
 import { validateTypeMigrations } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
 import { getModelVersionTransforms } from './model_version';
@@ -68,6 +69,13 @@ const buildTypeTransforms = ({
   const migrationsMap =
     typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
 
+  const coreTransforms = Object.entries(coreMigrationsMap).map<Transform>(
+    ([version, transform]) => ({
+      version,
+      transform: convertMigrationFunction(version, type, transform, log),
+      transformType: TransformType.Reference,
+    })
+  );
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({
       version,
@@ -80,6 +88,7 @@ const buildTypeTransforms = ({
 
   const conversionTransforms = getConversionTransforms(type);
   const transforms = [
+    ...coreTransforms,
     ...referenceTransforms,
     ...conversionTransforms,
     ...migrationTransforms,

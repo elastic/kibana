@@ -22,7 +22,7 @@ export async function importDashboards(
   const docs = objects
     .filter((item) => !exclude.includes(item.type))
     // filter out any document version, if present
-    .map(({ version, ...doc }) => ({ ...doc, migrationVersion: doc.migrationVersion || {} }));
+    .map(({ version, ...doc }) => ({ ...doc, migrationVersion: doc.migrationVersion || '' }));
 
   const results = await savedObjectsClient.bulkCreate(docs, { overwrite });
   return { objects: results.saved_objects };
