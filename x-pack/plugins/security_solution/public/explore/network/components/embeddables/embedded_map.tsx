@@ -139,7 +139,6 @@ export const EmbeddedMapComponent = ({
         );
         // ensures only index patterns with maps fields are passed
         const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
-        console.log('fetch complete', { canceled, availableDataViews, goodDataViews });
         if (!canceled) {
           setMapDataViews(goodDataViews);
         }
