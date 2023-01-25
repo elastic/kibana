@@ -14,6 +14,9 @@ export const registerDeleteRoute = (router: IRouter) => {
   router.delete(
     {
       path: `${KBN_CLIENT_API_PREFIX}/{type}/{id}`,
+      options: {
+        tags: ['access:ftrApis'],
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -32,4 +35,4 @@ export const registerDeleteRoute = (router: IRouter) => {
       return res.ok({ body: result });
     })
   );
-}
+};

@@ -14,6 +14,9 @@ export const registerFindRoute = (router: IRouter) => {
   router.get(
     {
       path: `${KBN_CLIENT_API_PREFIX}/_find`,
+      options: {
+        tags: ['access:ftrApis'],
+      },
       validate: {
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),
