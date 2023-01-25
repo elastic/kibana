@@ -8,149 +8,67 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-
-import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
 import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
 `;
 
-interface GetRowItemDraggableParams {
-  rowItem: string | null | undefined;
-  attrName: string;
+interface GetRowItemsWithActionsParams {
+  values: string[] | null | undefined;
+  fieldName: string;
+  fieldType?: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
-  fieldType?: string;
-  isAggregatable?: boolean;
   displayCount?: number;
-  dragDisplayValue?: string;
   maxOverflow?: number;
 }
 
-export const getRowItemDraggable = ({
-  rowItem,
-  attrName,
-  idPrefix,
-  fieldType,
-  isAggregatable,
-  render,
-  dragDisplayValue,
-}: GetRowItemDraggableParams): JSX.Element => {
-  if (rowItem != null) {
-    const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
-    return (
-      <DraggableWrapper
-        key={id}
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id,
-          name: rowItem,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: attrName,
-            value: rowItem,
-            displayValue: dragDisplayValue || rowItem,
-            operator: IS_OPERATOR,
-          },
-        }}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
-          )
-        }
-      />
-    );
-  } else {
-    return getEmptyTagValue();
-  }
-};
-
-interface GetRowItemDraggablesParams {
-  rowItems: string[] | null | undefined;
-  attrName: string;
-  idPrefix: string;
-  render?: (item: string) => JSX.Element;
-  fieldType?: string;
-  isAggregatable?: boolean;
-  displayCount?: number;
-  dragDisplayValue?: string;
-  maxOverflow?: number;
-}
-export const getRowItemDraggables = ({
-  rowItems,
-  attrName,
-  idPrefix,
-  render,
-  dragDisplayValue,
+export const getRowItemsWithActions = ({
+  values,
+  fieldName,
   fieldType = 'keyword',
-  isAggregatable = false,
+  idPrefix,
+  render,
   displayCount = 5,
   maxOverflow = 5,
-}: GetRowItemDraggablesParams): JSX.Element => {
-  if (rowItems != null && rowItems.length > 0) {
-    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
+}: GetRowItemsWithActionsParams): JSX.Element => {
+  if (values != null && values.length > 0) {
+    const visibleItems = values.slice(0, displayCount).map((value, index) => {
+      const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
       return (
-        <React.Fragment key={id}>
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: rowItem,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: attrName,
-                value: rowItem,
-                displayValue: dragDisplayValue || rowItem,
-                operator: IS_OPERATOR,
-              },
-            }}
-            fieldType={fieldType}
-            isAggregatable={isAggregatable}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>{render ? render(rowItem) : defaultToEmptyTag(rowItem)}</>
-              )
-            }
-          />
-        </React.Fragment>
+        <CellActions
+          key={id}
+          mode={CellActionsMode.HOVER}
+          visibleCellActions={5}
+          showActionTooltips
+          triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+          field={{
+            name: fieldName,
+            value,
+            type: fieldType,
+          }}
+        >
+          <>{render ? render(value) : defaultToEmptyTag(value)}</>
+        </CellActions>
       );
     });
 
-    return draggables.length > 0 ? (
+    return visibleItems.length > 0 ? (
       <>
-        {draggables}{' '}
+        {visibleItems}{' '}
         <RowItemOverflow
-          attrName={attrName}
-          dragDisplayValue={dragDisplayValue}
+          fieldName={fieldName}
+          values={values}
+          fieldType={fieldType}
           idPrefix={idPrefix}
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
-          rowItems={rowItems}
-          fieldType={fieldType}
-          isAggregatable={isAggregatable}
         />
       </>
     ) : (
@@ -162,46 +80,40 @@ export const getRowItemDraggables = ({
 };
 
 interface RowItemOverflowProps {
-  attrName: string;
-  dragDisplayValue?: string;
+  fieldName: string;
+  fieldType: string;
+  values: string[];
   idPrefix: string;
   maxOverflowItems: number;
   overflowIndexStart: number;
-  rowItems: string[];
-  fieldType?: string;
-  isAggregatable?: boolean;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
-  attrName,
-  dragDisplayValue,
+  fieldName,
+  values,
+  fieldType,
   idPrefix,
   maxOverflowItems = 5,
   overflowIndexStart = 5,
-  rowItems,
-  fieldType,
-  isAggregatable,
 }) => {
   return (
     <>
-      {rowItems.length > overflowIndexStart && (
-        <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
+      {values.length > overflowIndexStart && (
+        <Popover count={values.length - overflowIndexStart} idPrefix={idPrefix}>
           <EuiText size="xs">
             <MoreContainer
-              attrName={attrName}
-              dragDisplayValue={dragDisplayValue}
+              fieldName={fieldName}
               idPrefix={idPrefix}
-              overflowIndexStart={overflowIndexStart}
-              rowItems={rowItems}
-              moreMaxHeight="none"
               fieldType={fieldType}
-              isAggregatable={isAggregatable}
+              values={values}
+              overflowIndexStart={overflowIndexStart}
+              moreMaxHeight="none"
             />
 
-            {rowItems.length > overflowIndexStart + maxOverflowItems && (
+            {values.length > overflowIndexStart + maxOverflowItems && (
               <p data-test-subj="popover-additional-overflow">
                 <EuiTextColor color="subdued">
-                  {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
+                  {values.length - overflowIndexStart - maxOverflowItems}{' '}
                   <FormattedMessage
                     id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
                     defaultMessage="more not shown"
