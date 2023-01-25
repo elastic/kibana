@@ -7,6 +7,7 @@
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
@@ -22,6 +23,37 @@ import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+
+const augmentAlerts = <T>({
+  alerts,
+  options,
+  kibanaVersion,
+  includeLastDetected,
+  currentTimeOverride,
+}: {
+  alerts: Array<{ _id: string; _source: T }>;
+  options: RuleExecutorOptions<any, any, any, any, any>;
+  kibanaVersion: string;
+  includeLastDetected: boolean;
+  currentTimeOverride: Date | undefined;
+}) => {
+  const commonRuleFields = getCommonAlertFields(options);
+  return alerts.map((alert) => {
+    return {
+      ...alert,
+      _source: {
+        [ALERT_LAST_DETECTED]: includeLastDetected ? currentTimeOverride ?? new Date() : undefined,
+        [VERSION]: kibanaVersion,
+        ...commonRuleFields,
+        ...alert._source,
+      },
+    };
+  });
+};
+
+const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) => {
+  return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, alert._source]);
+};
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -51,8 +83,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               if (writeAlerts && numAlerts) {
-                const commonRuleFields = getCommonAlertFields(options);
-
                 const CHUNK_SIZE = 10000;
                 const alertChunks = chunk(alerts, CHUNK_SIZE);
                 const filteredAlerts: typeof alerts = [];
@@ -114,22 +144,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = enrichedAlerts.map((alert) => {
-                  return {
-                    ...alert,
-                    _source: {
-                      [VERSION]: ruleDataClient.kibanaVersion,
-                      ...commonRuleFields,
-                      ...alert._source,
-                    },
-                  };
+                const augmentedAlerts = augmentAlerts({
+                  alerts: enrichedAlerts,
+                  options,
+                  kibanaVersion: ruleDataClient.kibanaVersion,
+                  includeLastDetected: false,
+                  currentTimeOverride: undefined,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
-                  body: augmentedAlerts.flatMap((alert) => [
-                    { create: { _id: alert._id } },
-                    alert._source,
-                  ]),
+                  body: mapAlertsToBulkCreate(augmentedAlerts),
                   refresh,
                 });
 
@@ -176,8 +200,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               if (writeAlerts && alerts.length > 0) {
-                const commonRuleFields = getCommonAlertFields(options);
-
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
                   forceNow: currentTimeOverride,
                 });
@@ -279,25 +301,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   }
                 }
 
-                const augmentedAlerts = enrichedAlerts.map((alert) => {
-                  return {
-                    ...alert,
-                    _source: {
-                      [VERSION]: ruleDataClient.kibanaVersion,
-                      [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-                      ...commonRuleFields,
-                      ...alert._source,
-                    },
-                  };
+                const augmentedAlerts = augmentAlerts({
+                  alerts: enrichedAlerts,
+                  options,
+                  kibanaVersion: ruleDataClient.kibanaVersion,
+                  includeLastDetected: true,
+                  currentTimeOverride,
                 });
 
-                const newAlertCreates = augmentedAlerts.flatMap((alert) => [
-                  { create: { _id: alert._id } },
-                  alert._source,
-                ]);
-
                 const bulkResponse = await ruleDataClientWriter.bulk({
-                  body: [...duplicateAlertUpdates, ...newAlertCreates],
+                  body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
                   refresh: true,
                 });
 

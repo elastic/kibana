@@ -522,6 +522,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
                   isDisabled={
+                    !license.isAtLeast(minimumLicenseForSuppression) ||
                     groupByFields?.length === 0 ||
                     groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
                   }
