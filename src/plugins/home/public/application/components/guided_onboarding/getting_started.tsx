@@ -7,7 +7,16 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {EuiButton, EuiLink, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
