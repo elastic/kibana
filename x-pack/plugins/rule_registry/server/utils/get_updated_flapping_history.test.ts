@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
+import {
+  RulesSettingsFlapping,
+  DEFAULT_FLAPPING_SETTINGS,
+} from '@kbn/alerting-plugin/common/rules_settings';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 
 describe('getUpdatedFlappingHistory', () => {
-  const flappingSettings = {
-    enabled: true,
-    lookBackWindow: 20,
-    statusChangeThreshold: 4,
-  } as RulesSettingsFlapping;
+  const flappingSettings = DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping;
 
   type TestRuleState = Record<string, unknown> & {
     aRuleStateKey: string;

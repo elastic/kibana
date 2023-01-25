@@ -20,6 +20,10 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { Alert, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import {
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlapping,
+} from '@kbn/alerting-plugin/common/rules_settings';
+import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
@@ -36,7 +40,6 @@ import {
   BurnRateRuleParams,
   AlertStates,
 } from './types';
-import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
 
 const commonEsResponse = {
   took: 100,
@@ -119,11 +122,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      } as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -148,11 +147,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      } as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -177,11 +172,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      } as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();
@@ -211,11 +202,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      } as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).toBeCalledWith({
@@ -263,11 +250,7 @@ describe('BurnRateRuleExecutor', () => {
       rule: {} as SanitizedRuleConfig,
       spaceId: 'irrelevant',
       state: {},
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      } as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(alertWithLifecycleMock).not.toBeCalled();

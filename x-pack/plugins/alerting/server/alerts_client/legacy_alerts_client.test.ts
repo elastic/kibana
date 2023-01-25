@@ -14,7 +14,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { getAlertsForNotification, processAlerts, setFlapping } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS, RulesSettingsFlapping } from '../../common/rules_settings';
 
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
@@ -230,11 +230,7 @@ describe('Legacy Alerts Client', () => {
       ruleLabel: `ruleLogPrefix`,
       ruleRunMetricsStore,
       shouldLogAndScheduleActionsForAlerts: true,
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      } as RulesSettingsFlapping,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -250,11 +246,7 @@ describe('Legacy Alerts Client', () => {
       hasReachedAlertLimit: false,
       alertLimit: 1000,
       autoRecoverAlerts: true,
-      flappingSettings: {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
     });
 
     expect(setFlapping).toHaveBeenCalledWith(

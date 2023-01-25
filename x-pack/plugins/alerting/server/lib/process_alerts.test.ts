@@ -10,14 +10,10 @@ import { cloneDeep } from 'lodash';
 import { processAlerts, updateAlertFlappingHistory } from './process_alerts';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../types';
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlapping, DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 describe('processAlerts', () => {
-  const flappingSettings = {
-    enabled: true,
-    lookBackWindow: 20,
-    statusChangeThreshold: 4,
-  } as RulesSettingsFlapping;
+  const flappingSettings = DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping;
 
   let clock: sinon.SinonFakeTimers;
 

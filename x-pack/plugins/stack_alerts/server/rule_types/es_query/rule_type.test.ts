@@ -24,7 +24,10 @@ import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
-import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common/rules_settings';
+import {
+  RulesSettingsFlapping,
+  DEFAULT_FLAPPING_SETTINGS,
+} from '@kbn/alerting-plugin/common/rules_settings';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -727,10 +730,6 @@ async function invokeExecutor({
       notifyWhen: null,
     },
     logger,
-    flappingSettings: {
-      enabled: true,
-      lookBackWindow: 20,
-      statusChangeThreshold: 4,
-    } as RulesSettingsFlapping,
+    flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
   });
 }

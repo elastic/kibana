@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { RulesSettingsFlapping } from '../../common/rules_settings';
+import { RulesSettingsFlapping, DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { atCapacity, updateFlappingHistory, isFlapping } from './flapping_utils';
 
 describe('flapping utils', () => {
-  const flappingSettings = {
-    enabled: true,
-    lookBackWindow: 20,
-    statusChangeThreshold: 4,
-  } as RulesSettingsFlapping;
+  const flappingSettings = DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping;
 
   describe('updateFlappingHistory function', () => {
     test('correctly updates flappingHistory', () => {
