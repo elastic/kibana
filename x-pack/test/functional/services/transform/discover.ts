@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -28,6 +27,8 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     },
 
     async assertNoResults(expectedDestinationIndex: string) {
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
+
       // Discover should use the destination index pattern
       const actualIndexPatternSwitchLinkText = await (
         await testSubjects.find('discover-dataView-switch-link')
@@ -38,30 +39,6 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       );
 
       await testSubjects.existOrFail('discoverNoResults');
-    },
-
-    async assertSuperDatePickerToggleQuickMenuButtonExists() {
-      await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
-    },
-
-    async openSuperDatePicker() {
-      await testSubjects.click('superDatePickerToggleQuickMenuButton');
-      await testSubjects.existOrFail('superDatePickerQuickMenu');
-    },
-
-    async quickSelectYears() {
-      const quickMenuElement = await testSubjects.find('superDatePickerQuickMenu');
-
-      // No test subject, select "Years" to look back 15 years instead of 15 minutes.
-      await find.selectValue(`[aria-label*="Time unit"]`, 'y');
-
-      // Apply
-      const applyButton = await quickMenuElement.findByClassName('euiQuickSelect__applyButton');
-      const actualApplyButtonText = await applyButton.getVisibleText();
-      expect(actualApplyButtonText).to.be('Apply');
-
-      await applyButton.click();
-      await testSubjects.existOrFail('unifiedHistogramQueryHits');
     },
   };
 }
