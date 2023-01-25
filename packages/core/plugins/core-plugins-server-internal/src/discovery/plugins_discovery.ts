@@ -54,14 +54,6 @@ export function discover({
     from(config.additionalPluginPaths),
     scanPluginSearchPaths(config.pluginSearchPaths, log)
   ).pipe(
-    toArray(),
-    mergeMap((pathAndErrors) => {
-      return pathAndErrors.sort((a, b) => {
-        const pa = typeof a === 'string' ? a : a.path;
-        const pb = typeof b === 'string' ? b : b.path;
-        return pa < pb ? -1 : pa > pb ? 1 : 0;
-      });
-    }),
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
@@ -101,7 +93,18 @@ export function discover({
     })
   );
 
-  const discoveryResults$ = merge(fsDiscovery$, pluginPkgDiscovery$).pipe(shareReplay());
+  const discoveryResults$ = merge(fsDiscovery$, pluginPkgDiscovery$).pipe(
+    toArray(),
+    // ensure that everything is always provided in a consistent order
+    mergeMap((pkgs) =>
+      pkgs.sort((a, b) => {
+        const aComp = typeof a !== 'string' ? a.path : a;
+        const bComp = typeof b !== 'string' ? b.path : b;
+        return aComp.localeCompare(bComp);
+      })
+    ),
+    shareReplay()
+  );
 
   return {
     plugin$: discoveryResults$.pipe(
