@@ -164,7 +164,8 @@ describe('Integration', () => {
             ac('textBoxPosition', posCompare);
             ac('rangeToReplace', rangeCompare);
             done();
-          }
+          },
+          { setAnnotation: () => {}, removeAnnotation: () => {} }
         );
       });
     });

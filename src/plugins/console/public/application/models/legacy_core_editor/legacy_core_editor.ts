@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace, { type Annotation } from 'brace';
 import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
 import $ from 'jquery';
 import {
@@ -413,22 +413,29 @@ export class LegacyCoreEditor implements CoreEditor {
             column: pos.column + 1,
           };
 
-          const setAnnotationCallback = (text: string) => {
-            const annotations = DO_NOT_USE_2.getAnnotations();
-            DO_NOT_USE_2.setAnnotations([
-              ...annotations,
-              text
-                ? {
-                    text,
-                    row: pos.row,
-                    column: pos.column,
-                    type: 'warning',
-                  }
-                : null,
-            ]);
+          const getAnnotationControls = () => {
+            let customAnnotation: Annotation;
+            return {
+              setAnnotation(text: string) {
+                const annotations = DO_NOT_USE_2.getAnnotations();
+                customAnnotation = {
+                  text,
+                  row: pos.row,
+                  column: pos.column,
+                  type: 'warning',
+                };
+
+                DO_NOT_USE_2.setAnnotations([...annotations, customAnnotation]);
+              },
+              removeAnnotation() {
+                DO_NOT_USE_2.setAnnotations(
+                  DO_NOT_USE_2.getAnnotations().filter((a: Annotation) => a !== customAnnotation)
+                );
+              },
+            };
           };
 
-          autocompleter(position, prefix, callback, setAnnotationCallback);
+          autocompleter(position, prefix, callback, getAnnotationControls());
         },
       },
     ]);

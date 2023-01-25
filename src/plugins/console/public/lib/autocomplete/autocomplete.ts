@@ -1202,7 +1202,10 @@ export default function ({
     position: Position,
     prefix: string,
     callback: (e: Error | null, result: ResultTerm[] | null) => void,
-    setAnnotationCallback: (text: string) => void
+    annotationControls: {
+      setAnnotation: (text: string) => void;
+      removeAnnotation: () => void;
+    }
   ) {
     try {
       const context = getAutoCompleteContext(editor, position);
@@ -1217,13 +1220,16 @@ export default function ({
         }
 
         if (context.asyncResultsState) {
-          // TODO indicate mappings fetching is in progress
-          setAnnotationCallback('Fetching fields');
+          annotationControls.setAnnotation(
+            i18n.translate('console.autocomplete.fieldsFetchingAnnotation', {
+              defaultMessage: 'Fields fetching is in progress',
+            })
+          );
 
           context.asyncResultsState.results.then((r) => {
             const asyncSuggestions = getSuggestions(getTerms(context, r));
             callback(null, asyncSuggestions);
-            setAnnotationCallback('');
+            annotationControls.removeAnnotation();
           });
         }
       }
@@ -1245,8 +1251,12 @@ export default function ({
         _editSession: unknown,
         pos: Position,
         prefix: string,
-        callback: (e: Error | null, result: ResultTerm[] | null) => void
-      ) => getCompletions(pos, prefix, callback),
+        callback: (e: Error | null, result: ResultTerm[] | null) => void,
+        annotationControls: {
+          setAnnotation: (text: string) => void;
+          removeAnnotation: () => void;
+        }
+      ) => getCompletions(pos, prefix, callback, annotationControls),
       addReplacementInfoToContext,
       addChangeListener: () => editor.on('changeSelection', editorChangeListener),
       removeChangeListener: () => editor.off('changeSelection', editorChangeListener),

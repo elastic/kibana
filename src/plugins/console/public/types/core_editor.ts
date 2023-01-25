@@ -7,6 +7,7 @@
  */
 
 import type { Editor } from 'brace';
+import { ResultTerm } from '../lib/autocomplete/types';
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
 
@@ -23,8 +24,11 @@ export type EditorEvent =
 export type AutoCompleterFunction = (
   pos: Position,
   prefix: string,
-  callback: (...args: unknown[]) => void,
-  setAnnotationCallback: (text: string) => void
+  callback: (e: Error | null, result: ResultTerm[] | null) => void,
+  annotationControls: {
+    setAnnotation: (text: string) => void;
+    removeAnnotation: () => void;
+  }
 ) => void;
 
 export interface Position {
