@@ -50,6 +50,7 @@ const IntegrationButtonLink = ({
   policyId: string;
 }) => {
   const { application } = useKibana().services;
+
   return (
     <EuiLink
       href={application.getUrlForApp('security', {
@@ -96,7 +97,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
     render: (field: PackagePolicy) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
@@ -105,13 +105,12 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   },
   {
     field: 'package_policy',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.deploymentTypeColumnTitle', {
-      defaultMessage: 'Deployment Type',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.monitoringColumnTitle', {
+      defaultMessage: 'Monitoring',
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.DEPLOYMENT_TYPE,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.MONITORING,
     render: (field: PackagePolicy) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
       return enabledIntegration?.enabledIntegrationOption?.name || ' ';

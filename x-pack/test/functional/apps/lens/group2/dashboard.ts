@@ -34,6 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x, y, origin: el._webElement }).click().perform();
   }
 
+  async function rightClickInChart(x: number, y: number) {
+    const el = await elasticChart.getCanvas();
+    await browser.getActions().move({ x, y, origin: el._webElement }).contextClick().perform();
+  }
+
   describe('lens dashboard tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('dashboard');
@@ -88,6 +93,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
       const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
       expect(hasIpFilter).to.be(true);
+    });
+
+    it('should be able to add filters by right clicking in XYChart', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
+      await find.clickByButtonText('lnsXYvis');
+      await dashboardAddPanel.closeAddPanel();
+      await PageObjects.lens.goToTimeRange();
+      await retry.try(async () => {
+        // show the tooltip actions
+        await rightClickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await (await find.byCssSelector('.echTooltipActions__action')).click();
+        const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
+        expect(hasIpFilter).to.be(true);
+      });
     });
 
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
