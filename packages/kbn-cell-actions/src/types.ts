@@ -79,6 +79,8 @@ export interface CellActionsProps {
    * This data is sent directly to actions.
    */
   metadata?: Record<string, unknown>;
+
+  className?: string;
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {

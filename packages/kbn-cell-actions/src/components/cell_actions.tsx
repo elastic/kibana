@@ -20,6 +20,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   visibleCellActions = 3,
   disabledActions = [],
   metadata,
+  className,
 }) => {
   const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
   const nodeRef = useRef<HTMLDivElement | null>(null);
@@ -36,10 +37,9 @@ export const CellActions: React.FC<CellActionsProps> = ({
   );
 
   const dataTestSubj = `cellActions-renderContent-${field.name}`;
-
   if (mode === CellActionsMode.HOVER) {
     return (
-      <div ref={nodeRef} data-test-subj={dataTestSubj}>
+      <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>
         <HoverActionsPopover
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
@@ -55,7 +55,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   }
 
   return (
-    <div ref={nodeRef} data-test-subj={dataTestSubj}>
+    <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>
       {children}
       <InlineActions
         actionContext={actionContext}

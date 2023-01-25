@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import styled from 'styled-components';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -30,6 +31,10 @@ import { ACTION_ID as SHOW_TOP_N_ACTION_ID } from '../../../../actions/show_top_
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
+const StyledCellActions = styled(CellActions)`
+  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
   openEntityInTimeline: (entityName: string, oldestAlertTimestamp?: string) => void
@@ -44,7 +49,7 @@ export const getRiskScoreColumns = (
         return riskEntity === RiskScoreEntity.host ? (
           <>
             <HostDetailsLink hostName={entityName} hostTab={HostsTableType.risk} />
-            <CellActions
+            <StyledCellActions
               field={{
                 name: 'host.name',
                 value: entityName,
@@ -59,7 +64,7 @@ export const getRiskScoreColumns = (
         ) : (
           <>
             <UserDetailsLink userName={entityName} userTab={UsersTableType.risk} />
-            <CellActions
+            <StyledCellActions
               field={{
                 name: 'user.name',
                 value: entityName,
