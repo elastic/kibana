@@ -141,6 +141,9 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+
+      <EuiSpacer size="m" />
+
       <DetectorsValidationWarning validation={validation} />
       <EuiSpacer size="m" />
     </>
