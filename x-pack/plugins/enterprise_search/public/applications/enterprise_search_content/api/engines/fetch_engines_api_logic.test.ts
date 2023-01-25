@@ -29,6 +29,7 @@ describe('FetchEnginesAPILogic', () => {
       });
 
       await expect(result).resolves.toEqual({
+        isInitialRequest: true,
         result: 'result',
       });
     });

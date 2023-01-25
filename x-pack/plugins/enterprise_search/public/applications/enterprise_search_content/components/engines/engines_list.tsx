@@ -54,6 +54,7 @@ export const EnginesList: React.FC = () => {
     onPaginate,
     openDeleteEngineModal,
     setSearchQuery,
+    setIsFirstRequest,
   } = useActions(EnginesListLogic);
 
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
@@ -61,6 +62,7 @@ export const EnginesList: React.FC = () => {
   const {
     createEngineFlyoutOpen,
     deleteModalEngineName,
+    hasNoEngines,
     isDeleteModalVisible,
     isLoading,
     meta,
@@ -74,6 +76,11 @@ export const EnginesList: React.FC = () => {
     fetchEngines();
   }, [meta.from, meta.size, throttledSearchQuery]);
 
+  useEffect(() => {
+    // We don't want to trigger loading for each search query change, so we need this
+    // flag to set if the call to backend is first request.
+    setIsFirstRequest();
+  }, []);
   return (
     <>
       {isDeleteModalVisible ? (
@@ -120,7 +127,7 @@ export const EnginesList: React.FC = () => {
         isLoading={isLoading}
       >
         <EuiSpacer />
-        {searchQuery! || results?.length ? (
+        {!hasNoEngines ? (
           <>
             <div>
               <EuiFieldSearch
@@ -154,31 +161,25 @@ export const EnginesList: React.FC = () => {
             </EuiText>
 
             <EuiSpacer size="m" />
-            {results?.length ? (
-              <>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.engines.enginesList.description"
-                    defaultMessage="Showing {from}-{to} of {total}"
-                    values={{
-                      from: (
-                        <strong>
-                          <FormattedNumber value={meta.from + 1} />
-                        </strong>
-                      ),
-                      to: (
-                        <strong>
-                          <FormattedNumber value={meta.from + (results?.length ?? 0)} />
-                        </strong>
-                      ),
-                      total: <FormattedNumber value={meta.total} />,
-                    }}
-                  />
-                </EuiText>
-              </>
-            ) : (
-              <></>
-            )}
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engines.enginesList.description"
+                defaultMessage="Showing {from}-{to} of {total}"
+                values={{
+                  from: (
+                    <strong>
+                      <FormattedNumber value={meta.from + 1} />
+                    </strong>
+                  ),
+                  to: (
+                    <strong>
+                      <FormattedNumber value={meta.from + (results?.length ?? 0)} />
+                    </strong>
+                  ),
+                  total: <FormattedNumber value={meta.total} />,
+                }}
+              />
+            </EuiText>
 
             <DataPanel
               title={

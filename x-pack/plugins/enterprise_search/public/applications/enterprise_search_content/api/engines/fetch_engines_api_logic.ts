@@ -26,9 +26,15 @@ export const fetchEngines = async ({
     size: meta.size,
     ...(searchQuery && searchQuery.trim() !== '' ? { q: searchQuery } : {}),
   };
-  return await HttpLogic.values.http.get<EnterpriseSearchEnginesResponse>(route, {
+
+  // We need this to determine whether to show the empty state on the page
+  const isInitialRequest = meta.from === 0 && !searchQuery;
+
+  const response = await HttpLogic.values.http.get<EnterpriseSearchEnginesResponse>(route, {
     query,
   });
+
+  return { ...response, isInitialRequest };
 };
 
 export const FetchEnginesAPILogic = createApiLogic(['content', 'engines_api_logic'], fetchEngines);

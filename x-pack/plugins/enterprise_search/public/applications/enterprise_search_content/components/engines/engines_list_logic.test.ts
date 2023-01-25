@@ -23,8 +23,10 @@ const DEFAULT_VALUES = {
   deleteModalEngine: null,
   deleteModalEngineName: '',
   deleteStatus: Status.IDLE,
+  hasNoEngines: false,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
+  isFirstRequest: true,
   isLoading: true,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
@@ -33,7 +35,7 @@ const DEFAULT_VALUES = {
   status: Status.IDLE,
 };
 
-// may need to call  mock engines response when ready
+// may need to call mock engines response when ready
 
 const results: EnterpriseSearchEngine[] = [
   {
@@ -145,10 +147,12 @@ describe('EnginesListLogic', () => {
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
-            results,
             meta: newPageMeta,
+            results,
             // searchQuery: 'k',
           },
+          hasNoEngines: false,
+          isFirstRequest: false,
           isLoading: false,
           meta: newPageMeta,
           parameters: {
@@ -226,6 +230,7 @@ describe('EnginesListLogic', () => {
             results,
             meta: DEFAULT_META,
           },
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           parameters: {
