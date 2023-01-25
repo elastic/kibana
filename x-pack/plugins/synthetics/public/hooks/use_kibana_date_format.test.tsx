@@ -11,6 +11,7 @@ import * as redux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
 
 import {
+  getDateFormat,
   useKibanaDateFormat,
   DEFAULT_FORMAT as DEFAULT_FORMAT_STRING,
 } from './use_kibana_date_format';
@@ -35,15 +36,22 @@ const DEFAULT_FORMAT = {
   31536000000: 'YYYY',
 };
 
-function defaultRenderHook(timestamp?: number) {
+function defaultRenderHook(
+  timestamp?: number,
+  configOverride?: string,
+  dateFormatOverride?: string
+) {
+  const get = jest.fn();
+  get.mockImplementation((_key: string, def: string) => dateFormatOverride ?? def);
   return renderHook(() => useKibanaDateFormat(timestamp), {
     wrapper: ({ children }: { children: React.ReactElement }) => (
       <WrappedHelper
         core={{
           uiSettings: {
-            getAll: jest
-              .fn()
-              .mockReturnValue({ 'dateFormat:scaled': { value: DEFAULT_SCALED_FORMAT } }),
+            getAll: jest.fn().mockReturnValue({
+              'dateFormat:scaled': { value: configOverride ?? DEFAULT_SCALED_FORMAT },
+            }),
+            get,
           },
         }}
       >
@@ -54,6 +62,20 @@ function defaultRenderHook(timestamp?: number) {
 }
 
 describe('useKibanaDateFormat', () => {
+  describe('getDateFormat', () => {
+    it.each`
+      diff             | format
+      ${'1'}           | ${'HH:mm:ss.SSS'}
+      ${'1200'}        | ${'HH:mm:ss'}
+      ${'65000'}       | ${'HH:mm'}
+      ${'3900000'}     | ${'YYYY-MM-DD HH:mm'}
+      ${'89400000'}    | ${'YYYY-MM-DD'}
+      ${'32536000000'} | ${'YYYY'}
+    `(`returns '$format' for '$diff'`, ({ diff, format }) => {
+      expect(getDateFormat(DEFAULT_FORMAT, diff)).toBe(format);
+    });
+  });
+
   beforeEach(() => {
     jest.spyOn(moment, 'now').mockReturnValue(592437814);
     jest.spyOn(redux, 'useSelector').mockReturnValue({
@@ -62,11 +84,27 @@ describe('useKibanaDateFormat', () => {
     });
   });
 
+  afterAll(() => jest.clearAllMocks());
+
   it('returns expected format', () => {
+    jest.spyOn(redux, 'useSelector').mockReturnValue({
+      format: DEFAULT_FORMAT,
+      formatString: undefined,
+    });
     expect(defaultRenderHook(592435814).result.current).toBe(DEFAULT_FORMAT[1000]);
   });
 
+  it('throws error for invalid format config', () => {
+    expect(
+      () =>
+        defaultRenderHook(529304, '[["some invalid value"], ["an array", "with wrong length"]]')
+          .result?.error
+    ).toBeDefined();
+  });
+
   it('returns default format for undefined timestamp', () => {
-    expect(defaultRenderHook(undefined).result.current).toBe(DEFAULT_FORMAT_STRING);
+    expect(defaultRenderHook(undefined, undefined, undefined).result.current).toBe(
+      DEFAULT_FORMAT_STRING
+    );
   });
 });
