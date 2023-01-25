@@ -129,119 +129,232 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllCaseItems(es);
       });
 
-      it('should return the correct attachments', async () => {
-        const [secCase, obsCase] = await Promise.all([
-          // Create case owned by the security solution user
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
+      describe('security and observability cases', () => {
+        let secCase: CaseResponse;
+        let obsCase: CaseResponse;
+        let secAttachmentId: string;
+        let obsAttachmentId: string;
+
+        beforeEach(async () => {
+          [secCase, obsCase] = await Promise.all([
+            // Create case owned by the security solution user
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+              200,
+              {
+                user: superUser,
+                space: 'space1',
+              }
+            ),
+            // Create case owned by the observability user
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture' }),
+              200,
+              {
+                user: superUser,
+                space: 'space1',
+              }
+            ),
+          ]);
+
+          [secCase, obsCase] = await Promise.all([
+            createComment({
+              supertest: supertestWithoutAuth,
+              caseId: secCase.id,
+              params: postCommentUserReq,
+              auth: { user: superUser, space: 'space1' },
+            }),
+            createComment({
+              supertest: supertestWithoutAuth,
+              caseId: obsCase.id,
+              params: { ...postCommentUserReq, owner: 'observabilityFixture' },
+              auth: { user: superUser, space: 'space1' },
+            }),
+          ]);
+
+          secAttachmentId = secCase.comments![0].id;
+          obsAttachmentId = obsCase.comments![0].id;
+        });
+
+        it('should be able to read attachments', async () => {
+          for (const scenario of [
+            {
+              user: globalRead,
+              owners: ['securitySolutionFixture'],
+              caseId: secCase.id,
+              attachmentIds: [secAttachmentId],
+            },
+            {
+              user: globalRead,
+              owners: ['observabilityFixture'],
+              caseId: obsCase.id,
+              attachmentIds: [obsAttachmentId],
+            },
             {
               user: superUser,
-              space: 'space1',
-            }
-          ),
-          // Create case owned by the observability user
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture' }),
-            200,
+              owners: ['securitySolutionFixture'],
+              caseId: secCase.id,
+              attachmentIds: [secAttachmentId],
+            },
             {
               user: superUser,
-              space: 'space1',
-            }
-          ),
-        ]);
+              owners: ['observabilityFixture'],
+              caseId: obsCase.id,
+              attachmentIds: [obsAttachmentId],
+            },
+            {
+              user: secOnlyRead,
+              owners: ['securitySolutionFixture'],
+              caseId: secCase.id,
+              attachmentIds: [secAttachmentId],
+            },
+            {
+              user: obsOnlyRead,
+              owners: ['observabilityFixture'],
+              caseId: obsCase.id,
+              attachmentIds: [obsAttachmentId],
+            },
+            {
+              user: obsSecRead,
+              owners: ['securitySolutionFixture'],
+              caseId: secCase.id,
+              attachmentIds: [secAttachmentId],
+            },
+            {
+              user: obsSecRead,
+              owners: ['observabilityFixture'],
+              caseId: obsCase.id,
+              attachmentIds: [obsAttachmentId],
+            },
+            {
+              user: obsSec,
+              owners: ['securitySolutionFixture'],
+              caseId: secCase.id,
+              attachmentIds: [secAttachmentId],
+            },
+            {
+              user: obsSec,
+              owners: ['observabilityFixture'],
+              caseId: obsCase.id,
+              attachmentIds: [obsAttachmentId],
+            },
+            {
+              user: secOnly,
+              owners: ['securitySolutionFixture'],
+              caseId: secCase.id,
+              attachmentIds: [secAttachmentId],
+            },
+            {
+              user: obsOnly,
+              owners: ['observabilityFixture'],
+              caseId: obsCase.id,
+              attachmentIds: [obsAttachmentId],
+            },
+          ]) {
+            const { attachments, errors } = await bulkGetAttachments({
+              supertest: supertestWithoutAuth,
+              attachmentIds: scenario.attachmentIds,
+              caseId: scenario.caseId,
+              auth: { user: scenario.user, space: 'space1' },
+            });
 
-        const [patchedSecCase, patchedObsCase] = await Promise.all([
-          createComment({
-            supertest: supertestWithoutAuth,
-            caseId: secCase.id,
-            params: postCommentUserReq,
-            auth: { user: superUser, space: 'space1' },
-          }),
-          createComment({
-            supertest: supertestWithoutAuth,
-            caseId: obsCase.id,
-            params: { ...postCommentUserReq, owner: 'observabilityFixture' },
-            auth: { user: superUser, space: 'space1' },
-          }),
-        ]);
+            const numberOfCasesThatShouldBeReturned = 1;
+            ensureSavedObjectIsAuthorized(
+              attachments,
+              numberOfCasesThatShouldBeReturned,
+              scenario.owners
+            );
 
-        const secAttachmentId = patchedSecCase.comments![0].id;
-        const obsAttachmentId = patchedObsCase.comments![0].id;
-        const attachmentIds = [secAttachmentId, obsAttachmentId];
+            expect(errors.length).to.be(0);
+          }
+        });
 
-        for (const scenario of [
-          {
-            user: globalRead,
-            numberOfExpectedCases: 1,
-            owners: ['securitySolutionFixture', 'observabilityFixture'],
-          },
-          {
-            user: superUser,
-            numberOfExpectedCases: 2,
-            owners: ['securitySolutionFixture', 'observabilityFixture'],
-          },
-          {
-            user: secOnlyRead,
-            numberOfExpectedCases: 1,
-            owners: ['securitySolutionFixture'],
-            errors: { forAttachmentId: obsAttachmentId, forOwner: obsCase.owner },
-          },
-          {
-            user: obsOnlyRead,
-            numberOfExpectedCases: 1,
-            owners: ['observabilityFixture'],
-            errors: { forAttachmentId: secAttachmentId, forOwner: secCase.owner },
-          },
-          {
-            user: obsSecRead,
-            numberOfExpectedCases: 2,
-            owners: ['securitySolutionFixture', 'observabilityFixture'],
-          },
-          {
-            user: obsSec,
-            numberOfExpectedCases: 2,
-            owners: ['securitySolutionFixture', 'observabilityFixture'],
-          },
-          {
-            user: secOnly,
-            numberOfExpectedCases: 1,
-            owners: ['securitySolutionFixture'],
-            errors: { forAttachmentId: obsAttachmentId, forOwner: obsCase.owner },
-          },
-          {
-            user: obsOnly,
-            numberOfExpectedCases: 1,
-            owners: ['observabilityFixture'],
-            errors: { forAttachmentId: secAttachmentId, forOwner: secCase.owner },
-          },
-        ]) {
+        it('should return an association error when an observability attachment is requested for a security case', async () => {
           const { attachments, errors } = await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds,
-            auth: { user: scenario.user, space: 'space1' },
+            attachmentIds: [secAttachmentId, obsAttachmentId],
+            caseId: secCase.id,
+            auth: { user: secOnlyRead, space: 'space1' },
           });
 
-          ensureSavedObjectIsAuthorized(
-            attachments,
-            scenario.numberOfExpectedCases,
-            scenario.owners
-          );
+          expect(attachments.length).to.be(1);
+          expect(attachments[0].owner).to.be('securitySolutionFixture');
+          expect(errors.length).to.be(1);
+          expect(errors[0]).to.eql({
+            attachmentId: obsAttachmentId,
+            error: 'Bad Request',
+            message: `Attachment is not attached to case id=${secCase.id}`,
+            status: 400,
+          });
+        });
 
-          if (scenario.errors) {
-            expect(errors.length).to.eql(1);
-            expect(errors[0]).to.eql({
-              error: 'Forbidden',
-              message: `Unauthorized to access attachment with owner: "${scenario.errors.forOwner}"`,
-              status: 403,
-              attachmentId: scenario.errors.forAttachmentId,
-            });
-          } else {
-            expect(errors.length).to.eql(0);
-          }
-        }
+        it('should return an authorization error when a security solution user is attempting to retrieve an observability attachment', async () => {
+          const { attachments, errors } = await bulkGetAttachments({
+            supertest: supertestWithoutAuth,
+            attachmentIds: [obsAttachmentId],
+            caseId: obsCase.id,
+            auth: { user: secOnlyRead, space: 'space1' },
+          });
+
+          expect(attachments.length).to.be(0);
+          expect(errors.length).to.be(1);
+          expect(errors[0]).to.eql({
+            attachmentId: obsAttachmentId,
+            error: 'Forbidden',
+            message: 'Unauthorized to access attachment with owner: "observabilityFixture"',
+            status: 403,
+          });
+        });
+
+        it('should return authorization error when a observability user requests a security attachment for a security case', async () => {
+          const { attachments, errors } = await bulkGetAttachments({
+            supertest: supertestWithoutAuth,
+            attachmentIds: [secAttachmentId],
+            caseId: secCase.id,
+            auth: { user: obsOnlyRead, space: 'space1' },
+          });
+
+          expect(attachments.length).to.be(0);
+          expect(errors.length).to.be(1);
+          expect(errors[0]).to.eql({
+            attachmentId: secAttachmentId,
+            error: 'Forbidden',
+            message: 'Unauthorized to access attachment with owner: "securitySolutionFixture"',
+            status: 403,
+          });
+        });
+
+        it('should return an error for the unauthorized security attachment, an error for the observability attachment that is not associated to the case, and an error for an unknown attachment', async () => {
+          const { attachments, errors } = await bulkGetAttachments({
+            supertest: supertestWithoutAuth,
+            attachmentIds: [obsAttachmentId, secAttachmentId, 'does-not-exist'],
+            caseId: secCase.id,
+            auth: { user: obsOnlyRead, space: 'space1' },
+          });
+
+          expect(attachments.length).to.be(0);
+          expect(errors.length).to.be(3);
+          expect(errors[0]).to.eql({
+            error: 'Not Found',
+            message: 'Saved object [cases-comments/does-not-exist] not found',
+            status: 404,
+            attachmentId: 'does-not-exist',
+          });
+          expect(errors[1]).to.eql({
+            attachmentId: obsAttachmentId,
+            error: 'Bad Request',
+            message: `Attachment is not attached to case id=${secCase.id}`,
+            status: 400,
+          });
+          expect(errors[2]).to.eql({
+            attachmentId: secAttachmentId,
+            error: 'Forbidden',
+            message: 'Unauthorized to access attachment with owner: "securitySolutionFixture"',
+            status: 403,
+          });
+        });
       });
 
       for (const scenario of [

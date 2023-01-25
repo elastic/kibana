@@ -293,22 +293,21 @@ export async function bulkGet(
     const { validAttachments, attachmentsWithErrors, invalidAssociationAttachments } =
       partitionAttachments(caseID, attachments);
 
-    await authorization.ensureAuthorized({
-      entities: validAttachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-      })),
-      operation: Operations.bulkGetComments,
-    });
+    const { authorized: authorizedAttachments, unauthorized: unauthorizedAttachments } =
+      await authorization.getAndEnsureAuthorizedEntities({
+        savedObjects: validAttachments,
+        operation: Operations.bulkGetAttachments,
+      });
 
     const errors = constructErrors({
       associationErrors: invalidAssociationAttachments,
+      unauthorizedAttachments,
       soBulkGetErrors: attachmentsWithErrors,
       caseId: caseID,
     });
 
     return BulkGetCommentsResponseRt.encode({
-      attachments: flattenCommentSavedObjects(validAttachments),
+      attachments: flattenCommentSavedObjects(authorizedAttachments),
       errors,
     });
   } catch (error) {
@@ -372,12 +371,14 @@ const getCaseReference = (references: SavedObjectReference[]): SavedObjectRefere
 
 const constructErrors = ({
   caseId,
-  associationErrors,
   soBulkGetErrors,
+  associationErrors,
+  unauthorizedAttachments,
 }: {
   caseId: string;
-  associationErrors: AttachmentSavedObject[];
   soBulkGetErrors: AttachmentSavedObjectWithErrors;
+  associationErrors: AttachmentSavedObject[];
+  unauthorizedAttachments: AttachmentSavedObject[];
 }): BulkGetCommentsResponse['errors'] => {
   const errors: BulkGetCommentsResponse['errors'] = [];
 
@@ -393,9 +394,18 @@ const constructErrors = ({
   for (const attachment of associationErrors) {
     errors.push({
       error: 'Bad Request',
-      message: `Attachment with id=${attachment.id} is not attached to case id=${caseId}`,
+      message: `Attachment is not attached to case id=${caseId}`,
       status: 400,
       attachmentId: attachment.id,
+    });
+  }
+
+  for (const unauthorizedAttachment of unauthorizedAttachments) {
+    errors.push({
+      error: 'Forbidden',
+      message: `Unauthorized to access attachment with owner: "${unauthorizedAttachment.attributes.owner}"`,
+      status: 403,
+      attachmentId: unauthorizedAttachment.id,
     });
   }
 

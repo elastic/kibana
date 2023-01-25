@@ -109,10 +109,9 @@ export class Authorization {
     operation: OperationDetails;
   }) {
     try {
-      await this._ensureAuthorized(
-        entities.map((entity) => entity.owner),
-        operation
-      );
+      const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+
+      await this._ensureAuthorized(uniqueOwners, operation);
     } catch (error) {
       this.logSavedObjects({ entities, operation, error });
       throw error;
@@ -197,13 +196,11 @@ export class Authorization {
   }
 
   private async _ensureAuthorized(owners: string[], operation: OperationDetails) {
-    const uniqueOwners = Array.from(new Set(owners));
-
     const { securityAuth } = this;
-    const areAllOwnersAvailable = uniqueOwners.every((owner) => this.featureCaseOwners.has(owner));
+    const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
 
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const requiredPrivileges: string[] = uniqueOwners.map((owner) =>
+      const requiredPrivileges: string[] = owners.map((owner) =>
         securityAuth.actions.cases.get(owner, operation.name)
       );
 
@@ -220,20 +217,14 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(
-          AuthorizationAuditLogger.createFailureMessage({ owners: uniqueOwners, operation })
-        );
+        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
       }
 
       if (!hasAllRequested) {
-        throw Boom.forbidden(
-          AuthorizationAuditLogger.createFailureMessage({ owners: uniqueOwners, operation })
-        );
+        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
       }
     } else if (!areAllOwnersAvailable) {
-      throw Boom.forbidden(
-        AuthorizationAuditLogger.createFailureMessage({ owners: uniqueOwners, operation })
-      );
+      throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
     }
 
     // else security is disabled so let the operation proceed
