@@ -130,6 +130,7 @@ type TestSubject =
   | 'addProcessorButton'
   | 'addProcessorForm.submitButton'
   | 'appendValueField.input'
+  | 'allowDuplicatesSwitch.input'
   | 'formatsValueField.input'
   | 'timezoneField.input'
   | 'outputFormatField.input'
