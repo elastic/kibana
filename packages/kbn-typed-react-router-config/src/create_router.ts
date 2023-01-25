@@ -184,7 +184,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
     const validation = validationType.decode(paramsWithRouteDefaults);
 
     if (isLeft(validation)) {
-      // throw new Error(PathReporter.report(validation).join('\n'));
+      throw new Error(PathReporter.report(validation).join('\n'));
     }
 
     return qs.stringifyUrl(
