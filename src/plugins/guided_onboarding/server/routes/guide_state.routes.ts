@@ -10,13 +10,16 @@ import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { GuideId, GuideState } from '@kbn/guided-onboarding';
 import {
-  createDefaultGuideState,
+  getDefaultGuideState,
   updateGuideState,
   findGuideById,
 } from '../helpers/guide_state.utils';
 import { API_BASE_PATH, GuidesConfig } from '../../common';
 import { findAllGuides, getPluginState, updatePluginStatus } from '../helpers';
 
+/*
+ * This route is only used in the example plugin.
+ */
 export const registerGetGuideStateRoute = (router: IRouter) => {
   // Fetch all guides state
   router.get(
@@ -77,7 +80,7 @@ export const registerActivateGuideRoute = (router: IRouter, guidesConfig: Guides
         if (!guideConfig) {
           return response.badRequest();
         }
-        guideState = await createDefaultGuideState(guideId, guideConfig);
+        guideState = getDefaultGuideState(guideId, guideConfig);
       }
       await updateGuideState(soClient, guideState);
       await updatePluginStatus(soClient, 'in_progress');

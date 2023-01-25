@@ -67,8 +67,8 @@ export const Main = (props: MainProps) => {
     }
   }, [guidesState, setActiveGuide]);
 
-  const activateGuide = async (guideId: GuideId, guideState?: GuideState) => {
-    const response = await guidedOnboardingApi?.activateGuide(guideId, guideState);
+  const activateGuide = async (guideId: GuideId) => {
+    const response = await guidedOnboardingApi?.activateGuide(guideId);
 
     if (response) {
       notifications.toasts.addSuccess(
@@ -217,7 +217,7 @@ export const Main = (props: MainProps) => {
             return (
               <EuiFlexItem>
                 <EuiButton
-                  onClick={() => activateGuide(guideId, guideState)}
+                  onClick={() => activateGuide(guideId)}
                   fill
                   disabled={guideState?.status === 'complete'}
                 >

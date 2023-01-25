@@ -36,7 +36,7 @@ exports[`getting started should render getting started component 1`] = `
       textAlign="center"
     >
       <p>
-        Select a guide to help you make the most of your data.
+        Select an option below and we'll help you get started
       </p>
     </EuiText>
     <EuiSpacer
@@ -45,55 +45,19 @@ exports[`getting started should render getting started component 1`] = `
     <EuiSpacer
       size="xxl"
     />
-    <EuiFlexGrid
-      columns={4}
-      gutterSize="l"
-    >
-      <EuiFlexItem
-        key="guideCard-search"
-      >
-        <GuideCard
-          activateGuide={[Function]}
-          addBasePath={[Function]}
-          guides={Array []}
-          isDarkTheme={false}
-          useCase="search"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        key="guideCard-kubernetes"
-      >
-        <GuideCard
-          activateGuide={[Function]}
-          addBasePath={[Function]}
-          guides={Array []}
-          isDarkTheme={false}
-          useCase="kubernetes"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        key="linkCard-infrastructure"
-      >
-        <InfrastructureLinkCard
-          addBasePath={[Function]}
-          isDarkTheme={false}
-          navigateToApp={[MockFunction]}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        key="guideCard-siem"
-      >
-        <GuideCard
-          activateGuide={[Function]}
-          addBasePath={[Function]}
-          guides={Array []}
-          isDarkTheme={false}
-          useCase="siem"
-        />
-      </EuiFlexItem>
-    </EuiFlexGrid>
-    <EuiSpacer />
-    <EuiHorizontalRule />
+    <GuideFilters
+      activeFilter="all"
+      setActiveFilter={[Function]}
+    />
+    <EuiSpacer
+      size="xxl"
+    />
+    <GuideCards
+      activateGuide={[Function]}
+      activeFilter="all"
+      isLoading={false}
+      navigateToApp={[MockFunction]}
+    />
     <EuiSpacer />
     <div
       className="eui-textCenter"

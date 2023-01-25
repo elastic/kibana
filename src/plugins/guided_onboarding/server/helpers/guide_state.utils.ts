@@ -99,10 +99,7 @@ export const updateGuideState = async (
   }
 };
 
-export const createDefaultGuideState = async (
-  guideId: GuideId,
-  guideConfig: GuideConfig
-): Promise<GuideState> => {
+export const getDefaultGuideState = (guideId: GuideId, guideConfig: GuideConfig): GuideState => {
   // create a default state from the config
   const updatedSteps: GuideStep[] = guideConfig.steps.map((step, stepIndex) => {
     const isFirstStep = stepIndex === 0;
