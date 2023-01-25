@@ -20,8 +20,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
@@ -33,24 +33,29 @@ import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-// TODO: CIS AWS - add cspm integration button as well
 const AddCisIntegrationButton = () => {
-  const cisIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
+  const { http } = useKibana().services;
+
+  const integrationsPath = pagePathGetters
+    .integrations_all({
+      searchTerm: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    })
+    .join('');
 
   return (
     <EuiButton
       data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
       iconType="plusInCircle"
-      href={cisIntegrationLink}
-      isDisabled={!cisIntegrationLink}
+      href={http.basePath.prepend(integrationsPath)}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
-        defaultMessage="Add a KSPM integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addIntegrationButtonLabel"
+        defaultMessage="Add Integration"
       />
     </EuiButton>
   );

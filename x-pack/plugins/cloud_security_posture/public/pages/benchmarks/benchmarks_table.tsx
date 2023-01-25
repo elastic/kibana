@@ -50,6 +50,7 @@ const IntegrationButtonLink = ({
   policyId: string;
 }) => {
   const { application } = useKibana().services;
+
   return (
     <EuiLink
       href={application.getUrlForApp('security', {
