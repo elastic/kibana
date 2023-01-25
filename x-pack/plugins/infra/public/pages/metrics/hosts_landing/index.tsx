@@ -74,6 +74,7 @@ export const HostsLandingPage = () => {
               values={{
                 docsLink: (
                   <EuiLink
+                    target="_blank"
                     data-test-subj="hostsView-role-docs-link"
                     href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges"
                   >

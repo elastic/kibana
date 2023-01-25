@@ -40,7 +40,7 @@ export function NavNameWithBetaBadge({ label, iconType }: Props) {
         label={i18n.translate('xpack.observability.navigation.experimentalBadgeLabel', {
           defaultMessage: 'Technical preview',
         })}
-        size="m"
+        size="s"
         iconType={iconType}
       />
     </>
