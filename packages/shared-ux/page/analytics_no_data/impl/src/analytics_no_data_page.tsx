@@ -22,8 +22,8 @@ export const AnalyticsNoDataPage = ({
 }: AnalyticsNoDataPageProps) => {
   const services = useServices();
   const { kibanaGuideDocLink, customBranding } = services;
-
   const { hasCustomBranding$ } = customBranding;
+  const showPlainSpinner = useObservable(hasCustomBranding$) ?? false;
 
   return (
     <Component
@@ -31,7 +31,7 @@ export const AnalyticsNoDataPage = ({
         onDataViewCreated,
         allowAdHocDataView,
         kibanaGuideDocLink,
-        showPlainSpinner: useObservable(hasCustomBranding$) ?? false,
+        showPlainSpinner,
       }}
     />
   );

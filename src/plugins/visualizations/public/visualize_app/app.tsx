@@ -19,7 +19,6 @@ import {
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -38,7 +37,6 @@ interface NoDataComponentProps {
   dataViews: DataViewsContract;
   dataViewEditor: DataViewEditorStart;
   onDataViewCreated: (dataView: unknown) => void;
-  customBranding: CustomBrandingStart;
 }
 
 const NoDataComponent = ({
@@ -51,7 +49,6 @@ const NoDataComponent = ({
     coreStart: core,
     dataViews,
     dataViewEditor,
-    customBranding: core.customBranding,
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
@@ -67,7 +64,6 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       core,
       kbnUrlStateStorage,
       dataViewEditor,
-      customBranding,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -128,7 +124,6 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         dataViewEditor={dataViewEditor}
         dataViews={dataViews}
         onDataViewCreated={onDataViewCreated}
-        customBranding={customBranding}
       />
     );
   }
