@@ -557,14 +557,16 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - returns 404 if the space does not exist', async () => {
+    it('project monitors - returns error if the space does not exist', async () => {
       const messages = await parseStreamApiResponse(
         kibanaServerUrl + '/s/i_dont_exist' + API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
         JSON.stringify(projectMonitors)
       );
 
       expect(messages).to.have.length(2);
-      expect(messages[0]).to.equal('Unable to create monitors. Space not found.');
+      expect(messages[0]).to.equal(
+        "Unable to create monitors. Kibana space 'i_dont_exist' does not exist."
+      );
       expect(messages[1].failedMonitors).to.eql(projectMonitors.monitors.map((m) => m.id));
     });
 

@@ -79,7 +79,8 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
       });
     } catch (error) {
       if (error?.output?.statusCode === 404) {
-        subject?.next('Unable to create monitors. Space not found.');
+        const spaceId = server.spaces.spacesService.getSpaceId(request);
+        subject?.next(`Unable to create monitors. Kibana space '${spaceId}' does not exist.`);
         subject?.next({ failedMonitors: monitors.map((m) => m.id) });
       } else {
         subject?.error(error);
