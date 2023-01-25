@@ -661,7 +661,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const spacesToEnforce = enforceMap.get(obj.type) ?? new Set([namespace]); // Always enforce authZ for the active space
 
       // Object namespaces are passed into the repo's bulkGet method per object
-      for (const space of obj.requestedNamespaces ?? []) {
+      for (const space of obj.objectNamespaces ?? []) {
         spacesToEnforce.add(space);
         enforceMap.set(obj.type, spacesToEnforce);
         spacesToAuthorize.add(space);
@@ -771,7 +771,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
       types,
       spaces: namespaces,
-      auditOptions: { bypassOnFailure: true, bypassOnSuccess: true },
+      // No need to bypass in audit options - enforce is completely bypassed (no enforce map)
     });
 
     if (preAuthorizationResult?.status === 'unauthorized') {

@@ -376,7 +376,7 @@ export interface AuthorizeUpdateObject extends AuthorizeObject {
 }
 
 export interface AuthorizeBulkGetObject extends AuthorizeObject {
-  requestedNamespaces?: string[];
+  objectNamespaces?: string[];
   error?: boolean;
 }
 
@@ -498,6 +498,10 @@ export interface ISavedObjectsSecurityExtension {
 
   authorizeRemoveReferences: (
     params: AuthorizeDeleteParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeOpenPointInTime: (
+    params: AuthorizeOpenPointInTimeParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
 
   /**

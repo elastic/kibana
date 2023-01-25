@@ -59,6 +59,7 @@ import {
   AuthorizeCheckConflictsParams,
   AuthorizeDeleteParams,
   AuthorizeGetParams,
+  AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateSpacesParams,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
@@ -377,6 +378,18 @@ export const setupAuthorizeRemoveReferences = (
 ) => {
   mockSecurityExt.authorizeRemoveReferences.mockImplementation(
     (params: AuthorizeDeleteParams): Promise<CheckAuthorizationResult<string>> => {
+      if (status === 'unauthorized') throw enforceError;
+      return Promise.resolve({ status, typeMap: authMap });
+    }
+  );
+};
+
+export const setupAuthorizeOpenPointInTime = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+) => {
+  mockSecurityExt.authorizeOpenPointInTime.mockImplementation(
+    (params: AuthorizeOpenPointInTimeParams): Promise<CheckAuthorizationResult<string>> => {
       if (status === 'unauthorized') throw enforceError;
       return Promise.resolve({ status, typeMap: authMap });
     }

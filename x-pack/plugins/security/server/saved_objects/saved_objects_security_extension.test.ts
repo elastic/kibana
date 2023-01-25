@@ -4019,6 +4019,218 @@ describe(`#authorizeRemoveReferences`, () => {
   });
 });
 
+describe(`#authorizeOpenPointInTime`, () => {
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  const namespace = 'x';
+  const actionString = 'open_point_in_time';
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/open_point_in_time', authorized: true },
+        { privilege: 'login:', authorized: true },
+      ],
+    },
+  } as CheckPrivilegesResponse;
+
+  const expectedTypes = new Set([obj1.type]);
+  const expectedSpaces = new Set([namespace]);
+  const expectedTypeMap = new Map().set('a', {
+    open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+  });
+
+  test('throws an error when `namespaces` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeOpenPointInTime({
+        namespaces: new Set(),
+        types: expectedTypes,
+      })
+    ).rejects.toThrowError('No spaces specified for authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when `types` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await expect(
+      securityExtension.authorizeOpenPointInTime({
+        namespaces: expectedSpaces,
+        types: new Set(),
+      })
+    ).rejects.toThrowError('No types specified for authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when checkAuthorization fails', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+    await expect(
+      securityExtension.authorizeOpenPointInTime({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      })
+    ).rejects.toThrowError('Oh no!');
+  });
+
+  test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse); // Return any well-formed response to avoid an unhandled error
+
+    await securityExtension.authorizeOpenPointInTime({
+      namespaces: expectedSpaces,
+      types: expectedTypes,
+    });
+
+    expect(authorizeSpy).toHaveBeenCalledTimes(1);
+    expect(authorizeSpy).toHaveBeenCalledWith({
+      actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
+      types: expectedTypes,
+      spaces: expectedSpaces,
+    });
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      actions: new Set([actionString]),
+      spaces: expectedSpaces,
+      types: expectedTypes,
+      options: { allowGlobalResource: false },
+    });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [`mock-saved_object:${obj1.type}/${actionString}`, 'login:'],
+      [...expectedSpaces]
+    );
+
+    expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+  });
+
+  test(`returns result when fully authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeOpenPointInTime({
+      namespaces: expectedSpaces,
+      types: expectedTypes,
+    });
+    expect(result).toEqual({
+      status: 'fully_authorized',
+      typeMap: expectedTypeMap,
+    });
+    expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+  });
+
+  test(`returns result when partially authorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'mock-saved_object:a/open_point_in_time', authorized: true },
+          { privilege: 'login:', authorized: false },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    const result = await securityExtension.authorizeOpenPointInTime({
+      namespaces: expectedSpaces,
+      types: expectedTypes,
+    });
+    expect(result).toEqual({
+      status: 'partially_authorized',
+      typeMap: new Map().set(obj1.type, {
+        open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+    expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+    await securityExtension.authorizeOpenPointInTime({
+      namespaces: expectedSpaces,
+      types: expectedTypes,
+    });
+
+    expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as open PIT calls the addAudit method directly
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      error: undefined,
+      event: {
+        action: AuditAction.OPEN_POINT_IN_TIME,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['creation'],
+      },
+      kibana: {
+        add_to_spaces: undefined,
+        delete_from_spaces: undefined,
+        saved_object: undefined,
+      },
+      message: `User is opening point-in-time saved objects`,
+    });
+  });
+
+  test(`throws when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'delete', false);
+
+    await expect(
+      securityExtension.authorizeOpenPointInTime({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      })
+    ).rejects.toThrow(`unauthorized`); // This will be updated in the future, see issue https://github.com/elastic/kibana/issues/142414
+  });
+
+  test(`adds audit event when unauthorized`, async () => {
+    const { securityExtension, checkPrivileges, auditLogger } = setup();
+    setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'open_point_in_time', false);
+
+    await expect(
+      securityExtension.authorizeOpenPointInTime({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      })
+    ).rejects.toThrow(`unauthorized`); // This will be updated in the future, see issue https://github.com/elastic/kibana/issues/142414
+    expect(auditHelperSpy).not.toHaveBeenCalled();
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      error: { code: 'Error', message: `User is unauthorized for any requested types/spaces.` },
+      event: {
+        action: AuditAction.OPEN_POINT_IN_TIME,
+        category: ['database'],
+        outcome: 'failure',
+        type: ['creation'],
+      },
+      kibana: {
+        add_to_spaces: undefined,
+        delete_from_spaces: undefined,
+        saved_object: undefined,
+      },
+      message: `Failed attempt to open point-in-time saved objects`,
+    });
+  });
+});
+
 describe('#authorizeAndRedactMultiNamespaceReferences', () => {
   const namespace = 'x';
 

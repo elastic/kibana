@@ -1624,7 +1624,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         authorizationObjects.push({
           type,
           id,
-          requestedNamespaces: namespaces,
+          objectNamespaces: namespaces,
           // @ts-expect-error MultiGetHit._source is optional
           existingNamespaces: doc?._source?.namespaces,
           error: docNotFound,
@@ -2513,30 +2513,34 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     if (!disableExtensions && this._securityExtension) {
-      const spaces = new Set(namespaces);
-      const preAuthorizationResult = await this._securityExtension?.authorize({
-        actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
+      // const spaces = new Set(namespaces);
+      // const preAuthorizationResult = await this._securityExtension?.authorize({
+      //   actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
+      //   types: new Set(types),
+      //   spaces,
+      // });
+      // if (preAuthorizationResult?.status === 'unauthorized') {
+      //   // If the user is unauthorized to find *anything* they requested, return an empty response
+      //   // This is one of the last remaining calls to addAuditEvent outside of the security extension
+      //   this._securityExtension.addAuditEvent({
+      //     action: AuditAction.OPEN_POINT_IN_TIME,
+      //     error: new Error('User is unauthorized for any requested types/spaces.'),
+      //     // TODO: include object type(s) that were requested?
+      //     // requestedTypes: types,
+      //     // requestedSpaces: namespaces,
+      //   });
+      //   throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
+      // }
+      // this._securityExtension.addAuditEvent({
+      //   action: AuditAction.OPEN_POINT_IN_TIME,
+      //   outcome: 'unknown',
+      //   // TODO: include object type(s) that were requested?
+      //   // requestedTypes: types,
+      //   // requestedSpaces: namespaces,
+      // });
+      await this._securityExtension.authorizeOpenPointInTime({
+        namespaces: new Set(namespaces),
         types: new Set(types),
-        spaces,
-      });
-      if (preAuthorizationResult?.status === 'unauthorized') {
-        // If the user is unauthorized to find *anything* they requested, return an empty response
-        // This is one of the last remaining calls to addAuditEvent outside of the security extension
-        this._securityExtension.addAuditEvent({
-          action: AuditAction.OPEN_POINT_IN_TIME,
-          error: new Error('User is unauthorized for any requested types/spaces.'),
-          // TODO: include object type(s) that were requested?
-          // requestedTypes: types,
-          // requestedSpaces: namespaces,
-        });
-        throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
-      }
-      this._securityExtension.addAuditEvent({
-        action: AuditAction.OPEN_POINT_IN_TIME,
-        outcome: 'unknown',
-        // TODO: include object type(s) that were requested?
-        // requestedTypes: types,
-        // requestedSpaces: namespaces,
       });
     }
 

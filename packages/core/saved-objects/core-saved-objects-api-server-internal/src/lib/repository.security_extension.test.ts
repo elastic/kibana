@@ -72,6 +72,7 @@ import {
   setupAuthorizeBulkGet,
   setupAuthorizeRemoveReferences,
   REMOVE_REFS_COUNT,
+  setupAuthorizeOpenPointInTime,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
@@ -714,76 +715,66 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#openPointInTimeForType', () => {
-    test(`propagates decorated error when authorize rejects promise`, async () => {
-      mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeOpenPointInTime rejects promise`, async () => {
+      mockSecurityExt.authorizeOpenPointInTime.mockRejectedValueOnce(checkAuthError);
       await expect(repository.openPointInTimeForType(type)).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeOpenPointInTime(mockSecurityExt, 'partially_authorized');
 
       client.openPointInTime.mockResponseOnce({ id });
       const result = await repository.openPointInTimeForType(type);
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
       expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expect.objectContaining({ id }));
     });
 
-    // test(`adds audit event when successful`, async () => {
-    //   setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeOpenPointInTime(mockSecurityExt, 'fully_authorized');
 
-    //   client.openPointInTime.mockResponseOnce({ id });
-    //   await repository.openPointInTimeForType(type);
+      client.openPointInTime.mockResponseOnce({ id });
+      const result = await repository.openPointInTimeForType(type);
 
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.OPEN_POINT_IN_TIME,
-    //     outcome: 'unknown',
-    //   });
-    // });
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ id }));
+    });
 
     test(`throws an error when unauthorized`, async () => {
-      setupAuthorizeUnauthorized(mockSecurityExt);
+      setupAuthorizeOpenPointInTime(mockSecurityExt, 'unauthorized');
       await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
     });
 
-    // test(`adds audit event when unauthorized`, async () => {
-    //   setupPerformAuthUnauthorized(mockSecurityExt);
-
-    //   await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
-
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-    //     action: AuditAction.OPEN_POINT_IN_TIME,
-    //     error: new Error('User is unauthorized for any requested types/spaces.'),
-    //   });
-    // });
-
-    test(`calls authorize with correct actions, types, and spaces`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+    test(`calls authorizeOpenPointInTime with correct parameters`, async () => {
+      setupAuthorizeOpenPointInTime(mockSecurityExt, 'fully_authorized');
       client.openPointInTime.mockResponseOnce({ id });
-      await repository.openPointInTimeForType(type, { namespaces: [namespace] });
+      const namespaces = [namespace, 'x', 'y', 'z'];
+      await repository.openPointInTimeForType(type, { namespaces });
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledWith({
+        namespaces: new Set(namespaces),
+        types: new Set([type]),
+      });
+      // const expectedActions = new Set([SecurityAction.OPEN_POINT_IN_TIME]);
+      // const expectedSpaces = new Set([namespace]);
+      // const expectedTypes = new Set([type]);
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set([SecurityAction.OPEN_POINT_IN_TIME]);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
+      // const {
+      //   actions: actualActions,
+      //   spaces: actualSpaces,
+      //   types: actualTypes,
+      //   enforceMap: actualEnforceMap,
+      //   options: actualOptions,
+      // } = mockSecurityExt.authorize.mock.calls[0][0];
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-        enforceMap: actualEnforceMap,
-        options: actualOptions,
-      } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(actualEnforceMap).toBeUndefined();
-      expect(actualOptions).toBeUndefined();
+      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      // expect(actualEnforceMap).toBeUndefined();
+      // expect(actualOptions).toBeUndefined();
     });
   });
 
@@ -1069,13 +1060,16 @@ describe('SavedObjectsRepository Security Extension', () => {
     const expectedAuthObjects = [
       {
         error: true,
+        existingNamespaces: ['default'],
+        objectNamespaces: ['ns-1', 'ns-2', namespace],
         id: '6.0.0-alpha1',
         type: 'multiNamespaceTypeCustomIndex',
       },
       {
+        error: false,
         existingNamespaces: undefined,
-        id: 'logstash-*',
         objectNamespaces: ['ns-3'],
+        id: 'logstash-*',
         type: 'index-pattern',
       },
     ];
@@ -1187,7 +1181,22 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledWith({
         namespace: optionsNamespace,
-        objects: expectedAuthObjects,
+        objects: [
+          {
+            error: true,
+            existingNamespaces: [optionsNamespace],
+            objectNamespaces: objA.namespaces,
+            id: objA.id,
+            type: objA.type,
+          },
+          {
+            error: false,
+            existingNamespaces: undefined,
+            objectNamespaces: objB.namespaces,
+            id: objB.id,
+            type: objB.type,
+          },
+        ],
       });
     });
 
