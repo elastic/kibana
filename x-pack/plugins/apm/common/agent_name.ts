@@ -89,7 +89,7 @@ export function isServerlessAgent(cloudProviderAndService?: string) {
 }
 
 export function isAWSLambdaAgent(cloudProviderAndService?: string) {
-  return cloudProviderAndService?.toLowerCase().startsWith('aws_lambda');
+  return cloudProviderAndService?.toLowerCase().startsWith('aws.lambda');
 }
 
 export function isAzureFunctionsAgent(cloudProviderAndService?: string) {

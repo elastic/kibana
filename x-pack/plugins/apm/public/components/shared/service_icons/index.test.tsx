@@ -320,9 +320,9 @@ describe('ServiceIcons', () => {
       expect(getByTestId('serverless')).toBeInTheDocument();
       expect(getByTestId('cloud')).toBeInTheDocument();
 
-      fireEvent.click(getByTestId('popover_Serverless'));
+      fireEvent.click(getByTestId('popover_AWS Lambda'));
       expect(queryAllByTestId('loading-content')).toHaveLength(0);
-      expect(getByText('Serverless')).toBeInTheDocument();
+      expect(getByText('AWS Lambda')).toBeInTheDocument();
       expect(getByText('lambda-java-dev')).toBeInTheDocument();
       expect(getByText('datasource')).toBeInTheDocument();
       expect(getByText('http')).toBeInTheDocument();

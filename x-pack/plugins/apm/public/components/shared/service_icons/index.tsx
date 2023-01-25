@@ -151,7 +151,9 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
       },
       isVisible: !!icons?.serverlessType,
       title: i18n.translate('xpack.apm.serviceIcons.serverless', {
-        defaultMessage: serverlessTitles[icons?.serverlessType || 'default'],
+        defaultMessage: `${
+          serverlessTitles[icons?.serverlessType || 'default']
+        }`,
       }),
       component: <ServerlessDetails serverless={details?.serverless} />,
     },
