@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Dispatch, Reducer } from 'react';
+import type { ParsedCommandInterface } from '../../service/types';
 import type { CommandInputProps } from '../command_input';
-import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
+import type {
+  Command,
+  CommandDefinition,
+  CommandExecutionComponent,
+  CommandArgDefinition,
+} from '../../types';
 
 export interface ConsoleDataState {
   /**
@@ -48,17 +56,22 @@ export interface ConsoleDataState {
   /** state for the command input area */
   input: {
     /**
-     * The text the user is typing into the console input area. By default, this
-     * value goes into the left of the cursor position
+     * The left side of the cursor text entered by the user
      */
-    textEntered: string; // FIXME:PT convert this to same structure as `rightOfCursor`
+    leftOfCursorText: string;
 
-    rightOfCursor: {
-      text: string;
-    };
+    /**
+     * The right side of the cursor text entered by the user
+     */
+    rightOfCursorText: string;
 
-    /** The command name that was entered (derived from `textEntered` */
-    commandEntered: string;
+    /**
+     * The parsed user input
+     */
+    parsedInput: ParsedCommandInterface;
+
+    /** The entered command. Only defined if the command is "known" */
+    enteredCommand: undefined | EnteredCommand;
 
     /** Placeholder text for the input area **/
     placeholder: string;
@@ -74,9 +87,36 @@ export interface ConsoleDataState {
   };
 }
 
+/** State that is provided/received to Argument Value Selectors */
+export interface ArgSelectorState<TState = any> {
+  value: any;
+  valueText: string | undefined;
+  /**
+   * A store (data) for the Argument Selector Component so that it can persist state between
+   * re-renders or between console being opened/closed
+   */
+  store?: TState;
+}
+
+export interface EnteredCommand {
+  commandDefinition: CommandDefinition;
+
+  /** keeps a list of arguments definitions that are defined with a Value Selector component */
+  argsWithValueSelectors: undefined | Record<string, CommandArgDefinition>;
+
+  argState: {
+    // Each arg has an array (just like the parsed input) and keeps the
+    // state that is provided to that instance of the argument on the input.
+    [argName: string]: ArgSelectorState[];
+  };
+}
+
 export interface InputHistoryItem {
   id: string;
+  /** The command that will be used internally if entry is selected again from the popup */
   input: string;
+  /** The display value in the UI's input history popup */
+  display: string;
 }
 
 export interface CommandHistoryItem {
@@ -92,11 +132,20 @@ export interface CommandExecutionState {
   store: Record<string, unknown>;
 }
 
+export interface ExecuteCommandPayload {
+  input: string;
+  parsedInput: ParsedCommandInterface;
+  enteredCommand: ConsoleDataState['input']['enteredCommand'];
+}
+
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
   | { type: 'addFocusToKeyCapture' }
   | { type: 'removeFocusFromKeyCapture' }
-  | { type: 'executeCommand'; payload: { input: string } }
+  | {
+      type: 'executeCommand';
+      payload: ExecuteCommandPayload;
+    }
   | { type: 'clear' }
   | {
       type: 'showSidePanel';
@@ -119,11 +168,13 @@ export type ConsoleDataAction =
     }
   | {
       type: 'updateInputTextEnteredState';
-      payload: PayloadValueOrFunction<{
-        textEntered: string;
-        /** When omitted, the right side of the cursor value will be blanked out */
-        rightOfCursor?: ConsoleDataState['input']['rightOfCursor'];
-      }>;
+      payload: PayloadValueOrFunction<
+        Pick<ConsoleDataState['input'], 'leftOfCursorText' | 'rightOfCursorText'> & {
+          /** updates (if necessary) to any of the argument's state */
+          argState?: Record<string, ArgSelectorState[]>;
+        },
+        ConsoleDataState['input']
+      >;
     }
   | {
       type: 'updateInputPopoverState';
@@ -146,7 +197,21 @@ export type ConsoleDataAction =
   | {
       type: 'updateInputHistoryState';
       payload: {
+        /** The command that will be used internally if entry is selected again from the popup */
         command: string;
+        /** The display value in the UI's input history popup. Defaults to `command` */
+        display?: string;
+      };
+    }
+  | {
+      type: 'updateInputCommandArgState';
+      payload: {
+        /** Name of argument */
+        name: string;
+        /** Instance of the argument */
+        instance: number;
+        /** The updated state for the argument */
+        state: ArgSelectorState;
       };
     }
   | {
@@ -154,7 +219,9 @@ export type ConsoleDataAction =
       payload?: never;
     };
 
-type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);
+type PayloadValueOrFunction<T extends object = object, TCallbackArgs extends object = object> =
+  | T
+  | ((options: TCallbackArgs) => T);
 
 export interface ConsoleStore {
   state: ConsoleDataState;
