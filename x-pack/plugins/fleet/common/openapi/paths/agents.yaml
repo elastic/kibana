@@ -17,5 +17,6 @@ get:
     - $ref: ../components/parameters/show_upgradeable.yaml
     - $ref: ../components/parameters/sort_field.yaml
     - $ref: ../components/parameters/sort_order.yaml
+    - $ref: ../components/parameters/with_metrics.yaml
   security:
     - basicAuth: []
