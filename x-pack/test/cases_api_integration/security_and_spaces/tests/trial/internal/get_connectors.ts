@@ -233,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('push', () => {
       describe('latestPushDate', () => {
-        it('does not set latestPushDate when the connector has not been used to push', async () => {
+        it('does not set latestPushDate or oldestPushDate when the connector has not been used to push', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
@@ -245,9 +245,10 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(Object.keys(connectors).length).to.be(1);
           expect(connectors).to.have.property(connector.id);
           expect(connectors[connector.id].latestPushDate).to.be(undefined);
+          expect(connectors[connector.id].oldestPushDate).to.be(undefined);
         });
 
-        it('sets latestPushDate to the most recent push date', async () => {
+        it('sets latestPushDate to the most recent push date and oldestPushDate to the first push date', async () => {
           const { postedCase, connector } = await createCaseWithConnector({
             supertest,
             serviceNowSimulatorURL,
@@ -278,10 +279,12 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
 
           const pushes = userActions.filter((ua) => ua.type === ActionTypes.pushed);
+          const oldestPush = pushes[0];
           const latestPush = pushes[pushes.length - 1];
 
           expect(Object.keys(connectors).length).to.be(1);
           expect(connectors[connector.id].latestPushDate).to.eql(latestPush.created_at);
+          expect(connectors[connector.id].oldestPushDate).to.eql(oldestPush.created_at);
         });
       });
 
