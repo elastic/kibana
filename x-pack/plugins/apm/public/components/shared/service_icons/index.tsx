@@ -38,7 +38,9 @@ const serverlessTitles: Record<string, string> = {
   'azure.functions': i18n.translate('xpack.apm.serviceIcons.azure_functions', {
     defaultMessage: 'Azure Functions',
   }),
-  default: 'Serverless',
+  default: i18n.translate('xpack.apm.serviceIcons.serverless', {
+    defaultMessage: 'Serverless',
+  }),
 };
 
 export function getCloudIcon(provider?: string) {
