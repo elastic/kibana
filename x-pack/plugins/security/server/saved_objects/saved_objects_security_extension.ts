@@ -41,6 +41,7 @@ import type {
   AuthorizeDeleteParams,
   AuthorizeGetParams,
   AuthorizeObject,
+  AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateSpacesParams,
   InternalAuthorizeOptions,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
@@ -660,7 +661,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const spacesToEnforce = enforceMap.get(obj.type) ?? new Set([namespace]); // Always enforce authZ for the active space
 
       // Object namespaces are passed into the repo's bulkGet method per object
-      for (const space of obj.objectNamespaces ?? []) {
+      for (const space of obj.requestedNamespaces ?? []) {
         spacesToEnforce.add(space);
         enforceMap.set(obj.type, spacesToEnforce);
         spacesToAuthorize.add(space);
@@ -759,6 +760,41 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap: new Map([[object.type, spaces]]),
       auditOptions: { objects: [object] },
     });
+  }
+
+  async authorizeOpenPointInTime(
+    params: AuthorizeOpenPointInTimeParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const { namespaces, types } = params;
+
+    const preAuthorizationResult = await this.authorize({
+      actions: new Set([SecurityAction.OPEN_POINT_IN_TIME]),
+      types,
+      spaces: namespaces,
+      auditOptions: { bypassOnFailure: true, bypassOnSuccess: true },
+    });
+
+    if (preAuthorizationResult?.status === 'unauthorized') {
+      // If the user is unauthorized to find *anything* they requested, return an empty response
+      this.addAuditEvent({
+        action: AuditAction.OPEN_POINT_IN_TIME,
+        error: new Error('User is unauthorized for any requested types/spaces.'),
+        // TODO: include object type(s) that were requested?
+        // requestedTypes: types,
+        // requestedSpaces: namespaces,
+      });
+      // this.auditHelper({ action: AuditAction.OPEN_POINT_IN_TIME, objects: auditObjects });
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
+    }
+    this.addAuditEvent({
+      action: AuditAction.OPEN_POINT_IN_TIME,
+      outcome: 'unknown',
+      // TODO: include object type(s) that were requested?
+      // requestedTypes: types,
+      // requestedSpaces: namespaces,
+    });
+
+    return preAuthorizationResult;
   }
 
   /**

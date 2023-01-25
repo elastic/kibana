@@ -1599,27 +1599,38 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    const authObjects = new Array<AuthorizeBulkGetObject>();
+    const authorizationObjects = new Array<AuthorizeBulkGetObject>();
     const result = {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
-          const { type, id, error: resultError } = expectedResult.value;
-          authObjects.push({ type, id, error: !!resultError });
+          const { type, id } = expectedResult.value;
+          authorizationObjects.push({ type, id, error: true });
           return expectedResult.value as any;
         }
 
         const {
           type,
           id,
-          namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)], // set to default value for `rawDocExistsInNamespaces` check below
+          // set to default namespaces value for `rawDocExistsInNamespaces` check below
+          namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)],
           esRequestIndex,
         } = expectedResult.value;
+
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
         // @ts-expect-error MultiGetHit._source is optional
-        if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
-          // const { type, id, error } = expectedResult.value;
-          authObjects.push({ type, id, error: true });
+        const docNotFound = !doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces);
+
+        authorizationObjects.push({
+          type,
+          id,
+          requestedNamespaces: namespaces,
+          // @ts-expect-error MultiGetHit._source is optional
+          existingNamespaces: doc?._source?.namespaces,
+          error: docNotFound,
+        });
+
+        if (docNotFound) {
           return {
             id,
             type,
@@ -1627,50 +1638,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           } as any as SavedObject<T>;
         }
 
-        authObjects.push({
-          type,
-          id,
-          objectNamespaces: namespaces,
-          // @ts-expect-error MultiGetHit._source is optional
-          existingNamespaces: doc?._source?.namespaces,
-        });
         // @ts-expect-error MultiGetHit._source is optional
         return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
 
-    // const auditObjects = new Array<{ type: string; id: string }>();
-    // for (const { type, id, error: bulkError } of result.saved_objects) {
-    //   // Only log success events for objects that were actually found (and are being returned to the user)
-    //   if (!bulkError) {
-    //     auditObjects.push({ type, id });
-    //   }
-    // }
-
-    // const authorizationResult = await this._securityExtension?.authorize({
-    //   actions: new Set([SecurityAction.BULK_GET]),
-    //   types: new Set(typesAndSpaces.keys()),
-    //   spaces: spacesToAuthorize,
-    //   enforceMap: typesAndSpaces,
-    //   // ToDo: need to handle this case!
-    //   // auditCallback: (error) => {
-    //   //   for (const { type, id, error: bulkError } of result.saved_objects) {
-    //   //     if (!error && !!bulkError) continue; // Only log success events for objects that were actually found (and are being returned to the user)
-    //   //     this._securityExtension!.addAuditEvent({
-    //   //       action: AuditAction.GET,
-    //   //       savedObject: { type, id },
-    //   //       error,
-    //   //     });
-    //   //   }
-    //   // },
-    //   auditOptions: {
-    //     objects: auditObjects.length ? auditObjects : undefined,
-    //     useSuccessOutcome: true,
-    //   }, // ToDo: why is this array empty in out unit testing? Because we forgot a mock?
-    // });
     const authorizationResult = await this._securityExtension?.authorizeBulkGet({
       namespace,
-      objects: authObjects,
+      objects: authorizationObjects,
     });
 
     return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap);

@@ -111,6 +111,26 @@ export interface UpdateSpacesAuditHelperParams extends AuditHelperParams {
 }
 
 /**
+ * FUTURE: The TypesAndSpacesAuditHelperParams interface contains parameters to log
+ * audit events for the FIND and OPEN_POINT_IN_TIME audit actions within the
+ * ISavedObjectsSecurityExtension.
+ */
+// export interface TypesAndSpacesAuditHelperParams extends AuditHelperParams {
+//   /**
+//    * The audit action to log is either FIND or OPEN_POINT_IN_TIME.
+//    */
+//   action: AuditAction.FIND | AuditAction.OPEN_POINT_IN_TIME;
+//   /**
+//    * The spaces requested for the action.
+//    */
+//   spaces?: Set<string>;
+//   /**
+//    * The types requested for the action.
+//    */
+//   types?: Set<string>;
+// }
+
+/**
  * The AuditOptions interface contains optional settings for audit
  * logging within the ISavedObjectsSecurityExtension.
  */
@@ -356,7 +376,7 @@ export interface AuthorizeUpdateObject extends AuthorizeObject {
 }
 
 export interface AuthorizeBulkGetObject extends AuthorizeObject {
-  objectNamespaces?: string[];
+  requestedNamespaces?: string[];
   error?: boolean;
 }
 
@@ -404,6 +424,11 @@ export interface AuthorizeBulkGetParams {
 export interface AuthorizeCheckConflictsParams {
   namespace: string | undefined;
   objects: AuthorizeObject[];
+}
+
+export interface AuthorizeOpenPointInTimeParams {
+  namespaces: Set<string>;
+  types: Set<string>;
 }
 
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
