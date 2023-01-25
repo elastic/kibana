@@ -28,12 +28,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import {
-  Aggregators,
-  Comparator,
-  CustomMetricAggTypes,
-  QUERY_INVALID,
-} from '../../../../common/alerting/metrics';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -56,7 +51,6 @@ const defaultExpression = {
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
-  customMetrics: [{ name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes }],
 } as MetricExpression;
 export { defaultExpression };
 
@@ -190,7 +184,6 @@ export const Expressions: React.FC<Props> = (props) => {
           timeSize,
           timeUnit,
           aggType: metric.aggregation,
-          customMetrics: [{ name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes }],
         })) as AlertParams['criteria']
       );
     } else {
