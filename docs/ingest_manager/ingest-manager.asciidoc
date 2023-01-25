@@ -24,4 +24,4 @@ image::ingest_manager/images/ingest-manager-start.png[{ingest-manager} app in {k
 == Get started
 
 To get started with {ingest-management}, refer to the
-{ingest-guide}/index.html[Ingest Management Guide].
+{fleet-guide}/index.html[Ingest Management Guide].
