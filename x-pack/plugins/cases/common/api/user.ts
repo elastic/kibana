@@ -19,3 +19,10 @@ export const UserRT = rt.intersection([
 export const UsersRt = rt.array(UserRT);
 
 export type User = rt.TypeOf<typeof UserRT>;
+
+export const GetCaseUsersResponseRt = rt.type({
+  participants: rt.array(UserRT),
+  users: rt.array(rt.type({ uid: rt.string })),
+});
+
+export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;

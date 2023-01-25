@@ -88,6 +88,24 @@ interface ConnectorFieldsBeforePushAggsResult {
   };
 }
 
+interface ParticipantsAggsResult {
+  participants: {
+    buckets: Array<{
+      key: string;
+      docs: {
+        hits: {
+          hits: SavedObjectsRawDoc[];
+        };
+      };
+    }>;
+  };
+  assignees: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
   private readonly _finder: UserActionFinder;
@@ -655,6 +673,88 @@ export class CaseUserActionService {
               },
             },
           },
+        },
+      },
+    };
+  }
+
+  public async getUsers({ caseId }: { caseId: string }) {
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      CaseUserActionAttributesWithoutConnectorId,
+      ParticipantsAggsResult
+    >({
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: CaseUserActionService.buildParticipantsAgg(),
+    });
+
+    const users = new Set<{ uid: string }>();
+    const participants = [];
+    const participantsBuckets = response.aggregations?.participants.buckets ?? [];
+    const assigneesBuckets = response.aggregations?.assignees.buckets ?? [];
+
+    for (const bucket of participantsBuckets) {
+      const rawDoc = bucket.docs.hits.hits[0];
+      const user =
+        this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+          rawDoc
+        );
+
+      /**
+       * We are interested only for the created_by
+       * and the owner. For that reason, there is no
+       * need to call transformToExternalModel which
+       * injects the references ids to the document.
+       */
+      participants.push({
+        id: user.id,
+        created_by: user.attributes.created_by,
+        owner: user.attributes.owner,
+      });
+
+      if (user.attributes.created_by.profile_uid) {
+        users.add({ uid: user.attributes.created_by.profile_uid });
+      }
+    }
+
+    for (const bucket of assigneesBuckets) {
+      users.add({ uid: bucket.key });
+    }
+
+    return { participants, users };
+  }
+
+  private static buildParticipantsAgg(): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      participants: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_by.username`,
+          size: MAX_DOCS_PER_PAGE,
+          order: { _key: 'asc' },
+        },
+        aggregations: {
+          docs: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      assignees: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.assignees.uid`,
+          size: MAX_DOCS_PER_PAGE,
+          order: { _key: 'asc' },
         },
       },
     };
