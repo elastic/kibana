@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 
 import { id } from '../../common/id';
-import { include_expired_exceptions } from '../../common/include_expired_exceptions';
+import { includeExpiredExceptionsOrUndefined } from '../../common/include_expired_exceptions';
 import { list_id } from '../../common/list_id';
 import { namespace_type } from '../../common/namespace_type';
 
@@ -18,7 +18,7 @@ export const exportExceptionListQuerySchema = t.exact(
     id,
     list_id,
     namespace_type,
-    include_expired_exceptions,
+    include_expired_exceptions: includeExpiredExceptionsOrUndefined,
     // TODO: Add file_name here with a default value
   })
 );

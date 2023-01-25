@@ -115,7 +115,7 @@ export const allExceptionItemsReducer =
           ...{ [action.optionId]: !state.exceptionsToShow[action.optionId] },
         };
 
-        // Doesn't allow neither button to be selected
+        // At least one button must be selected
         if (!newExceptionsToShow.active && !newExceptionsToShow.expired) {
           return { ...state, exceptionsToShow: { active: true } };
         }

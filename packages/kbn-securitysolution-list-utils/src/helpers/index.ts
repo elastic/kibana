@@ -59,6 +59,7 @@ import {
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
+  SavedObjectType,
 } from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
@@ -912,3 +913,18 @@ export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
 
 export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
   items.some((item) => item.entries.some(({ type }) => type === OperatorTypeEnum.LIST));
+
+export const buildShowActiveExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const filters = savedObjectPrefix.map(
+    (prefix) =>
+      `(${prefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${prefix}.attributes.expire_time: *)`
+  );
+  return filters.join(' OR ');
+};
+
+export const buildShowExpiredExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const filters = savedObjectPrefix.map(
+    (prefix) => `(${prefix}.attributes.expire_time <= "${new Date().toISOString()}")`
+  );
+  return filters.join(' OR ');
+};

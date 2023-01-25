@@ -11,3 +11,10 @@
 import * as t from 'io-ts';
 
 export const include_expired_exceptions = t.keyof({ true: null, false: null });
+export const includeExpiredExceptionsOrUndefined = t.union([
+  include_expired_exceptions,
+  t.undefined,
+]);
+export type IncludeExpiredExceptionsOrUndefined = t.TypeOf<
+  typeof includeExpiredExceptionsOrUndefined
+>;

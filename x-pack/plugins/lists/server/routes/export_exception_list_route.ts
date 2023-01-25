@@ -35,7 +35,12 @@ export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
           include_expired_exceptions: includeExpiredExceptionsString,
         } = request.query;
         const exceptionListsClient = await getExceptionListClient(context);
-        const includeExpiredExceptions = includeExpiredExceptionsString === 'true';
+
+        // Defaults to including expired exceptions if query param is not present
+        const includeExpiredExceptions =
+          includeExpiredExceptionsString !== undefined
+            ? includeExpiredExceptionsString === 'true'
+            : true;
         const exportContent = await exceptionListsClient.exportExceptionListAndItems({
           id,
           includeExpiredExceptions,

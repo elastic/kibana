@@ -24,7 +24,11 @@ import {
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
 
-import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
+import {
+  buildShowActiveExceptionsFilter,
+  buildShowExpiredExceptionsFilter,
+  getSavedObjectTypes,
+} from '@kbn/securitysolution-list-utils';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -228,14 +232,14 @@ const ExceptionsViewerComponent = ({
     if (exceptionsToShow.active && exceptionsToShow.expired) {
       return undefined;
     }
-    const savedObjectPrefix = getSavedObjectTypes({
+    const savedObjectPrefixes = getSavedObjectTypes({
       namespaceType: namespaceTypes,
     });
     if (exceptionsToShow.active) {
-      return `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
+      return buildShowActiveExceptionsFilter(savedObjectPrefixes);
     }
     if (exceptionsToShow.expired) {
-      return `(${savedObjectPrefix}.attributes.expire_time <= "${new Date().toISOString()}")`;
+      return buildShowExpiredExceptionsFilter(savedObjectPrefixes);
     }
   }, [exceptionsToShow, namespaceTypes]);
 
@@ -299,7 +303,7 @@ const ExceptionsViewerComponent = ({
     ]
   );
 
-  const totalExceptionCount = useMemo(async () => {
+  const getTotalExceptionCount = useCallback(async () => {
     const abortCtrl = new AbortController();
 
     if (exceptionListsToQuery.length === 0) {
@@ -333,7 +337,7 @@ const ExceptionsViewerComponent = ({
         });
 
         setViewerState(
-          total > 0 ? null : (await totalExceptionCount) > 0 ? 'empty_search' : 'empty'
+          total > 0 ? null : (await getTotalExceptionCount()) > 0 ? 'empty_search' : 'empty'
         );
       } catch (e) {
         setViewerState('error');
@@ -344,7 +348,7 @@ const ExceptionsViewerComponent = ({
         });
       }
     },
-    [handleFetchItems, setExceptions, setViewerState, toasts, totalExceptionCount]
+    [handleFetchItems, setExceptions, setViewerState, toasts, getTotalExceptionCount]
   );
 
   const handleSearch = useCallback(
