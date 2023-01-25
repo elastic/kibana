@@ -72,8 +72,10 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
       euiThemeVars.euiColorPrimaryText
     ),
 
-    // math functions
+    // aggregation functions
     ...buildRuleGroup(['unary_function'], euiThemeVars.euiColorPrimaryText),
+    // math functions
+    ...buildRuleGroup(['math_function'], euiThemeVars.euiColorPrimaryText),
 
     // operators
     ...buildRuleGroup(

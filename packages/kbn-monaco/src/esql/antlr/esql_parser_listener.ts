@@ -21,6 +21,7 @@ import { BooleanExpressionContext } from "./esql_parser";
 import { ValueExpressionContext } from "./esql_parser";
 import { ComparisonContext } from "./esql_parser";
 import { MathFnContext } from "./esql_parser";
+import { MathEvalFnContext } from "./esql_parser";
 import { OperatorExpressionContext } from "./esql_parser";
 import { PrimaryExpressionContext } from "./esql_parser";
 import { RowCommandContext } from "./esql_parser";
@@ -32,9 +33,11 @@ import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { SourceIdentifierContext } from "./esql_parser";
 import { FunctionExpressionArgumentContext } from "./esql_parser";
+import { MathFunctionExpressionArgumentContext } from "./esql_parser";
 import { QualifiedNameContext } from "./esql_parser";
 import { QualifiedNamesContext } from "./esql_parser";
 import { IdentifierContext } from "./esql_parser";
+import { MathFunctionIdentifierContext } from "./esql_parser";
 import { FunctionIdentifierContext } from "./esql_parser";
 import { ConstantContext } from "./esql_parser";
 import { LimitCommandContext } from "./esql_parser";
@@ -259,6 +262,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitMathFn?: (ctx: MathFnContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `esql_parser.mathEvalFn`.
+	 * @param ctx the parse tree
+	 */
+	enterMathEvalFn?: (ctx: MathEvalFnContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mathEvalFn`.
+	 * @param ctx the parse tree
+	 */
+	exitMathEvalFn?: (ctx: MathEvalFnContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `esql_parser.operatorExpression`.
 	 * @param ctx the parse tree
 	 */
@@ -380,6 +394,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitFunctionExpressionArgument?: (ctx: FunctionExpressionArgumentContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `esql_parser.mathFunctionExpressionArgument`.
+	 * @param ctx the parse tree
+	 */
+	enterMathFunctionExpressionArgument?: (ctx: MathFunctionExpressionArgumentContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mathFunctionExpressionArgument`.
+	 * @param ctx the parse tree
+	 */
+	exitMathFunctionExpressionArgument?: (ctx: MathFunctionExpressionArgumentContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
 	 * @param ctx the parse tree
 	 */
@@ -411,6 +436,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIdentifier?: (ctx: IdentifierContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.mathFunctionIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	enterMathFunctionIdentifier?: (ctx: MathFunctionIdentifierContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mathFunctionIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	exitMathFunctionIdentifier?: (ctx: MathFunctionIdentifierContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.functionIdentifier`.
