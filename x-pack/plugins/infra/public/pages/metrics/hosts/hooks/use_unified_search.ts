@@ -11,18 +11,21 @@ import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
 import deepEqual from 'fast-deep-equal';
+import moment from 'moment';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useHostsUrlState, INITIAL_DATE_RANGE, HostsState } from './use_unified_search_url_state';
 
 const buildQuerySubmittedPayload = (hostState: HostsState) => {
-  const { panelFilters, filters, dateRange, query: queryObj } = hostState;
+  const { panelFilters, filters, dateRangeTimestamp, query: queryObj } = hostState;
 
   return {
     control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
     filters: filters.map((filter) => JSON.stringify(filter)),
-    interval: `interval(from:${dateRange.from},to:${dateRange.to})`,
+    interval: moment
+      .duration(moment(dateRangeTimestamp.to).diff(moment(dateRangeTimestamp.from)))
+      .humanize(),
     query: queryObj.query,
   };
 };
