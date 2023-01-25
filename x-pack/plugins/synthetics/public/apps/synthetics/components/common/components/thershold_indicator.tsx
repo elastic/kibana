@@ -56,7 +56,7 @@ export const ThresholdIndicator = ({
               })
             : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
                 defaultMessage: '{delta}% lower',
-                values: { delta },
+                values: { delta: Math.abs(delta) },
               }),
       },
     });
