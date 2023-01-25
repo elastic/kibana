@@ -554,6 +554,8 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
+      runtime_mappings: undefined,
+      track_total_hits: undefined,
       ignore_unavailable: true,
       body: {
         query: {
@@ -569,14 +571,12 @@ describe('create_signals', () => {
                   },
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
         _source: false,
         fields: ['@timestamp'],
+        runtime_mappings: undefined,
         sort: [
           {
             '@timestamp': {

@@ -78,6 +78,10 @@ export const singleSearchAfter = async <
         secondaryTimestamp,
         trackTotalHits,
         additionalFilters,
+        /**
+         * overrideBody allows the search after to ignore the _source property of the result,
+         * thus reducing the size of the response and increasing the performance of the query.
+         */
         overrideBody,
       });
 
