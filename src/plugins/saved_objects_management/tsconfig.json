@@ -25,6 +25,8 @@
     "@kbn/core-saved-objects-common",
     "@kbn/monaco",
     "@kbn/config-schema",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-custom-branding-browser",
   ],
   "exclude": [
     "target/**/*",
