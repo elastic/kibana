@@ -76,6 +76,7 @@
     "@kbn/babel-register",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
+    "@kbn/shared-ux-prompt-not-found",
   ],
   "exclude": [
     "target/**/*",
