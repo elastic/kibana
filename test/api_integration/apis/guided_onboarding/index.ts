@@ -14,5 +14,6 @@ export default function apiIntegrationTests({ loadTestFile }: FtrProviderContext
     loadTestFile(require.resolve('./put_state'));
     loadTestFile(require.resolve('./get_guides'));
     loadTestFile(require.resolve('./get_config'));
+    loadTestFile(require.resolve('./activate_guide'));
   });
 }
