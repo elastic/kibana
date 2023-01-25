@@ -259,11 +259,13 @@ export const ActionNotifyWhen = ({
 
   const summaryOrPerRuleSelect = (
     <EuiPopover
+      data-test-subj="summaryOrPerRuleSelect"
       initialFocus={`#actionNotifyWhen-option-${frequency.summary ? 'summary' : 'for_each'}`}
       isOpen={summaryMenuOpen}
       closePopover={useCallback(() => setSummaryMenuOpen(false), [setSummaryMenuOpen])}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-selected={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
       button={
         <EuiButtonEmpty
           size="xs"
