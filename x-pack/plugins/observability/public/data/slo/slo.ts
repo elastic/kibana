@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
+import { v1 as uuidv1 } from 'uuid';
 import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export const emptySloList: FindSLOResponse = {
@@ -17,10 +19,10 @@ export const emptySloList: FindSLOResponse = {
 const now = '2022-12-29T10:11:12.000Z';
 
 const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
-  name: 'irrelevant',
-  description: 'irrelevant',
+  name: 'super important level service',
+  description: 'some description useful',
   indicator: {
-    type: 'sli.kql.custom' as const,
+    type: 'sli.kql.custom',
     params: {
       index: 'some-index',
       filter: 'baz: foo and bar > 2',
@@ -127,6 +129,12 @@ export const anSLO: SLOWithSummaryResponse = {
 
 export const aForecastedSLO: SLOWithSummaryResponse = {
   ...baseSlo,
+  timeWindow: {
+    duration: '1M',
+    calendar: {
+      startTime: '2022-01-01T00:00:00.000Z',
+    },
+  },
   id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
   summary: {
     status: 'HEALTHY',
@@ -137,5 +145,41 @@ export const aForecastedSLO: SLOWithSummaryResponse = {
       remaining: 0.504831,
       isEstimated: true,
     },
+  },
+};
+
+export function createSLO(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
+  return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
+}
+
+export const anApmAvailabilityIndicator: SLOWithSummaryResponse['indicator'] = {
+  type: 'sli.apm.transactionErrorRate',
+  params: {
+    environment: 'development',
+    service: 'o11y-app',
+    transactionType: 'request',
+    transactionName: 'GET /flaky',
+    goodStatusCodes: ['2xx', '3xx', '4xx'],
+  },
+};
+
+export const anApmLatencyIndicator: SLOWithSummaryResponse['indicator'] = {
+  type: 'sli.apm.transactionDuration',
+  params: {
+    environment: 'development',
+    service: 'o11y-app',
+    transactionType: 'request',
+    transactionName: 'GET /slow',
+    'threshold.us': 5000000,
+  },
+};
+
+export const aCustomKqlIndicator: SLOWithSummaryResponse['indicator'] = {
+  type: 'sli.kql.custom',
+  params: {
+    index: 'some_logs*',
+    good: 'latency < 300',
+    total: 'latency > 0',
+    filter: 'labels.eventId: event-0',
   },
 };
