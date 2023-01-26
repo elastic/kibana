@@ -29,7 +29,7 @@ import {
   CONNECTOR_LOCKED_COLUMNS,
 } from '../../../constants';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api';
+import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import {
   ComponentOpts as ConnectorApis,
   withActionOperations,
