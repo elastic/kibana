@@ -7,6 +7,7 @@
  */
 
 export { getServicesMock as getAnalyticsNoDataPageServicesMock } from './src/jest';
+export { getServicesMockCustomBranding as getAnalyticsNoDataPageServicesMockWithCustomBranding } from './src/jest';
 
 export { StorybookMock as AnalyticsNoDataPageStorybookMock } from './src/storybook';
 export type { Params as AnalyticsNoDataPageStorybookParams } from './src/storybook';

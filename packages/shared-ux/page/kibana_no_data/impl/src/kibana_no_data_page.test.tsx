@@ -9,7 +9,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
@@ -103,5 +103,15 @@ describe('Kibana No Data Page', () => {
     expect(component.find(EuiLoadingElastic).length).toBe(1);
     expect(component.find(NoDataViewsPrompt).length).toBe(0);
     expect(component.find(NoDataConfigPage).length).toBe(0);
+  });
+
+  test('shows EuiLoadingSpinner vs EuiLoadingSpinner for custom branding', () => {
+    const services = getKibanaNoDataPageServicesMock(config);
+    const component = mountWithIntl(
+      <KibanaNoDataPageProvider {...services}>
+        <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated, showPlainSpinner: true }} />
+      </KibanaNoDataPageProvider>
+    );
+    expect(component.find(EuiLoadingSpinner).length).toBe(1);
   });
 });

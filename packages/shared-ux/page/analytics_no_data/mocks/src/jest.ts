@@ -19,3 +19,14 @@ export const getServicesMock = () => {
 
   return services;
 };
+
+export const getServicesMockCustomBranding = () => {
+  const services: AnalyticsNoDataPageServices = {
+    ...getKibanaNoDataPageServicesMock(),
+    // not specifying showPlainSpinner as true for testing the component
+    customBranding: { hasCustomBranding$: of(true) },
+    kibanaGuideDocLink: 'Kibana guide',
+  };
+
+  return services;
+};
