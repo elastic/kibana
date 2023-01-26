@@ -217,7 +217,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await table.toggleGroupByDropDown();
         await table.selectGroupBy('Resource');
         /* Findings by resource table has no Rule column */
-        expect(await findingsByResourceTable.hasColumnName('Failed Findings')).to.be(true);
+        expect(await findingsByResourceTable.hasColumnName('Compliance Score')).to.be(true);
       });
 
       it('Clicking on resource id navigates user to resource findings table', async () => {
@@ -227,11 +227,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         /* resource_findings table has Rule column but no Resource ID Column */
         expect(await findingsByResourceTable.hasColumnName('Resource ID')).to.be(false);
-        expect(await resourceFindingsTable.hasColumnValue('Rule', data[0].rule.name)).to.be(true);
+        expect(await resourceFindingsTable.hasColumnValue('Rule Name', data[0].rule.name)).to.be(
+          true
+        );
 
         await findingsByResourceTable.clickBasedOnText('Back to resources');
 
-        expect(await findingsByResourceTable.hasColumnName('Failed Findings')).to.be(true);
+        expect(await findingsByResourceTable.hasColumnName('Compliance Score')).to.be(true);
       });
     });
   });
