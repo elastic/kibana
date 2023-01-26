@@ -40,7 +40,7 @@ const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSel
   defaultMessage: `Select an option and we'll help you get started.`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `I’d like to do something else (skip)`,
+  defaultMessage: `I’d like to do something else.`,
 });
 
 export const GettingStarted = () => {

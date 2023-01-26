@@ -36,7 +36,7 @@ exports[`getting started should render getting started component 1`] = `
       textAlign="center"
     >
       <p>
-        Select an option below and we'll help you get started
+        Select an option and we'll help you get started.
       </p>
     </EuiText>
     <EuiSpacer
@@ -67,7 +67,7 @@ exports[`getting started should render getting started component 1`] = `
         data-test-subj="onboarding--skipGuideLink"
         onClick={[Function]}
       >
-        I’d like to do something else (skip)
+        I’d like to do something else.
       </EuiLink>
     </div>
   </_EuiPageSection>

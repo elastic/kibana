@@ -37,13 +37,14 @@ const getProgressLabel = (guideState: GuideState | undefined): string | undefine
   const { steps } = guideState;
   const numberSteps = steps.length;
   const numberCompleteSteps = steps.filter((step) => step.status === 'complete').length;
-  if (numberCompleteSteps < 1) {
+  if (numberCompleteSteps < 1 || numberCompleteSteps === numberSteps) {
     return undefined;
   }
   return i18n.translate('guidedOnboardingPackage.gettingStarted.cards.progressLabel', {
-    defaultMessage: '{progress} steps complete',
+    defaultMessage: '{numberCompleteSteps} of {numberSteps} steps complete',
     values: {
-      progress: `${numberCompleteSteps}/${numberSteps}`,
+      numberCompleteSteps,
+      numberSteps,
     },
   });
 };
@@ -82,7 +83,7 @@ export const GuideCards = ({
         };
         const isHighlighted = activeFilter === 'all' || activeFilter === card.solution;
         const isComplete = guideState && guideState.status === 'complete';
-        const progress = isComplete ? undefined : getProgressLabel(guideState);
+        const progress = getProgressLabel(guideState);
         return (
           <EuiFlexItem key={index} grow={false}>
             <EuiCard

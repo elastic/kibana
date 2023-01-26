@@ -546,7 +546,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
               }
             }
           >
-            Monitor kubernetes clusters
+            Monitor Kubernetes clusters
           </h3>
         </React.Fragment>
       }
