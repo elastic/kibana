@@ -10,3 +10,4 @@ export * from './types';
 export * from './triggers';
 export * from './actions';
 export * from './service';
+export * from './context_menu';
