@@ -17,9 +17,17 @@ interface RuleDetailsMock {
   missingRules?: Array<Record<'rule_id', string>>;
 }
 
-// TODO add the correct type DefaultActionConnectorDetails
 export const getActionConnectorDetailsMock = (): DefaultActionConnectorDetails => ({
   exported_action_connector_count: 0,
+  missing_action_connection_count: 0,
+  missing_action_connections: [],
+  excluded_action_connection_count: 0,
+  excluded_action_connections: [],
+});
+export const getOutputDetailsSampleWithActionConnectors = (): ExportRulesDetails => ({
+  ...getOutputDetailsSample(),
+  ...getExceptionExportDetailsMock(),
+  exported_action_connector_count: 1,
   missing_action_connection_count: 0,
   missing_action_connections: [],
   excluded_action_connection_count: 0,

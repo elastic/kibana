@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsExportResultDetails,
   ISavedObjectsExporter,
   SavedObjectsExportExcludedObject,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { createConcatStream, createMapStream, createPromiseFromStreams } from '@kbn/utils';
 import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
@@ -55,7 +56,6 @@ export const getRuleActionConnectorsForExport = async (
     actionConnectorDetails: defaultActionConnectorDetails,
   };
 
-  // TODO combine line 60 and 64
   const actionsIds = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
 
   if (!actionsIds.length) return exportedActionConnectors;
@@ -65,6 +65,17 @@ export const getRuleActionConnectorsForExport = async (
     objects: getActionsByObjectsParam,
     request,
   });
+
+  if (!actionDetails) {
+    exportedActionConnectors.actionConnectorDetails = {
+      exported_action_connector_count: 0,
+      missing_action_connection_count: actionsIds.length,
+      missing_action_connections: [], // TODO: check how to generate SO
+      excluded_action_connection_count: 0,
+      excluded_action_connections: [],
+    };
+    return exportedActionConnectors;
+  }
 
   const actionsConnectorsToExport: SavedObject[] = await createPromiseFromStreams([
     actionDetails,
