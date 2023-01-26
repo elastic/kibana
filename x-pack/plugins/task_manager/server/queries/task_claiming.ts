@@ -95,6 +95,11 @@ type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
 
 export const TASK_MANAGER_MARK_AS_CLAIMED = 'mark-available-tasks-as-claimed';
 
+interface ClaimAvailableTasksResult {
+  docs: ConcreteTaskInstance[];
+  tasksConflicted: number;
+}
+
 export class TaskClaiming {
   public readonly errors$ = new Subject<Error>();
   public readonly maxAttempts: number;
@@ -240,19 +245,16 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const { updated: tasksUpdated, version_conflicts: tasksConflicted } =
-      await this.markAvailableTasksAsClaimed({
-        claimOwnershipUntil,
-        size,
-        taskTypes,
-      });
-
-    const docs = tasksUpdated > 0 ? await this.sweepForClaimedTasks(taskTypes, size) : [];
+    const { docs, tasksConflicted } = await this.claimAvailableTasksImpl({
+      claimOwnershipUntil,
+      size,
+      taskTypes,
+    });
 
     this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
     const stats = {
-      tasksUpdated,
+      tasksUpdated: docs.length,
       tasksConflicted,
       tasksClaimed: docs.length,
     };
@@ -273,11 +275,11 @@ export class TaskClaiming {
     return false;
   }
 
-  private async markAvailableTasksAsClaimed({
+  private async claimAvailableTasksImpl({
     claimOwnershipUntil,
     size,
     taskTypes,
-  }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
+  }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksResult> {
     const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
       this.definitions.getAllTypes(),
       (type) =>
@@ -312,7 +314,7 @@ export class TaskClaiming {
     );
 
     try {
-      const result = await this.taskStore.updateByQuery(
+      const updateByQueryResult = await this.taskStore.updateByQuery(
         {
           query,
           script,
@@ -322,33 +324,27 @@ export class TaskClaiming {
           max_docs: size,
         }
       );
+
+      const claimedTasksQuery = tasksClaimedByOwner(
+        this.taskStore.taskManagerId,
+        tasksOfType([...taskTypes])
+      );
+      const { docs } = await this.taskStore.fetch({
+        query: claimedTasksQuery,
+        size,
+        sort: SortByRunAtAndRetryAt,
+        seq_no_primary_term: true,
+      });
+
       apmTrans?.end('success');
-      return result;
+      return {
+        docs,
+        tasksConflicted: updateByQueryResult.version_conflicts,
+      };
     } catch (err) {
       apmTrans?.end('failure');
       throw err;
     }
-  }
-
-  /**
-   * Fetches tasks from the index, which are owned by the current Kibana instance
-   */
-  private async sweepForClaimedTasks(
-    taskTypes: Set<string>,
-    size: number
-  ): Promise<ConcreteTaskInstance[]> {
-    const claimedTasksQuery = tasksClaimedByOwner(
-      this.taskStore.taskManagerId,
-      tasksOfType([...taskTypes])
-    );
-    const { docs } = await this.taskStore.fetch({
-      query: claimedTasksQuery,
-      size,
-      sort: SortByRunAtAndRetryAt,
-      seq_no_primary_term: true,
-    });
-
-    return docs;
   }
 }
 
