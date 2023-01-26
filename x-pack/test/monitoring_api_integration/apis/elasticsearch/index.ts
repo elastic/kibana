@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Elasticsearch', () => {
     loadTestFile(require.resolve('./ccr'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./ml_jobs'));
     loadTestFile(require.resolve('./nodes'));
     loadTestFile(require.resolve('./overview'));
   });
