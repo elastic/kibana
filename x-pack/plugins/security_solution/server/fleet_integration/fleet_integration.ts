@@ -177,7 +177,7 @@ export const getPackagePolicyPostCreateCallback = (
       return packagePolicy;
     }
 
-    const integrationConfig = packagePolicy?.inputs[0].config?.integration_config;
+    const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 
     if (integrationConfig && integrationConfig?.value?.eventFilters !== undefined) {
       createEventFilters(

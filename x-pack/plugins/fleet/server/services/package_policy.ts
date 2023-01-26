@@ -1334,72 +1334,79 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy | NewPackagePolicy | void> {
-    if (externalCallbackType === 'packagePolicyPostDelete') {
-      return await this.runPostDeleteExternalCallbacks(
-        packagePolicy as PostDeletePackagePoliciesResponse,
-        soClient,
-        esClient,
-        context,
-        request
-      );
-    } else if (externalCallbackType === 'packagePolicyDelete') {
-      return await this.runDeleteExternalCallbacks(
-        packagePolicy as DeletePackagePoliciesResponse,
-        soClient,
-        esClient
-      );
-    } else {
-      if (!Array.isArray(packagePolicy)) {
-        let newData = packagePolicy;
-        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
-        if (externalCallbacks && externalCallbacks.size > 0) {
-          let updatedNewData = newData;
-          for (const callback of externalCallbacks) {
-            let result;
-            if (externalCallbackType === 'packagePolicyPostCreate') {
-              result = await (callback as PostPackagePolicyPostCreateCallback)(
-                updatedNewData as PackagePolicy,
-                soClient,
-                esClient,
-                context,
-                request
-              );
-              updatedNewData = PackagePolicySchema.validate(result);
-            } else {
-              result = await (callback as PostPackagePolicyCreateCallback)(
-                updatedNewData as NewPackagePolicy,
-                soClient,
-                esClient,
-                context,
-                request
-              );
+    const logger = appContextService.getLogger();
+    try {
+      if (externalCallbackType === 'packagePolicyPostDelete') {
+        return await this.runPostDeleteExternalCallbacks(
+          packagePolicy as PostDeletePackagePoliciesResponse,
+          soClient,
+          esClient,
+          context,
+          request
+        );
+      } else if (externalCallbackType === 'packagePolicyDelete') {
+        return await this.runDeleteExternalCallbacks(
+          packagePolicy as DeletePackagePoliciesResponse,
+          soClient,
+          esClient
+        );
+      } else {
+        if (!Array.isArray(packagePolicy)) {
+          let newData = packagePolicy;
+          const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+          if (externalCallbacks && externalCallbacks.size > 0) {
+            let updatedNewData = newData;
+            for (const callback of externalCallbacks) {
+              let result;
+              if (externalCallbackType === 'packagePolicyPostCreate') {
+                result = await (callback as PostPackagePolicyPostCreateCallback)(
+                  updatedNewData as PackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+                updatedNewData = PackagePolicySchema.validate(result);
+              } else {
+                result = await (callback as PostPackagePolicyCreateCallback)(
+                  updatedNewData as NewPackagePolicy,
+                  soClient,
+                  esClient,
+                  context,
+                  request
+                );
+              }
+
+              if (externalCallbackType === 'packagePolicyCreate') {
+                updatedNewData = NewPackagePolicySchema.validate(result);
+              } else if (externalCallbackType === 'packagePolicyUpdate') {
+                const omitted = {
+                  ...omit(result, [
+                    'id',
+                    'version',
+                    'revision',
+                    'updated_at',
+                    'updated_by',
+                    'created_at',
+                    'created_by',
+                    'elasticsearch',
+                  ]),
+                  inputs: result.inputs.map((input) => omit(input, ['compiled_input'])),
+                };
+
+                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+              }
             }
 
-            if (externalCallbackType === 'packagePolicyCreate') {
-              updatedNewData = NewPackagePolicySchema.validate(result);
-            } else if (externalCallbackType === 'packagePolicyUpdate') {
-              const omitted = {
-                ...omit(result, [
-                  'id',
-                  'version',
-                  'revision',
-                  'updated_at',
-                  'updated_by',
-                  'created_at',
-                  'created_by',
-                  'elasticsearch',
-                ]),
-                inputs: result.inputs.map((input) => omit(input, ['compiled_input'])),
-              };
-
-              updatedNewData = UpdatePackagePolicySchema.validate(omitted);
-            }
+            newData = updatedNewData;
           }
-
-          newData = updatedNewData;
+          return newData;
         }
-        return newData;
       }
+    } catch (error) {
+      logger.error(`Error running external callbacks for ${externalCallbackType}:`);
+      logger.error(error);
+      throw error;
     }
   }
 
