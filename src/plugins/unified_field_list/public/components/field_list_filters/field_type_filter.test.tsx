@@ -59,7 +59,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
 
     await openPopover(wrapper, props);
 
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(11);
+    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(10);
     expect(
       wrapper
         .find(EuiContextMenuItem)
@@ -67,7 +67,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
         .join(', ')
     ).toBe(
       // format:type_icon type_name help_icon count
-      'BooleanBooleanInfo1, ConflictConflictInfo1, DateDateInfo4, Geo pointGeo pointInfo2, Geo shapeGeo shapeInfo1, IP addressIP addressInfo1, KeywordKeywordInfo4, Murmur3Murmur3Info2, NumberNumberInfo3, StringStringInfo1, TextTextInfo5'
+      'BooleanBooleanInfo1, ConflictConflictInfo1, DateDateInfo4, Geo pointGeo pointInfo2, Geo shapeGeo shapeInfo1, IP addressIP addressInfo1, KeywordKeywordInfo5, Murmur3Murmur3Info2, NumberNumberInfo3, TextTextInfo5'
     );
     expect(props.getCustomFieldType).toHaveBeenCalledTimes(props.allFields?.length ?? 0);
     expect(props.onChange).not.toBeCalled();
@@ -111,7 +111,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
     await openPopover(wrapper, props);
 
     const clearAllButton = findClearAllButton(wrapper, props)?.first();
-    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(11);
+    expect(wrapper.find(EuiContextMenuItem)?.length).toBe(10);
     expect(clearAllButton?.length).toBe(1);
     expect(
       wrapper
@@ -120,7 +120,7 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
         .join(', ')
     ).toBe(
       // format:selection_icon type_icon type_name help_icon count
-      'empty-BooleanBooleanInfo1, empty-ConflictConflictInfo1, check-DateDateInfo4, empty-Geo pointGeo pointInfo2, empty-Geo shapeGeo shapeInfo1, empty-IP addressIP addressInfo1, empty-KeywordKeywordInfo4, empty-Murmur3Murmur3Info2, check-NumberNumberInfo3, empty-StringStringInfo1, empty-TextTextInfo5'
+      'empty-BooleanBooleanInfo1, empty-ConflictConflictInfo1, check-DateDateInfo4, empty-Geo pointGeo pointInfo2, empty-Geo shapeGeo shapeInfo1, empty-IP addressIP addressInfo1, empty-KeywordKeywordInfo5, empty-Murmur3Murmur3Info2, check-NumberNumberInfo3, empty-TextTextInfo5'
     );
 
     await toggleType(wrapper, 'boolean');

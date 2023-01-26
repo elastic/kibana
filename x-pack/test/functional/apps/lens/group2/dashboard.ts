@@ -173,11 +173,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.clickByButtonText('lnsPieVis');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.closeAddPanel();
 
-      await panelActions.openContextMenu();
-      await panelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+      await retry.try(async () => {
+        await panelActions.openContextMenu();
+        await panelActions.clickContextMenuMoreItem();
+        await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+      });
     });
 
     it('should show all data from all layers in the inspector', async () => {
