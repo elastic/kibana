@@ -7,16 +7,16 @@
  */
 
 import { difference } from 'lodash';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
 export function getDataViewFieldList(
   dataView: DataView | undefined | null,
-  fieldCounts: Record<string, number> | undefined | null,
-  isPlainRecord: boolean
+  fieldCounts: Record<string, number> | undefined | null
 ): DataViewField[] | null {
-  if (isPlainRecord && !fieldCounts) {
+  if (!fieldCounts) {
     // still loading data
     return null;
   }
@@ -28,7 +28,7 @@ export function getDataViewFieldList(
   if (sourceFiltersValues) {
     const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
     dataViewFields = dataViewFields.filter((field) => {
-      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries, selected fields)
+      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for selected fields)
     });
   }
 
@@ -38,24 +38,42 @@ export function getDataViewFieldList(
 
   difference(fieldNamesInDocs, fieldNamesInDataView).forEach((unknownFieldName) => {
     if (dataView && isNestedFieldParent(unknownFieldName, dataView)) {
-      unknownFields.push({
-        displayName: String(unknownFieldName),
-        name: String(unknownFieldName),
-        type: 'nested',
-      } as DataViewField);
+      unknownFields.push(
+        new DataViewField({
+          name: String(unknownFieldName),
+          type: 'nested',
+          searchable: false,
+          aggregatable: false,
+        })
+      );
     } else {
-      unknownFields.push({
-        displayName: String(unknownFieldName),
-        name: String(unknownFieldName),
-        type: 'unknown',
-      } as DataViewField);
+      unknownFields.push(
+        new DataViewField({
+          name: String(unknownFieldName),
+          type: 'unknown',
+          searchable: false,
+          aggregatable: false,
+        })
+      );
     }
   });
 
-  return [
-    ...(isPlainRecord
-      ? dataViewFields.filter((field) => currentFieldCounts[field.name])
-      : dataViewFields),
-    ...unknownFields,
-  ];
+  return [...dataViewFields, ...unknownFields];
+}
+
+export function getTextBasedQueryFieldList(
+  textBasedQueryColumns?: DatatableColumn[]
+): DataViewField[] {
+  if (!textBasedQueryColumns) {
+    return [];
+  }
+  return textBasedQueryColumns.map(
+    (column) =>
+      new DataViewField({
+        name: column.name,
+        type: column.meta?.type ?? 'unknown',
+        searchable: false,
+        aggregatable: false,
+      })
+  );
 }
