@@ -1600,39 +1600,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.missingOrFail('lens-editor-warning');
     },
 
-    async assertInlineWarning(warningText: string) {
-      await testSubjects.click('chart-inline-warning-button');
-      await testSubjects.existOrFail('chart-inline-warning');
-      const warnings = await testSubjects.findAll('chart-inline-warning');
+    /**
+     * Applicable both on the embeddable and in the editor. In both scenarios, a popover containing user messages (errors, warnings) is shown.
+     */
+    async assertMessageListContains(assertText: string) {
+      await testSubjects.click('lens-message-list-trigger');
+      await testSubjects.existOrFail('lens-message-list-message');
+      const messages = await testSubjects.findAll('lens-editor-warning');
       let found = false;
-      for (const warning of warnings) {
-        const text = await warning.getVisibleText();
+      for (const message of messages) {
+        const text = await message.getVisibleText();
         log.info(text);
-        if (text === warningText) {
-          found = true;
-        }
-      }
-      await testSubjects.click('chart-inline-warning-button');
-      if (!found) {
-        throw new Error(`Warning with text "${warningText}" not found`);
-      }
-    },
-
-    async assertEditorWarning(warningText: string) {
-      await testSubjects.click('lens-editor-warning-button');
-      await testSubjects.existOrFail('lens-editor-warning');
-      const warnings = await testSubjects.findAll('lens-editor-warning');
-      let found = false;
-      for (const warning of warnings) {
-        const text = await warning.getVisibleText();
-        log.info(text);
-        if (text === warningText) {
+        if (text === assertText) {
           found = true;
         }
       }
       await testSubjects.click('lens-editor-warning-button');
       if (!found) {
-        throw new Error(`Warning with text "${warningText}" not found`);
+        throw new Error(`Message with text "${assertText}" not found`);
       }
     },
 

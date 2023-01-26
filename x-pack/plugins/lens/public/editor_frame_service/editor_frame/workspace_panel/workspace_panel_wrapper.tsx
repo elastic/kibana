@@ -20,7 +20,7 @@ import {
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
-import { MessagesPopover } from './messages_popover';
+import { MessageList } from './message_list';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -133,7 +133,7 @@ export function WorkspacePanelWrapper({
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 {userMessages?.length ? (
                   <EuiFlexItem grow={false}>
-                    <MessagesPopover messages={userMessages} />
+                    <MessageList messages={userMessages} />
                   </EuiFlexItem>
                 ) : null}
 

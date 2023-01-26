@@ -133,9 +133,6 @@ const accuracyModeDisabledWarning = (
     {
       defaultMessage:
         'This might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster.',
-      values: {
-        name: columnName,
-      },
     }
   ),
   longMessage: (
@@ -178,9 +175,6 @@ const accuracyModeEnabledWarning = (
     {
       defaultMessage:
         'This might be an approximation. For more precise results, try increasing the number of top values or using filters instead.',
-      values: {
-        name: columnName,
-      },
     }
   ),
   longMessage: (
@@ -388,9 +382,6 @@ export function getPrecisionErrorWarningMessages(
                 {
                   defaultMessage:
                     'This may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records.',
-                  values: {
-                    name: column.name,
-                  },
                 }
               ),
               longMessage: (

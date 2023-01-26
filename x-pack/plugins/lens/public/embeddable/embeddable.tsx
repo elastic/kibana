@@ -115,7 +115,7 @@ import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
-import { MessagesPopover } from '../editor_frame_service/editor_frame/workspace_panel/messages_popover';
+import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -280,7 +280,7 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   return (
-    <MessagesPopover
+    <MessageList
       messages={messages}
       customButtonStyles={css`
         block-size: ${euiTheme.size.l};
