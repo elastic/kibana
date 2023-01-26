@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       });
 
-      it.skip('Can search options list for available options case insensitive', async () => {
+      it('Can search options list for available options case insensitive', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSearchForOption('MEO');
         await dashboardControls.ensureAvailableOptionsEqual(

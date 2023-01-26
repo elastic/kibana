@@ -116,7 +116,6 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
           filteredSuggestions: {
             terms: {
               field: fieldName,
-              execution_hint: 'map',
               shard_size: 10,
               order: getSortType(sort),
             },
@@ -165,7 +164,6 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
             terms: {
               field: fieldName,
               include: `${getEscapedQuery(searchString)}.*`,
-              execution_hint: 'map',
               shard_size: 10,
               order: getSortType(sort),
             },

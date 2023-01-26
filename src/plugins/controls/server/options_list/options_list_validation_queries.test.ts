@@ -39,6 +39,7 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
+        allowExpensiveQueries: true,
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -72,6 +73,7 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
+        allowExpensiveQueries: true,
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock)).toBeUndefined();
     });

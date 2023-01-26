@@ -33,6 +33,7 @@
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/ui-theme",
+    "@kbn/field-formats-plugin",
   ],
   "exclude": [
     "target/**/*",
