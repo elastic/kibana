@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser';
+import { Presentable, PresentableGrouping } from '../types/presentable';
 import { Action, ActionDefinition, ActionMenuItemProps } from './action';
 
 /**

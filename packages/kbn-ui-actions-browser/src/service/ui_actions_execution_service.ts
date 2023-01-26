@@ -7,10 +7,20 @@
  */
 
 import { uniqBy } from 'lodash';
-import { defer as createDefer, Defer } from '@kbn/kibana-utils-plugin/public';
 import { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 import { Trigger } from '../triggers';
+
+export class Defer<T> {
+  public readonly resolve!: (data: T) => void;
+  public readonly reject!: (error: any) => void;
+  public readonly promise: Promise<T> = new Promise<T>((resolve, reject) => {
+    (this as any).resolve = resolve;
+    (this as any).reject = reject;
+  });
+}
+
+export const createDefer = <T>() => new Defer<T>();
 
 interface ExecuteActionTask {
   action: Action;

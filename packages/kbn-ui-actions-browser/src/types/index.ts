@@ -7,3 +7,4 @@
  */
 
 export * from './presentable';
+export * from './registries';

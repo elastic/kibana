@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ActionDefinition } from '../actions';
+import { ActionDefinition } from '@kbn/ui-actions-browser';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';

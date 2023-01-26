@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '.';
+import { Trigger } from '@kbn/ui-actions-browser';
 
 export const VISUALIZE_GEO_FIELD_TRIGGER = 'VISUALIZE_GEO_FIELD_TRIGGER';
 export const visualizeGeoFieldTrigger: Trigger = {

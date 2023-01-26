@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '@kbn/ui-actions-browser';
-
-export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
-export const visualizeFieldTrigger: Trigger = {
-  id: VISUALIZE_FIELD_TRIGGER,
-  title: 'Visualize field',
-  description: 'Triggered when user wants to visualize a field.',
-};
+export * from './trigger';
+export * from './trigger_contract';
+export * from './trigger_internal';
+export * from './default_trigger';
