@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
+import { Plugin, CoreStart } from '@kbn/core/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './alert_api';
@@ -51,7 +51,7 @@ export interface PluginStartContract {
 
 export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
-  public setup(core: CoreSetup) {
+  public setup() {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
 
     const registerNavigation = async (

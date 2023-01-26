@@ -17,7 +17,7 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
 
 export interface BuildViewInAppUrlOpts<Params extends RuleTypeParams> {
   kibanaBaseUrl: string | undefined;
-  spaceId: string | undefined;
+  spaceId: string;
   getViewInAppRelativeUrl: GetViewInAppRelativeUrlFn<Params> | undefined;
   opts: GetViewInAppRelativeUrlFnOpts<Params>;
   logger: Logger;
