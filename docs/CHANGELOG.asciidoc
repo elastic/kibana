@@ -8,8 +8,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.6.0 release.
+Review important information about the {kib} 8.6.x releases.
 
+* <<release-notes-8.6.1>>
 * <<release-notes-8.6.0>>
 //* <<release-notes-8.5.2>>
 //* <<release-notes-8.5.1>>
@@ -40,6 +41,80 @@ Review important information about the {kib} 8.6.0 release.
 
 --
 
+[[release-notes-8.6.1]]
+== {kib} 8.6.1
+
+coming::[8.6.1]
+
+Review the following information about the {kib} 8.6.1 release.
+
+[float]
+[[breaking-changes-8.6.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.6.1.
+// end::notable-breaking-changes[]
+
+{kibana-ref-all}/8.5/release-notes-8.5.0.html#breaking-changes-8.5.0[8.5.0] | {kibana-ref-all}/8.4/release-notes-8.4.0.html#breaking-changes-8.4.0[8.4.0] | {kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.6.1]]
+=== Enhancements
+Alerting::
+* Create OAS for get rule types and get alerting framework health {kibana-pull}148774[#148774]
+* Create open API specification for create/update connector {kibana-pull}148691[#148691]
+* Create open API specification for disable/enable rule and mute/unmute all alerts {kibana-pull}148494[#148494]
+
+Elastic Security::
+For the Elastic Security 8.6.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.6.1]]
+=== Bug fixes
+Canvas::
+Replaces React.lazy and withSuspense with async imports in expressions plugins {kibana-pull}147693[#147693]
+
+Dashboard::
+* Adds styling to allow clickable *TSVB* markdown images {kibana-pull}147802[#147802]
+* Changes the visibility of the panel filters action {kibana-pull}146335[#146335]
+
+Discover::
+* Adds support for case-insensitive search in Document Viewer {kibana-pull}148312[#148312]
+* Fixes the field stats for the epoch time format {kibana-pull}148288[#148288]
+
+Elastic Security::
+For the Elastic Security 8.6.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Fixes missing policy Id in installation URL for cloud integrations {kibana-pull}149243[#149243]
+* Fixes package installation APIs to install packages without a version {kibana-pull}149193[#149193]
+* Fixes issue where the latest GA version could not be installed if there was a newer prerelease version in the registry {kibana-pull}149133[#149133] and {kibana-pull}149104[#149104]
+
+Infrastructure::
+Fixes an issue where the summary request piled up {kibana-pull}148670[#148670]
+
+Machine Learning::
+* Fixes the bucket span estimator in the advanced wizard {kibana-pull}149008[#149008]
+* Fixes the transforms JSON display {kibana-pull}147996[#147996]
+
+Management::
+* Fixes the runtime field format editor {kibana-pull}148497[#148497]
+* Improves the check for response size in the `/autocomplete_entities` endpoint {kibana-pull}148328[#148328]
+
+Maps::
+Fixes an issue where Maps was unable to  initialize the time range from URLs {kibana-pull}148465[#148465]
+
+Platform::
+Fixes the server-side import of the contract `CloudStart` {kibana-pull}149203[#149203]
+
+Uptime::
+* ssl fields are now omitted when ssl is disabled {kibana-pull}149087[#149087]
+* Adds the ability to disable throttling for project monitors {kibana-pull}148669[#148669]
+
 [[release-notes-8.6.0]]
 == {kib} 8.6.0
 
@@ -67,7 +142,6 @@ This known issue only impacts the Observability Rules page. To work around this 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.6.0, review the breaking changes, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 [discrete]
 [[breaking-143081]]
 .Changes the `histogram:maxBars` default setting
@@ -83,7 +157,6 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 . Scroll or search for *histogram:maxBars*.
 . Enter `100`, then click *Save changes*.
 ====
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 

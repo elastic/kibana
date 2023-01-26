@@ -51,7 +51,6 @@ export const getNormalizeCommonFields = ({
   namespace,
 }: NormalizedProjectProps): Partial<CommonFields> => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
-
   const normalizedFields = {
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
@@ -231,3 +230,7 @@ export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) 
     unsupportedKeys,
   };
 };
+
+// returns true when any ssl fields are defined
+export const getHasTLSFields = (monitor: ProjectMonitor) =>
+  Object.keys(monitor).some((key) => key.includes('ssl'));
