@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, IconColor, EuiThemeComputed } from '@elastic/eui';
+import { EuiBadge, IconColor, EuiThemeComputed, EuiLoadingContent } from '@elastic/eui';
 
-type MonitorStatus = 'succeeded' | 'failed' | 'skipped';
+type MonitorStatus = 'succeeded' | 'failed' | 'skipped' | 'unknown';
 export const StatusBadge = ({ status }: { status: MonitorStatus }) => {
+  if (status === 'unknown') {
+    return <EuiLoadingContent lines={1} />;
+  }
+
   return (
     <EuiBadge color={getBadgeColorForMonitorStatus(status)}>
       {status === 'succeeded' ? COMPLETE_LABEL : status === 'failed' ? FAILED_LABEL : SKIPPED_LABEL}
@@ -18,7 +22,7 @@ export const StatusBadge = ({ status }: { status: MonitorStatus }) => {
   );
 };
 
-export const parseBadgeStatus = (status: string) => {
+export const parseBadgeStatus = (status?: string) => {
   switch (status) {
     case 'succeeded':
     case 'success':
@@ -32,7 +36,7 @@ export const parseBadgeStatus = (status: string) => {
     case 'skipped':
       return 'skipped';
     default:
-      return 'skipped';
+      return 'unknown';
   }
 };
 

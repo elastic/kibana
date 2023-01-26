@@ -5,13 +5,9 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { hostFieldsMap, processFieldsMap, userFieldsMap } from '@kbn/securitysolution-ecs';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
-import {
-  hostFieldsMap,
-  processFieldsMap,
-  userFieldsMap,
-} from '../../../../../../../common/ecs/ecs_fields';
 import type { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
 import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
 
