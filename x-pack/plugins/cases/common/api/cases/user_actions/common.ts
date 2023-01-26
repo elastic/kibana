@@ -66,6 +66,8 @@ export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSaved
  */
 export const CaseUserActionInjectedIdsRt = rt.type({
   comment_id: rt.union([rt.string, rt.null]),
+  id: rt.string,
+  version: rt.string,
 });
 
 /**

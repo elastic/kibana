@@ -10,7 +10,6 @@ import type {
   CaseUserActionResponse,
   CaseUserActionInjectedAttributesWithoutActionId,
   CaseUserActionsResponse,
-  CaseUserActionsResponseWithoutActionId,
 } from '../../../common/api';
 
 export const extractAttributes = (
@@ -21,5 +20,5 @@ export const extractAttributes = (
 
 export const formatSavedObjects = (
   response: SavedObjectsFindResponse<CaseUserActionInjectedAttributesWithoutActionId>
-): CaseUserActionsResponseWithoutActionId =>
+): CaseUserActionsResponse =>
   response.saved_objects.map((so) => ({ id: so.id, version: so.version ?? '', ...so.attributes }));

@@ -81,8 +81,8 @@ const CaseUserActionResponseRt = rt.intersection([
 ]);
 
 export const CaseUserActionAttributesRt = CaseUserActionBasicRt;
+export const CaseUserActionsDeprecatedResponse = rt.array(CaseUserActionDeprecatedResponseRt);
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
-export const CaseUserActionsResponseWithoutActionIdRt = rt.array(CaseUserActionResponseRt);
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
@@ -93,9 +93,7 @@ export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
 export type CaseUserActionInjectedAttributesWithoutActionId = rt.TypeOf<
   typeof CaseUserActionInjectedAttributesWithoutActionIdRt
 >;
-export type CaseUserActionsResponseWithoutActionId = rt.TypeOf<
-  typeof CaseUserActionsResponseWithoutActionIdRt
->;
+
 
 export type UserAction = rt.TypeOf<typeof ActionsRt>;
 export type UserActionTypes = ActionTypeValues;
