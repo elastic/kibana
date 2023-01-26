@@ -169,6 +169,8 @@ export class Mapping implements BaseMapping {
               .then((mapping) => {
                 this._isLoading$.next(false);
 
+                delete this.loadingState[indices as string];
+
                 autoCompleteContext.asyncResultsState!.isLoading = false;
                 autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
 
@@ -181,6 +183,7 @@ export class Mapping implements BaseMapping {
                 // eslint-disable-next-line no-console
                 console.error(error);
                 this._isLoading$.next(false);
+                delete this.loadingState[indices as string];
               });
           }
         );
