@@ -1454,8 +1454,8 @@ instanceStateValue: true
     ).to.be.greaterThan(0);
     // Process alerts is fast enough that it will sometimes report 0ms
     expect(
-      event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms
-    ).to.be.greaterThan(-1);
+      (event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms || -1) >= 0
+    ).to.be.ok();
     expect(
       event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms
     ).to.be.greaterThan(0);
