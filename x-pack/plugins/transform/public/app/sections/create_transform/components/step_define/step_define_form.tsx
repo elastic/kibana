@@ -60,6 +60,8 @@ import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
 
+const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
+
 const advancedEditorsSidebarWidth = '220px';
 
 export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
@@ -286,13 +288,15 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               </EuiFlexItem>
               {/* Flex Column #2: Apply-To-Config option */}
               <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    {searchItems.savedSearch === undefined && (
-                      <DatePickerApplySwitch {...stepDefineForm} />
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                {ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG && (
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      {searchItems.savedSearch === undefined && (
+                        <DatePickerApplySwitch {...stepDefineForm} />
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>
