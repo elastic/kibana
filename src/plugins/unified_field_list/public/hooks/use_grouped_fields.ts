@@ -43,7 +43,6 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   ) => Partial<FieldsGroupDetails> | undefined | null;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
-  onFilterField?: (field: T) => boolean; // TODO: deprecate after integrating the unified field search and field filters into Discover
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -68,7 +67,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
-  onFilterField,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -77,7 +75,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     getCustomFieldType,
     onSupportedFieldFilter,
   });
-  const onFilterFieldList = onFilterField ?? fieldListFilters.onFilterField;
+  const onFilterFieldList = fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
   const fieldsExistenceInfoUnavailable: boolean = dataViewId
@@ -131,6 +129,10 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         }
         if (dataView?.metaFields?.includes(field.name)) {
           return 'metaFields';
+        }
+        // `nested` root fields are not a part of data view fields list, so we need to check them separately
+        if (field.type === 'nested') {
+          return 'availableFields';
         }
         if (dataView?.getFieldByName && !dataView.getFieldByName(field.name)) {
           return 'unmappedFields';
