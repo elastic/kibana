@@ -40,7 +40,7 @@ describe('createPushedUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('pushed as new incident connector name')).toBeInTheDocument();
+    expect(screen.getByText('pushed as new incident My SN connector')).toBeInTheDocument();
     expect(screen.getByText('external title').closest('a')).toHaveAttribute(
       'href',
       'basicPush.com'
@@ -63,7 +63,7 @@ describe('createPushedUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('pushed as new incident connector name')).toBeInTheDocument();
+    expect(screen.getByText('pushed as new incident My SN connector')).toBeInTheDocument();
   });
 
   it('renders correctly when updating an external service', async () => {
@@ -85,7 +85,7 @@ describe('createPushedUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('updated incident connector name')).toBeInTheDocument();
+    expect(screen.getByText('updated incident My SN connector')).toBeInTheDocument();
   });
 
   it('shows only the top footer if it is the latest push and there is nothing to push', async () => {
@@ -218,9 +218,11 @@ describe('createPushedUserActionBuilder ', () => {
 
     expect(screen.queryByText('pushed as new incident none connector')).not.toBeInTheDocument();
     expect(screen.queryByText('updated incident none connector')).not.toBeInTheDocument();
-    expect(screen.queryByText('Already pushed to connector name incident')).not.toBeInTheDocument();
     expect(
-      screen.queryByText('Requires update to connector name incident')
+      screen.queryByText('Already pushed to My SN connector incident')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Requires update to My SN connector incident')
     ).not.toBeInTheDocument();
   });
 });

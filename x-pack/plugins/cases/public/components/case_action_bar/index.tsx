@@ -86,86 +86,84 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
-      <>
-        <EuiFlexItem grow={false}>
-          <MyDescriptionList compressed>
-            <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-              <EuiFlexItem grow={false} data-test-subj="case-view-status">
-                <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
+      <EuiFlexItem grow={false}>
+        <MyDescriptionList compressed>
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+            <EuiFlexItem grow={false} data-test-subj="case-view-status">
+              <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <StatusContextMenu
+                  currentStatus={caseData.status}
+                  disabled={!permissions.update}
+                  isLoading={isLoading}
+                  onStatusChanged={onStatusChanged}
+                />
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
+            {!metricsFeatures.includes('lifespan') ? (
+              <EuiFlexItem grow={false}>
+                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  <StatusContextMenu
-                    currentStatus={caseData.status}
-                    disabled={!permissions.update}
-                    isLoading={isLoading}
-                    onStatusChanged={onStatusChanged}
+                  <FormattedRelativePreferenceDate
+                    data-test-subj={'case-action-bar-status-date'}
+                    value={date}
                   />
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
-              {!metricsFeatures.includes('lifespan') ? (
-                <EuiFlexItem grow={false}>
-                  <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    <FormattedRelativePreferenceDate
-                      data-test-subj={'case-action-bar-status-date'}
-                      value={date}
-                    />
-                  </EuiDescriptionListDescription>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </MyDescriptionList>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed>
-            <EuiFlexGroup
-              gutterSize="l"
-              alignItems="center"
-              responsive={false}
-              justifyContent="spaceBetween"
-            >
-              {permissions.update && isSyncAlertsEnabled && (
-                <EuiFlexItem grow={false}>
-                  <EuiDescriptionListTitle>
-                    <EuiFlexGroup
-                      component="span"
-                      alignItems="center"
-                      gutterSize="xs"
-                      responsive={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <span>{i18n.SYNC_ALERTS}</span>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    <SyncAlertsSwitch
-                      disabled={isLoading}
-                      isSynced={caseData.settings.syncAlerts}
-                      onSwitchChange={onSyncAlertsChanged}
-                    />
-                  </EuiDescriptionListDescription>
-                </EuiFlexItem>
-              )}
+            ) : null}
+          </EuiFlexGroup>
+        </MyDescriptionList>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiDescriptionList compressed>
+          <EuiFlexGroup
+            gutterSize="l"
+            alignItems="center"
+            responsive={false}
+            justifyContent="spaceBetween"
+          >
+            {permissions.update && isSyncAlertsEnabled && (
               <EuiFlexItem grow={false}>
-                <span>
-                  <EuiButtonEmpty
-                    data-test-subj="case-refresh"
-                    flush="left"
-                    iconType="refresh"
-                    onClick={refreshCaseViewPage}
+                <EuiDescriptionListTitle>
+                  <EuiFlexGroup
+                    component="span"
+                    alignItems="center"
+                    gutterSize="xs"
+                    responsive={false}
                   >
-                    {i18n.CASE_REFRESH}
-                  </EuiButtonEmpty>
-                </span>
+                    <EuiFlexItem grow={false}>
+                      <span>{i18n.SYNC_ALERTS}</span>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip content={i18n.SYNC_ALERTS_HELP} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <SyncAlertsSwitch
+                    disabled={isLoading}
+                    isSynced={caseData.settings.syncAlerts}
+                    onSwitchChange={onSyncAlertsChanged}
+                  />
+                </EuiDescriptionListDescription>
               </EuiFlexItem>
-              <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
-            </EuiFlexGroup>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-      </>
+            )}
+            <EuiFlexItem grow={false}>
+              <span>
+                <EuiButtonEmpty
+                  data-test-subj="case-refresh"
+                  flush="left"
+                  iconType="refresh"
+                  onClick={refreshCaseViewPage}
+                >
+                  {i18n.CASE_REFRESH}
+                </EuiButtonEmpty>
+              </span>
+            </EuiFlexItem>
+            <Actions caseData={caseData} currentExternalIncident={currentExternalIncident} />
+          </EuiFlexGroup>
+        </EuiDescriptionList>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

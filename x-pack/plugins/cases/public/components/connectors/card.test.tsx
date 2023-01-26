@@ -53,7 +53,7 @@ describe('ConnectorCard ', () => {
     expect(screen.getByText('My connector')).toBeInTheDocument();
   });
 
-  it('shows the connector list itmes', () => {
+  it('shows the connector list items', () => {
     const listItems = [
       { title: 'item 1 title', description: 'item 1 desc' },
       { title: 'item 2 title', description: 'item 2 desc' },

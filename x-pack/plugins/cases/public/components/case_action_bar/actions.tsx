@@ -47,6 +47,15 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
           showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
         },
       },
+      ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
+        ? [
+            {
+              iconType: 'popout',
+              label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
+              onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
+            },
+          ]
+        : []),
       ...(permissions.delete
         ? [
             {
@@ -54,15 +63,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
               label: i18n.DELETE_CASE(),
               color: 'danger' as const,
               onClick: openModal,
-            },
-          ]
-        : []),
-      ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
-        ? [
-            {
-              iconType: 'popout',
-              label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
-              onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
             },
           ]
         : []),
