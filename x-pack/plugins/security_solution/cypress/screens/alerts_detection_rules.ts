@@ -71,23 +71,17 @@ export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
 export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
 
-export const RULES_TABLE = '[data-test-subj="rules-table"]';
+export const RULES_MANAGEMENT_TAB = '[data-test-subj="navigation-management"]';
+
+export const RULES_MONITORING_TAB = '[data-test-subj="navigation-monitoring"]';
+
+export const RULES_MANAGEMENT_TABLE = '[data-test-subj="rules-management-table"]';
+
+export const RULES_MONITORING_TABLE = '[data-test-subj="rules-monitoring-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONITORING_TABLE = '[role="tablist"] > [data-test-subj="navigation-monitoring"]';
-
 export const SEVERITY = '[data-test-subj="severity"]';
-
-export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
-
-export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
-
-export const rowsPerPageSelector = (count: number) =>
-  `[data-test-subj="tablePagination-${count}-rows"]`;
-
-export const pageSelector = (pageNumber: number) =>
-  `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
@@ -136,6 +130,8 @@ export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton
 export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWrapper"]';
 
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
+
+export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 

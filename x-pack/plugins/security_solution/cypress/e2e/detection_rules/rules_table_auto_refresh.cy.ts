@@ -12,7 +12,7 @@ import {
   REFRESH_SETTINGS_SELECTION_NOTE,
 } from '../../screens/alerts_detection_rules';
 import {
-  changeRowsPerPageTo,
+  setRowsPerPageTo,
   checkAutoRefresh,
   waitForRulesTableToBeLoaded,
   selectAllRules,
@@ -78,7 +78,7 @@ describe('Alerts detection rules table auto-refresh', () => {
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
     // check refresh settings if it's enabled before selecting
     openRefreshSettingsPopover();
@@ -107,7 +107,7 @@ describe('Alerts detection rules table auto-refresh', () => {
   it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
     openRefreshSettingsPopover();
     disableAutoRefresh();

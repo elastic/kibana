@@ -6,6 +6,7 @@
  */
 
 import { duplicatedRuleName } from '../objects/rule';
+import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import {
   BULK_ACTIONS_BTN,
   COLLAPSED_ACTION_BTN,
@@ -15,19 +16,14 @@ import {
   LOAD_PREBUILT_RULES_BTN,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
-  RULES_TABLE_REFRESH_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
-  PAGINATION_POPOVER_BTN,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
   RULE_SWITCH_LOADER,
-  RULES_TABLE,
-  SORT_RULES_BTN,
+  RULES_MANAGEMENT_TABLE,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
-  rowsPerPageSelector,
-  pageSelector,
   DUPLICATE_RULE_ACTION_BTN,
   DUPLICATE_RULE_MENU_PANEL_BTN,
   DUPLICATE_RULE_BULK_BTN,
@@ -57,6 +53,11 @@ import {
   MODAL_CONFIRMATION_BODY,
   RULE_SEARCH_FIELD,
   RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX,
+  RULES_TAGS_FILTER_BTN,
+  RULES_TAGS_FILTER_POPOVER,
+  RULES_TABLE_REFRESH_INDICATOR,
+  RULES_MANAGEMENT_TAB,
+  RULES_MONITORING_TAB,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
@@ -171,6 +172,14 @@ export const filterBySearchTerm = (term: string) => {
     .trigger('search', { waitForAnimations: true });
 };
 
+export const filterByTags = (tags: string[]) => {
+  cy.get(RULES_TAGS_FILTER_BTN).click();
+
+  for (const tag of tags) {
+    cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+  }
+};
+
 export const filterByElasticRules = () => {
   cy.get(ELASTIC_RULES_BTN).click();
   waitForRulesTableToBeRefreshed();
@@ -272,11 +281,6 @@ export const confirmRulesDelete = () => {
   cy.get(RULES_DELETE_CONFIRMATION_MODAL).should('not.exist');
 };
 
-export const sortByEnabledRules = () => {
-  cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
-  cy.get(SORT_RULES_BTN).contains('Enabled').click({ force: true });
-};
-
 /**
  * Because the Rule Management page is relatively slow, in order to avoid timeouts and flakiness,
  * we almost always want to wait until the Rules table is "loaded" before we do anything with it.
@@ -292,7 +296,7 @@ export const sortByEnabledRules = () => {
  */
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
-  cy.get(RULES_TABLE, { timeout: 300000 }).should('exist');
+  cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
 };
 
 /**
@@ -319,7 +323,7 @@ export const waitForRulesTableToBeRefreshed = () => {
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.log('Wait for prebuilt rules to be loaded');
   cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
-  cy.get(RULES_TABLE).should('exist');
+  cy.get(RULES_MANAGEMENT_TABLE).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
@@ -340,18 +344,6 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
   cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should(condition);
 };
 
-export const changeRowsPerPageTo = (rowsCount: number) => {
-  cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
-  cy.get(rowsPerPageSelector(rowsCount))
-    .pipe(($el) => $el.trigger('click'))
-    .should('not.exist');
-};
-
-export const goToPage = (pageNumber: number) => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-  cy.get(pageSelector(pageNumber)).last().click({ force: true });
-};
-
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).should('exist');
@@ -360,16 +352,42 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const expectNumberOfRules = (expectedNumber: number) => {
-  cy.get(RULES_TABLE).then(($table) => {
-    const rulesRow = cy.wrap($table.find(RULES_ROW));
+export const expectRulesManagementTab = () =>
+  cy.get(RULES_MANAGEMENT_TAB).should('have.class', 'euiTab-isSelected');
+export const expectRulesMonitoringTab = () =>
+  cy.get(RULES_MONITORING_TAB).should('have.class', 'euiTab-isSelected');
 
-    rulesRow.should('have.length', expectedNumber);
-  });
+export const expectFilterSearchTerm = (searchTerm: string) =>
+  cy.get(RULE_SEARCH_FIELD).should('have.value', searchTerm);
+
+export const expectTags = (tags: string[]) => {
+  cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
+
+  cy.get(RULES_TAGS_FILTER_POPOVER)
+    .find('.euiSelectableListItem[data-test-selected="true"]')
+    .should('have.length', tags.length)
+    .each(($el, index) => {
+      cy.wrap($el).contains(tags[index]);
+    });
+
+  for (const tag of tags) {
+    cy.get(RULES_TAGS_FILTER_POPOVER).contains('[data-test-selected="true"]', tag);
+  }
 };
 
-export const expectToContainRule = (ruleName: string) => {
-  cy.get(RULES_TABLE).find(RULES_ROW).should('include.text', ruleName);
+export const expectCustomRules = () =>
+  cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+
+export const expectNumberOfRules = (
+  tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
+  expectedNumber: number
+) => cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedNumber);
+
+export const expectToContainRule = (
+  tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
+  ruleName: string
+) => {
+  cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
 };
 
 const selectOverwriteRulesImport = () => {
