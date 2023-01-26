@@ -6,7 +6,7 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { ActionDefinition } from '@kbn/ui-actions-browser';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -29,7 +29,7 @@ export const createAddToTimelineAction = ({
 }: {
   store: SecurityAppStore;
   order?: number;
-}) => {
+}): ActionDefinition<CellActionExecutionContext> => {
   const { application: applicationService, notifications: notificationsService } =
     KibanaServices.get();
   let currentAppId: string | undefined;
@@ -37,7 +37,7 @@ export const createAddToTimelineAction = ({
     currentAppId = appId;
   });
 
-  return createAction<CellActionExecutionContext>({
+  return {
     id: ACTION_ID,
     type: ACTION_ID,
     order,
@@ -68,5 +68,5 @@ export const createAddToTimelineAction = ({
         });
       }
     },
-  });
+  };
 };
