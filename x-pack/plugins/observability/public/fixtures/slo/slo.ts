@@ -151,35 +151,3 @@ export const aForecastedSLO: SLOWithSummaryResponse = {
 export function createSLO(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
   return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
 }
-
-export const anApmAvailabilityIndicator: SLOWithSummaryResponse['indicator'] = {
-  type: 'sli.apm.transactionErrorRate',
-  params: {
-    environment: 'development',
-    service: 'o11y-app',
-    transactionType: 'request',
-    transactionName: 'GET /flaky',
-    goodStatusCodes: ['2xx', '3xx', '4xx'],
-  },
-};
-
-export const anApmLatencyIndicator: SLOWithSummaryResponse['indicator'] = {
-  type: 'sli.apm.transactionDuration',
-  params: {
-    environment: 'development',
-    service: 'o11y-app',
-    transactionType: 'request',
-    transactionName: 'GET /slow',
-    'threshold.us': 5000000,
-  },
-};
-
-export const aCustomKqlIndicator: SLOWithSummaryResponse['indicator'] = {
-  type: 'sli.kql.custom',
-  params: {
-    index: 'some_logs*',
-    good: 'latency < 300',
-    total: 'latency > 0',
-    filter: 'labels.eventId: event-0',
-  },
-};
