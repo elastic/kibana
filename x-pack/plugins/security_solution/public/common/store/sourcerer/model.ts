@@ -93,6 +93,7 @@ export interface SelectedDataView {
   selectedPatterns: SourcererScope['selectedPatterns'];
   // active patterns when dataViewId == null
   activePatterns?: string[];
+  sourcererDataView?: SourcererDataView;
 }
 
 /**

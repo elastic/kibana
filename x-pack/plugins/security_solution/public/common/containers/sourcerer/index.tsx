@@ -445,6 +445,8 @@ export const useSourcererDataView = (
       selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
+      // TODO: why not the whole thing lol
+      sourcererDataView,
     }),
     [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
   );

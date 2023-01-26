@@ -34,6 +34,8 @@ import { InvestigateInTimelineButton } from '../../../event_details/table/invest
 import { getTimeRangeSettings } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { InsightBuilderForm } from './builder_form';
+import { useSourcererDataView } from '../../../../containers/sourcerer';
+import { SourcererScopeName } from '../../../../store/sourcerer/model';
 
 interface InsightComponentProps {
   label?: string;
@@ -186,7 +188,18 @@ const InsightEditorComponent = ({
   };
 }>) => {
   const isEditMode = node != null;
-  const { osquery } = useKibana().services;
+  const { sourcererDataView, indexPattern } = useSourcererDataView(SourcererScopeName.default);
+  const {
+    unifiedSearch: {
+      ui: { FiltersBuilderLazy },
+    },
+  } = useKibana().services;
+  const why = useMemo(() => {
+    return {
+      ...sourcererDataView,
+      fields: sourcererDataView?.indexFields,
+    };
+  }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
     query: string;
@@ -220,6 +233,26 @@ const InsightEditorComponent = ({
     [onSave]
   );
 
+  const onChange = useCallback((...args) => {
+    console.log(args);
+  }, []);
+  const filtersStub = useMemo(() => {
+    const index = indexPattern !== undefined ? indexPattern.getName() : '*';
+    console.log({ index });
+    return [
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          index,
+        },
+      },
+    ];
+  }, [indexPattern]);
   return (
     <>
       <EuiModalHeader>
@@ -239,9 +272,7 @@ const InsightEditorComponent = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <FormProvider {...formMethods}>
-          <InsightBuilderForm fields={['idk']} formMethods={formMethods} />
-        </FormProvider>
+        <FiltersBuilderLazy filters={filtersStub} onChange={onChange} dataView={why} maxDepth={2} />
       </EuiModalBody>
 
       <EuiModalFooter>

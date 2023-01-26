@@ -18,6 +18,7 @@ import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
+import type { FiltersBuilderProps } from './filters_builder/types';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -46,6 +47,7 @@ export interface UnifiedSearchPublicPluginStartUi {
   AggregateQuerySearchBar: <QT extends Query | AggregateQuery = Query>(
     props: StatefulSearchBarProps<QT>
   ) => React.ReactElement;
+  FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
 }
 
 /**
