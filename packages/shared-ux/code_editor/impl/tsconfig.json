@@ -24,5 +24,6 @@
     "@kbn/i18n-react",
     "@kbn/code-editor-mocks",
     "@kbn/ui-theme",
+    "@kbn/test-jest-helpers",
   ]
 }
