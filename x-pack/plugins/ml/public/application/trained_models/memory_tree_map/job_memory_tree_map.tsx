@@ -35,14 +35,7 @@
  */
 
 import React, { FC, useEffect, useState, useCallback } from 'react';
-import {
-  Chart,
-  Settings,
-  PartialTheme,
-  Partition,
-  PartitionLayout,
-  ShapeTreeNode,
-} from '@elastic/charts';
+import { Chart, Settings, Partition, PartitionLayout, ShapeTreeNode } from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import {
   EuiComboBox,
@@ -55,8 +48,9 @@ import { JobMemorySize } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
-import { useCurrentEuiTheme } from '../../components/color_range_legend';
 import { useFieldFormatter } from '../../contexts/kibana';
+import { getMemoryItemColor } from '../nodes_overview/memory_item_colors';
+import { useRefresh } from '../../routing/use_refresh';
 
 interface Props {
   node?: string;
@@ -67,8 +61,8 @@ interface Props {
 type TreeMapOptions = EuiComboBoxOptionOption & { objectType: MlSavedObjectType };
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
-  const { euiTheme } = useCurrentEuiTheme();
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+  const refresh = useRefresh();
 
   const trainedModelsApiService = useTrainedModelsApiService();
   const [allData, setAllData] = useState<JobMemorySize[]>([]);
@@ -77,19 +71,19 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
   const TYPE_OPTIONS: TreeMapOptions[] = [
     {
-      label: 'Anomaly detector',
+      label: 'Anomaly detection jobs',
       objectType: 'anomaly-detector',
-      color: euiTheme.euiColorVis6,
+      color: getMemoryItemColor('anomaly-detector'),
     },
     {
-      label: 'Data frame analytics',
+      label: 'Data frame analytics jobs',
       objectType: 'data-frame-analytics',
-      color: euiTheme.euiColorVis4,
+      color: getMemoryItemColor('data-frame-analytics'),
     },
     {
-      label: 'Trained model',
+      label: 'Trained models',
       objectType: 'trained-model',
-      color: euiTheme.euiColorVis2,
+      color: getMemoryItemColor('trained-model'),
     },
   ];
   const [selectedOptions, setSelectedOptions] = useState<TreeMapOptions[]>(TYPE_OPTIONS);
@@ -115,31 +109,19 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     setLoading(false);
   }, [trainedModelsApiService, type, node]);
 
-  useEffect(() => {
-    setData(filterData(allData));
-  }, [selectedOptions, allData, filterData]);
+  useEffect(
+    function redrawOnFilterChange() {
+      setData(filterData(allData));
+    },
+    [selectedOptions, allData, filterData]
+  );
 
-  useEffect(() => {
-    loadJobMemorySize();
-  }, [loadJobMemorySize]);
-
-  const theme: PartialTheme = {
-    scales: { histogramPadding: 0.2 },
-  };
-
-  function getColor(typeIn: MlSavedObjectType) {
-    switch (typeIn) {
-      case 'anomaly-detector':
-        return euiTheme.euiColorVis6;
-      case 'data-frame-analytics':
-        return euiTheme.euiColorVis4;
-      case 'trained-model':
-        return euiTheme.euiColorVis2;
-
-      default:
-        return '';
-    }
-  }
+  useEffect(
+    function updateOnTimerRefresh() {
+      loadJobMemorySize();
+    },
+    [loadJobMemorySize, refresh]
+  );
 
   return (
     <div style={{ height }} data-test-subj={`mlJobTreeMap ${data.length ? 'withData' : 'empty'}`}>
@@ -160,7 +142,11 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <Chart>
-          <Settings theme={theme} />
+          <Settings
+            theme={{
+              scales: { histogramPadding: 0.2 },
+            }}
+          />
           <Partition
             id="spec_1"
             data={data}
@@ -176,7 +162,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                 },
                 shape: {
                   fillColor: (d: ShapeTreeNode) => {
-                    return getColor(d.dataName as JobType);
+                    return getMemoryItemColor(d.dataName as JobType);
                   },
                 },
               },
@@ -191,7 +177,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                 shape: {
                   fillColor: (d: ShapeTreeNode) => {
                     const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
-                    return getColor(parentId);
+                    return getMemoryItemColor(parentId);
                   },
                 },
               },

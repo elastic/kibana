@@ -33,7 +33,7 @@ import { useRefresh } from '../../routing/use_refresh';
 export type NodeItem = NodeDeploymentStatsResponse;
 
 interface PageUrlState {
-  pageKey: typeof ML_PAGES.TRAINED_MODELS_NODES;
+  pageKey: typeof ML_PAGES.MEMORY_USAGE;
   pageUrlState: ListingPageUrlState;
 }
 
@@ -61,7 +61,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     {}
   );
   const [pageState, updatePageState] = usePageUrlState<PageUrlState>(
-    ML_PAGES.TRAINED_MODELS_NODES,
+    ML_PAGES.MEMORY_USAGE,
     getDefaultNodesListState()
   );
 

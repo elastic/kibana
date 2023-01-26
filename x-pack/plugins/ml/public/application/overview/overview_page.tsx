@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { isServerless } from '../../../common/util/serverless';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { GettingStartedCallout } from './components/getting_started_callout';
@@ -25,6 +26,7 @@ import { PageTitle } from '../components/page_title';
 
 export const OverviewPage: FC = () => {
   const canViewMlNodes = checkPermission('canViewMlNodes');
+  const serverless = useMemo(() => isServerless(), []);
 
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
   const {
@@ -62,7 +64,7 @@ export const OverviewPage: FC = () => {
 
       <GettingStartedCallout />
 
-      {canViewMlNodes ? (
+      {canViewMlNodes && serverless === false ? (
         <>
           <EuiPanel hasShadow={false} hasBorder>
             <NodesList compactView />

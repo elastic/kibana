@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { ML_PAGES, type MlPages } from '../../common/constants/locator';
-export * from './ml_locator';
-export { useMlHref } from './use_ml_href';
+export function isServerless() {
+  return false;
+}

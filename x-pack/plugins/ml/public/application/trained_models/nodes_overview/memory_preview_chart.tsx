@@ -18,11 +18,11 @@ import {
   LineAnnotation,
   AnnotationDomainType,
 } from '@elastic/charts';
-import { EuiIcon, euiPaletteGray } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { useCurrentEuiTheme } from '../../components/color_range_legend';
+import { getMemoryItemColor } from './memory_item_colors';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
@@ -31,42 +31,39 @@ interface MemoryPreviewChartProps {
 export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
 
-  const { euiTheme } = useCurrentEuiTheme();
-
   const groups = useMemo(
     () => ({
       jvm: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.jvmHeapSIze', {
           defaultMessage: 'JVM heap size',
         }),
-        colour: euiTheme.euiColorVis1,
+        color: getMemoryItemColor('jvm-heap-size'),
       },
       trained_models: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsMemoryUsage', {
           defaultMessage: 'Trained models',
         }),
-        colour: euiTheme.euiColorVis2,
+        color: getMemoryItemColor('trained-model'),
       },
       anomaly_detection: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.adMemoryUsage', {
           defaultMessage: 'Anomaly detection jobs',
         }),
-        colour: euiTheme.euiColorVis6,
+        color: getMemoryItemColor('anomaly-detector'),
       },
       dfa_training: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.dfaMemoryUsage', {
           defaultMessage: 'Data frame analytics jobs',
         }),
-        colour: euiTheme.euiColorVis4,
+        color: getMemoryItemColor('data-frame-analytics'),
       },
       available: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.availableMemory', {
           defaultMessage: 'Estimated available memory',
         }),
-        colour: euiPaletteGray(5)[0],
+        color: getMemoryItemColor('estimated-available-memory'),
       },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -106,7 +103,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   const barSeriesColorAccessor: SeriesColorAccessor = ({ specId, yAccessor, splitAccessors }) => {
     const group = splitAccessors.get('g');
 
-    return Object.values(groups).find((v) => v.name === group)!.colour;
+    return Object.values(groups).find((v) => v.name === group)!.color;
   };
 
   return (

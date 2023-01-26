@@ -64,7 +64,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         <EuiTab isSelected={selectedTab === 'memory'} onClick={() => setSelectedTab('memory')}>
           <FormattedMessage
             id="xpack.ml.trainedModels.nodesList.expandedRow.memoryTabTitle"
-            defaultMessage="Memory"
+            defaultMessage="Memory usage"
           />
         </EuiTab>
       </EuiTabs>
