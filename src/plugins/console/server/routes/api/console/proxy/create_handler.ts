@@ -70,7 +70,7 @@ export function getRequestConfig(
   };
 }
 
-function getProxyHeaders(req: KibanaRequest) {
+export function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
