@@ -100,7 +100,7 @@ export function DimensionButtonIcon({
     indicatorIcon = (
       <EuiToolTip
         display="block"
-        content={message?.longMessage ?? message?.shortMessage ?? undefined}
+        content={message?.shortMessage || message?.longMessage || undefined}
       >
         <EuiFlexItem grow={false}>
           {message && (

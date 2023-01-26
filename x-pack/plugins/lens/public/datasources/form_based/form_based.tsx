@@ -853,13 +853,6 @@ export function getFormBasedDatasource({
             state,
             frameDatasourceAPI
           ) || []),
-          ...getPrecisionErrorWarningMessages(
-            data.datatableUtilities,
-            state,
-            frameDatasourceAPI,
-            core.docLinks,
-            setState
-          ),
         ].map((longMessage) => {
           const message: UserMessage = {
             severity: 'warning',
@@ -871,6 +864,13 @@ export function getFormBasedDatasource({
 
           return message;
         }),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frameDatasourceAPI,
+          core.docLinks,
+          setState
+        ),
         ...getDeprecatedSamplingWarningMessage(core),
       ];
 

@@ -121,15 +121,90 @@ export function fieldIsInvalid(
 
 const accuracyModeDisabledWarning = (
   columnName: string,
+  columnId: string,
   docLink: string,
   enableAccuracyMode: () => void
-) => (
-  <>
+): UserMessage => ({
+  severity: 'warning',
+  displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
+  fixableInEditor: true,
+  shortMessage: i18n.translate(
+    'xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled.shortMessage',
+    {
+      defaultMessage:
+        'This might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster.',
+      values: {
+        name: columnName,
+      },
+    }
+  ),
+  longMessage: (
+    <>
+      <FormattedMessage
+        id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
+        defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
+        values={{
+          name: <strong>{columnName}</strong>,
+          learnMoreLink: (
+            <EuiLink href={docLink} color="text" target="_blank" external={true}>
+              <FormattedMessage
+                defaultMessage="Learn more."
+                id="xpack.lens.indexPattern.precisionErrorWarning.link"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+      <EuiSpacer size="s" />
+      <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
+        {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
+          defaultMessage: 'Enable accuracy mode',
+        })}
+      </EuiLink>
+    </>
+  ),
+});
+
+const accuracyModeEnabledWarning = (
+  columnName: string,
+  columnId: string,
+  docLink: string
+): UserMessage => ({
+  severity: 'warning',
+  displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
+  fixableInEditor: true,
+  shortMessage: i18n.translate(
+    'xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled.shortMessage',
+    {
+      defaultMessage:
+        'This might be an approximation. For more precise results, try increasing the number of top values or using filters instead.',
+      values: {
+        name: columnName,
+      },
+    }
+  ),
+  longMessage: (
     <FormattedMessage
-      id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
-      defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
+      id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
+      defaultMessage="{name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
       values={{
         name: <strong>{columnName}</strong>,
+        topValues: (
+          <strong>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
+              defaultMessage="top values"
+            />
+          </strong>
+        ),
+        filters: (
+          <strong>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.precisionErrorWarning.filters"
+              defaultMessage="filters"
+            />
+          </strong>
+        ),
         learnMoreLink: (
           <EuiLink href={docLink} color="text" target="_blank" external={true}>
             <FormattedMessage
@@ -140,48 +215,8 @@ const accuracyModeDisabledWarning = (
         ),
       }}
     />
-    <EuiSpacer size="s" />
-    <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
-      {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
-        defaultMessage: 'Enable accuracy mode',
-      })}
-    </EuiLink>
-  </>
-);
-
-const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
-  <FormattedMessage
-    id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
-    defaultMessage="{name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
-    values={{
-      name: <strong>{columnName}</strong>,
-      topValues: (
-        <strong>
-          <FormattedMessage
-            id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-            defaultMessage="top values"
-          />
-        </strong>
-      ),
-      filters: (
-        <strong>
-          <FormattedMessage
-            id="xpack.lens.indexPattern.precisionErrorWarning.filters"
-            defaultMessage="filters"
-          />
-        </strong>
-      ),
-      learnMoreLink: (
-        <EuiLink href={docLink} color="text" target="_blank" external={true}>
-          <FormattedMessage
-            defaultMessage="Learn more."
-            id="xpack.lens.indexPattern.precisionErrorWarning.link"
-          />
-        </EuiLink>
-      ),
-    }}
-  />
-);
+  ),
+});
 
 export function getShardFailuresWarningMessages(
   state: FormBasedPersistedState,
@@ -271,7 +306,7 @@ export function getPrecisionErrorWarningMessages(
   docLinks: DocLinksStart,
   setState: StateSetter<FormBasedPrivateState>
 ) {
-  const warningMessages: React.ReactNode[] = [];
+  const warningMessages: UserMessage[] = [];
 
   if (state && activeData) {
     Object.entries(activeData)
@@ -313,9 +348,14 @@ export function getPrecisionErrorWarningMessages(
           ) {
             warningMessages.push(
               currentColumn.params.accuracyMode
-                ? accuracyModeEnabledWarning(column.name, docLinks.links.aggs.terms_doc_count_error)
+                ? accuracyModeEnabledWarning(
+                    column.name,
+                    column.id,
+                    docLinks.links.aggs.terms_doc_count_error
+                  )
                 : accuracyModeDisabledWarning(
                     column.name,
+                    column.id,
                     docLinks.links.aggs.terms_doc_count_error,
                     () => {
                       setState((prevState) =>
@@ -337,57 +377,75 @@ export function getPrecisionErrorWarningMessages(
                   )
             );
           } else {
-            warningMessages.push(
-              <>
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
-                  defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
-                  values={{
-                    name: <strong>{column.name}</strong>,
-                    link: (
-                      <EuiLink
-                        href={docLinks.links.aggs.rare_terms}
-                        color="text"
-                        target="_blank"
-                        external={true}
-                      >
-                        <FormattedMessage
-                          defaultMessage="visit the documentation"
-                          id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning.link"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-                <EuiSpacer size="s" />
-                <EuiLink
-                  onClick={() => {
-                    setState((prevState) =>
-                      mergeLayer({
-                        state: prevState,
-                        layerId,
-                        newLayer: updateDefaultLabels(
-                          updateColumnParam({
-                            layer: currentLayer,
-                            columnId: column.id,
-                            paramName: 'orderBy',
-                            value: {
-                              type: 'rare',
-                              maxDocCount: DEFAULT_MAX_DOC_COUNT,
-                            },
-                          }),
-                          indexPattern
-                        ),
-                      })
-                    );
-                  }}
-                >
-                  {i18n.translate('xpack.lens.indexPattern.switchToRare', {
-                    defaultMessage: 'Rank by rarity',
-                  })}
-                </EuiLink>
-              </>
-            );
+            warningMessages.push({
+              severity: 'warning',
+              displayLocations: [
+                { id: 'toolbar' },
+                { id: 'dimensionButton', dimensionId: column.id },
+              ],
+              shortMessage: i18n.translate(
+                'xpack.lens.indexPattern.precisionErrorWarning.ascendingCountPrecisionErrorWarning.shortMessage',
+                {
+                  defaultMessage:
+                    'This may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records.',
+                  values: {
+                    name: column.name,
+                  },
+                }
+              ),
+              longMessage: (
+                <>
+                  <FormattedMessage
+                    id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
+                    defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
+                    values={{
+                      name: <strong>{column.name}</strong>,
+                      link: (
+                        <EuiLink
+                          href={docLinks.links.aggs.rare_terms}
+                          color="text"
+                          target="_blank"
+                          external={true}
+                        >
+                          <FormattedMessage
+                            defaultMessage="visit the documentation"
+                            id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning.link"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiLink
+                    onClick={() => {
+                      setState((prevState) =>
+                        mergeLayer({
+                          state: prevState,
+                          layerId,
+                          newLayer: updateDefaultLabels(
+                            updateColumnParam({
+                              layer: currentLayer,
+                              columnId: column.id,
+                              paramName: 'orderBy',
+                              value: {
+                                type: 'rare',
+                                maxDocCount: DEFAULT_MAX_DOC_COUNT,
+                              },
+                            }),
+                            indexPattern
+                          ),
+                        })
+                      );
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.indexPattern.switchToRare', {
+                      defaultMessage: 'Rank by rarity',
+                    })}
+                  </EuiLink>
+                </>
+              ),
+              fixableInEditor: true,
+            });
           }
         }
       });

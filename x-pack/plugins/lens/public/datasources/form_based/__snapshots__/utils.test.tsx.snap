@@ -52,3 +52,57 @@ Object {
   },
 }
 `;
+
+exports[`indexpattern_datasource utils getPrecisionErrorWarningMessages if has precision error and sorting is by count ascending, show fix action and switch to rare terms 1`] = `
+Object {
+  "displayLocations": Array [
+    Object {
+      "id": "toolbar",
+    },
+    Object {
+      "dimensionId": "col1",
+      "id": "dimensionButton",
+    },
+  ],
+  "fixableInEditor": true,
+  "longMessage": "",
+  "severity": "warning",
+  "shortMessage": "This may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records.",
+}
+`;
+
+exports[`indexpattern_datasource utils getPrecisionErrorWarningMessages precision error warning with accuracy mode should other suggestions if accuracy mode already enabled 1`] = `
+Object {
+  "displayLocations": Array [
+    Object {
+      "id": "toolbar",
+    },
+    Object {
+      "dimensionId": "col1",
+      "id": "dimensionButton",
+    },
+  ],
+  "fixableInEditor": true,
+  "longMessage": "",
+  "severity": "warning",
+  "shortMessage": "This might be an approximation. For more precise results, try increasing the number of top values or using filters instead.",
+}
+`;
+
+exports[`indexpattern_datasource utils getPrecisionErrorWarningMessages precision error warning with accuracy mode should show accuracy mode prompt if currently disabled 1`] = `
+Object {
+  "displayLocations": Array [
+    Object {
+      "id": "toolbar",
+    },
+    Object {
+      "dimensionId": "col1",
+      "id": "dimensionButton",
+    },
+  ],
+  "fixableInEditor": true,
+  "longMessage": "",
+  "severity": "warning",
+  "shortMessage": "This might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster.",
+}
+`;
