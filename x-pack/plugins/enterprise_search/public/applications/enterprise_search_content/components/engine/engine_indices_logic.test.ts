@@ -13,8 +13,10 @@ import { FetchEngineApiLogic } from '../../api/engines/fetch_engine_api_logic';
 import { EngineIndicesLogic, EngineIndicesLogicValues } from './engine_indices_logic';
 
 const DEFAULT_VALUES: EngineIndicesLogicValues = {
+  addIndicesFlyoutOpen: false,
   engineData: undefined,
   engineName: 'my-test-engine',
+  isLoadingEngine: true,
 };
 
 const mockEngineData: EnterpriseSearchEngineDetails = {

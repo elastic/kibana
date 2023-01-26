@@ -31,6 +31,7 @@ import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle
 
 import {
   IndicesSelectComboBox,
+  IndicesSelectComboBoxOption,
   indexToOption,
 } from '../engines/components/indices_select_combobox';
 
@@ -46,7 +47,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
 
   const selectedOptions = useMemo(() => selectedIndices.map(indexToOption), [selectedIndices]);
   const onIndicesChange = useCallback(
-    (options) => {
+    (options: IndicesSelectComboBoxOption[]) => {
       setSelectedIndices(options.map(({ value }) => value).filter(isNotNullish));
     },
     [setSelectedIndices]

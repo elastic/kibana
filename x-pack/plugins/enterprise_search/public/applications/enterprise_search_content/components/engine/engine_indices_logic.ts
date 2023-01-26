@@ -28,6 +28,7 @@ export interface EngineIndicesLogicValues {
   addIndicesFlyoutOpen: boolean;
   engineData: EngineViewValues['engineData'];
   engineName: EngineViewValues['engineName'];
+  isLoadingEngine: EngineViewValues['isLoadingEngine'];
 }
 
 export const EngineIndicesLogic = kea<
@@ -46,7 +47,7 @@ export const EngineIndicesLogic = kea<
       UpdateEngineApiLogic,
       ['makeRequest as updateEngineRequest', 'apiSuccess as engineUpdated'],
     ],
-    values: [EngineViewLogic, ['engineData', 'engineName']],
+    values: [EngineViewLogic, ['engineData', 'engineName', 'isLoadingEngine']],
   },
   listeners: ({ actions, values }) => ({
     addIndicesToEngine: ({ indices }) => {
@@ -70,9 +71,6 @@ export const EngineIndicesLogic = kea<
         engineName: values.engineName,
         indices: updatedIndices,
       });
-    },
-    submitIndicesToAdd: () => {
-      actions.addIndicesToEngine(values.indicesToAdd);
     },
   }),
   path: ['enterprise_search', 'content', 'engine_indices_logic'],

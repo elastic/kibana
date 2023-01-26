@@ -15,7 +15,7 @@ import { EngineIndicesLogic, EngineIndicesLogicActions } from './engine_indices_
 
 export interface AddIndicesLogicActions {
   addIndicesToEngine: EngineIndicesLogicActions['addIndicesToEngine'];
-  closeAddIndices: () => void;
+  closeAddIndicesFlyout: EngineIndicesLogicActions['closeAddIndicesFlyout'];
   engineUpdated: EngineIndicesLogicActions['engineUpdated'];
   setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => {
     indices: ElasticsearchIndexWithIngestion[];
@@ -29,7 +29,7 @@ export interface AddIndicesLogicValues {
   updateEngineStatus: typeof UpdateEngineApiLogic.values.status;
 }
 
-export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicActions, AddIndicesLogicValues>>({
+export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndicesLogicActions>>({
   actions: {
     setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => ({ indices }),
     submitSelectedIndices: () => true,
