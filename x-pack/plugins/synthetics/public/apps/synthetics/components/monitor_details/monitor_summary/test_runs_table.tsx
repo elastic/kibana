@@ -254,63 +254,6 @@ export const TestRunsTable = ({
   );
 };
 
-// const JourneyScreenshot = ({ ping }: { ping: Ping }) => {
-//   const { data: stepsData, loading: stepsLoading } = useJourneySteps(ping?.monitor?.check_group);
-//   const stepEnds: JourneyStep[] = (stepsData?.steps ?? []).filter(isStepEnd);
-//   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
-
-//   const lastSignificantStep = useMemo(() => {
-//     const copy = [...stepEnds];
-//     // Sort desc by timestamp
-//     copy.sort(
-//       (stepA, stepB) =>
-//         Number(new Date(stepB['@timestamp'])) - Number(new Date(stepA['@timestamp']))
-//     );
-//     return copy.find(
-//       (stepEnd) => parseBadgeStatus(stepEnd?.synthetics?.step?.status ?? 'skipped') !== 'skipped'
-//     );
-//   }, [stepEnds]);
-
-//   return (
-//     <JourneyStepScreenshotContainer
-//       checkGroup={lastSignificantStep?.monitor.check_group}
-//       initialStepNo={lastSignificantStep?.synthetics?.step?.index}
-//       stepStatus={lastSignificantStep?.synthetics.payload?.status}
-//       allStepsLoaded={!stepsLoading}
-//       stepLabels={stepLabels}
-//       retryFetchOnRevisit={false}
-//     />
-//   );
-// };
-
-// const TestDetailsLink = ({
-//   isBrowserMonitor,
-//   timestamp,
-//   ping,
-// }: {
-//   isBrowserMonitor: boolean;
-//   timestamp: string;
-//   ping: Ping;
-// }) => {
-//   const { euiTheme } = useEuiTheme();
-//   const { basePath } = useSyntheticsSettingsContext();
-
-//   const format = useKibanaDateFormat(timestamp);
-//   const timestampText = (
-//     <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-//       {formatTestRunAt(timestamp, format)}
-//     </EuiText>
-//   );
-
-//   return isBrowserMonitor ? (
-//     <EuiLink href={`${basePath}/app/uptime/journey/${ping?.monitor?.check_group ?? ''}/steps`}>
-//       {timestampText}
-//     </EuiLink>
-//   ) : (
-//     timestampText
-//   );
-// };
-
 const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRuns', {
   defaultMessage: 'Test Runs',
 });
