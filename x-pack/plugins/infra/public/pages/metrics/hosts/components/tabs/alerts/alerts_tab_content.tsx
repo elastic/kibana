@@ -6,7 +6,6 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useTriggersActions } from '../../../../../../utils/triggers_actions_context';
 
 export const AlertsTabContent = () => {
   // const { getAlertSummaryWidget: AlertSummaryWidget } = useTriggersActions();
