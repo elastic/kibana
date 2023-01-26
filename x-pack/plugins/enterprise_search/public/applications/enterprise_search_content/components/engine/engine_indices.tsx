@@ -33,7 +33,6 @@ import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
 import { IngestionMethod } from '../../types';
 import { ingestionMethodToText } from '../../utils/indices';
 
-import { DeleteEngineModal } from '../engines/delete_engine_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineIndicesLogic } from './engine_indices_logic';
@@ -41,8 +40,7 @@ import { EngineViewHeaderActions } from './engine_view_header_actions';
 import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineIndices: React.FC = () => {
-  const { engineName, isLoadingEngine, isDeleteModalVisible } = useValues(EngineViewLogic);
-  const { closeDeleteEngineModal } = useActions(EngineViewLogic);
+  const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
   const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
@@ -168,92 +166,87 @@ export const EngineIndices: React.FC = () => {
     },
   ];
   return (
-    <>
-      {isDeleteModalVisible ? (
-        <DeleteEngineModal engineName={engineName} onClose={closeDeleteEngineModal} />
-      ) : null}
-      <EnterpriseSearchEnginesPageTemplate
-        pageChrome={[engineName]}
-        pageViewTelemetry={EngineViewTabs.INDICES}
-        isLoading={isLoadingEngine}
-        pageHeader={{
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.indices.pageTitle', {
-            defaultMessage: 'Indices',
-          }),
-          rightSideItems: [
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem>
-                <EuiButton data-test-subj="engine-add-new-indices-btn" iconType="plusInCircle" fill>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton',
-                    {
-                      defaultMessage: 'Add new indices',
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EngineViewHeaderActions />
-              </EuiFlexItem>
-            </EuiFlexGroup>,
-          ],
-        }}
-        engineName={engineName}
-      >
-        <>
-          <EuiInMemoryTable
-            items={indices}
-            columns={columns}
-            search={{
-              box: {
-                incremental: true,
-                placeholder: i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.indices.searchPlaceholder',
-                  { defaultMessage: 'Filter indices' }
-                ),
-                schema: true,
-              },
+    <EnterpriseSearchEnginesPageTemplate
+      pageChrome={[engineName]}
+      pageViewTelemetry={EngineViewTabs.INDICES}
+      isLoading={isLoadingEngine}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.indices.pageTitle', {
+          defaultMessage: 'Indices',
+        }),
+        rightSideItems: [
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem>
+              <EuiButton data-test-subj="engine-add-new-indices-btn" iconType="plusInCircle" fill>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton',
+                  {
+                    defaultMessage: 'Add new indices',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EngineViewHeaderActions />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+        ],
+      }}
+      engineName={engineName}
+    >
+      <>
+        <EuiInMemoryTable
+          items={indices}
+          columns={columns}
+          search={{
+            box: {
+              incremental: true,
+              placeholder: i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.searchPlaceholder',
+                { defaultMessage: 'Filter indices' }
+              ),
+              schema: true,
+            },
+          }}
+          pagination
+          sorting
+        />
+        {removeIndexConfirm !== null && (
+          <EuiConfirmModal
+            onCancel={() => setConfirmRemoveIndex(null)}
+            onConfirm={() => {
+              removeIndexFromEngine(removeIndexConfirm);
+              setConfirmRemoveIndex(null);
             }}
-            pagination
-            sorting
-          />
-          {removeIndexConfirm !== null && (
-            <EuiConfirmModal
-              onCancel={() => setConfirmRemoveIndex(null)}
-              onConfirm={() => {
-                removeIndexFromEngine(removeIndexConfirm);
-                setConfirmRemoveIndex(null);
-              }}
-              title={i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
-                { defaultMessage: 'Remove this index from the engine' }
-              )}
-              buttonColor="danger"
-              cancelButtonText={CANCEL_BUTTON_LABEL}
-              confirmButtonText={i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
-                {
-                  defaultMessage: 'Yes, Remove This Index',
-                }
-              )}
-              defaultFocusedButton="confirm"
-              maxWidth
-            >
-              <EuiText>
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
-                    {
-                      defaultMessage:
-                        "This won't delete the index. You may add it back to this engine at a later time.",
-                    }
-                  )}
-                </p>
-              </EuiText>
-            </EuiConfirmModal>
-          )}
-        </>
-      </EnterpriseSearchEnginesPageTemplate>
-    </>
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
+              { defaultMessage: 'Remove this index from the engine' }
+            )}
+            buttonColor="danger"
+            cancelButtonText={CANCEL_BUTTON_LABEL}
+            confirmButtonText={i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
+              {
+                defaultMessage: 'Yes, Remove This Index',
+              }
+            )}
+            defaultFocusedButton="confirm"
+            maxWidth
+          >
+            <EuiText>
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
+                  {
+                    defaultMessage:
+                      "This won't delete the index. You may add it back to this engine at a later time.",
+                  }
+                )}
+              </p>
+            </EuiText>
+          </EuiConfirmModal>
+        )}
+      </>
+    </EnterpriseSearchEnginesPageTemplate>
   );
 };
