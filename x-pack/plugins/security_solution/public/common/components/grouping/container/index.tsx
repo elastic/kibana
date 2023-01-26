@@ -9,33 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elast
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
 import type { BadgeMetric, CustomMetric } from '../accordion_panel';
 import { GroupPanel } from '../accordion_panel';
 import { GroupStats } from '../accordion_panel/group_stats';
 import { EmptyGroupingComponent } from '../empty_resuls_panel';
-import { GroupsUnitCount } from '../styles';
+import { GroupingStyledContainer, GroupsUnitCount } from '../styles';
 import { GROUPS_UNIT } from '../translations';
 import type { GroupingTableAggregation, RawBucket } from '../types';
-
-export const GroupingStyledContainer = styled.div`
-  .euiAccordion__childWrapper {
-    border-bottom: 1px solid #d3dae6;
-    border-radius: 5px;
-  }
-  .euiAccordion__triggerWrapper {
-    border-bottom: 1px solid #d3dae6;
-    border-radius: 5px;
-    min-height: 77px;
-  }
-  .groupingAccordionForm {
-    border-top: 1px solid #d3dae6;
-    border-left: 1px solid #d3dae6;
-    border-right: 1px solid #d3dae6;
-    border-bottom: none;
-    border-radius: 5px;
-  }
-`;
 
 interface GroupingContainerProps {
   selectedGroup: string;
@@ -142,7 +122,7 @@ const GroupingContainerComponent = ({
             }
             onToggleGroup={(isOpen) => {
               setTrigger({
-                ...trigger,
+                // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
                 [groupKey]: {
                   state: isOpen ? 'open' : 'closed',
                   selectedBucket: groupBucket,
