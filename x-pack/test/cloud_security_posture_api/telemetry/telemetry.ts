@@ -36,14 +36,17 @@ export default function ({ getService }: FtrProviderContext) {
     remove: () => es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true }),
 
     add: async <T>(findingsMock: T[]) => {
-      return await Promise.all(
-        findingsMock.map((finding) => {
-          es.index({
-            index: FINDINGS_INDEX,
-            body: finding,
-          });
-        })
-      );
+      const operations = findingsMock.flatMap((doc: T) => [
+        { index: { _index: FINDINGS_INDEX } },
+        doc,
+      ]);
+
+      //   es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations }).then((res) => {
+      //     expect(res.errors).to.eql(false);
+      //   });
+
+      const response = await es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations });
+      expect(response.errors).to.eql(false);
     },
   };
 
@@ -98,333 +101,307 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true });
+      await es.deleteByQuery({
+        index: FINDINGS_INDEX,
+        query: { match_all: {} },
+        refresh: true,
+      });
     });
 
     it('includes only KSPM findings', async () => {
       await index.add(data.kspmFindings);
 
-      retry.try(async () => {
-        const {
-          body: [{ stats: apiResponse }],
-        } = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            unencrypted: true,
-            refreshCache: true,
-          })
-          .expect(200);
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/api/telemetry/v2/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
 
-        expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql(
-          [
-            {
-              account_id: 'my-k8s-cluster-5555',
-              latest_findings_doc_count: 2,
-              posture_score: 100,
-              passed_findings_count: 2,
-              failed_findings_count: 0,
-              benchmark_name: 'CIS Kubernetes V1.23',
-              benchmark_id: 'cis_k8s',
-              benchmark_version: 'v1.0.0',
-              agents_count: 2,
-              nodes_count: 2,
-              pods_count: 0,
-            },
-          ]
-        );
-        expect(
-          apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats
-        ).to.eql([
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'k8s_object',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'ServiceAccount',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'process',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'process',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-        ]);
-      });
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql([
+        {
+          account_id: 'my-k8s-cluster-5555',
+          latest_findings_doc_count: 2,
+          posture_score: 100,
+          passed_findings_count: 2,
+          failed_findings_count: 0,
+          benchmark_name: 'CIS Kubernetes V1.23',
+          benchmark_id: 'cis_k8s',
+          benchmark_version: 'v1.0.0',
+          agents_count: 2,
+          nodes_count: 2,
+          pods_count: 0,
+        },
+      ]);
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'k8s_object',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'ServiceAccount',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'process',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'process',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+      ]);
     });
 
     it('includes only CSPM findings', async () => {
       await index.add(data.cspmFindings);
 
-      retry.try(async () => {
-        const {
-          body: [{ stats: apiResponse }],
-        } = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            unencrypted: true,
-            refreshCache: true,
-          })
-          .expect(200);
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/api/telemetry/v2/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
 
-        expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql(
-          [
-            {
-              account_id: 'my-aws-12345',
-              latest_findings_doc_count: 2,
-              posture_score: 50,
-              passed_findings_count: 1,
-              failed_findings_count: 1,
-              benchmark_name: 'CIS Amazon Web Services Foundations',
-              benchmark_id: 'cis_aws',
-              benchmark_version: 'v1.5.0',
-              agents_count: 1,
-              nodes_count: 1,
-              pods_count: 0,
-            },
-          ]
-        );
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql([
+        {
+          account_id: 'my-aws-12345',
+          latest_findings_doc_count: 2,
+          posture_score: 50,
+          passed_findings_count: 1,
+          failed_findings_count: 1,
+          benchmark_name: 'CIS Amazon Web Services Foundations',
+          benchmark_id: 'cis_aws',
+          benchmark_version: 'v1.5.0',
+          agents_count: 1,
+          nodes_count: 1,
+          pods_count: 0,
+        },
+      ]);
 
-        expect(
-          apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats
-        ).to.eql([
-          {
-            account_id: 'my-aws-12345',
-            resource_type: 'identifyingType',
-            resource_type_doc_count: 2,
-            resource_sub_type: 'aws-password-policy',
-            resource_sub_type_doc_count: 2,
-            passed_findings_count: 1,
-            failed_findings_count: 1,
-          },
-        ]);
-      });
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
+        {
+          account_id: 'my-aws-12345',
+          resource_type: 'identifyingType',
+          resource_type_doc_count: 2,
+          resource_sub_type: 'aws-password-policy',
+          resource_sub_type_doc_count: 2,
+          passed_findings_count: 1,
+          failed_findings_count: 1,
+        },
+      ]);
     });
 
     it('includes CSPM and KSPM findings', async () => {
       await index.add(data.kspmFindings);
-      await index.add(data.kspmFindings);
+      await index.add(data.cspmFindings);
 
-      retry.try(async () => {
-        const {
-          body: [{ stats: apiResponse }],
-        } = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            unencrypted: true,
-            refreshCache: true,
-          })
-          .expect(200);
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/api/telemetry/v2/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
 
-        expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql(
-          [
-            {
-              account_id: 'my-aws-12345',
-              latest_findings_doc_count: 2,
-              posture_score: 50,
-              passed_findings_count: 1,
-              failed_findings_count: 1,
-              benchmark_name: 'CIS Amazon Web Services Foundations',
-              benchmark_id: 'cis_aws',
-              benchmark_version: 'v1.5.0',
-              agents_count: 1,
-              nodes_count: 1,
-              pods_count: 0,
-            },
-            {
-              account_id: 'my-k8s-cluster-5555',
-              latest_findings_doc_count: 2,
-              posture_score: 100,
-              passed_findings_count: 2,
-              failed_findings_count: 0,
-              benchmark_name: 'CIS Kubernetes V1.23',
-              benchmark_id: 'cis_k8s',
-              benchmark_version: 'v1.0.0',
-              agents_count: 2,
-              nodes_count: 2,
-              pods_count: 0,
-            },
-          ]
-        );
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql([
+        {
+          account_id: 'my-aws-12345',
+          latest_findings_doc_count: 2,
+          posture_score: 50,
+          passed_findings_count: 1,
+          failed_findings_count: 1,
+          benchmark_name: 'CIS Amazon Web Services Foundations',
+          benchmark_id: 'cis_aws',
+          benchmark_version: 'v1.5.0',
+          agents_count: 1,
+          nodes_count: 1,
+          pods_count: 0,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          latest_findings_doc_count: 2,
+          posture_score: 100,
+          passed_findings_count: 2,
+          failed_findings_count: 0,
+          benchmark_name: 'CIS Kubernetes V1.23',
+          benchmark_id: 'cis_k8s',
+          benchmark_version: 'v1.0.0',
+          agents_count: 2,
+          nodes_count: 2,
+          pods_count: 0,
+        },
+      ]);
 
-        expect(
-          apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats
-        ).to.eql([
-          {
-            account_id: 'my-aws-12345',
-            resource_type: 'identifyingType',
-            resource_type_doc_count: 2,
-            resource_sub_type: 'aws-password-policy',
-            resource_sub_type_doc_count: 2,
-            passed_findings_count: 1,
-            failed_findings_count: 1,
-          },
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'k8s_object',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'ServiceAccount',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'process',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'process',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-        ]);
-      });
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
+        {
+          account_id: 'my-aws-12345',
+          resource_type: 'identifyingType',
+          resource_type_doc_count: 2,
+          resource_sub_type: 'aws-password-policy',
+          resource_sub_type_doc_count: 2,
+          passed_findings_count: 1,
+          failed_findings_count: 1,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'k8s_object',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'ServiceAccount',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'process',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'process',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+      ]);
     });
 
     it('includes only old version KSPM findings (no posture_type field)', async () => {
       await index.add(data.kspmFindingsNoPostureType);
 
-      retry.try(async () => {
-        const {
-          body: [{ stats: apiResponse }],
-        } = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            unencrypted: true,
-            refreshCache: true,
-          })
-          .expect(200);
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/api/telemetry/v2/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
 
-        expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql(
-          [
-            {
-              account_id: 'my-k8s-cluster-5555',
-              latest_findings_doc_count: 2,
-              posture_score: 100,
-              passed_findings_count: 2,
-              failed_findings_count: 0,
-              benchmark_name: 'CIS Kubernetes V1.23',
-              benchmark_id: 'cis_k8s',
-              benchmark_version: 'v1.0.0',
-              agents_count: 2,
-              nodes_count: 2,
-              pods_count: 0,
-            },
-          ]
-        );
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql([
+        {
+          account_id: 'my-k8s-cluster-5555',
+          latest_findings_doc_count: 2,
+          posture_score: 100,
+          passed_findings_count: 2,
+          failed_findings_count: 0,
+          benchmark_name: 'CIS Kubernetes V1.23',
+          benchmark_id: 'cis_k8s',
+          benchmark_version: 'v1.0.0',
+          agents_count: 2,
+          nodes_count: 2,
+          pods_count: 0,
+        },
+      ]);
 
-        expect(
-          apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats
-        ).to.eql([
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'k8s_object',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'ServiceAccount',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'process',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'process',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-        ]);
-      });
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'k8s_object',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'ServiceAccount',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'process',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'process',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+      ]);
     });
 
     it('includes only old version KSPM findings (no posture_type field) and CSPM', async () => {
       await index.add(data.kspmFindingsNoPostureType);
       await index.add(data.cspmFindings);
 
-      retry.try(async () => {
-        const {
-          body: [{ stats: apiResponse }],
-        } = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            unencrypted: true,
-            refreshCache: true,
-          })
-          .expect(200);
+      const {
+        body: [{ stats: apiResponse }],
+      } = await supertest
+        .post(`/api/telemetry/v2/clusters/_stats`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          unencrypted: true,
+          refreshCache: true,
+        })
+        .expect(200);
 
-        expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql(
-          [
-            {
-              account_id: 'my-aws-12345',
-              latest_findings_doc_count: 2,
-              posture_score: 50,
-              passed_findings_count: 1,
-              failed_findings_count: 1,
-              benchmark_name: 'CIS Amazon Web Services Foundations',
-              benchmark_id: 'cis_aws',
-              benchmark_version: 'v1.5.0',
-              agents_count: 1,
-              nodes_count: 1,
-              pods_count: 0,
-            },
-            {
-              account_id: 'my-k8s-cluster-5555',
-              latest_findings_doc_count: 2,
-              posture_score: 100,
-              passed_findings_count: 2,
-              failed_findings_count: 0,
-              benchmark_name: 'CIS Kubernetes V1.23',
-              benchmark_id: 'cis_k8s',
-              benchmark_version: 'v1.0.0',
-              agents_count: 2,
-              nodes_count: 2,
-              pods_count: 0,
-            },
-          ]
-        );
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.accounts_stats).to.eql([
+        {
+          account_id: 'my-aws-12345',
+          latest_findings_doc_count: 2,
+          posture_score: 50,
+          passed_findings_count: 1,
+          failed_findings_count: 1,
+          benchmark_name: 'CIS Amazon Web Services Foundations',
+          benchmark_id: 'cis_aws',
+          benchmark_version: 'v1.5.0',
+          agents_count: 1,
+          nodes_count: 1,
+          pods_count: 0,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          latest_findings_doc_count: 2,
+          posture_score: 100,
+          passed_findings_count: 2,
+          failed_findings_count: 0,
+          benchmark_name: 'CIS Kubernetes V1.23',
+          benchmark_id: 'cis_k8s',
+          benchmark_version: 'v1.0.0',
+          agents_count: 2,
+          nodes_count: 2,
+          pods_count: 0,
+        },
+      ]);
 
-        expect(
-          apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats
-        ).to.eql([
-          {
-            account_id: 'my-aws-12345',
-            resource_type: 'identifyingType',
-            resource_type_doc_count: 2,
-            resource_sub_type: 'aws-password-policy',
-            resource_sub_type_doc_count: 2,
-            passed_findings_count: 1,
-            failed_findings_count: 1,
-          },
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'k8s_object',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'ServiceAccount',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-          {
-            account_id: 'my-k8s-cluster-5555',
-            resource_type: 'process',
-            resource_type_doc_count: 1,
-            resource_sub_type: 'process',
-            resource_sub_type_doc_count: 1,
-            passed_findings_count: 1,
-            failed_findings_count: 0,
-          },
-        ]);
-      });
+      expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
+        {
+          account_id: 'my-aws-12345',
+          resource_type: 'identifyingType',
+          resource_type_doc_count: 2,
+          resource_sub_type: 'aws-password-policy',
+          resource_sub_type_doc_count: 2,
+          passed_findings_count: 1,
+          failed_findings_count: 1,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'k8s_object',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'ServiceAccount',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+        {
+          account_id: 'my-k8s-cluster-5555',
+          resource_type: 'process',
+          resource_type_doc_count: 1,
+          resource_sub_type: 'process',
+          resource_sub_type_doc_count: 1,
+          passed_findings_count: 1,
+          failed_findings_count: 0,
+        },
+      ]);
     });
   });
 }
