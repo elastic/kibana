@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { InlineActions } from './inline_actions';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { CellActionsMode, type CellActionsProps, type CellActionExecutionContext } from '../types';
@@ -55,15 +56,17 @@ export const CellActions: React.FC<CellActionsProps> = ({
   }
 
   return (
-    <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>
+    <EuiFlexGroup alignItems="center" ref={nodeRef} gutterSize="none" justifyContent="flexStart">
       {children}
-      <InlineActions
-        actionContext={actionContext}
-        showActionTooltips={showActionTooltips}
-        visibleCellActions={visibleCellActions}
-        disabledActions={disabledActions}
-      />
-      <div ref={extraContentNodeRef} />
-    </div>
+      <div className={className} data-test-subj={dataTestSubj}>
+        <InlineActions
+          actionContext={actionContext}
+          showActionTooltips={showActionTooltips}
+          visibleCellActions={visibleCellActions}
+          disabledActions={disabledActions}
+        />
+        <div ref={extraContentNodeRef} />
+      </div>
+    </EuiFlexGroup>
   );
 };
