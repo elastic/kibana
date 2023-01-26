@@ -76,7 +76,7 @@ export function getInvalidFieldMessage(
           }),
           displayLocations: [
             { id: 'toolbar' },
-            { id: 'dimensionTrigger', dimensionId: columnId },
+            { id: 'dimensionButton', dimensionId: columnId },
             { id: 'embeddableBadge' },
           ],
         },

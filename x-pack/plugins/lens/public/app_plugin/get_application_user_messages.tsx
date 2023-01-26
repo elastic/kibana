@@ -198,7 +198,7 @@ export const filterAndSortUserMessages = (
           return false;
         }
 
-        if (location.id === 'dimensionTrigger' && location.dimensionId !== dimensionId) {
+        if (location.id === 'dimensionButton' && location.dimensionId !== dimensionId) {
           return false;
         }
 

@@ -1077,7 +1077,7 @@ function getInvalidDimensionErrorMessages(
       const messages: UserMessage[] = [];
       for (const columnId of Object.keys(state.layers[layerId].columns)) {
         if (
-          filterAndSortUserMessages(currentErrorMessages, 'dimensionTrigger', {
+          filterAndSortUserMessages(currentErrorMessages, 'dimensionButton', {
             dimensionId: columnId,
           }).length > 0
         ) {
@@ -1089,7 +1089,7 @@ function getInvalidDimensionErrorMessages(
         if (!isValidColumn(layerId, columnId)) {
           messages.push({
             severity: 'error',
-            displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId }],
+            displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
             fixableInEditor: true,
             shortMessage: '',
             longMessage: (

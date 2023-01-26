@@ -289,7 +289,7 @@ type UserMessageDisplayLocation =
         | 'textBasedLanguagesQueryInput'
         | 'banner';
     }
-  | { id: 'dimensionTrigger'; dimensionId: string };
+  | { id: 'dimensionButton'; dimensionId: string };
 
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 

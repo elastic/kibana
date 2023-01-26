@@ -39,7 +39,7 @@ describe('helpers', () => {
       expect(messages![0]).toEqual({
         displayLocations: [
           { id: 'toolbar' },
-          { id: 'dimensionTrigger', dimensionId: columnId },
+          { id: 'dimensionButton', dimensionId: columnId },
           { id: 'embeddableBadge' },
         ],
         message: 'Field NoBytes was not found',
@@ -81,7 +81,7 @@ describe('helpers', () => {
       expect(messages![0]).toEqual({
         displayLocations: [
           { id: 'toolbar' },
-          { id: 'dimensionTrigger', dimensionId: columnId },
+          { id: 'dimensionButton', dimensionId: columnId },
           { id: 'embeddableBadge' },
         ],
         message: 'Field NoBytes was not found',
@@ -107,7 +107,7 @@ describe('helpers', () => {
       expect(messages![0]).toEqual({
         displayLocations: [
           { id: 'toolbar' },
-          { id: 'dimensionTrigger', dimensionId: columnId },
+          { id: 'dimensionButton', dimensionId: columnId },
           { id: 'embeddableBadge' },
         ],
         message: 'Fields NotExisting, NoBytes were not found',

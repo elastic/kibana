@@ -212,14 +212,14 @@ describe('filtering user messages', () => {
     {
       severity: 'error',
       fixableInEditor: true,
-      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId1 }],
+      displayLocations: [{ id: 'dimensionButton', dimensionId: dimensionId1 }],
       shortMessage: 'Warning on dimension 1!',
       longMessage: '',
     },
     {
       severity: 'warning',
       fixableInEditor: true,
-      displayLocations: [{ id: 'dimensionTrigger', dimensionId: dimensionId2 }],
+      displayLocations: [{ id: 'dimensionButton', dimensionId: dimensionId2 }],
       shortMessage: 'Warning on dimension 2!',
       longMessage: '',
     },
@@ -270,7 +270,7 @@ describe('filtering user messages', () => {
       ]
     `);
     expect(
-      filterAndSortUserMessages(userMessages, 'dimensionTrigger', {
+      filterAndSortUserMessages(userMessages, 'dimensionButton', {
         dimensionId: dimensionId1,
       })
     ).toMatchInlineSnapshot(`
@@ -290,7 +290,7 @@ describe('filtering user messages', () => {
       ]
     `);
     expect(
-      filterAndSortUserMessages(userMessages, 'dimensionTrigger', {
+      filterAndSortUserMessages(userMessages, 'dimensionButton', {
         dimensionId: dimensionId2,
       })
     ).toMatchInlineSnapshot(`

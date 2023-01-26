@@ -512,7 +512,7 @@ export function LayerPanel(
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
-                        const messages = props.getUserMessages('dimensionTrigger', {
+                        const messages = props.getUserMessages('dimensionButton', {
                           dimensionId: columnId,
                         });
 

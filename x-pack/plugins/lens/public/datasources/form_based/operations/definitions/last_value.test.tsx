@@ -921,7 +921,7 @@ describe('last_value', () => {
         {
           displayLocations: [
             { id: 'toolbar' },
-            { id: 'dimensionTrigger', dimensionId: 'col1' },
+            { id: 'dimensionButton', dimensionId: 'col1' },
             { id: 'embeddableBadge' },
           ],
           message: 'Field notExisting was not found',
