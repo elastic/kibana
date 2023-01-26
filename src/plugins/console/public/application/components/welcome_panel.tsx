@@ -58,7 +58,11 @@ export function WelcomePanel(props: Props) {
               }}
             />
           </p>
-          <EditorExample panel="welcome" example={examples.kibanaExample} linesOfExampleCode={2} />
+          <EditorExample
+            panel="welcome"
+            example={examples.kibanaApiExample}
+            linesOfExampleCode={2}
+          />
           <h4>
             <FormattedMessage
               id="console.welcomePage.sendMultipleRequestsTitle"

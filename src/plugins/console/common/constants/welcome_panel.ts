@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const kibanaExample = `
+export const kibanaApiExample = `
 # retrieve sets of saved objects 
 POST kbn:api/saved_objects/_export
 `;

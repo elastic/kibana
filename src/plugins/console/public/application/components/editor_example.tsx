@@ -24,21 +24,19 @@ interface EditorExampleProps {
 }
 
 const exampleText = `
-# index a doc
-PUT index/_doc/1
+GET _search
 {
-  "body": "here"
+  "query": {
+    "match_all": {}
+  }
 }
-
-# and get it ...
-GET index/_doc/1
 `;
 
 const EditorExample = ({
   panel,
   example,
   theme,
-  linesOfExampleCode = 8,
+  linesOfExampleCode = 6,
   mode = 'input',
 }: EditorExampleProps) => {
   const inputId = `help-example-${panel}-input`;
