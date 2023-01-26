@@ -23,7 +23,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -50,7 +49,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -74,7 +72,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -98,7 +95,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -125,7 +121,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -152,7 +147,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -176,7 +170,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -203,7 +196,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -230,7 +222,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer
@@ -254,7 +245,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
         }
       }
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer

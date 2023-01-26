@@ -12,7 +12,6 @@ import { shallow } from 'enzyme';
 import { GuideCards, GuideCardsProps } from './guide_cards';
 
 const defaultProps: GuideCardsProps = {
-  isLoading: false,
   activateGuide: jest.fn(),
   navigateToApp: jest.fn(),
   activeFilter: 'all',
