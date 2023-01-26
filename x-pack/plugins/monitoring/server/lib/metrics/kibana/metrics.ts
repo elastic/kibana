@@ -384,6 +384,22 @@ export const metrics = {
     isNotSupportedInInternalCollection: true,
     technicalPreview: true,
   }),
+  kibana_node_rule_failures: new KibanaClusterRuleMetric({
+    field: 'kibana.node_rules.failures',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleFailuresCountLabel', {
+      defaultMessage: 'Rules Failures Count',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.clusterRuleOverdueP50Description',
+      {
+        defaultMessage: 'Average failures alerting rules are queued.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+    technicalPreview: true,
+  }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
     title: ruleQueueDurationTitle,
     field: 'kibana.cluster_rules.overdue.delay.p99',

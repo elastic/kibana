@@ -13,6 +13,12 @@ export enum IN_MEMORY_METRICS {
   RULE_TIMEOUTS = 'ruleTimeouts',
 }
 
+interface RuleFailuresMetrics {
+  failures: number;
+  ruleTypeId: string;
+  ruleTypeProducer: string;
+}
+
 export class InMemoryMetrics {
   private logger: Logger;
   private inMemoryMetrics: Record<IN_MEMORY_METRICS, number | null> = {
@@ -20,6 +26,14 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_FAILURES]: 0,
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
+  private inMemoryRuleFailures: Record<
+    string,
+    {
+      failures: number;
+      ruleTypeId: string;
+      ruleTypeProducer: string;
+    }
+  > = {};
 
   constructor(logger: Logger) {
     this.logger = logger;
@@ -49,5 +63,21 @@ export class InMemoryMetrics {
 
   public getAllInMemoryMetrics() {
     return this.inMemoryMetrics;
+  }
+
+  public getAllFailedRuleInfo() {
+    return this.inMemoryRuleFailures;
+  }
+
+  public addFailedRuleInfo(ruleId: string, ruleTypeId: string, ruleTypeProducer: string) {
+    if (this.inMemoryRuleFailures[ruleId]) {
+      (this.inMemoryRuleFailures[ruleId].failures as number)++;
+    } else {
+      this.inMemoryRuleFailures[ruleId] = {
+        failures: 0,
+        ruleTypeId,
+        ruleTypeProducer,
+      };
+    }
   }
 }

@@ -27,12 +27,29 @@ export function registerNodeCollector({
       timeouts: {
         type: 'long',
       },
+      failuresByIds: {
+        DYNAMIC_KEY: {
+          failures: {
+            type: 'long',
+            _meta: {
+              description: 'The number of this type of control in all Control Groups',
+            },
+          },
+          ruleTypeId: {
+            type: 'keyword',
+          },
+          ruleTypeProducer: {
+            type: 'keyword',
+          },
+        },
+      },
     },
     fetch: async () => {
       return {
         failures: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_FAILURES),
         executions: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_EXECUTIONS),
         timeouts: inMemoryMetrics.getInMemoryMetric(IN_MEMORY_METRICS.RULE_TIMEOUTS),
+        failuresByIds: inMemoryMetrics.getAllFailedRuleInfo(),
       };
     },
   });

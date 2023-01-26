@@ -63,6 +63,13 @@ const KibanaOverview = ({ data }: { data: any }) => {
           {showRules && (
             <>
               <EuiFlexGroup>
+                <MonitoringTimeseriesContainer
+                  series={data.metrics.kibana_node_rule_failures}
+                  onBrush={onBrush}
+                  zoomInfo={zoomInfo}
+                />
+              </EuiFlexGroup>
+              <EuiFlexGroup>
                 <EuiFlexItem grow={true}>
                   <MonitoringTimeseriesContainer
                     series={data.metrics.kibana_cluster_rule_overdue_count}

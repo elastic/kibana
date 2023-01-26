@@ -252,6 +252,7 @@ export const RULE_THREAD_POOL_SEARCH_REJECTIONS = `${RULE_PREFIX}alert_thread_po
 export const RULE_THREAD_POOL_WRITE_REJECTIONS = `${RULE_PREFIX}alert_thread_pool_write_rejections`;
 export const RULE_CCR_READ_EXCEPTIONS = `${RULE_PREFIX}ccr_read_exceptions`;
 export const RULE_LARGE_SHARD_SIZE = `${RULE_PREFIX}shard_size`;
+export const RULE_RULES_FAILURE = `${RULE_PREFIX}alert_rules_failure`;
 
 interface LegacyRuleDetails {
   label: string;
@@ -510,6 +511,28 @@ export const RULE_DETAILS = {
       defaultMessage: 'Alert if the average shard size is larger than the configured threshold.',
     }),
   },
+  [RULE_RULES_FAILURE]: {
+    label: i18n.translate('xpack.monitoring.alerts.ruleFailures.label', {
+      defaultMessage: 'Rules failures',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.ruleFailures.description', {
+      defaultMessage: 'Alert when the rules failures are happening.',
+    }),
+    paramDetails: {
+      threshold: {
+        label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.threshold.label', {
+          defaultMessage: `Notify when the number of failing rules is more than`,
+        }),
+        type: AlertParamType.Number,
+      } as CommonAlertParamDetail,
+      duration: {
+        label: i18n.translate('xpack.monitoring.alerts.ruleFailures.paramDetails.duration.label', {
+          defaultMessage: `Look back duration`,
+        }),
+        type: AlertParamType.Duration,
+      } as CommonAlertParamDetail,
+    },
+  },
 };
 
 export const RULE_PANEL_MENU = [
@@ -523,6 +546,7 @@ export const RULE_PANEL_MENU = [
       { ruleName: RULE_ELASTICSEARCH_VERSION_MISMATCH },
       { ruleName: RULE_KIBANA_VERSION_MISMATCH },
       { ruleName: RULE_LOGSTASH_VERSION_MISMATCH },
+      { ruleName: RULE_RULES_FAILURE },
     ],
   },
   {
@@ -568,6 +592,7 @@ export const RULES = [
   RULE_THREAD_POOL_WRITE_REJECTIONS,
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
+  RULE_RULES_FAILURE,
 ];
 
 /**
