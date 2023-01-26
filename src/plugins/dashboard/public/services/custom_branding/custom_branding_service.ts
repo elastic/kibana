@@ -15,10 +15,11 @@ export type CustomBrandingServiceFactory = KibanaPluginServiceFactory<
   DashboardStartDependencies
 >;
 
-export const customBrandingServiceFactory: CustomBrandingServiceFactory = (customBranding) => {
+export const customBrandingServiceFactory: CustomBrandingServiceFactory = ({ coreStart }) => {
+  const { customBranding } = coreStart;
   return {
     customBranding: {
-      hasCustomBranding$: customBranding.coreStart.customBranding.hasCustomBranding$,
+      hasCustomBranding$: customBranding.hasCustomBranding$,
     },
   };
 };

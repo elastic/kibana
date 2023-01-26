@@ -7,16 +7,16 @@
  */
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardCustomBrandingService } from './types';
 
 type CustomBrandingServiceFactory = PluginServiceFactory<DashboardCustomBrandingService>;
 
 export const customBrandingServiceFactory: CustomBrandingServiceFactory = () => {
-  const pluginMock = customBrandingServiceMock.createStartContract();
+  const pluginMock = coreMock.createStart();
   return {
     customBranding: {
-      hasCustomBranding$: pluginMock.hasCustomBranding$,
+      hasCustomBranding$: pluginMock.customBranding.hasCustomBranding$,
     },
   };
 };
