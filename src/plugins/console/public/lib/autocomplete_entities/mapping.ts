@@ -220,8 +220,6 @@ export class Mapping implements BaseMapping {
   };
 
   loadMappings = (mappings: IndicesGetMappingResponse) => {
-    this.perIndexTypes = {};
-
     Object.entries(mappings).forEach(([index, indexMapping]) => {
       const normalizedIndexMappings: Record<string, object[]> = {};
       let transformedMapping: Record<string, any> = indexMapping;
