@@ -39,6 +39,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
     });
 
+    after(async () => {
+      await resetRulesSettings(Spaces.default.id);
+      await resetRulesSettings(Spaces.space1.id);
+      await objectRemover.removeAll();
+    });
+
     afterEach(async () => {
       await objectRemover.removeAll();
     });
@@ -544,7 +550,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth('superuser', 'superuser')
             .send({
-              enabled: false,
+              enabled: true,
               lookBackWindow: 3,
               statusChangeThreshold: 2,
             })
