@@ -47,6 +47,8 @@ describe('useMonitorList', () => {
       query: '',
       locations: [],
       monitorTypes: [],
+      projects: [],
+      schedules: [],
       tags: [],
     };
   });

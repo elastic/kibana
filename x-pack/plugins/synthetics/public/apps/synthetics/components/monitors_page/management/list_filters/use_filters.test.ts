@@ -13,17 +13,29 @@ describe('useMonitorListFilters', () => {
   it('returns expected results', () => {
     const { result } = renderHook(() => useFilters(), { wrapper: WrappedHelper });
 
-    expect(result.current).toStrictEqual({ locations: [], tags: [], types: [] });
+    expect(result.current).toStrictEqual({
+      locations: [],
+      tags: [],
+      monitorTypes: [],
+      projects: [],
+      schedules: [],
+    });
     expect(defaultCore.savedObjects.client.find).toHaveBeenCalledWith({
       aggs: {
         locations: {
           terms: { field: 'synthetics-monitor.attributes.locations.id', size: 10000 },
         },
+        monitorTypes: {
+          terms: { field: 'synthetics-monitor.attributes.type.keyword', size: 10000 },
+        },
+        projects: {
+          terms: { field: 'synthetics-monitor.attributes.project_id', size: 10000 },
+        },
+        schedules: {
+          terms: { field: 'synthetics-monitor.attributes.schedule.number', size: 10000 },
+        },
         tags: {
           terms: { field: 'synthetics-monitor.attributes.tags', size: 10000 },
-        },
-        types: {
-          terms: { field: 'synthetics-monitor.attributes.type.keyword', size: 10000 },
         },
       },
       perPage: 0,
@@ -40,16 +52,28 @@ describe('useMonitorListFilters', () => {
             { key: 'Test 2', doc_count: 2 },
           ],
         },
-        tags: {
+        monitorTypes: {
           buckets: [
             { key: 'Test 3', doc_count: 3 },
             { key: 'Test 4', doc_count: 4 },
           ],
         },
-        types: {
+        projects: {
           buckets: [
             { key: 'Test 5', doc_count: 5 },
             { key: 'Test 6', doc_count: 6 },
+          ],
+        },
+        schedules: {
+          buckets: [
+            { key: 'Test 7', doc_count: 7 },
+            { key: 'Test 8', doc_count: 8 },
+          ],
+        },
+        tags: {
+          buckets: [
+            { key: 'Test 9', doc_count: 9 },
+            { key: 'Test 10', doc_count: 10 },
           ],
         },
       },
@@ -59,7 +83,13 @@ describe('useMonitorListFilters', () => {
       wrapper: WrappedHelper,
     });
 
-    expect(result.current).toStrictEqual({ locations: [], tags: [], types: [] });
+    expect(result.current).toStrictEqual({
+      locations: [],
+      tags: [],
+      monitorTypes: [],
+      projects: [],
+      schedules: [],
+    });
 
     await waitForNextUpdate();
 
@@ -68,13 +98,21 @@ describe('useMonitorListFilters', () => {
         { label: 'Test 1', count: 1 },
         { label: 'Test 2', count: 2 },
       ],
-      tags: [
+      monitorTypes: [
         { label: 'Test 3', count: 3 },
         { label: 'Test 4', count: 4 },
       ],
-      types: [
+      projects: [
         { label: 'Test 5', count: 5 },
         { label: 'Test 6', count: 6 },
+      ],
+      schedules: [
+        { label: 'Test 7', count: 7 },
+        { label: 'Test 8', count: 8 },
+      ],
+      tags: [
+        { label: 'Test 9', count: 9 },
+        { label: 'Test 10', count: 10 },
       ],
     });
   });
