@@ -140,6 +140,7 @@ describe('createAlertFactory()', () => {
       context: {},
       scheduledExecutionOptions: undefined,
       id: '1',
+      uuid: 'UUID1',
     });
 
     alertFactory.done();
@@ -183,6 +184,7 @@ describe('createAlertFactory()', () => {
       context: {},
       scheduledExecutionOptions: undefined,
       id: '1',
+      uuid: 'UUID1',
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
@@ -211,6 +213,7 @@ describe('createAlertFactory()', () => {
       context: {},
       scheduledExecutionOptions: undefined,
       id: '1',
+      uuid: 'UUID1',
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
@@ -238,6 +241,7 @@ describe('createAlertFactory()', () => {
       context: {},
       scheduledExecutionOptions: undefined,
       id: '1',
+      uuid: 'UUID1',
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
@@ -264,6 +268,7 @@ describe('createAlertFactory()', () => {
       context: {},
       scheduledExecutionOptions: undefined,
       id: '1',
+      uuid: 'UUID1',
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
@@ -341,6 +346,7 @@ describe('createAlertFactory()', () => {
       context: {},
       scheduledExecutionOptions: undefined,
       id: '1',
+      uuid: 'UUID1',
     });
 
     const { getRecoveredAlerts: getRecoveredAlertsFn } = alertFactory.done();
