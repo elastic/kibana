@@ -8,11 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { BadgeMetric, CustomMetric } from '../accordion_panel';
 import { GroupPanel } from '../accordion_panel';
 import { GroupStats } from '../accordion_panel/group_stats';
+import { EmptyGroupingComponent } from '../empty_resuls_panel';
 import { GroupsUnitCount } from '../styles';
 import { GROUPS_UNIT } from '../translations';
 import type { GroupingTableAggregation, RawBucket } from '../types';
@@ -82,15 +83,6 @@ const GroupingContainerComponent = ({
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
   >({});
-  const [selectedBucket, setSelectedBucket] = useState<RawBucket>();
-
-  const onOpenGroupAction = useCallback((bucket: RawBucket, isOpen: boolean) => {
-    if (isOpen) {
-      setSelectedBucket(bucket);
-    } else {
-      setSelectedBucket(undefined);
-    }
-  }, []);
 
   const unitCountText = useMemo(() => {
     const countBuckets = data?.alertsCount?.buckets;
@@ -156,15 +148,11 @@ const GroupingContainerComponent = ({
                   selectedBucket: groupBucket,
                 },
               });
-              if (isOpen) {
-                setSelectedBucket(groupBucket);
-              }
             }}
             extraAction={
               <GroupStats
                 bucket={groupBucket}
                 takeActionItems={takeActionItems(groupFilters)}
-                onTakeActionsOpen={() => onOpenGroupAction(groupBucket, true)}
                 badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
                 customMetricStats={customMetricStats && customMetricStats(groupBucket)}
               />
@@ -184,13 +172,16 @@ const GroupingContainerComponent = ({
       customMetricStats,
       data.stackByMupltipleFields0?.buckets,
       groupPanelRenderer,
-      onOpenGroupAction,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
       trigger,
     ]
   );
+
+  if (data?.groupsNumber?.value === 0) {
+    return <EmptyGroupingComponent />;
+  }
 
   return (
     <>
