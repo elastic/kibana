@@ -114,9 +114,7 @@ export const GettingStarted = () => {
   const activateGuide = useCallback(
     async (guideId: GuideId, guideState?: GuideState) => {
       try {
-        setIsLoading(true);
         await guidedOnboardingService?.activateGuide(guideId, guideState);
-        setIsLoading(false);
       } catch (err) {
         getServices().toastNotifications.addDanger({
           title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
@@ -124,7 +122,6 @@ export const GettingStarted = () => {
           }),
           text: err.message,
         });
-        setIsLoading(false);
       }
     },
     [guidedOnboardingService]
@@ -204,7 +201,6 @@ export const GettingStarted = () => {
         <GuideCards
           activateGuide={activateGuide}
           navigateToApp={application.navigateToApp}
-          isLoading={isLoading}
           activeFilter={filter}
           guidesState={guidesState}
         />

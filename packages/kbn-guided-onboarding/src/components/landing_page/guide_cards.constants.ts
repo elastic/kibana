@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { GuideId } from '../../..';
 import { GuideCardSolutions } from './guide_cards';
 
-interface GuideCardConstants {
+export interface GuideCardConstants {
   solution: GuideCardSolutions;
   title: string;
   // if present, guideId indicates which guide is opened when clicking the card

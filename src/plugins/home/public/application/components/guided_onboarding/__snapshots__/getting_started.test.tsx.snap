@@ -56,7 +56,6 @@ exports[`getting started should render getting started component 1`] = `
       activateGuide={[Function]}
       activeFilter="all"
       guidesState={Array []}
-      isLoading={false}
       navigateToApp={[MockFunction]}
     />
     <EuiSpacer />

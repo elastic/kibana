@@ -10,52 +10,21 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="0"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "search",
+          "guideId": "search",
+          "order": 1,
+          "solution": "search",
+          "telemetryId": "guided-onboarding--search--application",
+          "title": "Build an application on top of Elasticsearch",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Build an application on top of Elasticsearch
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -65,52 +34,24 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="1"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "observability",
+          "navigateTo": Object {
+            "appId": "integrations",
+            "path": "/browse?q=log",
+          },
+          "order": 2,
+          "solution": "observability",
+          "telemetryId": "guided-onboarding--observability--logs",
+          "title": "Collect and analyze my logs",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Collect and analyze my logs
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -120,52 +61,21 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="2"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "security",
+          "guideId": "siem",
+          "order": 3,
+          "solution": "security",
+          "telemetryId": "guided-onboarding--security--siem",
+          "title": "Detect threats in my data with SIEM",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Detect threats in my data with SIEM
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -175,52 +85,21 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="3"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "search",
+          "guideId": "search",
+          "order": 4,
+          "solution": "search",
+          "telemetryId": "guided-onboarding--search--website",
+          "title": "Add search to my website",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Add search to my website
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -230,52 +109,24 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="4"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "observability",
+          "navigateTo": Object {
+            "appId": "home",
+            "path": "#/tutorial/apm",
+          },
+          "order": 5,
+          "solution": "observability",
+          "telemetryId": "guided-onboarding--observability--apm",
+          "title": "Monitor my application performance (APM / tracing)",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Monitor my application performance (APM / tracing)
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -285,52 +136,24 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="5"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "security",
+          "navigateTo": Object {
+            "appId": "integrations",
+            "path": "/detail/endpoint/overview",
+          },
+          "order": 6,
+          "solution": "security",
+          "telemetryId": "guided-onboarding--security--hosts",
+          "title": "Secure my hosts with endpoint security",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Secure my hosts with endpoint security
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -340,52 +163,21 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="6"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "search",
+          "guideId": "search",
+          "order": 7,
+          "solution": "search",
+          "telemetryId": "guided-onboarding--search--database",
+          "title": "Search across databases and business systems",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Search across databases and business systems
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -395,52 +187,24 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="7"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "observability",
+          "navigateTo": Object {
+            "appId": "integrations",
+            "path": "/browse/os_system",
+          },
+          "order": 8,
+          "solution": "observability",
+          "telemetryId": "guided-onboarding--observability--hosts",
+          "title": "Monitor my host metrics",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Monitor my host metrics
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -450,52 +214,24 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="8"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "security",
+          "navigateTo": Object {
+            "appId": "integrations",
+            "path": "/detail/cloud_security_posture/overview",
+          },
+          "order": 9,
+          "solution": "security",
+          "telemetryId": "guided-onboarding--security--cloud",
+          "title": "Secure my cloud assets with posture management",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Secure my cloud assets with posture management
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
@@ -505,52 +241,21 @@ exports[`guide cards snapshots should render all cards 1`] = `
     grow={false}
     key="9"
   >
-    <EuiCard
-      betaBadgeProps={
+    <GuideCard
+      activateGuide={[MockFunction]}
+      activeFilter="all"
+      card={
         Object {
-          "label": "observability",
+          "guideId": "kubernetes",
+          "order": 11,
+          "solution": "observability",
+          "telemetryId": "guided-onboarding--observability--kubernetes",
+          "title": "Monitor Kubernetes clusters",
         }
       }
-      css={
-        Object {
-          "map": undefined,
-          "name": "9w6uxv",
-          "next": undefined,
-          "styles": "
-  position: relative;
-  min-height: 110px;
-  width: 380px;
-  .euiCard__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-",
-          "toString": [Function],
-        }
-      }
-      description={<React.Fragment />}
-      hasBorder={false}
-      isDisabled={false}
-      onClick={[Function]}
-      title={
-        <React.Fragment>
-          <EuiSpacer
-            size="s"
-          />
-          <h3
-            style={
-              Object {
-                "fontWeight": 600,
-              }
-            }
-          >
-            Monitor Kubernetes clusters
-          </h3>
-        </React.Fragment>
-      }
-      titleSize="xs"
+      guidesState={Array []}
+      isLoading={false}
+      navigateToApp={[MockFunction]}
     />
     <EuiSpacer
       size="m"
