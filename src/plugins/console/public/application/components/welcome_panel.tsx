@@ -18,8 +18,10 @@ import {
   EuiButton,
   EuiText,
   EuiFlyoutFooter,
+  EuiCode,
 } from '@elastic/eui';
-import { EditorExample } from './editor_example';
+import EditorExample from './editor_example';
+import * as examples from '../../../common/constants/welcome_panel';
 
 interface Props {
   onDismiss: () => void;
@@ -27,85 +29,133 @@ interface Props {
 
 export function WelcomePanel(props: Props) {
   return (
-    <EuiFlyout onClose={props.onDismiss} data-test-subj="welcomePanel" size="s" ownFocus={false}>
+    <EuiFlyout onClose={props.onDismiss} data-test-subj="welcomePanel" size="m" ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
               id="console.welcomePage.pageTitle"
-              defaultMessage="Welcome to Console"
+              defaultMessage="Send requests with Console"
             />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>
-          <h4>
-            <FormattedMessage
-              id="console.welcomePage.quickIntroTitle"
-              defaultMessage="Quick intro to the UI"
-            />
-          </h4>
           <p>
             <FormattedMessage
               id="console.welcomePage.quickIntroDescription"
-              defaultMessage="The Console UI is split into two panes: an editor pane (left) and a response pane (right).
-                Use the editor to type requests and submit them to Elasticsearch. The results will be displayed in
-                the response pane on the right side."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="console.welcomePage.supportedRequestFormatTitle"
-              defaultMessage="Console understands requests in a compact format, similar to cURL:"
+              defaultMessage="Console understands commands in a cURL-like syntax. Here is a request to the Elasticsearch _search API."
             />
           </p>
           <EditorExample panel="welcome" />
           <p>
             <FormattedMessage
-              id="console.welcomePage.supportedRequestFormatDescription"
-              defaultMessage="While typing a request, Console will make suggestions which you can then accept by hitting Enter/Tab.
-              These suggestions are made based on the request structure as well as your indices and types."
+              id="console.welcomePage.kibanaAPIsDescription"
+              defaultMessage="To send a request to a Kibana API, prefix the path with {kibanaApiPrefix}."
+              values={{
+                kibanaApiPrefix: <EuiCode>kbn:</EuiCode>,
+              }}
             />
           </p>
+          <EditorExample panel="welcome" example={examples.kibanaExample} linesOfExampleCode={2} />
           <h4>
             <FormattedMessage
-              id="console.welcomePage.quickTipsTitle"
-              defaultMessage="A few quick tips, while I have your attention"
+              id="console.welcomePage.sendMultipleRequestsTitle"
+              defaultMessage="Send multiple requests"
             />
           </h4>
-          <ul>
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.sendMultipleRequestsDescription"
+              defaultMessage="Select multiple requests and send them together. You'll get responses to all your requests, regardless of whether they succeed or fail."
+            />
+          </p>
+          <EditorExample
+            panel="welcome"
+            example={examples.multipleRequestsExample}
+            linesOfExampleCode={19}
+            mode="output"
+          />
+
+          <h4>
+            <FormattedMessage
+              id="console.welcomePage.addCommentsTitle"
+              defaultMessage="Add comments in request bodies"
+            />
+          </h4>
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.addCommentsDescription"
+              defaultMessage="To add a single-line comment, use {hash} or {doubleSlash}. For a multiline comment, mark the beginninf with {slashAsterisk} and the end with {asteriskSlash}."
+              values={{
+                hash: <EuiCode>#</EuiCode>,
+                doubleSlash: <EuiCode>//</EuiCode>,
+                slashAsterisk: <EuiCode>/*</EuiCode>,
+                asteriskSlash: <EuiCode>*/</EuiCode>,
+              }}
+            />
+          </p>
+          <EditorExample
+            panel="welcome"
+            example={examples.commentsExample}
+            linesOfExampleCode={11}
+          />
+          <h4>
+            <FormattedMessage
+              id="console.welcomePage.useVariablesTitle"
+              defaultMessage="Reuse values with variables"
+            />
+          </h4>
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.useVariablesDescription"
+              defaultMessage="Define variables in Console, and then use them in your requests in the form of {variableName}."
+              values={{
+                // use html tags to render the curly braces
+                variableName: <EuiCode>$&#123;variableName&#125;</EuiCode>,
+              }}
+            />
+          </p>
+
+          <ol>
             <li>
               <FormattedMessage
-                id="console.welcomePage.quickTips.submitRequestDescription"
-                defaultMessage="Submit requests to ES using the green triangle button."
+                id="console.welcomePage.useVariables.step1"
+                defaultMessage="Click Variable, and then enter the variable name and value."
               />
             </li>
             <li>
               <FormattedMessage
-                id="console.welcomePage.quickTips.useWrenchMenuDescription"
-                defaultMessage="Use the wrench menu for other useful things."
+                id="console.welcomePage.useVariables.step2"
+                defaultMessage="Refer to variables in the paths and bodies of your requests as many times as you like."
               />
             </li>
-            <li>
-              <FormattedMessage
-                id="console.welcomePage.quickTips.cUrlFormatForRequestsDescription"
-                defaultMessage="You can paste requests in cURL format and they will be translated to the Console syntax."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="console.welcomePage.quickTips.resizeEditorDescription"
-                defaultMessage="You can resize the editor and output panes by dragging the separator between them."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="console.welcomePage.quickTips.keyboardShortcutsDescription"
-                defaultMessage="Study the keyboard shortcuts under the Help button. Good stuff in there!"
-              />
-            </li>
-          </ul>
+          </ol>
+          <EditorExample
+            panel="welcome"
+            example={examples.variablesExample}
+            linesOfExampleCode={8}
+          />
+
+          <h4>
+            <FormattedMessage
+              id="console.welcomePage.keyboardShortcutsTitle"
+              defaultMessage="Keyboard shortcuts"
+            />
+          </h4>
+          <p>
+            <FormattedMessage
+              id="console.welcomePage.keyboardShortcutsDescription"
+              defaultMessage="For a list of keyboard shortcuts, click Help."
+            />
+          </p>
+
+          {/* Animated gif here */}
+          <img
+            src={examples.keyboardShortcutsImageUrl}
+            alt="Keyboard shortcut for auto-indenting a command"
+          />
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

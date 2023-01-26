@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, withEuiTheme } from '@elastic/eui';
+import type { WithEuiThemeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 import { createReadOnlyAceEditor, CustomAceEditor } from '../models/sense_editor';
 // @ts-ignore
-import { Mode } from '../models/legacy_core_editor/mode/input';
+import { Mode as InputMode } from '../models/legacy_core_editor/mode/input';
+import { Mode as OutputMode } from '../models/legacy_core_editor/mode/output';
 
 interface EditorExampleProps {
   panel: string;
+  example?: string;
+  theme: WithEuiThemeProps['theme'];
+  linesOfExampleCode?: number;
+  mode?: string;
 }
 
 const exampleText = `
@@ -28,8 +34,14 @@ PUT index/_doc/1
 GET index/_doc/1
 `;
 
-export function EditorExample(props: EditorExampleProps) {
-  const inputId = `help-example-${props.panel}-input`;
+const EditorExample = ({
+  panel,
+  example,
+  theme,
+  linesOfExampleCode = 8,
+  mode = 'input',
+}: EditorExampleProps) => {
+  const inputId = `help-example-${panel}-input`;
   const wrapperDivRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<CustomAceEditor>();
 
@@ -38,8 +50,8 @@ export function EditorExample(props: EditorExampleProps) {
       editorRef.current = createReadOnlyAceEditor(wrapperDivRef.current);
 
       const editor = editorRef.current;
-      editor.update(exampleText.trim());
-      editor.session.setMode(new Mode());
+      const editorMode = mode === 'input' ? new InputMode() : new OutputMode();
+      editor.update((example || exampleText).trim(), editorMode);
       editor.session.setUseWorker(false);
       editor.setHighlightActiveLine(false);
 
@@ -55,7 +67,12 @@ export function EditorExample(props: EditorExampleProps) {
         editorRef.current.destroy();
       }
     };
-  }, [inputId]);
+  }, [example, inputId, mode]);
+
+  const wrapperDivStyle = {
+    height: `${parseInt(theme.euiTheme.size.base, 10) * linesOfExampleCode}px`,
+    margin: `${theme.euiTheme.size.base} 0`,
+  };
 
   return (
     <>
@@ -66,7 +83,10 @@ export function EditorExample(props: EditorExampleProps) {
           })}
         </label>
       </EuiScreenReaderOnly>
-      <div ref={wrapperDivRef} className="conHelp__example" />
+      <div ref={wrapperDivRef} className="conApp_example" css={wrapperDivStyle} />
     </>
   );
-}
+};
+
+// eslint-disable-next-line import/no-default-export
+export default withEuiTheme(EditorExample);
