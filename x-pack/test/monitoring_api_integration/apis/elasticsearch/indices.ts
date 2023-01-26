@@ -12,6 +12,8 @@ import { getTestRunner } from '../../utils/test_runner';
 
 import nonSystemIndicesResponse from '../../fixtures/elasticsearch/indices_no_system.json';
 import allIndicesResponse from '../../fixtures/elasticsearch/indices_all.json';
+import indexDetailResponse from '../../fixtures/elasticsearch/index_detail.json';
+import indexDetailAdvancedResponse from '../../fixtures/elasticsearch/index_detail_advanced.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -50,6 +52,36 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body).to.eql(allIndicesResponse);
+    });
+
+    it('should summarize index with chart metrics data for the non-advanced view', async () => {
+      const { body } = await supertest
+        .post(
+          '/api/monitoring/v1/clusters/-8HHufEtS72rt344JzYofg/elasticsearch/indices/.ds-metrics-elasticsearch.stack_monitoring.cluster_stats-default-2023.01.24-000001'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          timeRange,
+          is_advanced: false,
+        })
+        .expect(200);
+
+      expect(body).to.eql(indexDetailResponse);
+    });
+
+    it('should summarize index with chart metrics data for the advanced view', async () => {
+      const { body } = await supertest
+        .post(
+          '/api/monitoring/v1/clusters/-8HHufEtS72rt344JzYofg/elasticsearch/indices/.ds-metrics-elasticsearch.stack_monitoring.cluster_stats-default-2023.01.24-000001'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          timeRange,
+          is_advanced: true,
+        })
+        .expect(200);
+
+      expect(body).to.eql(indexDetailAdvancedResponse);
     });
   });
 }
