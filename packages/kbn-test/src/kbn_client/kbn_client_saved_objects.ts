@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { inspect } from 'util';
-import * as Rx from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { isAxiosResponseError } from '@kbn/dev-utils';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
+import { chunk } from 'lodash';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api-server';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -81,13 +78,7 @@ interface DeleteObjectsOptions {
   }>;
 }
 
-async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
-  if (arr.length) {
-    await Rx.lastValueFrom(
-      Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
-    );
-  }
-}
+const DELETE_CHUNK_SIZE = 50;
 
 /**
  * SO client for FTR.
@@ -269,28 +260,25 @@ export class KbnClientSavedObjects {
     let deleted = 0;
     let missing = 0;
 
-    await concurrently(20, options.objects, async (obj) => {
-      try {
-        await this.requester.request({
-          method: 'DELETE',
-          path: options.space
-            ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${obj.type}/${obj.id}`
-            : uriencode`/internal/ftr/kbn_client_so/${obj.type}/${obj.id}`,
-        });
-        deleted++;
-      } catch (error) {
-        if (isAxiosResponseError(error)) {
-          if (error.response.status === 404) {
-            missing++;
-            return;
-          }
+    const chunks = chunk(options.objects, DELETE_CHUNK_SIZE);
 
-          throw createFailError(`${error.response.status} resp: ${inspect(error.response.data)}`);
+    for (let i = 0; i < chunks.length; i++) {
+      const objects = chunks[i];
+      const { data: response } = await this.requester.request<SavedObjectsBulkDeleteResponse>({
+        method: 'POST',
+        path: options.space
+          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_bulk_delete`
+          : uriencode`/internal/ftr/kbn_client_so/_bulk_delete`,
+        body: objects.map(({ type, id }) => ({ type, id })),
+      });
+      response.statuses.forEach((status) => {
+        if (status.success) {
+          deleted++;
+        } else if (status.error?.statusCode === 404) {
+          missing++;
         }
-
-        throw error;
-      }
-    });
+      });
+    }
 
     return { deleted, missing };
   }
