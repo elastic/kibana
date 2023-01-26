@@ -67,6 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         body: {
           doc_as_upsert: true,
           doc: {
+            upload_id: 'file1',
             file: {
               ChunkSize: 4194304,
               extension: 'zip',
@@ -78,7 +79,6 @@ export default function (providerContext: FtrProviderContext) {
               size: 24917,
               Status: 'READY',
               type: 'file',
-              upload_id: 'file1',
             },
           },
         },
