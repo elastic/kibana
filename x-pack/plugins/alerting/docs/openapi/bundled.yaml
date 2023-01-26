@@ -794,9 +794,10 @@ components:
         example: default
     kbn_xsrf:
       schema:
-        type: string
+        type: boolean
       in: header
       name: kbn-xsrf
+      description: Cross-site request forgery protection
       required: true
     alert_id:
       in: path
