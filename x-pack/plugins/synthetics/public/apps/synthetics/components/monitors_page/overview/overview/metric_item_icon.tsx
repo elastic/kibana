@@ -20,27 +20,19 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
 import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
 import { manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useFormatTestRunAt } from '../../../../utils/monitor_test_result/test_time_formats';
 
-type PopoverPosition = 'relative' | 'default';
-
-interface ActionContainerProps {
-  boxShadow: string;
-  position: PopoverPosition;
-}
-
-const Container = styled.div<ActionContainerProps>`
+const Container = styled.div`
   display: inline-block;
   position: absolute;
   right: 10px;
   top: 10px;
   z-index: 1;
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  ${({ boxShadow, position }) => (position === 'relative' ? boxShadow : '')}
 `;
 
 export const MetricItemIcon = ({
@@ -86,10 +78,10 @@ export const MetricItemIcon = ({
 
   if (status === 'down') {
     return (
-      <Container boxShadow={euiShadow} position={'relative'}>
+      <Container>
         <EuiPopover
           button={
-            <StyledIcon onMouseEnter={() => setIsPopoverOpen()}>
+            <StyledIcon onMouseEnter={() => setIsPopoverOpen()} boxShadow={euiShadow}>
               <EuiButtonIcon iconType="alert" color="danger" size="m" />
             </StyledIcon>
           }
@@ -102,9 +94,7 @@ export const MetricItemIcon = ({
         >
           <EuiPopoverTitle>{testTime}</EuiPopoverTitle>
           <div style={{ width: '300px' }}>
-            <EuiCallOut title={ping?.error?.message} color="danger" iconType="alert">
-              <p />
-            </EuiCallOut>
+            <EuiCallOut title={ping?.error?.message} color="danger" iconType="alert" />
           </div>
           <EuiPopoverFooter>
             <EuiButton fullWidth size="s" href={errorLink}>
@@ -123,7 +113,7 @@ const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
   defaultMessage: 'Error details',
 });
 
-const StyledIcon = styled.div`
+const StyledIcon = euiStyled.div<{ boxShadow: string }>`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -134,8 +124,7 @@ const StyledIcon = styled.div`
   height: 32px;
   background: #ffffff;
   border: 1px solid #d3dae6;
-  box-shadow: 0px 0.7px 1.4px rgba(0, 0, 0, 0.07), 0px 1.9px 4px rgba(0, 0, 0, 0.05),
-    0px 4.5px 10px rgba(0, 0, 0, 0.05);
+  ${({ boxShadow }) => boxShadow}
   border-radius: 16px;
   flex: none;
   order: 0;
