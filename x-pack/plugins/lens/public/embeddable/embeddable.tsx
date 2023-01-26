@@ -895,14 +895,13 @@ export class Embeddable
           ref={(el) => {
             if (el) {
               this.badgeDomNode = el;
+              this.renderBadgeMessages();
             }
           }}
         />
       </KibanaThemeProvider>,
       domNode
     );
-
-    this.renderBadgeMessages();
   }
 
   private renderBadgeMessages() {
