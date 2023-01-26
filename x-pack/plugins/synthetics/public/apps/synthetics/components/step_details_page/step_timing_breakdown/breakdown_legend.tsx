@@ -43,10 +43,10 @@ export const BreakdownLegend = () => {
               <EuiFlexItem grow={false} style={{ minWidth: 50 }}>
                 <ThresholdIndicator
                   loading={loading}
-                  currentFormatted={formatMillisecond(value, { digits: 1 })}
-                  current={Number(value.toFixed(1))}
-                  previous={prevValue ? Number(prevValue.toFixed(1)) : null}
-                  previousFormatted={formatMillisecond(prevValue ?? 0, { digits: 1 })}
+                  currentFormatted={formatMillisecond(value, {})}
+                  current={value}
+                  previous={prevValue ? prevValue : null}
+                  previousFormatted={formatMillisecond(prevValue ?? 0, {})}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
