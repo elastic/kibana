@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core/types';
+import type { SavedObjectError } from '@kbn/core/types';
 import type { SavedObjectsNamespaceType } from '@kbn/core/public';
 
 /** Domain interfaces */
@@ -25,11 +25,19 @@ export interface SavedObjectMetadataV1 {
 }
 
 /**
- * A {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin.
+ * A saved object.
+ *
+ * @note This is intended as a domain-specific representation of a SavedObject
+ * which is intended for server-side only use.
  */
-export type SavedObjectWithMetadataV1<T = unknown> = SavedObject<T> & {
+export interface SavedObjectWithMetadataV1<T = unknown> {
+  id: string;
+  type: string;
   meta: SavedObjectMetadataV1;
-};
+  error?: SavedObjectError;
+  updated_at: string;
+  attributes: T;
+}
 
 export type SavedObjectRelationKindV1 = 'child' | 'parent';
 

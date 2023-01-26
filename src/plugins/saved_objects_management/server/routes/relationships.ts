@@ -11,6 +11,7 @@ import { IRouter } from '@kbn/core/server';
 import { chain } from 'lodash';
 import { findRelationships } from '../lib';
 import { ISavedObjectsManagement } from '../services';
+import type { RelationshipsResponseHTTPV1 } from '../../common';
 
 export const registerRelationshipsRoute = (
   router: IRouter,
@@ -48,7 +49,7 @@ export const registerRelationshipsRoute = (
 
       const client = getClient({ includedHiddenTypes });
 
-      const findRelationsResponse = await findRelationships({
+      const findRelationsResponse: RelationshipsResponseHTTPV1 = await findRelationships({
         type,
         id,
         client,
