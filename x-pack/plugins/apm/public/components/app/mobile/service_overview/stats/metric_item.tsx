@@ -29,7 +29,7 @@ export function MetricItem({
         borderRadius: '6px',
       }}
     >
-      {isLoading ? (
+      {data && isLoading ? (
         <EuiPanel hasBorder={true}>
           <EuiLoadingContent lines={3} />
         </EuiPanel>

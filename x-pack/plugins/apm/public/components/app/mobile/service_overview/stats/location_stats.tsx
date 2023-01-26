@@ -29,6 +29,10 @@ const getIcon =
   }) =>
     <EuiIcon type={type} width={width} height={height} fill={color} />;
 
+const valueFormatter = (value: number) => {
+  return `${value}`;
+};
+
 const formatDifference = (value: number) => {
   return value > 0 ? '+' + value.toFixed(2) : value.toFixed(2);
 };
@@ -135,7 +139,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('visBarHorizontal'),
       value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value: number) => `${value}`,
+      valueFormatter: (value) => valueFormatter(value),
       trend: currentPeriod?.mostRequests.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
@@ -149,7 +153,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('bug'),
       value: NOT_AVAILABLE_LABEL,
-      valueFormatter: (value: number) => `${value}`,
+      valueFormatter: (value) => valueFormatter(value),
       trend: [],
       trendShape: MetricTrendShape.Area,
     },
@@ -164,7 +168,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('timeslider'),
       value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value: number) => `${value}`,
+      valueFormatter: (value) => valueFormatter(value),
       trend: currentPeriod?.mostSessions.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
@@ -178,7 +182,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('launch'),
       value: NOT_AVAILABLE_LABEL,
-      valueFormatter: (value: number) => `${value}`,
+      valueFormatter: (value) => valueFormatter(value),
       trend: [],
       trendShape: MetricTrendShape.Area,
     },

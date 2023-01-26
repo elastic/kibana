@@ -6,29 +6,26 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
-import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import {
+  useFetcher,
+  FETCH_STATUS,
+  isPending,
+} from '../../../../../hooks/use_fetcher';
 import { MetricItem } from './metric_item';
+import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
 const valueFormatter = (value: number, suffix = '') => {
   return `${value} ${suffix}`;
 };
-
-const getIcon =
-  (type: string) =>
-  ({
-    width = 20,
-    height = 20,
-    color,
-  }: {
-    width: number;
-    height: number;
-    color: string;
-  }) =>
-    <EuiIcon type={type} width={width} height={height} fill={color} />;
 
 export function MobileStats({
   start,
@@ -43,8 +40,10 @@ export function MobileStats({
 
   const {
     path: { serviceName },
-    query: { environment, transactionType },
+    query: { environment, transactionType, offset, comparisonEnabled },
   } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
+
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -59,30 +58,72 @@ export function MobileStats({
               environment,
               kuery,
               transactionType,
+              offset,
             },
           },
         }
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType, offset]
   );
+
+  const getComparisonValueFormatter = useCallback(
+    (value) => {
+      return (
+        <span>
+          {value && comparisonEnabled
+            ? `${previousPeriodLabel}: ${value}`
+            : null}
+        </span>
+      );
+    },
+    [comparisonEnabled, previousPeriodLabel]
+  );
+
+  const getIcon = useCallback(
+    (type: string) =>
+      ({
+        width = 20,
+        height = 20,
+        color,
+      }: {
+        width: number;
+        height: number;
+        color: string;
+      }) => {
+        return status === FETCH_STATUS.LOADING ? (
+          <EuiLoadingSpinner size="m" />
+        ) : (
+          <EuiIcon type={type} width={width} height={height} fill={color} />
+        );
+      },
+    [status]
+  );
+
+  const loadingStats = isPending(status);
 
   const metrics: MetricDatum[] = [
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.eui.euiColorDisabled,
       title: i18n.translate('xpack.apm.mobile.metrics.crash.rate', {
-        defaultMessage: 'Crash Rate',
+        defaultMessage: 'Crash Rate (Crash per minute)',
+      }),
+      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+        defaultMessage: 'Coming Soon',
       }),
       icon: getIcon('bug'),
       value: 'N/A',
-      valueFormatter: (value: number) => valueFormatter(value, 'cpm'),
+      valueFormatter: (value: number) => valueFormatter(value),
       trend: [],
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorLightestShade,
+      color: euiTheme.eui.euiColorDisabled,
       title: i18n.translate('xpack.apm.mobile.metrics.load.time', {
         defaultMessage: 'Slowest App load time',
+      }),
+      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
+        defaultMessage: 'Coming Soon',
       }),
       icon: getIcon('visGauge'),
       value: 'N/A',
@@ -99,6 +140,7 @@ export function MobileStats({
       value: data?.currentPeriod?.sessions?.value ?? NaN,
       valueFormatter: (value: number) => valueFormatter(value),
       trend: data?.currentPeriod?.sessions?.timeseries,
+      extra: getComparisonValueFormatter(data?.previousPeriod.sessions?.value),
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -108,8 +150,9 @@ export function MobileStats({
       }),
       icon: getIcon('kubernetesPod'),
       value: data?.currentPeriod?.requests?.value ?? NaN,
+      extra: getComparisonValueFormatter(data?.previousPeriod.requests?.value),
       valueFormatter: (value: number) => valueFormatter(value),
-      trend: data?.currentPeriod?.requests?.timeseries ?? [],
+      trend: data?.currentPeriod?.requests?.timeseries,
       trendShape: MetricTrendShape.Area,
     },
   ];
@@ -118,11 +161,7 @@ export function MobileStats({
     <EuiFlexGroup>
       {metrics.map((metric, key) => (
         <EuiFlexItem key={key}>
-          <MetricItem
-            id={key}
-            data={[metric]}
-            isLoading={status === FETCH_STATUS.LOADING}
-          />
+          <MetricItem id={key} data={[metric]} isLoading={loadingStats} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

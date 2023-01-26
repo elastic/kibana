@@ -15,7 +15,6 @@ import {
   SERVICE_NAME,
   SESSION_ID,
   SERVICE_TARGET_TYPE,
-  EVENT_NAME,
   CLIENT_GEO_COUNTRY_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -97,22 +96,11 @@ async function getMobileLocationStats({
         },
       },
     },
-    crashCount: {
-      filter: { term: { [EVENT_NAME]: 'crash' } },
-      aggs: {
-        crashesByLocation: {
-          terms: {
-            field: locationField,
-          },
-        },
-      },
-    },
   };
 
   const response = await apmEventClient.search('get_mobile_location_stats', {
     apm: {
       events: [
-        ProcessorEvent.error,
         ProcessorEvent.metric,
         ProcessorEvent.transaction,
         ProcessorEvent.span,

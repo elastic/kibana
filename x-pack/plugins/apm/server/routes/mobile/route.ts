@@ -71,6 +71,7 @@ const mobileStatsRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       environmentRt,
+      offsetRt,
       t.partial({
         transactionType: t.string,
       }),
@@ -81,7 +82,7 @@ const mobileStatsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end } = params.query;
+    const { kuery, environment, start, end, offset } = params.query;
 
     const stats = await getMobileStatsPeriods({
       kuery,
@@ -90,6 +91,7 @@ const mobileStatsRoute = createApmServerRoute({
       end,
       serviceName,
       apmEventClient,
+      offset,
     });
 
     return stats;
