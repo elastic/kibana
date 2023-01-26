@@ -283,6 +283,15 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it('should not accept empty alert IDs', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          alert_ids: [' '],
+        });
+      }).toThrow();
+    });
+
     it('should accept alert IDs', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({
@@ -290,6 +299,15 @@ describe('actions schemas', () => {
           alert_ids: ['0000000-000-00'],
         });
       }).not.toThrow();
+    });
+
+    it('should not accept empty case IDs', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          case_ids: [' '],
+        });
+      }).toThrow();
     });
 
     it('should accept case IDs', () => {

@@ -24,9 +24,27 @@ const BaseActionRequestSchema = {
     },
   }),
   /** If defined, any case associated with the given IDs will be updated */
-  alert_ids: schema.maybe(schema.arrayOf(schema.string())),
+  alert_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (alertIds) => {
+        if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'alert_ids cannot contain empty strings';
+        }
+      },
+    })
+  ),
   /** Case IDs to be updated */
-  case_ids: schema.maybe(schema.arrayOf(schema.string())),
+  case_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (caseIds) => {
+        if (caseIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'case_ids cannot contain empty strings';
+        }
+      },
+    })
+  ),
   comment: schema.maybe(schema.string()),
   parameters: schema.maybe(schema.object({})),
 };
