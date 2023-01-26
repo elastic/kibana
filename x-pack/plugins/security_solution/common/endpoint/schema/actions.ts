@@ -93,6 +93,7 @@ export const EndpointActionListRequestSchema = {
         schema.string({ minLength: 1 }),
       ])
     ),
+    alertId: schema.maybe(schema.string({ minLength: 1 })),
     commands: schema.maybe(
       schema.oneOf([schema.arrayOf(commandsSchema, { minSize: 1 }), commandsSchema])
     ),

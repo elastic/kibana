@@ -88,11 +88,11 @@ export const scheduleNotificationResponseActions = (
         return createResponseActionHandler(
           endpointAppContext,
           {
-            endpoint_ids: agentIds,
+            endpoint_ids: alert.agent?.id ? [alert.agent.id] : [],
             ...(responseAction.params.command === 'kill-process'
               ? { parameters: { pid: alert.process.pid } }
               : {}),
-            alertIds,
+            alert_ids: [(alert as unknown as { _id: string })._id],
             comment: responseAction.params.comment,
           },
           {

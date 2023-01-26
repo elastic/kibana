@@ -27,6 +27,7 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
   commands?: string[];
+  alertId?: string;
   elasticAgentIds?: string[];
   endDate?: string;
   page?: number;
@@ -44,6 +45,7 @@ interface OptionalFilterParams {
  */
 export const getActionListByStatus = async ({
   commands,
+  alertId,
   elasticAgentIds,
   esClient,
   endDate,
@@ -66,6 +68,7 @@ export const getActionListByStatus = async ({
 
   const { actionDetails: allActionDetails } = await getActionDetailsList({
     commands,
+    alertId,
     elasticAgentIds,
     esClient,
     endDate,
@@ -103,6 +106,7 @@ export const getActionListByStatus = async ({
  */
 export const getActionList = async ({
   commands,
+  alertId,
   elasticAgentIds,
   esClient,
   endDate,
@@ -125,6 +129,7 @@ export const getActionList = async ({
 
   const { actionDetails, totalRecords } = await getActionDetailsList({
     commands,
+    alertId,
     elasticAgentIds,
     esClient,
     endDate,
@@ -159,6 +164,7 @@ export type GetActionDetailsListParam = OptionalFilterParams & {
 };
 const getActionDetailsList = async ({
   commands,
+  alertId,
   elasticAgentIds,
   esClient,
   endDate,
@@ -182,6 +188,7 @@ const getActionDetailsList = async ({
     // fetch actions with matching agent_ids if any
     const { actionIds, actionRequests: _actionRequests } = await getActions({
       commands,
+      alertId,
       esClient,
       elasticAgentIds,
       startDate,

@@ -20,8 +20,7 @@ export const EndpointResults = ({ alertId, agentIds }) => {
     isFetched,
   } = useGetEndpointActionList(
     {
-      alert_ids: alertId,
-      agentIds,
+      alertId,
     },
     { retry: false }
   );

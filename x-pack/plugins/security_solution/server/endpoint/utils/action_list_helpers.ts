@@ -28,6 +28,7 @@ const queryOptions = Object.freeze({
 
 export const getActions = async ({
   commands,
+  alertId,
   elasticAgentIds,
   esClient,
   endDate,
@@ -58,6 +59,10 @@ export const getActions = async ({
     additionalFilters.push({ range: { expiration: { gte: 'now' } } });
   }
 
+  if (alertId) {
+    additionalFilters.push({ terms: { 'alert.id': [alertId] } });
+  }
+
   const dateFilters = getDateFilters({ startDate, endDate });
 
   const actionsFilters = [
@@ -86,6 +91,12 @@ export const getActions = async ({
     size,
     from,
     body: {
+      // temporary solution, until we add a new field to the endpoint fields mapping in endpoint package
+      runtime_mappings: {
+        'alert.id': {
+          type: 'keyword',
+        },
+      },
       query: {
         bool: { must },
       },

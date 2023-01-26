@@ -39,6 +39,7 @@ export const useGetEndpointActionList = (
       return http.get<ActionListApiResponse>(ENDPOINTS_ACTION_LIST_ROUTE, {
         query: {
           agentIds: query.agentIds,
+          alertId: query.alertId,
           commands: query.commands,
           endDate: query.endDate,
           page: query.page,

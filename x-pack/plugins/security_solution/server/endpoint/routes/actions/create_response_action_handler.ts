@@ -70,9 +70,9 @@ export const createResponseActionHandler = async (
 
   let fleetActionIndexResult;
   let logsEndpointActionsResult;
-  const endpointIDs = [...new Set(params.endpoint_ids)]; // dedupe
+  const endpointIds = [...new Set(params.endpoint_ids)]; // dedupe
   // TODO context z requestu
-  const endpointData = await getMetadataForEndpoints(endpointIDs, esClient);
+  const endpointData = await getMetadataForEndpoints(endpointIds, esClient);
 
   const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
   const doc = {
@@ -80,12 +80,14 @@ export const createResponseActionHandler = async (
     agent: {
       id: agents,
     },
+    alert: {
+      id: params.alert_ids,
+    },
     EndpointActions: {
       action_id: actionID,
       expiration: moment().add(2, 'weeks').toISOString(),
       type: 'INPUT_ACTION',
       input_type: 'endpoint',
-      alert_ids: params.alert_ids,
       data: {
         command,
         comment: params.comment ?? undefined,

@@ -49,6 +49,7 @@ export const actionListHandler = (
     const {
       query: {
         agentIds: elasticAgentIds,
+        alertId,
         page,
         pageSize,
         startDate,
@@ -73,6 +74,7 @@ export const actionListHandler = (
 
       const requestParams = {
         commands: formatCommandValues(commands),
+        alertId,
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
         metadataService: endpointContext.service.getEndpointMetadataService(),
