@@ -63,6 +63,7 @@ export const getPackagePolicyCreateCallback = (
   ): Promise<NewPackagePolicy> => {
     // callback is called outside request context
     if (!context || !request) {
+      logger.info('PackagePolicyCreateCallback called outside request context. Skipping...');
       return newPackagePolicy;
     }
 
@@ -70,6 +71,7 @@ export const getPackagePolicyCreateCallback = (
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
+    logger.info('PackagePolicyCreateCallback called with request. Processing...');
 
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
