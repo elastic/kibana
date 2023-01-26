@@ -275,6 +275,21 @@ const paginatedEventLogListGetResponse = (path: string) => {
   return baseEventLogListGetResponse(path);
 };
 
+const rulesSettingsGetResponse = (path: string) => {
+  if (path.endsWith('/settings/_flapping')) {
+    return {
+      enabled: true,
+      lookBackWindow: 20,
+      statusChangeThreshold: 4,
+    };
+  }
+};
+
+const rulesSettingsIds = [
+  'app-rulessettingslink--with-all-permission',
+  'app-rulessettingslink--with-read-permission',
+];
+
 export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
   return {
     get: (async (path: string, options: HttpFetchOptions) => {
@@ -297,9 +312,13 @@ export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
       if (id === 'app-ruleeventloglist--with-paginated-events') {
         return paginatedEventLogListGetResponse(path);
       }
+      if (rulesSettingsIds.includes(id)) {
+        return rulesSettingsGetResponse(path);
+      }
     }) as HttpHandler,
     post: (async (path: string, options: HttpFetchOptions) => {
       action('POST')(path, options);
+      return Promise.resolve();
     }) as HttpHandler,
   } as unknown as HttpStart;
 };
