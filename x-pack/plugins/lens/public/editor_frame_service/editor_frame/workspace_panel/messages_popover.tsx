@@ -9,7 +9,15 @@ import './workspace_panel_wrapper.scss';
 import './messages_popover.scss';
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiText, EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiText,
+  EuiButton,
+  EuiIcon,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
@@ -92,7 +100,18 @@ export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
             className="lnsWorkspaceWarningList__item"
             data-test-subj="lens-editor-warning"
           >
-            <EuiText size="s">{message.longMessage}</EuiText>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {message.severity === 'error' ? (
+                  <EuiIcon type={IconError} color="danger" />
+                ) : (
+                  <EuiIcon type={IconWarning} color="warning" />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                <EuiText size="s">{message.longMessage}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </li>
         ))}
       </ul>
