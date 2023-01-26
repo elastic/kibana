@@ -73,6 +73,7 @@ export const createDefaultAlertExecutorOptions = <
   services: {
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
+    alertsClient: null,
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

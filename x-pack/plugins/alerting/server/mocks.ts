@@ -157,6 +157,7 @@ const createRuleExecutorServicesMock = <
       },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
+    alertsClient: null,
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

@@ -125,6 +125,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         },
         services: {
           alertFactory,
+          alertsClient: null,
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
           search: {} as any,

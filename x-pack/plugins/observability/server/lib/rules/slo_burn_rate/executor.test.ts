@@ -87,6 +87,7 @@ describe('BurnRateRuleExecutor', () => {
       savedObjectsClient: soClientMock,
       scopedClusterClient: { asCurrentUser: esClientMock, asInternalUser: esClientMock },
       alertFactory: alertFactoryMock,
+      alertsClient: null,
       searchSourceClient: searchSourceClientMock,
       uiSettingsClient: uiSettingsClientMock,
       shouldWriteAlerts: jest.fn(),
