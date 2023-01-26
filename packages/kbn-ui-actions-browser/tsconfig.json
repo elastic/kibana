@@ -17,6 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/ui-actions-browser",
   ]
 }
