@@ -10,7 +10,7 @@ import type { AuthorizeCreateObject, AuthorizeUpdateObject } from '@kbn/core-sav
 import { AuditAction, SecurityAction } from '@kbn/core-saved-objects-server';
 import type {
   AuthorizeBulkGetObject,
-  AuthorizeObject,
+  AuthorizeObjectWithExistingSpaces,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type {
   EcsEventOutcome,
@@ -2769,7 +2769,7 @@ describe('delete', () => {
 
     test('throws an error when `objects` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
-      const emptyObjects: AuthorizeObject[] = [];
+      const emptyObjects: AuthorizeObjectWithExistingSpaces[] = [];
 
       await expect(
         securityExtension.authorizeBulkDelete({
@@ -3617,7 +3617,7 @@ describe(`#authorizeCheckConflicts`, () => {
 
   test('throws an error when `objects` is empty', async () => {
     const { securityExtension, checkPrivileges } = setup();
-    const emptyObjects: AuthorizeObject[] = [];
+    const emptyObjects: AuthorizeObjectWithExistingSpaces[] = [];
 
     await expect(
       securityExtension.authorizeCheckConflicts({
@@ -4197,7 +4197,7 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: expectedSpaces,
         types: expectedTypes,
       })
-    ).rejects.toThrow(`unauthorized`); // This will be updated in the future, see issue https://github.com/elastic/kibana/issues/142414
+    ).rejects.toThrow(`User is unauthorized for any requested types/spaces.`);
   });
 
   test(`adds audit event when unauthorized`, async () => {
@@ -4209,7 +4209,7 @@ describe(`#authorizeOpenPointInTime`, () => {
         namespaces: expectedSpaces,
         types: expectedTypes,
       })
-    ).rejects.toThrow(`unauthorized`); // This will be updated in the future, see issue https://github.com/elastic/kibana/issues/142414
+    ).rejects.toThrow(`User is unauthorized for any requested types/spaces.`);
     expect(auditHelperSpy).not.toHaveBeenCalled();
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
     expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -5246,7 +5246,7 @@ describe('#authorizeUpdateSpaces', () => {
 
   test('throws an error when `objects` is empty', async () => {
     const { securityExtension, checkPrivileges } = setup();
-    const emptyObjects: AuthorizeObject[] = [];
+    const emptyObjects: AuthorizeObjectWithExistingSpaces[] = [];
 
     await expect(
       securityExtension.authorizeUpdateSpaces({
@@ -5666,5 +5666,413 @@ describe('#authorizeUpdateSpaces', () => {
         message: `Failed attempt to update spaces of ${obj.type} [id=${obj.id}]`,
       });
     }
+  });
+});
+
+describe('find', () => {
+  const namespace = 'x';
+  const actionString = 'find';
+  const fullyAuthorizedCheckPrivilegesResponse = {
+    hasAllRequested: true,
+    privileges: {
+      kibana: [
+        { privilege: 'mock-saved_object:a/find', authorized: true },
+        { privilege: 'login:', authorized: true },
+      ],
+    },
+  } as CheckPrivilegesResponse;
+
+  const expectedTypes = new Set([obj1.type]);
+  const expectedSpaces = new Set([namespace]);
+  const expectedTypeMap = new Map().set('a', {
+    find: { isGloballyAuthorized: true, authorizedSpaces: [] },
+    ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+  });
+
+  beforeEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  describe(`#authorizeFind`, () => {
+    test('throws an error when `namespaces` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.authorizeFind({
+          namespaces: new Set(),
+          types: expectedTypes,
+        })
+      ).rejects.toThrowError('No spaces specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when `types` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.authorizeFind({
+          namespaces: expectedSpaces,
+          types: new Set(),
+        })
+      ).rejects.toThrowError('No types specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        securityExtension.authorizeFind({ namespaces: expectedSpaces, types: expectedTypes })
+      ).rejects.toThrowError('Oh no!');
+    });
+
+    test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await securityExtension.authorizeFind({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      });
+
+      expect(authorizeSpy).toHaveBeenCalledTimes(1);
+      expect(authorizeSpy).toHaveBeenCalledWith({
+        actions: new Set([SecurityAction.FIND]),
+        types: expectedTypes,
+        spaces: expectedSpaces,
+      });
+
+      expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+        actions: new Set([actionString]),
+        spaces: expectedSpaces,
+        types: expectedTypes,
+        options: { allowGlobalResource: false },
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(
+        [`mock-saved_object:${obj1.type}/${actionString}`, 'login:'],
+        [...expectedSpaces]
+      );
+
+      expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+    });
+
+    test(`returns result when fully authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      const result = await securityExtension.authorizeFind({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      });
+      expect(result).toEqual({
+        status: 'fully_authorized',
+        typeMap: expectedTypeMap,
+      });
+      expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+    });
+
+    test(`returns result when partially authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue({
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            { privilege: 'mock-saved_object:a/find', authorized: true },
+            { privilege: 'login:', authorized: false },
+          ],
+        },
+      } as CheckPrivilegesResponse);
+
+      const result = await securityExtension.authorizeFind({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      });
+      expect(result).toEqual({
+        status: 'partially_authorized',
+        typeMap: new Map().set(obj1.type, {
+          find: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      });
+      expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+    });
+
+    test(`does not add audit event when successful`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await securityExtension.authorizeFind({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      });
+
+      expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as authorizeFind calls the addAudit method directly
+      expect(addAuditEventSpy).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    test(`returns result when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', false);
+
+      const result = await securityExtension.authorizeFind({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      });
+      expect(result).toEqual({
+        status: 'unauthorized',
+        typeMap: new Map().set(obj1.type, {
+          'login:': { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      });
+      expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+    });
+
+    test(`adds audit event when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', false);
+
+      await securityExtension.authorizeFind({
+        namespaces: expectedSpaces,
+        types: expectedTypes,
+      });
+      expect(auditHelperSpy).not.toHaveBeenCalled();
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: { code: 'Error', message: `User is unauthorized for any requested types/spaces.` },
+        event: {
+          action: AuditAction.FIND,
+          category: ['database'],
+          outcome: 'failure',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          saved_object: undefined,
+        },
+        message: `Failed attempt to access saved objects`,
+      });
+    });
+  });
+
+  describe(`#getFindRedactTypeMap`, () => {
+    const existingNamespaces = [namespace, 'y', 'z', 'foo'];
+    const objects = [
+      { type: obj1.type, id: obj1.id, existingNamespaces: [namespace, 'y'] },
+      { type: obj1.type, id: obj2.id, existingNamespaces: [namespace, 'z'] },
+      { type: obj1.type, id: obj3.id, existingNamespaces: [namespace, 'foo'] },
+    ];
+
+    const partiallyAuthorizedCheckPrivilegesResponse = {
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { privilege: 'login:', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:a/find', authorized: true },
+          { resource: 'y', privilege: 'mock-saved_object:a/find', authorized: false },
+          { resource: 'z', privilege: 'mock-saved_object:a/find', authorized: true },
+          { resource: 'foo', privilege: 'mock-saved_object:a/find', authorized: false },
+        ],
+      },
+    } as CheckPrivilegesResponse;
+
+    test('throws an error when `types` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await expect(
+        securityExtension.getFindRedactTypeMap({
+          authorizeNamespaces: expectedSpaces,
+          types: new Set(),
+          objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
+        })
+      ).rejects.toThrowError('No types specified for authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        securityExtension.getFindRedactTypeMap({
+          authorizeNamespaces: expectedSpaces,
+          types: expectedTypes,
+          objects: [{ type: obj1.type, id: obj1.id, existingNamespaces }],
+        })
+      ).rejects.toThrowError('Oh no!');
+    });
+
+    test(`calls authorize methods with expected actions, types, spaces, and no enforce map`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects,
+      });
+
+      const updateExpectedSpaces = new Set(existingNamespaces);
+
+      expect(authorizeSpy).toHaveBeenCalledTimes(1);
+      expect(authorizeSpy).toHaveBeenCalledWith({
+        actions: new Set([SecurityAction.FIND]),
+        types: expectedTypes,
+        spaces: updateExpectedSpaces,
+      });
+
+      expect(checkAuthorizationSpy).toHaveBeenCalledTimes(1);
+      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+        actions: new Set([actionString]),
+        spaces: updateExpectedSpaces,
+        types: expectedTypes,
+        options: { allowGlobalResource: false },
+      });
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledWith(
+        [`mock-saved_object:${obj1.type}/${actionString}`, 'login:'],
+        [...updateExpectedSpaces]
+      );
+
+      expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
+    });
+
+    test('returns undefined if there are no additional spaces', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      const result = await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects: [{ type: obj1.type, id: obj1.id, existingNamespaces: [namespace] }],
+      });
+      expect(result).toBeUndefined();
+    });
+
+    test(`returns result when fully authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
+
+      const result = await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects,
+      });
+
+      expect(result).toEqual(expectedTypeMap);
+    });
+
+    test(`returns result when partially authorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockResolvedValue(partiallyAuthorizedCheckPrivilegesResponse);
+
+      const result = await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects,
+      });
+
+      expect(result).toEqual(
+        new Map().set('a', {
+          find: { authorizedSpaces: ['x', 'z'] },
+          'login:': { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+      );
+    });
+
+    test(`returns result when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', false);
+
+      const result = await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects,
+      });
+
+      expect(result).toEqual(
+        new Map().set(obj1.type, {
+          'login:': { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+      );
+    });
+
+    test(`adds an audit event per object when unauthorized`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', false);
+
+      await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects,
+      });
+
+      expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as getFindRedactTypeMap calls the addAudit method directly
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+      expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      for (const obj of objects) {
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: undefined,
+          event: {
+            action: AuditAction.FIND,
+            category: ['database'],
+            outcome: 'success',
+            type: ['access'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: { type: obj.type, id: obj.id },
+          },
+          message: `User has accessed ${obj.type} [id=${obj.id}]`,
+        });
+      }
+    });
+
+    test(`adds an audit event per object when authorized`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup();
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, 'find', true);
+
+      await securityExtension.getFindRedactTypeMap({
+        authorizeNamespaces: expectedSpaces,
+        types: expectedTypes,
+        objects,
+      });
+
+      expect(auditHelperSpy).not.toHaveBeenCalled(); // The helper is not called, as getFindRedactTypeMap calls the addAudit method directly
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
+      expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
+      for (const obj of objects) {
+        expect(auditLogger.log).toHaveBeenCalledWith({
+          error: undefined,
+          event: {
+            action: AuditAction.FIND,
+            category: ['database'],
+            outcome: 'success',
+            type: ['access'],
+          },
+          kibana: {
+            add_to_spaces: undefined,
+            delete_from_spaces: undefined,
+            saved_object: { type: obj.type, id: obj.id },
+          },
+          message: `User has accessed ${obj.type} [id=${obj.id}]`,
+        });
+      }
+    });
   });
 });

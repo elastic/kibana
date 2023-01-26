@@ -365,88 +365,96 @@ export interface RedactNamespacesParams<T, A extends string> {
 export interface AuthorizeObject {
   type: string;
   id: string;
+}
+
+export interface AuthorizeObjectWithExistingSpaces extends AuthorizeObject {
   existingNamespaces?: string[];
 }
-export interface AuthorizeCreateObject extends AuthorizeObject {
+
+export interface AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces {
   initialNamespaces?: string[];
 }
 
-export interface AuthorizeUpdateObject extends AuthorizeObject {
+export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces {
   objectNamespace?: string;
 }
 
-export interface AuthorizeBulkGetObject extends AuthorizeObject {
+export interface AuthorizeBulkGetObject extends AuthorizeObjectWithExistingSpaces {
   objectNamespaces?: string[];
   error?: boolean;
 }
 
-export interface AuthorizeBulkCreateParams {
+export interface BaseAuthorizeParams {
   namespace: string | undefined;
+}
+
+export interface AuthorizeBulkCreateParams extends BaseAuthorizeParams {
   objects: AuthorizeCreateObject[];
 }
 
-export interface AuthorizeCreateParams {
-  namespace: string | undefined;
+export interface AuthorizeCreateParams extends BaseAuthorizeParams {
   object: AuthorizeCreateObject;
 }
 
-export interface AuthorizeUpdateParams {
-  namespace: string | undefined;
+export interface AuthorizeUpdateParams extends BaseAuthorizeParams {
   object: AuthorizeUpdateObject;
 }
 
-export interface AuthorizeBulkUpdateParams {
-  namespace: string | undefined;
+export interface AuthorizeBulkUpdateParams extends BaseAuthorizeParams {
   objects: AuthorizeUpdateObject[];
 }
 
-export interface AuthorizeDeleteParams {
-  namespace: string | undefined;
-  object: AuthorizeObject;
+export interface AuthorizeDeleteParams extends BaseAuthorizeParams {
+  object: AuthorizeObjectWithExistingSpaces;
 }
 
-export interface AuthorizeBulkDeleteParams {
-  namespace: string | undefined;
-  objects: AuthorizeObject[];
+export interface AuthorizeBulkDeleteParams extends BaseAuthorizeParams {
+  objects: AuthorizeObjectWithExistingSpaces[];
 }
 
-export interface AuthorizeGetParams {
-  namespace: string | undefined;
-  object: AuthorizeObject;
+export interface AuthorizeGetParams extends BaseAuthorizeParams {
+  object: AuthorizeObjectWithExistingSpaces;
   objectNotFound?: boolean;
 }
 
-export interface AuthorizeBulkGetParams {
-  namespace: string | undefined;
+export interface AuthorizeBulkGetParams extends BaseAuthorizeParams {
   objects: AuthorizeBulkGetObject[];
 }
 
-export interface AuthorizeCheckConflictsParams {
-  namespace: string | undefined;
-  objects: AuthorizeObject[];
+export interface AuthorizeCheckConflictsParams extends BaseAuthorizeParams {
+  objects: AuthorizeObjectWithExistingSpaces[];
 }
 
-export interface AuthorizeOpenPointInTimeParams {
+export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
+// {
+//   namespaces: Set<string>;
+//   types: Set<string>;
+// }
+
+export interface AuthorizeFindParams {
   namespaces: Set<string>;
   types: Set<string>;
 }
 
-export interface AuthorizeAndRedactMultiNamespaceReferencesParams {
-  namespace: string | undefined;
+export interface GetFindRedactTypeMapParams {
+  authorizeNamespaces: Set<string>;
+  types: Set<string>;
+  objects: AuthorizeObjectWithExistingSpaces[];
+}
+
+export interface AuthorizeAndRedactMultiNamespaceReferencesParams extends BaseAuthorizeParams {
   objects: SavedObjectReferenceWithContext[];
   options?: MultiNamespaceReferencesOptions;
 }
 
-export interface AuthorizeAndRedactInternalBulkResolveParams<T> {
-  namespace: string | undefined;
+export interface AuthorizeAndRedactInternalBulkResolveParams<T> extends BaseAuthorizeParams {
   objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 
-export interface AuthorizeUpdateSpacesParams {
-  namespace: string | undefined;
+export interface AuthorizeUpdateSpacesParams extends BaseAuthorizeParams {
   spacesToAdd: string[];
   spacesToRemove: string[];
-  objects: AuthorizeObject[];
+  objects: AuthorizeObjectWithExistingSpaces[];
 }
 
 /**
@@ -538,6 +546,19 @@ export interface ISavedObjectsSecurityExtension {
   authorizeUpdateSpaces: (
     params: AuthorizeUpdateSpacesParams
   ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  authorizeFind: (
+    params: AuthorizeFindParams
+  ) => Promise<CheckAuthorizationResult<string> | undefined>;
+
+  // ToDo: change name to...
+  // "updateFindTypeMapForRedact" OR
+  // "authorizeFindExistingObjectSpaces" OR
+  // "updateFindAuthorization" OR
+  // "authorizeFindAdditionalSpaces"
+  getFindRedactTypeMap: (
+    params: GetFindRedactTypeMapParams
+  ) => Promise<AuthorizationTypeMap<string> | undefined>;
 
   /**
    * Performs authorization (check & enforce) of actions on specified types in specified spaces.

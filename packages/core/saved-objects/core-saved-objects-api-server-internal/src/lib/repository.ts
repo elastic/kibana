@@ -69,10 +69,8 @@ import {
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectsSpacesExtension,
-  AuditAction,
   type CheckAuthorizationResult,
   type AuthorizationTypeMap,
-  SecurityAction,
   AuthorizeCreateObject,
   AuthorizeUpdateObject,
   type AuthorizeBulkGetObject,
@@ -99,6 +97,7 @@ import {
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import pMap from 'p-map';
+import { AuthorizeObjectWithExistingSpaces } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -1355,25 +1354,30 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     // We have to first do a "pre-authorization" check so that we can construct the search DSL accordingly
     const spacesToPreauthorize = new Set(namespaces);
+    const typesToAuthorize = new Set(types);
     let typeToNamespacesMap: Map<string, string[]> | undefined;
-    let preAuthorizationResult: CheckAuthorizationResult<'find'> | undefined;
+    let preAuthorizationResult: CheckAuthorizationResult<string> | undefined;
     if (!disableExtensions && this._securityExtension) {
-      preAuthorizationResult = await this._securityExtension.authorize({
-        actions: new Set([SecurityAction.FIND]),
-        types: new Set(types),
-        spaces: spacesToPreauthorize,
-        auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+      // preAuthorizationResult = await this._securityExtension.authorize({
+      //   actions: new Set([SecurityAction.FIND]),
+      //   types: new Set(types),
+      //   spaces: spacesToPreauthorize,
+      //   auditOptions: { bypassOnSuccess: true, bypassOnFailure: true },
+      // });
+      preAuthorizationResult = await this._securityExtension.authorizeFind({
+        namespaces: spacesToPreauthorize,
+        types: typesToAuthorize,
       });
       if (preAuthorizationResult?.status === 'unauthorized') {
         // If the user is unauthorized to find *anything* they requested, return an empty response
         // This is one of the last remaining calls to addAuditEvent outside of the sec ext
-        this._securityExtension.addAuditEvent({
-          action: AuditAction.FIND,
-          error: new Error(`User is unauthorized for any requested types/spaces.`),
-          // TODO: include object type(s) that were requested?
-          // requestedTypes: types,
-          // requestedSpaces: namespaces,
-        });
+        // this._securityExtension.addAuditEvent({
+        //   action: AuditAction.FIND,
+        //   error: new Error(`User is unauthorized for any requested types/spaces.`),
+        //   // TODO: include object type(s) that were requested?
+        //   // requestedTypes: types,
+        //   // requestedSpaces: namespaces,
+        // });
         return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
       if (preAuthorizationResult?.status === 'partially_authorized') {
@@ -1459,30 +1463,42 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       return result;
     }
 
-    const spacesToAuthorize = new Set<string>(spacesToPreauthorize); // only for namespace redaction
-    for (const { type: objType, id, namespaces: objectNamespaces = [] } of result.saved_objects) {
-      for (const space of objectNamespaces) {
-        spacesToAuthorize.add(space);
-      }
-      this._securityExtension?.addAuditEvent({
-        action: AuditAction.FIND,
-        savedObject: { type: objType, id },
-      });
-    }
-    const authorizationResult =
-      spacesToAuthorize.size > spacesToPreauthorize.size
-        ? // If there are any namespaces in the object results that were not already checked during pre-authorization, we need *another*
-          // authorization check so we can correctly redact the object namespaces below.
-          await this._securityExtension?.authorize({
-            actions: new Set([SecurityAction.FIND]),
-            types: new Set(types),
-            spaces: spacesToAuthorize,
-          })
-        : undefined;
+    // const spacesToAuthorize = new Set<string>(spacesToPreauthorize); // only for namespace redaction
+    // for (const { type: objType, id, namespaces: objectNamespaces = [] } of result.saved_objects) {
+    //   for (const space of objectNamespaces) {
+    //     spacesToAuthorize.add(space);
+    //   }
+    //   this._securityExtension?.addAuditEvent({
+    //     action: AuditAction.FIND,
+    //     savedObject: { type: objType, id },
+    //   });
+    // }
+    // const authorizationResult =
+    //   spacesToAuthorize.size > spacesToPreauthorize.size
+    //     ? // If there are any namespaces in the object results that were not already checked during pre-authorization, we need *another*
+    //       // authorization check so we can correctly redact the object namespaces below.
+    //       await this._securityExtension?.authorize({
+    //         actions: new Set([SecurityAction.FIND]),
+    //         types: new Set(types),
+    //         spaces: spacesToAuthorize,
+    //       })
+    //     : undefined;
+
+    const redactTypeMap = await this._securityExtension?.getFindRedactTypeMap({
+      authorizeNamespaces: spacesToPreauthorize,
+      types: typesToAuthorize,
+      objects: result.saved_objects.map((obj) => {
+        return {
+          type: obj.type,
+          id: obj.id,
+          existingNamespaces: obj.namespaces,
+        } as AuthorizeObjectWithExistingSpaces;
+      }),
+    });
 
     return this.optionallyDecryptAndRedactBulkResult(
       result,
-      authorizationResult?.typeMap ?? preAuthorizationResult?.typeMap // If we made a second authorization check, use that one; otherwise, fall back to the pre-authorization check
+      redactTypeMap ?? preAuthorizationResult?.typeMap // If the redact type map is valid, use that one; otherwise, fall back to the authorization check
     );
   }
 
@@ -1599,12 +1615,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    const authorizationObjects = new Array<AuthorizeBulkGetObject>();
+    const authObjects = new Array<AuthorizeBulkGetObject>();
     const result = {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           const { type, id } = expectedResult.value;
-          authorizationObjects.push({ type, id, error: true });
+          authObjects.push({ type, id, error: true });
           return expectedResult.value as any;
         }
 
@@ -1621,7 +1637,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         // @ts-expect-error MultiGetHit._source is optional
         const docNotFound = !doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces);
 
-        authorizationObjects.push({
+        authObjects.push({
           type,
           id,
           objectNamespaces: namespaces,
@@ -1645,7 +1661,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const authorizationResult = await this._securityExtension?.authorizeBulkGet({
       namespace,
-      objects: authorizationObjects,
+      objects: authObjects,
     });
 
     return this.optionallyDecryptAndRedactBulkResult(result, authorizationResult?.typeMap);

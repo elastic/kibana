@@ -39,10 +39,12 @@ import type {
   AuthorizeBulkUpdateParams,
   AuthorizeCheckConflictsParams,
   AuthorizeDeleteParams,
+  AuthorizeFindParams,
   AuthorizeGetParams,
-  AuthorizeObject,
+  AuthorizeObjectWithExistingSpaces,
   AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateSpacesParams,
+  GetFindRedactTypeMapParams,
   InternalAuthorizeOptions,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
@@ -141,7 +143,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     ]);
   }
 
-  private validateObjectsArray(objects: AuthorizeObject[], action: SecurityAction) {
+  private validateObjectsArray(
+    objects: AuthorizeObjectWithExistingSpaces[],
+    action: SecurityAction
+  ) {
     if (objects.length === 0) {
       throw new Error(
         `No objects specified for ${
@@ -343,25 +348,25 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw new Error('No spaces specified for authorization');
     }
 
-    const { authzActions, auditActions } = this.translateActions(params.actions);
+    const { authzActions } = this.translateActions(params.actions);
 
-    const {
-      objects: auditObjects,
-      bypassOnSuccess: bypassAuditOnSuccess,
-      useSuccessOutcome,
-    } = params.auditOptions || {};
+    // const {
+    //   objects: auditObjects,
+    //   bypassOnSuccess: bypassAuditOnSuccess,
+    //   useSuccessOutcome,
+    // } = params.auditOptions || {};
 
     // ToDo: get rid of this check and move it to the one authz method that requires this (close PIT)
     // If there are no actions to authorize then we can just add any audits for the sec actions
     // Example: SecurityAction.CLOSE_POINT_IN_TIME does not need authz, but we want an audit trail
-    if (authzActions.size === 0) {
-      if (!bypassAuditOnSuccess && auditActions.size > 0) {
-        auditActions.forEach((auditAction) => {
-          this.auditHelper({ action: auditAction, objects: auditObjects, useSuccessOutcome });
-        });
-      }
-      return;
-    }
+    // if (authzActions.size === 0) {
+    //   if (!bypassAuditOnSuccess && auditActions.size > 0) {
+    //     auditActions.forEach((auditAction) => {
+    //       this.auditHelper({ action: auditAction, objects: auditObjects, useSuccessOutcome });
+    //     });
+    //   }
+    //   return;
+    // }
 
     // console.log(`CHECKING...`);
     // console.log(`TYPES: ${Array.from(params.types).toString()}`);
@@ -776,15 +781,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     if (preAuthorizationResult?.status === 'unauthorized') {
       // If the user is unauthorized to find *anything* they requested, return an empty response
+      const error = new Error('User is unauthorized for any requested types/spaces.');
       this.addAuditEvent({
         action: AuditAction.OPEN_POINT_IN_TIME,
-        error: new Error('User is unauthorized for any requested types/spaces.'),
+        error,
         // TODO: include object type(s) that were requested?
         // requestedTypes: types,
         // requestedSpaces: namespaces,
       });
       // this.auditHelper({ action: AuditAction.OPEN_POINT_IN_TIME, objects: auditObjects });
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(error);
     }
     this.addAuditEvent({
       action: AuditAction.OPEN_POINT_IN_TIME,
@@ -1107,6 +1113,58 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         deleteFromSpaces,
       },
     });
+  }
+
+  async authorizeFind(
+    params: AuthorizeFindParams
+  ): Promise<CheckAuthorizationResult<string> | undefined> {
+    const { types, namespaces } = params;
+
+    const preAuthorizationResult = await this.authorize({
+      actions: new Set([SecurityAction.FIND]),
+      types: new Set(types),
+      spaces: new Set(namespaces),
+    });
+    if (preAuthorizationResult?.status === 'unauthorized') {
+      // If the user is unauthorized to find *anything* they requested, return an empty response
+      // This is one of the last remaining calls to addAuditEvent outside of the sec ext
+      this.addAuditEvent({
+        action: AuditAction.FIND,
+        error: new Error(`User is unauthorized for any requested types/spaces.`),
+        // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
+        // include object type(s) that were requested?
+        // requestedTypes: types,
+        // requestedSpaces: namespaces,
+      });
+    }
+    return preAuthorizationResult;
+  }
+
+  async getFindRedactTypeMap(
+    params: GetFindRedactTypeMapParams
+  ): Promise<AuthorizationTypeMap<string> | undefined> {
+    const { authorizeNamespaces, types, objects } = params;
+
+    const spacesToAuthorize = new Set<string>(authorizeNamespaces); // only for namespace redaction
+    for (const { type, id, existingNamespaces = [] } of objects) {
+      for (const space of existingNamespaces) {
+        spacesToAuthorize.add(space);
+      }
+      this.addAuditEvent({
+        action: AuditAction.FIND,
+        savedObject: { type, id },
+      });
+    }
+    if (spacesToAuthorize.size > authorizeNamespaces.size) {
+      // If there are any namespaces in the object results that were not already checked during pre-authorization, we need *another*
+      // authorization check so we can correctly redact the object namespaces below.
+      const authorizationResult = await this.authorize({
+        actions: new Set([SecurityAction.FIND]),
+        types,
+        spaces: spacesToAuthorize,
+      });
+      return authorizationResult?.typeMap;
+    } else return undefined;
   }
 }
 

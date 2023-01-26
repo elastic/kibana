@@ -30,7 +30,7 @@ import type {
   IndexMapping,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
+import { AuthorizeObjectWithExistingSpaces } from '@kbn/core-saved-objects-server/src/extensions/security';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -176,7 +176,7 @@ export async function updateObjectsSpaces({
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
-  const authObjects: AuthorizeObject[] = validObjects.map((element) => {
+  const authObjects: AuthorizeObjectWithExistingSpaces[] = validObjects.map((element) => {
     const { type, id, esRequestIndex: index } = element.value;
     const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
     return {

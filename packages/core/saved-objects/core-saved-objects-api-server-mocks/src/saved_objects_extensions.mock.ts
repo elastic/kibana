@@ -32,6 +32,8 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   authorizeRemoveReferences: jest.fn(),
   authorizeOpenPointInTime: jest.fn(),
   auditClosePointInTime: jest.fn(),
+  authorizeFind: jest.fn(),
+  getFindRedactTypeMap: jest.fn(),
   authorizeAndRedactMultiNamespaceReferences: jest.fn(),
   authorizeAndRedactInternalBulkResolve: jest.fn(),
   authorize: jest.fn(),

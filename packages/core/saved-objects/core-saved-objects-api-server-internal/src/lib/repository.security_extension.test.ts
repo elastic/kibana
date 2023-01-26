@@ -22,10 +22,8 @@ import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
   ISavedObjectsSecurityExtension,
-  AuditAction,
   SavedObjectsRawDocSource,
   AuthorizationTypeEntry,
-  SecurityAction,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';
@@ -58,9 +56,6 @@ import {
   expectUpdateResult,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
-  setupAuthorizeFullyAuthorized,
-  setupAuthorizePartiallyAuthorized,
-  setupAuthorizeUnauthorized,
   setupAuthorizeCreate,
   setupAuthorizeUpdate,
   setupAuthorizeBulkUpdate,
@@ -73,9 +68,12 @@ import {
   setupAuthorizeRemoveReferences,
   REMOVE_REFS_COUNT,
   setupAuthorizeOpenPointInTime,
+  setupAuthorizeFind,
+  setupGetFindRedactTypeMap,
+  generateIndexPatternSearchResults,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
-import { arrayMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
+import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -770,18 +768,24 @@ describe('SavedObjectsRepository Security Extension', () => {
   });
 
   describe('#find', () => {
-    test(`propagates decorated error when Authorization rejects promise`, async () => {
-      mockSecurityExt.authorize.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeFind rejects promise`, async () => {
+      mockSecurityExt.authorizeFind.mockRejectedValueOnce(checkAuthError);
       await expect(findSuccess(client, repository, { type })).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns empty result when unauthorized`, async () => {
-      setupAuthorizeUnauthorized(mockSecurityExt);
+    test(`propagates decorated error when getFindRedactTypeMap rejects promise`, async () => {
+      mockSecurityExt.getFindRedactTypeMap.mockRejectedValueOnce(checkAuthError);
+      await expect(findSuccess(client, repository, { type })).rejects.toThrow(checkAuthError);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
+    });
+
+    test(`returns empty result when preauthorization is unauthorized`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'unauthorized');
 
       const result = await repository.find({ type });
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({
           saved_objects: [],
@@ -790,18 +794,46 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
+    test(`returns result when getFindRedactTypeMap is unauthorized`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'unauthorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const generatedResults = generateIndexPatternSearchResults(namespace);
+      client.search.mockResponseOnce(generatedResults);
+      const result = await repository.find({ type });
+
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
+      expect(result.total).toBe(4);
+      expect(result.saved_objects).toHaveLength(4);
+      generatedResults.hits.hits.forEach((doc, i) => {
+        expect(result.saved_objects[i]).toEqual({
+          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          type: doc._source!.type,
+          originId: doc._source!.originId,
+          ...mockTimestampFields,
+          version: mockVersion,
+          score: doc._score,
+          attributes: doc._source![doc._source!.type],
+          references: [],
+          namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+        });
+      });
+    });
+
     test(`calls es search with only authorized spaces when partially authorized`, async () => {
       // Setup partial authorization with the specific type and space of the current test definition
       const authRecord: Record<string, AuthorizationTypeEntry> = {
         find: { authorizedSpaces: [namespace] },
       };
-      mockSecurityExt.authorize.mockResolvedValue({
+      mockSecurityExt.authorizeFind.mockResolvedValue({
         status: 'partially_authorized',
         typeMap: Object.freeze(new Map([[type, authRecord]])),
       });
 
       await findSuccess(client, repository, { type, namespaces: [namespace, 'ns-1'] });
-      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this shouyld always pass
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
       const {
         typeToNamespacesMap: actualMap,
       }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
@@ -814,7 +846,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result of es find when fully authorized`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
@@ -844,7 +877,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`uses the authorization map when partially authorized`, async () => {
-      setupAuthorizePartiallyAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await findSuccess(
@@ -868,7 +902,8 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result of es find when partially authorized`, async () => {
-      setupAuthorizePartiallyAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
@@ -897,52 +932,100 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
-    test(`calls authorize with correct actions, types, and spaces`, async () => {
-      setupAuthorizePartiallyAuthorized(mockSecurityExt);
+    test(`calls authorizeFind with correct parameters`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
       await findSuccess(client, repository, { type, namespaces: [namespace] }, 'ns-2');
 
-      expect(mockSecurityExt.authorize).toHaveBeenCalledTimes(2);
-      const expectedActions = new Set([SecurityAction.FIND]);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-        enforceMap: actualEnforceMap,
-        options: actualOptions,
-        auditOptions: actualAuditOptions,
-      } = mockSecurityExt.authorize.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-      expect(actualEnforceMap).toBeUndefined();
-      expect(actualOptions).toBeUndefined();
-      expect(actualAuditOptions).toEqual({
-        bypassOnSuccess: true,
-        bypassOnFailure: true,
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledWith({
+        namespaces: new Set([namespace]),
+        types: new Set(['index-pattern']),
       });
+      // const expectedActions = new Set([SecurityAction.FIND]);
+      // const expectedSpaces = new Set([namespace]);
+      // const expectedTypes = new Set([type]);
 
-      const {
-        actions: actualActions2,
-        spaces: actualSpaces2,
-        types: actualTypes2,
-        enforceMap: actualEnforceMap2,
-        options: actualOptions2,
-      } = mockSecurityExt.authorize.mock.calls[1][0];
+      // const {
+      //   actions: actualActions,
+      //   spaces: actualSpaces,
+      //   types: actualTypes,
+      //   enforceMap: actualEnforceMap,
+      //   options: actualOptions,
+      //   auditOptions: actualAuditOptions,
+      // } = mockSecurityExt.authorizeFind.mock.calls[0][0];
 
-      expect(setsAreEqual(actualActions2, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces2, new Set([...expectedSpaces, 'ns-2']))).toBeTruthy();
-      expect(setsAreEqual(actualTypes2, expectedTypes)).toBeTruthy();
-      expect(actualEnforceMap2).toBeUndefined();
-      expect(actualOptions2).toBeUndefined(); // ToDo: Is this true?
+      // expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
+      // expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+      // expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      // expect(actualEnforceMap).toBeUndefined();
+      // expect(actualOptions).toBeUndefined();
+      // expect(actualAuditOptions).toEqual({
+      //   bypassOnSuccess: true,
+      //   bypassOnFailure: true,
+      // });
+
+      // const {
+      //   actions: actualActions2,
+      //   spaces: actualSpaces2,
+      //   types: actualTypes2,
+      //   enforceMap: actualEnforceMap2,
+      //   options: actualOptions2,
+      // } = mockSecurityExt.authorize.mock.calls[1][0];
+
+      // expect(setsAreEqual(actualActions2, expectedActions)).toBeTruthy();
+      // expect(setsAreEqual(actualSpaces2, new Set([...expectedSpaces, 'ns-2']))).toBeTruthy();
+      // expect(setsAreEqual(actualTypes2, expectedTypes)).toBeTruthy();
+      // expect(actualEnforceMap2).toBeUndefined();
+      // expect(actualOptions2).toBeUndefined(); // ToDo: Is this true?
+    });
+
+    test(`calls GetFindRedactTypeMap with correct parameters`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+      const { generatedResults } = await findSuccess(
+        client,
+        repository,
+        { type, namespaces: [namespace] },
+        'ns-2'
+      );
+
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledWith({
+        authorizeNamespaces: new Set([namespace]),
+        types: new Set(['index-pattern']),
+        objects: generatedResults.hits.hits.map((obj) => {
+          return {
+            type: obj._source?.type,
+            id: obj._id.slice(obj._id.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
+            existingNamespaces:
+              obj._source?.namespaces ?? obj._source?.namespace
+                ? [obj._source?.namespace]
+                : undefined,
+          };
+        }),
+      });
+      // const {
+      //   actions: actualActions2,
+      //   spaces: actualSpaces2,
+      //   types: actualTypes2,
+      //   enforceMap: actualEnforceMap2,
+      //   options: actualOptions2,
+      // } = mockSecurityExt.authorize.mock.calls[1][0];
+
+      // expect(setsAreEqual(actualActions2, expectedActions)).toBeTruthy();
+      // expect(setsAreEqual(actualSpaces2, new Set([...expectedSpaces, 'ns-2']))).toBeTruthy();
+      // expect(setsAreEqual(actualTypes2, expectedTypes)).toBeTruthy();
+      // expect(actualEnforceMap2).toBeUndefined();
+      // expect(actualOptions2).toBeUndefined(); // ToDo: Is this true?
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
+      setupGetFindRedactTypeMap(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { generatedResults } = await findSuccess(client, repository, {
@@ -960,31 +1043,31 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
-    test(`adds audit per object event when successful`, async () => {
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
+    // test(`adds audit per object event when successful`, async () => {
+    //   setupAuthorizeFullyAuthorized(mockSecurityExt);
+    //   setupRedactPassthrough(mockSecurityExt);
 
-      const { generatedResults } = await findSuccess(client, repository, {
-        type,
-        namespaces: [namespace],
-      });
+    //   const { generatedResults } = await findSuccess(client, repository, {
+    //     type,
+    //     namespaces: [namespace],
+    //   });
 
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(
-        generatedResults.hits.hits.length
-      );
+    //   expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(
+    //     generatedResults.hits.hits.length
+    //   );
 
-      generatedResults.hits.hits.forEach((doc, i) => {
-        expect(mockSecurityExt.addAuditEvent.mock.calls[i]).toEqual([
-          {
-            action: AuditAction.FIND,
-            savedObject: {
-              type: doc._source!.type,
-              id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
-            },
-          },
-        ]);
-      });
-    });
+    //   generatedResults.hits.hits.forEach((doc, i) => {
+    //     expect(mockSecurityExt.addAuditEvent.mock.calls[i]).toEqual([
+    //       {
+    //         action: AuditAction.FIND,
+    //         savedObject: {
+    //           type: doc._source!.type,
+    //           id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+    //         },
+    //       },
+    //     ]);
+    //   });
+    // });
 
     // test(`adds audit event when not successful`, async () => {
     //   setupPerformAuthUnauthorized(mockSecurityExt);
@@ -1308,7 +1391,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupAuthorizeFullyAuthorized(mockSecurityExt);
+      setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
