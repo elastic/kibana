@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 export const OTHER_SERVICE_NAME = '_other';
-
-export const maxTransactionGroupsTitle = i18n.translate(
-  'xpack.apm.transactionsCallout.maxTransactionGroups.title',
-  {
-    defaultMessage: 'The number of transaction groups has been reached.',
-  }
-);
 
 export function ServiceMaxGroupsMessage({
   remainingServices,

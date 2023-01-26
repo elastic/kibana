@@ -26,10 +26,6 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import {
-  OTHER_SERVICE_NAME,
-  ServiceMaxGroupsMessage,
-} from '../../shared/links/apm/service_link/service_max_groups_message';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
@@ -215,9 +211,6 @@ export function ServiceInventory() {
 
   const hasKibanaUiLimitRestrictedData =
     mainStatisticsFetch.data?.maxServiceGroupsExceeded;
-  const shouldDisplayMaxGroupReachedCallout = mainStatisticsItems.some(
-    (item) => item.serviceName === OTHER_SERVICE_NAME
-  );
 
   const displayAlerts = [...mainStatisticsItems, ...preloadedServices].some(
     (item) => ServiceInventoryFieldName.AlertsCount in item
@@ -330,36 +323,12 @@ export function ServiceInventory() {
     </EuiFlexItem>
   );
 
-  const maxGroupReachedCallout = (
-    <EuiFlexItem>
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.serviceList.apmServer.limit.warning.calloutTitle',
-          {
-            defaultMessage:
-              'Number of services instrumented has reached the current capacity of the APM server',
-          }
-        )}
-        color="warning"
-        iconType="alert"
-      >
-        <EuiText size="s">
-          <ServiceMaxGroupsMessage remainingServices={2} />
-        </EuiText>
-      </EuiCallOut>
-    </EuiFlexItem>
-  );
-
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
-        {hasKibanaUiLimitRestrictedData
-          ? kibanaUiServiceLimitCallout
-          : shouldDisplayMaxGroupReachedCallout
-          ? maxGroupReachedCallout
-          : null}
+        {hasKibanaUiLimitRestrictedData && kibanaUiServiceLimitCallout}
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
