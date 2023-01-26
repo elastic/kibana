@@ -22,6 +22,12 @@ function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
+export class NotFoundRouteException extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
@@ -111,12 +117,14 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
     }
 
     const hasExactMatch = matches.some((match) => match.match.isExact);
+    if (!hasExactMatch) {
+      throw new NotFoundRouteException('No route was matched');
+    }
 
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {
       const route = routesByReactRouterConfig.get(matchedRoute.route);
 
-      // Only validates the params when exact match has been found, otherwise a 404 page should be show
-      if (hasExactMatch && route?.params) {
+      if (route?.params) {
         const decoded = deepExactRt(route.params).decode(
           merge({}, route.defaults ?? {}, {
             path: matchedRoute.match.params,
@@ -125,15 +133,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
         );
 
         if (isLeft(decoded)) {
-          return {
-            match: {
-              ...matchedRoute.match,
-              params: matchedRoute.match.params,
-            },
-            route,
-            hasExactMatch,
-            errorMessage: PathReporter.report(decoded).join('\n'),
-          };
+          throw new Error(PathReporter.report(decoded).join('\n'));
         }
 
         return {
@@ -142,7 +142,6 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
             params: decoded.right,
           },
           route,
-          hasExactMatch,
         };
       }
 
@@ -155,7 +154,6 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
           },
         },
         route,
-        hasExactMatch,
       };
     });
   };

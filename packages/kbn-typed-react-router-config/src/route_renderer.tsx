@@ -19,12 +19,7 @@ export function RouteRenderer() {
     .reduce((prev, match) => {
       const { element } = match.route;
       return (
-        <CurrentRouteContextProvider
-          match={match}
-          element={prev}
-          hasExactMatch={match.hasExactMatch}
-          errorMessage={match.errorMessage}
-        >
+        <CurrentRouteContextProvider match={match} element={prev}>
           {element}
         </CurrentRouteContextProvider>
       );

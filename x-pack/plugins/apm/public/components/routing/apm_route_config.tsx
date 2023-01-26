@@ -20,7 +20,6 @@ import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
-import { Router } from './router';
 
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
@@ -67,11 +66,9 @@ const apmRoutes = {
   },
   '/': {
     element: (
-      <Router>
-        <Breadcrumb title="APM" href="/">
-          <Outlet />
-        </Breadcrumb>
-      </Router>
+      <Breadcrumb title="APM" href="/">
+        <Outlet />
+      </Breadcrumb>
     ),
     children: {
       // this route fails on navigation unless it's defined before home
