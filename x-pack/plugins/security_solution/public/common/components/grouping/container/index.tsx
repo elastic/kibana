@@ -111,6 +111,7 @@ const GroupingContainerComponent = ({
   const groupPanels = useMemo(
     () =>
       data.stackByMupltipleFields0?.buckets?.map((groupBucket) => {
+        const group = isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key;
         const groupKey = `group0-${
           isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key
         }`;
@@ -125,13 +126,13 @@ const GroupingContainerComponent = ({
               type: 'phrase',
               key: selectedGroup,
               params: {
-                query: groupKey,
+                query: group,
               },
             },
             query: {
               match_phrase: {
                 [selectedGroup]: {
-                  query: groupKey,
+                  query: group,
                 },
               },
             },
