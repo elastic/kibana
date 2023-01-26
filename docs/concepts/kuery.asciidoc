@@ -70,7 +70,7 @@ http.request.referrer: "https://example.com"
 http.request.referrer: https\://example.com
 -------------------
 
-You must escape following characters:
+You must escape the following characters:
 
 [source,yaml]
 -------------------
@@ -80,7 +80,7 @@ You must escape following characters:
 [discrete]
 === Filter for documents within a range
 
-To search documents that contain terms within a provided range, use KQL’s range syntax.
+To search for documents that contain terms within a provided range, use KQL’s range syntax.
 For example, to search for all documents for which `http.response.bytes` is less than 10000,
 use the following syntax:
 
