@@ -6,9 +6,9 @@
  */
 
 import { omitBy } from 'lodash';
+import { isDefined } from '@kbn/ml-is-defined';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
-import { isDefined } from '../../../../common/types/guards';
 
 export interface GetSchemaDefinitionParams {
   path: string;
