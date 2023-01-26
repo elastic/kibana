@@ -21,5 +21,8 @@ export type CustomBrandingFetchFn = (
 /** @public */
 export interface CustomBrandingSetup {
   register: (fetchFn: CustomBrandingFetchFn) => void;
-  getBrandingFor: (request: KibanaRequest, unauthenticated?: boolean) => Promise<CustomBranding>;
+  getBrandingFor: (
+    request: KibanaRequest,
+    options: { unauthenticated?: boolean }
+  ) => Promise<CustomBranding>;
 }

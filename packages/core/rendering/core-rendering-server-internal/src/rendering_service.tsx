@@ -122,7 +122,9 @@ export class RenderingService {
           )
         );
       }
-      branding = await customBranding?.getBrandingFor(request, !authenticated)!;
+      branding = await customBranding?.getBrandingFor(request, {
+        unauthenticated: !authenticated,
+      })!;
     } catch (err) {
       // swallow error
     }

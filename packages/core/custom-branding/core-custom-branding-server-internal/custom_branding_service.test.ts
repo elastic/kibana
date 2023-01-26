@@ -70,7 +70,7 @@ describe('#setup', () => {
     fetchFn.mockImplementation(() => Promise.resolve({ logo: 'myLogo' }));
     register('customBranding', fetchFn);
     const kibanaRequest: jest.Mocked<KibanaRequest> = {} as unknown as jest.Mocked<KibanaRequest>;
-    await getBrandingFor(kibanaRequest, true);
+    await getBrandingFor(kibanaRequest, { unauthenticated: true });
     expect(fetchFn).toHaveBeenCalledWith(kibanaRequest, true);
   });
 });

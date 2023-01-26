@@ -15,7 +15,10 @@ import type { Logger } from '@kbn/logging';
  */
 export interface InternalCustomBrandingSetup {
   register: (pluginName: string, fetchFn: CustomBrandingFetchFn) => void;
-  getBrandingFor: (request: KibanaRequest, unauthenticated?: boolean) => Promise<CustomBranding>;
+  getBrandingFor: (
+    request: KibanaRequest,
+    options?: { unauthenticated?: boolean }
+  ) => Promise<CustomBranding>;
 }
 
 export class CustomBrandingService {
@@ -56,7 +59,7 @@ export class CustomBrandingService {
 
   private getBrandingFor = async (
     request: KibanaRequest,
-    unauthenticated?: boolean
+    options?: { unauthenticated?: boolean }
   ): Promise<CustomBranding> => {
     if (!this.startCalled) {
       throw new Error('Cannot be called before #start');
@@ -64,6 +67,6 @@ export class CustomBrandingService {
     if (!this.pluginName || this.pluginName !== 'customBranding' || !this.fetchFn) {
       return {};
     }
-    return this.fetchFn!(request, Boolean(unauthenticated));
+    return this.fetchFn!(request, Boolean(options?.unauthenticated));
   };
 }
