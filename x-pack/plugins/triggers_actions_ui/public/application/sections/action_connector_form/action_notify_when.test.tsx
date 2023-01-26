@@ -8,20 +8,14 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiSuperSelectProps } from '@elastic/eui';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { act } from 'react-dom/test-utils';
 import { RuleAction } from '../../../types';
+import { ActionNotifyWhen } from './action_notify_when';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
   DEFAULT_FREQUENCY_WITH_SUMMARY,
 } from '../../../common/constants';
-import { ActionNotifyWhen } from './action_notify_when';
-
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/action_connector_api', () => ({
-  loadAllActions: jest.fn(),
-  loadActionTypes: jest.fn(),
-}));
 
 describe('action_notify_when', () => {
   async function setup(
