@@ -15,7 +15,6 @@ import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
 import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
-import { of } from 'rxjs';
 
 describe('AnalyticsNoDataPageComponent', () => {
   const services = getAnalyticsNoDataPageServicesMock();
@@ -28,9 +27,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         <AnalyticsNoDataPage
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
-          showPlainSpinner={
-            services.customBranding.hasCustomBranding$.subscribe(() => of(true)) ? true : false
-          }
+          showPlainSpinner={false}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -54,9 +51,7 @@ describe('AnalyticsNoDataPageComponent', () => {
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
           allowAdHocDataView={true}
-          showPlainSpinner={
-            services.customBranding.hasCustomBranding$.subscribe(() => of(true)) ? true : false
-          }
+          showPlainSpinner={false}
         />
       </AnalyticsNoDataPageProvider>
     );

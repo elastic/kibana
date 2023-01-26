@@ -200,7 +200,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         },
       },
       dataViewEditor,
-      customBranding,
     };
 
     return (
