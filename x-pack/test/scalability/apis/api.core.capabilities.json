@@ -1,6 +1,11 @@
 {
   "journeyName": "POST /api/core/capabilities",
   "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 5000,
+      "threshold2": 10000,
+      "threshold3": 20000
+    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -12,11 +17,11 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 250,
-        "duration": "4m"
+        "maxUsersCount": 200,
+        "duration": "285s"
       }
     ],
-    "maxDuration": "6m"
+    "maxDuration": "5m"
   },
   "testData": {
     "esArchives": [],

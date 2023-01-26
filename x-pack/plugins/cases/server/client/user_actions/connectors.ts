@@ -7,13 +7,13 @@
 
 import { isEqual } from 'lodash';
 
-import type { SavedObject } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
-  CaseUserActionResponse,
   GetCaseConnectorsResponse,
   CaseConnector,
+  CaseUserActionInjectedAttributesWithoutActionId,
 } from '../../../common/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/api';
 import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
@@ -22,7 +22,7 @@ import type { CasesClientArgs } from '..';
 import type { Authorization, OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
-import type { CaseConnectorActivity, PushInfo } from '../../services/user_actions/types';
+import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
 
 export const getConnectors = async (
@@ -68,7 +68,7 @@ const checkConnectorsAuthorization = async ({
   authorization,
 }: {
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionResponse>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
   authorization: PublicMethodsOf<Authorization>;
 }) => {
   const entities: OwnerEntity[] = latestUserAction
@@ -82,10 +82,18 @@ const checkConnectorsAuthorization = async ({
     });
 
     if (connector.push) {
-      entities.push({
-        owner: connector.push.attributes.owner,
-        id: connector.connectorId,
-      });
+      entities.push(
+        ...[
+          {
+            owner: connector.push.mostRecent.attributes.owner,
+            id: connector.connectorId,
+          },
+          {
+            owner: connector.push.oldest.attributes.owner,
+            id: connector.connectorId,
+          },
+        ]
+      );
     }
   }
 
@@ -96,7 +104,8 @@ const checkConnectorsAuthorization = async ({
 };
 
 interface EnrichedPushInfo {
-  pushDate: Date;
+  latestPushDate: Date;
+  oldestPushDate: Date;
   connectorFieldsUsedInPush: CaseConnector;
 }
 
@@ -109,7 +118,7 @@ const getConnectorsInfo = async ({
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionResponse>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
 }): Promise<GetCaseConnectorsResponse> => {
@@ -123,6 +132,12 @@ const getConnectorsInfo = async ({
   return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
 };
 
+interface PushTimeFrameDetails {
+  connectorId: string;
+  mostRecentPush: Date;
+  oldestPush: Date;
+}
+
 const getPushInfo = async ({
   caseId,
   activity,
@@ -132,29 +147,39 @@ const getPushInfo = async ({
   activity: CaseConnectorActivity[];
   userActionService: CaseUserActionService;
 }): Promise<Map<string, EnrichedPushInfo>> => {
-  const pushRequest: PushInfo[] = [];
+  const pushDetails: PushTimeFrameDetails[] = [];
 
   for (const connectorInfo of activity) {
-    const pushCreatedAt = getDate(connectorInfo.push?.attributes.created_at);
+    const mostRecentPushCreatedAt = getDate(connectorInfo.push?.mostRecent.attributes.created_at);
+    const oldestPushCreatedAt = getDate(connectorInfo.push?.oldest.attributes.created_at);
 
-    if (connectorInfo.push != null && pushCreatedAt != null) {
-      pushRequest.push({ connectorId: connectorInfo.connectorId, date: pushCreatedAt });
+    if (
+      connectorInfo.push != null &&
+      mostRecentPushCreatedAt != null &&
+      oldestPushCreatedAt != null
+    ) {
+      pushDetails.push({
+        connectorId: connectorInfo.connectorId,
+        mostRecentPush: mostRecentPushCreatedAt,
+        oldestPush: oldestPushCreatedAt,
+      });
     }
   }
 
   const connectorFieldsForPushes = await userActionService.getConnectorFieldsBeforeLatestPush(
     caseId,
-    pushRequest
+    pushDetails.map((push) => ({ connectorId: push.connectorId, date: push.mostRecentPush }))
   );
 
   const enrichedPushInfo = new Map<string, EnrichedPushInfo>();
-  for (const request of pushRequest) {
-    const connectorFieldsSO = connectorFieldsForPushes.get(request.connectorId);
+  for (const pushInfo of pushDetails) {
+    const connectorFieldsSO = connectorFieldsForPushes.get(pushInfo.connectorId);
     const connectorFields = getConnectorInfoFromSavedObject(connectorFieldsSO);
 
     if (connectorFields != null) {
-      enrichedPushInfo.set(request.connectorId, {
-        pushDate: request.date,
+      enrichedPushInfo.set(pushInfo.connectorId, {
+        latestPushDate: pushInfo.mostRecentPush,
+        oldestPushDate: pushInfo.oldestPush,
         connectorFieldsUsedInPush: connectorFields,
       });
     }
@@ -180,7 +205,7 @@ const isDateValid = (date: Date): boolean => {
 };
 
 const getConnectorInfoFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionResponse> | undefined
+  savedObject: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined
 ): CaseConnector | undefined => {
   if (
     savedObject != null &&
@@ -200,7 +225,7 @@ const createConnectorInfoResult = ({
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
-  latestUserAction?: SavedObject<CaseUserActionResponse>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
 
@@ -223,7 +248,8 @@ const createConnectorInfoResult = ({
         ...connector,
         name: connectorDetails.name,
         needsToBePushed,
-        latestPushDate: enrichedPushInfo?.pushDate.toISOString(),
+        latestPushDate: enrichedPushInfo?.latestPushDate.toISOString(),
+        oldestPushDate: enrichedPushInfo?.oldestPushDate.toISOString(),
         hasBeenPushed: hasBeenPushed(enrichedPushInfo),
       };
     }
@@ -256,7 +282,9 @@ const hasDataToPush = ({
      * push fields will be undefined which will not equal the latest connector fields anyway.
      */
     !isEqual(connector, pushInfo?.connectorFieldsUsedInPush) ||
-    (pushInfo != null && latestUserActionDate != null && latestUserActionDate > pushInfo.pushDate)
+    (pushInfo != null &&
+      latestUserActionDate != null &&
+      latestUserActionDate > pushInfo.latestPushDate)
   );
 };
 
