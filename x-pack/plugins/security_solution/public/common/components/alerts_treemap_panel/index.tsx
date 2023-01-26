@@ -147,10 +147,10 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   useInspectButton({
     deleteQuery,
     loading: isLoadingAlerts,
-    request,
     response,
-    refetch,
     setQuery,
+    refetch,
+    request,
     uniqueQueryId,
   });
 
