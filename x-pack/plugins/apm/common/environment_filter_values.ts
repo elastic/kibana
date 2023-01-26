@@ -55,6 +55,18 @@ export function getEnvironmentEsField(environment: string) {
   return { [SERVICE_ENVIRONMENT]: environment };
 }
 
+export function getEnvironmentKuery(environment: string) {
+  if (
+    !environment ||
+    environment === ENVIRONMENT_NOT_DEFINED_VALUE ||
+    environment === ENVIRONMENT_ALL_VALUE
+  ) {
+    return null;
+  }
+
+  return `${[SERVICE_ENVIRONMENT]}: ${environment} `;
+}
+
 // returns the environment url param that should be used
 // based on the requested environment. If the requested
 // environment is different from the URL parameter, we'll
