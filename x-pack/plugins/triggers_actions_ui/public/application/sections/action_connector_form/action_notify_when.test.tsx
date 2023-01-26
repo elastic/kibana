@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { EuiAccordion, EuiSuperSelectProps } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
+import { EuiSuperSelectProps } from '@elastic/eui';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { act } from 'react-dom/test-utils';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Rule, RuleAction, GenericValidationResult } from '../../../types';
-import { ActionNotifyWhen } from './action_notify_when';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-  RuleNotifyWhen,
-} from '@kbn/alerting-plugin/common';
+import { RuleAction } from '../../../types';
 import {
   DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
   DEFAULT_FREQUENCY_WITH_SUMMARY,
-} from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+} from '../../../common/constants';
+import { ActionNotifyWhen } from './action_notify_when';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -63,7 +56,7 @@ describe('action_notify_when', () => {
         '[data-test-subj="summaryOrPerRuleSelect"]'
       );
       expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-selected']).toEqual('Summary of alerts');
+      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('Summary of alerts');
 
       const notifyWhenSelect = wrapperDefault.find('[data-test-subj="notifyWhenSelect"]');
       expect(notifyWhenSelect.exists()).toBeTruthy();
@@ -77,7 +70,7 @@ describe('action_notify_when', () => {
         '[data-test-subj="summaryOrPerRuleSelect"]'
       );
       expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-selected']).toEqual('For each alert');
+      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('For each alert');
 
       const notifyWhenSelect = wrapperForEach.find('[data-test-subj="notifyWhenSelect"]');
       expect(notifyWhenSelect.exists()).toBeTruthy();
@@ -95,7 +88,7 @@ describe('action_notify_when', () => {
         '[data-test-subj="summaryOrPerRuleSelect"]'
       );
       expect(summaryOrPerRuleSelect.exists()).toBeTruthy();
-      expect(summaryOrPerRuleSelect.first().props()['aria-selected']).toEqual('Summary of alerts');
+      expect(summaryOrPerRuleSelect.first().props()['aria-label']).toEqual('Summary of alerts');
 
       const notifyWhenSelect = wrapperSummaryThrottle.find('[data-test-subj="notifyWhenSelect"]');
       expect(notifyWhenSelect.exists()).toBeTruthy();

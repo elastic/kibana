@@ -265,7 +265,11 @@ export const ActionNotifyWhen = ({
       closePopover={useCallback(() => setSummaryMenuOpen(false), [setSummaryMenuOpen])}
       panelPaddingSize="none"
       anchorPosition="downLeft"
-      aria-selected={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
+      aria-label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
+      aria-roledescription={i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOrRulePerSelectRoleDescription',
+        { defaultMessage: 'Action frequency type select' }
+      )}
       button={
         <EuiButtonEmpty
           size="xs"
