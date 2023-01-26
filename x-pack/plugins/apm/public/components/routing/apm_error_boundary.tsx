@@ -25,10 +25,6 @@ export class ApmErrorBoundary extends React.Component<
   }
 
   render() {
-    if (this.state.error instanceof NotFoundRouteException) {
-      return <RouteNotFoundWithTemplate />;
-    }
-
     if (this.state.error) {
       return <ErrorWithTemplate error={this.state.error} />;
     }
@@ -37,26 +33,26 @@ export class ApmErrorBoundary extends React.Component<
   }
 }
 
-function RouteNotFoundWithTemplate() {
-  const { services } = useKibana<ApmPluginStartDeps>();
-  const { observability } = services;
-
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
-
-  return (
-    <ObservabilityPageTemplate pageHeader={{ pageTitle: 'APM' }}>
-      <NotFoundPrompt />
-    </ObservabilityPageTemplate>
-  );
-}
+const pageHeader = {
+  pageTitle: 'APM',
+};
 
 function ErrorWithTemplate({ error }: { error: Error }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const { observability } = services;
 
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+
+  if (error instanceof NotFoundRouteException) {
+    return (
+      <ObservabilityPageTemplate pageHeader={pageHeader}>
+        <NotFoundPrompt />
+      </ObservabilityPageTemplate>
+    );
+  }
+
   return (
-    <ObservabilityPageTemplate pageHeader={{ pageTitle: 'APM' }}>
+    <ObservabilityPageTemplate pageHeader={pageHeader}>
       <EuiErrorBoundary>
         <DummyComponent error={error} />
       </EuiErrorBoundary>
