@@ -101,7 +101,7 @@ const TagsFilterPopoverComponent = ({
       >
         {(list, search) => (
           <div style={{ width: 275 }}>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </div>
         )}
