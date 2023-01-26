@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { DocViewer } from '@kbn/unified-doc-viewer';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';

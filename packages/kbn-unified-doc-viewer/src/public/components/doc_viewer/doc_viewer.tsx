@@ -8,9 +8,12 @@
 
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getDocViewsRegistry } from '../../../../kibana_services';
+import { getDocViewsRegistry } from '@kbn/discover-plugin/public/kibana_services';
+import {
+  DocView,
+  DocViewRenderProps,
+} from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
 import { DocViewerTab } from './doc_viewer_tab';
-import { DocView, DocViewRenderProps } from '../../doc_views_types';
 
 /**
  * Rendering tabs with different views of 1 Elasticsearch hit in Discover.

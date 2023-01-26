@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
-import { DocViewRenderProps } from '../../doc_views_types';
+import { DocViewRenderProps } from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
 
 test('Mounting and unmounting DocViewerRenderTab', () => {
   const unmountFn = jest.fn();

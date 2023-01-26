@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DocViewerSource } from './source';
 
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default DocViewerSource;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-unified-doc-viewer'],
+};

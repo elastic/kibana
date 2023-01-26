@@ -73,10 +73,14 @@ import {
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 
 const DocViewerLegacyTable = React.lazy(
-  () => import('./services/doc_views/components/doc_viewer_table/legacy')
+  () => import('@kbn/unified-doc-viewer/src/public/components/doc_viewer_table/legacy')
 );
-const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
+const DocViewerTable = React.lazy(
+  () => import('@kbn/unified-doc-viewer/src/public/components/doc_viewer_table')
+);
+const SourceViewer = React.lazy(
+  () => import('@kbn/unified-doc-viewer/src/public/components/doc_viewer_source')
+);
 
 /**
  * @public

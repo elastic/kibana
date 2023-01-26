@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { DocViewFilterFn } from '../../doc_views_types';
+import { DocViewFilterFn } from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
 
 interface TableActionsProps {
   mode?: 'inline' | 'as_popover';

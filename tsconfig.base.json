@@ -1248,6 +1248,8 @@
       "@kbn/ui-shared-deps-src/*": ["packages/kbn-ui-shared-deps-src/*"],
       "@kbn/ui-theme": ["packages/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["packages/kbn-ui-theme/*"],
+      "@kbn/unified-doc-viewer": ["packages/kbn-unified-doc-viewer"],
+      "@kbn/unified-doc-viewer/*": ["packages/kbn-unified-doc-viewer/*"],
       "@kbn/unified-field-list-plugin": ["src/plugins/unified_field_list"],
       "@kbn/unified-field-list-plugin/*": ["src/plugins/unified_field_list/*"],
       "@kbn/unified-histogram-plugin": ["src/plugins/unified_histogram"],

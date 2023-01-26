@@ -9,10 +9,10 @@
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldName } from '../../../../../components/field_name/field_name';
+import { FieldRecordLegacy } from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
+import { FieldName } from '@kbn/discover-plugin/public/components/field_name/field_name';
 import { TableActions } from './table_cell_actions';
 import { TableFieldValue } from '../table_cell_value';
-import { FieldRecordLegacy } from '../../../doc_views_types';
 
 export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecordLegacy> = {
   field: 'action',

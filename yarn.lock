@@ -4305,6 +4305,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/user-profile-components@link:packages/kbn-user-profile-components":
   version "0.0.0"
   uid ""

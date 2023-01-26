@@ -13,11 +13,11 @@ import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
-import { useEsDocSearch } from '../../../../hooks/use_es_doc_search';
-import { ElasticRequestState } from '../../../../application/doc/types';
+import { useEsDocSearch } from '@kbn/discover-plugin/public/hooks/use_es_doc_search';
+import { useDiscoverServices } from '@kbn/discover-plugin/public/hooks/use_discover_services';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-plugin/common';
+import { ElasticRequestState } from '@kbn/discover-plugin/public/application/doc/types';
+import { JSONCodeEditorCommonMemoized } from '@kbn/discover-plugin/public/components/json_code_editor/json_code_editor_common';
 import { getHeight } from './get_height';
 
 interface SourceViewerProps {

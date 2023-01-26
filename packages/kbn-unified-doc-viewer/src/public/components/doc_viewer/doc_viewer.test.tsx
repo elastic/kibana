@@ -10,16 +10,14 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { getDocViewsRegistry } from '../../../../kibana_services';
-import { DocViewRenderProps } from '../../doc_views_types';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { getDocViewsRegistry } from '@kbn/discover-plugin/public/kibana_services';
+import { DocViewRenderProps } from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
+import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
 
-jest.mock('../../../../kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+jest.mock('@kbn/discover-plugin/public/kibana_services', () => {
   let registry: any[] = [];
   return {
     getDocViewsRegistry: () => ({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addDocView(view: any) {
         registry.push(view);
       },
@@ -33,7 +31,7 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-jest.mock('../../../../hooks/use_discover_services', () => {
+jest.mock('@kbn/discover-plugin/public/hooks/use_discover_services', () => {
   return {
     useDiscoverServices: {
       uiSettings: {
@@ -44,7 +42,6 @@ jest.mock('../../../../hooks/use_discover_services', () => {
 });
 
 beforeEach(() => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (getDocViewsRegistry() as any).resetRegistry();
   jest.clearAllMocks();
 });

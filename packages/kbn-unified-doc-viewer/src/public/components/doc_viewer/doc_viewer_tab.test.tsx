@@ -9,8 +9,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
-import { dataViewMock } from '../../../../__mocks__/data_view';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
+import { dataViewMock } from '@kbn/discover-plugin/public/__mocks__/data_view';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {

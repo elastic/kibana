@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views_types';
+import React, { useEffect, useRef } from 'react';
+import {
+  DocViewRenderFn,
+  DocViewRenderProps,
+} from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
 
 interface Props {
   render: DocViewRenderFn;

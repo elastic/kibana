@@ -8,9 +8,12 @@
 
 import React from 'react';
 import { isEqual } from 'lodash';
+import {
+  DocViewRenderFn,
+  DocViewRenderProps,
+} from '@kbn/discover-plugin/public/services/doc_views/doc_views_types';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
-import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views_types';
 
 interface Props {
   id: number;

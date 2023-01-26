@@ -26,7 +26,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
+import { DocViewer } from '@kbn/unified-doc-viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';

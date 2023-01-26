@@ -1024,6 +1024,7 @@ packages/kbn-ui-framework @elastic/kibana-design
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
+packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 packages/kbn-user-profile-components @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
