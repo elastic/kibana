@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { EcsEvent } from '@kbn/core/server';
 import { AuditEvent } from '@kbn/security-plugin/server';
 import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server';
+import { ArrayElement } from '@kbn/utility-types';
 
 export enum AlertAuditAction {
   GET = 'alert_get',
@@ -29,7 +30,7 @@ const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
   alert_find: ['access', 'accessing', 'accessed'],
 };
 
-const eventTypes: Record<AlertAuditAction, EcsEventType> = {
+const eventTypes: Record<AlertAuditAction, ArrayElement<EcsEvent['type']>> = {
   alert_get: 'access',
   alert_update: 'change',
   alert_find: 'access',
@@ -37,7 +38,7 @@ const eventTypes: Record<AlertAuditAction, EcsEventType> = {
 
 export interface AlertAuditEventParams {
   action: AlertAuditAction;
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   id?: string;
   error?: Error;
 }
