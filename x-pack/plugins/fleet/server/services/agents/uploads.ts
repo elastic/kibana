@@ -72,7 +72,7 @@ export async function getAgentUploads(
     const result = {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
-      status: file?.Status ?? 'IN_PROGRESS',
+      status: file?.Status ?? (action.error ? 'FAILED' : 'IN_PROGRESS'),
       name: fileName,
       createTime: action.timestamp!,
       filePath,
@@ -86,7 +86,7 @@ export async function getAgentUploads(
 async function _getRequestDiagnosticsActions(
   esClient: ElasticsearchClient,
   agentId: string
-): Promise<Array<{ actionId: string; timestamp?: string; fileId?: string }>> {
+): Promise<Array<{ actionId: string; timestamp?: string; fileId?: string; error?: string }>> {
   const agentActionRes = await esClient.search<any>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -144,6 +144,7 @@ async function _getRequestDiagnosticsActions(
       actionId: hit._source?.action_id as string,
       timestamp: hit._source?.['@timestamp'],
       fileId: hit._source?.data?.file_id as string,
+      error: hit._source?.error,
     }));
     return agentActions.map((action) => {
       const actionResult = actionResults.find((result) => result.actionId === action.actionId);
@@ -151,6 +152,7 @@ async function _getRequestDiagnosticsActions(
         actionId: action.actionId,
         timestamp: actionResult?.timestamp ?? action.timestamp,
         fileId: actionResult?.fileId,
+        error: actionResult?.error,
       };
     });
   } catch (err) {

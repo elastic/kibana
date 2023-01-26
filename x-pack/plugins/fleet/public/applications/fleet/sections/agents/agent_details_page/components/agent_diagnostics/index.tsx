@@ -132,7 +132,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           </EuiText>
         ) : (
           <EuiText color="subdued">
-            <EuiToolTip content={`File status: ${currentItem?.status}`}>
+            <EuiToolTip content={`Diagnostics status: ${currentItem?.status}`}>
               <EuiIcon type="alert" color="red" />
             </EuiToolTip>
             &nbsp;
