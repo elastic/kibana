@@ -215,8 +215,12 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
    * @param refreshFields - refresh field list when true
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  getDefaultDataView: (refreshFields?: boolean) => Promise<DataView | null>;
+  getDefaultDataView: (
+    refreshFields?: boolean,
+    displayErrors?: boolean
+  ) => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
@@ -261,7 +265,10 @@ export interface DataViewsServicePublicMethods {
    * @params savedObject - Data view saved object
    * @params displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
+  savedObjectToSpec: (
+    savedObject: SavedObject<DataViewAttributes>,
+    displayErrors?: boolean
+  ) => DataViewSpec;
   /**
    * Set default data view.
    * @param id - Id of the data view to set as default.
@@ -610,7 +617,8 @@ export class DataViewsService {
     id: string,
     title: string,
     options: GetFieldsOptions,
-    fieldAttrs: FieldAttrs = {}
+    fieldAttrs: FieldAttrs = {},
+    displayErrors: boolean = true
   ) => {
     const fieldsAsArr = Object.values(fields);
     const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
@@ -630,10 +638,12 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFieldSpecMap:${title}`
-        );
+        if (displayErrors) {
+          this.onNotification(
+            { title: err.message, color: 'danger', iconType: 'alert' },
+            `refreshFieldSpecMap:${title}`
+          );
+        }
         return {};
       }
 
@@ -739,9 +749,11 @@ export class DataViewsService {
   private initFromSavedObjectLoadFields = async ({
     savedObjectId,
     spec,
+    displayErrors = true,
   }: {
     savedObjectId: string;
     spec: DataViewSpec;
+    displayErrors?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     const { fields, indices } = await this.refreshFieldSpecMap(
@@ -755,7 +767,8 @@ export class DataViewsService {
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
       },
-      spec.fieldAttrs
+      spec.fieldAttrs,
+      displayErrors
     );
 
     const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
@@ -779,6 +792,7 @@ export class DataViewsService {
       const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
         savedObjectId: savedObject.id,
         spec,
+        displayErrors,
       });
       fields = fieldsAndIndices.fields;
       indices = fieldsAndIndices.indices;
@@ -1145,9 +1159,13 @@ export class DataViewsService {
    * If no possible data view found to become a default returns null.
    *
    * @param {boolean} refreshFields - if true, will refresh the fields of the default data view
+   * @param {boolean} displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    * @returns default data view
    */
-  async getDefaultDataView(refreshFields?: boolean): Promise<DataView | null> {
+  async getDefaultDataView(
+    refreshFields?: boolean,
+    displayErrors: boolean = true
+  ): Promise<DataView | null> {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1168,7 +1186,7 @@ export class DataViewsService {
     }
 
     if (defaultId) {
-      return this.get(defaultId, undefined, refreshFields);
+      return this.get(defaultId, displayErrors, refreshFields);
     } else {
       return null;
     }

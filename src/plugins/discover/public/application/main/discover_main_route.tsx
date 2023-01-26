@@ -100,7 +100,7 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const defaultDataView = await data.dataViews.getDefaultDataView();
+        const defaultDataView = await data.dataViews.getDefaultDataView(false, false);
 
         if (!defaultDataView) {
           setShowNoDataPage(true);

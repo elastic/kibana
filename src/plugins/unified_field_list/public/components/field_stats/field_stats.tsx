@@ -165,7 +165,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     try {
       const loadedDataView =
         typeof dataViewOrDataViewId === 'string'
-          ? await dataViews.get(dataViewOrDataViewId)
+          ? await dataViews.get(dataViewOrDataViewId, false)
           : dataViewOrDataViewId;
 
       setDataView(loadedDataView);
