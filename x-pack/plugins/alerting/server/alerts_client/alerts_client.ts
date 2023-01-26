@@ -29,7 +29,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { chunk, compact, flatMap, keys } from 'lodash';
-import { Alert } from '../../common/alert_schema/schemas/alert_schema';
+import { type Alert } from '../../common/alert_schema/schemas/alert_schema';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { PublicAlertFactory } from '../alert/create_alert_factory';
 import {
@@ -251,7 +251,10 @@ export class AlertsClient<
     const { alertsToReturn, recoveredAlertsToReturn } =
       await this.options.legacyAlertsClient.getAlertsToSerialize();
 
+    const context = this.options.ruleType.alerts?.context;
     const esClient = await this.options.elasticsearchClientPromise;
+
+    const indexTemplateAndPattern = getIndexTemplateAndPattern(context!);
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -311,6 +314,8 @@ export class AlertsClient<
 
     await esClient.bulk({
       refresh: 'wait_for',
+      index: indexTemplateAndPattern.alias,
+      require_alias: true,
       body: flatMap(
         [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert) => [
           {

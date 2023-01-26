@@ -19,6 +19,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ALERT_ACTION_GROUP, ALERT_ID } from '@kbn/rule-data-utils';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
@@ -445,13 +446,23 @@ function getPatternFiringAlertType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    useLegacy: schema.boolean({ defaultValue: true }),
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
     patternIndex?: number;
   }
-  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
+  const result: RuleType<
+    ParamsType,
+    never,
+    State,
+    {},
+    {},
+    'default',
+    'recovered',
+    { patternIndex: number; instancePattern: boolean[] }
+  > = {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -493,12 +504,30 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertFactory.create(instanceId).scheduleActions('default', {
-            ...EscapableStrings,
-            deep: DeepContextVariables,
-          });
+          if (!params.useLegacy && services.alertsClient) {
+            services.alertsClient.create({
+              [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_ID]: instanceId,
+              patternIndex,
+              instancePattern: instancePattern as boolean[],
+            });
+          } else {
+            services.alertFactory.create(instanceId).scheduleActions('default', {
+              ...EscapableStrings,
+              deep: DeepContextVariables,
+            });
+          }
         } else if (typeof scheduleByPattern === 'string') {
-          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+          if (!params.useLegacy && services.alertsClient) {
+            services.alertsClient.create({
+              [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_ID]: instanceId,
+              patternIndex,
+              instancePattern: [true],
+            });
+          } else {
+            services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+          }
         }
       }
 
@@ -509,7 +538,7 @@ function getPatternFiringAlertType() {
       };
     },
     alerts: {
-      context: 'test.patternFiring',
+      context: 'test.patternfiring',
       fieldMap: {
         patternIndex: {
           required: false,
