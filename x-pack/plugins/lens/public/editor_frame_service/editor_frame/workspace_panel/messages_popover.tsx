@@ -9,7 +9,8 @@ import './workspace_panel_wrapper.scss';
 import './messages_popover.scss';
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiText, EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiPopover, EuiText, EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
 
@@ -27,32 +28,59 @@ export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
     }
   });
 
+  const buttonLabel =
+    errorCount > 0 && warningCount > 0
+      ? i18n.translate('xpack.lens.messagesButton.label.errorsAndWarnings', {
+          defaultMessage:
+            '{errorCount} {errorCount, plural, one {error} other {errors}}, {warningCount} {warningCount, plural, one {warning} other {warnings}}',
+          values: {
+            errorCount,
+            warningCount,
+          },
+        })
+      : errorCount > 0
+      ? i18n.translate('xpack.lens.messagesButton.label.errors', {
+          defaultMessage: '{errorCount} {errorCount, plural, one {error} other {errors}}',
+          values: {
+            errorCount,
+          },
+        })
+      : i18n.translate('xpack.lens.messagesButton.label.warnings', {
+          defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
+          values: {
+            warningCount,
+          },
+        });
+
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
   return (
     <EuiPopover
       panelPaddingSize="none"
       button={
-        <EuiButton
-          minWidth={0}
-          color={errorCount ? 'danger' : 'warning'}
-          onClick={onButtonClick}
-          className="lnsWorkspaceWarning__button"
-          data-test-subj="lens-editor-warning-button"
-        >
-          {errorCount > 0 && (
-            <>
-              <EuiIcon type={IconError} />
-              {errorCount}
-            </>
-          )}
-          {warningCount > 0 && (
-            <>
-              <EuiIcon type={IconWarning} />
-              {warningCount}
-            </>
-          )}
-        </EuiButton>
+        <EuiToolTip content={buttonLabel}>
+          <EuiButton
+            minWidth={0}
+            color={errorCount ? 'danger' : 'warning'}
+            onClick={onButtonClick}
+            className="lnsWorkspaceWarning__button"
+            data-test-subj="lens-editor-warning-button"
+            title={buttonLabel}
+          >
+            {errorCount > 0 && (
+              <>
+                <EuiIcon type={IconError} />
+                {errorCount}
+              </>
+            )}
+            {warningCount > 0 && (
+              <>
+                <EuiIcon type={IconWarning} />
+                {warningCount}
+              </>
+            )}
+          </EuiButton>
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
