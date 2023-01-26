@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
-import { healthColorsMap } from '../../../shared/constants/health_colors';
+import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -68,7 +68,7 @@ export const EngineIndices: React.FC = () => {
       }),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
-          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          <EuiIcon type="dot" color={indexHealthToHealthColor(health)} />
           &nbsp;{health ?? '-'}
         </span>
       ),

@@ -39,6 +39,8 @@ export const REMOVED_TYPES: string[] = [
   'ui-counter',
   // Deprecated, no longer used since 7.13 https://github.com/elastic/kibana/pull/94923/files
   'application_usage_transactional',
+  // Deprecated, no longer used since 8.7 https://github.com/elastic/kibana/pull/148530
+  'csp_rule',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes
