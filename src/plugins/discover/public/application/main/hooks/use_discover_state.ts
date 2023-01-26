@@ -139,7 +139,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const unsubscribe = appState.subscribe(
-      buildStateSubscribe({ stateContainer, services, savedSearch, setState })
+      buildStateSubscribe({ stateContainer, savedSearch, setState })
     );
     return () => unsubscribe();
   }, [appState, savedSearch, services, stateContainer]);

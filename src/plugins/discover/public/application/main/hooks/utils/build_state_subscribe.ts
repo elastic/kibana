@@ -9,22 +9,18 @@ import { isEqual } from 'lodash';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { AppState } from '../../services/discover_app_state_container';
-import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/add_log';
-import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
 
 export const buildStateSubscribe =
   ({
     stateContainer,
-    services,
     savedSearch,
     setState,
   }: {
     stateContainer: DiscoverStateContainer;
     savedSearch: SavedSearch;
     setState: (state: AppState) => void;
-    services: DiscoverServices;
   }) =>
   async (nextState: AppState) => {
     addLog('📦 AppStateContainer.subscribe update', nextState);
@@ -39,30 +35,17 @@ export const buildStateSubscribe =
     const dataViewChanged = !isEqual(nextState.index, index);
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
-      /**
-       *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-       *  from a data view without to a data view with time filter for a brief moment
-       *  That's because appState is updated before savedSearchData$
-       *  The following line of code catches this, but should be improved
-       */
-      const nextDataViewData = await loadDataView(
-        services.dataViews,
-        services.uiSettings,
-        nextState.index
-      );
-      const nextDataView = resolveDataView(
-        nextDataViewData,
-        savedSearch.searchSource,
-        services.toastNotifications
-      );
+      const { dataView: nextDataView, fallback } =
+        await stateContainer.actions.loadAndResolveDataView(nextState.index, savedSearch);
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
-      if (!nextDataViewData.stateValFound) {
-        stateContainer.appState.replace({ index: nextDataView.id });
+      if (fallback) {
+        stateContainer.appState.replaceUrlState({ index: nextDataView.id });
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
+      stateContainer.dataState.reset();
       stateContainer.actions.setDataView(nextDataView);
     }
 

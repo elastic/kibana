@@ -15,7 +15,7 @@ import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { connectToQueryState, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { getValidFilters } from '../../../utils/get_valid_filters';
@@ -26,15 +26,42 @@ import { APP_STATE_URL_KEY, AppStateUrl, isEqualState, setState } from './discov
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
+  /**
+   * Returns the previous state, used for diffing e.g. if fetching new data is necessary
+   */
   getPrevious: () => AppState;
+  /**
+   * Determines if the current state is different from the initial state
+   */
   hasChanged: () => boolean;
+  /**
+   * Initializes the state by the given saved search and starts syncing the state with the URL
+   * @param currentSavedSearch
+   */
   initAndSync: (currentSavedSearch: SavedSearch) => () => void;
-  isEmptyURL: () => boolean;
-  push: (newPartial: AppState) => Promise<void>;
-  replace: (newPartial: AppState, merge?: boolean) => Promise<void>;
-  reset: (savedSearch: SavedSearch) => void;
+  /**
+   * Resets the state by the given saved search
+   * @param savedSearch
+   */
+  resetBySavedSearch: (savedSearch: SavedSearch) => void;
+  /**
+   * Resets the current state to the initial state
+   */
   resetInitialState: () => void;
+  /**
+   * Replaces the given state in the URL, instead of pushing a new history entry
+   * @param newState
+   */
+  replaceUrlState: (newState: AppState) => void;
+  /**
+   * Start syncing the state with the URL
+   */
   syncState: () => ISyncStateRef;
+  /**
+   * Updates the state, if replace is true, a history.replace is performed instead of history.push
+   * @param newPartial
+   * @param replace
+   */
   update: (newPartial: AppState, replace?: boolean) => void;
 }
 
@@ -100,6 +127,12 @@ export interface AppState {
 export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
   createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
+/**
+ * This is the app state container for Discover main, it's responsible for syncing state with the URL
+ * @param stateStorage
+ * @param savedSearch
+ * @param services
+ */
 export const getDiscoverAppStateContainer = (
   stateStorage: IKbnUrlStateStorage,
   savedSearch: SavedSearch,
@@ -124,6 +157,7 @@ export const getDiscoverAppStateContainer = (
   };
 
   const resetInitialState = () => {
+    addLog('🔗 [appState] reset initial state to the current state');
     initialState = appStateContainer.getState();
   };
 
@@ -131,11 +165,6 @@ export const getDiscoverAppStateContainer = (
     addLog('🔗 [appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-  };
-  const pushUrlState = async (newPartial: AppState) => {
-    addLog('🔗 [appState] pushUrlState', { newPartial });
-    const state = { ...appStateContainer.getState(), ...newPartial };
-    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: false });
   };
 
   const startAppStateUrlSync = () => {
@@ -174,7 +203,7 @@ export const getDiscoverAppStateContainer = (
     );
 
     // syncs `_g` portion of url with query services
-    const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
+    const { stop: stopSyncingGlobalStateWithUrl } = syncGlobalQueryStateWithUrl(
       services.data.query,
       stateStorage
     );
@@ -216,10 +245,6 @@ export const getDiscoverAppStateContainer = (
     }
   };
 
-  const isEmptyURL = () => {
-    return stateStorage.get(APP_STATE_URL_KEY) === null;
-  };
-
   const getPrevious = () => previousState;
 
   return {
@@ -227,11 +252,9 @@ export const getDiscoverAppStateContainer = (
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
-    isEmptyURL,
-    push: pushUrlState,
-    replace: replaceUrlState,
-    reset: resetBySavedSearch,
+    resetBySavedSearch,
     resetInitialState,
+    replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
   };

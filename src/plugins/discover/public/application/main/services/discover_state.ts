@@ -25,6 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
@@ -135,6 +136,17 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
+     * Load the data view of the given id
+     * A fallback data view is returned, given there's no match
+     * This is usually the default data view
+     * @param dataViewId
+     * @param savedSearch
+     */
+    loadAndResolveDataView: (
+      dataViewId: string,
+      savedSearch: SavedSearch
+    ) => Promise<{ fallback: boolean; dataView: DataView }>;
+    /**
      * Load current list of data views, add them to internal state
      */
     loadDataViewList: () => Promise<void>;
@@ -194,7 +206,7 @@ export function getDiscoverStateContainer({
   const appStateContainer = getDiscoverAppStateContainer(stateStorage, savedSearch, services);
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
-    await appStateContainer.replace(newPartial);
+    await appStateContainer.replaceUrlState(newPartial);
   };
 
   const internalStateContainer = getInternalStateContainer();
@@ -238,6 +250,16 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
 
+  const loadAndResolveDataView = async (id: string, actualSavedSearch: SavedSearch) => {
+    const nextDataViewData = await loadDataView(services.dataViews, services.uiSettings, id);
+    const nextDataView = resolveDataView(
+      nextDataViewData,
+      actualSavedSearch.searchSource,
+      services.toastNotifications
+    );
+    return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
@@ -252,7 +274,8 @@ export function getDiscoverStateContainer({
     setAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
     replaceUrlAppState,
     resetInitialAppState: () => appStateContainer.resetInitialState(),
-    resetAppState: (nextSavedSearch: SavedSearch) => appStateContainer.reset(nextSavedSearch),
+    resetAppState: (nextSavedSearch: SavedSearch) =>
+      appStateContainer.resetBySavedSearch(nextSavedSearch),
     getPreviousAppState: () => appStateContainer.getPrevious(),
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => appStateContainer.hasChanged(),
@@ -260,6 +283,7 @@ export function getDiscoverStateContainer({
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {
       setDataView,
+      loadAndResolveDataView,
       loadDataViewList,
       setAdHocDataViews,
       appendAdHocDataViews,
