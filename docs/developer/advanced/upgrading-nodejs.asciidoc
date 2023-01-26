@@ -17,7 +17,7 @@ These files must be updated when upgrading Node.js:
   - {kib-repo}blob/{branch}/WORKSPACE.bazel[`WORKSPACE.bazel`] - The version is specified in the `node_version` property.
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
     These can be found on the https://nodejs.org[nodejs.org] website.
-    Example for Node.js v18.13.0: https://nodejs.org/dist/v18.13.0/SHASUMS256.txt.asc
+    Example for Node.js v16.19.0: https://nodejs.org/dist/v16.19.0/SHASUMS256.txt.asc
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
