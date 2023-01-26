@@ -6,12 +6,19 @@
  */
 
 import { Meta, Story } from '@storybook/react/types-6-0';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { Aggregators, Comparator } from '../../../../../common/alerting/metrics';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  Aggregators,
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
+import { MetricExpression } from '../../types';
+import { validateMetricThreshold } from '../validation';
 
 export default {
   title: 'infra/alerting/CustomEquationEditor',
@@ -27,9 +34,35 @@ export default {
   },
 } as Meta;
 
-const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => (
-  <CustomEquationEditor {...args} />
-);
+const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) => {
+  const [expression, setExpression] = useState<MetricExpression>(args.expression);
+  const [errors, setErrors] = useState<IErrorObject>(args.errors);
+
+  const handleExpressionChange = useCallback(
+    (exp: MetricExpression) => {
+      setExpression(exp);
+      args.onChange(exp);
+      return exp;
+    },
+    [args]
+  );
+
+  useEffect(() => {
+    const validationObject = validateMetricThreshold({
+      criteria: [expression as MetricExpressionParams],
+    });
+    setErrors(validationObject.errors[0]);
+  }, [expression]);
+
+  return (
+    <CustomEquationEditor
+      {...args}
+      errors={errors}
+      expression={expression}
+      onChange={handleExpressionChange}
+    />
+  );
+};
 
 export const CustomEquationEditorDefault = CustomEquationEditorTemplate.bind({});
 export const CustomEquationEditorWithEquationErrors = CustomEquationEditorTemplate.bind({});
@@ -76,9 +109,9 @@ CustomEquationEditorWithFieldError.args = {
   ...BASE_ARGS,
   expression: {
     ...BASE_ARGS.expression,
-    customMetrics: [{ name: 'A', aggType: Aggregators.AVERAGE }],
+    customMetrics: [{ name: 'B', aggType: Aggregators.AVERAGE }],
   },
   errors: {
-    customMetrics: { A: { field: 'Field is required' } },
+    customMetrics: { B: { field: 'Field is required' } },
   },
 };
