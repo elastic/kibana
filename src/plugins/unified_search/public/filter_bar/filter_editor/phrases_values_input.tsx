@@ -55,6 +55,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
             defaultMessage: 'Select values',
           })}
           delimiter=","
+          isCaseSensitive={true}
           options={options}
           getLabel={(option) => option}
           selectedOptions={values || []}
