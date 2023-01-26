@@ -118,21 +118,33 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(updatedOptions[0]).not.toHaveTextContent('containerImageName');
   });
 
-  it('ensures at least one condition is provided, and a value specified', async () => {
-    const { getByText, getByTestId } = render(<WrappedComponent />);
+  it('shows an error if no conditions are added', async () => {
+    const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 
     userEvent.click(getByTestId('cloud-defend-btnremovecondition-operation'));
 
-    expect(onChange.mock.calls).toHaveLength(0); // because operation is the only condition, it should not have been removed.
+    const updatedSelector: ControlSelector = { ...onChange.mock.calls[0][0] };
 
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    await waitFor(() => expect(getByText(i18n.errorConditionRequired)).toBeTruthy());
+
+    expect(onChange.mock.calls[0][0]).toHaveProperty('hasErrors');
+  });
+
+  it('shows an error if no values provided for condition', async () => {
+    const { getByText, getByTestId } = render(<WrappedComponent />);
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+
+    userEvent.click(getByTestId('cloud-defend-btnremovecondition-operation'));
     userEvent.click(addConditionBtn);
 
     await waitFor(() => userEvent.click(getByText('Container image name'))); // add containerImageName
 
-    expect(onChange.mock.calls).toHaveLength(1);
-    expect(onChange.mock.calls[0][0]).toHaveProperty('containerImageName');
-    expect(onChange.mock.calls[0][0]).toHaveProperty('hasErrors');
+    expect(onChange.mock.calls).toHaveLength(2);
+    expect(onChange.mock.calls[1][0]).toHaveProperty('containerImageName');
+    expect(onChange.mock.calls[1][0]).toHaveProperty('hasErrors');
+    expect(getByText(i18n.errorValueRequired)).toBeTruthy();
   });
 
   it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH_BYTES', async () => {

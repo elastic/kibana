@@ -42,127 +42,137 @@ interface Props {
   showActionTooltips: boolean;
 }
 
-export const HoverActionsPopover = React.memo<Props>(
-  ({ children, visibleCellActions, actionContext, showActionTooltips }) => {
-    const contentRef = useRef<HTMLDivElement>(null);
-    const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
-    const [showHoverContent, setShowHoverContent] = useState(false);
-    const popoverRef = useRef<EuiPopover>(null);
+export const HoverActionsPopover: React.FC<Props> = ({
+  children,
+  visibleCellActions,
+  actionContext,
+  showActionTooltips,
+}) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
+  const [showHoverContent, setShowHoverContent] = useState(false);
+  const popoverRef = useRef<EuiPopover>(null);
 
-    const [{ value: actions }, loadActions] = useLoadActionsFn();
+  const [{ value: actions, error }, loadActions] = useLoadActionsFn();
 
-    const { visibleActions, extraActions } = useMemo(
-      () => partitionActions(actions ?? [], visibleCellActions),
-      [actions, visibleCellActions]
-    );
+  const { visibleActions, extraActions } = useMemo(
+    () => partitionActions(actions ?? [], visibleCellActions),
+    [actions, visibleCellActions]
+  );
 
-    const closePopover = useCallback(() => {
-      setShowHoverContent(false);
-    }, []);
+  const openPopOverDebounced = useMemo(
+    () =>
+      debounce(() => {
+        if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
+          setShowHoverContent(true);
+        }
+      }, HOVER_INTENT_DELAY),
+    []
+  );
 
-    const closeExtraActions = useCallback(
-      () => setIsExtraActionsPopoverOpen(false),
-      [setIsExtraActionsPopoverOpen]
-    );
+  const closePopover = useCallback(() => {
+    openPopOverDebounced.cancel();
+    setShowHoverContent(false);
+  }, [openPopOverDebounced]);
 
-    const onShowExtraActionsClick = useCallback(() => {
-      setIsExtraActionsPopoverOpen(true);
-      closePopover();
-    }, [closePopover, setIsExtraActionsPopoverOpen]);
+  const closeExtraActions = useCallback(
+    () => setIsExtraActionsPopoverOpen(false),
+    [setIsExtraActionsPopoverOpen]
+  );
 
-    const openPopOverDebounced = useMemo(
-      () =>
-        debounce(() => {
-          if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
-            setShowHoverContent(true);
-          }
-        }, HOVER_INTENT_DELAY),
-      []
-    );
+  const onShowExtraActionsClick = useCallback(() => {
+    setIsExtraActionsPopoverOpen(true);
+    closePopover();
+  }, [closePopover, setIsExtraActionsPopoverOpen]);
 
-    // prevent setState on an unMounted component
-    useEffect(() => {
-      return () => {
-        openPopOverDebounced.cancel();
-      };
-    }, [openPopOverDebounced]);
+  // prevent setState on an unMounted component
+  useEffect(() => {
+    return () => {
+      openPopOverDebounced.cancel();
+    };
+  }, [openPopOverDebounced]);
 
-    const onMouseEnter = useCallback(async () => {
-      // Do not open actions with extra action popover is open
-      if (isExtraActionsPopoverOpen) return;
+  const onMouseEnter = useCallback(async () => {
+    // Do not open actions with extra action popover is open
+    if (isExtraActionsPopoverOpen) return;
 
-      // memoize actions after the first call
-      if (actions === undefined) {
-        loadActions(actionContext);
-      }
+    // memoize actions after the first call
+    if (actions === undefined) {
+      loadActions(actionContext);
+    }
 
-      openPopOverDebounced();
-    }, [isExtraActionsPopoverOpen, actions, openPopOverDebounced, loadActions, actionContext]);
+    openPopOverDebounced();
+  }, [isExtraActionsPopoverOpen, actions, openPopOverDebounced, loadActions, actionContext]);
 
-    const onMouseLeave = useCallback(() => {
-      closePopover();
-    }, [closePopover]);
+  const onMouseLeave = useCallback(() => {
+    closePopover();
+  }, [closePopover]);
 
-    const content = useMemo(() => {
-      return (
-        // Hack - Forces extra actions popover to close when hover content is clicked.
-        // This hack is required because we anchor the popover to the hover content instead
-        // of anchoring it to the button that triggers the popover.
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-        <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
-          {children}
-        </div>
-      );
-    }, [onMouseEnter, closeExtraActions, children]);
-
+  const content = useMemo(() => {
     return (
-      <>
-        <div onMouseLeave={onMouseLeave}>
-          <EuiPopover
-            panelStyle={PANEL_STYLE}
-            ref={popoverRef}
-            anchorPosition={'downCenter'}
-            button={content}
-            closePopover={closePopover}
-            hasArrow={false}
-            isOpen={showHoverContent}
-            panelPaddingSize="none"
-            repositionOnScroll
-            ownFocus={false}
-            data-test-subj={'hoverActionsPopover'}
-            aria-label={ACTIONS_AREA_LABEL}
-          >
-            {showHoverContent ? (
-              <div css={hoverContentWrapperCSS}>
-                <EuiScreenReaderOnly>
-                  <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
-                </EuiScreenReaderOnly>
-                {visibleActions.map((action) => (
-                  <ActionItem
-                    key={action.id}
-                    action={action}
-                    actionContext={actionContext}
-                    showTooltip={showActionTooltips}
-                  />
-                ))}
-                {extraActions.length > 0 ? (
-                  <ExtraActionsButton
-                    onClick={onShowExtraActionsClick}
-                    showTooltip={showActionTooltips}
-                  />
-                ) : null}
-              </div>
-            ) : null}
-          </EuiPopover>
-        </div>
-        <ExtraActionsPopOverWithAnchor
-          actions={extraActions}
-          anchorRef={contentRef}
-          actionContext={actionContext}
-          closePopOver={closeExtraActions}
-          isOpen={isExtraActionsPopoverOpen}
-        />
-      </>
+      // Hack - Forces extra actions popover to close when hover content is clicked.
+      // This hack is required because we anchor the popover to the hover content instead
+      // of anchoring it to the button that triggers the popover.
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+      <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
+        {children}
+      </div>
     );
-  }
-);
+  }, [onMouseEnter, closeExtraActions, children]);
+
+  useEffect(() => {
+    if (error) {
+      throw error;
+    }
+  }, [error]);
+
+  return (
+    <>
+      <div onMouseLeave={onMouseLeave}>
+        <EuiPopover
+          panelStyle={PANEL_STYLE}
+          ref={popoverRef}
+          anchorPosition={'downCenter'}
+          button={content}
+          closePopover={closePopover}
+          hasArrow={false}
+          isOpen={showHoverContent}
+          panelPaddingSize="none"
+          repositionOnScroll
+          ownFocus={false}
+          data-test-subj={'hoverActionsPopover'}
+          aria-label={ACTIONS_AREA_LABEL}
+        >
+          {showHoverContent ? (
+            <div css={hoverContentWrapperCSS}>
+              <EuiScreenReaderOnly>
+                <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field.name)}</p>
+              </EuiScreenReaderOnly>
+              {visibleActions.map((action) => (
+                <ActionItem
+                  key={action.id}
+                  action={action}
+                  actionContext={actionContext}
+                  showTooltip={showActionTooltips}
+                />
+              ))}
+              {extraActions.length > 0 ? (
+                <ExtraActionsButton
+                  onClick={onShowExtraActionsClick}
+                  showTooltip={showActionTooltips}
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </EuiPopover>
+      </div>
+      <ExtraActionsPopOverWithAnchor
+        actions={extraActions}
+        anchorRef={contentRef}
+        actionContext={actionContext}
+        closePopOver={closeExtraActions}
+        isOpen={isExtraActionsPopoverOpen}
+      />
+    </>
+  );
+};

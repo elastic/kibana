@@ -1,5 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-fatal-errors-browser-mocks",
+  "devOnly": true,
   "owner": "@elastic/kibana-core"
 }

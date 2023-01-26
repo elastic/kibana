@@ -21,7 +21,7 @@ describe('SyntheticsDatePicker component', () => {
 
   it('renders properly with mock data', async () => {
     const { findByText } = render(<SyntheticsDatePicker />);
-    expect(await findByText('Last 15 minutes')).toBeInTheDocument();
+    expect(await findByText('Last 24 hours')).toBeInTheDocument();
     expect(await findByText('Refresh')).toBeInTheDocument();
   });
 

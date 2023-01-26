@@ -8,8 +8,8 @@
 import { EuiFlyoutBody } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
-import type { Ecs } from '../../../../../../common/ecs';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type {
   BrowserFields,
