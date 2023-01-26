@@ -33,7 +33,8 @@
     "unifiedSearch",
     "security",
     "guidedOnboarding",
-    "share"
+    "share",
+    "spaces"
   ],
   "ui": true,
   "server": true,

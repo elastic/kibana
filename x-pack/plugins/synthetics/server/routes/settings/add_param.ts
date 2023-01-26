@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SyntheticsParam } from '../../../common/runtime_types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -28,8 +27,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: true,
   handler: async ({ request, server, savedObjectsClient }): Promise<any> => {
     const { namespaces, ...data } = request.body as SyntheticsParam;
-
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
 
     const result = await savedObjectsClient.create(syntheticsParamType, data, {
       initialNamespaces: (namespaces ?? []).length > 0 ? namespaces : [spaceId],

@@ -23,7 +23,6 @@ import type {
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
@@ -50,7 +49,7 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
   securityPluginStart: SecurityPluginStart;
-  spacesPluginStart?: SpacesPluginStart;
+  spacesPluginStart: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
@@ -145,8 +144,7 @@ export class CasesClientFactory {
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId:
-        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
       savedObjectsSerializer,
     });
   }
@@ -198,8 +196,7 @@ export class CasesClientFactory {
       notifications: this.options.notifications,
       security: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId:
-        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
     });
 
     return {

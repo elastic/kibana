@@ -17,11 +17,7 @@ export type ActiveSpace =
 export const useActiveKibanaSpace = (): ActiveSpace => {
   const kibana = useKibanaContextForPlugin();
 
-  const asyncActiveSpace = useAsync(
-    kibana.services.spaces
-      ? kibana.services.spaces.getActiveSpace
-      : () => Promise.resolve(undefined)
-  );
+  const asyncActiveSpace = useAsync(kibana.services.spaces.getActiveSpace);
 
   if (asyncActiveSpace.loading) {
     return {

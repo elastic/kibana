@@ -54,7 +54,7 @@ export interface UptimeServerSetup {
   router: UptimeRouter;
   config: UptimeConfig;
   cloud?: CloudSetup;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
   savedObjectsClient?: SavedObjectsClientContract;
@@ -89,5 +89,5 @@ export interface UptimeCorePluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }

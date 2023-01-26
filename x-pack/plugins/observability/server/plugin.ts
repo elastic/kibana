@@ -46,7 +46,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   alerting: PluginSetupContract;
   guidedOnboarding: GuidedOnboardingPluginSetup;
 }

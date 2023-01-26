@@ -72,7 +72,7 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   notifications: NotificationsPluginStart;
 }
 

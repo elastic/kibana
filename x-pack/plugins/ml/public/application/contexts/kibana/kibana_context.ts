@@ -40,7 +40,7 @@ interface StartPlugins {
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
-  spacesApi?: SpacesPluginStart;
+  spacesApi: SpacesPluginStart;
   charts: ChartsPluginStart;
   cases?: CasesUiStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

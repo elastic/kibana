@@ -7,45 +7,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "fleet"
-  ],
-  "requiredPlugins": [
-    "licensing",
-    "data",
-    "encryptedSavedObjects",
-    "navigation",
-    "customIntegrations",
-    "share",
-    "security",
-    "unifiedSearch",
-    "savedObjectsTagging",
-    "taskManager",
-    "guidedOnboarding",
-    "files"
-  ],
-  "optionalPlugins": [
-    "features",
-    "cloud",
-    "usageCollection",
-    "home",
-    "globalSearch",
-    "telemetry",
-    "discover",
-    "ingestPipelines",
-    "spaces"
-  ],
-  "extraPublicDirs": [
-    "common"
-  ],
-  "requiredBundles": [
-    "kibanaReact",
-    "cloudChat",
-    "esUiShared",
-    "infra",
-    "kibanaUtils",
-    "usageCollection",
-    "unifiedSearch"
-  ]
+  "configPath": ["xpack", "fleet"],
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "navigation", "customIntegrations", "share", "spaces", "security", "unifiedSearch", "savedObjectsTagging", "taskManager", "guidedOnboarding", "files"],
+  "optionalPlugins": ["features", "cloud", "usageCollection", "home", "globalSearch", "telemetry", "discover", "ingestPipelines"],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaReact", "cloudChat", "esUiShared", "infra", "kibanaUtils", "usageCollection", "unifiedSearch"]
 }

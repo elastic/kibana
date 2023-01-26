@@ -104,7 +104,7 @@ export interface ObservabilityPublicPluginsStart {
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   home?: HomePublicPluginStart;

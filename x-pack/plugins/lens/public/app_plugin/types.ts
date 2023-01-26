@@ -158,7 +158,7 @@ export interface LensAppServices {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
-  spaces?: SpacesApi;
+  spaces: SpacesApi;
   charts: ChartsPluginSetup;
   share?: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

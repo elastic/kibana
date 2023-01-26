@@ -26,5 +26,5 @@ export interface KibanaDeps {
   infra: InfraClientStartExports;
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
 }

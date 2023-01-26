@@ -6,6 +6,7 @@
     "share",
     "features",
     "usageCollection",
+    "spaces",
     "embeddable",
     "data",
     "dataViews",
@@ -21,8 +22,7 @@
     "ml",
     "home",
     "embeddable",
-    "osquery",
-    "spaces"
+    "osquery"
   ],
   "server": true,
   "ui": true,

@@ -13,7 +13,6 @@ import { identity } from 'fp-ts/lib/function';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -29,7 +28,7 @@ const MIN_PROFILES_SIZE = 0;
 interface UserProfileOptions {
   securityPluginSetup: SecurityPluginSetup;
   securityPluginStart: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   licensingPluginStart: LicensingPluginStart;
 }
 
@@ -111,7 +110,7 @@ export class UserProfileService {
         size,
         owners,
         securityPluginStart: this.options.securityPluginStart,
-        spaceId: spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+        spaceId: spaces.spacesService.getSpaceId(request),
       });
     } catch (error) {
       throw createCaseError({

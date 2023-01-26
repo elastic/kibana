@@ -13,7 +13,6 @@ import {
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
@@ -197,7 +196,7 @@ export class InfraServerPlugin
         const soClient = (await context.core).savedObjects.client;
         const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
-        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {
           mlAnomalyDetectors,

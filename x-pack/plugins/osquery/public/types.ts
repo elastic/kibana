@@ -50,7 +50,7 @@ export interface StartPlugins {
   fleet: FleetStart;
   lens?: LensPublicStart;
   security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   timelines: TimelinesUIStart;

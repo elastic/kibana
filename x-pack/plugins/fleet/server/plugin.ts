@@ -44,7 +44,6 @@ import type {
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -117,7 +116,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
@@ -382,7 +381,7 @@ export class FleetPlugin
             return getInternalSoClient();
           },
           get spaceId() {
-            return deps.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+            return deps.spaces.spacesService.getSpaceId(request);
           },
 
           get limitedToPackages() {
