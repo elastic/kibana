@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useAsyncFn, { type AsyncState } from 'react-use/lib/useAsyncFn';
 import { useCellActionsContext } from '../context/cell_actions_context';
@@ -15,11 +14,9 @@ import type { CellAction, CellActionCompatibilityContext, GetActions } from '../
 type AsyncActions<V = CellAction[]> = Omit<AsyncState<V>, 'error'>;
 
 const useThrowError = (error?: Error) => {
-  useMemo(() => {
-    if (error) {
-      throw error;
-    }
-  }, [error]);
+  if (error) {
+    throw error;
+  }
 };
 
 /**
