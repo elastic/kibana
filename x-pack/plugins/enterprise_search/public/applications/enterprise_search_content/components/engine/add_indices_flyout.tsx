@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -17,20 +20,37 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiSelectable,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const AddIndicesFlyout: React.FC = ({ onClose }) => {
-  // const { searchIndices, setIndicesToAdd, submitIndicesToAdd } = useActions(EngineIndicesLogic);
-  // const { indicesOptions /* isLoadingIndices */ } = useValues(EngineIndicesLogic);
+import { Status } from '../../../../../common/types/api';
+import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
+import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
-  // useEffect(() => {
-  //   searchIndices();
-  // }, []);
+import {
+  IndicesSelectComboBox,
+  indexToOption,
+} from '../engines/components/indices_select_combobox';
 
-  const indicesOptions = [];
+import { AddIndicesLogic } from './add_indices_logic';
+
+export interface AddIndicesFlyoutProps {
+  onClose: () => void;
+}
+
+export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+  const { selectedIndices, updateEngineStatus, updateEngineError } = useValues(AddIndicesLogic);
+  const { setSelectedIndices, submitSelectedIndices } = useActions(AddIndicesLogic);
+
+  const selectedOptions = useMemo(() => selectedIndices.map(indexToOption), [selectedIndices]);
+  const onIndicesChange = useCallback(
+    (options) => {
+      setSelectedIndices(options.map(({ value }) => value).filter(isNotNullish));
+    },
+    [setSelectedIndices]
+  );
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -43,6 +63,22 @@ export const AddIndicesFlyout: React.FC = ({ onClose }) => {
             )}
           </h2>
         </EuiTitle>
+        {updateEngineStatus === Status.ERROR && updateEngineError && (
+          <>
+            <EuiSpacer />
+            <EuiCallOut
+              color="danger"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.engines.indices.addIndicesFlyout.updateError.title',
+                { defaultMessage: 'Error updating engine' }
+              )}
+            >
+              {getErrorsFromHttpResponse(updateEngineError).map((errMessage, i) => (
+                <p id={`createErrorMsg.${i}`}>{errMessage}</p>
+              ))}
+            </EuiCallOut>
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFormRow
@@ -52,20 +88,17 @@ export const AddIndicesFlyout: React.FC = ({ onClose }) => {
             { defaultMessage: 'Select searchable indices' }
           )}
         >
-          <EuiSelectable searchable options={indicesOptions}>
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+          <IndicesSelectComboBox
+            fullWidth
+            onChange={onIndicesChange}
+            selectedOptions={selectedOptions}
+          />
         </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plusInCircle" onClick={() => {}}>
+            <EuiButton fill iconType="plusInCircle" onClick={submitSelectedIndices}>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.submitButton',
                 { defaultMessage: 'Add selected' }

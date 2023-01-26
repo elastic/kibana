@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -35,19 +35,12 @@ import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 export const EngineIndices: React.FC = () => {
-  const { engineData, engineName, isLoadingEngine } = useValues(EngineIndicesLogic);
-  const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
+  const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
+    useValues(EngineIndicesLogic);
+  const { removeIndexFromEngine, openAddIndicesFlyout, closeAddIndicesFlyout } =
+    useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
-  const [addIndicesFlyoutOpen, setAddIndicesFlyoutOpen] = useState<boolean>(false);
-  const openAddIndicesFlyout = useCallback(
-    () => setAddIndicesFlyoutOpen(true),
-    [setAddIndicesFlyoutOpen]
-  );
-  const closeAddIndicesFlyout = useCallback(
-    () => setAddIndicesFlyoutOpen(false),
-    [setAddIndicesFlyoutOpen]
-  );
 
   if (!engineData) return null;
   const { indices } = engineData;

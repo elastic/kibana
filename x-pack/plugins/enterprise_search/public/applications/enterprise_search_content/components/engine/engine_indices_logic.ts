@@ -18,21 +18,18 @@ import { EngineViewActions, EngineViewLogic, EngineViewValues } from './engine_v
 
 export interface EngineIndicesLogicActions {
   addIndicesToEngine: (indices: string[]) => { indices: string[] };
+  closeAddIndicesFlyout: () => void;
   engineUpdated: UpdateEngineApiLogicActions['apiSuccess'];
   fetchEngine: EngineViewActions['fetchEngine'];
+  openAddIndicesFlyout: () => void;
   removeIndexFromEngine: (indexName: string) => { indexName: string };
   updateEngineRequest: UpdateEngineApiLogicActions['makeRequest'];
-
-  fetchIndices: FetchIndicesAPILogic['makeRequest'];
-  searchIndices: (searchQuery: string) => { searchQuery: string };
 }
 
 export interface EngineIndicesLogicValues {
+  addIndicesFlyoutOpen: boolean;
   engineData: EngineViewValues['engineData'];
   engineName: EngineViewValues['engineName'];
-
-  indicesToAdd: string[];
-  indicesOptions: { label: string; checked?: string };
 }
 
 export const EngineIndicesLogic = kea<
@@ -40,11 +37,9 @@ export const EngineIndicesLogic = kea<
 >({
   actions: {
     addIndicesToEngine: (indices) => ({ indices }),
+    closeAddIndicesFlyout: () => true,
+    openAddIndicesFlyout: () => true,
     removeIndexFromEngine: (indexName) => ({ indexName }),
-
-    searchIndices: (searchQuery) => ({ searchQuery }),
-    setIndicesToAdd: (indices) => ({ indices }),
-    submitIndicesToAdd: () => true,
   },
   connect: {
     actions: [
@@ -72,9 +67,6 @@ export const EngineIndicesLogic = kea<
         indices: updatedIndices,
       });
     },
-    submitIndicesToAdd: () => {
-      actions.addIndicesToEngine(values.indicesToAdd);
-    },
     engineUpdated: () => {
       actions.fetchEngine({ engineName: values.engineName });
     },
@@ -88,34 +80,18 @@ export const EngineIndicesLogic = kea<
         indices: updatedIndices,
       });
     },
-    searchIndices: async ({ searchQuery }, breakpoint) => {
-      await breakpoint(300);
-
-      actions.fetchIndices({
-        meta: { page: { current: 1 } },
-        returnHiddenIndices: false,
-        searchQuery,
-      });
+    submitIndicesToAdd: () => {
+      actions.addIndicesToEngine(values.indicesToAdd);
     },
   }),
   path: ['enterprise_search', 'content', 'engine_indices_logic'],
   reducers: {
-    indicesToAdd: [[], { setIndicesToAdd: (_, { indices }) => indices }],
+    addIndicesFlyoutOpen: [
+      false,
+      {
+        closeAddIndicesFlyout: () => false,
+        openAddIndicesFlyout: () => true,
+      },
+    ],
   },
-  selectors: ({ selectors }) => ({
-    indicesOptions: [
-      () => [selectors.indicesData, selectors.indicesToAdd],
-      (data, toAdd) =>
-        [
-          ...toAdd.map((i) => ({ label: i, checked: 'on' })),
-          ...(data?.indices
-            .filter((i) => !toAdd.includes(i.name))
-            .map((i) => ({ label: i.name })) ?? []),
-        ].sort((a, b) => (a.label < b.label ? -1 : 1)),
-    ],
-    isLoadingIndices: [
-      () => [selectors.fetchIndicesApiStatus],
-      (status) => status === 'loading' || status === 'idle',
-    ],
-  }),
 });
