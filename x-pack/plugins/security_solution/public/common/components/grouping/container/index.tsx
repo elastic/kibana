@@ -64,6 +64,7 @@ const GroupingContainerComponent = ({
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
   >({});
 
+  const groupsNumber = data?.groupsNumber?.value ?? 0;
   const unitCountText = useMemo(() => {
     const countBuckets = data?.alertsCount?.buckets;
     return `${(countBuckets && countBuckets.length > 0
@@ -75,10 +76,8 @@ const GroupingContainerComponent = ({
   }, [data?.alertsCount?.buckets, unit]);
 
   const unitGroupsCountText = useMemo(() => {
-    return `${(data?.groupsNumber?.value ?? 0).toLocaleString()} ${GROUPS_UNIT(
-      data?.groupsNumber?.value ?? 0
-    )}`;
-  }, [data?.groupsNumber?.value]);
+    return `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`;
+  }, [groupsNumber]);
 
   const groupPanels = useMemo(
     () =>
@@ -159,10 +158,6 @@ const GroupingContainerComponent = ({
     ]
   );
 
-  if (data?.groupsNumber?.value === 0) {
-    return <EmptyGroupingComponent />;
-  }
-
   return (
     <>
       <EuiFlexGroup
@@ -171,26 +166,28 @@ const GroupingContainerComponent = ({
         style={{ paddingBottom: 20, paddingTop: 20 }}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <GroupsUnitCount data-test-subj="alert-count">{unitCountText}</GroupsUnitCount>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <GroupsUnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
-                {unitGroupsCountText}
-              </GroupsUnitCount>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {groupsNumber > 0 ? (
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <GroupsUnitCount data-test-subj="alert-count">{unitCountText}</GroupsUnitCount>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <GroupsUnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
+                  {unitGroupsCountText}
+                </GroupsUnitCount>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs">
             {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
             <EuiFlexItem>{groupsSelector}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <GroupingStyledContainer>
-        {groupPanels}
+        {data?.groupsNumber?.value === 0 ? <EmptyGroupingComponent /> : groupPanels}
         <EuiSpacer size="m" />
         <EuiTablePagination
           data-test-subj="hostTablePaginator"
@@ -201,9 +198,7 @@ const GroupingContainerComponent = ({
             pagination.onChangeItemsPerPage(pageSize);
           }}
           pageCount={
-            data.groupsNumber?.value && pagination.pageSize
-              ? Math.ceil(data.groupsNumber?.value / pagination.pageSize)
-              : 1
+            groupsNumber && pagination.pageSize ? Math.ceil(groupsNumber / pagination.pageSize) : 1
           }
           onChangePage={(pageNumber) => {
             pagination.onChangePage(pageNumber);

@@ -54,7 +54,7 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                   size="200"
                   alt=""
                   url={http.basePath.prepend(
-                    '/plugins/security_solution/public/common/components/grouping/assets/illustration_product_no_results_magnifying_glass.svg'
+                    '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
                   )}
                 />
               </EuiFlexItem>

@@ -112,13 +112,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   filterGroup,
   runtimeMappings,
   signalIndexName,
-  columns,
-  itemsPerPage,
-  itemsPerPageOptions,
-  selectAll,
-  sort,
-  sessionViewConfig,
-  graphEventId,
 }) => {
   const dispatch = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string | undefined>(
@@ -470,6 +463,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         }}
         fields={indexPatterns.fields}
         options={options}
+        title={i18n.GROUP_ALERTS_SELECTOR}
       />
     ),
     [indexPatterns.fields, options, selectedGroup]
@@ -565,18 +559,7 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
     const { tableId } = ownProps;
     const table = getDataTable(state, tableId) ?? tableDefaults;
-    const {
-      isSelectAllChecked,
-      loadingEventIds,
-      selectedEventIds,
-      columns,
-      itemsPerPage,
-      itemsPerPageOptions,
-      selectAll,
-      sort,
-      sessionViewConfig,
-      graphEventId,
-    } = table;
+    const { isSelectAllChecked, loadingEventIds } = table;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
@@ -585,14 +568,6 @@ const makeMapStateToProps = () => {
       globalFilters: filters,
       isSelectAllChecked,
       loadingEventIds,
-      selectedEventIds,
-      columns,
-      itemsPerPage,
-      itemsPerPageOptions,
-      selectAll,
-      sort,
-      sessionViewConfig,
-      graphEventId,
     };
   };
   return mapStateToProps;

@@ -323,6 +323,13 @@ export const STATS_GROUP_IPS = i18n.translate(
   }
 );
 
+export const GROUP_ALERTS_SELECTOR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.selectGroup.title',
+  {
+    defaultMessage: `Group alerts`,
+  }
+);
+
 export const STATS_GROUP_USERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.stats.usersCount',
   {
