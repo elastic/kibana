@@ -195,7 +195,7 @@ export class UptimePlugin
         order: 8400,
         title:
           PLUGIN.SYNTHETICS +
-          i18n.translate('xpack.synthetics.overview.headingBea', {
+          i18n.translate('xpack.synthetics.overview.headingBeta', {
             defaultMessage: ' (beta)',
           }),
         category: DEFAULT_APP_CATEGORIES.observability,
@@ -290,7 +290,7 @@ function registerUptimeRoutesWithNavigation(
                 ...(isSyntheticsViewEnabled
                   ? [
                       {
-                        label: i18n.translate('xpack.synthetics.overview.headingBea', {
+                        label: i18n.translate('xpack.synthetics.overview.headingBetaSection', {
                           defaultMessage: 'Synthetics',
                         }),
                         app: 'synthetics',
