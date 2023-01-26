@@ -9,19 +9,19 @@ import type {
   AgentPolicy,
   CreateAgentPolicyResponse,
   PackagePolicy,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   FLEET_SERVER_PACKAGE,
-  FLEET_SERVER_SERVERS_INDEX,
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import type { GenerateServiceTokenResponse } from '@kbn/fleet-plugin/common/types';
 import { spawn } from 'child_process';
+import { fetchFleetAgents } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
-import type { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
 
 export const runFleetServerIfNeeded = async () => {
   const { log } = getRuntimeServices();
@@ -38,7 +38,7 @@ export const runFleetServerIfNeeded = async () => {
   }
 
   try {
-    const fleetServerAgentPolicyId = await getFleetServerAgentPolicyId();
+    const fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
     const serviceToken = await generateFleetServiceToken();
 
     await startFleetServerWithDocker({
@@ -54,34 +54,41 @@ export const runFleetServerIfNeeded = async () => {
 };
 
 const isFleetServerEnrolled = async () => {
-  const { esClient } = getRuntimeServices();
+  const { kbnClient } = getRuntimeServices();
+  const policyId = (await getFleetServerPackagePolicy())?.policy_id;
 
-  // FIXME:PT need better way to determine if the stack has a Fleet server enrolled and active
-  //        Not reliable because if inactive or unenrolled, the index below will still have
-  //        the entry
+  if (!policyId) {
+    return false;
+  }
 
-  const response = await esClient.search({
-    index: FLEET_SERVER_SERVERS_INDEX,
-    ignore_unavailable: true,
-    rest_total_hits_as_int: true,
+  const fleetAgentsResponse = await fetchFleetAgents(kbnClient, {
+    kuery: `(policy_id: "${policyId}" and active : true)`,
+    showInactive: false,
+    perPage: 1,
   });
 
-  return Boolean(response.hits.total);
+  return Boolean(fleetAgentsResponse.total);
 };
 
-const getFleetServerAgentPolicyId = async (): Promise<string> => {
-  const { log, kbnClient } = getRuntimeServices();
+const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined> => {
+  const { kbnClient } = getRuntimeServices();
 
-  const existingFleetServerIntegrationPolicy: PackagePolicy | undefined = await kbnClient
-    .request<GetPolicyListResponse>({
+  return kbnClient
+    .request<GetPackagePoliciesResponse>({
       method: 'GET',
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       query: {
-        perPage: 100,
+        perPage: 1,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
       },
     })
     .then((response) => response.data.items[0]);
+};
+
+const getOrCreateFleetServerAgentPolicyId = async (): Promise<string> => {
+  const { log, kbnClient } = getRuntimeServices();
+
+  const existingFleetServerIntegrationPolicy = await getFleetServerPackagePolicy();
 
   if (existingFleetServerIntegrationPolicy) {
     log.verbose(
@@ -149,10 +156,22 @@ const startFleetServerWithDocker = async ({
   policyId: string;
   serviceToken: string;
 }) => {
-  const { log, esUrlWithRealIp } = getRuntimeServices();
+  const {
+    log,
+    localhostRealIp,
+    elastic: { url: elasticUrl, isLocalhost },
+  } = getRuntimeServices();
 
   log.info(`Starting a new fleet server using Docker`);
   log.indent(4);
+
+  let esUrlWithRealIp: string = elasticUrl;
+
+  if (isLocalhost) {
+    const esNewUrl = new URL(elasticUrl);
+    esNewUrl.hostname = localhostRealIp;
+    esUrlWithRealIp = esNewUrl.toString();
+  }
 
   try {
     const agentVersion = await getAgentVersionMatchingCurrentStack();
@@ -187,7 +206,7 @@ const startFleetServerWithDocker = async ({
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
-    const fleetDockerProcess = spawn('docker', dockerArgs, {
+    spawn('docker', dockerArgs, {
       // TODO:PT redirect to an internal stream and watch it until it shows that it has been enrolled with Fleet
       stdio: 'inherit',
     });
