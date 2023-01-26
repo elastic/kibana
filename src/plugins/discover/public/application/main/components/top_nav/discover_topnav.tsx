@@ -186,8 +186,12 @@ export const DiscoverTopNav = ({
   );
 
   const onEditDataView = async (editedDataView: DataView) => {
+   if (!editedDataView.isPersisted()) {
+      await updateAdHocDataViewId(editedDataView);
+    } else {
+      stateContainer.actions.setDataView(editedDataView);
+    }
     stateContainer.dataState.fetch();
-    stateContainer.actions.setDataView(editedDataView);
   };
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
