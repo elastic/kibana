@@ -73,41 +73,13 @@ describe('UnifiedHistogramContainer', () => {
     mountWithIntl(<UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />);
     expect(api?.initialized).toBe(false);
     act(() => {
-      api?.initialize({
-        services: unifiedHistogramServicesMock,
-        initialState,
-      });
+      if (!api?.initialized) {
+        api?.initialize({
+          services: unifiedHistogramServicesMock,
+          initialState,
+        });
+      }
     });
     expect(api?.initialized).toBe(true);
-  });
-
-  it('should throw exceptions when calling methods before initialized', async () => {
-    let api: UnifiedHistogramApi | undefined;
-    const setApi = (ref: UnifiedHistogramApi) => {
-      api = ref;
-    };
-    mountWithIntl(<UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />);
-    expect(() => api?.getState$()).toThrow();
-    expect(() => api?.updateState({})).toThrow();
-    expect(() => api?.refetch()).toThrow();
-  });
-
-  it('should not throw exceptions when calling methods after initialized', async () => {
-    let api: UnifiedHistogramApi | undefined;
-    const setApi = (ref: UnifiedHistogramApi) => {
-      api = ref;
-    };
-    mountWithIntl(<UnifiedHistogramContainer ref={setApi} resizeRef={{ current: null }} />);
-    act(() => {
-      api?.initialize({
-        services: unifiedHistogramServicesMock,
-        initialState,
-      });
-    });
-    act(() => {
-      expect(() => api?.getState$()).not.toThrow();
-      expect(() => api?.updateState({})).not.toThrow();
-      expect(() => api?.refetch()).not.toThrow();
-    });
   });
 });

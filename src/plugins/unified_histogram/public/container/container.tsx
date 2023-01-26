@@ -33,13 +33,19 @@ export interface UnifiedHistogramInitializeOptions
   localStorageKeyPrefix?: string;
 }
 
-export interface UnifiedHistogramApi {
-  initialized: boolean;
+export interface UnifiedHistogramUninitializedApi {
+  initialized: false;
   initialize: (options: UnifiedHistogramInitializeOptions) => void;
+}
+
+export interface UnifiedHistogramInitializedApi {
+  initialized: true;
   getState$: UnifiedHistogramStateService['getState$'];
   updateState: UnifiedHistogramStateService['updateState'];
   refetch: () => void;
 }
+
+export type UnifiedHistogramApi = UnifiedHistogramUninitializedApi | UnifiedHistogramInitializedApi;
 
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
@@ -57,10 +63,6 @@ export const UnifiedHistogramContainer = forwardRef<
     () => ({
       initialized,
       initialize: (options: UnifiedHistogramInitializeOptions) => {
-        if (initialized) {
-          throw Error('Unified Histogram can only be initialized once.');
-        }
-
         const { services, disableAutoFetching, disableTriggers, disabledActions } = options;
 
         setLayoutProps({ services, disableAutoFetching, disableTriggers, disabledActions });
@@ -68,24 +70,12 @@ export const UnifiedHistogramContainer = forwardRef<
         setInitialized(true);
       },
       getState$: (selector) => {
-        if (!stateService) {
-          throw Error('Unified Histogram must be initialized before calling getState$.');
-        }
-
-        return stateService.getState$(selector);
+        return stateService!.getState$(selector);
       },
       updateState: (stateUpdate) => {
-        if (!stateService) {
-          throw Error('Unified Histogram must be initialized before calling updateState.');
-        }
-
-        stateService.updateState(stateUpdate);
+        stateService!.updateState(stateUpdate);
       },
       refetch: () => {
-        if (!initialized) {
-          throw Error('Unified Histogram must be initialized before calling refetch.');
-        }
-
         input$.next({ type: 'refetch' });
       },
     }),

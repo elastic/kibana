@@ -7,11 +7,14 @@
  */
 
 export type {
+  UnifiedHistogramUninitializedApi,
+  UnifiedHistogramInitializedApi,
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
   UnifiedHistogramInitializeOptions,
 } from './container';
 export { UnifiedHistogramContainer } from './container';
+export type { UnifiedHistogramState, UnifiedHistogramStateOptions } from './services/state_service';
 export {
   getChartHidden,
   getTopPanelHeight,

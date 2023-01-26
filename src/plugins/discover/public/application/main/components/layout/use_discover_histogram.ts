@@ -11,8 +11,8 @@ import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
+  UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
-import { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public/container/services/state_service';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';

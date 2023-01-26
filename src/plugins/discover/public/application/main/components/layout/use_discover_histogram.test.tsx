@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
-import { BehaviorSubject, map, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, map, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import {
   AvailableFields$,
@@ -31,13 +31,13 @@ import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import {
-  UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramInitializeOptions,
+  UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
+import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
-import type { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public/container/services/state_service';
 
 const mockData = dataPluginMock.createStartContract();
 const mockQueryState = {
@@ -172,23 +172,10 @@ describe('useDiscoverHistogram', () => {
     return { hook, initialProps };
   };
 
-  const createUnifiedHistogramApi = () => {
-    const api: UnifiedHistogramApi = {
-      initialized: false,
-      initialize: jest.fn(() => {
-        api.initialized = true;
-      }),
-      getState$: jest.fn(() => new Observable()),
-      updateState: jest.fn(),
-      refetch: jest.fn(),
-    };
-    return api;
-  };
-
   describe('initialization', () => {
     it('should call initialize if there is a search session', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -200,7 +187,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: null,
         isPlainRecord: true,
       });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -209,7 +196,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should not call initialize if there is no search session', async () => {
       const { hook } = await renderUseDiscoverHistogram({ searchSessionId: null });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -218,7 +205,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should not call initialize again if already initialized', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       api.initialized = true;
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
@@ -228,7 +215,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should pass the expected parameters to initialize', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       let params: UnifiedHistogramInitializeOptions | undefined;
       api.initialize = jest.fn((p) => {
         params = p;
@@ -258,7 +245,7 @@ describe('useDiscoverHistogram', () => {
   describe('state', () => {
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -277,7 +264,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       api.getState$ = jest.fn((selector) => {
         const returnedState = { ...state, lensRequestAdapter };
         if (selector) {
@@ -307,7 +294,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       api.getState$ = jest.fn((selector) => {
         if (selector) {
           return new BehaviorSubject(selector(state));
@@ -323,7 +310,7 @@ describe('useDiscoverHistogram', () => {
     it('should sync the state container state with Unified Histogram', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> | undefined;
       api.updateState = jest.fn((p) => {
         params = p;
@@ -355,7 +342,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> | undefined;
       api.updateState = jest.fn((p) => {
         params = p;
@@ -418,7 +405,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       api.getState$ = jest.fn((selector) => {
         const returnedState = {
           ...state,
@@ -457,7 +444,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       api.getState$ = jest.fn((selector) => {
         const returnedState = {
           ...state,
@@ -488,7 +475,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: string;
       }>();
       const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -508,7 +495,7 @@ describe('useDiscoverHistogram', () => {
         savedSearchFetch$,
         searchSessionId: null,
       });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -529,7 +516,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: null,
         isPlainRecord: true,
       });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -547,7 +534,7 @@ describe('useDiscoverHistogram', () => {
         searchSessionId: string;
       }>();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer, savedSearchFetch$ });
-      const api = createUnifiedHistogramApi();
+      const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
