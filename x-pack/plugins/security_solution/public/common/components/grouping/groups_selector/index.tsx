@@ -48,7 +48,7 @@ const GroupsSelectorComponent = ({
         id: 'firstPanel',
         items: [
           {
-            name: i18n.translate('xpack.infra.waffle.customGroupByOptionName', {
+            name: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByOptionName', {
               defaultMessage: 'Custom field',
             }),
             icon: 'empty',
@@ -67,7 +67,7 @@ const GroupsSelectorComponent = ({
       },
       {
         id: 'customPanel',
-        title: i18n.translate('xpack.infra.waffle.customGroupByPanelTitle', {
+        title: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByPanelTitle', {
           defaultMessage: 'Group By Custom Field',
         }),
         width: 685,
