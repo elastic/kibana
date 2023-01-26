@@ -1606,7 +1606,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMessageListContains(assertText: string) {
       await testSubjects.click('lens-message-list-trigger');
       await testSubjects.existOrFail('lens-message-list-message');
-      const messages = await testSubjects.findAll('lens-editor-warning');
+      const messages = await testSubjects.findAll('lens-message-list-message');
       let found = false;
       for (const message of messages) {
         const text = await message.getVisibleText();
@@ -1615,7 +1615,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           found = true;
         }
       }
-      await testSubjects.click('lens-editor-warning-button');
+      await testSubjects.click('lens-message-list-trigger');
       if (!found) {
         throw new Error(`Message with text "${assertText}" not found`);
       }

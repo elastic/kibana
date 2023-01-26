@@ -1,0 +1,20 @@
+.lnsWorkspaceWarning__buttonText {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
+    @include euiScreenReaderOnly;
+  }
+}
+
+.lnsWorkspaceWarningList {
+  @include euiYScroll;
+  max-height: $euiSize * 20;
+  width: $euiSize * 16;
+  overflow-wrap: break-word;
+}
+
+.lnsWorkspaceWarningList__item {
+  padding: $euiSize;
+
+  & + & {
+    border-top: $euiBorderThin;
+  }
+}
