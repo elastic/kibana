@@ -111,8 +111,6 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
 
       <NoDetectorsWarning show={detectors.length === 0} />
 
-      <EuiSpacer size="m" />
-
       <EuiFlexGrid columns={3}>
         {detectors.map((d, i) => (
           <EuiFlexItem key={i} data-test-subj={`mlAdvancedDetector ${i}`}>
@@ -143,6 +141,9 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+
+      <EuiSpacer size="m" />
+
       <DetectorsValidationWarning validation={validation} />
     </Fragment>
   );
@@ -168,7 +169,6 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
           defaultMessage="At least one detector is needed to create a job."
         />
       </EuiCallOut>
-      <EuiSpacer size="s" />
     </Fragment>
   );
 };
