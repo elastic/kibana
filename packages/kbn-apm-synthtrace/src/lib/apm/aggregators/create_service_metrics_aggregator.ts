@@ -32,7 +32,7 @@ export function createServiceMetricsAggregator(flushInterval: string) {
 
         return {
           ...set,
-          'metricset.name': 'service',
+          'metricset.name': 'service_transaction',
           'metricset.interval': flushInterval,
           'processor.event': 'metric',
           'processor.name': 'metric',

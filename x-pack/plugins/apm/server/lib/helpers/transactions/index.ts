@@ -106,7 +106,7 @@ export function getDocumentTypeFilterForTransactions(
             filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
             must_not: [
               { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
-              { term: { [METRICSET_NAME]: 'service' } },
+              { term: { [METRICSET_NAME]: 'service_transaction' } },
             ],
           },
         },
