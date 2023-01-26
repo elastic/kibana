@@ -8,6 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+
+import type { FindResponseHTTPV1 } from '../../common';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
 
@@ -87,12 +89,12 @@ export const registerFindRoute = (
           return result;
         });
 
-      return res.ok({
-        body: {
-          ...findResponse,
-          saved_objects: enhancedSavedObjects,
-        },
-      });
+      const response: FindResponseHTTPV1 = {
+        savedObjects: enhancedSavedObjects,
+        total: findResponse.total,
+      };
+
+      return res.ok({ body: response });
     })
   );
 };

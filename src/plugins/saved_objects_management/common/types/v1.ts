@@ -8,7 +8,6 @@
 
 import type { SavedObject } from '@kbn/core/types';
 import type { SavedObjectsNamespaceType } from '@kbn/core/public';
-import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 
 /** Domain interfaces */
 
@@ -98,25 +97,24 @@ export interface ReferenceHTTPV1 {
 }
 
 export interface FindQueryHTTPV1 {
-  perPage: number;
-  page: number;
+  perPage?: number;
+  page?: number;
   type: string | string[];
   // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
   search?: string;
-  defaultSearchOperator: FindSearchOperatorHTTPV1;
+  defaultSearchOperator?: FindSearchOperatorHTTPV1;
   // TODO: Fix. this API allows sorting by any field, thus leaking SO attributes to the public...
-  sortField: string;
-  sortOrder: FindSortOrderHTTPV1;
+  sortField?: string;
+  sortOrder?: FindSortOrderHTTPV1;
   hasReference?: ReferenceHTTPV1 | ReferenceHTTPV1[];
-  hasReferenceOperator: FindSearchOperatorHTTPV1;
-  fields: string | string[];
+  hasReferenceOperator?: FindSearchOperatorHTTPV1;
+  fields?: string | string[];
 }
 
-/**
- * TODO: Fix, we are directly expose server-only types to the client. This should
- * be wrapped in something that can be versioned.
- */
-export type FindResponseHTTPV1 = SavedObjectsFindResponse;
+export interface FindResponseHTTPV1 {
+  savedObjects: SavedObjectWithMetadataV1[];
+  total: number;
+}
 
 export interface GetAllowedTypesResponseHTTPV1 {
   types: SavedObjectManagementTypeInfoV1;
