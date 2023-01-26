@@ -16,7 +16,8 @@
     "@kbn/es-query",
     "@kbn/monaco",
     "@kbn/std",
-    "@kbn/image-embeddable-plugin"
+    "@kbn/image-embeddable-plugin",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": [
     "target/**/*",
