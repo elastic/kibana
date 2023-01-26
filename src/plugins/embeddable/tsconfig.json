@@ -27,6 +27,7 @@
     "@kbn/expressions-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
+    "@kbn/ui-actions-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -75,5 +75,6 @@
     "@kbn/ml-date-picker",
     "@kbn/ml-is-defined",
     "@kbn/ml-query-utils",
+    "@kbn/ui-actions-browser",
   ],
 }
