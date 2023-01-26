@@ -19,6 +19,8 @@ export type {
 export type {
   BulkGetHTTPBodyV1,
   BulkGetHTTPResponseV1,
+  BulkDeleteHTTPBodyV1,
+  BulkDeleteHTTPResponseV1,
   FindQueryHTTPV1,
   FindResponseHTTPV1,
   FindSearchOperatorHTTPV1,

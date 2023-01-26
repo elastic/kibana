@@ -89,12 +89,23 @@ export type BulkGetHTTPBodyV1 = Array<{
   type: string;
 }>;
 
-/**
- * We assume that the "SavedObject" interface is itself versioned and so safe to expose to public code.
- *
- * However, we can better control the output of this API if we used our own, domain-specific type.
- */
 export type BulkGetHTTPResponseV1 = SavedObjectWithMetadataV1[];
+
+export type BulkDeleteHTTPBodyV1 = Array<{
+  type: string;
+  id: string;
+}>;
+
+export type BulkDeleteHTTPResponseV1 = Array<{
+  /** The ID of the saved object */
+  id: string;
+  /** The type of the saved object */
+  type: string;
+  /** The status of deleting the object: true for deleted, false for error */
+  success: boolean;
+  /** Reason the object could not be deleted (success is false) */
+  error?: SavedObjectError;
+}>;
 
 export type FindSearchOperatorHTTPV1 = 'AND' | 'OR';
 export type FindSortOrderHTTPV1 = 'asc' | 'desc';

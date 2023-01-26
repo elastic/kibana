@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import type { BulkDeleteHTTPResponseV1 } from '../../common';
 
 export const registerBulkDeleteRoute = (router: IRouter) => {
   router.post(
@@ -29,7 +30,8 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
       const client = getClient();
       const response = await client.bulkDelete(objects, { force: true });
 
-      return res.ok({ body: response.statuses });
+      const body: BulkDeleteHTTPResponseV1 = response.statuses;
+      return res.ok({ body });
     })
   );
 };

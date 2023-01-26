@@ -7,20 +7,13 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { SavedObjectError, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-
-interface SavedObjectDeleteStatus {
-  id: string;
-  success: boolean;
-  type: string;
-  error?: SavedObjectError;
-}
+import { BulkDeleteHTTPBodyV1, BulkDeleteHTTPResponseV1 } from '../../common';
 
 export function bulkDeleteObjects(
   http: HttpStart,
-  objects: SavedObjectTypeIdTuple[]
-): Promise<SavedObjectDeleteStatus[]> {
-  return http.post<SavedObjectDeleteStatus[]>(
+  objects: BulkDeleteHTTPBodyV1
+): Promise<BulkDeleteHTTPResponseV1> {
+  return http.post<BulkDeleteHTTPResponseV1>(
     '/internal/kibana/management/saved_objects/_bulk_delete',
     {
       body: JSON.stringify(objects),
