@@ -91,7 +91,7 @@ describe('When using `getActionList()', () => {
         {
           agents: ['agent-a'],
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
-          command: 'unisolate',
+          command: 'kill-process',
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
           errors: undefined,
@@ -171,7 +171,7 @@ describe('When using `getActionList()', () => {
             'agent-b': { name: 'Host-agent-b' },
             'agent-x': { name: '' },
           },
-          command: 'unisolate',
+          command: 'kill-process',
           completedAt: undefined,
           wasSuccessful: false,
           errors: undefined,
