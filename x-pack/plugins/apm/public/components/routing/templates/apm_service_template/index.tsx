@@ -213,6 +213,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
 
+  const { rangeFrom, rangeTo } = queryFromUrl;
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -222,11 +225,15 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
             path: {
               serviceName,
             },
+            query: {
+              start,
+              end,
+            },
           },
         }
       );
     },
-    [serviceName]
+    [serviceName, start, end]
   );
 
   const query = omit(
