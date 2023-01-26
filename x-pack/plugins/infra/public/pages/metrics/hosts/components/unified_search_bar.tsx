@@ -23,7 +23,7 @@ interface Props {
 
 export const UnifiedSearchBar = ({ dataView }: Props) => {
   const {
-    services: { unifiedSearch },
+    services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
   const {
     unifiedSearchDateRange,
@@ -36,10 +36,6 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
-
-  const onFilterChange = (filters: Filter[]) => {
-    onQueryChange({ filters });
-  };
 
   const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     onQueryChange({ payload });
@@ -62,14 +58,12 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
 
   const onQueryChange = ({
     payload,
-    filters,
     panelFilters,
   }: {
     payload?: { dateRange: TimeRange; query?: Query };
-    filters?: Filter[];
     panelFilters?: Filter[];
   }) => {
-    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, filters, panelFilters });
+    onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
   };
 
   return (
@@ -83,14 +77,12 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         query={unifiedSearchQuery}
         dateRangeFrom={unifiedSearchDateRange.from}
         dateRangeTo={unifiedSearchDateRange.to}
-        filters={unifiedSearchFilters}
         onQuerySubmit={onQuerySubmit}
         onSaved={onQuerySave}
         onSavedQueryUpdated={onQuerySave}
         onClearSavedQuery={onClearSavedQuery}
-        showSaveQuery
+        showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
         showQueryInput
-        onFiltersUpdated={onFilterChange}
         displayStyle="inPage"
       />
       <ControlsContent
