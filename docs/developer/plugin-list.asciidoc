@@ -185,7 +185,7 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
-|Set of APIs used internally by the FTR.
+|This plugin exposes a set of APIs used internally during functional tests by the FTR.
 
 
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
