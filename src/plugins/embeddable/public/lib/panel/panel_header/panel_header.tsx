@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action } from '@kbn/ui-actions-browser';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';

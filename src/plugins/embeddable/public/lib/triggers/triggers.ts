@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { Trigger } from '@kbn/ui-actions-browser';
+import { RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {

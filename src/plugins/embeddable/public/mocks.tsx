@@ -14,7 +14,7 @@ import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { UiActionsService } from './lib/ui_actions';
+import { UiActionsService } from '@kbn/ui-actions-browser';
 import { EmbeddablePublicPlugin } from './plugin';
 import {
   EmbeddableStart,
