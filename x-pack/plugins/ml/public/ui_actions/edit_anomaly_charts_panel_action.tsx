@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-browser';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import {
@@ -18,7 +18,7 @@ export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
 export function createEditAnomalyChartsPanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<EditAnomalyChartsPanelContext> {
+): ActionDefinition<EditAnomalyChartsPanelContext> {
   return {
     id: 'edit-anomaly-charts',
     type: EDIT_ANOMALY_CHARTS_PANEL_ACTION,

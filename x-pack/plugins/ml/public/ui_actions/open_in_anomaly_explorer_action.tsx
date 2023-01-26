@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SerializableRecord } from '@kbn/utility-types';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-browser';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import {
@@ -25,7 +25,7 @@ export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
 export function createOpenInExplorerAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext> {
+): ActionDefinition<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext> {
   return {
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
