@@ -6,7 +6,7 @@
  */
 
 import './workspace_panel_wrapper.scss';
-import './warnings_popover.scss';
+import './messages_popover.scss';
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiText, EuiButton, EuiIcon } from '@elastic/eui';

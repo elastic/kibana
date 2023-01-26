@@ -20,7 +20,7 @@ import {
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
-import { MessagesPopover } from './warnings_popover';
+import { MessagesPopover } from './messages_popover';
 import {
   useLensDispatch,
   updateVisualizationState,
