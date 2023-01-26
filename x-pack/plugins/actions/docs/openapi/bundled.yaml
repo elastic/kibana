@@ -484,9 +484,10 @@ components:
   parameters:
     kbn_xsrf:
       schema:
-        type: string
+        type: boolean
       in: header
       name: kbn-xsrf
+      description: Cross-site request forgery protection
       required: true
     space_id:
       in: path
@@ -945,7 +946,7 @@ components:
           description: |
             The type of authentication to use. The default value is false, which means basic authentication is used instead of open authorization (OAuth).
           default: false
-          type: string
+          type: boolean
         jwtKeyId:
           description: |
             The key identifier assigned to the JWT verifier map of your OAuth application. This property is required when `isOAuth` is `true`.
@@ -1022,7 +1023,7 @@ components:
           description: |
             The type of authentication to use. The default value is false, which means basic authentication is used instead of open authorization (OAuth).
           default: false
-          type: string
+          type: boolean
         jwtKeyId:
           description: |
             The key identifier assigned to the JWT verifier map of your OAuth application. This property is required when `isOAuth` is `true`.

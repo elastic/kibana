@@ -60,7 +60,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -116,7 +116,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -350,7 +350,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -421,7 +421,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">kbn-xsrf (required)</div>
 
-      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash;  default: null </div>
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
 
     </div>  <!-- field-items -->
 
@@ -834,7 +834,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ServiceNow instance URL. </div>
 <div class="param">clientId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The client ID assigned to your OAuth application. This property is required when <code>isOAuth</code> is <code>true</code>. </div>
-<div class="param">isOAuth (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of authentication to use. The default value is false, which means basic authentication is used instead of open authorization (OAuth). </div>
+<div class="param">isOAuth (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> The type of authentication to use. The default value is false, which means basic authentication is used instead of open authorization (OAuth). </div>
 <div class="param">jwtKeyId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key identifier assigned to the JWT verifier map of your OAuth application. This property is required when <code>isOAuth</code> is <code>true</code>. </div>
 <div class="param">userIdentifierValue (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier to use for OAuth authentication. This identifier should be the user field you selected when you created an OAuth JWT API endpoint for external clients in your ServiceNow instance. For example, if the selected user field is <code>Email</code>, the user identifier should be the user's email address. This property is required when <code>isOAuth</code> is <code>true</code>. </div>
 <div class="param">usesTableApi (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Determines whether the connector uses the Table API or the Import Set API. This property is supported only for ServiceNow ITSM and ServiceNow SecOps connectors.  NOTE: If this property is set to <code>false</code>, the Elastic application should be installed in ServiceNow. </div>
@@ -846,7 +846,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">apiUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ServiceNow instance URL. </div>
 <div class="param">clientId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The client ID assigned to your OAuth application. This property is required when <code>isOAuth</code> is <code>true</code>. </div>
-<div class="param">isOAuth (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of authentication to use. The default value is false, which means basic authentication is used instead of open authorization (OAuth). </div>
+<div class="param">isOAuth (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> The type of authentication to use. The default value is false, which means basic authentication is used instead of open authorization (OAuth). </div>
 <div class="param">jwtKeyId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The key identifier assigned to the JWT verifier map of your OAuth application. This property is required when <code>isOAuth</code> is <code>true</code>. </div>
 <div class="param">userIdentifierValue (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier to use for OAuth authentication. This identifier should be the user field you selected when you created an OAuth JWT API endpoint for external clients in your ServiceNow instance. For example, if the selected user field is <code>Email</code>, the user identifier should be the user's email address. This property is required when <code>isOAuth</code> is <code>true</code>. </div>
     </div>  <!-- field-items -->
