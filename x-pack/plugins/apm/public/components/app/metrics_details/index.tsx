@@ -15,9 +15,9 @@ export function MetricsDetails() {
   const {
     path: { id },
   } = useApmParams('/services/{serviceName}/metrics/{id}');
-  const { cloudProviderAndService } = useApmServiceContext();
+  const { serverlessType } = useApmServiceContext();
 
-  if (isAWSLambdaAgent(cloudProviderAndService)) {
+  if (isAWSLambdaAgent(serverlessType)) {
     return <ServerlessMetricsDetails serverlessId={id} />;
   }
 
