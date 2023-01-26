@@ -12,8 +12,6 @@ import {
   UpdateEngineApiLogicActions,
 } from '../../api/engines/update_engine_api_logic';
 
-import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
-
 import { EngineViewActions, EngineViewLogic, EngineViewValues } from './engine_view_logic';
 
 export interface EngineIndicesLogicActions {
@@ -47,15 +45,8 @@ export const EngineIndicesLogic = kea<
       ['fetchEngine'],
       UpdateEngineApiLogic,
       ['makeRequest as updateEngineRequest', 'apiSuccess as engineUpdated'],
-      FetchIndicesAPILogic,
-      ['makeRequest as fetchIndices', 'apiSuccess as indicesFetched'],
     ],
-    values: [
-      EngineViewLogic,
-      ['engineData', 'engineName'],
-      FetchIndicesAPILogic,
-      ['data as indicesData', 'status as fetchIndicesApiStatus'],
-    ],
+    values: [EngineViewLogic, ['engineData', 'engineName']],
   },
   listeners: ({ actions, values }) => ({
     addIndicesToEngine: ({ indices }) => {
