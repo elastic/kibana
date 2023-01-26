@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { v1 as uuidv1 } from 'uuid';
+
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
@@ -345,6 +347,10 @@ export default ({ getService }: FtrProviderContext): void => {
           await createCase(supertest, postCaseReq);
         });
 
+        afterEach(async () => {
+          await deleteAllCaseItems(es);
+        });
+
         it('should successfully find a case when using valid searchFields', async () => {
           const cases = await findCases({
             supertest,
@@ -361,6 +367,44 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(cases.total).to.be(1);
+        });
+
+        it('should successfully find a case when using a valid uuid', async () => {
+          const caseWithId = await createCase(supertest, postCaseReq);
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: caseWithId.id },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].id).to.equal(caseWithId.id);
+        });
+
+        it('should successfully find a case with a valid uuid in title', async () => {
+          const uuid = uuidv1();
+          await createCase(supertest, { ...postCaseReq, title: uuid });
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: uuid },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].title).to.equal(uuid);
+        });
+
+        it('should successfully find a case with a valid uuid in title', async () => {
+          const uuid = uuidv1();
+          await createCase(supertest, { ...postCaseReq, description: uuid });
+
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: uuid },
+          });
+
+          expect(cases.total).to.be(1);
+          expect(cases.cases[0].description).to.equal(uuid);
         });
 
         it('should not find any cases when it does not use a wildcard and the string does not match', async () => {
