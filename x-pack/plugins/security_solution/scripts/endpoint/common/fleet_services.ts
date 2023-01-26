@@ -6,10 +6,12 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { AgentStatus } from '@kbn/fleet-plugin/common';
+import { AGENT_API_ROUTES, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { AgentStatus, GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { GetAgentsRequest } from '@kbn/fleet-plugin/common/types';
+import type { KbnClient } from '@kbn/test';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
@@ -63,4 +65,23 @@ export const checkInFleetAgent = async (
       doc: update,
     },
   });
+};
+
+/**
+ * Query Fleet Agents API
+ *
+ * @param kbnClient
+ * @param options
+ */
+export const fetchFleetAgents = async (
+  kbnClient: KbnClient,
+  options: GetAgentsRequest['query']
+): Promise<GetAgentsResponse> => {
+  return kbnClient
+    .request<GetAgentsResponse>({
+      method: 'GET',
+      path: AGENT_API_ROUTES.LIST_PATTERN,
+      query: options,
+    })
+    .then((response) => response.data);
 };
