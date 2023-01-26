@@ -18,10 +18,7 @@ import type {
   ESLicense,
   ListTemplate,
   TelemetryEvent,
-  ValueListResponseAggregation,
-  ValueListExceptionListResponseAggregation,
-  ValueListItemsResponseAggregation,
-  ValueListIndicatorMatchResponseAggregation,
+  ValueListResponse,
   TaskMetric,
 } from './types';
 import {
@@ -241,32 +238,30 @@ export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfi
   return merge(DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS, policyConfig);
 };
 
-export const metricsResponseToValueListMetaData = ({
-  listMetricsResponse,
-  itemMetricsResponse,
-  exceptionListMetricsResponse,
-  indicatorMatchMetricsResponse,
-}: {
-  listMetricsResponse: ValueListResponseAggregation;
-  itemMetricsResponse: ValueListItemsResponseAggregation;
-  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
-  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
-}) => ({
-  total_list_count: listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
+export const formatValueListMetaData = (
+  valueListResponse: ValueListResponse,
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined,
+) => ({
+  '@timestamp': moment().toISOString(),
+  cluster_uuid: clusterInfo.cluster_uuid,
+  cluster_name: clusterInfo.cluster_name,
+  license_id: licenseInfo?.uid,
+  total_list_count: valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
   types:
-    listMetricsResponse?.aggregations?.type_breakdown?.buckets.map((breakdown) => ({
+    valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map((breakdown) => ({
       type: breakdown.key,
       count: breakdown.doc_count,
     })) ?? [],
   lists:
-    itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map((itemCount) => ({
+    valueListResponse.itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map((itemCount) => ({
       id: itemCount.key,
       count: itemCount.doc_count,
     })) ?? [],
   included_in_exception_lists_count:
-    exceptionListMetricsResponse?.aggregations?.vl_included_in_exception_lists_count?.value ?? 0,
+    valueListResponse.exceptionListMetricsResponse?.aggregations?.vl_included_in_exception_lists_count?.value ?? 0,
   used_in_indicator_match_rule_count:
-    indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+    valueListResponse.indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
 
 export let isElasticCloudDeployment = false;
@@ -295,6 +290,6 @@ export const createTaskMetric = (
     time_executed_in_ms: endTime - startTime,
     start_time: startTime,
     end_time: endTime,
-    error_message: errorMessage,
+    error_message: errorMessage
   };
 };

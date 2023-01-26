@@ -436,3 +436,10 @@ export interface TelemetryFilterListArtifact {
   exception_lists: AllowlistFields;
   prebuilt_rules_alerts: AllowlistFields;
 }
+
+export interface ValueListResponse {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}
