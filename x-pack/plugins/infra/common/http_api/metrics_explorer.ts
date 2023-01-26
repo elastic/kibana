@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { xor } from 'lodash';
 
 export const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
@@ -34,8 +35,9 @@ export type MetricExplorerCustomMetricAggregations = Exclude<
   MetricsExplorerAggregation,
   'custom' | 'rate' | 'p95' | 'p99'
 >;
-const metricsExplorerCustomMetricAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.filter(
-  (a) => OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS.includes(a) === false
+const metricsExplorerCustomMetricAggregationKeys = xor(
+  METRIC_EXPLORER_AGGREGATIONS,
+  OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS
 ).reduce<Record<MetricExplorerCustomMetricAggregations, null>>(
   (acc, agg) => ({ ...acc, [agg]: null }),
   {} as Record<MetricExplorerCustomMetricAggregations, null>
