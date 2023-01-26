@@ -70,7 +70,7 @@ export default function (ftrContext: FtrProviderContext) {
     ) => {
       it(`returns expected ${httpCode} response for ${description ?? username}`, async () => {
         await supertest
-          .post(`/internal/ftr/kbn_client_so/_find`)
+          .post(`/internal/ftr/kbn_client_so/_clean`)
           .send({ types: ['tag', 'dashboard', 'visualization'] })
           .auth(username, password)
           .expect(httpCode)
