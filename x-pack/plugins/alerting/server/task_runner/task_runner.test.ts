@@ -306,7 +306,7 @@ describe('Task Runner', () => {
   });
 
   test.each(ephemeralTestParams)(
-    'test actionsPlugin.execute is called per alert alert that is scheduled %s',
+    'actionsPlugin.execute is called per alert alert that is scheduled %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true

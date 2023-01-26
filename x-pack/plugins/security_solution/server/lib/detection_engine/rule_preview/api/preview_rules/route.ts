@@ -246,6 +246,7 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
+                alertsClient: null,
                 savedObjectsClient: coreContext.savedObjects.client,
                 scopedClusterClient: wrapScopedClusterClient({
                   abortController,
