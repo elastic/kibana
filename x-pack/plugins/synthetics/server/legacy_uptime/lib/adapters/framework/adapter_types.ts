@@ -28,7 +28,7 @@ import { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { UptimeEsClient } from '../../lib';
@@ -54,7 +54,7 @@ export interface UptimeServerSetup {
   router: UptimeRouter;
   config: UptimeConfig;
   cloud?: CloudSetup;
-  spaces?: SpacesPluginSetup;
+  spaces?: SpacesPluginStart;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
   savedObjectsClient?: SavedObjectsClientContract;
@@ -76,7 +76,6 @@ export interface UptimeCorePluginsSetup {
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
   cloud?: CloudSetup;
-  spaces?: SpacesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -90,4 +89,5 @@ export interface UptimeCorePluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
+  spaces?: SpacesPluginStart;
 }

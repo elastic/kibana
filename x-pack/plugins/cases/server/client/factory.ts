@@ -147,6 +147,7 @@ export class CasesClientFactory {
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId:
         this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      savedObjectsSerializer,
     });
   }
 

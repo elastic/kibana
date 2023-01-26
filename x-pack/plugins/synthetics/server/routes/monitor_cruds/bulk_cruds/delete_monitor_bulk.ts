@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   formatTelemetryDeleteEvent,
@@ -36,9 +36,9 @@ export const deleteMonitorBulk = async ({
   request: KibanaRequest;
 }) => {
   const { logger, telemetry, stackVersion } = server;
-  const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
   try {
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,

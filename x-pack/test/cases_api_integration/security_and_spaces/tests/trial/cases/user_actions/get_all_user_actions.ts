@@ -17,11 +17,11 @@ import {
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getCaseUserActions,
   pushCase,
   updateCase,
   updateConfiguration,
 } from '../../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../../common/lib/user_actions';
 import {
   createCaseWithConnector,
   getServiceNowSimulationServer,

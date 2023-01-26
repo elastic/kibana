@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -87,6 +87,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { AlertsService } from './alerts_service/alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -187,6 +188,8 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
+  private alertsService?: AlertsService;
+  private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -198,6 +201,7 @@ export class AlertingPlugin {
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(
@@ -236,12 +240,24 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
+    if (this.config.enableFrameworkAlerts) {
+      this.alertsService = new AlertsService({
+        logger: this.logger,
+        pluginStop$: this.pluginStop$,
+        elasticsearchClientPromise: core
+          .getStartServices()
+          .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      });
+      this.alertsService!.initialize();
+    }
+
     const ruleTypeRegistry = new RuleTypeRegistry({
       logger: this.logger,
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
+      alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
     });
@@ -350,6 +366,7 @@ export class AlertingPlugin {
         ruleType.cancelAlertsOnRuleTimeout =
           ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
         ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+        ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
         ruleTypeRegistry.register(ruleType);
       },
       getSecurityHealth: async () => {
@@ -526,5 +543,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
   }
 }

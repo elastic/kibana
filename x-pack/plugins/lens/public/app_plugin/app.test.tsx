@@ -36,6 +36,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 
 import { setState, LensAppState } from '../state_management';
+import { coreMock } from '@kbn/core/public/mocks';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('@kbn/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -85,6 +86,7 @@ describe('Lens App', () => {
       visualizationMap,
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
+      coreStart: coreMock.createStart(),
     };
   }
 
@@ -144,6 +146,8 @@ describe('Lens App', () => {
     expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
       {
         indexPatternService: expect.any(Object),
+        getUserMessages: expect.any(Function),
+        addUserMessages: expect.any(Function),
         lensInspector: {
           adapters: {
             expression: expect.any(Object),

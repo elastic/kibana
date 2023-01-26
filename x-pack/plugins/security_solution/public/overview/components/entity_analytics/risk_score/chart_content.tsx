@@ -41,14 +41,16 @@ const ChartContentComponent = ({
       {isChartEmbeddablesEnabled && spaceId && dataExists && (
         <VisualizationEmbeddable
           applyGlobalQueriesAndFilters={false}
+          donutTextWrapperClassName="risk-score"
           extraOptions={extraOptions}
           getLensAttributes={getRiskScoreDonutAttributes}
-          height="140px"
+          height="180px"
           id={`${kpiQueryId}-donut`}
           isDonut={true}
           label={TOTAL_LABEL}
           stackByField={riskEntity}
           timerange={timerange}
+          width="270px"
         />
       )}
       {!isChartEmbeddablesEnabled && (

@@ -11,6 +11,7 @@
     "dataViews",
     "visTypeTimeseries",
     "alerting",
+    "lens",
     "triggersActionsUi",
     "observability",
     "ruleRegistry",

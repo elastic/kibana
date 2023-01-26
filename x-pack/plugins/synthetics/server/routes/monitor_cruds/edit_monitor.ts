@@ -57,9 +57,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
     try {
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
         syntheticsMonitorType,
         monitorId

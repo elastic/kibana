@@ -7,12 +7,17 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
 import { Console } from './console';
-import type { ConsoleProps, CommandDefinition, CommandExecutionComponent } from './types';
+import type {
+  ConsoleProps,
+  CommandDefinition,
+  CommandExecutionComponent,
+  CommandArgumentValueSelectorProps,
+} from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
@@ -236,7 +241,35 @@ export const getCommandListMock = (): CommandDefinition[] => {
         },
       },
     },
+    {
+      name: 'cmd7',
+      about: 'Command with argument selector',
+      RenderComponent: jest.fn(RenderComponent),
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: true,
+          allowMultiples: true,
+          SelectorComponent: ArgumentSelectorComponentMock,
+        },
+      },
+    },
   ];
 
   return commands;
 };
+
+export const ArgumentSelectorComponentMock = memo<
+  CommandArgumentValueSelectorProps<{ selection: string }>
+>(({ value, valueText, onChange, argName, argIndex }) => {
+  useEffect(() => {
+    if (!value) {
+      onChange({ valueText: 'foo selected', value: { selection: 'foo' } });
+    }
+  }, [onChange, value]);
+
+  return (
+    <span data-test-subj="argSelectorValueText">{`${argName}[${argIndex}]: ${valueText}`}</span>
+  );
+});
+ArgumentSelectorComponentMock.displayName = 'ArgumentSelectorComponentMock';
