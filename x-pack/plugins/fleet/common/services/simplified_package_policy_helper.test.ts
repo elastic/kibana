@@ -132,6 +132,8 @@ describe('toPackagePolicy', () => {
               features: {
                 synthetic_source: true,
                 tsdb: false,
+                doc_value_only_numeric: false,
+                doc_value_only_other: false,
               },
             },
           ],
@@ -144,6 +146,8 @@ describe('toPackagePolicy', () => {
           features: {
             synthetic_source: true,
             tsdb: false,
+            doc_value_only_numeric: false,
+            doc_value_only_other: false,
           },
         },
       ]);

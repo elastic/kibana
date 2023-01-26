@@ -1445,300 +1445,12 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/collect_multi_namespace_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/collect_multi_namespace_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/collect_multi_namespace_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/update_objects_spaces.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/update_objects_spaces.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/collect_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_objects_filter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_objects_filter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
@@ -1750,138 +1462,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/split_overwrites.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/validate_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/validate_references.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
@@ -1919,102 +1499,6 @@
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/utils.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/import.ts"
           },
           {
             "plugin": "core",
@@ -2213,68 +1697,16 @@
             "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/server/saved_objects/saved_objects_security_extension.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/server/saved_objects/saved_objects_security_extension.ts"
-          },
-          {
-            "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/saved_objects_encryption_extension.ts"
-          },
-          {
-            "plugin": "encryptedSavedObjects",
-            "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/saved_objects_encryption_extension.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
+            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/utils.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/authorization/authorization.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/common/types.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/common/types.ts"
+            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",
@@ -2313,64 +1745,48 @@
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/hooks/use_params_list.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/server/routes/monitor_cruds/bulk_cruds/delete_monitor_bulk.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/server/routes/monitor_cruds/bulk_cruds/delete_monitor_bulk.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/test_helpers.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/test_helpers.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/test_helpers.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/rules_client/tests/bulk_disable.test.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/server/services/agents/action.mock.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/server/services/slo/fixtures/slo.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/server/services/slo/fixtures/slo.ts"
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -2403,158 +1819,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.security_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.security_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.security_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.spaces_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.spaces_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.spaces_extension.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/collect_exported_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/saved_objects_exporter.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/sort_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/utils.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/import_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/import_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
           },
           {
             "plugin": "@kbn/core-ui-settings-server-internal",
@@ -2567,126 +1831,6 @@
           {
             "plugin": "@kbn/core-ui-settings-server-internal",
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/saved_objects/transforms.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/create_saved_objects.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/execute_import_hooks.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/extract_errors.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/get_import_state_map_for_retries.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/regenerate_ids.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -2757,30 +1901,6 @@
           {
             "plugin": "core",
             "path": "src/core/types/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.13/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.13/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -3155,36 +2275,12 @@
             "path": "x-pack/plugins/ml/common/types/modules.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
           },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/save_dashboard_state_to_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/collect_references_deep.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -3618,22 +2714,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/decorator/inject_tag_references.test.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts"
-          },
-          {
             "plugin": "core",
             "path": "src/core/types/index.ts"
           },
@@ -4178,38 +3258,6 @@
             "path": "src/plugins/data/common/search/search_source/inject_references.test.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.16/index.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/common/locator/locator.ts"
           },
@@ -4230,56 +3278,76 @@
             "path": "x-pack/plugins/lens/public/app_plugin/share_action.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/cpu.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/cpu.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/resolve_import_errors.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_conflicts.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/tx.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/tx.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-import-export-server-internal",
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/lib/check_origin_conflicts.test.ts"
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_read.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_read.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_write.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_write.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
           }
         ],
         "initialIsOpen": false
