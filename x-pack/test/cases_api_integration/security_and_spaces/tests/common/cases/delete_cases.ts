@@ -19,8 +19,8 @@ import {
   getComment,
   getCase,
   superUserSpace1Auth,
-  getCaseUserActions,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   secOnly,
   secOnlyRead,

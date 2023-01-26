@@ -106,6 +106,42 @@ describe('parseDataStreamElasticsearchEntry', () => {
       },
     });
   });
+  it('Should handle dotted values for data_stream', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'index_template.data_stream': { hidden: true },
+      })
+    ).toEqual({
+      'index_template.data_stream': { hidden: true },
+    });
+    expect(
+      parseDataStreamElasticsearchEntry({
+        'index_template.data_stream': { hidden: false },
+      })
+    ).toEqual({
+      'index_template.data_stream': { hidden: false },
+    });
+  });
+  it('Should handle non-dotted values for data_stream', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        index_template: {
+          data_stream: { hidden: true },
+        },
+      })
+    ).toEqual({
+      'index_template.data_stream': { hidden: true },
+    });
+    expect(
+      parseDataStreamElasticsearchEntry({
+        index_template: {
+          data_stream: { hidden: false },
+        },
+      })
+    ).toEqual({
+      'index_template.data_stream': { hidden: false },
+    });
+  });
   it('Should handle dotted values for mappings and settings', () => {
     expect(
       parseDataStreamElasticsearchEntry({

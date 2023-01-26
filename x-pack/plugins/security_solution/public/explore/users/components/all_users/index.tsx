@@ -19,7 +19,7 @@ import {
 import type { Columns, Criteria, ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 
-import { getRowItemDraggables } from '../../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
@@ -80,12 +80,11 @@ const getUsersColumns = (
       mobileOptions: { show: true },
       render: (name) =>
         name != null && name.length > 0
-          ? getRowItemDraggables({
-              rowItems: [name],
-              attrName: 'user.name',
+          ? getRowItemsWithActions({
+              fieldName: 'user.name',
+              values: [name],
               idPrefix: `users-table-${name}-name`,
               render: (item) => <UserDetailsLink userName={item} />,
-              isAggregatable: true,
               fieldType: 'keyword',
             })
           : getOrEmptyTagFromValue(name),
@@ -106,11 +105,10 @@ const getUsersColumns = (
       mobileOptions: { show: true },
       render: (domain) =>
         domain != null && domain.length > 0
-          ? getRowItemDraggables({
-              rowItems: [domain],
-              attrName: 'user.domain',
+          ? getRowItemsWithActions({
+              fieldName: 'user.domain',
+              values: [domain],
               idPrefix: `users-table-${domain}-domain`,
-              isAggregatable: true,
               fieldType: 'keyword',
             })
           : getOrEmptyTagFromValue(domain),
