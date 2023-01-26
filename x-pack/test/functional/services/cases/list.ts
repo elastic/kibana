@@ -115,7 +115,20 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
     },
 
-    async getCaseFromTable(index: number) {
+    async getCaseById(caseId: string) {
+      const targetCase = await find.allByCssSelector(
+        `[data-test-subj*="cases-table-row-${caseId}"`,
+        100
+      );
+
+      if (!targetCase.length) {
+        throw new Error(`Cannot find case with id ${caseId} on table.`);
+      }
+
+      return targetCase[0];
+    },
+
+    async getCaseByIndex(index: number) {
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
       assertCaseExists(index, rows.length);
@@ -361,7 +374,7 @@ export function CasesTableServiceProvider(
 
     async getCaseTitle(index: number) {
       const titleElement = await (
-        await this.getCaseFromTable(index)
+        await this.getCaseByIndex(index)
       ).findByTestSubject('case-details-link');
 
       return await titleElement.getVisibleText();
