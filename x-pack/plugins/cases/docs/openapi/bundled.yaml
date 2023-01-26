@@ -1309,15 +1309,15 @@ paths:
           description: The page number to return.
           schema:
             type: string
-            default: 1
-          example: 1
+            default: '1'
+          example: '1'
         - name: perPage
           in: query
           description: The number of user actions to return per page.
           schema:
             type: string
-            default: 20
-          example: 20
+            default: '20'
+          example: '20'
         - name: sortOrder
           in: query
           description: Determines the sort order.
@@ -1398,6 +1398,7 @@ components:
         type: string
       in: header
       name: kbn-xsrf
+      description: Cross-site request forgery protection
       required: true
     space_id:
       in: path
