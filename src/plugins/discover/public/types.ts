@@ -7,6 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 
 export type ValueToStringConverter = (
   rowIndex: number,
@@ -37,4 +38,9 @@ export interface DataTableRecord {
    * Determines that the given doc is the anchor doc when rendering view surrounding docs
    */
   isAnchor?: boolean;
+}
+
+export interface RecordsFetchResponse {
+  records: DataTableRecord[];
+  textBasedQueryColumns?: DatatableColumn[];
 }

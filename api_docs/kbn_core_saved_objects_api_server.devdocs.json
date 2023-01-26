@@ -5554,7 +5554,8 @@
               "\nUse the sort values from the previous page to retrieve the next page of results."
             ],
             "signature": [
-              "string[] | undefined"
+              "SortResults",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
@@ -6012,7 +6013,8 @@
               "\nThe Elasticsearch `sort` value of this result.\n"
             ],
             "signature": [
-              "string[] | undefined"
+              "SortResults",
+              " | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
             "deprecated": false,
