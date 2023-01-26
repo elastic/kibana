@@ -41,6 +41,7 @@ describe('workspace_panel_wrapper', () => {
         datasourceStates={{}}
         isFullscreen={false}
         lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -63,6 +64,7 @@ describe('workspace_panel_wrapper', () => {
         datasourceStates={{}}
         isFullscreen={false}
         lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       />
     );
 
@@ -118,6 +120,7 @@ describe('workspace_panel_wrapper', () => {
           datasourceStates={{}}
           isFullscreen={false}
           lensInspector={{} as unknown as LensInspector}
+          getUserMessages={() => []}
         >
           <div />
         </WorkspacePanelWrapper>

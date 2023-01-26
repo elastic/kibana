@@ -7,23 +7,17 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import type { UserRiskScoreColumns } from '.';
-
 import * as i18n from './translations';
 import { RiskScore } from '../../../components/risk_score/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -40,29 +34,20 @@ export const getUserRiskScoreColumns = ({
       if (userName != null && userName.length > 0) {
         const id = escapeDataProviderId(`user-risk-score-table-userName-${userName}`);
         return (
-          <DraggableWrapper
+          <CellActions
             key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              excluded: false,
-              id,
-              name: userName,
-              kqlQuery: '',
-              queryMatch: { field: 'user.name', value: userName, operator: IS_OPERATOR },
+            mode={CellActionsMode.HOVER}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+            field={{
+              name: 'user.name',
+              value: userName,
+              type: 'keyword',
             }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
-              )
-            }
-            isAggregatable={true}
-            fieldType={'keyword'}
-          />
+          >
+            <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
+          </CellActions>
         );
       }
       return getEmptyTagValue();

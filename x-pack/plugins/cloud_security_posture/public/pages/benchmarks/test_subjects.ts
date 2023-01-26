@@ -10,7 +10,7 @@ export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'csp_benchmarks_table';
 export const ADD_INTEGRATION_TEST_SUBJ = 'csp_add_integration';
 export const BENCHMARKS_TABLE_COLUMNS = {
   INTEGRATION_NAME: 'benchmarks-table-column-integration-name',
-  DEPLOYMENT_TYPE: 'benchmarks-table-column-deployment-type',
+  MONITORING: 'benchmarks-table-column-monitoring',
   RULES: 'benchmarks-table-column-rules',
   INTEGRATION: 'benchmarks-table-column-integration',
   AGENT_POLICY: 'benchmarks-table-column-agent-policy',

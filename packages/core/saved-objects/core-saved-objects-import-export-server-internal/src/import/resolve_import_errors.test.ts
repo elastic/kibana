@@ -24,12 +24,11 @@ import {
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import type {
-  SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
-  SavedObjectReference,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsType,
