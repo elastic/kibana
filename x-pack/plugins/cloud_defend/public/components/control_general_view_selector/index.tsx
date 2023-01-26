@@ -64,6 +64,14 @@ export const ControlGeneralViewSelector = ({
     setAddConditionOpen(false);
   }, []);
 
+  const remainingProps = useMemo(() => {
+    return Object.keys(ControlSelectorCondition).filter(
+      (condition) => !selector.hasOwnProperty(condition)
+    );
+  }, [selector]);
+
+  const conditionsAdded = Object.keys(ControlSelectorCondition).length - remainingProps.length;
+
   const onRemoveClicked = useCallback(() => {
     // we prevent the removal of the last selector to avoid an empty state
     if (selectors.length > 1) {
@@ -106,11 +114,11 @@ export const ControlGeneralViewSelector = ({
       const updatedSelector = { ...selector };
 
       updatedSelector.name = value;
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 0;
 
       onChange(updatedSelector, index);
     },
-    [errorMap, index, onChange, selector, selectors]
+    [errorMap, index, conditionsAdded, onChange, selector, selectors]
   );
 
   const onChangeCondition = useCallback(
@@ -140,12 +148,12 @@ export const ControlGeneralViewSelector = ({
         delete errorMap[prop];
       }
 
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 0;
       setErrorMap({ ...errorMap });
 
       onChange(updatedSelector, index);
     },
-    [errorMap, index, onChange, selector]
+    [errorMap, index, conditionsAdded, onChange, selector]
   );
 
   const onAddCondition = useCallback(
@@ -163,12 +171,12 @@ export const ControlGeneralViewSelector = ({
 
       delete errorMap[prop];
       setErrorMap({ ...errorMap });
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 1;
 
       onChange(updatedSelector, index);
       closeAddCondition();
     },
-    [closeAddCondition, errorMap, index, onChange, selector]
+    [closeAddCondition, conditionsAdded, errorMap, index, onChange, selector]
   );
 
   const onAddValueToCondition = useCallback(
@@ -184,18 +192,16 @@ export const ControlGeneralViewSelector = ({
   );
 
   const errors = useMemo(() => {
-    return Object.keys(errorMap).reduce<string[]>((prev, current) => {
+    const errs = Object.keys(errorMap).reduce<string[]>((prev, current) => {
       return prev.concat(errorMap[current]);
     }, []);
-  }, [errorMap]);
 
-  const remainingProps = useMemo(() => {
-    return Object.keys(ControlSelectorCondition).filter(
-      (condition) => !selector.hasOwnProperty(condition)
-    );
-  }, [selector]);
+    if (conditionsAdded === 0) {
+      errs.push(i18n.errorConditionRequired);
+    }
 
-  const conditionsAdded = Object.keys(ControlSelectorCondition).length - remainingProps.length;
+    return errs;
+  }, [errorMap, conditionsAdded]);
 
   return (
     <EuiAccordion
@@ -305,7 +311,6 @@ export const ControlGeneralViewSelector = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
-                      disabled={conditionsAdded < 2}
                       iconType="cross"
                       onClick={() => onRemoveCondition(prop)}
                       aria-label="Remove condition"

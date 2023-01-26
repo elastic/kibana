@@ -30,7 +30,7 @@ export function SloList() {
   const {
     loading,
     error,
-    sloList: { results: slos = [], total, perPage },
+    sloList: { results: sloList = [], total, perPage },
   } = useFetchSloList({
     page: activePage + 1,
     name: query,
@@ -88,7 +88,7 @@ export function SloList() {
 
       <EuiFlexItem>
         <SloListItems
-          slos={slos}
+          sloList={sloList}
           loading={loading}
           error={error}
           onDeleting={handleDeleting}
@@ -96,7 +96,7 @@ export function SloList() {
         />
       </EuiFlexItem>
 
-      {slos.length ? (
+      {sloList.length ? (
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
