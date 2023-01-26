@@ -74,7 +74,7 @@ export const useActions = ({
 
   const actions = useMemo(
     () =>
-      defaultActions.reduce<Action[]>((acc, action) => {
+      defaultActions?.reduce<Action[]>((acc, action) => {
         if (action === 'inspect' && inspectActionProps != null) {
           return [
             ...acc,
