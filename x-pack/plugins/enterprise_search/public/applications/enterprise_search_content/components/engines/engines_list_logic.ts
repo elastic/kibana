@@ -109,6 +109,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: (_, { engine }) => engine,
       },
     ],
+
     isDeleteModalVisible: [
       false,
       {
@@ -116,6 +117,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         openDeleteEngineModal: () => true,
       },
     ],
+
     parameters: [
       { meta: DEFAULT_META },
       {
@@ -141,6 +143,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   }),
   selectors: ({ selectors }) => ({
     deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
+
     isDeleteLoading: [
       () => [selectors.deleteStatus],
       (status: EngineListValues['deleteStatus']) => [Status.LOADING].includes(status),
