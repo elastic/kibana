@@ -92,7 +92,6 @@ const TagsFilterPopoverComponent = ({
         searchable
         searchProps={{
           placeholder: 'Search tags',
-          compressed: true,
         }}
         aria-label="Rules tag search"
         options={selectableOptions}
