@@ -323,8 +323,8 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
-  return cy.visit(url, {
+export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
+  return cy.visit(role ? getUrlWithRoute(role, url) : url, {
     ...options,
     qs: {
       ...options.qs,
