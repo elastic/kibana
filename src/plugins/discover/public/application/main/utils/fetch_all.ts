@@ -23,7 +23,7 @@ import {
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import { DataMsg, RecordRawType, SavedSearchData } from '../hooks/use_saved_search';
+import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
 

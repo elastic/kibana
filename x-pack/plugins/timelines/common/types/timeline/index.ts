@@ -7,9 +7,9 @@
 
 import * as runtimeTypes from 'io-ts';
 
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { unionWithNullType } from '../../utility_types';
 import { Direction } from '../../search_strategy';
-import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
