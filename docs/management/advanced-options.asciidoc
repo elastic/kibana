@@ -546,10 +546,6 @@ Disable this option if you prefer to use the new heatmap charts with improved pe
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
 
-[[lens-sampling]]`lens:useFieldExistenceSampling`::
-**This setting is deprecated and will not be supported as of 8.6.**
-If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.
-
 [float]
 [[kibana-telemetry-settings]]
 ==== Usage Data
