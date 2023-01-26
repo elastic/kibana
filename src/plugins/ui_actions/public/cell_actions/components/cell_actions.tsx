@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
-import type { ActionExecutionContext } from '../../actions';
+import type { ActionExecutionContext } from '@kbn/ui-actions-browser';
 import { InlineActions } from './inline_actions';
 import { HoverActionsPopover } from './hover_actions_popover';
 

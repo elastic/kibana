@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiButtonIcon, EuiToolTip, IconType } from '@elastic/eui';
-import type { Action } from '../../actions';
+import type { Action } from '@kbn/ui-actions-browser';
 import { CellActionExecutionContext } from './cell_actions';
 
 export const ActionItem = ({
