@@ -143,7 +143,7 @@ async function _getRequestDiagnosticsActions(
     const actionResults = actionResultsRes.hits.hits.map((hit) => ({
       actionId: hit._source?.action_id as string,
       timestamp: hit._source?.['@timestamp'],
-      fileId: hit._source?.data?.file_id as string,
+      fileId: hit._source?.data?.upload_id as string,
       error: hit._source?.error,
     }));
     return agentActions.map((action) => {
