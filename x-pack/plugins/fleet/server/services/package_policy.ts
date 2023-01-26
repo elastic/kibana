@@ -1336,7 +1336,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<PackagePolicy | NewPackagePolicy | void> {
     const logger = appContextService.getLogger();
     const numberOfCallbacks = appContextService.getExternalCallbacks(externalCallbackType)?.size;
-    logger.info(`Running ${numberOfCallbacks} external callbacks for ${externalCallbackType}`);
+    logger.debug(`Running ${numberOfCallbacks} external callbacks for ${externalCallbackType}`);
     try {
       if (externalCallbackType === 'packagePolicyPostDelete') {
         return await this.runPostDeleteExternalCallbacks(
