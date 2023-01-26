@@ -94,13 +94,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: 'new',
                 description: 'fetch chart data and total hits',
-                child: {
-                  type: 'lens',
-                  name: 'lnsXY',
-                  id: 'unifiedHistogramLensComponent',
-                  description: 'Edit visualization',
-                  url: '/app/lens#/edit_by_value',
-                },
               },
             }),
             retry,
