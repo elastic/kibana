@@ -129,6 +129,12 @@ export const anSLO: SLOWithSummaryResponse = {
 
 export const aForecastedSLO: SLOWithSummaryResponse = {
   ...baseSlo,
+  timeWindow: {
+    duration: '1M',
+    calendar: {
+      startTime: '2022-01-01T00:00:00.000Z',
+    },
+  },
   id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
   summary: {
     status: 'HEALTHY',
