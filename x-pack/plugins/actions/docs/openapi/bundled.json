@@ -667,7 +667,46 @@
                         "$ref": "#/components/schemas/run_connector_params_level_message"
                       },
                       {
-                        "$ref": "#/components/schemas/run_connector_params_subactions"
+                        "title": "Subaction parameters",
+                        "description": "Test an action that involves a subaction.",
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_addevent"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_closealert"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_createalert"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_fieldsbyissuetype"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_getchoices"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_getfields"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_getincident"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_issue"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_issues"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_issuetypes"
+                          },
+                          {
+                            "$ref": "#/components/schemas/run_connector_subaction_pushtoservice"
+                          }
+                        ],
+                        "discriminator": {
+                          "propertyName": "subAction"
+                        }
                       }
                     ]
                   }
@@ -3060,7 +3099,7 @@
         ]
       },
       "run_connector_params_documents": {
-        "title": "Run index connector parameters",
+        "title": "Index connector parameters",
         "description": "Test an action that indexes a document into Elasticsearch.",
         "type": "object",
         "required": [
@@ -3069,7 +3108,7 @@
         "properties": {
           "documents": {
             "type": "array",
-            "description": "The documents to index in JSON format.",
+            "description": "The documents in JSON format for index connectors.",
             "items": {
               "type": "object",
               "additionalProperties": true
@@ -3078,7 +3117,7 @@
         }
       },
       "run_connector_params_level_message": {
-        "title": "Run server log connector parameters",
+        "title": "Server log connector parameters",
         "description": "Test an action that writes an entry to the Kibana server log.",
         "type": "object",
         "required": [
@@ -3087,7 +3126,7 @@
         "properties": {
           "level": {
             "type": "string",
-            "description": "The log level of the message.",
+            "description": "The log level of the message for server log connectors.",
             "enum": [
               "debug",
               "error",
@@ -3100,37 +3139,644 @@
           },
           "message": {
             "type": "string",
-            "description": "The message to log."
+            "description": "The message for server log connectors."
           }
         }
       },
-      "run_connector_params_subactions": {
-        "title": "Run connector subactions",
-        "description": "Test an actions that require subactions and subaction parameters.",
+      "run_connector_subaction_addevent": {
+        "title": "The addEvent subaction",
         "type": "object",
         "required": [
           "subAction"
+        ],
+        "description": "The `addEvent` subaction for ServiceNow ITOM connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "addEvent"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "description": "The set of configuration properties for the action.",
+            "properties": {
+              "additional_info": {
+                "type": "string",
+                "description": "Additional information about the event."
+              },
+              "description": {
+                "type": "string",
+                "description": "The details about the event."
+              },
+              "event_class": {
+                "type": "string",
+                "description": "A specific instance of the source."
+              },
+              "message_key": {
+                "type": "string",
+                "description": "All actions sharing this key are associated with the same ServiceNow alert. The default value is `<rule ID>:<alert instance ID>`."
+              },
+              "metric_name": {
+                "type": "string",
+                "description": "The name of the metric."
+              },
+              "node": {
+                "type": "string",
+                "description": "The host that the event was triggered for."
+              },
+              "resource": {
+                "type": "string",
+                "description": "The name of the resource."
+              },
+              "severity": {
+                "type": "string",
+                "description": "The severity of the event."
+              },
+              "source": {
+                "type": "string",
+                "description": "The name of the event source type."
+              },
+              "time_of_event": {
+                "type": "string",
+                "description": "The time of the event."
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of event."
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_closealert": {
+        "title": "The closeAlert subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `closeAlert` subaction for Opsgenie connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "closeAlert"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "alias"
+            ],
+            "properties": {
+              "alias": {
+                "type": "string",
+                "description": "The unique identifier used for alert deduplication in Opsgenie. The alias must match the value used when creating the alert."
+              },
+              "note": {
+                "type": "string",
+                "description": "Additional information for the alert."
+              },
+              "source": {
+                "type": "string",
+                "description": "The display name for the source of the alert."
+              },
+              "user": {
+                "type": "string",
+                "description": "The display name for the owner."
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_createalert": {
+        "title": "The createAlert subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `createAlert` subaction for Opsgenie connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "createAlert"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "message"
+            ],
+            "properties": {
+              "actions": {
+                "type": "array",
+                "description": "The custom actions available to the alert.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "alias": {
+                "type": "string",
+                "description": "The unique identifier used for alert deduplication in Opsgenie."
+              },
+              "description": {
+                "type": "string",
+                "description": "A description that provides detailed information about the alert."
+              },
+              "details": {
+                "type": "object",
+                "description": "The custom properties of the alert.",
+                "additionalProperties": true,
+                "example": {
+                  "key1": "value1",
+                  "key2": "value2"
+                }
+              },
+              "entity": {
+                "type": "string",
+                "description": "The domain of the alert. For example, the application or server name."
+              },
+              "message": {
+                "type": "string",
+                "description": "The alert message."
+              },
+              "note": {
+                "type": "string",
+                "description": "Additional information for the alert."
+              },
+              "priority": {
+                "type": "string",
+                "description": "The priority level for the alert.",
+                "enum": [
+                  "P1",
+                  "P2",
+                  "P3",
+                  "P4",
+                  "P5"
+                ]
+              },
+              "responders": {
+                "type": "array",
+                "description": "The entities to receive notifications about the alert. If `type` is `user`, either `id` or `username` is required. If `type` is `team`, either `id` or `name` is required.\n",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The identifier for the entity."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the entity."
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "The type of responders, in this case `escalation`.",
+                      "enum": [
+                        "escalation",
+                        "schedule",
+                        "team",
+                        "user"
+                      ]
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "A valid email address for the user."
+                    }
+                  }
+                }
+              },
+              "source": {
+                "type": "string",
+                "description": "The display name for the source of the alert."
+              },
+              "tags": {
+                "type": "array",
+                "description": "The tags for the alert.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "user": {
+                "type": "string",
+                "description": "The display name for the owner."
+              },
+              "visibleTo": {
+                "type": "array",
+                "description": "The teams and users that the alert will be visible to without sending a notification. Only one of `id`, `name`, or `username` is required.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The identifier for the entity."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the entity."
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Valid values are `team` and `user`.",
+                      "enum": [
+                        "team",
+                        "user"
+                      ]
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "The user name. This property is required only when the `type` is `user`."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_fieldsbyissuetype": {
+        "title": "The fieldsByIssueType subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `fieldsByIssueType` subaction for Jira connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "fieldsByIssueType"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The Jira issue type identifier.",
+                "example": 10024
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_getchoices": {
+        "title": "The getChoices subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `getChoices` subaction for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "getChoices"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "description": "The set of configuration properties for the action.",
+            "required": [
+              "fields"
+            ],
+            "properties": {
+              "fields": {
+                "type": "array",
+                "description": "An array of fields.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_getfields": {
+        "title": "The getFields subaction",
+        "type": "object",
+        "required": [
+          "subAction"
+        ],
+        "description": "The `getFields` subaction for Jira, ServiceNow ITSM, and ServiceNow SecOps connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "getFields"
+            ]
+          }
+        }
+      },
+      "run_connector_subaction_getincident": {
+        "title": "The getIncident subaction",
+        "type": "object",
+        "description": "The `getIncident` subaction for Jira, ServiceNow ITSM, and ServiceNow SecOps connectors.",
+        "required": [
+          "subAction",
+          "subActionParams"
         ],
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
             "enum": [
-              "addEvent",
-              "createAlert",
-              "closeAlert",
-              "fieldsByIssueType",
-              "getChoices",
-              "getFields",
-              "getIncident",
-              "issue",
-              "issues",
-              "issueTypes",
+              "getIncident"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "externalId"
+            ],
+            "properties": {
+              "externalId": {
+                "type": "string",
+                "description": "The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.",
+                "example": 71778
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_issue": {
+        "title": "The issue subaction",
+        "type": "object",
+        "required": [
+          "subAction"
+        ],
+        "description": "The `issue` subaction for Jira connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "issue"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The Jira issue identifier.",
+                "example": 71778
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_issues": {
+        "title": "The issues subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `issues` subaction for Jira connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "issues"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "The title of the Jira issue."
+              }
+            }
+          }
+        }
+      },
+      "run_connector_subaction_issuetypes": {
+        "title": "The issueTypes subaction",
+        "type": "object",
+        "required": [
+          "subAction"
+        ],
+        "description": "The `issueTypes` subaction for Jira connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "issueTypes"
+            ]
+          }
+        }
+      },
+      "run_connector_subaction_pushtoservice": {
+        "title": "The pushToService subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, and Swimlane connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
               "pushToService"
             ]
           },
           "subActionParams": {
-            "type": "object"
+            "type": "object",
+            "description": "The set of configuration properties for the action.",
+            "properties": {
+              "comments": {
+                "type": "array",
+                "description": "Additional information that is sent to Jira, ServiceNow ITSM, ServiceNow SecOps, or Swimlane.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "comment": {
+                      "type": "string",
+                      "description": "A comment related to the incident. For example, describe how to troubleshoot the issue."
+                    },
+                    "commentId": {
+                      "type": "integer",
+                      "description": "A unique identifier for the comment."
+                    }
+                  }
+                }
+              },
+              "incident": {
+                "type": "object",
+                "description": "Information necessary to create or update a Jira, ServiceNow ITSM, ServiveNow SecOps, or Swimlane incident.",
+                "properties": {
+                  "alertId": {
+                    "type": "string",
+                    "description": "The alert identifier for Swimlane connectors."
+                  },
+                  "caseId": {
+                    "type": "string",
+                    "description": "The case identifier for the incident for Swimlane connectors."
+                  },
+                  "caseName": {
+                    "type": "string",
+                    "description": "The case name for the incident for Swimlane connectors."
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors."
+                  },
+                  "correlation_display": {
+                    "type": "string",
+                    "description": "A descriptive label of the alert for correlation purposes for ServiceNow ITSM and ServiceNow SecOps connectors."
+                  },
+                  "correlation_id": {
+                    "type": "string",
+                    "description": "The correlation identifier for the security incident for ServiceNow ITSM and ServiveNow SecOps connectors. Connectors using the same correlation ID are associated with the same ServiceNow incident. This value determines whether a new ServiceNow incident is created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the correlation ID value in ServiceNow. The maximum character length for this value is 100 characters. NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that ServiceNow creates a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, ServiceNow creates and continually updates a single incident record for the alert.\n"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, and Swimlane connectors."
+                  },
+                  "dest_ip": {
+                    "description": "A list of destination IP addresses related to the security incident for ServiceNow SecOps connectors. The IPs are added as observables to the security incident.\n",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "externalId": {
+                    "type": "string",
+                    "description": "The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier. If present, the incident is updated. Otherwise, a new incident is created.\n"
+                  },
+                  "impact": {
+                    "type": "string",
+                    "description": "The impact of the incident for ServiceNow ITSM connectors."
+                  },
+                  "issueType": {
+                    "type": "integer",
+                    "description": "The type of incident for Jira connectors. For example, 10006. To obtain the list of valid values, set `subAction` to `issueTypes`."
+                  },
+                  "labels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The labels for the incident for Jira connectors. NOTE: Labels cannot contain spaces.\n"
+                  },
+                  "malware_hash": {
+                    "description": "A list of malware hashes related to the security incident for ServiceNow SecOps connectors. The hashes are added as observables to the security incident.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "malware_url": {
+                    "type": "string",
+                    "description": "A list of malware URLs related to the security incident for ServiceNow SecOps connectors. The URLs are added as observables to the security incident.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "parent": {
+                    "type": "string",
+                    "description": "The ID or key of the parent issue for Jira connectors. Applies only to `Sub-task` types of issues."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "description": "The priority of the incident in Jira and ServiceNow SecOps connectors."
+                  },
+                  "ruleName": {
+                    "type": "string",
+                    "description": "The rule name for Swimlane connectors."
+                  },
+                  "severity": {
+                    "type": "string",
+                    "description": "The severity of the incident for ServiceNow ITSM and Swimlane connectors."
+                  },
+                  "short_description": {
+                    "type": "string",
+                    "description": "A short description of the incident for ServiceNow ITSM and ServiceNow SecOps connectors. It is used for searching the contents of the knowledge base.\n"
+                  },
+                  "source_ip": {
+                    "description": "A list of source IP addresses related to the security incident for ServiceNow SecOps connectors. The IPs are added as observables to the security incident.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "subcategory": {
+                    "type": "string",
+                    "description": "The subcategory of the incident for ServiceNow ITSM and ServiceNow SecOps connectors."
+                  },
+                  "summary": {
+                    "type": "string",
+                    "description": "A summary of the incident for Jira connectors."
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "A title for the incident for Jira connectors. It is used for searching the contents of the knowledge base.\n"
+                  },
+                  "urgency": {
+                    "type": "string",
+                    "description": "The urgency of the incident for ServiceNow ITSM connectors."
+                  }
+                }
+              }
+            }
           }
         }
       }

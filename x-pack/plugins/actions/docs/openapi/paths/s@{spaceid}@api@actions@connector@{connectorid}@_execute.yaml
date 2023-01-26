@@ -26,25 +26,22 @@ post:
               oneOf:
                 - $ref: '../components/schemas/run_connector_params_documents.yaml'
                 - $ref: '../components/schemas/run_connector_params_level_message.yaml'
-                - $ref: '../components/schemas/run_connector_params_subactions.yaml'
-#              anyOf:
-#               - $ref: '../components/schemas/run_connector_request_cases_webhook.yaml'
-#                - $ref: '../components/schemas/run_connector_request_email.yaml'
-#                - $ref: '../components/schemas/run_connector_request_index.yaml'  
-#                - $ref: '../components/schemas/run_connector_request_jira.yaml'
-#                - $ref: '../components/schemas/run_connector_request_opsgenie.yaml'
-#               - $ref: '../components/schemas/run_connector_request_pagerduty.yaml'
-#               - $ref: '../components/schemas/run_connector_request_resilient.yaml'
-#                - $ref: '../components/schemas/run_connector_request_serverlog.yaml'
-#                - $ref: '../components/schemas/run_connector_request_servicenow.yaml'
-#                - $ref: '../components/schemas/run_connector_request_servicenow_itom.yaml'
-#                - $ref: '../components/schemas/run_connector_request_servicenow_sir.yaml'
-#               - $ref: '../components/schemas/run_connector_request_slack.yaml'
-#                - $ref: '../components/schemas/run_connector_request_swimlane.yaml'
-#               - $ref: '../components/schemas/run_connector_request_teams.yaml'
-#               - $ref: '../components/schemas/run_connector_request_tines.yaml'
-#               - $ref: '../components/schemas/run_connector_request_webhook.yaml'
-#               - $ref: '../components/schemas/run_connector_request_xmatters.yaml'
+                - title: Subaction parameters
+                  description: Test an action that involves a subaction.
+                  oneOf:
+                    - $ref: '../components/schemas/run_connector_subaction_addevent.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_closealert.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_createalert.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_fieldsbyissuetype.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_getchoices.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_getfields.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_getincident.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_issue.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_issues.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_issuetypes.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_pushtoservice.yaml'
+                  discriminator:
+                    propertyName: subAction     
         examples:
           runIndexConnectorRequest:
             $ref: '../components/examples/run_index_connector_request.yaml'

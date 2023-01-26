@@ -1,4 +1,4 @@
-title: Run index connector parameters
+title: Index connector parameters
 description: Test an action that indexes a document into Elasticsearch.
 type: object
 required:
@@ -6,7 +6,7 @@ required:
 properties: 
   documents:
     type: array
-    description: The documents to index in JSON format.
+    description: The documents in JSON format for index connectors.
     items:
       type: object
       additionalProperties: true
