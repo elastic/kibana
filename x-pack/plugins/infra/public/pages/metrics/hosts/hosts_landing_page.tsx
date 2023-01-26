@@ -28,10 +28,6 @@ export const HostsLandingPage = () => {
       new Observable((subs) => subs.next(false))
   );
 
-  const LEARN_MORE = i18n.translate('xpack.infra.hostsViewPage.landing.learnMore', {
-    defaultMessage: 'Learn more',
-  });
-
   if (isHostViewEnabled) {
     return <HostsPage />;
   }
@@ -81,7 +77,9 @@ export const HostsLandingPage = () => {
                     data-test-subj="hostsView-docs-link"
                     href="https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html#kibana-feature-privileges"
                   >
-                    {LEARN_MORE}
+                    {i18n.translate('xpack.infra.hostsViewPage.landing.learnMore', {
+                      defaultMessage: 'Learn more',
+                    })}
                   </EuiLink>
                 ),
               }}
