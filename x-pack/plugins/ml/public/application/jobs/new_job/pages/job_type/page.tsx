@@ -235,7 +235,7 @@ export const Page: FC = () => {
         defaultMessage: 'Geo',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.geoDescription', {
-        defaultMessage: 'Detect anomalies in the geographic location of the input data.',
+        defaultMessage: 'Detect anomalies in the geographic location of the data.',
       }),
       id: 'mlJobTypeLinkGeoJob',
     });
