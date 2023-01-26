@@ -25,6 +25,7 @@ import { TestNowMode } from './test_now_mode';
 
 export interface TestRun {
   id: string;
+  name: string;
   monitor: MonitorFields;
 }
 
@@ -56,7 +57,9 @@ export function TestNowModeFlyout({
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{TEST_RESULTS}</h2>
+          <h2>
+            {testRun?.name}-{TEST_RESULTS}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
