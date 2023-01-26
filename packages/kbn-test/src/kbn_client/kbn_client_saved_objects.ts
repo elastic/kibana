@@ -54,20 +54,13 @@ interface MigrateResponse {
   result: Array<{ status: string }>;
 }
 
-interface FindApiResponse {
-  saved_objects: Array<{
-    type: string;
-    id: string;
-    [key: string]: unknown;
-  }>;
-  total: number;
-  per_page: number;
-  page: number;
-}
-
 interface CleanOptions {
   space?: string;
   types: string[];
+}
+
+interface CleanApiResponse {
+  deleted: number;
 }
 
 interface DeleteObjectsOptions {
@@ -79,6 +72,42 @@ interface DeleteObjectsOptions {
 }
 
 const DELETE_CHUNK_SIZE = 50;
+
+// add types here
+const STANDARD_LIST_TYPES = [
+  'url',
+  'index-pattern',
+  'action',
+  'query',
+  'alert',
+  'graph-workspace',
+  'tag',
+  'visualization',
+  'canvas-element',
+  'canvas-workpad',
+  'dashboard',
+  'search',
+  'lens',
+  'map',
+  'cases',
+  'uptime-dynamic-settings',
+  'osquery-saved-query',
+  'osquery-pack',
+  'infrastructure-ui-source',
+  'metrics-explorer-view',
+  'inventory-view',
+  'infrastructure-monitoring-log-view',
+  'apm-indices',
+  // Fleet saved object types
+  'ingest-outputs',
+  'ingest-download-sources',
+  'ingest-agent-policies',
+  'ingest-package-policies',
+  'epm-packages',
+  'epm-packages-assets',
+  'fleet-preconfiguration-deletion-record',
+  'fleet-fleet-server-host',
+];
 
 /**
  * SO client for FTR.
@@ -185,74 +214,22 @@ export class KbnClientSavedObjects {
   public async clean(options: CleanOptions) {
     this.log.debug('Cleaning all saved objects', { space: options.space });
 
-    let deleted = 0;
-
-    while (true) {
-      const resp = await this.requester.request<FindApiResponse>({
-        method: 'GET',
-        path: options.space
-          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_find`
-          : `/internal/ftr/kbn_client_so/_find`,
-        query: {
-          per_page: 1000,
-          type: options.types,
-          fields: 'none',
-        },
-      });
-
-      this.log.info('deleting batch of', resp.data.saved_objects.length, 'objects');
-      const deletion = await this.bulkDelete({
-        space: options.space,
-        objects: resp.data.saved_objects,
-      });
-      deleted += deletion.deleted;
-
-      if (resp.data.total <= resp.data.per_page) {
-        break;
-      }
-    }
+    const resp = await this.requester.request<CleanApiResponse>({
+      method: 'POST',
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/_clean`
+        : `/internal/ftr/kbn_client_so/_clean`,
+      body: {
+        types: options.types,
+      },
+    });
+    const deleted = resp.data.deleted;
 
     this.log.success('deleted', deleted, 'objects');
   }
 
   public async cleanStandardList(options?: { space?: string }) {
-    // add types here
-    const types = [
-      'url',
-      'index-pattern',
-      'action',
-      'query',
-      'alert',
-      'graph-workspace',
-      'tag',
-      'visualization',
-      'canvas-element',
-      'canvas-workpad',
-      'dashboard',
-      'search',
-      'lens',
-      'map',
-      'cases',
-      'uptime-dynamic-settings',
-      'osquery-saved-query',
-      'osquery-pack',
-      'infrastructure-ui-source',
-      'metrics-explorer-view',
-      'inventory-view',
-      'infrastructure-monitoring-log-view',
-      'apm-indices',
-      // Fleet saved object types
-      'ingest-outputs',
-      'ingest-download-sources',
-      'ingest-agent-policies',
-      'ingest-package-policies',
-      'epm-packages',
-      'epm-packages-assets',
-      'fleet-preconfiguration-deletion-record',
-      'fleet-fleet-server-host',
-    ];
-
-    const newOptions = { types, space: options?.space };
+    const newOptions = { types: STANDARD_LIST_TYPES, space: options?.space };
     await this.clean(newOptions);
   }
 
