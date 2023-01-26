@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseCommandInput } from '../../service/parsed_command_input';
 import {
   handleInputAreaState,
   INPUT_DEFAULT_PLACEHOLDER_TEXT,
@@ -31,16 +32,17 @@ export const initiateState = (
   managedConsolePriorState?: ConsoleDataState
 ): ConsoleDataState => {
   const commands = getBuiltinCommands().concat(userCommandList);
-  const state = managedConsolePriorState ?? {
+  const state: ConsoleDataState = managedConsolePriorState ?? {
     commands,
     ...otherOptions,
     commandHistory: [],
     sidePanel: { show: null },
     footerContent: '',
     input: {
-      textEntered: '',
-      rightOfCursor: { text: '' },
-      commandEntered: '',
+      leftOfCursorText: '',
+      rightOfCursorText: '',
+      parsedInput: parseCommandInput(''),
+      enteredCommand: undefined,
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,
       history: [],
@@ -102,6 +104,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
     case 'setInputState':
+    case 'updateInputCommandArgState':
       newState = handleInputAreaState(state, action);
       break;
 
