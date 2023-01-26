@@ -169,15 +169,15 @@ export class Mapping implements BaseMapping {
               .then((mapping) => {
                 this._isLoading$.next(false);
 
-                delete this.loadingState[indices as string];
-
                 autoCompleteContext.asyncResultsState!.isLoading = false;
                 autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
 
                 // cache mappings
                 this.loadMappings(mapping);
 
-                resolve(this.getMappings(autoCompleteContext, indices, types));
+                const mappings = this.getMappings(autoCompleteContext, indices, types);
+                delete this.loadingState[indices as string];
+                resolve(mappings);
               })
               .catch((error) => {
                 // eslint-disable-next-line no-console
