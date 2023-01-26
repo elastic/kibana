@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { aForecastedSLO } from '../../../../fixtures/slo/slo';
+import { buildForecastedSlo } from '../../../../fixtures/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloBadges as Component, Props } from './slo_badges';
 
@@ -21,7 +21,7 @@ export default {
 const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
-  slo: aForecastedSLO,
+  slo: buildForecastedSlo(),
 };
 
 export const SloBadges = Template.bind({});

@@ -8,6 +8,16 @@
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  buildDegradingSummary,
+  buildHealthySummary,
+  buildNoDataSummary,
+  buildOccurrencesObjective,
+  buildTimeslicesObjective,
+  buildViolatedSummary,
+} from './common';
+import { buildCalendarAlignedTimeWindow, buildRollingTimeWindow } from './time_window';
+import { buildApmAvailabilityIndicator, buildCustomKqlIndicator } from './indicator';
 
 export const emptySloList: FindSLOResponse = {
   results: [],
@@ -61,60 +71,57 @@ export const sloList: FindSLOResponse = {
     {
       ...baseSlo,
       id: '1f1c6ee7-433f-4b56-b727-5682262e0d7d',
-      summary: {
-        status: 'HEALTHY',
-        sliValue: 0.99872,
-        errorBudget: {
-          initial: 0.02,
-          consumed: 0.064,
-          remaining: 0.936,
-          isEstimated: false,
-        },
-      },
+      indicator: buildCustomKqlIndicator(),
+      summary: buildHealthySummary(),
+      timeWindow: buildRollingTimeWindow(),
+    },
+    {
+      ...baseSlo,
+      id: '1f1c6ee7-433f-4b56-b727-5682262e0d7e',
+      indicator: buildApmAvailabilityIndicator(),
+      summary: buildHealthySummary(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
     },
     {
       ...baseSlo,
       id: 'c0f8d669-9177-4706-9098-f397a88173a6',
-      summary: {
-        status: 'VIOLATED',
-        sliValue: 0.97,
-        errorBudget: {
-          initial: 0.02,
-          consumed: 1,
-          remaining: 0,
-          isEstimated: false,
-        },
-      },
+      summary: buildViolatedSummary(),
+      indicator: buildApmAvailabilityIndicator(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173a6',
+      summary: buildViolatedSummary(),
+      timeWindow: buildRollingTimeWindow({ duration: '7d' }),
     },
     {
       ...baseSlo,
       id: 'c0f8d669-9177-4706-9098-f397a88173a7',
-      summary: {
-        status: 'NO_DATA',
-        sliValue: -1,
-        errorBudget: {
-          initial: 0.02,
-          consumed: 0,
-          remaining: 1,
-          isEstimated: false,
-        },
-      },
+      summary: buildNoDataSummary(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173b7',
+      summary: buildNoDataSummary(),
+      indicator: buildApmAvailabilityIndicator(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
     },
     {
       ...baseSlo,
       id: 'c0f8d669-9177-4706-9098-f397a88173a8',
       budgetingMethod: 'timeslices',
-      objective: { target: 0.98, timesliceTarget: 0.9, timesliceWindow: '5m' },
-      summary: {
-        status: 'DEGRADING',
-        sliValue: 0.97,
-        errorBudget: {
-          initial: 0.02,
-          consumed: 0.88,
-          remaining: 0.12,
-          isEstimated: false,
-        },
-      },
+      timeWindow: buildCalendarAlignedTimeWindow(),
+      objective: buildTimeslicesObjective(),
+      summary: buildDegradingSummary(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173a9',
+      objective: buildOccurrencesObjective(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
+      summary: buildDegradingSummary(),
+      indicator: buildApmAvailabilityIndicator(),
     },
   ],
   page: 1,
@@ -122,32 +129,23 @@ export const sloList: FindSLOResponse = {
   total: 4,
 };
 
-export const anSLO: SLOWithSummaryResponse = {
-  ...baseSlo,
-  id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
-};
+export function buildForecastedSlo(
+  params: Partial<SLOWithSummaryResponse> = {}
+): SLOWithSummaryResponse {
+  return buildSlo({
+    timeWindow: buildCalendarAlignedTimeWindow(),
+    summary: buildHealthySummary({
+      errorBudget: {
+        initial: 0.02,
+        consumed: 0.064,
+        remaining: 0.936,
+        isEstimated: true,
+      },
+    }),
+    ...params,
+  });
+}
 
-export const aForecastedSLO: SLOWithSummaryResponse = {
-  ...baseSlo,
-  timeWindow: {
-    duration: '1M',
-    calendar: {
-      startTime: '2022-01-01T00:00:00.000Z',
-    },
-  },
-  id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
-  summary: {
-    status: 'HEALTHY',
-    sliValue: 0.990097,
-    errorBudget: {
-      initial: 0.02,
-      consumed: 0.495169,
-      remaining: 0.504831,
-      isEstimated: true,
-    },
-  },
-};
-
-export function createSLO(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
+export function buildSlo(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
   return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
 }

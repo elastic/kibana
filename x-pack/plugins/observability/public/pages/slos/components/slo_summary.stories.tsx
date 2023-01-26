@@ -13,7 +13,7 @@ import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../fixtures/slo/historical_summary_data';
-import { createSLO } from '../../../fixtures/slo/slo';
+import { buildSlo } from '../../../fixtures/slo/slo';
 import { SloSummary as Component, Props } from './slo_summary';
 
 export default {
@@ -25,7 +25,7 @@ export default {
 const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps = {
-  slo: createSLO(),
+  slo: buildSlo(),
   historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
   historicalSummaryLoading: false,
 };

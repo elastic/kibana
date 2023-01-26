@@ -27,7 +27,9 @@ export const buildTimeslicesObjective = (
   };
 };
 
-export const buildHealthySummary = (params: Partial<SLOWithSummaryResponse['summary']> = {}) => {
+export const buildHealthySummary = (
+  params: Partial<SLOWithSummaryResponse['summary']> = {}
+): SLOWithSummaryResponse['summary'] => {
   return {
     status: 'HEALTHY',
     sliValue: 0.99872,
@@ -41,7 +43,9 @@ export const buildHealthySummary = (params: Partial<SLOWithSummaryResponse['summ
   };
 };
 
-export const buildViolatedSummary = (params: Partial<SLOWithSummaryResponse['summary']> = {}) => {
+export const buildViolatedSummary = (
+  params: Partial<SLOWithSummaryResponse['summary']> = {}
+): SLOWithSummaryResponse['summary'] => {
   return {
     status: 'VIOLATED',
     sliValue: 0.97,
@@ -51,10 +55,13 @@ export const buildViolatedSummary = (params: Partial<SLOWithSummaryResponse['sum
       remaining: 0,
       isEstimated: false,
     },
+    ...params,
   };
 };
 
-export const buildNoDataSummary = (params: Partial<SLOWithSummaryResponse['summary']> = {}) => {
+export const buildNoDataSummary = (
+  params: Partial<SLOWithSummaryResponse['summary']> = {}
+): SLOWithSummaryResponse['summary'] => {
   return {
     status: 'NO_DATA',
     sliValue: -1,
@@ -64,10 +71,13 @@ export const buildNoDataSummary = (params: Partial<SLOWithSummaryResponse['summa
       remaining: 1,
       isEstimated: false,
     },
+    ...params,
   };
 };
 
-export const buildDegradingSummary = (params: Partial<SLOWithSummaryResponse['summary']> = {}) => {
+export const buildDegradingSummary = (
+  params: Partial<SLOWithSummaryResponse['summary']> = {}
+): SLOWithSummaryResponse['summary'] => {
   return {
     status: 'DEGRADING',
     sliValue: 0.97,
@@ -75,7 +85,8 @@ export const buildDegradingSummary = (params: Partial<SLOWithSummaryResponse['su
       initial: 0.02,
       consumed: 0.88,
       remaining: 0.12,
-      isEstimated: false,
+      isEstimated: true,
     },
+    ...params,
   };
 };

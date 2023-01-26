@@ -15,7 +15,7 @@ import {
 } from '../../../../fixtures/slo/indicator';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloIndicatorTypeBadge as Component, Props } from './slo_indicator_type_badge';
-import { createSLO } from '../../../../fixtures/slo/slo';
+import { buildSlo } from '../../../../fixtures/slo/slo';
 
 export default {
   component: Component,
@@ -26,10 +26,10 @@ export default {
 const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 export const WithCustomKql = Template.bind({});
-WithCustomKql.args = { slo: createSLO({ indicator: buildCustomKqlIndicator() }) };
+WithCustomKql.args = { slo: buildSlo({ indicator: buildCustomKqlIndicator() }) };
 
 export const WithApmAvailability = Template.bind({});
-WithApmAvailability.args = { slo: createSLO({ indicator: buildApmAvailabilityIndicator() }) };
+WithApmAvailability.args = { slo: buildSlo({ indicator: buildApmAvailabilityIndicator() }) };
 
 export const WithApmLatency = Template.bind({});
-WithApmLatency.args = { slo: createSLO({ indicator: buildApmLatencyIndicator() }) };
+WithApmLatency.args = { slo: buildSlo({ indicator: buildApmLatencyIndicator() }) };

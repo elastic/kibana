@@ -12,7 +12,7 @@ import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
 } from '../../../fixtures/slo/historical_summary_data';
-import { anSLO } from '../../../fixtures/slo/slo';
+import { buildSlo } from '../../../fixtures/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListItem as Component, SloListItemProps } from './slo_list_item';
 
@@ -27,7 +27,7 @@ const Template: ComponentStory<typeof Component> = (props: SloListItemProps) => 
 );
 
 const defaultProps = {
-  slo: anSLO,
+  slo: buildSlo(),
   historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
 };
 
