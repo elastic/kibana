@@ -33,6 +33,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   createRule,
   deleteAllAlerts,
@@ -42,6 +43,7 @@ import {
   getRuleForSignalTesting,
   getSimpleRule,
   previewRule,
+  setSignalStatus,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { indexDocumentsFactory } from '../../utils/data_generator';
@@ -810,7 +812,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(secondAlerts.hits.hits.length).eql(1);
           expect(secondAlerts.hits.hits[0]._source).to.eql({
             ...secondAlerts.hits.hits[0]._source,
-            [TIMESTAMP]: alerts.hits.hits[0]._source?.[TIMESTAMP],
+            [TIMESTAMP]: secondAlerts.hits.hits[0]._source?.[TIMESTAMP],
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'agent.name',
@@ -821,6 +823,98 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_START]: firstTimestamp,
             [ALERT_SUPPRESSION_END]: secondTimestampISOString,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+          });
+        });
+
+        it('should NOT update an alert if the alert is closed', async () => {
+          const id = uuidv4();
+          const firstTimestamp = new Date().toISOString();
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          await indexDocuments([firstDocument, firstDocument]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            rule_id: 'rule-2',
+            query: `id:${id}`,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+            },
+          };
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenSignals(supertest, log, es, createdRule);
+
+          // Close the alert. Subsequent rule executions should ignore this closed alert
+          // for suppression purposes.
+          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ signalIds: alertIds, status: 'closed' }))
+            .expect(200);
+
+          const secondTimestamp = new Date();
+          const secondTimestampISOString = secondTimestamp.toISOString();
+          const secondDocument = {
+            id,
+            '@timestamp': secondTimestampISOString,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
+          // trigger a new alert since the first one is now closed.
+          await indexDocuments([secondDocument, secondDocument]);
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const secondAlerts = await getOpenSignals(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatus.succeeded,
+            undefined,
+            secondTimestamp
+          );
+          expect(secondAlerts.hits.hits.length).eql(2);
+          expect(secondAlerts.hits.hits[0]._source).to.eql({
+            ...secondAlerts.hits.hits[0]._source,
+            [TIMESTAMP]: secondAlerts.hits.hits[0]._source?.[TIMESTAMP],
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_WORKFLOW_STATUS]: 'closed',
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: firstTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+          expect(secondAlerts.hits.hits[1]._source).to.eql({
+            ...secondAlerts.hits.hits[1]._source,
+            [TIMESTAMP]: secondAlerts.hits.hits[1]._source?.[TIMESTAMP],
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_WORKFLOW_STATUS]: 'open',
+            [ALERT_ORIGINAL_TIME]: secondTimestampISOString,
+            [ALERT_SUPPRESSION_START]: secondTimestampISOString,
+            [ALERT_SUPPRESSION_END]: secondTimestampISOString,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
         });
 

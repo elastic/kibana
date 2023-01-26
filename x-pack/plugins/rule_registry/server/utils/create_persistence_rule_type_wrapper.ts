@@ -15,6 +15,7 @@ import {
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -225,6 +226,15 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                               [ALERT_INSTANCE_ID]: alerts.map(
                                 (alert) => alert._source['kibana.alert.instance.id']
                               ),
+                            },
+                          },
+                          {
+                            bool: {
+                              must_not: {
+                                term: {
+                                  [ALERT_WORKFLOW_STATUS]: 'closed',
+                                },
+                              },
                             },
                           },
                         ],
