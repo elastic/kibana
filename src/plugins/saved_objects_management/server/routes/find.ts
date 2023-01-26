@@ -7,11 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
 import type { FindResponseHTTPV1 } from '../../common';
 import { injectMetaAttributes } from '../lib';
-import { ISavedObjectsManagement } from '../services';
+import type { ISavedObjectsManagement } from '../services';
 
 export const registerFindRoute = (
   router: IRouter,

@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { injectMetaAttributes } from '../lib';
-import { ISavedObjectsManagement } from '../services';
+import type { ISavedObjectsManagement } from '../services';
 import type { BulkGetHTTPResponseV1 } from '../../common';
 
 export const registerBulkGetRoute = (
