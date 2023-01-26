@@ -279,7 +279,7 @@ describe('filtering user messages', () => {
           "displayLocations": Array [
             Object {
               "dimensionId": "foo",
-              "id": "dimensionTrigger",
+              "id": "dimensionButton",
             },
           ],
           "fixableInEditor": true,
@@ -299,7 +299,7 @@ describe('filtering user messages', () => {
           "displayLocations": Array [
             Object {
               "dimensionId": "baz",
-              "id": "dimensionTrigger",
+              "id": "dimensionButton",
             },
           ],
           "fixableInEditor": true,

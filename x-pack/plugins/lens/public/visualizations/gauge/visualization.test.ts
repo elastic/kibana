@@ -554,11 +554,11 @@ describe('gauge', () => {
             "displayLocations": Array [
               Object {
                 "dimensionId": "min-accessor",
-                "id": "dimensionTrigger",
+                "id": "dimensionButton",
               },
               Object {
                 "dimensionId": "max-accessor",
-                "id": "dimensionTrigger",
+                "id": "dimensionButton",
               },
             ],
             "fixableInEditor": true,
