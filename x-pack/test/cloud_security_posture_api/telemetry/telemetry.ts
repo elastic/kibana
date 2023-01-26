@@ -10,7 +10,6 @@ import { data } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
-const mappingComponentTemplate = 'logs-cloud_security_posture.findings@package';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -33,7 +32,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
   const index = {
-    remove: () => es.indices.delete({ index: FINDINGS_INDEX, ignore_unavailable: true }),
+    remove: () =>
+      es.deleteByQuery({
+        index: FINDINGS_INDEX,
+        query: { match_all: {} },
+        refresh: true,
+      }),
 
     add: async <T>(findingsMock: T[]) => {
       const operations = findingsMock.flatMap((doc: T) => [
@@ -41,71 +45,18 @@ export default function ({ getService }: FtrProviderContext) {
         doc,
       ]);
 
-      //   es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations }).then((res) => {
-      //     expect(res.errors).to.eql(false);
-      //   });
-
       const response = await es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations });
       expect(response.errors).to.eql(false);
     },
   };
 
-  // The new mappings will be available in the one of our next package version - once those two task will be merged,
-  // meanwhile the telemetry code already support those new fields, so we need to update the mappings manually.
-  // https://github.com/elastic/integrations/pull/5035
-  // https://github.com/elastic/cloudbeat/issues/650
-  const updateMappings = async () => {
-    const { body } = await supertest
-      .get(`/api/index_management/component_templates/${mappingComponentTemplate}`)
-      .set('kbn-xsrf', 'xxx')
-      .expect(200);
-
-    const currentMappings = body.template.mappings.properties;
-
-    await supertest
-      .put(`/api/index_management/component_templates/${mappingComponentTemplate}`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        template: {
-          settings: {
-            index: {
-              number_of_shards: 1,
-            },
-          },
-          mappings: {
-            properties: {
-              ...currentMappings,
-              'rule.benchmark.posture_type': {
-                type: 'keyword',
-              },
-              'cloud.account.id': {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-        name: mappingComponentTemplate,
-        version: 1,
-        _kbnMeta: {
-          usedBy: [],
-          isManaged: false,
-        },
-      })
-      .expect(200);
-  };
-
   describe('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
       await waitForPluginInitialized();
-      await updateMappings();
     });
 
     afterEach(async () => {
-      await es.deleteByQuery({
-        index: FINDINGS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      });
+      await index.remove();
     });
 
     it('includes only KSPM findings', async () => {
