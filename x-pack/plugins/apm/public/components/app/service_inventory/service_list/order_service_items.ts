@@ -10,6 +10,7 @@ import {
   ServiceListItem,
   ServiceInventoryFieldName,
 } from '../../../../../common/service_inventory';
+import { OTHER_SERVICE_NAME } from '../../../shared/links/apm/service_link/service_max_groups_message';
 
 type SortValueGetter = (item: ServiceListItem) => string | number;
 
@@ -56,6 +57,7 @@ export function orderServiceItems({
   // For healthStatus, sort items by healthStatus first, then by tie-breaker
 
   const sortFn = sorts[primarySortField as ServiceInventoryFieldName];
+  let sortedItems;
 
   if (primarySortField === ServiceInventoryFieldName.HealthStatus) {
     const tiebreakerSortDirection =
@@ -65,12 +67,28 @@ export function orderServiceItems({
 
     const tiebreakerSortFn = sorts[tiebreakerField];
 
-    return orderBy(
+    sortedItems = orderBy(
       items,
       [sortFn, tiebreakerSortFn],
       [sortDirection, tiebreakerSortDirection]
     );
+  } else {
+    sortedItems = orderBy(items, sortFn, sortDirection);
   }
 
-  return orderBy(items, sortFn, sortDirection);
+  // Irrespective of sort order, move the service overflow bucket to the top
+  let indexOfOverFlowBucket = -1;
+  const isOverFlowBucketPresent = sortedItems.some((item, index) => {
+    if (item.serviceName === OTHER_SERVICE_NAME) {
+      indexOfOverFlowBucket = index;
+      return true;
+    }
+    return false;
+  });
+
+  if (isOverFlowBucketPresent) {
+    sortedItems.unshift(sortedItems.splice(indexOfOverFlowBucket, 1)[0]);
+  }
+
+  return sortedItems;
 }
