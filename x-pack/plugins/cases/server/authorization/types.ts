@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { EcsEventType } from '@kbn/core/server';
+import type { EcsEvent } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -74,7 +75,7 @@ export interface OperationDetails {
   /**
    * The ECS event type that this operation should be audit logged as (creation, deletion, access, etc)
    */
-  ecsType: EcsEventType;
+  ecsType: ArrayElement<EcsEvent['type']>;
   /**
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
