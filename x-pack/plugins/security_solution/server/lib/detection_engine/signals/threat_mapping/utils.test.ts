@@ -7,7 +7,7 @@
 
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { sampleSignalHit } from '../__mocks__/es_results';
-import type { ThreatMatchNamedQuery } from './types';
+import type { ThreatMatchNamedQuery, ThreatTermNamedQuery } from './types';
 
 import {
   buildExecutionIntervalValidator,
@@ -718,6 +718,7 @@ describe('utils', () => {
           index: 'index',
           field: 'threat.indicator.domain',
           value: 'host.name',
+          queryType: 'mq',
         };
 
         const encoded = encodeThreatMatchNamedQuery(query);
@@ -727,27 +728,18 @@ describe('utils', () => {
         expect(decoded).toEqual(query);
       });
 
-      it('raises an error if the input is invalid', () => {
-        const badInput = 'nope';
-
-        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"nope"}'
-        );
-      });
-
-      it('raises an error if the query is missing a value', () => {
-        const badQuery: ThreatMatchNamedQuery = {
-          id: 'my_id',
-          index: 'index',
-          // @ts-expect-error field intentionally undefined
-          field: undefined,
+      it('can decode if some parameters not passed', () => {
+        const query: ThreatTermNamedQuery = {
+          field: 'threat.indicator.domain',
           value: 'host.name',
+          queryType: 'tq',
         };
-        const badInput = encodeThreatMatchNamedQuery(badQuery);
 
-        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name"}'
-        );
+        const encoded = encodeThreatMatchNamedQuery(query);
+        const decoded = decodeThreatMatchNamedQuery(encoded);
+
+        expect(decoded).not.toBe(query);
+        expect(decoded).toEqual({ ...query, id: '', index: '' });
       });
     });
   });

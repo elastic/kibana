@@ -116,7 +116,7 @@ export const createAndOrClauses = ({
   threatMapping,
   threatListItem,
   entryKey,
-}: CreateAndOrClausesOptions): BooleanFilter => {
+}: CreateAndOrClausesOptions): unknown[] => {
   const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
     const innerAndClauses = createInnerAndClauses({
       threatMappingEntries: threatMap.entries,
@@ -131,7 +131,7 @@ export const createAndOrClauses = ({
     }
     return accum;
   }, []);
-  return { bool: { should, minimum_should_match: 1 } };
+  return should;
 };
 
 export const buildEntriesMappingFilter = ({
@@ -144,10 +144,13 @@ export const buildEntriesMappingFilter = ({
   const allFieldAllowedForTermQuery = (entries: ThreatMappingEntries) =>
     entries.every(
       (entry) =>
-        allowedFieldsForTermsQuery.source[entry.field] &&
-        allowedFieldsForTermsQuery.threat[entry.value]
+        allowedFieldsForTermsQuery?.source?.[entry.field] &&
+        allowedFieldsForTermsQuery?.threat?.[entry.value]
     );
-  const combinedShould = threatMapping.reduce<Array<BooleanFilter | TermQuery>>(
+  const combinedShould = threatMapping.reduce<{
+    match: unknown[];
+    term: TermQuery[];
+  }>(
     (acc, threatMap) => {
       if (threatMap.entries.length > 1 || !allFieldAllowedForTermQuery(threatMap.entries)) {
         threatList.forEach((threatListSearchItem) => {
@@ -161,9 +164,9 @@ export const buildEntriesMappingFilter = ({
             threatListItem: threatListSearchItem,
             entryKey,
           });
-          if (queryWithAndOrClause.bool.should.length !== 0) {
+          if (queryWithAndOrClause.length !== 0) {
             // These values can be 10k+ large, so using a push here for performance
-            acc.push(queryWithAndOrClause);
+            acc.match.push(...queryWithAndOrClause);
           }
         });
       } else {
@@ -174,7 +177,7 @@ export const buildEntriesMappingFilter = ({
           .filter((val) => val)
           .map((val) => val[0]);
         if (threats.length > 0) {
-          acc.push({
+          acc.term.push({
             terms: {
               _name: encodeThreatMatchNamedQuery({
                 field: threatMappingEntry.field,
@@ -188,17 +191,23 @@ export const buildEntriesMappingFilter = ({
       }
       return acc;
     },
-    []
+    { match: [], term: [] }
   );
 
-  const should = splitShouldClauses({ should: combinedShould, chunkSize });
-  return { bool: { should, minimum_should_match: 1 } };
+  const matchShould = splitShouldClauses({
+    should:
+      combinedShould.match.length > 0
+        ? [{ bool: { should: combinedShould.match, minimum_should_match: 1 } }]
+        : [],
+    chunkSize,
+  });
+  return { bool: { should: [...matchShould, ...combinedShould.term], minimum_should_match: 1 } };
 };
 
 export const splitShouldClauses = ({
   should,
   chunkSize,
-}: SplitShouldClausesOptions): Array<BooleanFilter | TermQuery> => {
+}: SplitShouldClausesOptions): BooleanFilter[] => {
   if (should.length <= chunkSize) {
     return should;
   } else {

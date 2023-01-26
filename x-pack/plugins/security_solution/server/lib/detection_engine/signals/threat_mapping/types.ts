@@ -154,7 +154,7 @@ export interface BuildThreatMappingFilterOptions {
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
-  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
 }
 
 export interface FilterThreatMappingOptions {
@@ -180,12 +180,12 @@ export interface BuildEntriesMappingFilterOptions {
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
-  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
 }
 
 export interface SplitShouldClausesOptions {
   chunkSize: number;
-  should: Array<BooleanFilter | TermQuery>;
+  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
@@ -250,7 +250,7 @@ export interface ThreatMatchNamedQuery {
   index: string;
   field: string;
   value: string;
-  queryType: string;
+  queryType?: string;
 }
 
 export interface ThreatTermNamedQuery {
@@ -258,7 +258,7 @@ export interface ThreatTermNamedQuery {
   index?: string;
   field: string;
   value: string;
-  queryType: string;
+  queryType?: string;
 }
 export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
 

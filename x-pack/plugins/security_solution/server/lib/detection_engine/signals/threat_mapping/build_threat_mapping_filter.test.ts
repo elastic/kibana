@@ -332,7 +332,7 @@ describe('build_threat_mapping_filter', () => {
       const threatMapping = getThreatMappingMock();
       const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
       const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
-      expect(innerClause).toEqual(getThreatMappingFilterShouldMock());
+      expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
     });
 
     test('it should filter out data from entries that do not have mappings', () => {
@@ -343,7 +343,7 @@ describe('build_threat_mapping_filter', () => {
         foo: 'bar',
       };
       const innerClause = createAndOrClauses({ threatMapping, threatListItem, entryKey: 'value' });
-      expect(innerClause).toEqual(getThreatMappingFilterShouldMock());
+      expect(innerClause).toEqual(getThreatMappingFilterShouldMock().bool.should);
     });
 
     test('it should return an empty boolean given an empty array', () => {
@@ -353,7 +353,7 @@ describe('build_threat_mapping_filter', () => {
         threatListItem,
         entryKey: 'value',
       });
-      expect(innerClause).toEqual({ bool: { minimum_should_match: 1, should: [] } });
+      expect(innerClause).toEqual([]);
     });
 
     test('it should return an empty boolean clause given an empty object for a threat list item', () => {
@@ -363,7 +363,7 @@ describe('build_threat_mapping_filter', () => {
         threatListItem: getThreatListItemMock({ _source: {}, fields: {} }),
         entryKey: 'value',
       });
-      expect(innerClause).toEqual({ bool: { minimum_should_match: 1, should: [] } });
+      expect(innerClause).toEqual([]);
     });
   });
 
