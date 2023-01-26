@@ -67,7 +67,12 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  Warnings,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -77,6 +82,7 @@ import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper'
 import {
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensMultiFilterEvent,
   isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
   LensTableRowContextMenuEvent,
@@ -135,7 +141,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -979,7 +985,11 @@ export class Embeddable
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
+    if (
+      isLensTableRowContextMenuClickEvent(event) ||
+      isLensMultiFilterEvent(event) ||
+      isLensFilterEvent(event)
+    ) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
@@ -1075,7 +1085,7 @@ export class Embeddable
         this.input.onBrushEnd(event.data);
       }
     }
-    if (isLensFilterEvent(event)) {
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
