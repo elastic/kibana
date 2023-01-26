@@ -8,14 +8,14 @@
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import type { FC } from 'react';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { updateIsLoading, updateTotalCount } from '../../../common/store/data_table/actions';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { dataTableActions } from '../../../common/store/data_table';
@@ -95,6 +95,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 }) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
+  const alertTableRefreshHandlerRef = useRef<(() => void) | null>(null);
+
+  const dispatch = useDispatch();
+
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
     timelineID: tableId,
@@ -104,10 +108,15 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   });
   const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
 
-  const dispatch = useDispatch();
   const getGlobalInputs = inputsSelectors.globalSelector();
   const globalInputs = useSelector((state) => getGlobalInputs(state));
-  const { query: globalQuery, filters: globalFilters } = globalInputs;
+  const { query: globalQuery, filters: globalFilters, queries: globalQueries } = globalInputs;
+
+  useEffect(() => {
+    if (globalQueries && alertTableRefreshHandlerRef.current) {
+      alertTableRefreshHandlerRef.current();
+    }
+  }, [globalQueries, alertTableRefreshHandlerRef]);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
@@ -123,34 +132,36 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     } = eventsDefaultModel,
   } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableId));
 
-  const boolQueryDSL = buildQueryFromFilters(allFilters, undefined);
-
-  const getGlobalQuery = useCallback(
-    (customFilters?: Filter[]) => {
-      if (browserFields != null && indexPatterns != null) {
-        return combineQueries({
-          config: getEsQueryConfig(uiSettings),
-          dataProviders: [],
-          indexPattern: indexPatterns,
-          browserFields,
-          filters: [...(customFilters ?? []), ...allFilters],
-          kqlQuery: globalQuery,
-          kqlMode: globalQuery.language,
-        });
-      }
-      return null;
-    },
-    [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]
-  );
+  const combinedQuery = useMemo(() => {
+    if (browserFields != null && indexPatterns != null) {
+      return combineQueries({
+        config: getEsQueryConfig(uiSettings),
+        dataProviders: [],
+        indexPattern: indexPatterns,
+        browserFields,
+        filters: [...allFilters],
+        kqlQuery: globalQuery,
+        kqlMode: globalQuery.language,
+      });
+    }
+    return null;
+  }, [browserFields, globalQuery, indexPatterns, uiSettings, allFilters]);
 
   useInvalidFilterQuery({
     id: tableId,
-    filterQuery: getGlobalQuery([])?.filterQuery,
-    kqlError: getGlobalQuery([])?.kqlError,
+    filterQuery: combinedQuery?.filterQuery,
+    kqlError: combinedQuery?.kqlError,
     query: globalQuery,
     startDate: from,
     endDate: to,
   });
+
+  const finalBoolQuery: AlertsTableStateProps['query'] = useMemo(() => {
+    if (!combinedQuery || combinedQuery.kqlError || !combinedQuery.filterQuery) {
+      return { bool: {} };
+    }
+    return JSON.parse(combinedQuery.filterQuery);
+  }, [combinedQuery]);
 
   const gridStyle = useMemo(
     () =>
@@ -191,6 +202,27 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [tableView, browserFields]
   );
 
+  const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
+    ({ isLoading, totalCount, refresh }) => {
+      dispatch(
+        updateIsLoading({
+          id: tableId,
+          isLoading,
+        })
+      );
+
+      dispatch(
+        updateTotalCount({
+          id: tableId,
+          totalCount,
+        })
+      );
+
+      alertTableRefreshHandlerRef.current = refresh;
+    },
+    [dispatch, tableId, alertTableRefreshHandlerRef]
+  );
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -198,17 +230,16 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       id: `detection-engine-alert-table-${configId}`,
       flyoutSize,
       featureIds: ['siem'],
-      query: {
-        bool: boolQueryDSL,
-      },
+      query: finalBoolQuery,
       showExpandToDetails: false,
       gridStyle,
       rowHeightsOptions,
       columns: finalColumns,
       browserFields: finalBrowserFields,
+      onUpdate: onAlertTableUpdate,
     }),
     [
-      boolQueryDSL,
+      finalBoolQuery,
       configId,
       triggersActionsUi.alertsTableConfigurationRegistry,
       flyoutSize,
@@ -216,6 +247,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       rowHeightsOptions,
       finalColumns,
       finalBrowserFields,
+      onAlertTableUpdate,
     ]
   );
 

@@ -8,6 +8,7 @@
 import { getNewRule } from '../../objects/rule';
 import { SELECTED_ALERTS } from '../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
+import { selectAllAlerts, selectFirstPageAlerts } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -22,8 +23,9 @@ import { openEvents, openSessions } from '../../tasks/hosts/main';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL, HOSTS_URL } from '../../urls/navigation';
 
-const assertFirstPageEventsAddToTimeline = () => {
-  selectFirstPageEvents();
+const assertFirstPageEventsAddToTimeline = (type: 'alerts' | 'events') => {
+  if (type === 'alerts') selectFirstPageAlerts();
+  else selectFirstPageEvents();
   cy.get(SELECTED_ALERTS).then((sub) => {
     const alertCountText = sub.text();
     const alertCount = alertCountText.split(' ')[1];
@@ -33,8 +35,9 @@ const assertFirstPageEventsAddToTimeline = () => {
   });
 };
 
-const assertAllEventsAddToTimeline = () => {
-  selectAllEvents();
+const assertAllEventsAddToTimeline = (type: 'alerts' | 'events') => {
+  if (type === 'alerts') selectAllAlerts();
+  else selectAllEvents();
   cy.get(SELECTED_ALERTS).then((sub) => {
     const alertCountText = sub.text(); // Selected 3,654 alerts
     const alertCount = alertCountText.split(' ')[1];
@@ -66,11 +69,11 @@ describe('Bulk Investigate in Timeline', () => {
     });
 
     it('Adding multiple alerts to the timeline should be successful', () => {
-      assertFirstPageEventsAddToTimeline();
+      assertFirstPageEventsAddToTimeline('alerts');
     });
 
     it('When selected all alerts are selected should be successfull', () => {
-      assertAllEventsAddToTimeline();
+      assertAllEventsAddToTimeline('alerts');
     });
   });
 
@@ -81,12 +84,12 @@ describe('Bulk Investigate in Timeline', () => {
       waitsForEventsToBeLoaded();
     });
 
-    it('Adding multiple alerts to the timeline should be successful', () => {
-      assertFirstPageEventsAddToTimeline();
+    it('Adding multiple events to the timeline should be successful', () => {
+      assertFirstPageEventsAddToTimeline('events');
     });
 
     it('When selected all alerts are selected should be successfull', () => {
-      assertAllEventsAddToTimeline();
+      assertAllEventsAddToTimeline('events');
     });
   });
 
@@ -97,12 +100,12 @@ describe('Bulk Investigate in Timeline', () => {
       waitsForEventsToBeLoaded();
     });
 
-    it('Adding multiple alerts to the timeline should be successful', () => {
-      assertFirstPageEventsAddToTimeline();
+    it('Adding multiple events to the timeline should be successful', () => {
+      assertFirstPageEventsAddToTimeline('events');
     });
 
-    it('When selected all alerts are selected should be successfull', () => {
-      assertAllEventsAddToTimeline();
+    it('When selected all events are selected should be successfull', () => {
+      assertAllEventsAddToTimeline('events');
     });
   });
 });

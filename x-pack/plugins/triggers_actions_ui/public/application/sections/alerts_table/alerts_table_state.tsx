@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -36,6 +36,7 @@ import {
   BulkActionsReducerAction,
   BulkActionsState,
   RowSelectionState,
+  TableUpdateHandlerArgs,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
@@ -64,6 +65,7 @@ export type AlertsTableStateProps = {
   pageSize?: number;
   showExpandToDetails: boolean;
   browserFields?: BrowserFields;
+  onUpdate?: (args: TableUpdateHandlerArgs) => void;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -107,11 +109,17 @@ const AlertsTableState = ({
   columns: propColumns,
   gridStyle,
   browserFields: propBrowserFields,
+  onUpdate,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
+
+  if (!hasAlertsTableConfiguration)
+    // eslint-disable-next-line no-console
+    console.warn(`Missing Alert Table configuration for configuration ID: ${configurationId}`);
+
   const alertsTableConfiguration = hasAlertsTableConfiguration
     ? alertsTableConfigurationRegistry.get(configurationId)
     : EmptyConfiguration;
@@ -193,6 +201,12 @@ const AlertsTableState = ({
     sort,
     skip: false,
   });
+
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate({ isLoading, totalCount: alertsCount, refresh });
+    }
+  }, [isLoading, alertsCount, onUpdate, refresh]);
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);

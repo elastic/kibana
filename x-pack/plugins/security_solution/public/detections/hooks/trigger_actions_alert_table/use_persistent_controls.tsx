@@ -9,31 +9,28 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { changeViewMode } from '../../../common/store/data_table/actions';
-import type { ViewSelection } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
+import type { ViewSelection, TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
 import { useDataTableFilters } from '../../pages/detection_engine/use_alert_table_filters';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 
-export const getPersistentControlsHook = () => {
+export const getPersistentControlsHook = (tableId: TableId) => {
   const usePersistentControls = () => {
     const dispatch = useDispatch();
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
     const tableView = useShallowEqualSelector(
-      (state) =>
-        (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).viewMode ??
-        tableDefaults.viewMode
+      (state) => (getTable(state, tableId) ?? tableDefaults).viewMode ?? tableDefaults.viewMode
     );
 
     const handleChangeTableView = useCallback(
       (selectedView: ViewSelection) => {
         dispatch(
           changeViewMode({
-            id: TableId.alertsOnAlertsPage,
+            id: tableId,
             viewMode: selectedView,
           })
         );
@@ -46,7 +43,7 @@ export const getPersistentControlsHook = () => {
       setShowBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,
       setShowOnlyThreatIndicatorAlerts,
-    } = useDataTableFilters(TableId.alertsOnAlertsPage);
+    } = useDataTableFilters(tableId);
 
     const additionalFiltersComponent = useMemo(
       () => (
@@ -71,7 +68,7 @@ export const getPersistentControlsHook = () => {
         <RightTopMenu
           tableView={tableView}
           loading={false}
-          tableId={TableId.alertsOnAlertsPage}
+          tableId={tableId}
           title={'Some Title'}
           onViewChange={handleChangeTableView}
           hasRightOffset={false}

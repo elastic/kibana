@@ -8,7 +8,7 @@
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createCustomRule, createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
@@ -317,7 +317,7 @@ describe('Add/edit exception from rule details', () => {
       // Closed alert should appear in table
       goToClosedAlertsOnRuleDetailsPage();
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+      cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
       // Remove the exception and load an event that would have matched that exception
       // to show that said exception now starts to show up again
@@ -332,12 +332,13 @@ describe('Add/edit exception from rule details', () => {
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
+      waitForAlertsToPopulate();
       goToOpenedAlertsOnRuleDetailsPage();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+      cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
     });
   });
 });

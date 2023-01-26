@@ -10,7 +10,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import { TableId } from '../../../../common/types';
+import type { TableId } from '../../../../common/types';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
@@ -55,21 +55,23 @@ function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] 
   ];
 }
 
-export const useBulkActionHook: AlertsTableConfigurationRegistry['useBulkActions'] = (query) => {
-  const { from, to } = useGlobalTime();
-  const filters = getFiltersForDSLQuery(query);
+export const getBulkActionHook =
+  (tableId: TableId): AlertsTableConfigurationRegistry['useBulkActions'] =>
+  (query) => {
+    const { from, to } = useGlobalTime();
+    const filters = getFiltersForDSLQuery(query);
 
-  const timelineAction = useAddBulkToTimelineAction({
-    localFilters: filters,
-    from,
-    to,
-    scopeId: SourcererScopeName.detections,
-    tableId: TableId.alertsOnAlertsPage,
-  });
+    const timelineAction = useAddBulkToTimelineAction({
+      localFilters: filters,
+      from,
+      to,
+      scopeId: SourcererScopeName.detections,
+      tableId,
+    });
 
-  const alertActions = useBulkAlertActionItems({ scopeId: SourcererScopeName.detections });
+    const alertActions = useBulkAlertActionItems({ scopeId: SourcererScopeName.detections });
 
-  const caseActions = useBulkAddToCaseActions();
+    const caseActions = useBulkAddToCaseActions();
 
-  return [...alertActions, ...caseActions, timelineAction];
-};
+    return [...alertActions, ...caseActions, timelineAction];
+  };

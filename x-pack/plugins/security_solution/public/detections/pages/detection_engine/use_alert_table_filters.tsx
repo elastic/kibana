@@ -13,7 +13,7 @@ import {
   updateShowBuildingBlockAlertsFilter,
 } from '../../../common/store/data_table/actions';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
-import { TableId } from '../../../../common/types';
+import type { TableId } from '../../../../common/types';
 import { dataTableSelectors } from '../../../common/store/data_table';
 
 export const useDataTableFilters = (tableId: TableId) => {
@@ -23,7 +23,7 @@ export const useDataTableFilters = (tableId: TableId) => {
 
   const { showOnlyThreatIndicatorAlerts, showBuildingBlockAlerts } = useShallowEqualSelector(
     (state) =>
-      (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).additionalFilters ??
+      (getTable(state, tableId) ?? tableDefaults).additionalFilters ??
       tableDefaults.additionalFilters
   );
 
