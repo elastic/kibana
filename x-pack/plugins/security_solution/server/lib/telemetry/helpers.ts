@@ -241,27 +241,34 @@ export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfi
 export const formatValueListMetaData = (
   valueListResponse: ValueListResponse,
   clusterInfo: ESClusterInfo,
-  licenseInfo: ESLicense | undefined,
+  licenseInfo: ESLicense | undefined
 ) => ({
   '@timestamp': moment().toISOString(),
   cluster_uuid: clusterInfo.cluster_uuid,
   cluster_name: clusterInfo.cluster_name,
   license_id: licenseInfo?.uid,
-  total_list_count: valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
+  total_list_count:
+    valueListResponse.listMetricsResponse?.aggregations?.total_value_list_count ?? 0,
   types:
-    valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map((breakdown) => ({
-      type: breakdown.key,
-      count: breakdown.doc_count,
-    })) ?? [],
+    valueListResponse.listMetricsResponse?.aggregations?.type_breakdown?.buckets.map(
+      (breakdown) => ({
+        type: breakdown.key,
+        count: breakdown.doc_count,
+      })
+    ) ?? [],
   lists:
-    valueListResponse.itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map((itemCount) => ({
-      id: itemCount.key,
-      count: itemCount.doc_count,
-    })) ?? [],
+    valueListResponse.itemMetricsResponse?.aggregations?.value_list_item_count?.buckets.map(
+      (itemCount) => ({
+        id: itemCount.key,
+        count: itemCount.doc_count,
+      })
+    ) ?? [],
   included_in_exception_lists_count:
-    valueListResponse.exceptionListMetricsResponse?.aggregations?.vl_included_in_exception_lists_count?.value ?? 0,
+    valueListResponse.exceptionListMetricsResponse?.aggregations
+      ?.vl_included_in_exception_lists_count?.value ?? 0,
   used_in_indicator_match_rule_count:
-    valueListResponse.indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
+    valueListResponse.indicatorMatchMetricsResponse?.aggregations
+      ?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
 
 export let isElasticCloudDeployment = false;
@@ -290,6 +297,6 @@ export const createTaskMetric = (
     time_executed_in_ms: endTime - startTime,
     start_time: startTime,
     end_time: endTime,
-    error_message: errorMessage
+    error_message: errorMessage,
   };
 };

@@ -72,11 +72,11 @@ export interface ITelemetryReceiver {
 
   fetchFleetAgents(): Promise<
     | {
-      agents: Agent[];
-      total: number;
-      page: number;
-      perPage: number;
-    }
+        agents: Agent[];
+        total: number;
+        page: number;
+        perPage: number;
+      }
     | undefined
   >;
 

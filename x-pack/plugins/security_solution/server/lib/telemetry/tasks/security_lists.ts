@@ -18,7 +18,13 @@ import {
   TASK_METRICS_CHANNEL,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
-import { batchTelemetryRecords, templateExceptionList, tlog, createTaskMetric, formatValueListMetaData } from '../helpers';
+import {
+  batchTelemetryRecords,
+  templateExceptionList,
+  tlog,
+  createTaskMetric,
+  formatValueListMetaData,
+} from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -117,7 +123,11 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         const valueListResponse = await receiver.fetchValueListMetaData(
           FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
         );
-        const valueListMetaData = formatValueListMetaData(valueListResponse, clusterInfo, licenseInfo)
+        const valueListMetaData = formatValueListMetaData(
+          valueListResponse,
+          clusterInfo,
+          licenseInfo
+        );
         tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
