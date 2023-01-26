@@ -12,17 +12,17 @@ import { CommentField } from './comment_field';
 import { ActionTypeField } from './action_type_field';
 
 interface OsqueryResponseActionsValues {
-  type: string;
-  comment: string;
+  command?: string;
+  comment?: string;
 }
 
 interface OsqueryResponseActionsParamsFormFields {
-  type: string;
-  comment: string;
+  command?: string;
+  comment?: string;
 }
 
 export interface OsqueryResponseActionsParamsFormProps {
-  defaultValues?: OsqueryResponseActionsValues;
+  defaultValues: OsqueryResponseActionsValues;
   onChange: (data: OsqueryResponseActionsValues) => void;
   onError: (error: FieldErrors<OsqueryResponseActionsParamsFormFields>) => void;
 }
@@ -35,7 +35,7 @@ const EndpointResponseActionParamsFormComponent = ({
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     mode: 'all',
     defaultValues: defaultValues ?? {
-      type: '',
+      command: '',
       comment: '',
     },
   });
@@ -49,7 +49,7 @@ const EndpointResponseActionParamsFormComponent = ({
   useEffect(() => {
     const subscription = watch((formData) => {
       onChange({
-        command: formData?.command,
+        command: formData.command,
         comment: formData.comment,
       });
     });

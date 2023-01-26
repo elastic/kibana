@@ -26,6 +26,7 @@ import {
   UPGRADE_ENDPOINT_FOR_RESPONDER,
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
+import { commandToCapabilitiesMap, getRbacControl } from './utils';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -48,33 +49,6 @@ const pidValidator = (argData: ParsedArgData): true | string => {
       defaultMessage: 'Argument must be a positive number representing the PID of a process',
     });
   }
-};
-
-const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
-  ['isolate', 'isolation'],
-  ['release', 'isolation'],
-  ['kill-process', 'kill_process'],
-  ['suspend-process', 'suspend_process'],
-  ['processes', 'running_processes'],
-  ['get-file', 'get_file'],
-]);
-
-const getRbacControl = ({
-  commandName,
-  privileges,
-}: {
-  commandName: ConsoleResponseActionCommands;
-  privileges: EndpointPrivileges;
-}): boolean => {
-  const commandToPrivilegeMap = new Map<ConsoleResponseActionCommands, boolean>([
-    ['isolate', privileges.canIsolateHost],
-    ['release', privileges.canUnIsolateHost],
-    ['kill-process', privileges.canKillProcess],
-    ['suspend-process', privileges.canSuspendProcess],
-    ['processes', privileges.canGetRunningProcesses],
-    ['get-file', privileges.canWriteFileOperations],
-  ]);
-  return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {

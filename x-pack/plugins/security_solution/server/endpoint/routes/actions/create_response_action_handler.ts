@@ -35,7 +35,6 @@ export const createResponseActionHandler = async (
   params,
   options
 ) => {
-  console.log('started');
   const {
     metadata: { currentUser },
     casesClient,

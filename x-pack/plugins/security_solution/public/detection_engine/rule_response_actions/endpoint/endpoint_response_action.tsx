@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ResponseActionFormField } from './endpoint_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
 import { UseField } from '../../../shared_imports';
@@ -14,10 +15,10 @@ interface EndpointResponseActionProps {
   item: ArrayItem;
 }
 
-const GhostFormField = () => <></>;
-
 export const EndpointResponseAction = React.memo((props: EndpointResponseActionProps) => {
-  // add capability check here
+  // TODO Decide when should it be available
+  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
+  console.log({ endpointPrivileges });
 
   return (
     <UseField
