@@ -29,7 +29,7 @@ import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
-import { HostsLandingPage } from './hosts_landing';
+import { HostsLandingPage } from './hosts/hosts_landing_page';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';

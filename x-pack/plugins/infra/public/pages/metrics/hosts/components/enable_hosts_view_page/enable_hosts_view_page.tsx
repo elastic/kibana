@@ -11,15 +11,15 @@ import { css } from '@emotion/react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { MetricsPageTemplate } from '../page_template';
+import { MetricsPageTemplate } from '../../../page_template';
 import hostsLandingBeta from './hosts_landing_beta.svg';
-import { ExperimentalBadge } from '../hosts/components/experimental_badge';
+import { ExperimentalBadge } from '../experimental_badge';
 
 interface Props {
   actions?: ReactNode;
 }
 
-export const EnableHostViewPage = ({ actions }: Props) => {
+export const EnableHostsViewPage = ({ actions }: Props) => {
   const backgroundColor = useEuiBackgroundColor('subdued');
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts_feature_enable_landing_page' });

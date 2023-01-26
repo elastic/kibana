@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
-import { HostsPage } from '../hosts';
-import { EnableHostViewPage } from './enable_host_view_page';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
+import { InfraClientStartDeps } from '../../../types';
+import { EnableHostsViewPage } from './components/enable_hosts_view_page/enable_hosts_view_page';
+import { HostsPage } from '.';
 
 export const HostsLandingPage = () => {
-  const kibana = useKibana();
-  const canEditAdvancedSettings = kibana.services.application?.capabilities.advancedSettings.save;
-  const [isHostViewEnabled, setIsHostViewEnabled] = useState<boolean | undefined>(
-    kibana.services.uiSettings?.get(enableInfrastructureHostsView)
+  const {
+    services: { uiSettings, application },
+  } = useKibana<InfraClientStartDeps>();
+  const canEditAdvancedSettings = application?.capabilities.advancedSettings.save;
+  const isHostViewEnabled = useObservable<boolean>(
+    uiSettings?.get$<boolean>(enableInfrastructureHostsView) ??
+      new Observable((subs) => subs.next(false))
   );
 
   const LEARN_MORE = i18n.translate('xpack.infra.hostsViewPage.landing.learnMore', {
@@ -32,15 +38,14 @@ export const HostsLandingPage = () => {
 
   if (canEditAdvancedSettings) {
     return (
-      <EnableHostViewPage
+      <EnableHostsViewPage
         actions={
           <EuiButton
             iconType="check"
             color="primary"
             data-test-subj="hostsView-enable-feature-button"
             onClick={() => {
-              kibana.services.uiSettings?.set(enableInfrastructureHostsView, true);
-              setIsHostViewEnabled(true);
+              uiSettings?.set(enableInfrastructureHostsView, true);
             }}
           >
             {i18n.translate('xpack.infra.hostsViewPage.landing.enableHostsView', {
@@ -53,7 +58,7 @@ export const HostsLandingPage = () => {
   }
 
   return (
-    <EnableHostViewPage
+    <EnableHostsViewPage
       actions={
         <EuiCallOut data-test-subj="hostView-no-enable-access" size="s" color="warning">
           <p>
