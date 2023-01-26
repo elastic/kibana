@@ -552,72 +552,37 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getCreateControlButton",
+            "id": "def-public.ControlGroupContainer.openAddDataControlFlyout",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "getCreateControlButton",
-            "description": [
-              "\nReturns a button that allows controls to be created externally using the embeddable"
-            ],
+            "tags": [],
+            "label": "openAddDataControlFlyout",
+            "description": [],
             "signature": [
-              "(buttonType: ",
-              "CreateControlButtonTypes",
-              ", closePopover?: (() => void) | undefined) => JSX.Element"
+              "(this: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              ") => void"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getCreateControlButton.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "buttonType",
-                "description": [
-                  "Controls the button styling"
-                ],
-                "signature": [
-                  "CreateControlButtonTypes"
-                ],
-                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getCreateControlButton.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "closePopover",
-                "description": [
-                  "Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`"
-                ],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
-                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": [
-              "If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.\nOtherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types."
-            ]
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton",
+            "id": "def-public.ControlGroupContainer.getEditControlGroupButton",
             "type": "Function",
             "tags": [],
-            "label": "getCreateTimeSliderControlButton",
+            "label": "getEditControlGroupButton",
             "description": [],
             "signature": [
-              "(closePopover?: (() => void) | undefined) => JSX.Element"
+              "(closePopover: () => void) => JSX.Element"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -625,43 +590,21 @@
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton.$1",
+                "id": "def-public.ControlGroupContainer.getEditControlGroupButton.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "closePopover",
                 "description": [],
                 "signature": [
-                  "(() => void) | undefined"
+                  "() => void"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getToolbarButtons",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "getToolbarButtons",
-            "description": [
-              "\nReturns the toolbar button that is used for creating controls and managing control settings"
-            ],
-            "signature": [
-              "() => JSX.Element"
-            ],
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": [
-              "`SolutionToolbarPopover` button for input controls"
-            ]
           },
           {
             "parentPluginId": "controls",
@@ -3374,54 +3317,6 @@
       },
       {
         "parentPluginId": "controls",
-        "id": "def-public.LazyControlsCallout",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyControlsCallout",
-        "description": [],
-        "signature": [
-          "React.ExoticComponent<",
-          {
-            "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.CalloutProps",
-            "text": "CalloutProps"
-          },
-          "> & { readonly _result: ({ getCreateControlButton }: ",
-          {
-            "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.CalloutProps",
-            "text": "CalloutProps"
-          },
-          ") => JSX.Element | null; }"
-        ],
-        "path": "src/plugins/controls/public/controls_callout/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.LazyControlsCallout.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
         "id": "def-public.useControlGroupContainerContext",
         "type": "Function",
         "tags": [],
@@ -3604,36 +3499,6 @@
             "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
-        "id": "def-public.CalloutProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "CalloutProps",
-        "description": [],
-        "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.CalloutProps.getCreateControlButton",
-            "type": "Function",
-            "tags": [],
-            "label": "getCreateControlButton",
-            "description": [],
-            "signature": [
-              "(() => JSX.Element) | undefined"
-            ],
-            "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4401,6 +4266,21 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "OptionsListSortingType",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.selectedOptions",
             "type": "Array",
             "tags": [],
@@ -4499,14 +4379,13 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.sort",
-            "type": "Object",
+            "id": "def-public.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
             "tags": [],
-            "label": "sort",
+            "label": "hideActionBar",
             "description": [],
             "signature": [
-              "SortingType",
-              " | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -4521,6 +4400,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -5983,6 +5876,21 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "OptionsListSortingType",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.selectedOptions",
             "type": "Array",
             "tags": [],
@@ -6081,14 +5989,13 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.sort",
-            "type": "Object",
+            "id": "def-common.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
             "tags": [],
-            "label": "sort",
+            "label": "hideActionBar",
             "description": [],
             "signature": [
-              "SortingType",
-              " | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -6103,6 +6010,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,

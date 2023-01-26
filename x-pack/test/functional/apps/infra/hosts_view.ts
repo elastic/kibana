@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should load 5 metrics trend tiles', async () => {
-        const hosts = await pageObjects.infraHostsView.getMetricsTrendTilesCount();
+        const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();
         expect(hosts.length).to.equal(5);
       });
 
@@ -57,12 +57,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         { metric: 'hosts', value: '6' },
         { metric: 'cpu', value: '0.8%' },
         { metric: 'memory', value: '16.8%' },
-        { metric: 'tx', value: '0bit/s' },
-        { metric: 'rx', value: '0bit/s' },
+        { metric: 'tx', value: '0 bit/s' },
+        { metric: 'rx', value: '0 bit/s' },
       ].forEach(({ metric, value }) => {
         it(`${metric} tile should show ${value}`, async () => {
           const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
           expect(tileValue).to.eql(value);
+        });
+      });
+
+      describe('Lens charts', () => {
+        it('should load 7 lens metric charts', async () => {
+          const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
+          expect(metricCharts.length).to.equal(7);
+        });
+
+        it('should have an option to open the chart in lens', async () => {
+          await pageObjects.infraHostsView.getOpenInLensOption();
         });
       });
     });

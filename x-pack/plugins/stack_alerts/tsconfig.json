@@ -40,6 +40,8 @@
     "@kbn/react-field",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
+    "@kbn/share-plugin",
+    "@kbn/discover-plugin",
   ],
   "exclude": [
     "target/**/*",

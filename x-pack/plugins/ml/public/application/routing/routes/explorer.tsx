@@ -11,10 +11,10 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
-import { NavigateToPath, useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -35,14 +35,14 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
 import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 import { MlPageHeader } from '../../components/page_header';
+import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import {
-  AnomalyExplorerContext,
-  useAnomalyExplorerContextValue,
+  useAnomalyExplorerContext,
+  AnomalyExplorerContextProvider,
 } from '../../explorer/anomaly_explorer_context';
 
 export const explorerRouteFactory = (
@@ -85,7 +85,9 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+        <AnomalyExplorerContextProvider>
+          <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+        </AnomalyExplorerContextProvider>
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
@@ -100,10 +102,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     services: { cases },
   } = useMlKibana();
 
-  const [, , explorerUrlStateService] = useExplorerUrlState();
-
-  const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
-
   const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
@@ -117,6 +115,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   const explorerState = useObservable(explorerService.state$);
+  const anomalyExplorerContext = useAnomalyExplorerContext();
 
   const refresh = useRefresh();
   const lastRefresh = refresh?.lastRefresh ?? 0;
@@ -173,12 +172,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       // upon component unmounting
       // clear any data to prevent next page from rendering old charts
       explorerService.clearExplorerData();
-
-      anomalyExplorerContext.anomalyExplorerCommonStateService.destroy();
-      anomalyExplorerContext.anomalyTimelineStateService.destroy();
-      anomalyExplorerContext.chartsStateService.destroy();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [explorerData, loadExplorerData] = useExplorerData();
@@ -269,33 +263,35 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+            <PageTitle
+              title={i18n.translate('xpack.ml.explorer.pageTitle', {
+                defaultMessage: 'Anomaly Explorer',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
       <StyledComponentsThemeProvider>
         <CasesContext owner={[]} permissions={casesPermissions!}>
-          <AnomalyExplorerContext.Provider value={anomalyExplorerContext}>
-            {jobsWithTimeRange.length === 0 ? (
-              <AnomalyDetectionEmptyState />
-            ) : (
-              <Explorer
-                {...{
-                  explorerState,
-                  overallSwimlaneData,
-                  showCharts,
-                  severity: tableSeverity.val,
-                  stoppedPartitions,
-                  invalidTimeRangeError,
-                  selectedJobsRunning,
-                  timeBuckets,
-                  timefilter,
-                  selectedCells,
-                  swimLaneSeverity,
-                }}
-              />
-            )}
-          </AnomalyExplorerContext.Provider>
+          {jobsWithTimeRange.length === 0 ? (
+            <AnomalyDetectionEmptyState />
+          ) : (
+            <Explorer
+              {...{
+                explorerState,
+                overallSwimlaneData,
+                showCharts,
+                severity: tableSeverity.val,
+                stoppedPartitions,
+                invalidTimeRangeError,
+                selectedJobsRunning,
+                timeBuckets,
+                timefilter,
+                selectedCells,
+                swimLaneSeverity,
+              }}
+            />
+          )}
         </CasesContext>
       </StyledComponentsThemeProvider>
     </div>

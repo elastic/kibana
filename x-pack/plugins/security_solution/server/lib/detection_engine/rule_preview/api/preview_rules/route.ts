@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
@@ -91,7 +91,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const [, { data, security: securityService }] = await getStartServices();
+        const [, { data, security: securityService, share, dataViews }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
@@ -121,7 +121,7 @@ export const previewRulesRoute = async (
         await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewId = uuid.v4();
+        const previewId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
@@ -229,11 +229,16 @@ export const previewRulesRoute = async (
 
           let invocationStartTime;
 
+          const dataViewsService = await dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            coreContext.elasticsearch.client.asInternalUser
+          );
+
           while (invocationCount > 0 && !isAborted) {
             invocationStartTime = moment();
 
-            statePreview = (await executor({
-              executionId: uuid.v4(),
+            ({ state: statePreview } = (await executor({
+              executionId: uuidv4(),
               params,
               previousStartedAt,
               rule,
@@ -251,12 +256,14 @@ export const previewRulesRoute = async (
                   searchSourceClient,
                 }),
                 uiSettingsClient: coreContext.uiSettings.client,
+                dataViews: dataViewsService,
+                share,
               },
               spaceId,
               startedAt: startedAt.toDate(),
               state: statePreview,
               logger,
-            })) as TState;
+            })) as { state: TState });
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)

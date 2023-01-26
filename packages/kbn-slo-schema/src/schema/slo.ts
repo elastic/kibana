@@ -12,8 +12,8 @@ import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
 
-const occurrencesBudgetingMethodSchema = t.literal<string>('occurrences');
-const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
+const occurrencesBudgetingMethodSchema = t.literal('occurrences');
+const timeslicesBudgetingMethodSchema = t.literal('timeslices');
 
 const budgetingMethodSchema = t.union([
   occurrencesBudgetingMethodSchema,

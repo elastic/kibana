@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext, FieldError } from 'react-hook-form';
+import styled from 'styled-components';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
@@ -31,11 +32,14 @@ export const AdvancedConfig = () => {
         <EuiSpacer />
         {FORM_CONFIG[type].advanced?.map((configGroup) => {
           return (
-            <EuiDescribedFormGroup
+            <DescripedFormGroup
               description={configGroup.description}
               title={<h4>{configGroup.title}</h4>}
               fullWidth
               key={configGroup.title}
+              descriptionFlexItemProps={{ style: { minWidth: 200 } }}
+              fieldFlexItemProps={{ style: { minWidth: 500 } }}
+              style={{ flexWrap: 'wrap' }}
             >
               {configGroup.components.map((field) => {
                 return (
@@ -46,10 +50,16 @@ export const AdvancedConfig = () => {
                   />
                 );
               })}
-            </EuiDescribedFormGroup>
+            </DescripedFormGroup>
           );
         })}
       </EuiAccordion>
     </EuiPanel>
   ) : null;
 };
+
+const DescripedFormGroup = styled(EuiDescribedFormGroup)`
+  > div.euiFlexGroup {
+    flex-wrap: wrap;
+  }
+`;

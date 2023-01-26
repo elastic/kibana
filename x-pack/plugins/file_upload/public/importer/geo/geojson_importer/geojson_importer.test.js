@@ -278,4 +278,74 @@ describe('previewFile', () => {
     expect(results.features).toEqual([]);
     expect(results.invalidFeatures.length).toBe(2);
   });
+
+  describe('crs', () => {
+    test('should read features with supported CRS', async () => {
+      const file = new File(
+        [
+          JSON.stringify({
+            ...FEATURE_COLLECTION,
+            crs: {
+              type: 'name',
+              properties: {
+                name: 'urn:ogc:def:crs:OGC:1.3:CRS84',
+              },
+            },
+          }),
+        ],
+        'testfile.json',
+        { type: 'text/json' }
+      );
+
+      const importer = new GeoJsonImporter(file);
+      const results = await importer.previewFile();
+
+      expect(results).toEqual({
+        previewCoverage: 100,
+        hasPoints: true,
+        hasShapes: false,
+        features: FEATURE_COLLECTION.features,
+        invalidFeatures: [],
+      });
+    });
+
+    test('should reject "link" CRS', async () => {
+      const file = new File(
+        [
+          JSON.stringify({
+            ...FEATURE_COLLECTION,
+            crs: {
+              type: 'link',
+            },
+          }),
+        ],
+        'testfile.json',
+        { type: 'text/json' }
+      );
+
+      const importer = new GeoJsonImporter(file);
+      await expect(importer.previewFile()).rejects.toThrow();
+    });
+
+    test('should reject unsupported CRS', async () => {
+      const file = new File(
+        [
+          JSON.stringify({
+            ...FEATURE_COLLECTION,
+            crs: {
+              type: 'name',
+              properties: {
+                name: 'urn:ogc:def:crs:EPSG::25833',
+              },
+            },
+          }),
+        ],
+        'testfile.json',
+        { type: 'text/json' }
+      );
+
+      const importer = new GeoJsonImporter(file);
+      await expect(importer.previewFile()).rejects.toThrow();
+    });
+  });
 });

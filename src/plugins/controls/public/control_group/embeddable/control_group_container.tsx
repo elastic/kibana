@@ -12,13 +12,8 @@ import ReactDOM from 'react-dom';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import _ from 'lodash';
-import { EuiContextMenuPanel } from '@elastic/eui';
 
-import {
-  ReduxEmbeddablePackage,
-  ReduxEmbeddableTools,
-  SolutionToolbarPopover,
-} from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -36,14 +31,11 @@ import {
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
+import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '../..';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { getNextPanelOrder } from './control_group_helpers';
 import type {
   AddDataControlProps,
@@ -127,101 +119,15 @@ export class ControlGroupContainer extends Container<
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
-  /**
-   * Returns a button that allows controls to be created externally using the embeddable
-   * @param buttonType Controls the button styling
-   * @param closePopover Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`
-   * @return If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.
-   *         Otherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types.
-   */
-  public getCreateControlButton = (
-    buttonType: CreateControlButtonTypes,
-    closePopover?: () => void
-  ) => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
+  public openAddDataControlFlyout = openAddDataControlFlyout;
 
-    return (
-      <ControlsServicesProvider>
-        <CreateControlButton
-          buttonType={buttonType}
-          defaultControlWidth={this.getInput().defaultControlWidth}
-          defaultControlGrow={this.getInput().defaultControlGrow}
-          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-          updateDefaultGrow={(defaultControlGrow: boolean) =>
-            this.updateInput({ defaultControlGrow })
-          }
-          addNewEmbeddable={(type, input) => {
-            if (type === OPTIONS_LIST_CONTROL) {
-              this.addOptionsListControl(input as AddOptionsListControlProps);
-              return;
-            }
-
-            if (type === RANGE_SLIDER_CONTROL) {
-              this.addRangeSliderControl(input as AddRangeSliderControlProps);
-              return;
-            }
-
-            this.addDataControlFromField(input as AddDataControlProps);
-          }}
-          closePopover={closePopover}
-          getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
-          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-        />
-      </ControlsServicesProvider>
-    );
-  };
-
-  public getCreateTimeSliderControlButton = (closePopover?: () => void) => {
-    const childIds = this.getChildIds();
-    const hasTimeSliderControl = childIds.some((id) => {
-      const child = this.getChild(id);
-      return child.type === TIME_SLIDER_CONTROL;
-    });
-    return (
-      <CreateTimeSliderControlButton
-        onCreate={() => {
-          this.addTimeSliderControl();
-        }}
-        closePopover={closePopover}
-        hasTimeSliderControl={hasTimeSliderControl}
-      />
-    );
-  };
-
-  private getEditControlGroupButton = (closePopover: () => void) => {
+  public getEditControlGroupButton = (closePopover: () => void) => {
     const ControlsServicesProvider = pluginServices.getContextProvider();
 
     return (
       <ControlsServicesProvider>
         <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
       </ControlsServicesProvider>
-    );
-  };
-
-  /**
-   * Returns the toolbar button that is used for creating controls and managing control settings
-   * @return `SolutionToolbarPopover` button for input controls
-   */
-  public getToolbarButtons = () => {
-    return (
-      <SolutionToolbarPopover
-        ownFocus
-        label={ControlGroupStrings.getControlButtonTitle()}
-        iconType="arrowDown"
-        iconSide="right"
-        panelPaddingSize="none"
-        data-test-subj="dashboard-controls-menu-button"
-      >
-        {({ closePopover }: { closePopover: () => void }) => (
-          <EuiContextMenuPanel
-            items={[
-              this.getCreateControlButton('toolbar', closePopover),
-              this.getCreateTimeSliderControlButton(closePopover),
-              this.getEditControlGroupButton(closePopover),
-            ]}
-          />
-        )}
-      </SolutionToolbarPopover>
     );
   };
 

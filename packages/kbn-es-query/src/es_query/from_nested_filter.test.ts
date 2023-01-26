@@ -42,7 +42,7 @@ describe('fromNestedFilter', function () {
   it('should allow to configure ignore_unmapped', () => {
     const field = getField('nestedField.child');
     const filter = buildPhraseFilter(field!, 'foo', indexPattern);
-    const result = fromNestedFilter(filter, indexPattern, { ignoreUnmapped: true });
+    const result = fromNestedFilter(filter, indexPattern, { nestedIgnoreUnmapped: true });
     expect(result).toEqual({
       meta: {
         index: 'logstash-*',

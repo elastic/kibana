@@ -68,6 +68,7 @@ import { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
+    charts,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -91,6 +92,11 @@ export function RuleDetailsPage() {
   const history = useHistory();
   const location = useLocation();
 
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
+
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
     [observabilityRuleTypeRegistry]
@@ -111,7 +117,9 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-  const [defaultAlertTimeRange] = useState(getDefaultAlertSummaryTimeRange);
+  const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
+    getDefaultAlertSummaryTimeRange
+  );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ]);
@@ -123,11 +131,15 @@ export function RuleDetailsPage() {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+    const timeRange = getDefaultAlertSummaryTimeRange();
+    setAlertSummaryWidgetTimeRange(timeRange);
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
+        rangeFrom: timeRange.utcFrom,
+        rangeTo: timeRange.utcTo,
         ruleId,
-        tabId: ALERTS_TAB,
         status,
+        tabId: ALERTS_TAB,
       },
       {
         replace: true,
@@ -384,9 +396,10 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
+            chartThemes={chartThemes}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
-            timeRange={defaultAlertTimeRange}
+            timeRange={alertSummaryWidgetTimeRange}
             filter={alertSummaryWidgetFilter.current}
           />
         </EuiFlexItem>

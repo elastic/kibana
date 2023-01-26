@@ -258,7 +258,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         indexName: 'logs-elastic_analytics.events-*',
         type: 'index_name',
       },
-      name: 'Enterprise Search Behaviorial Analytics Logs',
+      name: 'Enterprise Search Behavioral Analytics Logs',
     });
 
     /**

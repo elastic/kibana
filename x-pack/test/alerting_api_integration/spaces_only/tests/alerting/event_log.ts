@@ -7,14 +7,9 @@
 
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../scenarios';
-import {
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  getEventLog,
-  ESTestIndexTool,
-} from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -586,9 +581,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 // make sure the counts of the # of events per type are as expected
                 ['execute-start', { gte: 25 }],
                 ['execute', { gte: 25 }],
-                ['execute-action', { equal: 23 }],
-                ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 23 }],
+                ['execute-action', { equal: 25 }],
+                ['new-instance', { equal: 2 }],
+                ['active-instance', { gte: 25 }],
                 ['recovered-instance', { equal: 2 }],
               ]),
             });
@@ -601,7 +596,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, false, false].concat(new Array(21).fill(true)).concat([false]);
+          const result = [false, false, false]
+            .concat(new Array(20).fill(true))
+            .concat([false, false, false, false]);
           expect(flapping).to.eql(result);
         });
 
@@ -660,9 +657,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 // make sure the counts of the # of events per type are as expected
                 ['execute-start', { gte: 20 }],
                 ['execute', { gte: 20 }],
-                ['execute-action', { equal: 3 }],
+                ['execute-action', { equal: 9 }],
                 ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
+                ['active-instance', { gte: 9 }],
                 ['recovered-instance', { equal: 3 }],
               ]),
             });
@@ -675,7 +672,20 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, false, false, true, false, false]);
+          expect(flapping).to.eql([
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+          ]);
         });
       });
     }

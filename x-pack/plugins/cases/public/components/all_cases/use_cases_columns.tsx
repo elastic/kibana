@@ -112,8 +112,10 @@ export const useCasesColumns = ({
 
   const columns: CasesColumns[] = [
     {
+      field: 'title',
       name: i18n.NAME,
-      render: (theCase: Case) => {
+      sortable: true,
+      render: (title: string, theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
             <TruncatedText text={theCase.title} />
@@ -135,7 +137,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-      width: '20%',
+      width: !isSelectorView ? '20%' : undefined,
     },
   ];
 
@@ -195,7 +197,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
-    width: '15%',
+    width: !isSelectorView ? '15%' : undefined,
   });
 
   if (isAlertsEnabled) {
@@ -207,7 +209,7 @@ export const useCasesColumns = ({
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
-      width: '80px',
+      width: !isSelectorView ? '80px' : '55px',
     });
   }
 
@@ -276,6 +278,23 @@ export const useCasesColumns = ({
     });
   }
 
+  columns.push({
+    field: 'updatedAt',
+    name: i18n.UPDATED_ON,
+    sortable: true,
+    render: (updatedAt: Case['updatedAt']) => {
+      if (updatedAt != null) {
+        return (
+          <span data-test-subj="case-table-column-updatedAt">
+            <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
+          </span>
+        );
+      }
+      return getEmptyTagValue();
+    },
+    width: isSelectorView ? '80px' : undefined,
+  });
+
   columns.push(
     {
       name: i18n.EXTERNAL_INCIDENT,
@@ -285,25 +304,30 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
+      width: isSelectorView ? '80px' : undefined,
     },
     {
+      field: 'status',
       name: i18n.STATUS,
-      render: (theCase: Case) => {
-        if (theCase.status === null || theCase.status === undefined) {
-          return getEmptyTagValue();
+      sortable: true,
+      render: (status: Case['status']) => {
+        if (status != null) {
+          return <Status status={status} />;
         }
 
-        return <Status status={theCase.status} />;
+        return getEmptyTagValue();
       },
     },
     {
+      field: 'severity',
       name: i18n.SEVERITY,
-      render: (theCase: Case) => {
-        if (theCase.severity != null) {
-          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+      sortable: true,
+      render: (severity: Case['severity']) => {
+        if (severity != null) {
+          const severityData = severities[severity ?? CaseSeverity.LOW];
           return (
             <EuiHealth
-              data-test-subj={`case-table-column-severity-${theCase.severity}`}
+              data-test-subj={`case-table-column-severity-${severity}`}
               color={severityData.color}
             >
               {severityData.label}

@@ -75,7 +75,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/errors/bar?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/bar/samples?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

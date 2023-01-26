@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import React, { type FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -26,7 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
@@ -485,7 +485,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
           {progressPercentComplete !== undefined && isBatchTransform && (
-            <Fragment>
+            <>
               <EuiSpacer size="m" />
               <EuiText size="xs">
                 <strong>
@@ -508,10 +508,10 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   <EuiText size="xs">{progressPercentComplete}%</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </Fragment>
+            </>
           )}
           {created && (
-            <Fragment>
+            <>
               <EuiHorizontalRule />
               <EuiFlexGroup gutterSize="l">
                 <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
@@ -566,7 +566,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-            </Fragment>
+            </>
           )}
         </EuiForm>
         {alertFlyoutVisible ? (

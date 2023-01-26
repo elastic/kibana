@@ -19,8 +19,8 @@ import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plu
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import {
-  createFleetAuthzMock,
   Installation,
   ListResult,
   PackagePolicy,
@@ -29,7 +29,7 @@ import {
 import {
   ExternalCallback,
   FleetStartContract,
-  PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
@@ -89,7 +89,6 @@ describe('Cloud Security Posture Plugin', () => {
           {
             type: 'csp_rule',
             attributes: {
-              enabled: false,
               metadata: {
                 rego_rule_id: 'cis_1_1_1',
                 benchmark: { id: 'cis_k8s' },
@@ -299,9 +298,9 @@ describe('Cloud Security Posture Plugin', () => {
         const deletedPackagePolicyMock = deletePackagePolicyMock();
         deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
-        const packagePolicyPostDeleteCallbacks: PostPackagePolicyDeleteCallback[] = [];
+        const packagePolicyPostDeleteCallbacks: PostPackagePolicyPostDeleteCallback[] = [];
         fleetMock.registerExternalCallback.mockImplementation((...args) => {
-          if (args[0] === 'postPackagePolicyDelete') {
+          if (args[0] === 'packagePolicyPostDelete') {
             packagePolicyPostDeleteCallbacks.push(args[1]);
           }
         });

@@ -6,15 +6,19 @@
  */
 
 import datemath, { Unit } from '@kbn/datemath';
-import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  getAllMonitors,
+  processMonitors,
+} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
-import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
@@ -36,67 +40,59 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
  * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
  */
 export async function getStatus(
+  server: UptimeServerSetup,
   uptimeEsClient: UptimeEsClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  soClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
   params: MonitorsQuery
 ) {
   const { query } = params;
-  let monitors;
-  const enabledIds: string[] = [];
-  let disabledCount = 0;
-  let page = 1;
-  let maxPeriod = 0;
-  let maxLocations = 1;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
    * Track max period to make sure the snapshot query should reach back far enough to catch
    * latest ping for all enabled monitors.
    */
-  do {
-    monitors = await getMonitors(
-      {
-        perPage: 500,
-        page,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
-        query,
-        fields: [
-          ConfigKey.ENABLED,
-          ConfigKey.LOCATIONS,
-          ConfigKey.MONITOR_QUERY_ID,
-          ConfigKey.SCHEDULE,
-        ],
-      },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-    page++;
-    monitors.saved_objects.forEach((monitor) => {
-      const attrs = monitor.attributes;
-      if (attrs[ConfigKey.ENABLED] === false) {
-        disabledCount += attrs[ConfigKey.LOCATIONS].length;
-      } else {
-        enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-        maxLocations = Math.max(maxLocations, attrs[ConfigKey.LOCATIONS].length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
-      }
-    });
-  } while (monitors.saved_objects.length === monitors.per_page);
 
-  const { up, down, upConfigs, downConfigs } = await queryMonitorStatus(
+  const allMonitors = await getAllMonitors({
+    soClient,
+    search: query ? `${query}*` : undefined,
+    fields: [
+      ConfigKey.ENABLED,
+      ConfigKey.LOCATIONS,
+      ConfigKey.MONITOR_QUERY_ID,
+      ConfigKey.SCHEDULE,
+      ConfigKey.MONITOR_SOURCE_TYPE,
+    ],
+  });
+
+  const {
+    enabledIds,
+    disabledCount,
+    maxPeriod,
+    listOfLocations,
+    monitorLocationMap,
+    disabledMonitorsCount,
+    projectMonitorsCount,
+  } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
+
+  const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
-    maxLocations,
+    listOfLocations,
     { from: maxPeriod, to: 'now' },
-    enabledIds
+    enabledIds,
+    monitorLocationMap
   );
 
   return {
+    allMonitorsCount: allMonitors.length,
+    disabledMonitorsCount,
+    projectMonitorsCount,
     enabledIds,
     disabledCount,
     up,
     down,
+    pending,
     upConfigs,
     downConfigs,
   };
@@ -109,15 +105,19 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
     query: QuerySchema,
   },
   handler: async ({
+    server,
     uptimeEsClient,
     savedObjectsClient,
     syntheticsMonitorClient,
-    response,
     request,
-  }): Promise<IKibanaResponse<OverviewStatus>> => {
+  }): Promise<any> => {
     const params = request.query;
-    return response.ok({
-      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient, params),
-    });
+    return await getStatus(
+      server,
+      uptimeEsClient,
+      savedObjectsClient,
+      syntheticsMonitorClient,
+      params
+    );
   },
 });

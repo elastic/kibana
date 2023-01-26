@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UiComponent } from '@kbn/kibana-utils-plugin/public';
-import { Presentable } from '../util/presentable';
-import { Trigger } from '../triggers';
+import type { Presentable } from '@kbn/ui-actions-browser';
+import type { Trigger } from '../triggers';
 
 /**
  * During action execution we can provide additional information,
@@ -67,12 +66,6 @@ export interface Action<Context extends object = object>
    * @param context
    */
   getDisplayName(context: ActionExecutionContext<Context>): string;
-
-  /**
-   * `UiComponent` to render when displaying this action as a context menu item.
-   * If not provided, `getDisplayName` will be used instead.
-   */
-  MenuItem?: UiComponent<ActionMenuItemProps<Context>>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,

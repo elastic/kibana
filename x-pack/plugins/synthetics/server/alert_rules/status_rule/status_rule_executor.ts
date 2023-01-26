@@ -12,10 +12,13 @@ import {
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import {
+  getAllMonitors,
+  processMonitors,
+} from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { createUptimeESClient, UptimeEsClient } from '../../legacy_uptime/lib/lib';
+import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
 import {
   ConfigKey,
@@ -58,10 +61,7 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = createUptimeESClient({
-      esClient: scopedClient,
-      savedObjectsClient: this.soClient,
-    });
+    this.esClient = new UptimeEsClient(this.soClient, scopedClient);
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
@@ -88,38 +88,38 @@ export class StatusRuleExecutor {
 
   async getMonitors() {
     await this.getAllLocationNames();
-    this.monitors = await getAllMonitors(
-      this.soClient,
-      `attributes.${AlertConfigKey.STATUS_ENABLED}: true`
-    );
-    const allIds: string[] = [];
-    const enabledIds: string[] = [];
-    let maxLocations = 1;
-
-    this.monitors.forEach((monitor) => {
-      const attrs = monitor.attributes;
-      allIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-      if (attrs[ConfigKey.ENABLED] === true) {
-        enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
-      }
-
-      maxLocations = Math.max(maxLocations, attrs[ConfigKey.LOCATIONS].length);
+    this.monitors = await getAllMonitors({
+      soClient: this.soClient,
+      search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
-    return { enabledIds, maxLocations, allIds };
+    const { allIds, enabledIds, listOfLocations, monitorLocationMap, projectMonitorsCount } =
+      await processMonitors(
+        this.monitors,
+        this.server,
+        this.soClient,
+        this.syntheticsMonitorClient
+      );
+
+    return { enabledIds, listOfLocations, allIds, monitorLocationMap, projectMonitorsCount };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { maxLocations, enabledIds } = await this.getMonitors();
+    const { listOfLocations, enabledIds, allIds, monitorLocationMap, projectMonitorsCount } =
+      await this.getMonitors();
 
     if (enabledIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
-        maxLocations,
-        { to: 'now', from: this.previousStartedAt?.toISOString() ?? 'now-1m' },
-        enabledIds
+        listOfLocations,
+        {
+          to: 'now',
+          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+        },
+        enabledIds,
+        monitorLocationMap
       );
 
       const downConfigs = currentStatus.downConfigs;
@@ -133,7 +133,13 @@ export class StatusRuleExecutor {
 
       const staleDownConfigs = this.markDeletedConfigs(downConfigs);
 
-      return { ...currentStatus, staleDownConfigs };
+      return {
+        ...currentStatus,
+        staleDownConfigs,
+        projectMonitorsCount,
+        allMonitorsCount: allIds.length,
+        disabledMonitorsCount: allIds.length - enabledIds.length,
+      };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
     return {
@@ -142,7 +148,11 @@ export class StatusRuleExecutor {
       staleDownConfigs,
       down: 0,
       up: 0,
+      pending: 0,
       enabledIds,
+      allMonitorsCount: allIds.length,
+      disabledMonitorsCount: allIds.length,
+      projectMonitorsCount,
     };
   }
 

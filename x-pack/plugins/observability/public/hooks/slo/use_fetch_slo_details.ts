@@ -10,12 +10,12 @@ import { useCallback, useMemo } from 'react';
 import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useDataFetcher } from '../use_data_fetcher';
 
-interface UseFetchSloDetailsResponse {
+export interface UseFetchSloDetailsResponse {
   loading: boolean;
   slo: SLOWithSummaryResponse | undefined;
 }
 
-function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
+export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
   const params = useMemo(() => ({ sloId }), [sloId]);
   const shouldExecuteApiCall = useCallback(
     (apiCallParams: { sloId?: string }) => params.sloId === apiCallParams.sloId,
@@ -57,6 +57,3 @@ const fetchSlo = async (
 
   return undefined;
 };
-
-export type { UseFetchSloDetailsResponse };
-export { useFetchSloDetails };

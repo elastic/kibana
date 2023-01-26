@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useEffect, useMemo, useRef } from 'react';
 
 import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
@@ -25,6 +25,7 @@ interface Props {
  * Component for rendering a set of buttons for switching between the Anomaly Detection results views.
  */
 export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) => {
+  const mounted = useRef(false);
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
@@ -71,14 +72,24 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
 
   const [globalState] = useUrlState('_g');
 
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   const onChangeView = async (newViewId: Props['viewId']) => {
-    const url = await locator.getUrl({
-      page: newViewId,
-      pageState: {
-        globalState,
-      },
-    });
-    await navigateToPath(url);
+    // Avoid calling and triggering a React state update on a possibly unmounted component
+    if (mounted.current) {
+      const url = await locator.getUrl({
+        page: newViewId,
+        pageState: {
+          globalState,
+        },
+      });
+      await navigateToPath(url);
+    }
   };
 
   return (

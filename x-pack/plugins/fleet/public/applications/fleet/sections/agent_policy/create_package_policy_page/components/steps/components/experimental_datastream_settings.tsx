@@ -57,17 +57,42 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
     experimentalDataFeatures ?? [],
     registryDataStream
   );
+
+  const isTimeSeriesEnabledByDefault =
+    registryDataStream.elasticsearch?.index_mode === 'time_series';
+
   const isSyntheticSourceEnabledByDefault =
-    registryDataStream.elasticsearch?.source_mode === 'synthetic';
+    registryDataStream.elasticsearch?.source_mode === 'synthetic' || isTimeSeriesEnabledByDefault;
+
+  const docValueOnlyNumericExperimentalValue = getExperimentalFeatureValue(
+    'doc_value_only_numeric',
+    experimentalDataFeatures ?? [],
+    registryDataStream
+  );
+
+  const docValueOnlyOtherExperimentalValue = getExperimentalFeatureValue(
+    'doc_value_only_other',
+    experimentalDataFeatures ?? [],
+    registryDataStream
+  );
 
   const newExperimentalIndexingFeature = {
     synthetic_source:
       typeof syntheticSourceExperimentalValue !== 'undefined'
         ? syntheticSourceExperimentalValue
         : isSyntheticSourceEnabledByDefault,
-    tsdb:
-      getExperimentalFeatureValue('tsdb', experimentalDataFeatures ?? [], registryDataStream) ??
-      false,
+    tsdb: isTimeSeriesEnabledByDefault
+      ? isTimeSeriesEnabledByDefault
+      : getExperimentalFeatureValue('tsdb', experimentalDataFeatures ?? [], registryDataStream) ??
+        false,
+    doc_value_only_numeric:
+      typeof docValueOnlyNumericExperimentalValue !== 'undefined'
+        ? docValueOnlyNumericExperimentalValue
+        : false,
+    doc_value_only_other:
+      typeof docValueOnlyOtherExperimentalValue !== 'undefined'
+        ? docValueOnlyOtherExperimentalValue
+        : false,
   };
 
   const onIndexingSettingChange = (
@@ -172,6 +197,40 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
               }}
             />
           </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={newExperimentalIndexingFeature.doc_value_only_numeric ?? false}
+            data-test-subj="packagePolicyEditor.docValueOnlyNumericExperimentalFeature.switch"
+            label={
+              <FormattedMessage
+                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.docValueOnlyNumericLabel"
+                defaultMessage="Doc value only (numeric types)"
+              />
+            }
+            onChange={(e) => {
+              onIndexingSettingChange({
+                doc_value_only_numeric: e.target.checked,
+              });
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={newExperimentalIndexingFeature.doc_value_only_other ?? false}
+            data-test-subj="packagePolicyEditor.docValueOnlyOtherExperimentalFeature.switch"
+            label={
+              <FormattedMessage
+                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.docValueOnlyOtherLabel"
+                defaultMessage="Doc value only (other types)"
+              />
+            }
+            onChange={(e) => {
+              onIndexingSettingChange({
+                doc_value_only_other: e.target.checked,
+              });
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

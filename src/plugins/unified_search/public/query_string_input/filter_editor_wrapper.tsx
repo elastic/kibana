@@ -17,20 +17,31 @@ import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
+interface QueryDslFilter {
+  queryDsl: string;
+  customLabel: string | null;
+}
+
 interface FilterEditorWrapperProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
-  closePopover?: () => void;
+  closePopoverOnAdd?: () => void;
+  closePopoverOnCancel?: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
+  onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
+  onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
 }
 
 export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
-  closePopover,
+  closePopoverOnAdd,
+  closePopoverOnCancel,
   onFiltersUpdated,
+  onLocalFilterUpdate,
+  onLocalFilterCreate,
 }: FilterEditorWrapperProps) {
   const fetchIndexAbortController = useRef<AbortController>();
 
@@ -78,11 +89,11 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
     if (indexPatterns) {
       fetchDataViews();
     }
-  }, [data.dataViews, indexPatterns, isPinned]);
+  }, [data.dataViews, indexPatterns, onLocalFilterCreate, onLocalFilterUpdate, isPinned]);
 
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    closePopover?.();
+    closePopoverOnAdd?.();
     const updatedFilters = [...filters, filter];
     onFiltersUpdated?.(updatedFilters);
   }
@@ -91,13 +102,15 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
     <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
       {newFilter && (
         <FilterEditor
+          mode="add"
           filter={newFilter}
           indexPatterns={dataViews}
-          onSubmit={onAdd}
-          onCancel={() => closePopover?.()}
           key={JSON.stringify(newFilter)}
+          onSubmit={onAdd}
+          onCancel={() => closePopoverOnCancel?.()}
+          onLocalFilterUpdate={onLocalFilterUpdate}
+          onLocalFilterCreate={onLocalFilterCreate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          mode="add"
         />
       )}
     </div>

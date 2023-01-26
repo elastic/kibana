@@ -9,7 +9,7 @@ import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
-import { useFindCspRules, type RuleSavedObject } from './use_csp_rules';
+import { useFindCspRuleTemplates, type RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
@@ -19,8 +19,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 const chance = new Chance();
 
 jest.mock('./use_csp_rules', () => ({
-  useFindCspRules: jest.fn(),
-  useBulkUpdateCspRules: jest.fn(),
+  useFindCspRuleTemplates: jest.fn(),
+  useBulkUpdateCspRuleTemplates: jest.fn(),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -84,7 +84,6 @@ const getRuleMock = ({
         tags: [chance.word(), chance.word()],
         version: chance.sentence(),
       },
-      muted: false,
     },
   } as RuleSavedObject);
 
@@ -104,7 +103,7 @@ describe('<RulesContainer />', () => {
     const Wrapper = getWrapper();
     const rule1 = getRuleMock({ enabled: true });
 
-    (useFindCspRules as jest.Mock).mockReturnValue({
+    (useFindCspRuleTemplates as jest.Mock).mockReturnValue({
       status: 'success',
       data: {
         total: 1,

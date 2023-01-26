@@ -13,6 +13,7 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
+import { ExecutorType } from '@kbn/alerting-plugin/server';
 
 import { Duration, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
@@ -36,7 +37,19 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
   BurnRateAlertContext,
   BurnRateAllowedActionGroups
 > =>
-  async function executor({ services, params, startedAt }): Promise<void> {
+  async function executor({
+    services,
+    params,
+    startedAt,
+  }): ReturnType<
+    ExecutorType<
+      BurnRateRuleParams,
+      BurnRateRuleTypeState,
+      BurnRateAlertState,
+      BurnRateAlertContext,
+      BurnRateAllowedActionGroups
+    >
+  > {
     const {
       alertWithLifecycle,
       savedObjectsClient: soClient,
@@ -58,8 +71,8 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     );
 
     const sliData = await sliClient.fetchSLIDataFrom(slo, [
-      { name: LONG_WINDOW, duration: longWindowDuration },
-      { name: SHORT_WINDOW, duration: shortWindowDuration },
+      { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
+      { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
     ]);
 
     const longWindowBurnRate = computeBurnRate(slo, sliData[LONG_WINDOW]);
@@ -111,6 +124,8 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
 
       recoveredAlert.setContext(context);
     }
+
+    return { state: {} };
   };
 
 const FIRED_ACTION_ID = 'slo.burnRate.fired';

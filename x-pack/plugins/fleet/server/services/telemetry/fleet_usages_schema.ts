@@ -60,6 +60,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'The total number of enrolled agents currently offline',
         },
       },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
       total_all_statuses: {
         type: 'long',
         _meta: {
@@ -175,20 +187,6 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'Count of agent last checkin status degraded',
         },
       },
-    },
-  },
-  agent_logs_top_errors: {
-    type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from agent error logs' },
-    },
-  },
-  fleet_server_logs_top_errors: {
-    type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from fleet server error logs' },
     },
   },
 };

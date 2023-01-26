@@ -30,6 +30,7 @@ import { PageRouter } from './routes';
 import { store, storage, setBasePath } from './state';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
+import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
 
 const Application = (props: SyntheticsAppProps) => {
   const {
@@ -63,6 +64,7 @@ const Application = (props: SyntheticsAppProps) => {
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
   kibanaService.core = core;
+  kibanaService.startPlugins = startPlugins;
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
@@ -109,6 +111,7 @@ const Application = (props: SyntheticsAppProps) => {
                                 <InspectorContextProvider>
                                   <PageRouter />
                                   <ActionMenu appMountParameters={appMountParameters} />
+                                  <TestNowModeFlyoutContainer />
                                 </InspectorContextProvider>
                               </RedirectAppLinks>
                             </div>

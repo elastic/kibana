@@ -23,6 +23,7 @@ import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInspector } from '../../hooks/use_inspector';
@@ -37,11 +38,10 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../hooks/use_saved_search';
+import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
@@ -62,9 +62,7 @@ export function DiscoverLayout({
   onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
-  savedSearchRefetch$,
   resetSavedSearch,
-  savedSearchData$,
   savedSearch,
   searchSource,
   stateContainer,
@@ -85,7 +83,7 @@ export function DiscoverLayout({
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$ } = savedSearchData$;
+  const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -165,8 +163,8 @@ export function DiscoverLayout({
     if (!dataView.isPersisted()) {
       await updateAdHocDataViewId(dataView);
     }
-    savedSearchRefetch$.next('reset');
-  }, [dataView, savedSearchRefetch$, updateAdHocDataViewId]);
+    stateContainer.dataState.refetch$.next('reset');
+  }, [dataView, stateContainer, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -223,7 +221,11 @@ export function DiscoverLayout({
     }
 
     if (resultState === 'uninitialized') {
-      return <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />;
+      return (
+        <DiscoverUninitialized
+          onRefresh={() => stateContainer.dataState.refetch$.next(undefined)}
+        />
+      );
     }
 
     return (
@@ -236,8 +238,6 @@ export function DiscoverLayout({
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
-          savedSearchData$={savedSearchData$}
-          savedSearchRefetch$={savedSearchRefetch$}
           stateContainer={stateContainer}
           isTimeBased={isTimeBased}
           columns={currentColumns}
@@ -269,8 +269,6 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    savedSearchData$,
-    savedSearchRefetch$,
     searchSessionManager,
     setExpandedDoc,
     stateContainer,
@@ -325,7 +323,7 @@ export function DiscoverLayout({
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false} className="dscPageBody__sidebar">
             <SidebarMemoized
-              documents$={savedSearchData$.documents$}
+              documents$={stateContainer.dataState.data$.documents$}
               onAddField={onAddColumn}
               columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
@@ -338,7 +336,7 @@ export function DiscoverLayout({
               onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
-              availableFields$={savedSearchData$.availableFields$}
+              availableFields$={stateContainer.dataState.data$.availableFields$}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

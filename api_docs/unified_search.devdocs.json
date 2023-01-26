@@ -157,9 +157,11 @@
           "\nRenders a single filter pill"
         ],
         "signature": [
-          "(props: ",
+          "(props: Omit<",
           "FilterItemProps",
-          ") => JSX.Element"
+          ", keyof ",
+          "WithCloseFilterEditorConfirmModalProps",
+          ">) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -173,7 +175,11 @@
             "label": "props",
             "description": [],
             "signature": [
-              "FilterItemProps"
+              "Omit<",
+              "FilterItemProps",
+              ", keyof ",
+              "WithCloseFilterEditorConfirmModalProps",
+              ">"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -369,7 +375,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; refreshInterval?: number | undefined; placeholder?: string | undefined; iconType?: ",
+              "[] | undefined; placeholder?: string | undefined; refreshInterval?: number | undefined; iconType?: ",
               "IconType",
               " | undefined; indexPatterns?: ",
               {

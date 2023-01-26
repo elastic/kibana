@@ -11,11 +11,11 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
-import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
-import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
@@ -26,8 +26,6 @@ export interface DiscoverMainContentProps {
   savedSearch: SavedSearch;
   isPlainRecord: boolean;
   navigateTo: (url: string) => void;
-  savedSearchData$: SavedSearchData;
-  savedSearchRefetch$: DataRefetch$;
   stateContainer: DiscoverStateContainer;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;
@@ -41,8 +39,6 @@ export const DiscoverMainContent = ({
   dataView,
   isPlainRecord,
   navigateTo,
-  savedSearchData$,
-  savedSearchRefetch$,
   expandedDoc,
   setExpandedDoc,
   viewMode,
@@ -84,7 +80,6 @@ export const DiscoverMainContent = ({
       )}
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
         <DiscoverDocuments
-          documents$={savedSearchData$.documents$}
           expandedDoc={expandedDoc}
           dataView={dataView}
           navigateTo={navigateTo}
@@ -96,15 +91,12 @@ export const DiscoverMainContent = ({
         />
       ) : (
         <FieldStatisticsTab
-          availableFields$={savedSearchData$.availableFields$}
           savedSearch={savedSearch}
           dataView={dataView}
           columns={columns}
           stateContainer={stateContainer}
           onAddFilter={!isPlainRecord ? onAddFilter : undefined}
           trackUiMetric={trackUiMetric}
-          savedSearchRefetch$={savedSearchRefetch$}
-          savedSearchDataTotalHits$={savedSearchData$.totalHits$}
         />
       )}
     </EuiFlexGroup>

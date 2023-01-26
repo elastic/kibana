@@ -318,6 +318,7 @@ describe('bulkEnableRules', () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [disabledRuleWithAction1, disabledRuleWithAction2],
     });
+
     actionsAuthorization.ensureAuthorized.mockImplementation(() => {
       throw new Error('UPS');
     });
