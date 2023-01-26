@@ -33,7 +33,7 @@ import {
   LABEL_LABEL,
 } from '../../i18n_strings';
 
-interface Props {
+interface CustomEquationEditorProps {
   onChange: (expression: MetricExpression) => void;
   expression: MetricExpression;
   fields: NormalizedFields;
@@ -44,7 +44,7 @@ interface Props {
 const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
 const VAR_NAMES = range(65, 65 + 26).map((c) => String.fromCharCode(c));
 
-export const CustomEquationEditor: React.FC<Props> = ({
+export const CustomEquationEditor: React.FC<CustomEquationEditorProps> = ({
   onChange,
   expression,
   fields,
