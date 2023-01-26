@@ -17,7 +17,7 @@ import {
   deleteAllCaseItems,
   findCases,
   getCase,
-} from '../../../cases_api_integration/common/lib/utils';
+} from '../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const createLogStashDataView = async (

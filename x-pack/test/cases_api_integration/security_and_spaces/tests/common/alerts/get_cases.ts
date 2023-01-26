@@ -20,7 +20,7 @@ import {
   createComment,
   getCasesByAlert,
   deleteAllCaseItems,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 import {
   globalRead,

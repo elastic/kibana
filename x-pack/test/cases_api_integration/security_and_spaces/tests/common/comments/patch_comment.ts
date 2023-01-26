@@ -30,7 +30,7 @@ import {
   createComment,
   updateComment,
   superUserSpace1Auth,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,

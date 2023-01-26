@@ -15,7 +15,7 @@ import {
   getCasesByAlert,
   deleteAllCaseItems,
   getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
@@ -23,16 +21,11 @@ import {
   CASE_TAGS_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  CasesConfigureRequest,
   CasesConfigureResponse,
-  CaseConnector,
-  ConnectorTypes,
-  CasePostRequest,
   CaseResponse,
   CaseStatuses,
   CasesResponse,
   CasesFindResponse,
-  CommentRequest,
   CommentResponse,
   CasesPatchRequest,
   AllCommentsResponse,
@@ -55,9 +48,20 @@ import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
 import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
-import { User } from './authentication/types';
-import { superUser } from './authentication/users';
-import { postCaseReq } from './mock';
+import { User } from '../authentication/types';
+import { superUser } from '../authentication/users';
+import { postCaseReq } from '../mock';
+import { getSpaceUrlPrefix, setupAuth } from './helpers';
+import { createCase } from './case';
+
+export * from './attachments';
+export * from './case';
+export * from './connectors';
+export * from './user_actions';
+export * from './user_profiles';
+export * from './omit';
+export * from './configuration';
+export { getSpaceUrlPrefix } from './helpers';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -162,44 +166,6 @@ export const deleteCaseAction = async (
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
 };
 
-type ConfigRequestParams = Partial<CaseConnector> & {
-  overrides?: Record<string, unknown>;
-};
-
-export const getConfigurationRequest = ({
-  id = 'none',
-  name = 'none',
-  type = ConnectorTypes.none,
-  fields = null,
-  overrides,
-}: ConfigRequestParams = {}): CasesConfigureRequest => {
-  return {
-    connector: {
-      id,
-      name,
-      type,
-      fields,
-    } as CaseConnector,
-    closure_type: 'close-by-user',
-    owner: 'securitySolutionFixture',
-    ...overrides,
-  };
-};
-
-export const getConfigurationOutput = (
-  update = false,
-  overwrite = {}
-): Partial<CasesConfigureResponse> => {
-  return {
-    ...getConfigurationRequest(),
-    error: null,
-    mappings: [],
-    created_by: { email: null, full_name: null, username: 'elastic' },
-    updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
-    ...overwrite,
-  };
-};
-
 export const getMappings = () => [
   {
     source: 'title',
@@ -217,48 +183,6 @@ export const getMappings = () => [
     actionType: 'append',
   },
 ];
-
-interface CommonSavedObjectAttributes {
-  id?: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-  version?: string | null;
-  [key: string]: unknown;
-}
-
-const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'];
-
-export const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
-  object: T,
-  keys: K[]
-): Omit<T, K> => {
-  return omit<T, K>(object, keys);
-};
-export const removeServerGeneratedPropertiesFromSavedObject = <
-  T extends CommonSavedObjectAttributes
->(
-  attributes: T,
-  keys: Array<keyof T> = []
-): Omit<T, typeof savedObjectCommonAttributes[number] | typeof keys[number]> => {
-  return removeServerGeneratedPropertiesFromObject(attributes, [
-    ...savedObjectCommonAttributes,
-    ...keys,
-  ]);
-};
-
-export const removeServerGeneratedPropertiesFromCase = (
-  theCase: CaseResponse
-): Partial<CaseResponse> => {
-  return removeServerGeneratedPropertiesFromSavedObject<CaseResponse>(theCase, ['closed_at']);
-};
-
-export const removeServerGeneratedPropertiesFromComments = (
-  comments: CommentResponse[] | undefined
-): Array<Partial<CommentResponse>> | undefined => {
-  return comments?.map((comment) => {
-    return removeServerGeneratedPropertiesFromSavedObject<CommentResponse>(comment, []);
-  });
-};
 
 export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
@@ -344,10 +268,6 @@ export function getAuthWithSuperUser(space: string | null = 'space1'): {
 export function getActionsSpace(space: string | null) {
   return space ?? 'default';
 }
-
-export const getSpaceUrlPrefix = (spaceId: string | undefined | null) => {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
-};
 
 interface OwnerEntity {
   owner: string;
@@ -445,99 +365,7 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
   return configure;
 };
 
-export const createCase = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  params: CasePostRequest,
-  expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
-): Promise<CaseResponse> => {
-  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
-
-  setupAuth({ apiCall, headers, auth });
-
-  const { body: theCase } = await apiCall
-    .set('kbn-xsrf', 'true')
-    .set(headers)
-    .send(params)
-    .expect(expectedHttpCode);
-
-  return theCase;
-};
-
-const setupAuth = ({
-  apiCall,
-  headers,
-  auth,
-}: {
-  apiCall: SuperTest.Test;
-  headers: Record<string, unknown>;
-  auth?: { user: User; space: string | null } | null;
-}): SuperTest.Test => {
-  if (!Object.hasOwn(headers, 'Cookie') && auth != null) {
-    return apiCall.auth(auth.user.username, auth.user.password);
-  }
-
-  return apiCall;
-};
-
-/**
- * Sends a delete request for the specified case IDs.
- */
-export const deleteCases = async ({
-  supertest,
-  caseIDs,
-  expectedHttpCode = 204,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  caseIDs: string[];
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}) => {
-  const { body } = await supertest
-    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}`)
-    .auth(auth.user.username, auth.user.password)
-    // we need to json stringify here because just passing in the array of case IDs will cause a 400 with Kibana
-    // not being able to parse the array correctly. The format ids=["1", "2"] seems to work, which stringify outputs.
-    .query({ ids: JSON.stringify(caseIDs) })
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(expectedHttpCode);
-
-  return body;
-};
-
 // TODO: move the comment related stuff to the attachment helper file
-export const createComment = async ({
-  supertest,
-  caseId,
-  params,
-  auth = { user: superUser, space: null },
-  expectedHttpCode = 200,
-  headers = {},
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  caseId: string;
-  params: CommentRequest;
-  auth?: { user: User; space: string | null } | null;
-  expectedHttpCode?: number;
-  headers?: Record<string, unknown>;
-}): Promise<CaseResponse> => {
-  const apiCall = supertest.post(
-    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
-  );
-
-  setupAuth({ apiCall, headers, auth });
-
-  const { body: theCase } = await apiCall
-    .set('kbn-xsrf', 'true')
-    .set(headers)
-    .send(params)
-    .expect(expectedHttpCode);
-
-  return theCase;
-};
 
 export const bulkCreateAttachments = async ({
   supertest,
@@ -719,26 +547,6 @@ export const getConfiguration = async ({
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .query(query)
-    .expect(expectedHttpCode);
-
-  return configuration;
-};
-
-export const createConfiguration = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  req: CasesConfigureRequest = getConfigurationRequest(),
-  expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
-): Promise<CasesConfigureResponse> => {
-  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}`);
-
-  setupAuth({ apiCall, headers, auth });
-
-  const { body: configuration } = await apiCall
-    .set('kbn-xsrf', 'true')
-    .set(headers)
-    .send(req)
     .expect(expectedHttpCode);
 
   return configuration;

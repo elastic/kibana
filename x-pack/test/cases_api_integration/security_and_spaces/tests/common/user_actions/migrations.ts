@@ -9,8 +9,7 @@ import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { ActionTypes, CaseUserActionsResponse, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems } from '../../../../common/lib/utils';
-import { getCaseUserActions } from '../../../../common/lib/user_actions';
+import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {

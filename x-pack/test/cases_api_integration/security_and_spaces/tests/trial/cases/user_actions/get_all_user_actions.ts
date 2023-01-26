@@ -20,15 +20,13 @@ import {
   pushCase,
   updateCase,
   updateConfiguration,
-} from '../../../../../common/lib/utils';
-import { getCaseUserActions } from '../../../../../common/lib/user_actions';
-import {
   createCaseWithConnector,
   getServiceNowSimulationServer,
-} from '../../../../../common/lib/connectors';
+  getCaseUserActions,
+} from '../../../../../common/lib/api';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
-import { setupSuperUserProfile } from '../../../../../common/lib/user_profiles';
+import { setupSuperUserProfile } from '../../../../../common/lib/api/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

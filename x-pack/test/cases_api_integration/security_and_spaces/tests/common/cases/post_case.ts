@@ -19,11 +19,9 @@ import {
   deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
-} from '../../../../common/lib/utils';
-import {
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
-} from '../../../../common/lib/user_actions';
+} from '../../../../common/lib/api';
 import {
   secOnly,
   secOnlyRead,

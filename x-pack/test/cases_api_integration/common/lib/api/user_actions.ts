@@ -14,10 +14,11 @@ import {
   CaseUserActionResponse,
 } from '@kbn/cases-plugin/common/api';
 import type SuperTest from 'supertest';
-import { User } from './authentication/types';
+import { User } from '../authentication/types';
 
-import { superUser } from './authentication/users';
-import { getSpaceUrlPrefix, removeServerGeneratedPropertiesFromObject } from './utils';
+import { superUser } from '../authentication/users';
+import { getSpaceUrlPrefix } from './helpers';
+import { removeServerGeneratedPropertiesFromObject } from './omit';
 
 export const removeServerGeneratedPropertiesFromUserAction = (
   attributes: CaseUserActionResponse

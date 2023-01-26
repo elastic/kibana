@@ -18,12 +18,10 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
   getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
-import {
   getServiceNowConnector,
   createConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/connectors';
+} from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

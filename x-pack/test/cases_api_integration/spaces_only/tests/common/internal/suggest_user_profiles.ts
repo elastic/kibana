@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { suggestUserProfiles } from '../../../../common/lib/user_profiles';
+import { suggestUserProfiles } from '../../../../common/lib/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
