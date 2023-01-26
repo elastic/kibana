@@ -21,6 +21,10 @@ import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  ServerlessType,
+  getServerlessTypeFromCloudData,
+} from '../../../common/serverless';
 
 type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,
@@ -30,7 +34,7 @@ type ServiceMetadataIconsRaw = Pick<
 export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
-  serverlessType?: string;
+  serverlessType?: ServerlessType;
   cloudProvider?: string;
 }
 
@@ -106,15 +110,10 @@ export async function getServiceMetadataIcons({
     containerType = 'Docker';
   }
 
-  let serverlessType: string | undefined;
-  if (cloud?.provider === 'aws' && cloud?.service?.name === 'lambda') {
-    serverlessType = 'aws.lambda';
-  } else if (
-    cloud?.provider === 'azure' &&
-    cloud?.service?.name === 'functions'
-  ) {
-    serverlessType = 'azure.functions';
-  }
+  const serverlessType = getServerlessTypeFromCloudData(
+    cloud?.provider,
+    cloud?.service?.name
+  );
 
   return {
     agentName: agent?.name,

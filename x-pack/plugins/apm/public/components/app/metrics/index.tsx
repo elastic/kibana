@@ -17,9 +17,8 @@ import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
-  const { agentName, runtimeName, cloudProviderAndService } =
-    useApmServiceContext();
-  const isAWSLambda = isAWSLambdaAgent(cloudProviderAndService);
+  const { agentName, runtimeName, serverlessType } = useApmServiceContext();
+  const isAWSLambda = isAWSLambdaAgent(serverlessType);
 
   if (
     !isAWSLambda &&

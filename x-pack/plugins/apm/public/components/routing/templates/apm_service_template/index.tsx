@@ -44,6 +44,7 @@ import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { ServerlessType } from '../../../../../common/serverless';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -169,39 +170,37 @@ function TemplateWithContext({
 
 export function isMetricsTabHidden({
   agentName,
-  cloudProviderAndService,
+  serverlessType,
   isAwsLambdaEnabled,
 }: {
   agentName?: string;
-  cloudProviderAndService?: string;
+  serverlessType?: ServerlessType;
   isAwsLambdaEnabled?: boolean;
 }) {
-  if (isAWSLambdaAgent(cloudProviderAndService)) {
+  if (isAWSLambdaAgent(serverlessType)) {
     return !isAwsLambdaEnabled;
   }
   return (
     !agentName ||
     isRumAgentName(agentName) ||
-    isServerlessAgent(cloudProviderAndService)
+    isAzureFunctionsAgent(serverlessType)
   );
 }
 
 export function isInfraTabHidden({
   agentName,
-  cloudProviderAndService,
+  serverlessType,
 }: {
   agentName?: string;
-  cloudProviderAndService?: string;
+  serverlessType?: ServerlessType;
 }) {
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isServerlessAgent(cloudProviderAndService)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(serverlessType)
   );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
-  const { agentName, cloudProviderAndService } = useApmServiceContext();
+  const { agentName, serverlessType } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
@@ -296,12 +295,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgent(cloudProviderAndService) && (
+      append: isServerlessAgent(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
       hidden: isMetricsTabHidden({
         agentName,
-        cloudProviderAndService,
+        serverlessType,
         isAwsLambdaEnabled,
       }),
     },
@@ -315,7 +314,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      hidden: isInfraTabHidden({ agentName, cloudProviderAndService }),
+      hidden: isInfraTabHidden({ agentName, serverlessType }),
     },
     {
       key: 'service-map',
@@ -336,13 +335,13 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgent(cloudProviderAndService) && (
+      append: isServerlessAgent(serverlessType) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
       hidden:
         !agentName ||
         isRumAgentName(agentName) ||
-        isAzureFunctionsAgent(cloudProviderAndService),
+        isAzureFunctionsAgent(serverlessType),
     },
     {
       key: 'alerts',

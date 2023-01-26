@@ -15,6 +15,7 @@ import {
   CLOUD_SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 
 interface ServiceAgent {
   agent?: {
@@ -108,13 +109,14 @@ export async function getServiceAgent({
 
   const { agent, service, cloud } = response.hits.hits[0]
     ._source as ServiceAgent;
-  const cloudProviderAndService =
-    cloud?.provider && cloud?.service?.name
-      ? `${cloud?.provider}.${cloud?.service?.name}`
-      : undefined;
+  const serverlessType = getServerlessTypeFromCloudData(
+    cloud?.provider,
+    cloud?.service?.name
+  );
+
   return {
     agentName: agent?.name,
     runtimeName: service?.runtime?.name,
-    cloudProviderAndService,
+    serverlessType,
   };
 }

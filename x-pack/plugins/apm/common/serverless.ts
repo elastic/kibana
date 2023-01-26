@@ -15,3 +15,27 @@ export function getServerlessFunctionNameFromId(serverlessId: string) {
   const match = serverlessIdRegex.exec(serverlessId);
   return match ? match[1] : serverlessId;
 }
+
+export enum ServerlessType {
+  AWS_LAMBDA = 'aws.lambda',
+  AZURE_FUNCTIONS = 'azure.functions',
+}
+
+export function getServerlessTypeFromCloudData(
+  cloudProvider?: string,
+  cloudServiceName?: string
+): ServerlessType | undefined {
+  if (
+    cloudProvider?.toLowerCase() === 'aws' &&
+    cloudServiceName?.toLowerCase() === 'lambda'
+  ) {
+    return ServerlessType.AWS_LAMBDA;
+  } else if (
+    cloudProvider?.toLowerCase() === 'azure' &&
+    cloudServiceName?.toLowerCase() === 'functions'
+  ) {
+    return ServerlessType.AZURE_FUNCTIONS;
+  } else {
+    return undefined;
+  }
+}

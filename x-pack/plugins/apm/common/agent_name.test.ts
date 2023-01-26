@@ -16,6 +16,8 @@ import {
   isAzureFunctionsAgent,
 } from './agent_name';
 
+import { ServerlessType } from './serverless';
+
 describe('agent name helpers', () => {
   describe('isJavaAgentName', () => {
     describe('when the agent name is java', () => {
@@ -148,67 +150,63 @@ describe('agent name helpers', () => {
   });
 
   describe('isServerlessAgent', () => {
-    describe('when the cloudProviderAndService is aws.lambda', () => {
+    describe('when the serverlessType is AWS_LAMBDA', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('aws.lambda')).toEqual(true);
+        expect(isServerlessAgent(ServerlessType.AWS_LAMBDA)).toEqual(true);
       });
     });
 
-    describe('when the cloudProviderAndService is AWS.Lambda', () => {
+    describe('when the serverlessType is AZURE_FUNCTIONS', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('AWS.Lambda')).toEqual(true);
+        expect(isServerlessAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(true);
       });
     });
 
-    describe('when the cloudProviderAndService is azure.functions', () => {
-      it('returns true', () => {
-        expect(isServerlessAgent('azure.functions')).toEqual(true);
-      });
-    });
-
-    describe('when the cloudProviderAndService is something else', () => {
+    describe('when the serverlessType is undefined', () => {
       it('returns false', () => {
-        expect(isServerlessAgent('aws.ec2')).toEqual(false);
+        expect(isServerlessAgent(undefined)).toEqual(false);
       });
     });
   });
 
   describe('isAWSLambdaAgent', () => {
-    describe('when the cloudProviderAndService is aws.lambda', () => {
+    describe('when the serverlessType is AWS_LAMBDA', () => {
       it('returns true', () => {
-        expect(isAWSLambdaAgent('aws.lambda')).toEqual(true);
+        expect(isAWSLambdaAgent(ServerlessType.AWS_LAMBDA)).toEqual(true);
       });
     });
 
-    describe('when the cloudProviderAndService is AWS.Lambda', () => {
+    describe('when the serverlessType is AZURE_FUNCTIONS', () => {
       it('returns true', () => {
-        expect(isAWSLambdaAgent('AWS.Lambda')).toEqual(true);
+        expect(isAWSLambdaAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(false);
       });
     });
 
-    describe('when the cloudProviderAndService is something else', () => {
+    describe('when the serverlessType is undefined', () => {
       it('returns false', () => {
-        expect(isAWSLambdaAgent('azure.functions')).toEqual(false);
+        expect(isAWSLambdaAgent(undefined)).toEqual(false);
       });
     });
   });
 
   describe('isAzureFunctionsAgent', () => {
-    describe('when the cloudProviderAndService is azure.functions', () => {
+    describe('when the serverlessType is AZURE_FUNCTIONS', () => {
       it('returns true', () => {
-        expect(isAzureFunctionsAgent('azure.functions')).toEqual(true);
+        expect(isAzureFunctionsAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(
+          true
+        );
       });
     });
 
-    describe('when the cloudProviderAndService is Azure.Functions', () => {
+    describe('when the serverlessType is AWS_LAMBDA', () => {
       it('returns true', () => {
-        expect(isAzureFunctionsAgent('Azure.Functions')).toEqual(true);
+        expect(isAzureFunctionsAgent(ServerlessType.AWS_LAMBDA)).toEqual(false);
       });
     });
 
-    describe('when the cloudProviderAndService is something else', () => {
+    describe('when the serverlessType is undefined', () => {
       it('returns false', () => {
-        expect(isAzureFunctionsAgent('aws.lambda')).toEqual(false);
+        expect(isAzureFunctionsAgent(undefined)).toEqual(false);
       });
     });
   });

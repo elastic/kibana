@@ -8,18 +8,21 @@
 import defaultIcon from '../span_icon/icons/default.svg';
 import lambdaIcon from './icons/lambda.svg';
 import azureFunctionsIcon from './icons/functions.svg';
+import { ServerlessType } from '../../../../common/serverless';
 
-const serverlessIcons: { [key: string]: string } = {
+type ServerlessIcons = Record<ServerlessType, string>;
+
+const serverlessIcons: ServerlessIcons = {
   'aws.lambda': lambdaIcon,
   'azure.functions': azureFunctionsIcon,
 };
 
-const darkServerlessIcons: { [key: string]: string } = {
+const darkServerlessIcons: ServerlessIcons = {
   ...serverlessIcons,
 };
 
 export function getServerlessIcon(
-  serverlessType: string | undefined,
+  serverlessType: ServerlessType | undefined,
   isDarkMode: boolean
 ) {
   if (!serverlessType) {

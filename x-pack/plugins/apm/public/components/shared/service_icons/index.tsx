@@ -18,6 +18,7 @@ import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
+import { ServerlessType } from '../../../../common/serverless';
 
 interface Props {
   serviceName: string;
@@ -31,17 +32,21 @@ const cloudIcons: Record<string, string> = {
   azure: 'logoAzure',
 };
 
-const serverlessTitles: Record<string, string> = {
-  'aws.lambda': i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
-    defaultMessage: 'AWS Lambda',
-  }),
-  'azure.functions': i18n.translate('xpack.apm.serviceIcons.azure_functions', {
-    defaultMessage: 'Azure Functions',
-  }),
-  default: i18n.translate('xpack.apm.serviceIcons.serverless', {
-    defaultMessage: 'Serverless',
-  }),
-};
+function getServerlessTitle(serverlessType?: ServerlessType): string {
+  if (serverlessType === ServerlessType.AWS_LAMBDA) {
+    return i18n.translate('xpack.apm.serviceIcons.aws_lambda', {
+      defaultMessage: 'AWS Lambda',
+    });
+  } else if (serverlessType === ServerlessType.AZURE_FUNCTIONS) {
+    return i18n.translate('xpack.apm.serviceIcons.azure_functions', {
+      defaultMessage: 'Azure Functions',
+    });
+  } else {
+    return i18n.translate('xpack.apm.serviceIcons.serverless', {
+      defaultMessage: 'Serverless',
+    });
+  }
+}
 
 export function getCloudIcon(provider?: string) {
   if (provider) {
@@ -156,7 +161,7 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
           getServerlessIcon(icons?.serverlessType, theme.darkMode) || 'node',
       },
       isVisible: !!icons?.serverlessType,
-      title: serverlessTitles[icons?.serverlessType || 'default'],
+      title: getServerlessTitle(icons?.serverlessType),
       component: <ServerlessDetails serverless={details?.serverless} />,
     },
     {
