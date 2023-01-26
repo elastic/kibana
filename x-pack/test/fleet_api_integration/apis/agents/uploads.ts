@@ -62,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await esClient.update({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
-        id: 'id1',
+        id: 'file1',
         refresh: true,
         body: {
           doc_as_upsert: true,
