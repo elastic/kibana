@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiBadgeProps, euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import { AlertStatus, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
 export interface AlertLifecycleStatusBadgeProps {
@@ -40,38 +40,32 @@ interface BadgeProps {
   label: string;
   color: string;
   iconProps?: {
-    iconSide: EuiBadgeProps['iconSide'];
     iconType: EuiBadgeProps['iconType'];
   };
 }
 
-const getBadgeProps = (
-  alertStatus: AlertStatus,
-  flapping: boolean | undefined,
-  colors: string[]
-): BadgeProps => {
+const getBadgeProps = (alertStatus: AlertStatus, flapping: boolean | undefined): BadgeProps => {
   // Prefer recovered over flapping
   if (alertStatus === ALERT_STATUS_RECOVERED) {
     return {
       label: RECOVERED_LABEL,
-      color: colors[1],
+      color: 'success',
     };
   }
 
   if (flapping) {
     return {
       label: FLAPPING_LABEL,
-      color: colors[2],
+      color: 'danger',
       iconProps: {
         iconType: 'visGauge',
-        iconSide: 'right',
       },
     };
   }
 
   return {
     label: ACTIVE_LABEL,
-    color: colors[2],
+    color: 'danger',
   };
 };
 
@@ -85,27 +79,12 @@ const castFlapping = (flapping: boolean | string | undefined) => {
 export const AlertLifecycleStatusBadge = memo((props: AlertLifecycleStatusBadgeProps) => {
   const { alertStatus, flapping } = props;
 
-  const colors = euiPaletteColorBlind();
-  const theme = useEuiTheme();
-
-  const badgeStyle = useMemo(
-    () => ({
-      color: theme.euiTheme.colors.ghost,
-    }),
-    [theme]
-  );
-
   const castedFlapping = castFlapping(flapping);
 
-  const { label, color, iconProps } = getBadgeProps(alertStatus, castedFlapping, colors);
+  const { label, color, iconProps } = getBadgeProps(alertStatus, castedFlapping);
 
   return (
-    <EuiBadge
-      data-test-subj="alertLifecycleStatusBadge"
-      color={color}
-      style={badgeStyle}
-      {...iconProps}
-    >
+    <EuiBadge data-test-subj="alertLifecycleStatusBadge" color={color} {...iconProps}>
       {label}
     </EuiBadge>
   );
