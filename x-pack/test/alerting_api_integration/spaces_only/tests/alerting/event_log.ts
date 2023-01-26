@@ -42,7 +42,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
     after(async () => {
       await resetRulesSettings(Spaces.default.id);
       await resetRulesSettings(Spaces.space1.id);
-      await objectRemover.removeAll();
     });
 
     afterEach(async () => {
