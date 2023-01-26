@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const es = getService('es');
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -22,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe('data views', function () {
+  describe('data view flyout', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -30,15 +31,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setCommonlyUsedTime('This_week');
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await es.transport.request({
+        path: '/my-index-000001',
+        method: 'DELETE',
+      });
+      await es.transport.request({
+        path: '/my-index-000002',
+        method: 'DELETE',
+      });
     });
 
     it('create data view', async function () {
-      const initialPattern = 'my-index-*';
+      const initialPattern = 'my-index-';
       await es.transport.request({
         path: '/my-index-000001/_doc',
         method: 'POST',
@@ -58,19 +68,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.discover.createAdHocDataView(initialPattern, true);
-      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be(initialPattern);
+      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be(`${initialPattern}*`);
       await PageObjects.discover.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(2);
-      expect(await PageObjects.discover.getAllFieldNames()).to.be(2);
+      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(3);
     });
 
-    it('create data view', async function () {
+    it('update data view', async function () {
       const updatedPattern = 'my-index-000001';
+      await PageObjects.discover.clickIndexPatternActions();
       await PageObjects.unifiedSearch.editDataView(updatedPattern);
 
-      expect(await PageObjects.discover.getHitCountInt()).to.be(1);
-      expect(await PageObjects.discover.getAllFieldNames()).to.be(1);
+      await retry.try(async () => {
+        expect(await PageObjects.discover.getHitCountInt()).to.be(1);
+      });
+      expect((await PageObjects.discover.getAllFieldNames()).length).to.be(2);
     });
   });
 }
