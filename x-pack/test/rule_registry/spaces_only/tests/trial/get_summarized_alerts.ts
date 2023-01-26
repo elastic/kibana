@@ -175,6 +175,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           alertFactory: { create: sinon.stub() },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS as RulesSettingsFlapping,
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<{ shouldTriggerAlert: boolean }>,
