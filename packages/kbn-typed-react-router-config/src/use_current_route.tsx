@@ -10,11 +10,7 @@ import { OutletContextProvider } from './outlet';
 import { RouteMatch } from './types';
 
 const CurrentRouteContext = createContext<
-  | {
-      match: RouteMatch;
-      element: React.ReactElement;
-    }
-  | undefined
+  { match: RouteMatch; element: React.ReactElement } | undefined
 >(undefined);
 
 export const CurrentRouteContextProvider = ({
