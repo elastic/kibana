@@ -113,7 +113,7 @@ const GroupingContainerComponent = ({
           <GroupPanel
             selectedGroup={selectedGroup}
             groupBucket={groupBucket}
-            forceState={trigger[groupKey] && trigger[groupKey].state}
+            forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
             renderChildComponent={
               trigger[groupKey] && trigger[groupKey].state === 'open'
                 ? renderChildComponent
