@@ -396,7 +396,8 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
-  it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
+
+  it('should allow searching by string, and calcFieldCount should just be executed once', async function () {
     const comp = await mountComponent(props);
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
@@ -405,7 +406,7 @@ describe('discover responsive sidebar', function () {
     );
 
     await act(async () => {
-      await findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
+      await findTestSubject(comp, 'fieldListFiltersFieldSearch').simulate('change', {
         target: { value: 'bytes' },
       });
     });
@@ -416,6 +417,34 @@ describe('discover responsive sidebar', function () {
     );
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
+
+  it('should allow filtering by field type', async function () {
+    const comp = await mountComponent(props);
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+    );
+
+    await act(async () => {
+      await findTestSubject(comp, 'fieldListFiltersFieldTypeFilterToggle').simulate('click');
+    });
+
+    await comp.update();
+
+    await act(async () => {
+      await findTestSubject(comp, 'typeFilter-number').simulate('click');
+    });
+
+    await comp.update();
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('2');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 popular field. 2 available fields. 1 empty field. 0 meta fields.'
+    );
+
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+  }, 10000);
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();
@@ -433,6 +462,11 @@ describe('discover responsive sidebar', function () {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
+        textBasedQueryColumns: [
+          { id: '1', name: 'extension', meta: { type: 'text' } },
+          { id: '1', name: 'bytes', meta: { type: 'number' } },
+          { id: '1', name: '@timestamp', meta: { type: 'date' } },
+        ],
       }) as DataDocuments$,
     };
     const compInViewerMode = await mountComponent(propsWithTextBasedMode, {
@@ -461,15 +495,15 @@ describe('discover responsive sidebar', function () {
 
     expect(selectedFieldsCount.text()).toBe('2');
     expect(popularFieldsCount.exists()).toBe(false);
-    expect(availableFieldsCount.text()).toBe('4');
+    expect(availableFieldsCount.text()).toBe('3');
     expect(emptyFieldsCount.exists()).toBe(false);
     expect(metaFieldsCount.exists()).toBe(false);
     expect(unmappedFieldsCount.exists()).toBe(false);
 
-    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
 
     expect(findTestSubject(compInViewerMode, 'fieldListGrouped__ariaDescription').text()).toBe(
-      '2 selected fields. 4 available fields.'
+      '2 selected fields. 3 available fields.'
     );
   });
 
