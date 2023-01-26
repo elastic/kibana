@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -56,6 +56,10 @@ export const registerCreateRoute = (
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
 
+      const { savedObjects } = await context.core;
+
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+
       const options = {
         id,
         overwrite,
@@ -64,7 +68,6 @@ export const registerCreateRoute = (
         references,
         initialNamespaces,
       };
-      const { savedObjects } = await context.core;
       const result = await savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });
     })

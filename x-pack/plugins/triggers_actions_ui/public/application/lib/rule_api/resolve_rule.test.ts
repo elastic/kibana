@@ -51,6 +51,11 @@ describe('resolveRule', () => {
           id: '1',
           params: { documents: [{ dsfsdf: 1212 }] },
           connector_type_id: '.index',
+          frequency: {
+            summary: null,
+            notify_when: 'onActiveAlert',
+            throttle: null,
+          },
         },
       ],
       outcome: 'aliasMatch',
@@ -95,6 +100,11 @@ describe('resolveRule', () => {
           id: '1',
           params: { documents: [{ dsfsdf: 1212 }] },
           actionTypeId: '.index',
+          frequency: {
+            summary: null,
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+          },
         },
       ],
       outcome: 'aliasMatch',

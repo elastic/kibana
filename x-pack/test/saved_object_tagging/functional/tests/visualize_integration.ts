@@ -203,7 +203,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('editing', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/88639
+    describe.skip('editing', () => {
       before(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.deleteAllVisualizations();
