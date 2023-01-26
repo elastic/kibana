@@ -48,7 +48,7 @@ export function WelcomePanel(props: Props) {
               defaultMessage="Console understands commands in a cURL-like syntax. Here is a request to the Elasticsearch _search API."
             />
           </p>
-          <EditorExample panel="welcome" />
+          <EditorExample panel="welcome-example-1" />
           <p>
             <FormattedMessage
               id="console.welcomePage.kibanaAPIsDescription"
@@ -59,7 +59,7 @@ export function WelcomePanel(props: Props) {
             />
           </p>
           <EditorExample
-            panel="welcome"
+            panel="welcome-example-2"
             example={examples.kibanaApiExample}
             linesOfExampleCode={2}
           />
@@ -76,7 +76,7 @@ export function WelcomePanel(props: Props) {
             />
           </p>
           <EditorExample
-            panel="welcome"
+            panel="welcome-example-3"
             example={examples.multipleRequestsExample}
             linesOfExampleCode={19}
             mode="output"
@@ -101,7 +101,7 @@ export function WelcomePanel(props: Props) {
             />
           </p>
           <EditorExample
-            panel="welcome"
+            panel="welcome-example-4"
             example={examples.commentsExample}
             linesOfExampleCode={11}
           />
@@ -137,7 +137,7 @@ export function WelcomePanel(props: Props) {
             </li>
           </ol>
           <EditorExample
-            panel="welcome"
+            panel="welcome-example-5"
             example={examples.variablesExample}
             linesOfExampleCode={8}
           />
