@@ -62,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await esClient.update({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
-        id: 'file1',
+        id: 'id1',
         refresh: true,
         body: {
           doc_as_upsert: true,
@@ -78,6 +78,7 @@ export default function (providerContext: FtrProviderContext) {
               size: 24917,
               Status: 'READY',
               type: 'file',
+              upload_id: 'file1',
             },
           },
         },
