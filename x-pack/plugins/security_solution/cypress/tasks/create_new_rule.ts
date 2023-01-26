@@ -617,11 +617,14 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  rule.machineLearningJobs.forEach((machineLearningJob) => {
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
-  });
+  const text = rule.machineLearningJobs
+    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
+    .join('');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
+
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
+
   cy.get(ANOMALY_THRESHOLD_INPUT).type(
     `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
     {
