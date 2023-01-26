@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-browser';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
@@ -15,7 +15,7 @@ export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
 export function createEditSwimlanePanelAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<EditSwimlanePanelContext> {
+): ActionDefinition<EditSwimlanePanelContext> {
   return {
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,

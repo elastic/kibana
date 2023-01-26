@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-browser';
 import { MlCoreSetup } from '../plugin';
 
 export const CLEAR_SELECTION_ACTION = 'clearSelectionAction';
@@ -17,7 +17,7 @@ export interface ClearSelectionContext {
 
 export function createClearSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<ClearSelectionContext> {
+): ActionDefinition<ClearSelectionContext> {
   return {
     id: 'clear-selection-action',
     type: CLEAR_SELECTION_ACTION,

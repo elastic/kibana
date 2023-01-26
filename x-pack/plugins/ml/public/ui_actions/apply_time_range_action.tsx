@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-browser';
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import { MlCoreSetup } from '../plugin';
@@ -19,7 +19,7 @@ const supportedApps = [DASHBOARD_APP_ID];
 
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+): ActionDefinition<SwimLaneDrilldownContext> {
   return {
     id: 'apply-time-range-selection',
     type: APPLY_TIME_RANGE_SELECTION_ACTION,
