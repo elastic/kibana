@@ -180,7 +180,7 @@ export function initRoutes(
   router.post(
     {
       path: '/session/_run_cleanup',
-      validate: {},
+      validate: false,
     },
     async (context, request, response) => {
       const [, { taskManager }] = await core.getStartServices();
