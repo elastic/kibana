@@ -242,7 +242,6 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
-              extraActions={resetGroupByFieldAction}
               filters={alertsHistogramDefaultFilters}
               inspectTitle={i18n.TREEMAP}
               isPanelExpanded={isTreemapPanelExpanded}
