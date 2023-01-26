@@ -202,8 +202,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   ) {
     this.kibanaIndex = kibanaIndex;
     this.alertsIndex = alertsIndex;
-    this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
-    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
+    this.agentClient = endpointContextService?.getInternalFleetServices().agent;
+    this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
     this.packageService = packageService;

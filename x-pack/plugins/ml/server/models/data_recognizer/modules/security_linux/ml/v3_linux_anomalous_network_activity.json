@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.",
   "groups": [
     "auditbeat",

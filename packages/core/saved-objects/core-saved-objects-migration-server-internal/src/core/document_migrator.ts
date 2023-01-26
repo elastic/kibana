@@ -42,7 +42,7 @@
  */
 
 import Boom from '@hapi/boom';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
