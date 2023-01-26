@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { CreatedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject, CreatedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { extractErrors } from './extract_errors';
 
