@@ -23,7 +23,7 @@ export const autoCompleteEntitiesValidationConfig = {
     {
       validate: (payload) => {
         if (Object.keys(payload).length === 0) {
-          return 'Request must contain at least one of the following parameters: indices, fields, templates, dataStreams';
+          return 'The request must contain at least one of the following parameters: indices, fields, templates, dataStreams.';
         }
       },
     }
