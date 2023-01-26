@@ -285,7 +285,7 @@ export class TaskRunner<
       ruleTypeState,
     });
 
-    // Create AlertsClient framework alerts are enabled and
+    // Create AlertsClient if framework alerts are enabled and
     // if rule type has registered an alerts context with the
     // framework. The AlertsClient will handle reading and
     // writing from alerts-as-data indices and eventually
@@ -315,6 +315,7 @@ export class TaskRunner<
       },
     });
 
+    // Switch between LegacyAlertsClient and AlertsClient depending on configuration
     const alertsClientToUse: IAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId> =
       alertsClient ? alertsClient : legacyAlertsClient;
 
@@ -387,7 +388,11 @@ export class TaskRunner<
                  * @deprecated
                  */
                 alertFactory: legacyAlertsClient.getExecutorServices(),
-                // alertsClient: alertsClient?.getExecutorServices(),
+                /**
+                 * Only available when framework alerts are enabled and rule
+                 * type has registered alert context with the framework
+                 */
+                alertsClient: alertsClient?.getExecutorServices() ?? null,
                 // can move to alertsclient
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 // can move to alertsclient
@@ -749,7 +754,6 @@ export class TaskRunner<
       return {
         ...omit(runStateWithMetrics, ['metrics']),
         previousStartedAt: startedAt,
-        // previousExecutionUuid: this.executionId,
       };
     };
 

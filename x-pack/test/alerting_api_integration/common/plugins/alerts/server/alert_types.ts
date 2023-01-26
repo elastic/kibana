@@ -92,27 +92,6 @@ function getAlwaysFiringAlertType() {
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
     executor: curry(alwaysFiringExecutor)(),
-    alerts: {
-      context: 'test.always-firing',
-      fieldMap: {
-        instance_state_value: {
-          required: false,
-          type: 'boolean',
-        },
-        instance_params_value: {
-          required: false,
-          type: 'boolean',
-        },
-        instance_context_value: {
-          required: false,
-          type: 'boolean',
-        },
-        group_in_series_index: {
-          required: false,
-          type: 'long',
-        },
-      },
-    },
   };
   return result;
 }
@@ -528,6 +507,20 @@ function getPatternFiringAlertType() {
           patternIndex: patternIndex + 1,
         },
       };
+    },
+    alerts: {
+      context: 'test.patternFiring',
+      fieldMap: {
+        patternIndex: {
+          required: false,
+          type: 'long',
+        },
+        instancePattern: {
+          required: false,
+          type: 'boolean',
+          array: true,
+        },
+      },
     },
   };
   return result;

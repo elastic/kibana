@@ -119,7 +119,8 @@ export type NormalizedRuleType<
         InstanceState,
         InstanceContext,
         ActionGroupIds,
-        RecoveryActionGroupId
+        RecoveryActionGroupId,
+        AlertData
       >
     >,
     'recoveryActionGroup'
@@ -422,7 +423,8 @@ function augmentActionGroupsWithReserved<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >
 ): NormalizedRuleType<
   Params,

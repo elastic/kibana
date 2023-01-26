@@ -1016,7 +1016,7 @@ describe('Legacy Alerts Client', () => {
         alertFactory.create('6').scheduleActions('default' as never, { foo: 'emus' });
         alertFactory.create('7').scheduleActions('default' as never, { foo: 'ocelots' });
         expect(() => {
-          alertFactory.create('7').scheduleActions('default' as never, { foo: 'kangaroos' });
+          alertFactory.create('8').scheduleActions('default' as never, { foo: 'kangaroos' });
         }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 5 alerts."`);
 
         expect(alertsClient.hasReachedAlertLimit()).toEqual(true);

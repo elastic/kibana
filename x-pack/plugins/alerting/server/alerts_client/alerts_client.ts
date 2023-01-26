@@ -91,16 +91,16 @@ interface InitializeOpts {
   };
 }
 
+export interface IAlertsAsDataClient<AlertData extends RuleAlertData = never> {
+  create(alert: ReportedAlert & AlertData): void;
+}
+
 export type PublicAlertsClient<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> = Pick<
-  AlertsClient<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>,
-  'create'
-> & {
+  ActionGroupIds extends string
+> = Pick<IAlertsAsDataClient<AlertData>, 'create'> & {
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
   getRecoveredAlerts: () => Array<LegacyAlert<LegacyState, LegacyContext, ActionGroupIds>>;
@@ -112,7 +112,9 @@ export class AlertsClient<
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> implements IAlertsClient<LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>
+> implements
+    IAlertsAsDataClient<AlertData>,
+    IAlertsClient<LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>
 {
   private rule: AlertRuleSchema | null = null;
   private alertsFactory: PublicAlertFactory<
@@ -332,8 +334,7 @@ export class AlertsClient<
     AlertData,
     LegacyState,
     LegacyContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   > {
     return {
       create: (...args) => this.create(...args),

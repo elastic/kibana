@@ -111,7 +111,8 @@ export interface PluginSetupContract {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
-    RecoveryActionGroupId extends string = never
+    RecoveryActionGroupId extends string = never,
+    AlertData extends RuleAlertData = never
   >(
     ruleType: RuleType<
       Params,
@@ -120,7 +121,8 @@ export interface PluginSetupContract {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;

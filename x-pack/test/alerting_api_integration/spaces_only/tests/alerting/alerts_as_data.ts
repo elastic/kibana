@@ -8,11 +8,14 @@
 import { alertFieldMap } from '@kbn/alerting-plugin/common/alert_schema';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common/alert_schema/field_maps/mapping_from_field_map';
 import expect from '@kbn/expect';
+import { Space } from '@kbn/spaces-plugin/common';
+import { getTestRuleData, getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createAlertsAsDataTest({ getService }: FtrProviderContext) {
+export default function createAlertsAsDataTest({ getService }: FtrProviderContext, space: Space) {
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const commonFrameworkMappings = mappingFromFieldMap(alertFieldMap, 'strict');
 
   describe('alerts as data', () => {
@@ -65,21 +68,15 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     });
 
     it('should install context specific alerts as data resources on startup', async () => {
-      const componentTemplateName = 'alerts-test.always-firing-component-template';
-      const indexTemplateName = '.alerts-test.always-firing-default-template';
-      const indexName = '.alerts-test.always-firing-default-000001';
+      const componentTemplateName = 'alerts-test.patternFiring-component-template';
+      const indexTemplateName = '.alerts-test.patternFiring-default-template';
+      const indexName = '.alerts-test.patternFiring-default-000001';
       const contextSpecificMappings = {
-        instance_params_value: {
-          type: 'boolean',
-        },
-        instance_state_value: {
-          type: 'boolean',
-        },
-        instance_context_value: {
-          type: 'boolean',
-        },
-        group_in_series_index: {
+        patternIndex: {
           type: 'long',
+        },
+        instancePattern: {
+          type: 'boolean',
         },
       };
 
@@ -111,11 +108,11 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       const contextIndexTemplate = indexTemplates[0];
       expect(contextIndexTemplate.name).to.eql(indexTemplateName);
       expect(contextIndexTemplate.index_template.index_patterns).to.eql([
-        '.alerts-test.always-firing-default-*',
+        '.alerts-test.patternFiring-default-*',
       ]);
       expect(contextIndexTemplate.index_template.composed_of).to.eql([
         'alerts-common-component-template',
-        'alerts-test.always-firing-component-template',
+        'alerts-test.patternFiring-component-template',
       ]);
       expect(contextIndexTemplate.index_template.template!.mappings).to.eql({
         dynamic: false,
@@ -124,7 +121,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         index: {
           lifecycle: {
             name: 'alerts-default-ilm-policy',
-            rollover_alias: '.alerts-test.always-firing-default',
+            rollover_alias: '.alerts-test.patternFiring-default',
           },
           mapping: {
             total_fields: {
@@ -141,7 +138,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       });
 
       expect(contextIndex[indexName].aliases).to.eql({
-        '.alerts-test.always-firing-default': {
+        '.alerts-test.patternFiring-default': {
           is_write_index: true,
         },
       });
@@ -156,7 +153,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
 
       expect(contextIndex[indexName].settings?.index?.lifecycle).to.eql({
         name: 'alerts-default-ilm-policy',
-        rollover_alias: '.alerts-test.always-firing-default',
+        rollover_alias: '.alerts-test.patternFiring-default',
       });
 
       expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
@@ -169,8 +166,30 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       expect(contextIndex[indexName].settings?.index?.number_of_shards).to.eql(1);
       expect(contextIndex[indexName].settings?.index?.auto_expand_replicas).to.eql('0-1');
       expect(contextIndex[indexName].settings?.index?.provided_name).to.eql(
-        '.alerts-test.always-firing-default-000001'
+        '.alerts-test.patternFiring-default-000001'
       );
+    });
+
+    it('should write alert docs during rule execution', async () => {
+      const pattern = {
+        alertA: [true, true, true], // stays active across executions
+        alertB: [true, false, false], // active then recovers
+        alertC: [true, false, true], // active twice
+      };
+      const createdRule = await supertestWithoutAuth
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              pattern,
+            },
+            actions: [],
+          })
+        );
     });
   });
 }

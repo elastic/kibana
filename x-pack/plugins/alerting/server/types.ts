@@ -52,6 +52,7 @@ import {
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
+import { PublicAlertsClient } from './alerts_client/alerts_client';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -80,13 +81,24 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = RuleAlertData
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
+  /**
+   * Deprecate alertFactory and remove when all rules are onboarded to
+   * the alertsClient
+   * @deprecated
+   */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
+  /**
+   * Only available when framework alerts are enabled and rule
+   * type has registered alert context with the framework
+   */
+  alertsClient: PublicAlertsClient<AlertData, State, Context, ActionGroupIds> | null;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
@@ -100,14 +112,15 @@ export interface RuleExecutorOptions<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = never
 > {
   executionId: string;
   logger: Logger;
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
   spaceId: string;
   startedAt: Date;
   state: State;
@@ -124,9 +137,17 @@ export type ExecutorType<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = never
 > = (
-  options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+  options: RuleExecutorOptions<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    AlertData
+  >
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
@@ -193,7 +214,8 @@ export interface RuleType<
      * Ensure that the reserved ActionGroups (such as `Recovered`) are not
      * available for scheduling in the Executor
      */
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
+    AlertData
   >;
   producer: string;
   actionVariables?: {

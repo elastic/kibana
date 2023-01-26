@@ -77,7 +77,6 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -96,7 +95,7 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 
-describe('Task Runner', () => {
+describe('Task Runner for Rule Type Registered with Framework Alerts as Data', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
   let alertingEventLoggerInitializer: RuleContextOpts;
 
@@ -121,9 +120,8 @@ describe('Task Runner', () => {
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
-  const alertsService = alertsServiceMock.create();
-  const alertsClient = alertsClientMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+  const mockAlertService = alertsServiceMock.create();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
   const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
@@ -155,7 +153,7 @@ describe('Task Runner', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry,
-    alertsService: null,
+    alertsService: mockAlertService,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
     maxEphemeralActionsPerRule: 10,
@@ -168,35 +166,6 @@ describe('Task Runner', () => {
       },
     },
   };
-
-  const dynamicTestParams: Array<
-    [
-      nameExtension: string,
-      customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
-      enqueueFunction: unknown,
-      isBulk: boolean
-    ]
-  > = [
-    ['', taskRunnerFactoryInitializerParams, actionsClient.bulkEnqueueExecution, true],
-    [
-      ' (with ephemeral support)',
-      {
-        ...taskRunnerFactoryInitializerParams,
-        supportsEphemeralTasks: true,
-      },
-      actionsClient.ephemeralEnqueuedExecution,
-      false,
-    ],
-    [
-      ' (with alerts as data client)',
-      {
-        ...taskRunnerFactoryInitializerParams,
-        alertsService,
-      },
-      actionsClient.bulkEnqueueExecution,
-      true,
-    ],
-  ];
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -233,7 +202,7 @@ describe('Task Runner', () => {
     ruleType.executor.mockResolvedValue({ state: {} });
   });
 
-  test('successfully executes the task', async () => {
+  test('test successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
       ruleType,
       {
@@ -277,7 +246,6 @@ describe('Task Runner', () => {
     expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toEqual(RULE_ACTIONS);
     expect(call.services.alertFactory.create).toBeTruthy();
-    expect(call.services.alertsClient).toBeFalsy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
@@ -318,12 +286,9 @@ describe('Task Runner', () => {
     ).toHaveBeenCalled();
   });
 
-  test.each(dynamicTestParams)(
-    'test actionsPlugin.execute is called per alert alert that is scheduled %s',
+  test.each(ephemeralTestParams)(
+    'actionsPlugin.execute is called per alert alert that is scheduled %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      if (customTaskRunnerFactoryInitializerParams.alertsService) {
-        alertsService.createAlertsClient.mockReturnValue(alertsClient);
-      }
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );
@@ -583,7 +548,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'skips firing actions for active alert if alert is muted %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
       (
@@ -650,7 +615,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'skips firing actions for active alert if alert is throttled %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
       (
@@ -717,7 +682,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'skips firing actions for active alert when alert is muted even if notifyWhen === onActionGroupChange %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
@@ -829,7 +794,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert state has changed %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -904,7 +869,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'includes the apiKey in the request used to initialize the actionsClient %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -995,7 +960,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'fire recovered actions for execution for the alertInstances which is in the recovered state %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -1136,7 +1101,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     "should skip alertInstances which weren't active on the previous execution %s",
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -1234,7 +1199,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'fire actions under a custom recovery group when specified on an alert type for alertInstances which are in the recovered state %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -1344,7 +1309,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'triggers summary actions (Per rule run)',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
@@ -1420,7 +1385,7 @@ describe('Task Runner', () => {
     }
   );
 
-  test.each(dynamicTestParams)(
+  test.each(ephemeralTestParams)(
     'triggers summary actions (Custom Frequency)',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
