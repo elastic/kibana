@@ -26,9 +26,6 @@ import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { getAlertsTreemapLensAttributes as getLensAttributes } from '../visualization_actions/lens_attributes/common/alerts/alerts_treemap';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -92,15 +89,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuidv4()}`, []);
   const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
-
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      breakdownField: stackByField1,
-      filters,
-    }),
-    [stackByField1, filters]
-  );
 
   const additionalFilters = useMemo(() => {
     try {
@@ -133,7 +121,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
       stackByField1,
       to,
     }),
-    skip: !isPanelExpanded || isChartEmbeddablesEnabled,
+    skip: !isPanelExpanded,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.TREE_MAP,
   });
@@ -213,19 +201,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         </HeaderSection>
 
         {isPanelExpanded ? (
-          isChartEmbeddablesEnabled && getLensAttributes && timerange ? (
-            <VisualizationEmbeddable
-              extraActions={extraActions}
-              extraOptions={extraVisualizationOptions}
-              getLensAttributes={getLensAttributes}
-              height={`${DEFAULT_MIN_CHART_HEIGHT}px`}
-              id={`charts-embeddable-${uniqueQueryId}`}
-              inspectTitle={inspectTitle}
-              scopeId={SourcererScopeName.detections}
-              stackByField={stackByField0}
-              timerange={timerange}
-            />
-          ) : isLoadingAlerts ? (
+          isLoadingAlerts ? (
             <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
           ) : (
             <>
