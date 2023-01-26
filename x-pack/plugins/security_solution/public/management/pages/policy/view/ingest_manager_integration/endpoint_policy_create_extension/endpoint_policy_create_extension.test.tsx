@@ -120,121 +120,41 @@ describe('Onboarding Component new section', () => {
     });
 
     describe('showing license notes for config presets', () => {
-      it('not enterprise users should see Essential EDR notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+      it.each`
+        preset              | license             | result              | text
+        ${'EDREssential'}   | ${'below platinum'} | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDREssential'}   | ${'platinum'}       | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDREssential'}   | ${'enterprise'}     | ${'should NOT see'} | ${''}
+        ${'EDRComplete'}    | ${'below platinum'} | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDRComplete'}    | ${'platinum'}       | ${'should see'}     | ${'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.'}
+        ${'EDRComplete'}    | ${'enterprise'}     | ${'should NOT see'} | ${''}
+        ${'NGAV'}           | ${'below platinum'} | ${'should see'}     | ${'Note: advanced protections require a platinum license level.'}
+        ${'NGAV'}           | ${'platinum'}       | ${'should NOT see'} | ${''}
+        ${'NGAV'}           | ${'enterprise'}     | ${'should NOT see'} | ${''}
+        ${'DataCollection'} | ${'below platinum'} | ${'should NOT see'} | ${''}
+        ${'DataCollection'} | ${'platinum'}       | ${'should NOT see'} | ${''}
+        ${'DataCollection'} | ${'enterprise'}     | ${'should NOT see'} | ${''}
+      `('$preset: $license users $result notes', ({ license, preset, result, text }) => {
+        const isEnterprise = license === 'enterprise';
+        const isPlatinumPlus = ['platinum', 'enterprise'].includes(license);
 
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-        licenseServiceMock.isEnterprise.mockReturnValue(false);
+        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+        licenseServiceMock.isEnterprise.mockReturnValue(isEnterprise);
+        licenseServiceMock.isPlatinumPlus.mockReturnValue(isPlatinumPlus);
+
         renderResult = mockedContext.render(
           <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
         );
-        userEvent.click(screen.getByDisplayValue('EDREssential'));
-        expect(renderResult.getByDisplayValue('EDREssential')).toBeChecked();
-        expect(
-          renderResult.getByText(
-            'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
-            { exact: false }
-          )
-        ).toBeInTheDocument();
-      });
+        userEvent.click(screen.getByDisplayValue(preset));
+        expect(renderResult.getByDisplayValue(preset)).toBeChecked();
 
-      it('enterprise users should NOT see Essential EDR notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-        licenseServiceMock.isEnterprise.mockReturnValue(true);
-        renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-        );
-        userEvent.click(screen.getByDisplayValue('EDREssential'));
-        expect(renderResult.getByDisplayValue('EDREssential')).toBeChecked();
-        expect(
-          renderResult.queryByText(
-            'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
-            { exact: false }
-          )
-        ).not.toBeInTheDocument();
-      });
-
-      it('not enterprise users should see Complete EDR notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-        licenseServiceMock.isEnterprise.mockReturnValue(false);
-        renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-        );
-        userEvent.click(screen.getByDisplayValue('EDRComplete'));
-        expect(renderResult.getByDisplayValue('EDRComplete')).toBeChecked();
-        expect(
-          renderResult.getByText(
-            'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
-            { exact: false }
-          )
-        ).toBeInTheDocument();
-      });
-
-      it('enterprise users should NOT see Complete EDR notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-        licenseServiceMock.isEnterprise.mockReturnValue(true);
-        renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-        );
-        userEvent.click(screen.getByDisplayValue('EDRComplete'));
-        expect(renderResult.getByDisplayValue('EDRComplete')).toBeChecked();
-        expect(
-          renderResult.queryByText(
-            'Note: advanced protections require a platinum license, and full response capabilities require an enterprise license.',
-            { exact: false }
-          )
-        ).not.toBeInTheDocument();
-      });
-
-      it('below platinum license users should see NGAV notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-        licenseServiceMock.isEnterprise.mockReturnValue(false);
-        renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-        );
-        expect(
-          renderResult.getByText('Note: advanced protections require a platinum license level.', {
-            exact: false,
-          })
-        ).toBeInTheDocument();
-      });
-
-      it('platinum license users should not see NGAV notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-        licenseServiceMock.isEnterprise.mockReturnValue(false);
-        renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-        );
-        expect(
-          renderResult.queryByText('Note: advanced protections require a platinum license level.', {
-            exact: false,
-          })
-        ).not.toBeInTheDocument();
-      });
-
-      it('any license users should not see DataCollection notes', async () => {
-        const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-        licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-        licenseServiceMock.isEnterprise.mockReturnValue(false);
-        renderResult = mockedContext.render(
-          <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
-        );
-        userEvent.click(screen.getByDisplayValue('DataCollection'));
-        expect(renderResult.getByDisplayValue('DataCollection')).toBeChecked();
-        expect(
-          renderResult.queryByTestId('create-endpoint-policy-license-note')
-        ).not.toBeInTheDocument();
+        if (result === 'should see') {
+          expect(renderResult.getByText(text, { exact: false })).toBeInTheDocument();
+        } else {
+          expect(
+            renderResult.queryByTestId('create-endpoint-policy-license-note')
+          ).not.toBeInTheDocument();
+        }
       });
     });
   });
