@@ -64,13 +64,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         const errorEvents = someEvents.filter(
           (event) => event?.kibana?.alerting?.status === 'error'
         );
-        if (errorEvents.length === 0) {
-          throw new Error('no execute/error events yet');
+        if (errorEvents.length < 2) {
+          throw new Error('not enough execute/error events yet');
         }
         return errorEvents;
       });
 
-      const event = events[0];
+      const event = events[1];
       expect(event).to.be.ok();
 
       validateEvent(event, {

@@ -179,7 +179,6 @@ export class AlertingEventLogger {
       updateEvent(this.event, { status: status.status });
 
       if (status.error) {
-        delete this.event.rule?.name;
         updateEvent(this.event, {
           outcome: 'failure',
           alertingOutcome: 'failure',
