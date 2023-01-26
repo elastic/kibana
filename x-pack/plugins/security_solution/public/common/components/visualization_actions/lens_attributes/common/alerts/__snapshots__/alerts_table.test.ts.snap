@@ -159,10 +159,6 @@ Object {
       ],
       "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
       "layerType": "data",
-      "paging": Object {
-        "enabled": true,
-        "size": 10,
-      },
     },
   },
   "title": "Alerts",
@@ -353,10 +349,6 @@ Object {
       ],
       "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
       "layerType": "data",
-      "paging": Object {
-        "enabled": true,
-        "size": 10,
-      },
     },
   },
   "title": "Alerts",
@@ -523,10 +515,6 @@ Object {
       ],
       "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
       "layerType": "data",
-      "paging": Object {
-        "enabled": true,
-        "size": 10,
-      },
     },
   },
   "title": "Alerts",

@@ -231,7 +231,7 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
-        "position": "right",
+        "position": "left",
       },
       "preferredSeriesType": "bar",
       "tickLabelsVisibilitySettings": Object {
