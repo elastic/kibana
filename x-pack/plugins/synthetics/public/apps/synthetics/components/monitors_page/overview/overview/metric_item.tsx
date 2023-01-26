@@ -60,7 +60,10 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const { status, timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
+  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
+    monitor.configId,
+    locationName
+  );
   const theme = useTheme();
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
@@ -86,12 +89,13 @@ export const MetricItem = ({
           style={{
             height: '100%',
             overflow: 'hidden',
+            position: 'relative',
           }}
           title={moment(timestamp).format('LLL')}
         >
           <Chart>
             <Settings
-              onElementClick={() => {
+              onElementClick={(d) => {
                 if (testInProgress) {
                   dispatch(toggleTestNowFlyoutAction(monitor.configId));
                 } else {
@@ -113,7 +117,6 @@ export const MetricItem = ({
               data={[
                 [
                   {
-                    icon: () => <MetricItemIcon configId={monitor.configId} />,
                     title: monitor.name,
                     subtitle: locationName,
                     value: averageDuration,
@@ -139,6 +142,15 @@ export const MetricItem = ({
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
               position="relative"
+            />
+          )}
+          {configIdByLocation && (
+            <MetricItemIcon
+              monitor={monitor}
+              status={status}
+              ping={ping}
+              timestamp={timestamp}
+              configIdByLocation={configIdByLocation}
             />
           )}
         </EuiPanel>
