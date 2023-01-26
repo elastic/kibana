@@ -27,6 +27,10 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
       params: {
         path: { serviceName },
+        query: {
+          start,
+          end,
+        },
       },
     });
   }
