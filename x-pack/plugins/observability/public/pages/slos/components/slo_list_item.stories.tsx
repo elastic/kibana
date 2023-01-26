@@ -11,8 +11,8 @@ import { ComponentStory } from '@storybook/react';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
-} from '../../../data/slo/historical_summary_data';
-import { anSLO } from '../../../data/slo/slo';
+} from '../../../fixtures/slo/historical_summary_data';
+import { anSLO } from '../../../fixtures/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListItem as Component, SloListItemProps } from './slo_list_item';
 

@@ -16,7 +16,7 @@ import {
   historicalSummaryData,
   DEGRADING_FAST_ROLLING_SLO,
   NO_DATA_TO_HEALTHY_ROLLING_SLO,
-} from '../../../data/slo/historical_summary_data';
+} from '../../../fixtures/slo/historical_summary_data';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloSparkline as Component, Props } from './slo_sparkline';
 

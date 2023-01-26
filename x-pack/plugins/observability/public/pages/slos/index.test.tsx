@@ -14,11 +14,11 @@ import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useLicense } from '../../hooks/use_license';
 import { SlosPage } from '.';
-import { emptySloList, sloList } from '../../data/slo/slo';
+import { emptySloList, sloList } from '../../fixtures/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { historicalSummaryData } from '../../data/slo/historical_summary_data';
+import { historicalSummaryData } from '../../fixtures/slo/historical_summary_data';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

@@ -9,7 +9,7 @@ import { HistoricalSummaryResponse } from '@kbn/slo-schema';
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
-} from '../../../data/slo/historical_summary_data';
+} from '../../../fixtures/slo/historical_summary_data';
 import { UseFetchHistoricalSummaryResponse, Params } from '../use_fetch_historical_summary';
 
 export const useFetchHistoricalSummary = ({

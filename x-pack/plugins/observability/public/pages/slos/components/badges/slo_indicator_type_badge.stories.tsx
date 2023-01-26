@@ -15,7 +15,7 @@ import {
   anApmAvailabilityIndicator,
   anApmLatencyIndicator,
   createSLO,
-} from '../../../../data/slo/slo';
+} from '../../../../fixtures/slo/slo';
 
 export default {
   component: Component,

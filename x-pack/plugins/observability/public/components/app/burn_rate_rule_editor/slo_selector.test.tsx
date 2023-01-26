@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { wait } from '@testing-library/user-event/dist/utils';
 import React from 'react';
 
-import { emptySloList } from '../../../data/slo/slo';
+import { emptySloList } from '../../../fixtures/slo/slo';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { render } from '../../../utils/test_helper';
 import { SloSelector } from './slo_selector';
