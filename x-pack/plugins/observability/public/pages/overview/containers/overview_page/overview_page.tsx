@@ -10,11 +10,12 @@ import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertSummaryTimeRange } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useMemo, useRef, useCallback, useState } from 'react';
 
-import { calculateBucketSize } from './helpers';
-import { buildEsQuery } from '../../../../utils/build_es_query';
-import { getNewsFeed } from '../../../../services/get_news_feed';
+import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
+import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
+import { calculateBucketSize, useOverviewMetrics } from './helpers';
 
 import {
   DataSections,
@@ -22,6 +23,10 @@ import {
   HeaderActions,
   DataAssistantFlyout,
 } from '../../components';
+
+import { buildEsQuery } from '../../../../utils/build_es_query';
+import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
+import { getNewsFeed } from '../../../../services/get_news_feed';
 import { EmptySections } from '../../../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../../../components/app/header';
 import { Resources } from '../../../../components/app/resources';
@@ -35,22 +40,25 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useOverviewMetrics } from './helpers/use_metrics';
+import { observabilityAlertFeatureIds, paths } from '../../../../config';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
-import { observabilityFeatureId } from '../../../../../common';
-import { observabilityAlertFeatureIds, paths } from '../../../../config';
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
-
 import type { ObservabilityAppServices } from '../../../../application/types';
+
+import { observabilityFeatureId } from '../../../../../common';
 
 export function OverviewPage() {
   const {
     cases: {
       ui: { getCasesContext },
     },
+    charts,
     http,
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry,
+      getAlertsStateTable: AlertsStateTable,
+      getAlertSummaryWidget: AlertSummaryWidget,
+    },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -85,6 +93,19 @@ export function OverviewPage() {
       to: relativeEnd,
     })
   );
+  const timeBuckets = useTimeBuckets();
+  const alertSummaryTimeRange: AlertSummaryTimeRange = getAlertSummaryTimeRange(
+    {
+      from: relativeStart,
+      to: relativeEnd,
+    },
+    timeBuckets
+  );
+
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
 
   const bucketSize = useMemo(
     () =>
@@ -170,6 +191,13 @@ export function OverviewPage() {
               permissions={userCasesPermissions}
               features={{ alerts: { sync: false } }}
             >
+              <AlertSummaryWidget
+                featureIds={observabilityAlertFeatureIds}
+                filter={esQuery}
+                fullSize
+                timeRange={alertSummaryTimeRange}
+                chartThemes={chartThemes}
+              />
               <AlertsStateTable
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
