@@ -45,7 +45,7 @@ export function getDateFormat(bounds: { [key: number]: string }, diff: number): 
 const INVALID_FORMAT_MESSAGE =
   'Invalid date format specified. See Kibana Advanced Settings key `dateFormat:scaled`.';
 
-export function useKibanaDateFormat(timestamp: AcceptedInputs): string {
+export function useKibanaDateFormat(timestamp?: AcceptedInputs): string {
   const now = moment.now();
   const numericTimestamp = toNumeric(timestamp);
   const dispatch = useDispatch();

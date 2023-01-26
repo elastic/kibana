@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import React, { MouseEvent, useMemo, useState } from 'react';
+import React, { MouseEvent, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiLink,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
@@ -38,15 +37,7 @@ export const ErrorsList = ({
   loading: boolean;
 }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('@timestamp');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const { format } = useSelector(selectScaledDateFormat);
-
-  // const { errorStates, loading } = useMonitorErrors();
-
-  const items = errorStates.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -58,8 +49,6 @@ export const ErrorsList = ({
 
   const history = useHistory();
 
-  // const format = useDateFormatForTest();
-
   const selectedLocation = useSelectedLocation();
 
   const columns = [
@@ -69,34 +58,27 @@ export const ErrorsList = ({
       sortable: (a: PingState) => {
         return moment(a.state.started_at).valueOf();
       },
-      render: (value: string, item: Ping) => {
+      render: (value: string, item: PingState) => {
+        const timestamp = item.state!.started_at;
         const link = (
           <ErrorDetailsLink
             configId={monitorId}
             stateId={item.state?.id!}
-            label={formatTestRunAt(item.state!.started_at, format)}
+            label={formatTestRunAt(
+              item.state!.started_at,
+              format
+                ? getDateFormat(format, Date.now().valueOf() - Number(timestamp)) ?? DEFAULT_FORMAT
+                : DEFAULT_FORMAT
+            )}
           />
         );
         const isActive = isActiveState(item);
         if (!isActive) {
           return link;
         }
-        const timestamp = item.state!.started_at;
         return (
           <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              {
-                <EuiLink href={`${basePath}/app/synthetics/error-details/${item.state?.id}`}>
-                  {formatTestRunAt(
-                    timestamp,
-                    format
-                      ? getDateFormat(format, Date.now().valueOf() - Number(timestamp)) ??
-                          DEFAULT_FORMAT
-                      : DEFAULT_FORMAT
-                  )}
-                </EuiLink>
-              }
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{link}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge iconType="clock" iconSide="right">
                 Active
