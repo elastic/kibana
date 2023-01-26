@@ -46,7 +46,7 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
     timingsWithLabels: prevTimingsWithLabels,
     loading,
     transferSizePrev,
-  } = useNetworkTimingsPrevious24Hours(step.synthetics.step?.index);
+  } = useNetworkTimingsPrevious24Hours(step.synthetics.step?.index, step['@timestamp']);
 
   const items = timingsWithLabels?.map((item) => {
     const prevValueItem = prevTimingsWithLabels?.find((prev) => prev.label === item.label);

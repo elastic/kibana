@@ -18,6 +18,8 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-plugin/common';
+import moment from 'moment';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
@@ -36,12 +38,16 @@ export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   ];
 };
 
-export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
+export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number, timestampArg?: string) => {
   const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
 
   const configId = params.monitorId;
   const checkGroupId = params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
+
+  const { currentStep } = useJourneySteps();
+
+  const timestamp = timestampArg ?? currentStep?.['@timestamp'];
 
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
@@ -70,8 +76,8 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
               {
                 range: {
                   '@timestamp': {
-                    lte: 'now',
-                    gte: 'now-24h/h',
+                    lte: moment(timestamp).toISOString(),
+                    gte: moment(timestamp).subtract(24, 'hours').toISOString(),
                   },
                 },
               },
@@ -158,7 +164,10 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
       },
     },
     [configId, stepIndex, checkGroupId],
-    { name: `stepNetworkPreviousTimings/${configId}/${stepIndex}` }
+    {
+      name: `stepNetworkPreviousTimings/${configId}/${stepIndex}`,
+      isRequestReady: Boolean(timestamp),
+    }
   );
 
   const aggs = data?.aggregations;
