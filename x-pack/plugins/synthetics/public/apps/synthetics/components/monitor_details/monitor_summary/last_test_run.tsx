@@ -42,7 +42,6 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 
 export const LastTestRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
@@ -151,7 +150,6 @@ const PanelHeader = ({
   const { basePath } = useSyntheticsSettingsContext();
 
   const selectedLocation = useSelectedLocation();
-  const format = useKibanaDateFormat(latestPing?.timestamp);
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
