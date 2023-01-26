@@ -171,20 +171,20 @@ export function openContextMenu(
 
   ReactDOM.render(
     // <KibanaThemeProvider theme$={getTheme().theme$}>
-      <EuiPopover
-        className="embPanel__optionsMenuPopover"
-        button={container}
-        isOpen={true}
-        closePopover={onClose}
-        panelPaddingSize="none"
-        anchorPosition="downRight"
-      >
-        <EuiContextMenu
-          initialPanelId="mainMenu"
-          panels={panels}
-          data-test-subj={props['data-test-subj']}
-        />
-      </EuiPopover>,
+    <EuiPopover
+      className="embPanel__optionsMenuPopover"
+      button={container}
+      isOpen={true}
+      closePopover={onClose}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+    >
+      <EuiContextMenu
+        initialPanelId="mainMenu"
+        panels={panels}
+        data-test-subj={props['data-test-subj']}
+      />
+    </EuiPopover>,
     // </KibanaThemeProvider>,
     container
   );

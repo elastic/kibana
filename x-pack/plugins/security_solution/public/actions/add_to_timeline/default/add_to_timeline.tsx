@@ -6,7 +6,7 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ActionDefinition } from '@kbn/ui-actions-browser';
+import type { ActionDefinition } from '@kbn/ui-actions-browser';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
 import { KibanaServices } from '../../../common/lib/kibana';
