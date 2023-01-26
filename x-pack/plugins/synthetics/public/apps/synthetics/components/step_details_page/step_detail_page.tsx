@@ -30,7 +30,7 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, isFailed, currentStep } = useJourneySteps();
+  const { data, isFailedStep, currentStep } = useJourneySteps();
 
   useStepDetailsBreadcrumbs();
 
@@ -62,7 +62,7 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailedStep} />
             )}
           </EuiPanel>
         </EuiFlexItem>
