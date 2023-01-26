@@ -167,7 +167,7 @@ export const Page: FC = () => {
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.populationDescription', {
         defaultMessage:
-          'Detect activity that is unusual compared to the behavior of the population.',
+          'Detect unusual activity in a population. Recommended for high cardinality data.',
       }),
       id: 'mlJobTypeLinkPopulationJob',
     },

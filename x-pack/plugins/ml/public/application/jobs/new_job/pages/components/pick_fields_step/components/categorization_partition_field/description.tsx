@@ -15,7 +15,7 @@ interface Props {
 }
 export const Description: FC<Props> = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.perPartitionCategorization.enable.title', {
-    defaultMessage: 'Enable per-partition categorization',
+    defaultMessage: 'Per-partition categorization',
   });
   return (
     <EuiDescribedFormGroup
@@ -23,7 +23,7 @@ export const Description: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.perPartitionCategorization.enable.description"
-          defaultMessage="If enabled, categories are determined independently for each value of the partition field."
+          defaultMessage="Determine categories independently for each value of the partition field."
         />
       }
     >

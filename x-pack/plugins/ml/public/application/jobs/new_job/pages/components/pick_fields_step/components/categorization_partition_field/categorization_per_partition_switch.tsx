@@ -49,7 +49,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
       label={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel"
-          defaultMessage="Enable per-partition categorization"
+          defaultMessage="Off"
         />
       }
     />
