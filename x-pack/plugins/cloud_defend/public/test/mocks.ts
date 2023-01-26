@@ -38,8 +38,7 @@ responses:
 `;
 
 export const MOCK_YAML_INVALID_CONFIGURATION = `
-selectrs:
-reeesponses:
+s
 `;
 
 export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): NewPackagePolicy => ({
