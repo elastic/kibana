@@ -71,9 +71,9 @@ import {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
-  Warnings,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -115,6 +115,7 @@ import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
+import { MessagesPopover } from '../editor_frame_service/editor_frame/workspace_panel/messages_popover';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -274,6 +275,26 @@ function getViewUnderlyingDataArgs({
   };
 }
 
+const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  return (
+    <MessagesPopover
+      messages={messages}
+      customButtonStyles={css`
+        block-size: ${euiTheme.size.l};
+        border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
+        font-size: ${xsFontSize};
+        padding: 0 ${euiTheme.size.xs};
+        & > * {
+          gap: ${euiTheme.size.xs};
+        }
+      `}
+    />
+  );
+};
+
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
@@ -289,7 +310,7 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private warningDomNode: HTMLElement | Element | undefined;
+  private badgeDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
@@ -873,7 +894,7 @@ export class Embeddable
           })}
           ref={(el) => {
             if (el) {
-              this.warningDomNode = el;
+              this.badgeDomNode = el;
             }
           }}
         />
@@ -885,14 +906,14 @@ export class Embeddable
   }
 
   private renderBadgeMessages() {
-    const warningsToDisplay = this.getUserMessages('embeddableBadge');
+    const messages = this.getUserMessages('embeddableBadge');
 
-    if (warningsToDisplay.length && this.warningDomNode) {
+    if (messages.length && this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <Warnings warnings={warningsToDisplay.map((message) => message.longMessage)} compressed />
+          <EmbeddableMessagesPopover messages={messages} />
         </KibanaThemeProvider>,
-        this.warningDomNode
+        this.badgeDomNode
       );
     }
   }

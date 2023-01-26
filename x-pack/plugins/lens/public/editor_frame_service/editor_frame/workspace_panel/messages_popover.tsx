@@ -19,10 +19,17 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SerializedStyles } from '@emotion/react';
 import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
 
-export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
+export const MessagesPopover = ({
+  messages,
+  customButtonStyles,
+}: {
+  messages: UserMessage[];
+  customButtonStyles?: SerializedStyles;
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   let warningCount = 0;
@@ -74,6 +81,7 @@ export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
             className="lnsWorkspaceWarning__button"
             data-test-subj="lens-editor-warning-button"
             title={buttonLabel}
+            css={customButtonStyles}
           >
             {errorCount > 0 && (
               <>
