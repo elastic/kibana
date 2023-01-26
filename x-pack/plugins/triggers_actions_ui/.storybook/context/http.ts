@@ -288,6 +288,7 @@ const rulesSettingsGetResponse = (path: string) => {
 const rulesSettingsIds = [
   'app-rulessettingslink--with-all-permission',
   'app-rulessettingslink--with-read-permission',
+  'app-rulessettingslink--with-no-permission',
 ];
 
 export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
