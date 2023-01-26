@@ -32,6 +32,8 @@ export interface NavigationEntry {
   onClick?: (event: React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>) => void;
   // shows NEW badge besides the navigation label, which will automatically disappear when menu item is clicked.
   isNewFeature?: boolean;
+  // shows beta badge lab icon if the feature is still beta besides the navigation label
+  isBeta?: boolean;
   // override default path matching logic to determine if nav entry is selected
   matchPath?: (path: string) => boolean;
 }
