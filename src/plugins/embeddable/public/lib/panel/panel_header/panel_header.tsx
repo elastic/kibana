@@ -51,6 +51,7 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
       iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
       onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
       onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
+      data-test-subj={`embeddablePanelBadge-${badge.id}`}
     >
       {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>

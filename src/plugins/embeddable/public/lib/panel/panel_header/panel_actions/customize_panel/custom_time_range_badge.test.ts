@@ -15,68 +15,6 @@ import {
 } from '../../../../test_samples/embeddables';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 
-// TODO make sure this is a functional test
-
-// test('Removing custom time range from badge resets embeddable back to container time', async () => {
-//   const container = new TimeRangeContainer(
-//     {
-//       timeRange: { from: 'now-15m', to: 'now' },
-//       panels: {
-//         '1': {
-//           type: TIME_RANGE_EMBEDDABLE,
-//           explicitInput: {
-//             id: '1',
-//             timeRange: { from: '1', to: '2' },
-//           },
-//         },
-//         '2': {
-//           type: TIME_RANGE_EMBEDDABLE,
-//           explicitInput: {
-//             id: '2',
-//           },
-//         },
-//       },
-//       id: '123',
-//     },
-//     () => undefined
-//   );
-
-//   await container.untilEmbeddableLoaded('1');
-//   await container.untilEmbeddableLoaded('2');
-
-//   const child1 = container.getChild<TimeRangeEmbeddable>('1');
-//   const child2 = container.getChild<TimeRangeEmbeddable>('2');
-
-//   const openModalMock = jest.fn();
-//   openModalMock.mockReturnValue({ close: jest.fn() });
-
-//   new CustomTimeRangeBadge(
-//     overlayServiceMock.createStartContract(),
-//     themeServiceMock.createStartContract(),
-//     [],
-//     'MM YYYY'
-//   ).execute({
-//     embeddable: child1,
-//   });
-
-//   await nextTick();
-//   const openModal = openModalMock.mock.calls[0][0] as ReactElement;
-
-//   const wrapper = mount(openModal);
-//   findTestSubject(wrapper, 'removePerPanelTimeRangeButton').simulate('click');
-
-//   const promise = Rx.merge(child1.getInput$(), container.getOutput$(), container.getInput$())
-//     .pipe(skip(4), take(1))
-//     .toPromise();
-
-//   container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
-
-//   await promise;
-
-//   expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-//   expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-// });
-
 test(`badge is not compatible with embeddable that inherits from parent`, async () => {
   const container = new TimeRangeContainer(
     {

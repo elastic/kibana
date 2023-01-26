@@ -15,7 +15,7 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
   return new (class DashboardCustomizePanel {
     public readonly FLYOUT_TEST_SUBJ = 'customizePanel';
-    public readonly CUSTOM_TIME_RANGE_ACTION = 'CUSTOM_TIME_RANGE';
+    public readonly TOGGLE_TIME_RANGE_TEST_SUBJ = 'customizePanelShowCustomTimeRange';
 
     async expectCustomizePanelSettingsFlyoutOpen() {
       log.debug('expectCustomizePanelSettingsFlyoutOpen');
@@ -25,6 +25,16 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
     async expectCustomizePanelSettingsFlyoutClosed() {
       log.debug('expectCustomizePanelSettingsFlyoutClosed');
       await testSubjects.missingOrFail(this.FLYOUT_TEST_SUBJ);
+    }
+
+    async expectExistsCustomTimeRange() {
+      log.debug('expectExistsCustomTimeRange');
+      await testSubjects.existOrFail(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+    }
+
+    async expectMissingCustomTimeRange() {
+      log.debug('expectMissingCustomTimeRange');
+      await testSubjects.missingOrFail(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
     }
 
     public async findFlyout() {
@@ -90,7 +100,7 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickToggleShowCustomTimeRange() {
       log.debug('clickToggleShowCustomTimeRange');
-      await testSubjects.click('customizePanelShowCustomTimeRange');
+      await testSubjects.click(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
     }
   })();
 }

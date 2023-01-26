@@ -12,5 +12,6 @@ export { DashboardAddPanelService } from './add_panel';
 export { DashboardReplacePanelService } from './replace_panel';
 export { DashboardPanelActionsService } from './panel_actions';
 export { DashboardCustomizePanelProvider } from './panel_settings';
+export { DashboardBadgeActionsProvider } from './panel_badge_actions';
 export { DashboardDrilldownPanelActionsProvider } from './panel_drilldown_actions';
 export { DashboardDrilldownsManageProvider } from './drilldowns_manage';
