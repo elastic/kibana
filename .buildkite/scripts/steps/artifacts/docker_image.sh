@@ -58,7 +58,9 @@ cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Container Images
 
   Manifest: \`$KIBANA_IMAGE\`
+
   AMD64: \`$KIBANA_IMAGE-amd64\`
+
   ARM64: \`$KIBANA_IMAGE-arm64\`
 EOF
 
