@@ -1,0 +1,98 @@
+delete:
+  summary: Deletes a connector.
+  operationId: legacyDeleteConnector
+  deprecated: true
+  description: >
+    Deprecated in 7.13.0. Use the delete connector API instead.
+    WARNING: When you delete a connector, it cannot be recovered.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/action_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
+get:
+  summary: Retrieves a connector by ID.
+  operationId: legacyGetConnector
+  description: Deprecated in 7.13.0. Use the get connector API instead.
+  deprecated: true
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/parameters/action_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/action_response_properties.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
+put:
+  summary: Updates the attributes for a connector.
+  operationId: legacyUpdateConnector
+  deprecated: true
+  description: Deprecated in 7.13.0. Use the update connector API instead.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/action_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          title: Legacy update connector request body properties
+          description: The properties vary depending on the connector type.
+          type: object
+          properties:
+            config:
+              type: object
+              description: The new connector configuration. Configuration properties vary depending on the connector type.
+            name:
+              type: string
+              description: The new name for the connector.
+            secrets:
+              type: object
+              description: The updated secrets configuration for the connector. Secrets properties vary depending on the connector type.
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            $ref: '../components/schemas/action_response_properties.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
+servers:
+  - url: https://localhost:5601

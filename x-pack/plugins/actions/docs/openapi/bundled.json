@@ -816,6 +816,474 @@
           "url": "https://localhost:5601"
         }
       ]
+    },
+    "/s/{spaceId}/api/actions/action/{actionId}": {
+      "delete": {
+        "summary": "Deletes a connector.",
+        "operationId": "legacyDeleteConnector",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the delete connector API instead. WARNING: When you delete a connector, it cannot be recovered.\n",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/action_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves a connector by ID.",
+        "operationId": "legacyGetConnector",
+        "description": "Deprecated in 7.13.0. Use the get connector API instead.",
+        "deprecated": true,
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/action_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/action_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Updates the attributes for a connector.",
+        "operationId": "legacyUpdateConnector",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the update connector API instead.",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/action_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy update connector request body properties",
+                "description": "The properties vary depending on the connector type.",
+                "type": "object",
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "description": "The new connector configuration. Configuration properties vary depending on the connector type."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The new name for the connector."
+                  },
+                  "secrets": {
+                    "type": "object",
+                    "description": "The updated secrets configuration for the connector. Secrets properties vary depending on the connector type."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/action_response_properties"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/actions": {
+      "get": {
+        "summary": "Retrieves all connectors.",
+        "operationId": "legacyGetConnectors",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get all connectors API instead.",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/action_response_properties"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Creates a connector.",
+        "operationId": "legacyCreateConnector",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the create connector API instead.",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy create connector request properties",
+                "type": "object",
+                "properties": {
+                  "actionTypeId": {
+                    "type": "string",
+                    "description": "The connector type identifier."
+                  },
+                  "config": {
+                    "type": "object",
+                    "description": "The configuration for the connector. Configuration properties vary depending on the connector type."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The display name for the connector."
+                  },
+                  "secrets": {
+                    "type": "object",
+                    "description": "The secrets configuration for the connector. Secrets configuration properties vary depending on the connector type. NOTE: Remember these values. You must provide them each time you update the connector.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/action_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/actions/list_action_types": {
+      "get": {
+        "summary": "Retrieves a list of all connector types.",
+        "operationId": "legacyGetConnectorTypes",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get all connector types API instead.",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Legacy get connector types response body properties",
+                  "description": "The properties vary for each connector type.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in Kibana."
+                      },
+                      "enabledInConfig": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in the Kibana `.yml` file."
+                      },
+                      "enabledInLicense": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled in the license.",
+                        "example": true
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier for the connector type."
+                      },
+                      "minimumLicenseRequired": {
+                        "type": "string",
+                        "description": "The license that is required to use the connector type."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the connector type."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/actions/action/{actionId}/_execute": {
+      "post": {
+        "summary": "Runs a connector.",
+        "operationId": "legacyRunConnector",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the run connector API instead.",
+        "tags": [
+          "connectors"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/action_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy run connector request body properties",
+                "description": "The properties vary depending on the connector type.",
+                "type": "object",
+                "required": [
+                  "params"
+                ],
+                "properties": {
+                  "params": {
+                    "type": "object",
+                    "description": "The parameters of the connector. Parameter properties vary depending on the connector type."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "description": "Information returned from the action.",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "description": "An array of information returned from the action.",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "The status of the action."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
     }
   },
   "components": {
@@ -858,6 +1326,16 @@
         "schema": {
           "type": "string",
           "example": "df770e30-8b8b-11ed-a780-3b746c987a81"
+        }
+      },
+      "action_id": {
+        "in": "path",
+        "name": "actionId",
+        "description": "An identifier for the action.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
         }
       }
     },
@@ -3778,6 +4256,37 @@
                 }
               }
             }
+          }
+        }
+      },
+      "action_response_properties": {
+        "title": "Action response properties",
+        "description": "The properties vary depending on the action type.",
+        "type": "object",
+        "properties": {
+          "actionTypeId": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isDeprecated": {
+            "type": "boolean",
+            "description": "Indicates whether the action type is deprecated."
+          },
+          "isMissingSecrets": {
+            "type": "boolean",
+            "description": "Indicates whether secrets are missing for the action."
+          },
+          "isPreconfigured": {
+            "type": "boolean",
+            "description": "Indicates whether it is a preconfigured action."
+          },
+          "name": {
+            "type": "string"
           }
         }
       }

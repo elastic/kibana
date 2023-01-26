@@ -23,6 +23,13 @@ Any modifications made to this file will be overwritten.
   <li><a href="#getConnector"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   <li><a href="#getConnectorTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connector_types</code></a></li>
   <li><a href="#getConnectors"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/connectors</code></a></li>
+  <li><a href="#legacyCreateConnector"><code><span class="http-method">post</span> /s/{spaceId}/api/actions</code></a></li>
+  <li><a href="#legacyDeleteConnector"><code><span class="http-method">delete</span> /s/{spaceId}/api/actions/action/{actionId}</code></a></li>
+  <li><a href="#legacyGetConnector"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/action/{actionId}</code></a></li>
+  <li><a href="#legacyGetConnectorTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/actions/list_action_types</code></a></li>
+  <li><a href="#legacyGetConnectors"><code><span class="http-method">get</span> /s/{spaceId}/api/actions</code></a></li>
+  <li><a href="#legacyRunConnector"><code><span class="http-method">post</span> /s/{spaceId}/api/actions/action/{actionId}/_execute</code></a></li>
+  <li><a href="#legacyUpdateConnector"><code><span class="http-method">put</span> /s/{spaceId}/api/actions/action/{actionId}</code></a></li>
   <li><a href="#runConnector"><code><span class="http-method">post</span> /s/{spaceId}/api/actions/connector/{connectorId}/_execute</code></a></li>
   <li><a href="#updateConnector"><code><span class="http-method">put</span> /s/{spaceId}/api/actions/connector/{connectorId}</code></a></li>
   </ul>
@@ -316,6 +323,441 @@ Any modifications made to this file will be overwritten.
         <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
+  <div class="method"><a name="legacyCreateConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/actions</code></pre></div>
+    <div class="method-summary">Creates a connector. (<span class="nickname">legacyCreateConnector</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the create connector API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Legacy_create_connector_request_properties <a href="#Legacy_create_connector_request_properties">Legacy_create_connector_request_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#action_response_properties">action_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "isPreconfigured" : true,
+  "isDeprecated" : true,
+  "actionTypeId" : "actionTypeId",
+  "name" : "name",
+  "id" : "id",
+  "config" : "{}",
+  "isMissingSecrets" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#action_response_properties">action_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyDeleteConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/actions/action/{actionId}</code></pre></div>
+    <div class="method-summary">Deletes a connector. (<span class="nickname">legacyDeleteConnector</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the delete connector API instead. WARNING: When you delete a connector, it cannot be recovered.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">actionId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the action. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyGetConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/actions/action/{actionId}</code></pre></div>
+    <div class="method-summary">Retrieves a connector by ID. (<span class="nickname">legacyGetConnector</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the get connector API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">actionId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the action. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#action_response_properties">action_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "isPreconfigured" : true,
+  "isDeprecated" : true,
+  "actionTypeId" : "actionTypeId",
+  "name" : "name",
+  "id" : "id",
+  "config" : "{}",
+  "isMissingSecrets" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#action_response_properties">action_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyGetConnectorTypes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/actions/list_action_types</code></pre></div>
+    <div class="method-summary">Retrieves a list of all connector types. (<span class="nickname">legacyGetConnectorTypes</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the get all connector types API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#Legacy_get_connector_types_response_body_properties_inner">Legacy_get_connector_types_response_body_properties_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "enabledInConfig" : true,
+  "name" : "name",
+  "enabledInLicense" : true,
+  "id" : "id",
+  "minimumLicenseRequired" : "minimumLicenseRequired",
+  "enabled" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyGetConnectors"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/actions</code></pre></div>
+    <div class="method-summary">Retrieves all connectors. (<span class="nickname">legacyGetConnectors</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the get all connectors API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#action_response_properties">action_response_properties</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "isPreconfigured" : true,
+  "isDeprecated" : true,
+  "actionTypeId" : "actionTypeId",
+  "name" : "name",
+  "id" : "id",
+  "config" : "{}",
+  "isMissingSecrets" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyRunConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/actions/action/{actionId}/_execute</code></pre></div>
+    <div class="method-summary">Runs a connector. (<span class="nickname">legacyRunConnector</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the run connector API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">actionId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the action. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Legacy_run_connector_request_body_properties <a href="#Legacy_run_connector_request_body_properties">Legacy_run_connector_request_body_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#legacyRunConnector_200_response">legacyRunConnector_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "actionId" : "actionId",
+  "status" : "status"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#legacyRunConnector_200_response">legacyRunConnector_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyUpdateConnector"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /s/{spaceId}/api/actions/action/{actionId}</code></pre></div>
+    <div class="method-summary">Updates the attributes for a connector. (<span class="nickname">legacyUpdateConnector</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the update connector API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">actionId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the action. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Legacy_update_connector_request_body_properties <a href="#Legacy_update_connector_request_body_properties">Legacy_update_connector_request_body_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#action_response_properties">action_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "isPreconfigured" : true,
+  "isDeprecated" : true,
+  "actionTypeId" : "actionTypeId",
+  "name" : "name",
+  "id" : "id",
+  "config" : "{}",
+  "isMissingSecrets" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#action_response_properties">action_response_properties</a>
+    <h4 class="field-label">404</h4>
+    Object is not found.
+        <a href="#404_response">404_response</a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="runConnector"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -478,12 +920,17 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Create_connector_request_body_properties"><code>Create_connector_request_body_properties</code> - Create connector request body properties</a></li>
     <li><a href="#Get_connector_types_response_body_properties_inner"><code>Get_connector_types_response_body_properties_inner</code> - </a></li>
     <li><a href="#Get_connectors_response_body_properties"><code>Get_connectors_response_body_properties</code> - Get connectors response body properties</a></li>
+    <li><a href="#Legacy_create_connector_request_properties"><code>Legacy_create_connector_request_properties</code> - Legacy create connector request properties</a></li>
+    <li><a href="#Legacy_get_connector_types_response_body_properties_inner"><code>Legacy_get_connector_types_response_body_properties_inner</code> - </a></li>
+    <li><a href="#Legacy_run_connector_request_body_properties"><code>Legacy_run_connector_request_body_properties</code> - Legacy run connector request body properties</a></li>
+    <li><a href="#Legacy_update_connector_request_body_properties"><code>Legacy_update_connector_request_body_properties</code> - Legacy update connector request body properties</a></li>
     <li><a href="#Rule_name_mapping"><code>Rule_name_mapping</code> - Rule name mapping</a></li>
     <li><a href="#Run_connector_request_body_properties"><code>Run_connector_request_body_properties</code> - Run connector request body properties</a></li>
     <li><a href="#Run_connector_request_body_properties_params"><code>Run_connector_request_body_properties_params</code> - </a></li>
     <li><a href="#Severity_mapping"><code>Severity_mapping</code> - Severity mapping</a></li>
     <li><a href="#Subaction_parameters"><code>Subaction_parameters</code> - Subaction parameters</a></li>
     <li><a href="#Update_connector_request_body_properties"><code>Update_connector_request_body_properties</code> - Update connector request body properties</a></li>
+    <li><a href="#action_response_properties"><code>action_response_properties</code> - Action response properties</a></li>
     <li><a href="#config_properties_cases_webhook"><code>config_properties_cases_webhook</code> - Connector request properties for Webhook - Case Management connector</a></li>
     <li><a href="#config_properties_index"><code>config_properties_index</code> - Connector request properties for an index connector</a></li>
     <li><a href="#config_properties_jira"><code>config_properties_jira</code> - Connector request properties for a Jira connector</a></li>
@@ -530,6 +977,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#create_connector_request_xmatters"><code>create_connector_request_xmatters</code> - Create xMatters connector request</a></li>
     <li><a href="#features"><code>features</code> - </a></li>
     <li><a href="#getConnector_404_response"><code>getConnector_404_response</code> - </a></li>
+    <li><a href="#legacyRunConnector_200_response"><code>legacyRunConnector_200_response</code> - </a></li>
     <li><a href="#runConnector_200_response"><code>runConnector_200_response</code> - </a></li>
     <li><a href="#runConnector_200_response_data"><code>runConnector_200_response_data</code> - </a></li>
     <li><a href="#run_connector_params_documents"><code>run_connector_params_documents</code> - Index connector parameters</a></li>
@@ -709,6 +1157,44 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="Legacy_create_connector_request_properties"><code>Legacy_create_connector_request_properties</code> - Legacy create connector request properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actionTypeId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The connector type identifier. </div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The configuration for the connector. Configuration properties vary depending on the connector type. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The secrets configuration for the connector. Secrets configuration properties vary depending on the connector type. NOTE: Remember these values. You must provide them each time you update the connector. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_get_connector_types_response_body_properties_inner"><code>Legacy_get_connector_types_response_body_properties_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is enabled in Kibana. </div>
+<div class="param">enabledInConfig (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector type is enabled in the Kibana <code>.yml</code> file. </div>
+<div class="param">enabledInLicense (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the connector is enabled in the license. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The unique identifier for the connector type. </div>
+<div class="param">minimumLicenseRequired (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The license that is required to use the connector type. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the connector type. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_run_connector_request_body_properties"><code>Legacy_run_connector_request_body_properties</code> - Legacy run connector request body properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The properties vary depending on the connector type.</div>
+    <div class="field-items">
+      <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The parameters of the connector. Parameter properties vary depending on the connector type. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_update_connector_request_body_properties"><code>Legacy_update_connector_request_body_properties</code> - Legacy update connector request body properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The properties vary depending on the connector type.</div>
+    <div class="field-items">
+      <div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The new connector configuration. Configuration properties vary depending on the connector type. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new name for the connector. </div>
+<div class="param">secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="Rule_name_mapping"><code>Rule_name_mapping</code> - Rule name mapping</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Mapping for the name of the alert's rule.</div>
     <div class="field-items">
@@ -767,6 +1253,19 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_swimlane">config_properties_swimlane</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_swimlane">secrets_properties_swimlane</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="action_response_properties"><code>action_response_properties</code> - Action response properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The properties vary depending on the action type.</div>
+    <div class="field-items">
+      <div class="param">actionTypeId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">isDeprecated (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the action type is deprecated. </div>
+<div class="param">isMissingSecrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether secrets are missing for the action. </div>
+<div class="param">isPreconfigured (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether it is a preconfigured action. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1349,6 +1848,15 @@ Any modifications made to this file will be overwritten.
       <div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">statusCode (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyRunConnector_200_response"><code>legacyRunConnector_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actionId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#runConnector_200_response_data">runConnector_200_response_data</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The status of the action. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
