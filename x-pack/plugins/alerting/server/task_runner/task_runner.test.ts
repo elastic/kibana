@@ -76,8 +76,6 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
-import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -121,8 +119,6 @@ describe('Task Runner', () => {
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
-  const alertsService = alertsServiceMock.create();
-  const alertsClient = alertsClientMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
   const dataPlugin = dataPluginMock.createStartContract();
@@ -186,15 +182,6 @@ describe('Task Runner', () => {
       },
       actionsClient.ephemeralEnqueuedExecution,
       false,
-    ],
-    [
-      ' (with alerts as data client)',
-      {
-        ...taskRunnerFactoryInitializerParams,
-        alertsService,
-      },
-      actionsClient.bulkEnqueueExecution,
-      true,
     ],
   ];
 
@@ -321,9 +308,6 @@ describe('Task Runner', () => {
   test.each(dynamicTestParams)(
     'test actionsPlugin.execute is called per alert alert that is scheduled %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
-      if (customTaskRunnerFactoryInitializerParams.alertsService) {
-        alertsService.createAlertsClient.mockReturnValue(alertsClient);
-      }
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
         true
       );

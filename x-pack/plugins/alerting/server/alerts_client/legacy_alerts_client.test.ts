@@ -782,6 +782,7 @@ describe('Legacy Alerts Client', () => {
               meta: {
                 flapping: false,
                 flappingHistory: [true, true, false, false, true],
+                uuid: 'UUID1',
               },
               state: {
                 duration: '172800000000000',
@@ -793,6 +794,7 @@ describe('Legacy Alerts Client', () => {
               meta: {
                 flapping: false,
                 flappingHistory: [true],
+                uuid: 'UUID1',
               },
               state: {
                 duration: '59160000000000',
@@ -923,6 +925,7 @@ describe('Legacy Alerts Client', () => {
               meta: {
                 flapping: false,
                 flappingHistory: [true, true, false, false, true],
+                uuid: 'UUID1',
               },
               state: {
                 duration: '172800000000000',
@@ -934,6 +937,7 @@ describe('Legacy Alerts Client', () => {
               meta: {
                 flapping: false,
                 flappingHistory: [true],
+                uuid: 'UUID1',
               },
               state: {
                 duration: '59160000000000',
@@ -1346,6 +1350,7 @@ describe('Legacy Alerts Client', () => {
           meta: {
             flapping: true,
             flappingHistory: [...flapping, true].slice(1),
+            uuid: 'UUID1',
           },
           state: {
             duration: '172800000000000',

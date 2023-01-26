@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { type Alert, alertFieldMap } from '@kbn/alerting-plugin/common/alert_schema';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common/alert_schema/field_maps/mapping_from_field_map';
@@ -24,6 +25,11 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
 
   type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+  const fieldsToOmitInComparison = [
+    '@timestamp',
+    'kibana.alert.flapping_history',
+    'kibana.alert.rule.execution.uuid',
+  ];
 
   describe('alerts as data', () => {
     afterEach(() => objectRemover.removeAll());
@@ -220,7 +226,6 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
 
       // Query for alerts by execution UUID
       const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
-      console.log(`alertDocsRun1 ${JSON.stringify(alertDocsRun1)}`);
 
       // After the first run, we should have 3 alert docs for the 3 active alerts
       expect(alertDocsRun1.length).to.equal(3);
@@ -285,7 +290,6 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
 
       // Query for alerts by execution UUID
       const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
-      console.log(`alertDocsRun2 ${JSON.stringify(alertDocsRun2)}`);
 
       // After the second run, we should have 3 alert docs
       expect(alertDocsRun2.length).to.equal(3);
@@ -397,15 +401,90 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
 
       // Query for alerts by execution UUID
       const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
-      console.log(`alertDocsRun3 ${JSON.stringify(alertDocsRun3)}`);
 
       // After the third run, we should have 4 alert docs
-      // The docs for "alertB" and "alertC" should not have been updated
-      // There should be two docs for "alertA", one for the first active -> recovered span
+      // The docs for "alertA" and "alertB" should not have been updated
+      // There should be two docs for "alertC", one for the first active -> recovered span
       // the second for the new active span
       expect(alertDocsRun3.length).to.equal(4);
 
-      testExpectRuleData(alertDocsRun3, ruleId, ruleParameters, executionUuid!);
+      testExpectRuleData(alertDocsRun3, ruleId, ruleParameters);
+
+      // alertA, run3
+      // status is still active; duration is updated; no end time
+      alertDoc = alertDocsRun3.find((doc) => doc._source!['kibana.alert.id'] === 'alertA');
+      const alertADocRun3 = alertDoc!._source!;
+      expect(alertADocRun3.instancePattern).to.eql(pattern.alertA);
+      // uuid is the same as previous runs
+      expect(alertADocRun3['kibana.alert.uuid']).to.equal(alertADocRun2['kibana.alert.uuid']);
+      expect(alertADocRun3['kibana.alert.uuid']).to.equal(alertADocRun1['kibana.alert.uuid']);
+      // patternIndex should be 2 for the third run
+      expect(alertADocRun3.patternIndex).to.equal(2);
+      expect(alertADocRun3['kibana.alert.action_group']).to.equal('default');
+      // start time should be defined and the same as prior runs
+      expect(alertADocRun3['kibana.alert.start']).to.match(timestampPattern);
+      expect(alertADocRun3['kibana.alert.start']).to.equal(alertADocRun2['kibana.alert.start']);
+      expect(alertADocRun3['kibana.alert.start']).to.equal(alertADocRun1['kibana.alert.start']);
+      // timestamp should be defined and not the same as prior run
+      expect(alertADocRun3['@timestamp']).to.match(timestampPattern);
+      expect(alertADocRun3['@timestamp']).not.to.equal(alertADocRun2['@timestamp']);
+      // status should still be active
+      expect(alertADocRun3['kibana.alert.status']).to.equal('active');
+      // flapping false, flapping history updated with additional entry
+      expect(alertADocRun3['kibana.alert.flapping']).to.equal(false);
+      expect(alertADocRun3['kibana.alert.flapping_history']).to.eql([
+        ...alertADocRun2['kibana.alert.flapping_history']!,
+        false,
+      ]);
+
+      // alertB doc should be unchanged from prior run because it is still recovered
+      // but its flapping history should be updated
+      alertDoc = alertDocsRun3.find((doc) => doc._source!['kibana.alert.id'] === 'alertB');
+      const alertBDocRun3 = alertDoc!._source!;
+      expect(omit(alertBDocRun3, fieldsToOmitInComparison)).to.eql(
+        omit(alertBDocRun2, fieldsToOmitInComparison)
+      );
+      // execution uuid should be current one
+      expect(alertBDocRun3['kibana.alert.rule.execution.uuid']).to.equal(executionUuid);
+      // flapping history should be history from prior run with additional entry
+      expect(alertBDocRun3['kibana.alert.flapping_history']).to.eql([
+        ...alertBDocRun2['kibana.alert.flapping_history']!,
+        false,
+      ]);
+
+      // alertC should have 2 docs
+      const alertCDocs = alertDocsRun3.filter(
+        (doc) => doc._source!['kibana.alert.id'] === 'alertC'
+      );
+      // alertC recovered doc should be exactly the same as the alertC doc from prior run
+      const recoveredAlertCDoc = alertCDocs.find(
+        (doc) => doc._source!['kibana.alert.rule.execution.uuid'] !== executionUuid
+      )!._source!;
+      expect(recoveredAlertCDoc).to.eql(alertCDocRun2);
+
+      // alertC doc from current execution
+      const alertCDocRun3 = alertCDocs.find(
+        (doc) => doc._source!['kibana.alert.rule.execution.uuid'] === executionUuid
+      )!._source!;
+      expect(alertCDocRun3.instancePattern).to.eql(pattern.alertC);
+      // uuid is the different from prior run]
+      expect(alertCDocRun3['kibana.alert.uuid']).not.to.equal(alertCDocRun2['kibana.alert.uuid']);
+      // patternIndex should be 2 for the third run
+      expect(alertCDocRun3.patternIndex).to.equal(2);
+      expect(alertCDocRun3['kibana.alert.action_group']).to.equal('default');
+      // start time should be defined and different from the prior run
+      expect(alertCDocRun3['kibana.alert.start']).to.match(timestampPattern);
+      expect(alertCDocRun3['kibana.alert.start']).not.to.equal(alertCDocRun2['kibana.alert.start']);
+      // timestamp should be defined and not the same as prior run
+      expect(alertCDocRun3['@timestamp']).to.match(timestampPattern);
+      // duration should be '0' since this is a new alert
+      expect(alertCDocRun3['kibana.alert.duration.us']).to.equal('0');
+      // flapping false, flapping history should be history from prior run with additional entry
+      expect(alertCDocRun3['kibana.alert.flapping']).to.equal(false);
+      expect(alertCDocRun3['kibana.alert.flapping_history']).to.eql([
+        ...alertCDocRun2['kibana.alert.flapping_history']!,
+        true,
+      ]);
     });
   });
 
@@ -413,7 +492,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     alertDocs: Array<SearchHit<PatternFiringAlert>>,
     ruleId: string,
     ruleParameters: unknown,
-    executionUuid: string
+    executionUuid?: string
   ) {
     for (let i = 0; i < alertDocs.length; ++i) {
       const source: PatternFiringAlert = alertDocs[i]._source!;
@@ -421,7 +500,6 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       // Each doc should have a copy of the rule data
       expect(source['kibana.alert.rule.category']).to.equal('Test: Firing on a Pattern');
       expect(source['kibana.alert.rule.consumer']).to.equal('alertsFixture');
-      expect(source['kibana.alert.rule.execution.uuid']).to.equal(executionUuid);
       expect(source['kibana.alert.rule.name']).to.equal('abc');
       expect(source['kibana.alert.rule.producer']).to.equal('alertsFixture');
       expect(source['kibana.alert.rule.tags']).to.eql(['foo']);
@@ -429,6 +507,10 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       expect(source['kibana.alert.rule.uuid']).to.equal(ruleId);
       expect(source['kibana.alert.rule.parameters']).to.eql(ruleParameters);
       expect(source['kibana.space_ids']).to.eql(['space1']);
+
+      if (executionUuid) {
+        expect(source['kibana.alert.rule.execution.uuid']).to.equal(executionUuid);
+      }
     }
   }
 

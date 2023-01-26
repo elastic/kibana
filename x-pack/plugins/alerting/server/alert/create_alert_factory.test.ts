@@ -15,6 +15,10 @@ jest.mock('../lib', () => ({
   processAlerts: jest.fn(),
 }));
 
+jest.mock('uuid', () => ({
+  v4: () => 'UUID1',
+}));
+
 let clock: sinon.SinonFakeTimers;
 const logger = loggingSystemMock.create().get();
 
@@ -37,6 +41,7 @@ describe('createAlertFactory()', () => {
       Object {
         "meta": Object {
           "flappingHistory": Array [],
+          "uuid": "UUID1",
         },
         "state": Object {},
       }
@@ -67,6 +72,7 @@ describe('createAlertFactory()', () => {
             "date": "1970-01-01T00:00:00.000Z",
             "group": "default",
           },
+          "uuid": "UUID1",
         },
         "state": Object {
           "foo": true,
@@ -89,6 +95,7 @@ describe('createAlertFactory()', () => {
         "1": Object {
           "meta": Object {
             "flappingHistory": Array [],
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -127,6 +134,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: 'UUID1',
       },
       state: {},
       context: {},
@@ -169,6 +177,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: 'UUID1',
       },
       state: {},
       context: {},
@@ -196,6 +205,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: 'UUID1',
       },
       state: {},
       context: {},
@@ -222,6 +232,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: 'UUID1',
       },
       state: {},
       context: {},
@@ -247,6 +258,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: 'UUID1',
       },
       state: {},
       context: {},
@@ -323,6 +335,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        uuid: 'UUID1',
       },
       state: {},
       context: {},

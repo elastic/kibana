@@ -9,6 +9,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Alert } from '../alert';
 import { getEarlyRecoveredAlerts, trimRecoveredAlerts } from './trim_recovered_alerts';
 
+jest.mock('uuid', () => ({
+  v4: () => 'UUID1',
+}));
+
 describe('trimRecoveredAlerts', () => {
   const logger = loggingSystemMock.createLogger();
 

@@ -8,6 +8,10 @@
 import { getAlertsForNotification } from '.';
 import { Alert } from '../alert';
 
+jest.mock('uuid', () => ({
+  v4: () => 'UUID1',
+}));
+
 describe('getAlertsForNotification', () => {
   test('should set pendingRecoveredCount to zero for all active alerts', () => {
     const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
@@ -32,6 +36,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -44,6 +49,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -52,6 +58,7 @@ describe('getAlertsForNotification', () => {
             "flapping": false,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -89,6 +96,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 1,
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -111,6 +119,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -118,6 +127,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -130,6 +140,7 @@ describe('getAlertsForNotification', () => {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": "UUID1",
           },
           "state": Object {},
         },
@@ -137,6 +148,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "uuid": "UUID1",
           },
           "state": Object {},
         },

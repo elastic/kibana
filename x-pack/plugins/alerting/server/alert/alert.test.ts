@@ -490,6 +490,7 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        uuid: 'UUID1',
       },
       state: {
         duration: '172800000000000',

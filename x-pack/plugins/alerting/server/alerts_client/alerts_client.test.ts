@@ -339,7 +339,9 @@ describe('Alerts Client', () => {
 
       expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
       expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test-default',
         refresh: 'wait_for',
+        require_alias: true,
         body: [
           {
             index: {
@@ -400,7 +402,9 @@ describe('Alerts Client', () => {
 
       expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
       expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test-default',
         refresh: 'wait_for',
+        require_alias: true,
         body: [
           {
             index: {
@@ -491,7 +495,9 @@ describe('Alerts Client', () => {
 
       expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
       expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test-default',
         refresh: 'wait_for',
+        require_alias: true,
         body: [
           {
             index: {
@@ -612,7 +618,9 @@ describe('Alerts Client', () => {
 
       expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
       expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test-default',
         refresh: 'wait_for',
+        require_alias: true,
         body: [
           {
             index: {
@@ -748,7 +756,9 @@ describe('Alerts Client', () => {
 
       expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
       expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test-default',
         refresh: 'wait_for',
+        require_alias: true,
         body: [
           {
             index: {
@@ -860,7 +870,9 @@ describe('Alerts Client', () => {
 
       expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
       expect(clusterClient.bulk).toHaveBeenCalledWith({
+        index: '.alerts-test-default',
         refresh: 'wait_for',
+        require_alias: true,
         body: [
           {
             index: {
