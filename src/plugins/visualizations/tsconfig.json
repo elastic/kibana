@@ -50,7 +50,6 @@
     "@kbn/core-overlays-browser",
     "@kbn/config-schema",
     "@kbn/usage-collection-plugin",
-    "@kbn/core-custom-branding-browser",
   ],
   "exclude": [
     "target/**/*",
