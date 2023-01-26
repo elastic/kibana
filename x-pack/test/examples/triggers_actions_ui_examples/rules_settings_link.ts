@@ -8,25 +8,24 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../test/functional/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
-  const esArchiver = getService('esArchiver');
 
-  describe('Rules list', () => {
+  describe('Rules Settings Link', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await PageObjects.common.navigateToApp('triggersActionsUiExample/rules_list');
-    });
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await PageObjects.common.navigateToApp('triggersActionsUiExample/rules_settings_link');
     });
 
     it('should load from shareable lazy loader', async () => {
-      await testSubjects.find('rulesList');
-      const exists = await testSubjects.exists('rulesList');
+      const exists = await testSubjects.exists('rulesSettingsLink');
       expect(exists).to.be(true);
+    });
+
+    it('should be able to open the modal', async () => {
+      await testSubjects.click('rulesSettingsLink');
+      await testSubjects.waitForDeleted('centerJustifiedSpinner');
+      await testSubjects.existOrFail('rulesSettingsModal');
     });
   });
 };
