@@ -38,13 +38,13 @@ export const HostContainer = () => {
       <EuiSpacer />
       <HostsViewProvider>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
+          <EuiFlexItem grow={0}>
             <KPICharts />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={0}>
             <HostsTable />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={0}>
             <Tabs />
           </EuiFlexItem>
         </EuiFlexGroup>

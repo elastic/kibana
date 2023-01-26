@@ -31,3 +31,5 @@ export const TriggersActionsProvider: React.FC<Props> = (props) => {
     </TriggerActionsContext.Provider>
   );
 };
+
+export const useTriggersActions = () => React.useContext(TriggerActionsContext).triggersActionsUI;
