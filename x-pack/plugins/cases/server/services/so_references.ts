@@ -42,9 +42,9 @@ export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) =>
 type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
 
 /**
- * This function should be used when there's a potential for the attributes field being undefined. Specifically when
- * performing a bulkGet within the core saved object library. If a particular id cannot be found then the error field
- * will be set and attributes will be undefined.
+ * This function should be used when the attributes field could be undefined. Specifically when
+ * performing a bulkGet within the core saved object library. If one of the requested ids does not exist in elasticsearch
+ * then the error field will be set and attributes will be undefined.
  */
 export const injectAttachmentAttributesAndHandleErrors = (
   savedObject: OptionalAttributes<CommentAttributesWithoutRefs>,
