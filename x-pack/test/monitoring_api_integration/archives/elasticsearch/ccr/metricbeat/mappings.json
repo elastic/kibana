@@ -1,0 +1,1157 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "metrics-elasticsearch.stack_monitoring.ccr-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "elasticsearch"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "metrics-elasticsearch.stack_monitoring.ccr-*"
+      ],
+      "name": "metrics-elasticsearch.stack_monitoring.ccr",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "elasticsearch"
+            }
+          },
+          "date_detection": false,
+          "dynamic": false,
+          "dynamic_templates": [
+            {
+              "strings_as_keyword": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "ccr_auto_follow_stats": {
+              "properties": {
+                "follower": {
+                  "properties": {
+                    "failed_read_requests": {
+                      "path": "elasticsearch.ccr.requests.failed.read.count",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "number_of_failed_follow_indices": {
+                  "path": "elasticsearch.ccr.auto_follow.failed.follow_indices.count",
+                  "type": "alias"
+                },
+                "number_of_failed_remote_cluster_state_requests": {
+                  "path": "elasticsearch.ccr.auto_follow.failed.remote_cluster_state_requests.count",
+                  "type": "alias"
+                },
+                "number_of_successful_follow_indices": {
+                  "path": "elasticsearch.ccr.auto_follow.success.follow_indices.count",
+                  "type": "alias"
+                }
+              }
+            },
+            "ccr_stats": {
+              "properties": {
+                "bytes_read": {
+                  "path": "elasticsearch.ccr.bytes_read",
+                  "type": "alias"
+                },
+                "failed_read_requests": {
+                  "path": "elasticsearch.ccr.requests.failed.read.count",
+                  "type": "alias"
+                },
+                "failed_write_requests": {
+                  "path": "elasticsearch.ccr.requests.failed.write.count",
+                  "type": "alias"
+                },
+                "follower_aliases_version": {
+                  "path": "elasticsearch.ccr.follower.aliases_version",
+                  "type": "alias"
+                },
+                "follower_global_checkpoint": {
+                  "path": "elasticsearch.ccr.follower.global_checkpoint",
+                  "type": "alias"
+                },
+                "follower_index": {
+                  "path": "elasticsearch.ccr.follower.index",
+                  "type": "alias"
+                },
+                "follower_mapping_version": {
+                  "path": "elasticsearch.ccr.follower.mapping_version",
+                  "type": "alias"
+                },
+                "follower_max_seq_no": {
+                  "path": "elasticsearch.ccr.follower.max_seq_no",
+                  "type": "alias"
+                },
+                "follower_settings_version": {
+                  "path": "elasticsearch.ccr.follower.settings_version",
+                  "type": "alias"
+                },
+                "last_requested_seq_no": {
+                  "path": "elasticsearch.ccr.last_requested_seq_no",
+                  "type": "alias"
+                },
+                "leader_global_checkpoint": {
+                  "path": "elasticsearch.ccr.leader.global_checkpoint",
+                  "type": "alias"
+                },
+                "leader_index": {
+                  "path": "elasticsearch.ccr.leader.index",
+                  "type": "alias"
+                },
+                "leader_max_seq_no": {
+                  "path": "elasticsearch.ccr.leader.max_seq_no",
+                  "type": "alias"
+                },
+                "operations_read": {
+                  "path": "elasticsearch.ccr.follower.operations.read.count",
+                  "type": "alias"
+                },
+                "operations_written": {
+                  "path": "elasticsearch.ccr.follower.operations_written",
+                  "type": "alias"
+                },
+                "outstanding_read_requests": {
+                  "path": "elasticsearch.ccr.requests.outstanding.read.count",
+                  "type": "alias"
+                },
+                "outstanding_write_requests": {
+                  "path": "elasticsearch.ccr.requests.outstanding.write.count",
+                  "type": "alias"
+                },
+                "remote_cluster": {
+                  "path": "elasticsearch.ccr.remote_cluster",
+                  "type": "alias"
+                },
+                "shard_id": {
+                  "path": "elasticsearch.ccr.follower.shard.number",
+                  "type": "alias"
+                },
+                "successful_read_requests": {
+                  "path": "elasticsearch.ccr.requests.successful.read.count",
+                  "type": "alias"
+                },
+                "successful_write_requests": {
+                  "path": "elasticsearch.ccr.requests.successful.write.count",
+                  "type": "alias"
+                },
+                "total_read_remote_exec_time_millis": {
+                  "path": "elasticsearch.ccr.total_time.read.remote_exec.ms",
+                  "type": "alias"
+                },
+                "total_read_time_millis": {
+                  "path": "elasticsearch.ccr.total_time.read.ms",
+                  "type": "alias"
+                },
+                "total_write_time_millis": {
+                  "path": "elasticsearch.ccr.total_time.write.ms",
+                  "type": "alias"
+                },
+                "write_buffer_operation_count": {
+                  "path": "elasticsearch.ccr.write_buffer.operation.count",
+                  "type": "alias"
+                },
+                "write_buffer_size_in_bytes": {
+                  "path": "elasticsearch.ccr.write_buffer.size.bytes",
+                  "type": "alias"
+                }
+              }
+            },
+            "cluster_uuid": {
+              "path": "elasticsearch.cluster.id",
+              "type": "alias"
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "elasticsearch": {
+              "properties": {
+                "ccr": {
+                  "properties": {
+                    "auto_follow": {
+                      "properties": {
+                        "failed": {
+                          "properties": {
+                            "follow_indices": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "remote_cluster_state_requests": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "success": {
+                          "properties": {
+                            "follow_indices": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "bytes_read": {
+                      "type": "long"
+                    },
+                    "follower": {
+                      "properties": {
+                        "aliases_version": {
+                          "type": "long"
+                        },
+                        "global_checkpoint": {
+                          "type": "long"
+                        },
+                        "index": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "mapping_version": {
+                          "type": "long"
+                        },
+                        "max_seq_no": {
+                          "type": "long"
+                        },
+                        "operations": {
+                          "properties": {
+                            "read": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "operations_written": {
+                          "type": "long"
+                        },
+                        "settings_version": {
+                          "type": "long"
+                        },
+                        "shard": {
+                          "properties": {
+                            "number": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "time_since_last_read": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "last_requested_seq_no": {
+                      "type": "long"
+                    },
+                    "leader": {
+                      "properties": {
+                        "global_checkpoint": {
+                          "type": "long"
+                        },
+                        "index": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "max_seq_no": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "read_exceptions": {
+                      "type": "nested"
+                    },
+                    "remote_cluster": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "requests": {
+                      "properties": {
+                        "failed": {
+                          "properties": {
+                            "read": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "write": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "outstanding": {
+                          "properties": {
+                            "read": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "write": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "successful": {
+                          "properties": {
+                            "read": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "write": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "shard_id": {
+                      "type": "long"
+                    },
+                    "total_time": {
+                      "properties": {
+                        "read": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            },
+                            "remote_exec": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "write": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "write_buffer": {
+                      "properties": {
+                        "operation": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "size": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "cluster": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "state": {
+                      "properties": {
+                        "id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "node": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "master": {
+                      "type": "boolean"
+                    },
+                    "mlockall": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "message": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "duration": {
+                  "type": "long"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "type": "date"
+                },
+                "module": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "service": {
+              "properties": {
+                "address": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "source_node": {
+              "properties": {
+                "name": {
+                  "path": "elasticsearch.node.name",
+                  "type": "alias"
+                },
+                "uuid": {
+                  "path": "elasticsearch.node.id",
+                  "type": "alias"
+                }
+              }
+            },
+            "timestamp": {
+              "path": "@timestamp",
+              "type": "alias"
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "codec": "best_compression",
+            "default_pipeline": "metrics-elasticsearch.stack_monitoring.ccr-1.2.0-preview2",
+            "final_pipeline": ".fleet_final_pipeline-1",
+            "lifecycle": {
+              "name": "metrics"
+            },
+            "mapping": {
+              "total_fields": {
+                "limit": "10000"
+              }
+            },
+            "query": {
+              "default_field": [
+                "ecs.version",
+                "event.dataset",
+                "event.module",
+                "host.name",
+                "service.address",
+                "service.type",
+                "service.name",
+                "error.message",
+                "elasticsearch.ccr.remote_cluster",
+                "elasticsearch.ccr.leader.index",
+                "elasticsearch.ccr.follower.index",
+                "elasticsearch.cluster.name",
+                "elasticsearch.cluster.id",
+                "elasticsearch.cluster.state.id",
+                "elasticsearch.node.id",
+                "elasticsearch.node.name"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "metrics-elasticsearch.stack_monitoring.cluster_stats-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "elasticsearch"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "metrics-elasticsearch.stack_monitoring.cluster_stats-*"
+      ],
+      "name": "metrics-elasticsearch.stack_monitoring.cluster_stats",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "elasticsearch"
+            }
+          },
+          "date_detection": false,
+          "dynamic": false,
+          "dynamic_templates": [
+            {
+              "strings_as_keyword": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "cluster_state": {
+              "properties": {
+                "master_node": {
+                  "path": "elasticsearch.cluster.stats.state.master_node",
+                  "type": "alias"
+                },
+                "nodes_hash": {
+                  "path": "elasticsearch.cluster.stats.state.nodes_hash",
+                  "type": "alias"
+                },
+                "state_uuid": {
+                  "path": "elasticsearch.cluster.stats.state.state_uuid",
+                  "type": "alias"
+                },
+                "status": {
+                  "path": "elasticsearch.cluster.stats.status",
+                  "type": "alias"
+                },
+                "version": {
+                  "path": "elasticsearch.cluster.stats.state.version",
+                  "type": "alias"
+                }
+              }
+            },
+            "cluster_stats": {
+              "properties": {
+                "indices": {
+                  "properties": {
+                    "count": {
+                      "path": "elasticsearch.cluster.stats.indices.total",
+                      "type": "alias"
+                    },
+                    "shards": {
+                      "properties": {
+                        "total": {
+                          "path": "elasticsearch.cluster.stats.indices.shards.count",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                },
+                "nodes": {
+                  "properties": {
+                    "count": {
+                      "properties": {
+                        "total": {
+                          "path": "elasticsearch.cluster.stats.nodes.count",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "jvm": {
+                      "properties": {
+                        "max_uptime_in_millis": {
+                          "path": "elasticsearch.cluster.stats.nodes.jvm.max_uptime.ms",
+                          "type": "alias"
+                        },
+                        "mem": {
+                          "properties": {
+                            "heap_max_in_bytes": {
+                              "path": "elasticsearch.cluster.stats.nodes.jvm.memory.heap.max.bytes",
+                              "type": "alias"
+                            },
+                            "heap_used_in_bytes": {
+                              "path": "elasticsearch.cluster.stats.nodes.jvm.memory.heap.used.bytes",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "cluster_uuid": {
+              "path": "elasticsearch.cluster.id",
+              "type": "alias"
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "elasticsearch": {
+              "properties": {
+                "cluster": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "state": {
+                      "properties": {
+                        "id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "stats": {
+                      "properties": {
+                        "indices": {
+                          "properties": {
+                            "docs": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "fielddata": {
+                              "properties": {
+                                "memory": {
+                                  "properties": {
+                                    "bytes": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "shards": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "primaries": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "store": {
+                              "properties": {
+                                "size": {
+                                  "properties": {
+                                    "bytes": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "license": {
+                          "properties": {
+                            "cluster_needs_tls": {
+                              "type": "boolean"
+                            },
+                            "expiry_date": {
+                              "type": "date"
+                            },
+                            "expiry_date_in_millis": {
+                              "type": "long"
+                            },
+                            "issue_date": {
+                              "type": "date"
+                            },
+                            "issue_date_in_millis": {
+                              "type": "long"
+                            },
+                            "issued_to": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "issuer": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "max_nodes": {
+                              "type": "long"
+                            },
+                            "start_date_in_millis": {
+                              "type": "long"
+                            },
+                            "status": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "type": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "uid": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "nodes": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            },
+                            "data": {
+                              "type": "long"
+                            },
+                            "fs": {
+                              "properties": {
+                                "available": {
+                                  "properties": {
+                                    "bytes": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "total": {
+                                  "properties": {
+                                    "bytes": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "jvm": {
+                              "properties": {
+                                "max_uptime": {
+                                  "properties": {
+                                    "ms": {
+                                      "type": "long"
+                                    }
+                                  }
+                                },
+                                "memory": {
+                                  "properties": {
+                                    "heap": {
+                                      "properties": {
+                                        "max": {
+                                          "properties": {
+                                            "bytes": {
+                                              "type": "long"
+                                            }
+                                          }
+                                        },
+                                        "used": {
+                                          "properties": {
+                                            "bytes": {
+                                              "type": "long"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "master": {
+                              "type": "long"
+                            },
+                            "stats": {
+                              "properties": {
+                                "data": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "versions": {
+                              "type": "text"
+                            }
+                          }
+                        },
+                        "stack": {
+                          "properties": {
+                            "apm": {
+                              "properties": {
+                                "found": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "xpack": {
+                              "properties": {
+                                "ccr": {
+                                  "properties": {
+                                    "available": {
+                                      "type": "boolean"
+                                    },
+                                    "enabled": {
+                                      "type": "boolean"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "state": {
+                          "properties": {
+                            "master_node": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "nodes": {
+                              "type": "flattened"
+                            },
+                            "nodes_hash": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "state_uuid": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "status": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "node": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "master": {
+                      "type": "boolean"
+                    },
+                    "mlockall": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "message": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "duration": {
+                  "type": "long"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "type": "date"
+                },
+                "module": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "license": {
+              "properties": {
+                "status": {
+                  "path": "elasticsearch.cluster.stats.license.status",
+                  "type": "alias"
+                },
+                "type": {
+                  "path": "elasticsearch.cluster.stats.license.type",
+                  "type": "alias"
+                }
+              }
+            },
+            "service": {
+              "properties": {
+                "address": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "source_node": {
+              "properties": {
+                "name": {
+                  "path": "elasticsearch.node.name",
+                  "type": "alias"
+                },
+                "uuid": {
+                  "path": "elasticsearch.node.id",
+                  "type": "alias"
+                }
+              }
+            },
+            "stack_stats": {
+              "properties": {
+                "apm": {
+                  "properties": {
+                    "found": {
+                      "path": "elasticsearch.cluster.stats.stack.apm.found",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "xpack": {
+                  "properties": {
+                    "ccr": {
+                      "properties": {
+                        "available": {
+                          "path": "elasticsearch.cluster.stats.stack.xpack.ccr.available",
+                          "type": "alias"
+                        },
+                        "enabled": {
+                          "path": "elasticsearch.cluster.stats.stack.xpack.ccr.enabled",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "timestamp": {
+              "path": "@timestamp",
+              "type": "alias"
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "codec": "best_compression",
+            "default_pipeline": "metrics-elasticsearch.stack_monitoring.cluster_stats-1.2.0-preview2",
+            "final_pipeline": ".fleet_final_pipeline-1",
+            "lifecycle": {
+              "name": "metrics"
+            },
+            "mapping": {
+              "total_fields": {
+                "limit": "10000"
+              }
+            },
+            "query": {
+              "default_field": [
+                "ecs.version",
+                "event.dataset",
+                "event.module",
+                "host.name",
+                "service.address",
+                "service.type",
+                "service.name",
+                "error.message",
+                "elasticsearch.cluster.stats.version",
+                "elasticsearch.cluster.stats.state.nodes_hash",
+                "elasticsearch.cluster.stats.state.master_node",
+                "elasticsearch.cluster.stats.state.version",
+                "elasticsearch.cluster.stats.state.state_uuid",
+                "elasticsearch.cluster.stats.status",
+                "elasticsearch.cluster.stats.nodes.versions",
+                "elasticsearch.cluster.stats.license.issued_to",
+                "elasticsearch.cluster.stats.license.issuer",
+                "elasticsearch.cluster.stats.license.status",
+                "elasticsearch.cluster.stats.license.type",
+                "elasticsearch.cluster.stats.license.uid",
+                "elasticsearch.cluster.name",
+                "elasticsearch.cluster.id",
+                "elasticsearch.cluster.state.id",
+                "elasticsearch.version",
+                "elasticsearch.node.id",
+                "elasticsearch.node.name"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

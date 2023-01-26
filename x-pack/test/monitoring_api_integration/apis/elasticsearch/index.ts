@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Elasticsearch', () => {
+    loadTestFile(require.resolve('./ccr'));
     loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./overview'));
   });
 }
