@@ -57,6 +57,7 @@ import {
   caseWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
+  basicPushSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -842,12 +843,18 @@ describe('Cases API', () => {
   });
 
   describe('getCaseConnectors', () => {
+    const caseConnectors = getCaseConnectorsMockResponse();
+    const connectorCamelCase = caseConnectors['servicenow-1'];
+
+    const snakeCaseConnector = {
+      ...connectorCamelCase,
+      push: { ...connectorCamelCase.push, externalService: basicPushSnake },
+    };
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(response);
+      fetchMock.mockResolvedValue({ 'servicenow-1': snakeCaseConnector });
     });
-
-    const response = getCaseConnectorsMockResponse();
 
     it('should be called with correct check url, method, signal', async () => {
       await getCaseConnectors(basicCase.id, abortCtrl.signal);
@@ -860,7 +867,7 @@ describe('Cases API', () => {
 
     it('should return correct response', async () => {
       const resp = await getCaseConnectors(basicCase.id, abortCtrl.signal);
-      expect(resp).toEqual(response);
+      expect(resp).toEqual({ 'servicenow-1': connectorCamelCase });
     });
   });
 });

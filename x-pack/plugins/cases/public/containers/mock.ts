@@ -372,7 +372,7 @@ export const casesMetrics: CasesMetrics = {
 
 export const basicPush = {
   connectorId: pushConnectorId,
-  connectorName: 'connector name',
+  connectorName: 'My SN connector',
   externalId: 'external_id',
   externalTitle: 'external title',
   externalUrl: 'basicPush.com',
@@ -384,7 +384,7 @@ export const pushedCase: Case = {
   ...basicCase,
   connector: {
     id: pushConnectorId,
-    name: 'My SN Connector',
+    name: 'My SN connector',
     type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
@@ -542,7 +542,7 @@ export const casesStatusSnake: CasesStatusResponse = {
 
 export const pushSnake = {
   connector_id: pushConnectorId,
-  connector_name: 'connector name',
+  connector_name: 'My SN connector',
   external_id: 'external_id',
   external_title: 'external title',
   external_url: 'basicPush.com',
@@ -558,7 +558,7 @@ export const pushedCaseSnake = {
   ...basicCaseSnake,
   connector: {
     id: pushConnectorId,
-    name: 'My SN Connector',
+    name: 'My SN connector',
     type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
@@ -604,7 +604,7 @@ export const getUserAction = (
 
   const externalService = {
     connectorId: pushConnectorId,
-    connectorName: 'connector name',
+    connectorName: 'My SN connector',
     externalId: 'external_id',
     externalTitle: 'external title',
     externalUrl: 'basicPush.com',
