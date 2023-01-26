@@ -27,6 +27,7 @@ import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
+import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -103,6 +104,8 @@ export function ObservabilityPageTemplate({
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.isNewFeature ? (
               <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
+            ) : entry.isBeta ? (
+              <NavNameWithBetaBadge label={entry.label} iconType="beaker" />
             ) : (
               entry.label
             ),

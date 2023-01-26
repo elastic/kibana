@@ -122,6 +122,8 @@ interface RuleNotifyWhenProps {
   throttleUnit: string;
   onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
+  showMinimumThrottleWarning?: boolean;
+  showMinimumThrottleUnitWarning?: boolean;
 }
 
 export const ActionNotifyWhen = ({
@@ -130,6 +132,8 @@ export const ActionNotifyWhen = ({
   throttleUnit,
   onNotifyWhenChange,
   onThrottleChange,
+  showMinimumThrottleWarning,
+  showMinimumThrottleUnitWarning,
 }: RuleNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
@@ -195,6 +199,7 @@ export const ActionNotifyWhen = ({
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={2}>
                     <EuiFieldNumber
+                      isInvalid={showMinimumThrottleWarning}
                       min={1}
                       value={throttle ?? 1}
                       name="throttle"
@@ -220,6 +225,7 @@ export const ActionNotifyWhen = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={3}>
                     <EuiSelect
+                      isInvalid={showMinimumThrottleUnitWarning}
                       data-test-subj="throttleUnitInput"
                       value={throttleUnit}
                       options={getTimeOptions(throttle ?? 1)}
@@ -230,6 +236,20 @@ export const ActionNotifyWhen = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFormRow>
+              {(showMinimumThrottleWarning || showMinimumThrottleUnitWarning) && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs" color="danger">
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning',
+                      {
+                        defaultMessage:
+                          "Custom action intervals cannot be shorter than the rule's check interval",
+                      }
+                    )}
+                  </EuiText>
+                </>
+              )}
             </>
           )}
         </EuiFlexItem>
