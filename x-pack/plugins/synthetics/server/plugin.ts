@@ -86,7 +86,6 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
-      spaces: plugins.spaces,
     } as UptimeServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
@@ -126,6 +125,7 @@ export class Plugin implements PluginType {
       this.server.fleet = pluginsStart.fleet;
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
+      this.server.spaces = pluginsStart.spaces;
     }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
