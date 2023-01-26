@@ -34,13 +34,23 @@ export async function getAgentUploads(
   const getFile = async (fileId: string) => {
     if (!fileId) return;
     try {
-      const file = await esClient.get({
+      const fileResponse = await esClient.search({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
-        id: fileId,
+        query: {
+          bool: {
+            filter: {
+              term: { upload_id: fileId },
+            },
+          },
+        },
       });
+      if (fileResponse.hits.total === 0) {
+        appContextService.getLogger().debug(`No matches for upload_id ${fileId}`);
+        return;
+      }
       return {
-        id: file._id,
-        ...(file._source as any)?.file,
+        id: fileResponse.hits.hits[0]._id,
+        ...(fileResponse.hits.hits[0]._source as any)?.file,
       };
     } catch (err) {
       if (err.statusCode === 404) {
