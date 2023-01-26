@@ -40,8 +40,8 @@ export const command = {
     const exclude = args.getStringValues('exclude') ?? [];
     const include = args.getStringValues('include') ?? [];
 
-    const { discoverBazelPackages } = External['@kbn/bazel-packages']();
-    const packages = await discoverBazelPackages(REPO_ROOT);
+    const { getPackages } = External['@kbn/repo-packages']();
+    const packages = getPackages(REPO_ROOT);
     for (const { manifest, pkg, normalizedRepoRelativeDir } of packages) {
       if (
         exclude.includes(manifest.id) ||

@@ -81,6 +81,7 @@ const mockOptions = {
         started: '2020-01-01T12:00:00.000Z',
         flappingHistory: [],
         flapping: false,
+        pendingRecoveredCount: 0,
       },
       TEST_ALERT_1: {
         alertId: 'TEST_ALERT_1',
@@ -88,6 +89,7 @@ const mockOptions = {
         started: '2020-01-02T12:00:00.000Z',
         flappingHistory: [],
         flapping: false,
+        pendingRecoveredCount: 0,
       },
     },
     trackedAlertsRecovered: {},
@@ -428,7 +430,12 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
+      const { state: stateResult1 } = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something'],
+        'test.metric.2'
+      );
       expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
       setEvaluationResults([
         {
@@ -470,7 +477,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult2 = await execute(
+      const { state: stateResult2 } = await execute(
         Comparator.GT,
         [0.75],
         ['something'],
@@ -508,7 +515,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult3 = await execute(
+      const { state: stateResult3 } = await execute(
         Comparator.GT,
         [0.75],
         ['something', 'something-else'],
@@ -583,7 +590,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult1 = await executeWithFilter(
+      const { state: stateResult1 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'q' }),
@@ -630,7 +637,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult2 = await executeWithFilter(
+      const { state: stateResult2 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'q' }),
@@ -668,7 +675,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult3 = await executeWithFilter(
+      const { state: stateResult3 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'different' }),

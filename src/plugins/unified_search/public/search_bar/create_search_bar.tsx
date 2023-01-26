@@ -193,45 +193,47 @@ export function createSearchBar({
           ...core,
         }}
       >
-        <SearchBar
-          showAutoRefreshOnly={props.showAutoRefreshOnly}
-          showDatePicker={props.showDatePicker}
-          showFilterBar={props.showFilterBar}
-          showQueryMenu={props.showQueryMenu}
-          showQueryInput={props.showQueryInput}
-          showSaveQuery={props.showSaveQuery}
-          showSubmitButton={props.showSubmitButton}
-          submitButtonStyle={props.submitButtonStyle}
-          isDisabled={props.isDisabled}
-          screenTitle={props.screenTitle}
-          indexPatterns={props.indexPatterns}
-          indicateNoData={props.indicateNoData}
-          timeHistory={data.query.timefilter.history}
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
-          refreshInterval={refreshInterval.value}
-          isRefreshPaused={refreshInterval.pause}
-          filters={filters}
-          query={query}
-          onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-          onRefreshChange={defaultOnRefreshChange(data.query)}
-          savedQuery={savedQuery}
-          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
-          onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
-          onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
-          onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
-          iconType={props.iconType}
-          nonKqlMode={props.nonKqlMode}
-          customSubmitButton={props.customSubmitButton}
-          isClearable={props.isClearable}
-          placeholder={props.placeholder}
-          {...overrideDefaultBehaviors(props)}
-          dataViewPickerComponentProps={props.dataViewPickerComponentProps}
-          textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
-          onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
-          displayStyle={props.displayStyle}
-          isScreenshotMode={isScreenshotMode}
-        />
+        <core.i18n.Context>
+          <SearchBar
+            showAutoRefreshOnly={props.showAutoRefreshOnly}
+            showDatePicker={props.showDatePicker}
+            showFilterBar={props.showFilterBar}
+            showQueryMenu={props.showQueryMenu}
+            showQueryInput={props.showQueryInput}
+            showSaveQuery={props.showSaveQuery}
+            showSubmitButton={props.showSubmitButton}
+            submitButtonStyle={props.submitButtonStyle}
+            isDisabled={props.isDisabled}
+            screenTitle={props.screenTitle}
+            indexPatterns={props.indexPatterns}
+            indicateNoData={props.indicateNoData}
+            timeHistory={data.query.timefilter.history}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            refreshInterval={refreshInterval.value}
+            isRefreshPaused={refreshInterval.pause}
+            filters={filters}
+            query={query}
+            onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
+            onRefreshChange={defaultOnRefreshChange(data.query)}
+            savedQuery={savedQuery}
+            onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
+            onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+            onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+            iconType={props.iconType}
+            nonKqlMode={props.nonKqlMode}
+            customSubmitButton={props.customSubmitButton}
+            isClearable={props.isClearable}
+            placeholder={props.placeholder}
+            {...overrideDefaultBehaviors(props)}
+            dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+            textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
+            onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
+            displayStyle={props.displayStyle}
+            isScreenshotMode={isScreenshotMode}
+          />
+        </core.i18n.Context>
       </KibanaContextProvider>
     );
   };

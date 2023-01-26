@@ -13,6 +13,7 @@ import type {
   PackageInfo,
   RegistryVarsEntry,
   RegistryDataStream,
+  InstallablePackage,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
@@ -20,7 +21,7 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   type: 'text',
   title: 'Dataset name',
   description:
-    "Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).\n",
+    "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
   multi: false,
   required: true,
   show_user: true,
@@ -52,7 +53,10 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
   return [input];
 };
 
-export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryDataStream[] => {
+export const getNormalizedDataStreams = (
+  packageInfo: PackageInfo | InstallablePackage,
+  datasetName?: string
+): RegistryDataStream[] => {
   if (packageInfo.type !== 'input') {
     return packageInfo.data_streams || [];
   }
@@ -66,11 +70,12 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
   return policyTemplates.map((policyTemplate) => {
     const dataStream: RegistryDataStream = {
       type: policyTemplate.type,
-      dataset: createDefaultDatasetName(packageInfo, policyTemplate),
+      dataset: datasetName || createDefaultDatasetName(packageInfo, policyTemplate),
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
       path: packageInfo.name,
+      elasticsearch: packageInfo.elasticsearch,
       streams: [
         {
           input: policyTemplate.input,
@@ -104,6 +109,6 @@ const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntr
 };
 
 const createDefaultDatasetName = (
-  packageInfo: PackageInfo,
-  policyTemplate: RegistryPolicyInputOnlyTemplate
+  packageInfo: { name: string },
+  policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;

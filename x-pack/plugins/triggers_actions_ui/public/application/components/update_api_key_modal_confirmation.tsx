@@ -12,11 +12,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 import { useBulkEditResponse } from '../hooks/use_bulk_edit_response';
-import { BulkEditResponse } from '../../types';
+import { BulkEditResponse, RuleTableItem } from '../../types';
 
 export const UpdateApiKeyModalConfirmation = ({
   onCancel,
   idsToUpdate,
+  rulesToUpdate,
   idsToUpdateFilter,
   numberOfSelectedRules = 0,
   apiUpdateApiKeyCall,
@@ -25,7 +26,8 @@ export const UpdateApiKeyModalConfirmation = ({
   onSearchPopulate,
 }: {
   onCancel: () => void;
-  idsToUpdate: string[];
+  idsToUpdate?: string[];
+  rulesToUpdate?: RuleTableItem[];
   idsToUpdateFilter?: KueryNode | null | undefined;
   numberOfSelectedRules?: number;
   apiUpdateApiKeyCall: ({
@@ -50,20 +52,30 @@ export const UpdateApiKeyModalConfirmation = ({
 
   const { showToast } = useBulkEditResponse({ onSearchPopulate });
 
+  const computedIdsToUpdate = useMemo(() => {
+    if (idsToUpdate?.length) {
+      return idsToUpdate;
+    }
+    if (rulesToUpdate?.length) {
+      return rulesToUpdate.map((rule) => rule.id);
+    }
+    return [];
+  }, [idsToUpdate, rulesToUpdate]);
+
   useEffect(() => {
     if (typeof idsToUpdateFilter !== 'undefined') {
       setUpdateModalVisibility(true);
     } else {
-      setUpdateModalVisibility(idsToUpdate.length > 0);
+      setUpdateModalVisibility(computedIdsToUpdate.length > 0);
     }
-  }, [idsToUpdate, idsToUpdateFilter]);
+  }, [computedIdsToUpdate, idsToUpdateFilter]);
 
   const numberOfIdsToUpdate = useMemo(() => {
     if (typeof idsToUpdateFilter !== 'undefined') {
       return numberOfSelectedRules;
     }
-    return idsToUpdate.length;
-  }, [idsToUpdate, idsToUpdateFilter, numberOfSelectedRules]);
+    return computedIdsToUpdate.length;
+  }, [idsToUpdateFilter, numberOfSelectedRules, computedIdsToUpdate]);
 
   return updateModalFlyoutVisible ? (
     <EuiConfirmModal
@@ -81,7 +93,7 @@ export const UpdateApiKeyModalConfirmation = ({
         setIsLoadingState(true);
         try {
           const response = await apiUpdateApiKeyCall({
-            ids: idsToUpdate,
+            ids: computedIdsToUpdate,
             filter: idsToUpdateFilter,
             http,
           });

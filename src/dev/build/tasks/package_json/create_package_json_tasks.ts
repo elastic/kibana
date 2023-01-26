@@ -61,7 +61,7 @@ export const CreatePackageJson: Task = {
       },
       repository: pkg.repository,
       engines: {
-        node: pkg.engines.node,
+        node: pkg.engines?.node,
       },
       resolutions: pkg.resolutions,
       dependencies: foundPkgDeps,

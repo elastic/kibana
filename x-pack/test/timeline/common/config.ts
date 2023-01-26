@@ -10,7 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;

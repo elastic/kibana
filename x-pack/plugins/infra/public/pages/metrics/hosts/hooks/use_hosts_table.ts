@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import type { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
-import { HostMetics } from '../components/hosts_table_columns';
+import { HostMetrics } from '../components/hosts_table_columns';
 
-type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
+type MappedMetrics = Record<keyof HostMetrics, SnapshotNodeMetric>;
 
 export const useHostsTable = (nodes: SnapshotNode[]) => {
   const items = useMemo(() => {
@@ -21,7 +21,7 @@ export const useHostsTable = (nodes: SnapshotNode[]) => {
         cloudProvider: path.at(-1)?.cloudProvider ?? null,
       },
       ...metrics.reduce((data, metric) => {
-        data[metric.name as keyof HostMetics] = metric;
+        data[metric.name as keyof HostMetrics] = metric;
         return data;
       }, {} as MappedMetrics),
     }));

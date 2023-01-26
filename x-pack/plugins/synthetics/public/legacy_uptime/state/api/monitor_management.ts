@@ -18,12 +18,11 @@ import {
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
   ThrottlingOptions,
-  Locations,
-  SyntheticsMonitorSchedule,
 } from '../../../../common/runtime_types';
 import {
   DecryptedSyntheticsMonitorSavedObject,
   SyntheticsServiceAllowed,
+  TestNowResponse,
 } from '../../../../common/types';
 import { apiService } from './utils';
 
@@ -86,14 +85,6 @@ export const runOnceMonitor = async ({
 }): Promise<{ errors: Array<{ error: Error }> }> => {
   return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
 };
-
-export interface TestNowResponse {
-  schedule: SyntheticsMonitorSchedule;
-  locations: Locations;
-  errors?: ServiceLocationErrors;
-  testRunId: string;
-  monitorId: string;
-}
 
 export const triggerTestNowMonitor = async (
   configId: string
