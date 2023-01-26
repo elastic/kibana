@@ -383,13 +383,23 @@ export const expectNoTags = () => {
     .should('not.exist');
 };
 
-export const expectCustomRules = () =>
+export const expectCustomRules = () => {
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectElasticAndCustomRules = () => {
+  cy.get(ELASTIC_RULES_BTN).should('exist');
+  cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+  cy.get(CUSTOM_RULES_BTN).should('exist');
+  cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+};
 
 export const expectNumberOfRules = (
   tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
   expectedNumber: number
-) => cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedNumber);
+) => {
+  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedNumber);
+};
 
 export const expectToContainRule = (
   tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,

@@ -29,6 +29,7 @@ import {
   expectRulesManagementTab,
   expectRulesMonitoringTab,
   expectNoTags,
+  expectElasticAndCustomRules,
 } from '../../tasks/alerts_detection_rules';
 import {
   RULES_MANAGEMENT_TABLE,
@@ -92,6 +93,7 @@ function expectRulesTableState(): void {
 function expectDefaultRulesTableState(): void {
   expectFilterSearchTerm('');
   expectNoTags();
+  expectElasticAndCustomRules();
   expectTableSorting('Enabled', 'desc');
   expectRowsPerPage(20);
   expectTablePage(1);
@@ -338,6 +340,7 @@ describe('Persistent rules table state', () => {
 
         expectFilterSearchTerm('');
         expectNoTags();
+        expectElasticAndCustomRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(2);
@@ -399,6 +402,7 @@ describe('Persistent rules table state', () => {
 
         expectFilterSearchTerm('');
         expectNoTags();
+        expectElasticAndCustomRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(1);

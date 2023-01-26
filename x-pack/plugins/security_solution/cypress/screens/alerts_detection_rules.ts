@@ -13,6 +13,8 @@ export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
 
+export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
+
 export const CUSTOM_RULES_BTN = '[data-test-subj="showCustomRulesFilterButton"]';
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
@@ -33,8 +35,6 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
-
-export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
