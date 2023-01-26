@@ -15,8 +15,11 @@ import {
   EuiText,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { useStartServices } from '../../../../../../../../hooks';
 
 import type {
   ExperimentalDataStreamFeature,
@@ -50,6 +53,8 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
   experimentalDataFeatures,
   setNewExperimentalDataFeatures,
 }) => {
+  const { docLinks } = useStartServices();
+
   const isSyntheticSourceEditable = registryDataStream.elasticsearch?.source_mode !== 'default';
 
   const syntheticSourceExperimentalValue = getExperimentalFeatureValue(
@@ -136,20 +141,46 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesDescription"
-              defaultMessage="Select data streams to configure indexing options. This is an {experimentalFeature} and may have effects on other properties."
-              values={{
-                experimentalFeature: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.fleet.packagePolicyEditor.experimentalFeatureText"
-                      defaultMessage="experimental feature"
-                    />
-                  </strong>
-                ),
-              }}
-            />
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesDescription"
+                defaultMessage="These settings control how your data streams' backing indices are stored. These are {experimentalFeatures} and may have effects on other properties."
+                values={{
+                  experimentalFeatures: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.fleet.packagePolicyEditor.experimentalFeatureText"
+                        defaultMessage="experimental features"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.packagePolicyEditor.stepConfigure.experimentalFeaturesRolloverWarning"
+                defaultMessage="Note: toggling these features requires a {rollover} of your existing data streams to take effect. {learnMoreLink}"
+                values={{
+                  rollover: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.fleet.packagePolicyEditor.experimentalFeatureRolloverText"
+                        defaultMessage="manual rollover"
+                      />
+                    </strong>
+                  ),
+                  learnMoreLink: (
+                    <EuiLink href={docLinks.links.fleet.datastreamsManualRollover} target="_blank">
+                      {i18n.translate(
+                        'xpack.fleet.packagePolicyEditor.experimentalFeatureRolloverLearnMore',
+                        { defaultMessage: 'Learn more' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
           </EuiText>
         </EuiFlexItem>
         <EuiSpacer size="s" />
@@ -172,31 +203,21 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiToolTip
-            content={
+          <EuiSwitch
+            checked={newExperimentalIndexingFeature.tsdb ?? false}
+            data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
+            label={
               <FormattedMessage
-                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBTooltip"
-                defaultMessage="Enabling this feature is irreversible"
+                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBLabel"
+                defaultMessage="Time-series indexing (TSDB)"
               />
             }
-          >
-            <EuiSwitch
-              disabled={newExperimentalIndexingFeature.tsdb ?? false}
-              checked={newExperimentalIndexingFeature.tsdb ?? false}
-              data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBLabel"
-                  defaultMessage="Time-series indexing (TSDB)"
-                />
-              }
-              onChange={(e) => {
-                onIndexingSettingChange({
-                  tsdb: e.target.checked,
-                });
-              }}
-            />
-          </EuiToolTip>
+            onChange={(e) => {
+              onIndexingSettingChange({
+                tsdb: e.target.checked,
+              });
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
