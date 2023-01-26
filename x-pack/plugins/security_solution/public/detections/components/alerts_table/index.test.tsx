@@ -9,9 +9,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import '../../../common/mock/match_media';
-import { TableId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { AlertsTableComponent } from '.';
+import { TableId } from '../../../../common/types';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {

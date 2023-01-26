@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
@@ -15,7 +15,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitor,
-  EncryptedSyntheticsMonitorWithId,
+  SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
 import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -42,7 +42,7 @@ export const deleteMonitorBulk = async ({
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
         id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
-      })) as EncryptedSyntheticsMonitorWithId[],
+      })) as SyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
       spaceId

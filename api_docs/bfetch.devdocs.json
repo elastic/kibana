@@ -1,7 +1,81 @@
 {
   "id": "bfetch",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-public.BfetchRequestError",
+        "type": "Class",
+        "tags": [],
+        "label": "BfetchRequestError",
+        "description": [
+          "\nError thrown when xhr request fails"
+        ],
+        "signature": [
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.BfetchRequestError",
+            "text": "BfetchRequestError"
+          },
+          " extends Error"
+        ],
+        "path": "src/plugins/bfetch/common/bfetch_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-public.BfetchRequestError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nconstructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/bfetch/common/bfetch_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-public.BfetchRequestError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "code",
+                "description": [
+                  "- Xhr error code"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/bfetch/common/bfetch_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-public.BfetchRequestError.code",
+            "type": "number",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/plugins/bfetch/common/bfetch_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "bfetch",
@@ -290,9 +364,9 @@
             "<BatchItemData extends object, BatchItemResult extends object>(path: string, handler: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -335,9 +409,9 @@
                 "(request: ",
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
+                  "section": "def-common.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>) => ",
@@ -369,17 +443,17 @@
             "<Payload, Response>(path: string, params: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
+              "section": "def-common.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>, context: ",
             {
               "pluginId": "@kbn/core-http-request-handler-context-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-              "section": "def-server.RequestHandlerContext",
+              "section": "def-common.RequestHandlerContext",
               "text": "RequestHandlerContext"
             },
             ") => ",
@@ -393,25 +467,25 @@
             "<Payload, Response>, method?: \"GET\" | \"POST\" | \"PUT\" | \"DELETE\" | undefined, pluginRouter?: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.IRouter",
+              "section": "def-common.IRouter",
               "text": "IRouter"
             },
             "<",
             {
               "pluginId": "@kbn/core-http-request-handler-context-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-              "section": "def-server.RequestHandlerContext",
+              "section": "def-common.RequestHandlerContext",
               "text": "RequestHandlerContext"
             },
             "> | undefined, options?: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.RouteConfigOptions",
+              "section": "def-common.RouteConfigOptions",
               "text": "RouteConfigOptions"
             },
             "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined) => void"
@@ -446,17 +520,17 @@
                 "(request: ",
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
+                  "section": "def-common.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>, context: ",
                 {
                   "pluginId": "@kbn/core-http-request-handler-context-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                  "section": "def-server.RequestHandlerContext",
+                  "section": "def-common.RequestHandlerContext",
                   "text": "RequestHandlerContext"
                 },
                 ") => ",
@@ -499,17 +573,17 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.IRouter",
+                  "section": "def-common.IRouter",
                   "text": "IRouter"
                 },
                 "<",
                 {
                   "pluginId": "@kbn/core-http-request-handler-context-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                  "section": "def-server.RequestHandlerContext",
+                  "section": "def-common.RequestHandlerContext",
                   "text": "RequestHandlerContext"
                 },
                 "> | undefined"
@@ -529,9 +603,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.RouteConfigOptions",
+                  "section": "def-common.RouteConfigOptions",
                   "text": "RouteConfigOptions"
                 },
                 "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined"
@@ -565,6 +639,79 @@
   },
   "common": {
     "classes": [
+      {
+        "parentPluginId": "bfetch",
+        "id": "def-common.BfetchRequestError",
+        "type": "Class",
+        "tags": [],
+        "label": "BfetchRequestError",
+        "description": [
+          "\nError thrown when xhr request fails"
+        ],
+        "signature": [
+          {
+            "pluginId": "bfetch",
+            "scope": "common",
+            "docId": "kibBfetchPluginApi",
+            "section": "def-common.BfetchRequestError",
+            "text": "BfetchRequestError"
+          },
+          " extends Error"
+        ],
+        "path": "src/plugins/bfetch/common/bfetch_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BfetchRequestError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nconstructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/bfetch/common/bfetch_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "bfetch",
+                "id": "def-common.BfetchRequestError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "code",
+                "description": [
+                  "- Xhr error code"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/plugins/bfetch/common/bfetch_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "bfetch",
+            "id": "def-common.BfetchRequestError.code",
+            "type": "number",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/plugins/bfetch/common/bfetch_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "bfetch",
         "id": "def-common.ItemBuffer",

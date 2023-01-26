@@ -45,7 +45,7 @@ import {
   buildRequiredFieldsDescription,
   buildAlertSuppressionDescription,
 } from './helpers';
-import { buildMlJobsDescription } from './ml_job_description';
+import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { THREAT_QUERY_LABEL } from './translations';

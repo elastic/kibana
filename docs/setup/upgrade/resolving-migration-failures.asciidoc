@@ -133,7 +133,7 @@ Migrations will fail if saved objects belong to an unknown
 saved object type. Unknown saved objects are typically caused by performing manual modifications
 to the {es} index (no longer allowed in 8.x), or by disabling a plugin that had previously created a saved object.
 
-We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant]
+We recommend using the <<upgrade-assistant,Upgrade Assistant>>
 to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
 object types will also log the following warning message:
 

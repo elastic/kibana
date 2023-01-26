@@ -14,6 +14,8 @@ or a similar tool that can generate HTML output from OAS.
 . Generate HTML output. For example:
 
   ```
+  openapi-generator-cli generate -g html -i $GIT_HOME/kibana/x-pack/plugins/alerting/docs/openapi/bundled.yaml -o $GIT_HOME/kibana/docs/api-generated/rules -t $GIT_HOME/kibana/docs/api-generated/template
+
   openapi-generator-cli generate -g html -i $GIT_HOME/kibana/x-pack/plugins/cases/docs/openapi/bundled.yaml -o $GIT_HOME/kibana/docs/api-generated/cases -t $GIT_HOME/kibana/docs/api-generated/template
 
   openapi-generator-cli generate -g html -i $GIT_HOME/kibana/x-pack/plugins/actions/docs/openapi/bundled.yaml -o $GIT_HOME/kibana/docs/api-generated/connectors -t $GIT_HOME/kibana/docs/api-generated/template
@@ -23,9 +25,10 @@ or a similar tool that can generate HTML output from OAS.
 
 . Rename the output files. For example:
   ```
+   mv $GIT_HOME/kibana/docs/api-generated/rules/index.html $GIT_HOME/kibana/docs/api-generated/rules/rule-apis-passthru.asciidoc
   mv $GIT_HOME/kibana/docs/api-generated/cases/index.html $GIT_HOME/kibana/docs/api-generated/cases/case-apis-passthru.asciidoc
   mv $GIT_HOME/kibana/docs/api-generated/connectors/index.html $GIT_HOME/kibana/docs/api-generated/connectors/connector-apis-passthru.asciidoc
-  mv $GIT_HOME/kibana/docs/api-generated/machine-learning/index.html $GIT_HOME/kibana/docs/api-generated/machine-learning/ml-apis-passthru.adoc
+  mv $GIT_HOME/kibana/docs/api-generated/machine-learning/index.html $GIT_HOME/kibana/docs/api-generated/machine-learning/ml-apis-passthru.asciidoc
   ```
 
 . If you're creating a new set of API output, you will need to have a page that incorporates the output by using passthrough blocks. For more information, refer to [Asciidoctor docs](https://docs.asciidoctor.org/asciidoc/latest/pass/pass-block/)

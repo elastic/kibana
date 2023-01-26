@@ -7,16 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface Props {
-  transaction: Transaction;
+  transactionId: string;
 }
 
-export function TransactionMetadata({ transaction }: Props) {
+export function TransactionMetadata({ transactionId }: Props) {
   const { data: transactionEvent, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -25,13 +24,13 @@ export function TransactionMetadata({ transaction }: Props) {
           params: {
             path: {
               processorEvent: ProcessorEvent.transaction,
-              id: transaction.transaction.id,
+              id: transactionId,
             },
           },
         }
       );
     },
-    [transaction.transaction.id]
+    [transactionId]
   );
 
   const sections = useMemo(

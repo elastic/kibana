@@ -214,6 +214,10 @@ export const CasesFindRequestRt = rt.partial({
    */
   searchFields: rt.union([rt.array(rt.string), rt.string]),
   /**
+   * The root fields to perform the simple_query_string parsed query against
+   */
+  rootSearchFields: rt.array(rt.string),
+  /**
    * The field to use for sorting the found objects.
    *
    * This only supports, `create_at`, `closed_at`, and `status`
@@ -325,6 +329,27 @@ export const AllTagsFindRequestRt = rt.partial({
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const CasesBulkGetRequestRt = rt.intersection([
+  rt.type({
+    ids: rt.array(rt.string),
+  }),
+  rt.partial({
+    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
+  }),
+]);
+
+export const CasesBulkGetResponseRt = rt.type({
+  cases: CasesResponseRt,
+  errors: rt.array(
+    rt.type({
+      error: rt.string,
+      message: rt.string,
+      status: rt.union([rt.undefined, rt.number]),
+      caseId: rt.string,
+    })
+  ),
+});
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
@@ -347,3 +372,16 @@ export type AllReportersFindRequest = AllTagsFindRequest;
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
 export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
+
+export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
+export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
+export type CasesBulkGetRequestCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetRequest, 'fields'> & {
+  fields?: Field[];
+};
+export type CasesBulkGetResponseCertainFields<
+  Field extends keyof CaseResponse = keyof CaseResponse
+> = Omit<CasesBulkGetResponse, 'cases'> & {
+  cases: Array<Pick<CaseResponse, Field | 'id' | 'version' | 'owner'>>;
+};

@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { compareFilters } from '@kbn/es-query';
 
 import { pluginServices } from '../services';
-import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
+import { getDefaultControlGroupInput } from '../../common';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -22,60 +25,35 @@ import {
   CONTROL_GROUP_TYPE,
 } from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
-import { DataControlInput } from '../types';
-import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 import { controlGroupReducers } from './state/control_group_reducers';
-
-const ControlGroupInputBuilder = {
-  addDataControlFromField: async (
-    initialInput: Partial<ControlGroupInput>,
-    newPanelInput: {
-      title?: string;
-      panelId?: string;
-      fieldName: string;
-      dataViewId: string;
-    } & Partial<ControlPanelState>
-  ) => {
-    const { defaultControlGrow, defaultControlWidth } = getDefaultControlGroupInput();
-    const controlGrow = initialInput.defaultControlGrow ?? defaultControlGrow;
-    const controlWidth = initialInput.defaultControlWidth ?? defaultControlWidth;
-
-    const { panelId, dataViewId, fieldName, title, grow, width } = newPanelInput;
-    const newPanelId = panelId || uuid.v4();
-    const nextOrder = getNextPanelOrder(initialInput);
-    const controlType = await getCompatibleControlType({ dataViewId, fieldName });
-
-    initialInput.panels = {
-      ...initialInput.panels,
-      [newPanelId]: {
-        order: nextOrder,
-        type: controlType,
-        grow: grow ?? controlGrow,
-        width: width ?? controlWidth,
-        explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
-      } as ControlPanelState<DataControlInput>,
-    };
-  },
-};
+import { controlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
-  onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
-  getCreationOptions: (
-    builder: typeof ControlGroupInputBuilder
+  filters?: Filter[];
+  getInitialInput: (
+    initialInput: Partial<ControlGroupInput>,
+    builder: typeof controlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
+  onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
+  timeRange?: TimeRange;
+  query?: Query;
 }
 
 export const ControlGroupRenderer = ({
-  onEmbeddableLoad,
-  getCreationOptions,
+  onLoadComplete,
+  getInitialInput,
+  filters,
+  timeRange,
+  query,
 }: ControlGroupRendererProps) => {
-  const controlsRoot = useRef(null);
-  const [controlGroupContainer, setControlGroupContainer] = useState<ControlGroupContainer>();
-  const id = useMemo(() => uuid.v4(), []);
+  const controlGroupRef = useRef(null);
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const id = useMemo(() => uuidv4(), []);
   /**
    * Use Lifecycles to load initial control group container
    */
   useLifecycles(
+    // onMount
     () => {
       const { embeddable } = pluginServices.getServices();
       (async () => {
@@ -84,29 +62,50 @@ export const ControlGroupRenderer = ({
           ControlGroupOutput,
           IEmbeddable<ControlGroupInput, ControlGroupOutput>
         >(CONTROL_GROUP_TYPE);
-        const container = (await factory?.create({
+        const newControlGroup = (await factory?.create({
           id,
           ...getDefaultControlGroupInput(),
-          ...(await getCreationOptions(ControlGroupInputBuilder)),
+          ...(await getInitialInput(getDefaultControlGroupInput(), controlGroupInputBuilder)),
         })) as ControlGroupContainer;
 
-        if (controlsRoot.current) {
-          container.render(controlsRoot.current);
+        if (controlGroupRef.current) {
+          newControlGroup.render(controlGroupRef.current);
         }
-        setControlGroupContainer(container);
-        onEmbeddableLoad(container);
+        setControlGroup(newControlGroup);
+        if (onLoadComplete) {
+          onLoadComplete(newControlGroup);
+        }
       })();
     },
+    // onUnmount
     () => {
-      controlGroupContainer?.destroy();
+      controlGroup?.destroy();
     }
   );
 
-  return <div ref={controlsRoot} />;
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+
+    if (
+      (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
+      !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
+      !isEqual(controlGroup.getInput().query, query)
+    ) {
+      controlGroup.updateInput({
+        timeRange,
+        query,
+        filters,
+      });
+    }
+  }, [query, filters, controlGroup, timeRange]);
+
+  return <div ref={controlGroupRef} />;
 };
 
 export const useControlGroupContainerContext = () =>
-  useReduxContainerContext<ControlGroupReduxState, typeof controlGroupReducers>();
+  useReduxEmbeddableContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

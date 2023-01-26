@@ -11,90 +11,62 @@ import React, { useMemo, useState } from 'react';
 import {
   LazyControlGroupRenderer,
   ControlGroupContainer,
-  ControlGroupInput,
   useControlGroupContainerContext,
   ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-interface Props {
-  dataView: DataView;
-}
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-export const BasicReduxExample = ({ dataView }: Props) => {
-  const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
+export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
   const ControlGroupReduxWrapper = useMemo(() => {
-    if (myControlGroup) return myControlGroup.getReduxEmbeddableTools().Wrapper;
-  }, [myControlGroup]);
+    if (controlGroup) return controlGroup.getReduxEmbeddableTools().Wrapper;
+  }, [controlGroup]);
 
   const ButtonControls = () => {
     const {
       useEmbeddableDispatch,
+      useEmbeddableSelector: select,
       actions: { setControlStyle },
     } = useControlGroupContainerContext();
     const dispatch = useEmbeddableDispatch();
+    const controlStyle = select((state) => state.explicitInput.controlStyle);
 
     return (
-      <>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <p>Choose a style for your control group:</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButtonGroup
-              legend="Text style"
-              options={[
-                {
-                  id: `oneLine`,
-                  label: 'One line',
-                  value: 'oneLine' as ControlStyle,
-                },
-                {
-                  id: `twoLine`,
-                  label: 'Two lines',
-                  value: 'twoLine' as ControlStyle,
-                },
-              ]}
-              idSelected={currentControlStyle}
-              onChange={(id, value) => {
-                setCurrentControlStyle(value);
-                dispatch(setControlStyle(value));
-              }}
-              type="single"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </>
+      <EuiButtonGroup
+        legend="Text style"
+        options={[
+          {
+            id: `oneLine`,
+            label: 'One line',
+            value: 'oneLine' as ControlStyle,
+          },
+          {
+            id: `twoLine`,
+            label: 'Two lines',
+            value: 'twoLine' as ControlStyle,
+          },
+        ]}
+        idSelected={controlStyle}
+        onChange={(id, value) => {
+          dispatch(setControlStyle(value));
+        }}
+        type="single"
+      />
     );
   };
 
   return (
     <>
       <EuiTitle>
-        <h2>Basic Redux Example</h2>
+        <h2>Redux example</h2>
       </EuiTitle>
       <EuiText>
-        <p>
-          This example uses the redux context from the control group container in order to
-          dynamically change the style of the control group.
-        </p>
+        <p>Use the redux context from the control group to set layout style.</p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
@@ -105,26 +77,28 @@ export const BasicReduxExample = ({ dataView }: Props) => {
         )}
 
         <ControlGroupRenderer
-          onEmbeddableLoad={async (controlGroup) => {
-            setControlGroup(controlGroup);
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
           }}
-          getCreationOptions={async (controlGroupInputBuilder) => {
-            const initialInput: Partial<ControlGroupInput> = {
-              ...getDefaultControlGroupInput(),
-              defaultControlWidth: 'small',
-            };
-            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
-              fieldName: 'customer_first_name.keyword',
-            });
-            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
-              fieldName: 'customer_last_name.keyword',
+          getInitialInput={async (initialInput, builder) => {
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
+              title: 'Destintion country',
+              fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
-              title: 'Last Name',
             });
-            return initialInput;
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
+              fieldName: 'bytes',
+              width: 'medium',
+              grow: true,
+              title: 'Bytes',
+            });
+            return {
+              ...initialInput,
+              viewMode: ViewMode.VIEW,
+            };
           }}
         />
       </EuiPanel>

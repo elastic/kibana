@@ -39,9 +39,9 @@ export {
 } from './components';
 
 export {
-  useReduxContainerContext,
   useReduxEmbeddableContext,
   lazyLoadReduxEmbeddablePackage,
+  cleanFiltersForSerialize,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
   type ReduxEmbeddablePackage,
@@ -90,3 +90,5 @@ export function plugin() {
 }
 
 export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();
+
+export const getContextProvider = () => pluginServices.getContextProvider();

@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.CoreStatus",
+        "id": "def-common.CoreStatus",
         "type": "Interface",
         "tags": [],
         "label": "CoreStatus",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.CoreStatus.elasticsearch",
+            "id": "def-common.CoreStatus.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -48,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.CoreStatus.savedObjects",
+            "id": "def-common.CoreStatus.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -72,7 +80,7 @@
       },
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatus",
+        "id": "def-common.ServiceStatus",
         "type": "Interface",
         "tags": [],
         "label": "ServiceStatus",
@@ -95,7 +103,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.level",
+            "id": "def-common.ServiceStatus.level",
             "type": "CompoundType",
             "tags": [],
             "label": "level",
@@ -111,7 +119,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.summary",
+            "id": "def-common.ServiceStatus.summary",
             "type": "string",
             "tags": [],
             "label": "summary",
@@ -124,7 +132,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.detail",
+            "id": "def-common.ServiceStatus.detail",
             "type": "string",
             "tags": [],
             "label": "detail",
@@ -140,7 +148,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.documentationUrl",
+            "id": "def-common.ServiceStatus.documentationUrl",
             "type": "string",
             "tags": [],
             "label": "documentationUrl",
@@ -156,7 +164,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.meta",
+            "id": "def-common.ServiceStatus.meta",
             "type": "Uncategorized",
             "tags": [],
             "label": "meta",
@@ -175,7 +183,7 @@
       },
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.StatusServiceSetup",
+        "id": "def-common.StatusServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "StatusServiceSetup",
@@ -188,7 +196,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.core$",
+            "id": "def-common.StatusServiceSetup.core$",
             "type": "Object",
             "tags": [],
             "label": "core$",
@@ -213,7 +221,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.overall$",
+            "id": "def-common.StatusServiceSetup.overall$",
             "type": "Object",
             "tags": [],
             "label": "overall$",
@@ -238,7 +246,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.set",
+            "id": "def-common.StatusServiceSetup.set",
             "type": "Function",
             "tags": [],
             "label": "set",
@@ -264,7 +272,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-status-server",
-                "id": "def-server.StatusServiceSetup.set.$1",
+                "id": "def-common.StatusServiceSetup.set.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "status$",
@@ -291,7 +299,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.dependencies$",
+            "id": "def-common.StatusServiceSetup.dependencies$",
             "type": "Object",
             "tags": [],
             "label": "dependencies$",
@@ -316,7 +324,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.derivedStatus$",
+            "id": "def-common.StatusServiceSetup.derivedStatus$",
             "type": "Object",
             "tags": [],
             "label": "derivedStatus$",
@@ -341,7 +349,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.isStatusPageAnonymous",
+            "id": "def-common.StatusServiceSetup.isStatusPageAnonymous",
             "type": "Function",
             "tags": [],
             "label": "isStatusPageAnonymous",
@@ -365,7 +373,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatusLevel",
+        "id": "def-common.ServiceStatusLevel",
         "type": "Type",
         "tags": [],
         "label": "ServiceStatusLevel",
@@ -382,7 +390,7 @@
       },
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatusLevelId",
+        "id": "def-common.ServiceStatusLevelId",
         "type": "Type",
         "tags": [],
         "label": "ServiceStatusLevelId",
@@ -401,7 +409,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatusLevels",
+        "id": "def-common.ServiceStatusLevels",
         "type": "Object",
         "tags": [],
         "label": "ServiceStatusLevels",
@@ -417,13 +425,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

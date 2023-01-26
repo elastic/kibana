@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
+    "outDir": "target/types",
   },
   "include": [
     "index.ts",
@@ -11,11 +11,15 @@
     "server/**/*.ts",
     "../../typings/**/*",
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
-    { "path": "../../src/plugins/data/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/aiops-utils",
+    "@kbn/config-schema",
   ]
 }

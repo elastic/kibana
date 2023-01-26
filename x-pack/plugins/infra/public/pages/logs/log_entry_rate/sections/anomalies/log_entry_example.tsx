@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';

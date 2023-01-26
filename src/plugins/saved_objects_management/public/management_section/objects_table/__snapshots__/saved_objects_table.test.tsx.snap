@@ -47,6 +47,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
       },
     ]
   }
+  showPlainSpinner={false}
 />
 `;
 
@@ -228,7 +229,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       goInspectObject={[Function]}
       isSearching={false}
-      itemId="id"
+      itemId={[Function]}
       items={
         Array [
           Object {

@@ -15,6 +15,12 @@ export { CONTROL_GROUP_TYPE } from './types';
 export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
 
 export {
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
+  controlGroupInputBuilder,
+} from './control_group_input_builder';
+
+export {
   type ControlGroupRendererProps,
   useControlGroupContainerContext,
 } from './control_group_renderer';

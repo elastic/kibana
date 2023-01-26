@@ -22,15 +22,16 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_CREATED_BY,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
 } from '@kbn/rule-data-utils';
 
-import type { TGridModel } from '@kbn/timelines-plugin/public';
-
 import { lastValueFrom } from 'rxjs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { DataTableModel } from '../../../common/store/data_table/types';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -50,7 +51,6 @@ import type {
   GetExceptionFilter,
   CreateTimeline,
 } from './types';
-import type { Ecs } from '../../../../common/ecs';
 import type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
@@ -448,7 +448,7 @@ const createThresholdTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -474,6 +474,7 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
+    const ruleAuthor = getField(alertDoc, ALERT_RULE_CREATED_BY);
     const filters: Filter[] =
       (params as MightHaveFilters).filters ??
       (alertDoc.signal?.rule as MightHaveFilters)?.filters ??
@@ -522,6 +523,7 @@ const createThresholdTimeline = async (
       },
       to: thresholdTo,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -603,7 +605,7 @@ const createNewTermsTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -768,7 +770,7 @@ const createSuppressedTimeline = async (
     filters?: Filter[];
     query?: string;
     dataProviders?: DataProvider[];
-    columns?: TGridModel['columns'];
+    columns?: DataTableModel['columns'];
   },
   getExceptionFilter: GetExceptionFilter
 ) => {
@@ -941,6 +943,7 @@ export const sendAlertToTimelineAction = async ({
 
   const ecsData: Ecs = Array.isArray(ecs) ? ecs[0] : ecs;
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const ruleAuthor = getField(ecsData, ALERT_RULE_CREATED_BY);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId = !isEmpty(ruleTimelineId)
@@ -1063,6 +1066,7 @@ export const sendAlertToTimelineAction = async ({
             },
             to,
             ruleNote: noteContent,
+            ruleAuthor,
             notes: notes ?? null,
           });
         }
@@ -1128,6 +1132,7 @@ export const sendAlertToTimelineAction = async ({
       },
       to,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   }
 };

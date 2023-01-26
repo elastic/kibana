@@ -1,0 +1,13 @@
+{
+  "id": "alertsFixtures",
+  "owner": {
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["taskManager", "features", "actions", "alerting", "encryptedSavedObjects", "ruleRegistry"],
+  "optionalPlugins": ["security", "spaces"],
+  "server": true,
+  "ui": false
+}

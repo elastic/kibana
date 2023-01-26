@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiAccordion,
@@ -32,6 +32,19 @@ export const DefaultPipelineItem: React.FC<{
   pipelineName: string;
   pipelineState: IngestPipelineParams;
 }> = ({ index, indexName, ingestionMethod, openModal, pipelineName, pipelineState }) => {
+  /**
+   * If we don't open the accordion on load, the curl code never shows the copy button
+   * Because if the accordion is closed, the code block is not present in the DOM
+   * And EuiCodeBlock doesn't show the copy button if it's virtualized (ie not present in DOM)
+   * It doesn't re-evaluate whether it's present in DOM if the inner text doesn't change
+   * Opening and closing makes sure it's present in DOM on initial load, so the copy button shows
+   * We use setImmediate to then close it on the next javascript loop
+   */
+  const [accordionOpen, setAccordionOpen] = useState<boolean>(true);
+  useEffect(() => {
+    setImmediate(() => setAccordionOpen(false));
+  }, []);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
@@ -65,6 +78,8 @@ export const DefaultPipelineItem: React.FC<{
                   { defaultMessage: 'Ingest a document using cURL' }
                 )}
                 id="ingestPipelinesCurlAccordion"
+                forceState={accordionOpen ? 'open' : 'closed'}
+                onClick={() => setAccordionOpen(!accordionOpen)}
               >
                 <CurlRequest
                   document={{ body: 'body', title: 'Title' }}

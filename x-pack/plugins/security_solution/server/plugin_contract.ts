@@ -10,6 +10,7 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginSetupContract as AlertingPluginSetup,
@@ -37,6 +38,9 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -55,6 +59,8 @@ export interface SecuritySolutionPluginSetupDependencies {
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
+  guidedOnboarding: GuidedOnboardingPluginSetup;
+  unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
@@ -62,6 +68,7 @@ export interface SecuritySolutionPluginStartDependencies {
   cases?: CasesPluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
   licensing: LicensingPluginStart;
@@ -70,6 +77,7 @@ export interface SecuritySolutionPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
+  share: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

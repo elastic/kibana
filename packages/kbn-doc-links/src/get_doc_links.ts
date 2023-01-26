@@ -124,6 +124,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
+      behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
@@ -375,13 +376,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         linux_deadlock: `${SECURITY_SOLUTION_DOCS}ts-management.html#linux-deadlock`,
       },
       packageActionTroubleshooting: {
-        // TODO: Pending to be updated when docs are ready
-        es_connection: '',
+        es_connection: `${SECURITY_SOLUTION_DOCS}ts-management.html`,
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
       configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
       exceptions: {
-        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html`,
+        value_lists: `${SECURITY_SOLUTION_DOCS}value-lists-exceptions.html`,
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
@@ -489,6 +489,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
       slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
+      connectors: `${KIBANA_DOCS}action-types.html`,
+    },
+    taskManager: {
+      healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
     },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,
@@ -685,7 +689,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       netIntroduction: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/introduction.html`,
       netNest: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/nest.html`,
       netSingleNode: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/connecting.html#single-node`,
-      perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
       phpConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/connecting.html`,
       phpInstallation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/installation.html`,
       phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,

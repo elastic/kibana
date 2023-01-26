@@ -15,10 +15,11 @@ export {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
 } from './lib';
 
 // future enhancement: make these configurable?
-export const MAX_INTERVALS = 1000;
 export const MAX_GROUPS = 1000;
 export const DEFAULT_GROUPS = 100;
 

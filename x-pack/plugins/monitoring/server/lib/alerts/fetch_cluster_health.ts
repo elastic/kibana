@@ -15,7 +15,8 @@ import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  filterQuery?: string
+  filterQuery?: string,
+  duration: string = '2m'
 ): Promise<AlertClusterHealth[]> {
   const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
@@ -58,7 +59,7 @@ export async function fetchClusterHealth(
             {
               range: {
                 timestamp: {
-                  gte: 'now-2m',
+                  gte: `now-${duration}`,
                 },
               },
             },

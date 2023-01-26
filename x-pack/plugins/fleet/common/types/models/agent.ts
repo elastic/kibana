@@ -22,13 +22,19 @@ export type AgentStatus =
   | 'error'
   | 'online'
   | 'inactive'
-  | 'warning'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
-export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+export type SimplifiedAgentStatus =
+  | 'healthy'
+  | 'unhealthy'
+  | 'updating'
+  | 'offline'
+  | 'inactive'
+  | 'unenrolled';
 
 export type AgentActionType =
   | 'UNENROLL'
@@ -54,6 +60,7 @@ export interface NewAgentAction {
   expiration?: string;
   start_time?: string;
   minimum_execution_duration?: number;
+  rollout_duration_seconds?: number;
   source_uri?: string;
   total?: number;
 }
@@ -92,6 +99,11 @@ interface AgentBase {
   components?: FleetServerAgentComponent[];
 }
 
+export interface AgentMetrics {
+  cpu_avg?: number;
+  memory_size_byte_avg?: number;
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
@@ -107,6 +119,7 @@ export interface Agent extends AgentBase {
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
+  metrics?: AgentMetrics;
 }
 
 export interface AgentSOAttributes extends AgentBase {
@@ -135,7 +148,7 @@ export interface ActionStatus {
   type?: string;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
-  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
   expiration?: string;
   completionTime?: string;
   cancellationTime?: string;
@@ -346,9 +359,15 @@ export interface FleetServerAgentAction {
   start_time?: string;
 
   /**
+   * @deprecated
    * Minimun execution duration in seconds, used for progressive rollout of the action.
    */
   minimum_execution_duration?: number;
+
+  /**
+   * Rollout duration in seconds, used for progressive rollout of the action.
+   */
+  rollout_duration_seconds?: number;
 
   /**
    * The opaque payload.

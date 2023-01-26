@@ -80,6 +80,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         await validateRuleDefaultExceptionList({
           exceptionsList: params.exceptions_list,
           rulesClient,
+          ruleRuleId: params.rule_id,
           ruleId: params.id,
         });
 

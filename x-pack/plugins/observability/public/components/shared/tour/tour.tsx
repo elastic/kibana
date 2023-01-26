@@ -173,7 +173,7 @@ export function ObservabilityTour({
   const isGuidedOnboardingActive = useObservable(
     // if guided onboarding is not available, return false
     guidedOnboardingApi
-      ? guidedOnboardingApi.isGuideStepActive$('observability', 'tour_observability')
+      ? guidedOnboardingApi.isGuideStepActive$('kubernetes', 'tour_observability')
       : of(false)
   );
 
@@ -193,7 +193,7 @@ export function ObservabilityTour({
   const endTour = useCallback(async () => {
     // Mark the onboarding guide step as complete
     if (guidedOnboardingApi) {
-      await guidedOnboardingApi.completeGuideStep('observability', 'tour_observability');
+      await guidedOnboardingApi.completeGuideStep('kubernetes', 'tour_observability');
     }
     // Reset EuiTour step state
     setActiveStep(1);

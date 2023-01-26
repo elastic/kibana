@@ -50,12 +50,15 @@ export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 // Endpoint API routes
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
-export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;
+export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+
+/** Suggestions routes */
+export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
 
 /** Host Isolation Routes */
 export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
@@ -75,8 +78,10 @@ export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
-export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/{agent_id}/file`;
-export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/{agent_id}/file/download`;
+export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
+export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
+
+// FIXME:PT `const` below seem like a duplicate. Delete it
 export const ENDPOINTS_ACTION_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
 
 export const failedFleetActionErrorCode = '424';
@@ -87,3 +92,5 @@ export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,
 };
+
+export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';

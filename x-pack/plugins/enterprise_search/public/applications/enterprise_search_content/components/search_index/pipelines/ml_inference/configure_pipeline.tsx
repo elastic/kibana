@@ -30,6 +30,7 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
+import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
@@ -275,6 +276,7 @@ export const ConfigurePipeline: React.FC = () => {
               setInferencePipelineConfiguration({
                 ...configuration,
                 modelID: value,
+                inferenceConfig: undefined,
               })
             }
             options={modelOptions}
@@ -357,6 +359,7 @@ export const ConfigurePipeline: React.FC = () => {
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <InferenceConfiguration />
       </EuiForm>
     </>
   );

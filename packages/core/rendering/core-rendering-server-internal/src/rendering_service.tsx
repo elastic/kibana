@@ -17,6 +17,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -32,8 +33,8 @@ import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
-  | RenderingSetupDeps;
+  | RenderingSetupDeps
+  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never; customBranding?: never });
 
 /** @internal */
 export class RenderingService {
@@ -65,6 +66,7 @@ export class RenderingService {
     http,
     status,
     uiPlugins,
+    customBranding,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -77,16 +79,21 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status }),
+      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status, customBranding }),
     };
   }
 
   private async render(
-    { elasticsearch, http, uiPlugins, status }: RenderOptions,
+    renderOptions: RenderOptions,
     request: KibanaRequest,
-    uiSettings: IUiSettingsClient,
+    uiSettings: {
+      client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
+    },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
+    const { elasticsearch, http, uiPlugins, status, customBranding } = renderOptions;
+
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
@@ -95,11 +102,15 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
-      defaults: uiSettings.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
+      defaults: uiSettings.client?.getRegistered() ?? {},
+      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
     };
-
+    const globalSettings = {
+      defaults: uiSettings.globalClient?.getRegistered() ?? {},
+      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
+    };
     let clusterInfo = {};
+    let branding: CustomBranding = {};
     try {
       // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
       if (isAuthenticated(http.auth, request) && elasticsearch) {
@@ -109,6 +120,7 @@ export class RenderingService {
             catchError(() => of({}))
           )
         );
+        branding = await customBranding?.getBrandingFor(request);
       }
     } catch (err) {
       // swallow error
@@ -135,6 +147,11 @@ export class RenderingService {
       darkMode,
       themeVersion,
       stylesheetPaths,
+      customBranding: {
+        faviconSVG: branding?.faviconSVG,
+        faviconPNG: branding?.faviconPNG,
+        pageTitle: branding?.pageTitle,
+      },
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,
@@ -152,6 +169,10 @@ export class RenderingService {
           darkMode,
           version: themeVersion,
         },
+        customBranding: {
+          logo: branding?.logo,
+          customizedLogo: branding?.customizedLogo,
+        },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
         vars: vars ?? {},
@@ -168,6 +189,7 @@ export class RenderingService {
         ),
         legacyMetadata: {
           uiSettings: settings,
+          globalUiSettings: globalSettings,
         },
       },
     };

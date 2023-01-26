@@ -231,7 +231,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://default-registry.co',
+          sourceURI: 'http://default-registry.co',
         },
         monitoring: {
           namespace: 'default',
@@ -267,7 +267,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://default-registry.co',
+          sourceURI: 'http://default-registry.co',
         },
         monitoring: {
           namespace: 'default',
@@ -352,7 +352,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
 
-  it('should return the source_uri from the agent policy', async () => {
+  it('should return the sourceURI from the agent policy', async () => {
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -376,7 +376,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://custom-registry-test',
+          sourceURI: 'http://custom-registry-test',
         },
         monitoring: {
           namespace: 'default',

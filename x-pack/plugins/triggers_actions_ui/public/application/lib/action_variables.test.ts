@@ -64,6 +64,11 @@ const expectedTransformResult = [
     name: 'alert.actionGroupName',
   },
   {
+    description:
+      'A flag on the alert that indicates whether the alert status is changing repeatedly.',
+    name: 'alert.flapping',
+  },
+  {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
     name: 'kibanaBaseUrl',
   },

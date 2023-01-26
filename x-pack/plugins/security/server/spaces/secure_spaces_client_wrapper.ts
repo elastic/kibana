@@ -322,23 +322,20 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
         [new Set<string>(), new Map<string, Set<string>>()]
       );
 
-      const { typeMap } = await this.securityExtension.checkAuthorization({
-        types: new Set(typesAndSpaces.keys()),
-        spaces: uniqueSpaces,
-        actions: new Set(['bulk_update']),
-      });
       let error: Error | undefined;
       try {
-        await this.securityExtension.enforceAuthorization({
-          typesAndSpaces,
-          action: 'bulk_update',
-          typeMap,
+        await this.securityExtension.performAuthorization({
+          actions: new Set(['bulk_update']),
+          types: new Set(typesAndSpaces.keys()),
+          spaces: uniqueSpaces,
+          enforceMap: typesAndSpaces,
         });
       } catch (err) {
         error = this.errors.decorateForbiddenError(
           new Error(`Unable to disable aliases: ${err.message}`)
         );
       }
+
       for (const alias of aliases) {
         const id = getAliasId(alias);
         this.securityExtension.addAuditEvent({

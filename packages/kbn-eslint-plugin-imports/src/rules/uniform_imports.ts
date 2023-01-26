@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import Eslint from 'eslint';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getRelativeImportReq, getPackageRelativeImportReq } from '@kbn/import-resolver';
 
 import { report } from '../helpers/report';
@@ -54,8 +54,9 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
         return;
       }
 
-      const packageId = resolver.getPackageIdForPath(absolute);
-      if (ownPackageId && !packageId) {
+      const { pkgId } = result;
+
+      if (ownPackageId && !pkgId) {
         // special cases, files that aren't in packages but packages are allowed to import them
         if (
           absolute === PKGJSON_PATH ||
@@ -74,11 +75,12 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
         }
       }
 
-      if (packageId === ownPackageId || !packageId) {
+      if (pkgId === ownPackageId || !pkgId) {
         const correct = getRelativeImportReq({
           ...result,
           original: req,
           dirname: sourceDirname,
+          sourcePath,
           type,
         });
 
@@ -92,11 +94,11 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
         return;
       }
 
-      const packageDir = resolver.getAbsolutePackageDir(packageId);
+      const packageDir = resolver.getAbsolutePackageDir(pkgId);
       if (!packageDir) {
         report(context, {
           node,
-          message: `Unable to determine location of package [${packageId}]`,
+          message: `Unable to determine location of package [${pkgId}]`,
         });
         return;
       }
@@ -104,9 +106,10 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
       const correct = getPackageRelativeImportReq({
         ...result,
         packageDir,
-        packageId,
+        pkgId,
         type,
       });
+
       if (req !== correct) {
         report(context, {
           node,

@@ -6758,6 +6758,12 @@
                       "_meta": {
                         "description": "Indicates if security headers to disable embedding have been configured."
                       }
+                    },
+                    "crossOriginOpenerPolicy": {
+                      "type": "keyword",
+                      "_meta": {
+                        "description": "The crossOriginOpenerPolicy response header, \"NULL\" if disabled."
+                      }
                     }
                   }
                 }
@@ -8844,12 +8850,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "visualization:visualize:legacyPieChartsLibrary": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "visualization:visualize:legacyHeatmapChartsLibrary": {
           "type": "boolean",
           "_meta": {
@@ -8930,6 +8930,12 @@
         },
         "observability:apmAWSLambdaRequestCostPerMillion": {
           "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:profilingElasticsearchPlugin": {
+          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -9030,12 +9036,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "lens:useFieldExistenceSampling": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "metrics:allowCheckingForFailedShards": {
           "type": "boolean",
           "_meta": {
@@ -9046,12 +9046,6 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
-          }
-        },
-        "observability:apmOperationsTab": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
           }
         },
         "observability:apmLabsButton": {
@@ -9120,7 +9114,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "enterpriseSearch:enableBehavioralAnalyticsSection": {
+        "enterpriseSearch:enableEnginesSection": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

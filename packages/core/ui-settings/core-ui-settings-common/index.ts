@@ -12,4 +12,5 @@ export type {
   UiSettingsParams,
   PublicUiSettingsParams,
   UserProvidedValues,
+  UiSettingsScope,
 } from './src/ui_settings';

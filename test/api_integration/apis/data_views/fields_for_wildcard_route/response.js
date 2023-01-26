@@ -90,6 +90,16 @@ export default function ({ getService }) {
         .then(ensureFieldsAreSorted);
     });
 
+    it('returns a single field as requested', async () => {
+      await supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({ pattern: 'basic_index', fields: JSON.stringify(['bar']) })
+        .expect(200, {
+          fields: [testFields[0]],
+          indices: ['basic_index'],
+        });
+    });
+
     it('always returns a field for all passed meta fields', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')

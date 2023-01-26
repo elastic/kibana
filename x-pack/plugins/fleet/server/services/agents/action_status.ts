@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -69,12 +70,15 @@ export async function getActionStatuses(
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
     const cardinalityCount = (matchingBucket?.agent_count as any)?.value ?? 0;
     const docCount = matchingBucket?.doc_count ?? 0;
-    const nbAgentsAck = Math.min(
-      docCount,
-      // only using cardinality count when count lower than precision threshold
-      docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
-      nbAgentsActioned
-    );
+    const nbAgentsAck =
+      action.type === 'UPDATE_TAGS'
+        ? Math.min(docCount, nbAgentsActioned)
+        : Math.min(
+            docCount,
+            // only using cardinality count when count lower than precision threshold
+            docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
+            nbAgentsActioned
+          );
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
@@ -125,7 +129,7 @@ export async function getActionStatuses(
           : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
-      completionTime: complete ? completionTime : undefined,
+      completionTime,
     });
   }
 
@@ -201,7 +205,11 @@ async function _getActions(
           startTime: source.start_time,
           type: source.type,
           nbAgentsActioned: source.total ?? 0,
-          status: isExpired ? 'EXPIRED' : 'IN_PROGRESS',
+          status: isExpired
+            ? 'EXPIRED'
+            : hasRolloutPeriodPassed(source)
+            ? 'ROLLOUT_PASSED'
+            : 'IN_PROGRESS',
           expiration: source.expiration,
           newPolicyId: source.data?.policy_id as string,
           creationTime: source['@timestamp']!,
@@ -215,3 +223,11 @@ async function _getActions(
     }, {} as { [k: string]: ActionStatus })
   );
 }
+
+export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
+  source.type === 'UPGRADE' && source.rollout_duration_seconds
+    ? Date.now() >
+      moment(source.start_time ?? Date.now())
+        .add(source.rollout_duration_seconds, 'seconds')
+        .valueOf()
+    : false;

@@ -31,20 +31,6 @@
   align-items: center;
 }
 
-.dscFieldList {
-  padding: 0 $euiSizeXS $euiSizeXS;
-}
-
-.dscFieldListHeader {
-  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
-.dscFieldList--popular {
-  padding-bottom: $euiSizeS;
-  background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
 .dscSidebarItem {
   &:hover,
   &:focus-within,

@@ -90,6 +90,7 @@ export const createRuleRoute = (
         await validateRuleDefaultExceptionList({
           exceptionsList: request.body.exceptions_list,
           rulesClient,
+          ruleRuleId: undefined,
           ruleId: undefined,
         });
 

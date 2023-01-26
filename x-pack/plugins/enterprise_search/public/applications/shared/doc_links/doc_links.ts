@@ -34,6 +34,7 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public behavioralAnalyticsEvents: string;
   public bulkApi: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
@@ -148,6 +149,7 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.behavioralAnalyticsEvents = '';
     this.bulkApi = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
@@ -264,6 +266,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
@@ -276,7 +279,6 @@ class DocLinks {
     this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
     this.clientsNetNest = docLinks.links.clients.netNest;
     this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
-    this.clientsPerlGuide = docLinks.links.clients.perlGuide;
     this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
     this.clientsPhpGuide = docLinks.links.clients.phpGuide;
     this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;

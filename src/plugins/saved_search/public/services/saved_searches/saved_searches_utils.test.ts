@@ -41,6 +41,7 @@ describe('saved_searches_utils', () => {
         )
       ).toMatchInlineSnapshot(`
         Object {
+          "breakdownField": undefined,
           "columns": Array [
             "a",
             "b",
@@ -128,6 +129,7 @@ describe('saved_searches_utils', () => {
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
         Object {
+          "breakdownField": undefined,
           "columns": Array [
             "c",
             "d",

@@ -6,15 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
-import { incrementApiUsageCounter } from '..';
+import { promisify } from 'util';
 import { ReportingCore } from '../..';
-import { API_BASE_URL } from '../../../common/constants';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { jobsQueryFactory } from '../lib/jobs_query';
-import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
-import { handleUnavailable } from '../lib/request_handler';
+import { ALLOWED_JOB_CONTENT_TYPES, API_BASE_URL } from '../../../common/constants';
+import { getContentStream } from '../../lib';
+import {
+  authorizedUserPreRouting,
+  getCounters,
+  handleUnavailable,
+  jobManagementPreRouting,
+  jobsQueryFactory,
+} from '../lib';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -39,7 +42,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -54,6 +57,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         const size = Math.min(100, parseInt(querySize, 10) || 10);
         const jobIds = queryIds ? queryIds.split(',') : null;
         const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
+
+        counters.usageCounter();
 
         return res.ok({
           body: results,
@@ -75,7 +80,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         validate: false,
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -87,6 +92,8 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         } = await reporting.getLicenseInfo();
 
         const count = await jobsQuery.count(jobTypes, user);
+
+        counters.usageCounter();
 
         return res.ok({
           body: count.toString(),
@@ -112,7 +119,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -120,33 +127,14 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
-
-        const result = await jobsQuery.get(user, docId);
-
-        if (!result) {
-          return res.notFound();
-        }
-
-        const { jobtype: jobType } = result;
-
-        if (!jobTypes.includes(jobType)) {
-          return res.forbidden({
-            body: i18n.translate('xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage', {
-              defaultMessage: 'Sorry, you are not authorized to view {jobType} info',
-              values: { jobType },
-            }),
-          });
-        }
-
-        return res.ok({
-          body: result,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
+        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) =>
+          res.ok({
+            body: doc,
+            headers: {
+              'content-type': 'application/json',
+            },
+          })
+        );
       })
     );
   };
@@ -166,7 +154,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         options: { tags: [ROUTE_TAG_CAN_REDIRECT] },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -174,11 +162,26 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
 
-        return downloadJobResponseHandler(reporting, res, jobTypes, user, { docId });
+        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
+          const payload = await jobsQuery.getDocumentPayload(doc);
+
+          if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
+            return res.badRequest({
+              body: `Unsupported content-type of ${payload.contentType} specified by job output`,
+            });
+          }
+
+          return res.custom({
+            body:
+              typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
+            statusCode: payload.statusCode,
+            headers: {
+              ...payload.headers,
+              'content-type': payload.contentType,
+            },
+          });
+        });
       })
     );
   };
@@ -197,7 +200,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         // ensure the async dependencies are loaded
         if (!context.reporting) {
@@ -205,11 +208,19 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        const {
-          management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
 
-        return deleteJobResponseHandler(reporting, res, jobTypes, user, { docId });
+        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
+          const docIndex = doc.index;
+          const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+
+          /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
+          await promisify(stream.end.bind(stream, '', 'utf8'))();
+          await jobsQuery.delete(docIndex, docId);
+
+          return res.ok({
+            body: { deleted: true },
+          });
+        });
       })
     );
   };

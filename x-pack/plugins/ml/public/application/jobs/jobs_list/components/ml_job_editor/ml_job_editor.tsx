@@ -23,6 +23,7 @@ interface MlJobEditorProps {
   syntaxChecking?: boolean;
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
+  'data-test-subj'?: string;
   schema?: object;
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
@@ -34,6 +35,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   syntaxChecking = true,
   theme = 'textmate',
   onChange = () => {},
+  'data-test-subj': dataTestSubj,
   schema,
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
@@ -52,7 +54,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
       width={width}
       height={height}
       onChange={onChange}
-      languageConfiguration={{}}
+      data-test-subj={dataTestSubj}
       editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
         if (schema) {
           monaco.languages.json.jsonDefaults.setDiagnosticsOptions({

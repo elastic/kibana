@@ -339,6 +339,20 @@
         },
         {
           "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.telemetry",
+          "type": "Object",
+          "tags": [],
+          "label": "telemetry",
+          "description": [],
+          "signature": [
+            "ITelemetryClient"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.ContainerMetricsTable",
           "type": "Function",
           "tags": [],
@@ -655,9 +669,9 @@
             "(savedObjectsClient: ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-server.SavedObjectsClientContract",
+              "section": "def-common.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
             ", sourceId?: string | undefined) => Promise<string>"
@@ -676,9 +690,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-server.SavedObjectsClientContract",
+                  "section": "def-common.SavedObjectsClientContract",
                   "text": "SavedObjectsClientContract"
                 }
               ],

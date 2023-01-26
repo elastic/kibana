@@ -52,7 +52,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
                 lines={4}
                 data-test-subj="exceptionItemViewerEmptyPrompts-loading"
               />
-            ) : null
+            ) : undefined
           }
           pagination={pagination}
           onTableChange={onTableChange}

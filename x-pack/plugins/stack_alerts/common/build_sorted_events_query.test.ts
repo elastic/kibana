@@ -57,9 +57,6 @@ describe('buildSortedEventsQuery', () => {
                   ],
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -107,9 +104,6 @@ describe('buildSortedEventsQuery', () => {
                     },
                   ],
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -160,9 +154,6 @@ describe('buildSortedEventsQuery', () => {
                   ],
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -212,9 +203,6 @@ describe('buildSortedEventsQuery', () => {
                     },
                   ],
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },
@@ -271,9 +259,6 @@ describe('buildSortedEventsQuery', () => {
                   ],
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -329,9 +314,6 @@ describe('buildSortedEventsQuery', () => {
                   ],
                 },
               },
-              {
-                match_all: {},
-              },
             ],
           },
         },
@@ -379,9 +361,6 @@ describe('buildSortedEventsQuery', () => {
                     },
                   ],
                 },
-              },
-              {
-                match_all: {},
               },
             ],
           },

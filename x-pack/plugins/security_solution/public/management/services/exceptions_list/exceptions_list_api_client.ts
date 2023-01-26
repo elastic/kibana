@@ -94,6 +94,10 @@ export class ExceptionsListApiClient {
     return this.http === coreHttp;
   }
 
+  protected getHttp(): HttpStart {
+    return this.http;
+  }
+
   /**
    * Static method to get a fresh or existing instance.
    * It will ensure we only check and create the list once.

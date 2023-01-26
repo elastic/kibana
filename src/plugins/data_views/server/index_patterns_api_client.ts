@@ -26,7 +26,8 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     type,
     rollupIndex,
     allowNoIndex,
-    filter,
+    indexFilter,
+    fields,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     return await indexPatterns
@@ -35,7 +36,8 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         metaFields,
         type,
         rollupIndex,
-        filter,
+        indexFilter,
+        fields,
       })
       .catch((err) => {
         if (

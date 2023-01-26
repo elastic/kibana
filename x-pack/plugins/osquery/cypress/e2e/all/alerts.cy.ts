@@ -10,6 +10,7 @@ import {
   RESPONSE_ACTIONS_ITEM_1,
   RESPONSE_ACTIONS_ITEM_2,
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
+  RESPONSE_ACTIONS_ITEM_3,
 } from '../../tasks/response_actions';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
@@ -31,14 +32,17 @@ describe('Alert Event Details', () => {
 
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
+
   beforeEach(() => {
     login(ROLES.soc_manager);
   });
 
   after(() => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
@@ -144,18 +148,87 @@ describe('Alert Event Details', () => {
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRule');
     cy.contains('Save changes').click();
+    cy.wait('@saveRule').should(({ request }) => {
+      const oneQuery = [
+        {
+          interval: 10,
+          query: 'select * from uptime;',
+          id: 'fds',
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+    });
+
     cy.contains(`${RULE_NAME} was saved`).should('exist');
     cy.getBySel('toastCloseButton').click();
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('testpack');
+      cy.getBySel('comboBoxInput').type('Example{downArrow}{enter}');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
+    });
+    cy.contains('Save changes').click();
+    cy.wait('@saveRule').should(({ request }) => {
+      const threeQueries = [
+        {
+          interval: 3600,
+          query: 'SELECT * FROM memory_info;',
+          platform: 'linux',
+          id: 'system_memory_linux_elastic',
+        },
+        {
+          interval: 3600,
+          query: 'SELECT * FROM system_info;',
+          id: 'system_info_elastic',
+        },
+        {
+          interval: 10,
+          query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+          id: 'failingQuery',
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
+    });
+  });
+
+  it('should be able to add investigation guides to response actions', () => {
+    const investigationGuideNote =
+      'It seems that you have suggested queries in investigation guide, would you like to add them as response actions?';
+    cy.visit('/app/security/rules');
+    cy.contains(RULE_NAME).click();
+    cy.contains('Edit rule settings').click();
+    cy.getBySel('edit-rule-actions-tab').wait(500).click();
+
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.contains('Example');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
+      cy.contains('select * from uptime');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_2).should('not.exist');
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_3).should('not.exist');
+    cy.contains(investigationGuideNote);
+    cy.getBySel('osqueryAddInvestigationGuideQueries').click();
+    cy.contains(investigationGuideNote).should('not.exist');
+
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+      cy.contains('Example');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
+      cy.contains('select * from uptime');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
+      cy.contains('SELECT * FROM processes;');
+    });
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_3).within(() => {
+      cy.contains('select * from users');
     });
   });
 

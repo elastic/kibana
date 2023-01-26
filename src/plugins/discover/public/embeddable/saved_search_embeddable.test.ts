@@ -20,8 +20,8 @@ import { of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { VIEW_MODE } from '../components/view_mode_toggle';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { VIEW_MODE } from '../../common/constants';
 
 let discoverComponent: ReactWrapper;
 
@@ -88,7 +88,7 @@ describe('saved search embeddable', () => {
       (input) => (input.lastReloadRequestTime = Date.now())
     );
 
-    return { embeddable };
+    return { embeddable, searchInput };
   };
 
   beforeEach(() => {
@@ -260,5 +260,25 @@ describe('saved search embeddable', () => {
     expect(loadedOutput.loading).toBe(false);
     expect(loadedOutput.rendered).toBe(true);
     expect(loadedOutput.error).not.toBe(undefined);
+  });
+
+  it('a custom title should not start another search which would cause an Abort error', async () => {
+    const search = jest.fn().mockReturnValue(
+      of({
+        rawResponse: { hits: { hits: [], total: 0 } },
+        isPartial: false,
+        isRunning: false,
+      })
+    );
+    const { embeddable, searchInput } = createEmbeddable(search);
+
+    embeddable.render(mountpoint);
+    // wait for data fetching
+    await waitOneTick();
+    expect(search).toHaveBeenCalledTimes(1);
+    embeddable.updateOutput({ title: 'custom title' });
+    embeddable.updateInput(searchInput);
+    await waitOneTick();
+    expect(search).toHaveBeenCalledTimes(1);
   });
 });

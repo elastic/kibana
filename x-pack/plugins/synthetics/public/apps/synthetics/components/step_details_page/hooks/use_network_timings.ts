@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import {
   NETWORK_TIMINGS_FIELDS,
   SYNTHETICS_BLOCKED_TIMINGS,
@@ -14,30 +15,34 @@ import {
   SYNTHETICS_RECEIVE_TIMINGS,
   SYNTHETICS_SEND_TIMINGS,
   SYNTHETICS_SSL_TIMINGS,
-  SYNTHETICS_STEP_DURATION,
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-plugin/common';
-import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
+import { CONTENT_SIZE_LABEL } from './use_network_timings_prev';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
-export const useStepFilters = (prevCheckGroupId?: string) => {
-  const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
+export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   return [
     {
       term: {
-        'monitor.check_group': prevCheckGroupId ?? checkGroupId,
+        'monitor.check_group': checkGroupId,
       },
     },
     {
       term: {
-        'synthetics.step.index': Number(stepIndex),
+        'synthetics.step.index': stepIndex,
       },
     },
   ];
 };
 
-export const useNetworkTimings = () => {
+export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: number) => {
+  const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
+
+  const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
+  const stepIndex = stepIndexArg ?? Number(params.stepIndex);
+
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
       ...acc,
@@ -48,24 +53,20 @@ export const useNetworkTimings = () => {
     {}
   );
 
-  const networkAggs = NETWORK_TIMINGS_FIELDS.reduce(
-    (acc, field) => ({
-      ...acc,
-      [field]: {
-        sum: {
-          field,
-        },
-      },
-    }),
-    {}
-  );
-
-  const { data } = useEsSearch(
+  const { data } = useReduxEsSearch(
     {
-      index: 'synthetics-*',
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
-        runtime_mappings: runTimeMappings,
+        runtime_mappings: {
+          ...runTimeMappings,
+          'synthetics.payload.is_navigation_request': {
+            type: 'boolean',
+          },
+          'synthetics.payload.transfer_size': {
+            type: 'long',
+          },
+        },
         query: {
           bool: {
             filter: [
@@ -74,17 +75,16 @@ export const useNetworkTimings = () => {
                   'synthetics.type': 'journey/network_info',
                 },
               },
-              ...useStepFilters(),
+              {
+                term: {
+                  'synthetics.payload.is_navigation_request': true,
+                },
+              },
+              ...useStepFilters(checkGroupId, stepIndex),
             ],
           },
         },
         aggs: {
-          ...networkAggs,
-          totalDuration: {
-            sum: {
-              field: SYNTHETICS_STEP_DURATION,
-            },
-          },
           dns: {
             sum: {
               field: SYNTHETICS_DNS_TIMINGS,
@@ -125,11 +125,16 @@ export const useNetworkTimings = () => {
               field: SYNTHETICS_TOTAL_TIMINGS,
             },
           },
+          transferSize: {
+            sum: {
+              field: 'synthetics.payload.transfer_size',
+            },
+          },
         },
       },
     },
-    [],
-    { name: 'networkTimings' }
+    [checkGroupId, stepIndex],
+    { name: `stepNetworkTimingsMetrics/${checkGroupId}/${stepIndex}` }
   );
 
   const aggs = data?.aggregations;
@@ -142,10 +147,15 @@ export const useNetworkTimings = () => {
     wait: aggs?.wait.value ?? 0,
     blocked: aggs?.blocked.value ?? 0,
     ssl: aggs?.ssl.value ?? 0,
+    transferSize: aggs?.transferSize.value ?? 0,
   };
 
   return {
     timings,
+    transferSize: {
+      value: timings.transferSize,
+      label: CONTENT_SIZE_LABEL,
+    },
     timingsWithLabels: [
       {
         value: timings.dns,
@@ -176,7 +186,6 @@ export const useNetworkTimings = () => {
         label: SYNTHETICS_WAIT_TIMINGS_LABEL,
       },
     ].sort((a, b) => b.value - a.value),
-    totalDuration: aggs?.totalDuration.value ?? 0,
   };
 };
 

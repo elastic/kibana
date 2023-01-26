@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchClientConfig",
+        "id": "def-common.ElasticsearchClientConfig",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchClientConfig",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.customHeaders",
+            "id": "def-common.ElasticsearchClientConfig.customHeaders",
             "type": "Object",
             "tags": [],
             "label": "customHeaders",
@@ -41,7 +49,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.requestHeadersWhitelist",
+            "id": "def-common.ElasticsearchClientConfig.requestHeadersWhitelist",
             "type": "Array",
             "tags": [],
             "label": "requestHeadersWhitelist",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.maxSockets",
+            "id": "def-common.ElasticsearchClientConfig.maxSockets",
             "type": "number",
             "tags": [],
             "label": "maxSockets",
@@ -66,7 +74,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "id": "def-common.ElasticsearchClientConfig.maxIdleSockets",
             "type": "number",
             "tags": [],
             "label": "maxIdleSockets",
@@ -77,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "id": "def-common.ElasticsearchClientConfig.idleSocketTimeout",
             "type": "Object",
             "tags": [],
             "label": "idleSocketTimeout",
@@ -91,7 +99,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.compression",
+            "id": "def-common.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
             "label": "compression",
@@ -102,7 +110,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.sniffOnStart",
+            "id": "def-common.ElasticsearchClientConfig.sniffOnStart",
             "type": "boolean",
             "tags": [],
             "label": "sniffOnStart",
@@ -113,7 +121,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.sniffOnConnectionFault",
+            "id": "def-common.ElasticsearchClientConfig.sniffOnConnectionFault",
             "type": "boolean",
             "tags": [],
             "label": "sniffOnConnectionFault",
@@ -124,7 +132,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.sniffInterval",
+            "id": "def-common.ElasticsearchClientConfig.sniffInterval",
             "type": "CompoundType",
             "tags": [],
             "label": "sniffInterval",
@@ -138,7 +146,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.username",
+            "id": "def-common.ElasticsearchClientConfig.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -152,7 +160,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.password",
+            "id": "def-common.ElasticsearchClientConfig.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -166,7 +174,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.serviceAccountToken",
+            "id": "def-common.ElasticsearchClientConfig.serviceAccountToken",
             "type": "string",
             "tags": [],
             "label": "serviceAccountToken",
@@ -180,7 +188,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.hosts",
+            "id": "def-common.ElasticsearchClientConfig.hosts",
             "type": "Array",
             "tags": [],
             "label": "hosts",
@@ -194,7 +202,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.keepAlive",
+            "id": "def-common.ElasticsearchClientConfig.keepAlive",
             "type": "CompoundType",
             "tags": [],
             "label": "keepAlive",
@@ -208,7 +216,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.pingTimeout",
+            "id": "def-common.ElasticsearchClientConfig.pingTimeout",
             "type": "CompoundType",
             "tags": [],
             "label": "pingTimeout",
@@ -222,7 +230,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.requestTimeout",
+            "id": "def-common.ElasticsearchClientConfig.requestTimeout",
             "type": "CompoundType",
             "tags": [],
             "label": "requestTimeout",
@@ -236,7 +244,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.caFingerprint",
+            "id": "def-common.ElasticsearchClientConfig.caFingerprint",
             "type": "string",
             "tags": [],
             "label": "caFingerprint",
@@ -250,7 +258,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.ssl",
+            "id": "def-common.ElasticsearchClientConfig.ssl",
             "type": "Object",
             "tags": [],
             "label": "ssl",
@@ -258,9 +266,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClientSslConfig",
+                "section": "def-common.ElasticsearchClientSslConfig",
                 "text": "ElasticsearchClientSslConfig"
               },
               " | undefined"
@@ -274,7 +282,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchClientSslConfig",
+        "id": "def-common.ElasticsearchClientSslConfig",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchClientSslConfig",
@@ -285,7 +293,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientSslConfig.verificationMode",
+            "id": "def-common.ElasticsearchClientSslConfig.verificationMode",
             "type": "CompoundType",
             "tags": [],
             "label": "verificationMode",
@@ -299,7 +307,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientSslConfig.certificate",
+            "id": "def-common.ElasticsearchClientSslConfig.certificate",
             "type": "string",
             "tags": [],
             "label": "certificate",
@@ -313,7 +321,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientSslConfig.certificateAuthorities",
+            "id": "def-common.ElasticsearchClientSslConfig.certificateAuthorities",
             "type": "Array",
             "tags": [],
             "label": "certificateAuthorities",
@@ -327,7 +335,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientSslConfig.key",
+            "id": "def-common.ElasticsearchClientSslConfig.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -341,7 +349,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientSslConfig.keyPassphrase",
+            "id": "def-common.ElasticsearchClientSslConfig.keyPassphrase",
             "type": "string",
             "tags": [],
             "label": "keyPassphrase",
@@ -355,7 +363,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientSslConfig.alwaysPresentCertificate",
+            "id": "def-common.ElasticsearchClientSslConfig.alwaysPresentCertificate",
             "type": "CompoundType",
             "tags": [],
             "label": "alwaysPresentCertificate",
@@ -372,7 +380,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchConfigPreboot",
+        "id": "def-common.ElasticsearchConfigPreboot",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchConfigPreboot",
@@ -385,7 +393,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchConfigPreboot.hosts",
+            "id": "def-common.ElasticsearchConfigPreboot.hosts",
             "type": "Array",
             "tags": [],
             "label": "hosts",
@@ -401,7 +409,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchConfigPreboot.credentialsSpecified",
+            "id": "def-common.ElasticsearchConfigPreboot.credentialsSpecified",
             "type": "boolean",
             "tags": [],
             "label": "credentialsSpecified",
@@ -417,7 +425,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchRequestHandlerContext",
+        "id": "def-common.ElasticsearchRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchRequestHandlerContext",
@@ -430,7 +438,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchRequestHandlerContext.client",
+            "id": "def-common.ElasticsearchRequestHandlerContext.client",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -438,9 +446,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
+                "section": "def-common.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               }
             ],
@@ -453,7 +461,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchServicePreboot",
+        "id": "def-common.ElasticsearchServicePreboot",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchServicePreboot",
@@ -464,7 +472,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServicePreboot.config",
+            "id": "def-common.ElasticsearchServicePreboot.config",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -480,7 +488,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServicePreboot.createClient",
+            "id": "def-common.ElasticsearchServicePreboot.createClient",
             "type": "Function",
             "tags": [],
             "label": "createClient",
@@ -491,17 +499,17 @@
               "(type: string, clientConfig?: Partial<",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
+                "section": "def-common.ElasticsearchClientConfig",
                 "text": "ElasticsearchClientConfig"
               },
               "> | undefined) => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ICustomClusterClient",
+                "section": "def-common.ICustomClusterClient",
                 "text": "ICustomClusterClient"
               }
             ],
@@ -511,7 +519,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.ElasticsearchServicePreboot.createClient.$1",
+                "id": "def-common.ElasticsearchServicePreboot.createClient.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -528,7 +536,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.ElasticsearchServicePreboot.createClient.$2",
+                "id": "def-common.ElasticsearchServicePreboot.createClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "clientConfig",
@@ -539,9 +547,9 @@
                   "Partial<",
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.ElasticsearchClientConfig",
+                    "section": "def-common.ElasticsearchClientConfig",
                     "text": "ElasticsearchClientConfig"
                   },
                   "> | undefined"
@@ -559,7 +567,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchServiceSetup",
+        "id": "def-common.ElasticsearchServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchServiceSetup",
@@ -570,7 +578,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServiceSetup.setUnauthorizedErrorHandler",
+            "id": "def-common.ElasticsearchServiceSetup.setUnauthorizedErrorHandler",
             "type": "Function",
             "tags": [],
             "label": "setUnauthorizedErrorHandler",
@@ -581,9 +589,9 @@
               "(handler: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.UnauthorizedErrorHandler",
+                "section": "def-common.UnauthorizedErrorHandler",
                 "text": "UnauthorizedErrorHandler"
               },
               ") => void"
@@ -594,7 +602,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.ElasticsearchServiceSetup.setUnauthorizedErrorHandler.$1",
+                "id": "def-common.ElasticsearchServiceSetup.setUnauthorizedErrorHandler.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
@@ -602,9 +610,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.UnauthorizedErrorHandler",
+                    "section": "def-common.UnauthorizedErrorHandler",
                     "text": "UnauthorizedErrorHandler"
                   }
                 ],
@@ -618,7 +626,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServiceSetup.legacy",
+            "id": "def-common.ElasticsearchServiceSetup.legacy",
             "type": "Object",
             "tags": [
               "deprecated"
@@ -631,9 +639,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IElasticsearchConfig",
+                "section": "def-common.IElasticsearchConfig",
                 "text": "IElasticsearchConfig"
               },
               ">; }"
@@ -669,7 +677,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchServiceStart",
+        "id": "def-common.ElasticsearchServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchServiceStart",
@@ -680,7 +688,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServiceStart.client",
+            "id": "def-common.ElasticsearchServiceStart.client",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -690,9 +698,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IClusterClient",
+                "section": "def-common.IClusterClient",
                 "text": "IClusterClient"
               }
             ],
@@ -702,7 +710,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServiceStart.createClient",
+            "id": "def-common.ElasticsearchServiceStart.createClient",
             "type": "Function",
             "tags": [],
             "label": "createClient",
@@ -713,17 +721,17 @@
               "(type: string, clientConfig?: Partial<",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClientConfig",
+                "section": "def-common.ElasticsearchClientConfig",
                 "text": "ElasticsearchClientConfig"
               },
               "> | undefined) => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ICustomClusterClient",
+                "section": "def-common.ICustomClusterClient",
                 "text": "ICustomClusterClient"
               }
             ],
@@ -733,7 +741,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.ElasticsearchServiceStart.createClient.$1",
+                "id": "def-common.ElasticsearchServiceStart.createClient.$1",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -750,7 +758,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.ElasticsearchServiceStart.createClient.$2",
+                "id": "def-common.ElasticsearchServiceStart.createClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "clientConfig",
@@ -761,9 +769,9 @@
                   "Partial<",
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.ElasticsearchClientConfig",
+                    "section": "def-common.ElasticsearchClientConfig",
                     "text": "ElasticsearchClientConfig"
                   },
                   "> | undefined"
@@ -781,7 +789,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchSslConfig",
+        "id": "def-common.ElasticsearchSslConfig",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchSslConfig",
@@ -792,7 +800,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchSslConfig.verificationMode",
+            "id": "def-common.ElasticsearchSslConfig.verificationMode",
             "type": "CompoundType",
             "tags": [],
             "label": "verificationMode",
@@ -806,7 +814,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchSslConfig.certificate",
+            "id": "def-common.ElasticsearchSslConfig.certificate",
             "type": "string",
             "tags": [],
             "label": "certificate",
@@ -820,7 +828,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchSslConfig.certificateAuthorities",
+            "id": "def-common.ElasticsearchSslConfig.certificateAuthorities",
             "type": "Array",
             "tags": [],
             "label": "certificateAuthorities",
@@ -834,7 +842,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchSslConfig.key",
+            "id": "def-common.ElasticsearchSslConfig.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -848,7 +856,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchSslConfig.keyPassphrase",
+            "id": "def-common.ElasticsearchSslConfig.keyPassphrase",
             "type": "string",
             "tags": [],
             "label": "keyPassphrase",
@@ -862,7 +870,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchSslConfig.alwaysPresentCertificate",
+            "id": "def-common.ElasticsearchSslConfig.alwaysPresentCertificate",
             "type": "boolean",
             "tags": [],
             "label": "alwaysPresentCertificate",
@@ -876,7 +884,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.FakeRequest",
+        "id": "def-common.FakeRequest",
         "type": "Interface",
         "tags": [],
         "label": "FakeRequest",
@@ -889,7 +897,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.FakeRequest.headers",
+            "id": "def-common.FakeRequest.headers",
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
@@ -908,7 +916,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.IClusterClient",
+        "id": "def-common.IClusterClient",
         "type": "Interface",
         "tags": [],
         "label": "IClusterClient",
@@ -921,7 +929,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IClusterClient.asInternalUser",
+            "id": "def-common.IClusterClient.asInternalUser",
             "type": "Object",
             "tags": [],
             "label": "asInternalUser",
@@ -1369,29 +1377,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -2123,7 +2131,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IClusterClient.asScoped",
+            "id": "def-common.IClusterClient.asScoped",
             "type": "Function",
             "tags": [],
             "label": "asScoped",
@@ -2134,17 +2142,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ScopeableRequest",
+                "section": "def-common.ScopeableRequest",
                 "text": "ScopeableRequest"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
+                "section": "def-common.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               }
             ],
@@ -2154,7 +2162,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.IClusterClient.asScoped.$1",
+                "id": "def-common.IClusterClient.asScoped.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "request",
@@ -2162,9 +2170,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.ScopeableRequest",
+                    "section": "def-common.ScopeableRequest",
                     "text": "ScopeableRequest"
                   }
                 ],
@@ -2181,7 +2189,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ICustomClusterClient",
+        "id": "def-common.ICustomClusterClient",
         "type": "Interface",
         "tags": [],
         "label": "ICustomClusterClient",
@@ -2191,17 +2199,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ICustomClusterClient",
+            "section": "def-common.ICustomClusterClient",
             "text": "ICustomClusterClient"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.IClusterClient",
+            "section": "def-common.IClusterClient",
             "text": "IClusterClient"
           }
         ],
@@ -2211,7 +2219,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ICustomClusterClient.close",
+            "id": "def-common.ICustomClusterClient.close",
             "type": "Function",
             "tags": [],
             "label": "close",
@@ -2232,7 +2240,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.IElasticsearchConfig",
+        "id": "def-common.IElasticsearchConfig",
         "type": "Interface",
         "tags": [],
         "label": "IElasticsearchConfig",
@@ -2243,7 +2251,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.healthCheckDelay",
+            "id": "def-common.IElasticsearchConfig.healthCheckDelay",
             "type": "Object",
             "tags": [],
             "label": "healthCheckDelay",
@@ -2259,7 +2267,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.ignoreVersionMismatch",
+            "id": "def-common.IElasticsearchConfig.ignoreVersionMismatch",
             "type": "boolean",
             "tags": [],
             "label": "ignoreVersionMismatch",
@@ -2272,7 +2280,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.apiVersion",
+            "id": "def-common.IElasticsearchConfig.apiVersion",
             "type": "string",
             "tags": [],
             "label": "apiVersion",
@@ -2285,7 +2293,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.maxSockets",
+            "id": "def-common.IElasticsearchConfig.maxSockets",
             "type": "number",
             "tags": [],
             "label": "maxSockets",
@@ -2298,7 +2306,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.maxIdleSockets",
+            "id": "def-common.IElasticsearchConfig.maxIdleSockets",
             "type": "number",
             "tags": [],
             "label": "maxIdleSockets",
@@ -2311,7 +2319,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.idleSocketTimeout",
+            "id": "def-common.IElasticsearchConfig.idleSocketTimeout",
             "type": "Object",
             "tags": [],
             "label": "idleSocketTimeout",
@@ -2327,7 +2335,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.compression",
+            "id": "def-common.IElasticsearchConfig.compression",
             "type": "boolean",
             "tags": [],
             "label": "compression",
@@ -2340,7 +2348,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.hosts",
+            "id": "def-common.IElasticsearchConfig.hosts",
             "type": "Array",
             "tags": [],
             "label": "hosts",
@@ -2356,7 +2364,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.requestHeadersWhitelist",
+            "id": "def-common.IElasticsearchConfig.requestHeadersWhitelist",
             "type": "Array",
             "tags": [],
             "label": "requestHeadersWhitelist",
@@ -2372,7 +2380,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.pingTimeout",
+            "id": "def-common.IElasticsearchConfig.pingTimeout",
             "type": "Object",
             "tags": [],
             "label": "pingTimeout",
@@ -2388,7 +2396,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.requestTimeout",
+            "id": "def-common.IElasticsearchConfig.requestTimeout",
             "type": "Object",
             "tags": [],
             "label": "requestTimeout",
@@ -2404,7 +2412,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.shardTimeout",
+            "id": "def-common.IElasticsearchConfig.shardTimeout",
             "type": "Object",
             "tags": [],
             "label": "shardTimeout",
@@ -2420,7 +2428,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.sniffOnStart",
+            "id": "def-common.IElasticsearchConfig.sniffOnStart",
             "type": "boolean",
             "tags": [],
             "label": "sniffOnStart",
@@ -2433,7 +2441,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.sniffInterval",
+            "id": "def-common.IElasticsearchConfig.sniffInterval",
             "type": "CompoundType",
             "tags": [],
             "label": "sniffInterval",
@@ -2449,7 +2457,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.sniffOnConnectionFault",
+            "id": "def-common.IElasticsearchConfig.sniffOnConnectionFault",
             "type": "boolean",
             "tags": [],
             "label": "sniffOnConnectionFault",
@@ -2462,7 +2470,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.username",
+            "id": "def-common.IElasticsearchConfig.username",
             "type": "string",
             "tags": [],
             "label": "username",
@@ -2478,7 +2486,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.password",
+            "id": "def-common.IElasticsearchConfig.password",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -2494,7 +2502,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.serviceAccountToken",
+            "id": "def-common.IElasticsearchConfig.serviceAccountToken",
             "type": "string",
             "tags": [],
             "label": "serviceAccountToken",
@@ -2510,7 +2518,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.customHeaders",
+            "id": "def-common.IElasticsearchConfig.customHeaders",
             "type": "Object",
             "tags": [],
             "label": "customHeaders",
@@ -2526,7 +2534,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.ssl",
+            "id": "def-common.IElasticsearchConfig.ssl",
             "type": "Object",
             "tags": [],
             "label": "ssl",
@@ -2536,9 +2544,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchSslConfig",
+                "section": "def-common.ElasticsearchSslConfig",
                 "text": "ElasticsearchSslConfig"
               }
             ],
@@ -2551,7 +2559,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.IScopedClusterClient",
+        "id": "def-common.IScopedClusterClient",
         "type": "Interface",
         "tags": [],
         "label": "IScopedClusterClient",
@@ -2564,7 +2572,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IScopedClusterClient.asInternalUser",
+            "id": "def-common.IScopedClusterClient.asInternalUser",
             "type": "Object",
             "tags": [],
             "label": "asInternalUser",
@@ -3012,29 +3020,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -3766,7 +3774,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IScopedClusterClient.asCurrentUser",
+            "id": "def-common.IScopedClusterClient.asCurrentUser",
             "type": "Object",
             "tags": [],
             "label": "asCurrentUser",
@@ -4214,29 +4222,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -4971,7 +4979,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandlerNotHandledResult",
+        "id": "def-common.UnauthorizedErrorHandlerNotHandledResult",
         "type": "Interface",
         "tags": [],
         "label": "UnauthorizedErrorHandlerNotHandledResult",
@@ -4982,7 +4990,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerNotHandledResult.type",
+            "id": "def-common.UnauthorizedErrorHandlerNotHandledResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -4999,7 +5007,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandlerOptions",
+        "id": "def-common.UnauthorizedErrorHandlerOptions",
         "type": "Interface",
         "tags": [],
         "label": "UnauthorizedErrorHandlerOptions",
@@ -5010,7 +5018,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerOptions.error",
+            "id": "def-common.UnauthorizedErrorHandlerOptions.error",
             "type": "CompoundType",
             "tags": [],
             "label": "error",
@@ -5025,7 +5033,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerOptions.request",
+            "id": "def-common.UnauthorizedErrorHandlerOptions.request",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -5033,9 +5041,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5049,7 +5057,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandlerResultRetryParams",
+        "id": "def-common.UnauthorizedErrorHandlerResultRetryParams",
         "type": "Interface",
         "tags": [],
         "label": "UnauthorizedErrorHandlerResultRetryParams",
@@ -5060,7 +5068,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerResultRetryParams.authHeaders",
+            "id": "def-common.UnauthorizedErrorHandlerResultRetryParams.authHeaders",
             "type": "Object",
             "tags": [],
             "label": "authHeaders",
@@ -5077,7 +5085,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandlerRetryResult",
+        "id": "def-common.UnauthorizedErrorHandlerRetryResult",
         "type": "Interface",
         "tags": [],
         "label": "UnauthorizedErrorHandlerRetryResult",
@@ -5085,17 +5093,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerRetryResult",
+            "section": "def-common.UnauthorizedErrorHandlerRetryResult",
             "text": "UnauthorizedErrorHandlerRetryResult"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerResultRetryParams",
+            "section": "def-common.UnauthorizedErrorHandlerResultRetryParams",
             "text": "UnauthorizedErrorHandlerResultRetryParams"
           }
         ],
@@ -5105,7 +5113,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerRetryResult.type",
+            "id": "def-common.UnauthorizedErrorHandlerRetryResult.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -5122,7 +5130,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandlerToolkit",
+        "id": "def-common.UnauthorizedErrorHandlerToolkit",
         "type": "Interface",
         "tags": [],
         "label": "UnauthorizedErrorHandlerToolkit",
@@ -5135,7 +5143,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerToolkit.notHandled",
+            "id": "def-common.UnauthorizedErrorHandlerToolkit.notHandled",
             "type": "Function",
             "tags": [],
             "label": "notHandled",
@@ -5146,9 +5154,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerNotHandledResult",
+                "section": "def-common.UnauthorizedErrorHandlerNotHandledResult",
                 "text": "UnauthorizedErrorHandlerNotHandledResult"
               }
             ],
@@ -5160,7 +5168,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandlerToolkit.retry",
+            "id": "def-common.UnauthorizedErrorHandlerToolkit.retry",
             "type": "Function",
             "tags": [],
             "label": "retry",
@@ -5171,17 +5179,17 @@
               "(params: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerResultRetryParams",
+                "section": "def-common.UnauthorizedErrorHandlerResultRetryParams",
                 "text": "UnauthorizedErrorHandlerResultRetryParams"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerRetryResult",
+                "section": "def-common.UnauthorizedErrorHandlerRetryResult",
                 "text": "UnauthorizedErrorHandlerRetryResult"
               }
             ],
@@ -5191,7 +5199,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.UnauthorizedErrorHandlerToolkit.retry.$1",
+                "id": "def-common.UnauthorizedErrorHandlerToolkit.retry.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -5199,9 +5207,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.UnauthorizedErrorHandlerResultRetryParams",
+                    "section": "def-common.UnauthorizedErrorHandlerResultRetryParams",
                     "text": "UnauthorizedErrorHandlerResultRetryParams"
                   }
                 ],
@@ -5221,7 +5229,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ElasticsearchClient",
+        "id": "def-common.ElasticsearchClient",
         "type": "Type",
         "tags": [],
         "label": "ElasticsearchClient",
@@ -5669,29 +5677,29 @@
           "ExplainResponse",
           "<TDocument>>; }; features: ",
           "default",
-          "; fieldCaps: { (this: That, params?: ",
+          "; fieldCaps: { (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
           "FieldCapsResponse",
-          ">; (this: That, params?: ",
+          ">; (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithMeta",
           " | undefined): Promise<",
           "TransportResult",
           "<",
           "FieldCapsResponse",
-          ", unknown>>; (this: That, params?: ",
+          ", unknown>>; (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
           "FieldCapsResponse",
@@ -6424,7 +6432,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.ScopeableRequest",
+        "id": "def-common.ScopeableRequest",
         "type": "Type",
         "tags": [],
         "label": "ScopeableRequest",
@@ -6434,17 +6442,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any> | ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.FakeRequest",
+            "section": "def-common.FakeRequest",
             "text": "FakeRequest"
           }
         ],
@@ -6455,7 +6463,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandler",
+        "id": "def-common.UnauthorizedErrorHandler",
         "type": "Type",
         "tags": [],
         "label": "UnauthorizedErrorHandler",
@@ -6466,33 +6474,33 @@
           "(options: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerOptions",
+            "section": "def-common.UnauthorizedErrorHandlerOptions",
             "text": "UnauthorizedErrorHandlerOptions"
           },
           ", toolkit: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerToolkit",
+            "section": "def-common.UnauthorizedErrorHandlerToolkit",
             "text": "UnauthorizedErrorHandlerToolkit"
           },
           ") => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.MaybePromise",
+            "section": "def-common.MaybePromise",
             "text": "MaybePromise"
           },
           "<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerResult",
+            "section": "def-common.UnauthorizedErrorHandlerResult",
             "text": "UnauthorizedErrorHandlerResult"
           },
           ">"
@@ -6504,7 +6512,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandler.$1",
+            "id": "def-common.UnauthorizedErrorHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -6512,9 +6520,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerOptions",
+                "section": "def-common.UnauthorizedErrorHandlerOptions",
                 "text": "UnauthorizedErrorHandlerOptions"
               }
             ],
@@ -6524,7 +6532,7 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.UnauthorizedErrorHandler.$2",
+            "id": "def-common.UnauthorizedErrorHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "toolkit",
@@ -6532,9 +6540,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.UnauthorizedErrorHandlerToolkit",
+                "section": "def-common.UnauthorizedErrorHandlerToolkit",
                 "text": "UnauthorizedErrorHandlerToolkit"
               }
             ],
@@ -6547,7 +6555,7 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
-        "id": "def-server.UnauthorizedErrorHandlerResult",
+        "id": "def-common.UnauthorizedErrorHandlerResult",
         "type": "Type",
         "tags": [],
         "label": "UnauthorizedErrorHandlerResult",
@@ -6555,17 +6563,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerRetryResult",
+            "section": "def-common.UnauthorizedErrorHandlerRetryResult",
             "text": "UnauthorizedErrorHandlerRetryResult"
           },
           " | ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.UnauthorizedErrorHandlerNotHandledResult",
+            "section": "def-common.UnauthorizedErrorHandlerNotHandledResult",
             "text": "UnauthorizedErrorHandlerNotHandledResult"
           }
         ],
@@ -6575,14 +6583,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

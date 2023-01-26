@@ -7,7 +7,7 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
@@ -252,21 +252,18 @@ async function optionallyUseSecurity(
   }
   const action =
     purpose === 'updateObjectsSpaces' ? ('share_to_space' as const) : ('bulk_get' as const);
-  const { typeMap } = await securityExtension.checkAuthorization({
-    types: typesToAuthorize,
-    spaces: spacesToAuthorize,
-    actions: new Set([action]),
-  });
 
   // Enforce authorization based on all *requested* object types and the current space
   const typesAndSpaces = objects.reduce(
     (acc, { type }) => (acc.has(type) ? acc : acc.set(type, new Set([namespaceString]))), // Always enforce authZ for the active space
     new Map<string, Set<string>>()
   );
-  securityExtension!.enforceAuthorization({
-    typesAndSpaces,
-    action,
-    typeMap,
+
+  const { typeMap } = await securityExtension?.performAuthorization({
+    actions: new Set([action]),
+    types: typesToAuthorize,
+    spaces: spacesToAuthorize,
+    enforceMap: typesAndSpaces,
     auditCallback: (error) => {
       if (!error) return; // We will audit success results below, after redaction
       for (const { type, id } of objects) {
@@ -307,6 +304,9 @@ async function optionallyUseSecurity(
     // Is the user authorized to access this object in this space?
     let isAuthorizedForObject = true;
     try {
+      // ToDo: this is the only remaining call to enforceAuthorization outside of the security extension
+      // This was a bit complicated to change now, but can ultimately be removed when authz logic is
+      // migrated from the repo level to the extension level.
       securityExtension.enforceAuthorization({
         typesAndSpaces: new Map([[type, new Set([namespaceString])]]),
         action,

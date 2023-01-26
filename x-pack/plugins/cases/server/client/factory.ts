@@ -13,8 +13,13 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
@@ -115,10 +120,14 @@ export class CasesClientFactory {
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
+    const savedObjectsSerializer = savedObjectsService.createSerializer();
+
     const services = this.createServices({
       unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
       esClient: scopedClusterClient,
       request,
+      auditLogger,
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -136,6 +145,7 @@ export class CasesClientFactory {
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      savedObjectsSerializer,
     });
   }
 
@@ -147,12 +157,16 @@ export class CasesClientFactory {
 
   private createServices({
     unsecuredSavedObjectsClient,
+    savedObjectsSerializer,
     esClient,
     request,
+    auditLogger,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
+    auditLogger: AuditLogger;
   }): CasesServices {
     this.validateInitialization();
 
@@ -190,10 +204,13 @@ export class CasesClientFactory {
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(
-        this.logger,
-        this.options.persistableStateAttachmentTypeRegistry
-      ),
+      userActionService: new CaseUserActionService({
+        log: this.logger,
+        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        savedObjectsSerializer,
+        auditLogger,
+      }),
       attachmentService,
       licensingService,
       notificationService,

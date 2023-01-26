@@ -10,7 +10,7 @@ import './app_container.scss';
 
 import { Observable } from 'rxjs';
 import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -36,6 +36,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
+  showPlainSpinner?: boolean;
 }
 
 export const AppContainer: FC<Props> = ({
@@ -48,6 +49,7 @@ export const AppContainer: FC<Props> = ({
   appStatus,
   setIsMounting,
   theme$,
+  showPlainSpinner,
 }: Props) => {
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
@@ -114,13 +116,18 @@ export const AppContainer: FC<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
-      {showSpinner && !appNotFound && <AppLoadingPlaceholder />}
+      {showSpinner && !appNotFound && (
+        <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
+      )}
       <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
   );
 };
 
-const AppLoadingPlaceholder: FC = () => {
+const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+  if (showPlainSpinner) {
+    return <EuiLoadingSpinner size={'xxl'} data-test-subj="appContainer-loadingSpinner" />;
+  }
   return (
     <EuiLoadingElastic
       className="appContainer__loading"

@@ -13,7 +13,6 @@ import { checkArtifactHasData } from './services/exceptions_list/check_artifact_
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -61,7 +60,6 @@ import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
-import { KibanaServices } from '../common/lib/kibana';
 
 const categories = [
   {
@@ -131,7 +129,8 @@ export const links: LinkItem = {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage: 'Create and manage exceptions to prevent the creation of unwanted alerts.',
+        defaultMessage:
+          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
@@ -243,7 +242,6 @@ export const getManagementFilteredLinks = async (
 
   const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
   const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
 
   const linksToExclude: SecurityPageName[] = [];
 
@@ -269,7 +267,7 @@ export const getManagementFilteredLinks = async (
     )
   ) {
     hasHostIsolationExceptions = await checkArtifactHasData(
-      HostIsolationExceptionsApiClient.getInstance(KibanaServices.get().http)
+      HostIsolationExceptionsApiClient.getInstance(core.http)
     );
   }
 
@@ -278,19 +276,25 @@ export const getManagementFilteredLinks = async (
     canReadHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
+    canReadEventFilters,
+    canReadBlocklist,
+    canReadPolicyManagement,
   } = fleetAuthz
     ? calculateEndpointAuthz(
         licenseService,
         fleetAuthz,
         currentUser.roles,
         isEndpointRbacEnabled,
-        endpointPermissions,
         hasHostIsolationExceptions
       )
     : getEndpointAuthzInitialState();
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
+  }
+
+  if (!canReadPolicyManagement) {
+    linksToExclude.push(SecurityPageName.policies);
   }
 
   if (!canReadActionsLogManagement) {
@@ -301,8 +305,16 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  if (endpointRbacEnabled && !canReadTrustedApplications) {
+  if (!canReadTrustedApplications) {
     linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadEventFilters) {
+    linksToExclude.push(SecurityPageName.eventFilters);
+  }
+
+  if (!canReadBlocklist) {
+    linksToExclude.push(SecurityPageName.blocklist);
   }
 
   return excludeLinks(linksToExclude);

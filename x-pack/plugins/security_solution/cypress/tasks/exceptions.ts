@@ -21,7 +21,7 @@ import {
   CLOSE_SINGLE_ALERT_CHECKBOX,
   ADD_TO_RULE_RADIO_LABEL,
   ADD_TO_SHARED_LIST_RADIO_LABEL,
-  SHARED_LIST_CHECKBOX,
+  SHARED_LIST_SWITCH,
   OS_SELECTION_SECTION,
   OS_INPUT,
 } from '../screens/exceptions';
@@ -69,11 +69,9 @@ export const editException = (updatedField: string, itemIndex = 0, fieldIndex = 
 };
 
 export const addExceptionFlyoutItemName = (name: string) => {
-  cy.root()
-    .pipe(($el) => {
-      return $el.find(EXCEPTION_ITEM_NAME_INPUT);
-    })
-    .type(`${name}{enter}`)
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
+  cy.get(EXCEPTION_ITEM_NAME_INPUT)
+    .type(`${name}{enter}`, { force: true })
     .should('have.value', name);
 };
 
@@ -88,6 +86,7 @@ export const editExceptionFlyoutItemName = (name: string) => {
 };
 
 export const selectBulkCloseAlerts = () => {
+  cy.get(CLOSE_ALERTS_CHECKBOX).should('exist');
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
 };
 
@@ -124,10 +123,9 @@ export const selectAddToRuleRadio = () => {
 export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
   cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
   for (let i = 0; i < numListsToCheck; i++) {
-    cy.get(SHARED_LIST_CHECKBOX)
+    cy.get(SHARED_LIST_SWITCH)
       .eq(i)
-      .pipe(($el) => $el.trigger('click'))
-      .should('be.checked');
+      .pipe(($el) => $el.trigger('click'));
   }
 };
 

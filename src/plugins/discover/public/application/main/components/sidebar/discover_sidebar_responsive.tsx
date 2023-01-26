@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -19,20 +19,35 @@ import {
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiProgress,
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  useExistingFieldsFetcher,
+  useQuerySubscriber,
+} from '@kbn/unified-field-list-plugin/public';
+import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import {
+  discoverSidebarReducer,
+  getInitialState,
+  DiscoverSidebarReducerActionType,
+  DiscoverSidebarReducerStatus,
+} from './lib/sidebar_reducer';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -47,10 +62,6 @@ export interface DiscoverSidebarResponsiveProps {
    * hits fetched from ES, displayed in the doc table
    */
   documents$: DataDocuments$;
-  /**
-   * List of available data views
-   */
-  dataViewList: DataViewListItem[];
   /**
    * Has been toggled closed
    */
@@ -111,38 +122,104 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
+  const { data, dataViews, core } = services;
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  /**
-   * fieldCounts are used to determine which fields are actually used in the given set of documents
-   */
-  const fieldCounts = useRef<Record<string, number> | null>(null);
-  if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result!, selectedDataView);
-  }
+  const [sidebarState, dispatchSidebarStateAction] = useReducer(
+    discoverSidebarReducer,
+    selectedDataView,
+    getInitialState
+  );
+  const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
+  const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
 
-  const [documentState, setDocumentState] = useState(props.documents$.getValue());
   useEffect(() => {
-    const subscription = props.documents$.subscribe((next) => {
-      if (next.fetchStatus !== documentState.fetchStatus) {
-        if (next.result) {
-          fieldCounts.current = calcFieldCounts(next.result, selectedDataView!);
-        }
-        setDocumentState({ ...documentState, ...next });
+    const subscription = props.documents$.subscribe((documentState) => {
+      const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
+
+      switch (documentState?.fetchStatus) {
+        case FetchStatus.UNINITIALIZED:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.RESET,
+            payload: {
+              dataView: selectedDataViewRef.current,
+            },
+          });
+          break;
+        case FetchStatus.LOADING:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+            payload: {
+              isPlainRecord: isPlainRecordType,
+            },
+          });
+          break;
+        case FetchStatus.COMPLETE:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+            payload: {
+              dataView: selectedDataViewRef.current,
+              fieldCounts: calcFieldCounts(documentState.result),
+              isPlainRecord: isPlainRecordType,
+            },
+          });
+          break;
+        case FetchStatus.ERROR:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+            payload: {
+              dataView: selectedDataViewRef.current,
+              fieldCounts: {},
+              isPlainRecord: isPlainRecordType,
+            },
+          });
+          break;
+        default:
+          break;
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, selectedDataView, documentState, setDocumentState]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
 
   useEffect(() => {
-    // when data view changes fieldCounts needs to be cleaned up to prevent displaying
-    // fields of the previous data view
-    fieldCounts.current = {};
-  }, [selectedDataView]);
+    if (selectedDataView !== selectedDataViewRef.current) {
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+        payload: {
+          dataView: selectedDataView,
+        },
+      });
+      selectedDataViewRef.current = selectedDataView;
+    }
+  }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
+
+  const querySubscriberResult = useQuerySubscriber({ data });
+  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
+  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+    disableAutoFetching: true,
+    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
+    query: querySubscriberResult.query,
+    filters: querySubscriberResult.filters,
+    fromDate: querySubscriberResult.fromDate,
+    toDate: querySubscriberResult.toDate,
+    services: {
+      data,
+      dataViews,
+      core,
+    },
+  });
+
+  useEffect(() => {
+    if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
+      refetchFieldsExistenceInfo();
+    }
+    // refetching only if status changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarState.status]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -180,30 +257,18 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !selectedDataView?.isPersisted();
 
-  useEffect(
-    () => {
-      // For an external embeddable like the Field stats
-      // it is useful to know what fields are populated in the docs fetched
-      // or what fields are selected by the user
+  useEffect(() => {
+    // For an external embeddable like the Field stats
+    // it is useful to know what fields are populated in the docs fetched
+    // or what fields are selected by the user
 
-      const fieldCnts = fieldCounts.current ?? {};
-
-      const availableFields = props.columns.length > 0 ? props.columns : Object.keys(fieldCnts);
-      availableFields$.next({
-        fetchStatus: FetchStatus.COMPLETE,
-        fields: availableFields,
-      });
-    },
-    // Using columns.length here instead of columns to avoid array reference changing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      selectedDataView,
-      availableFields$,
-      fieldCounts.current,
-      documentState.result,
-      props.columns.length,
-    ]
-  );
+    const availableFields =
+      props.columns.length > 0 ? props.columns : Object.keys(sidebarState.fieldCounts || {});
+    availableFields$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      fields: availableFields,
+    });
+  }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
 
   const editField = useMemo(
     () =>
@@ -259,14 +324,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     <>
       {!props.isClosed && (
         <EuiHideFor sizes={['xs', 's']}>
+          {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
           <DiscoverSidebar
             {...props}
-            documents={documentState.result!}
+            onFieldEdited={onFieldEdited}
+            allFields={sidebarState.allFields}
             fieldFilter={fieldFilter}
-            fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
+            showFieldList={showFieldList}
+            isAffectedByGlobalFilter={isAffectedByGlobalFilter}
           />
         </EuiHideFor>
       )}
@@ -322,8 +390,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlyoutHeader>
               <DiscoverSidebar
                 {...props}
-                documents={documentState.result}
-                fieldCounts={fieldCounts.current}
+                onFieldEdited={onFieldEdited}
+                allFields={sidebarState.allFields}
                 fieldFilter={fieldFilter}
                 setFieldFilter={setFieldFilter}
                 alwaysShowActionButtons={true}
@@ -332,6 +400,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 editField={editField}
                 createNewDataView={createNewDataView}
                 showDataViewPicker={true}
+                showFieldList={showFieldList}
+                isAffectedByGlobalFilter={isAffectedByGlobalFilter}
               />
             </EuiFlyout>
           </EuiPortal>

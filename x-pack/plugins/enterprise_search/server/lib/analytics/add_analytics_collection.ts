@@ -45,12 +45,12 @@ const createAnalyticsCollection = async (
   };
 };
 
-const getDataViewName = ({ name: collectionName }: AnalyticsCollection): string => {
-  return `elastic_analytics.events-${collectionName}`;
+const getDataViewName = (collectionId: string): string => {
+  return `elastic_analytics.events-${collectionId}`;
 };
 
-const getDataStreamName = (id: string): string => {
-  return `elastic_analytics-events-${id}`;
+const getDataStreamName = (collectionId: string): string => {
+  return `logs-${getDataViewName(collectionId)}`;
 };
 
 const createDataView = async (
@@ -60,9 +60,9 @@ const createDataView = async (
   return dataViewsService.createAndSave(
     {
       allowNoIndex: true,
-      namespaces: [getDataStreamName(analyticsCollection.id)],
+      title: getDataStreamName(analyticsCollection.id),
+      name: getDataViewName(analyticsCollection.id),
       timeFieldName: '@timestamp',
-      title: getDataViewName(analyticsCollection),
     },
     true
   );

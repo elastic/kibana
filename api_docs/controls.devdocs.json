@@ -288,15 +288,15 @@
             "label": "addDataControlFromField",
             "description": [],
             "signature": [
-              "({ uuid, dataViewId, fieldName, title, }: { uuid?: string | undefined; dataViewId: string; fieldName: string; title?: string | undefined; }) => Promise<",
+              "(controlProps: ",
               {
-                "pluginId": "embeddable",
+                "pluginId": "controls",
                 "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.ErrorEmbeddable",
-                "text": "ErrorEmbeddable"
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.AddDataControlProps",
+                "text": "AddDataControlProps"
               },
-              " | ",
+              ") => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -304,57 +304,15 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<{ viewMode: ",
+              "<",
               {
                 "pluginId": "embeddable",
                 "scope": "common",
                 "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.ViewMode",
-                "text": "ViewMode"
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
               },
-              "; title: string; id: string; lastReloadRequestTime: number; hidePanelTitles: boolean; enhancements: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              "; disabledActions: string[]; disableTriggers: boolean; searchSessionId: string; syncColors: boolean; syncCursor: boolean; syncTooltips: boolean; executionContext: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
-              "; query: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              "; filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]; timeRange: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              "; timeslice: [number, number]; controlStyle: \"twoLine\" | \"oneLine\"; ignoreParentSettings: ",
-              "ParentIgnoreSettings",
-              "; fieldName: string; parentFieldName: string; childFieldName: string; dataViewId: string; }, ",
+              ", ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -362,7 +320,15 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ", any>>"
+              ", any> | ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ErrorEmbeddable",
+                "text": "ErrorEmbeddable"
+              },
+              ">"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -373,135 +339,74 @@
                 "id": "def-public.ControlGroupContainer.addDataControlFromField.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    uuid,\n    dataViewId,\n    fieldName,\n    title,\n  }",
+                "label": "controlProps",
                 "description": [],
-                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "controls",
-                    "id": "def-public.ControlGroupContainer.addDataControlFromField.$1.uuid",
-                    "type": "string",
-                    "tags": [],
-                    "label": "uuid",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "controls",
-                    "id": "def-public.ControlGroupContainer.addDataControlFromField.$1.dataViewId",
-                    "type": "string",
-                    "tags": [],
-                    "label": "dataViewId",
-                    "description": [],
-                    "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "controls",
-                    "id": "def-public.ControlGroupContainer.addDataControlFromField.$1.fieldName",
-                    "type": "string",
-                    "tags": [],
-                    "label": "fieldName",
-                    "description": [],
-                    "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "controls",
-                    "id": "def-public.ControlGroupContainer.addDataControlFromField.$1.title",
-                    "type": "string",
-                    "tags": [],
-                    "label": "title",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getCreateControlButton",
-            "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "getCreateControlButton",
-            "description": [
-              "\nReturns a button that allows controls to be created externally using the embeddable"
-            ],
-            "signature": [
-              "(buttonType: ",
-              "CreateControlButtonTypes",
-              ", closePopover?: (() => void) | undefined) => JSX.Element"
-            ],
-            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getCreateControlButton.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "buttonType",
-                "description": [
-                  "Controls the button styling"
-                ],
                 "signature": [
-                  "CreateControlButtonTypes"
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.AddDataControlProps",
+                    "text": "AddDataControlProps"
+                  }
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getCreateControlButton.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "closePopover",
-                "description": [
-                  "Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`"
-                ],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
-                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
-            "returnComment": [
-              "If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.\nOtherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types."
-            ]
+            "returnComment": []
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton",
+            "id": "def-public.ControlGroupContainer.addOptionsListControl",
             "type": "Function",
             "tags": [],
-            "label": "getCreateTimeSliderControlButton",
+            "label": "addOptionsListControl",
             "description": [],
             "signature": [
-              "(closePopover?: (() => void) | undefined) => JSX.Element"
+              "(controlProps: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.AddOptionsListControlProps",
+                "text": "AddOptionsListControlProps"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", any> | ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ErrorEmbeddable",
+                "text": "ErrorEmbeddable"
+              },
+              ">"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -509,43 +414,197 @@
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getCreateTimeSliderControlButton.$1",
-                "type": "Function",
+                "id": "def-public.ControlGroupContainer.addOptionsListControl.$1",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "closePopover",
+                "label": "controlProps",
                 "description": [],
                 "signature": [
-                  "(() => void) | undefined"
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.AddOptionsListControlProps",
+                    "text": "AddOptionsListControlProps"
+                  }
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getToolbarButtons",
+            "id": "def-public.ControlGroupContainer.addRangeSliderControl",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
-            "label": "getToolbarButtons",
-            "description": [
-              "\nReturns the toolbar button that is used for creating controls and managing control settings"
-            ],
+            "tags": [],
+            "label": "addRangeSliderControl",
+            "description": [],
             "signature": [
-              "() => JSX.Element"
+              "(controlProps: ",
+              "AddRangeSliderControlProps",
+              ") => Promise<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", any> | ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ErrorEmbeddable",
+                "text": "ErrorEmbeddable"
+              },
+              ">"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.addRangeSliderControl.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "controlProps",
+                "description": [],
+                "signature": [
+                  "AddRangeSliderControlProps"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.addTimeSliderControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addTimeSliderControl",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              ", ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", any> | ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ErrorEmbeddable",
+                "text": "ErrorEmbeddable"
+              },
+              ">"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": [
-              "`SolutionToolbarPopover` button for input controls"
-            ]
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.openAddDataControlFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "openAddDataControlFlyout",
+            "description": [],
+            "signature": [
+              "(this: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getEditControlGroupButton",
+            "type": "Function",
+            "tags": [],
+            "label": "getEditControlGroupButton",
+            "description": [],
+            "signature": [
+              "(closePopover: () => void) => JSX.Element"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.getEditControlGroupButton.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "closePopover",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "controls",
@@ -3224,7 +3283,7 @@
             "section": "def-public.ControlGroupRendererProps",
             "text": "ControlGroupRendererProps"
           },
-          "> & { readonly _result: ({ onEmbeddableLoad, getCreationOptions, }: ",
+          "> & { readonly _result: ({ onLoadComplete, getInitialInput, filters, timeRange, query, }: ",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -3258,54 +3317,6 @@
       },
       {
         "parentPluginId": "controls",
-        "id": "def-public.LazyControlsCallout",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyControlsCallout",
-        "description": [],
-        "signature": [
-          "React.ExoticComponent<",
-          {
-            "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.CalloutProps",
-            "text": "CalloutProps"
-          },
-          "> & { readonly _result: ({ getCreateControlButton }: ",
-          {
-            "pluginId": "controls",
-            "scope": "public",
-            "docId": "kibControlsPluginApi",
-            "section": "def-public.CalloutProps",
-            "text": "CalloutProps"
-          },
-          ") => JSX.Element | null; }"
-        ],
-        "path": "src/plugins/controls/public/controls_callout/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.LazyControlsCallout.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
         "id": "def-public.useControlGroupContainerContext",
         "type": "Function",
         "tags": [],
@@ -3313,7 +3324,7 @@
         "description": [],
         "signature": [
           "() => ",
-          "ReduxContainerContext",
+          "ReduxEmbeddableContext",
           "<",
           "ControlGroupReduxState",
           ", { setControlStyle: (state: ",
@@ -3358,7 +3369,31 @@
           "WritableDraft",
           "<",
           "ControlGroupReduxState",
-          ">, action: { payload: { ids: string[]; }; type: string; }) => void; }>"
+          ">, action: { payload: { ids: string[]; }; type: string; }) => void; }, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Embeddable",
+            "text": "Embeddable"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", ",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupOutput",
+            "text": "ControlGroupOutput"
+          },
+          ", any>>"
         ],
         "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
         "deprecated": false,
@@ -3371,30 +3406,99 @@
     "interfaces": [
       {
         "parentPluginId": "controls",
-        "id": "def-public.CalloutProps",
+        "id": "def-public.AddDataControlProps",
         "type": "Interface",
         "tags": [],
-        "label": "CalloutProps",
+        "label": "AddDataControlProps",
         "description": [],
-        "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
+        "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-public.CalloutProps.getCreateControlButton",
-            "type": "Function",
+            "id": "def-public.AddDataControlProps.controlId",
+            "type": "string",
             "tags": [],
-            "label": "getCreateControlButton",
+            "label": "controlId",
             "description": [],
             "signature": [
-              "(() => JSX.Element) | undefined"
+              "string | undefined"
             ],
-            "path": "src/plugins/controls/public/controls_callout/controls_callout.tsx",
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.AddDataControlProps.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.AddDataControlProps.fieldName",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.AddDataControlProps.grow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "grow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.AddDataControlProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.AddDataControlProps.width",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlWidth",
+                "text": "ControlWidth"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3672,21 +3776,100 @@
         "children": [
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupRendererProps.onEmbeddableLoad",
-            "type": "Function",
+            "id": "def-public.ControlGroupRendererProps.filters",
+            "type": "Array",
             "tags": [],
-            "label": "onEmbeddableLoad",
+            "label": "filters",
             "description": [],
             "signature": [
-              "(controlGroupContainer: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRendererProps.getInitialInput",
+            "type": "Function",
+            "tags": [],
+            "label": "getInitialInput",
+            "description": [],
+            "signature": [
+              "(initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, builder: { addDataControlFromField: (initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, controlProps: ",
               {
                 "pluginId": "controls",
                 "scope": "public",
                 "docId": "kibControlsPluginApi",
-                "section": "def-public.ControlGroupContainer",
-                "text": "ControlGroupContainer"
+                "section": "def-public.AddDataControlProps",
+                "text": "AddDataControlProps"
               },
-              ") => void"
+              ") => Promise<void>; addOptionsListControl: (initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, controlProps: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.AddOptionsListControlProps",
+                "text": "AddOptionsListControlProps"
+              },
+              ") => void; addRangeSliderControl: (initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, controlProps: ",
+              "AddRangeSliderControlProps",
+              ") => void; addTimeSliderControl: (initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">) => void; }) => Promise<Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">>"
             ],
             "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
             "deprecated": false,
@@ -3694,10 +3877,123 @@
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupRendererProps.onEmbeddableLoad.$1",
+                "id": "def-public.ControlGroupRendererProps.getInitialInput.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "controlGroupContainer",
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupRendererProps.getInitialInput.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "builder",
+                "description": [],
+                "signature": [
+                  "{ addDataControlFromField: (initialInput: Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">, controlProps: ",
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.AddDataControlProps",
+                    "text": "AddDataControlProps"
+                  },
+                  ") => Promise<void>; addOptionsListControl: (initialInput: Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">, controlProps: ",
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.AddOptionsListControlProps",
+                    "text": "AddOptionsListControlProps"
+                  },
+                  ") => void; addRangeSliderControl: (initialInput: Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">, controlProps: ",
+                  "AddRangeSliderControlProps",
+                  ") => void; addTimeSliderControl: (initialInput: Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">) => void; }"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRendererProps.onLoadComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "onLoadComplete",
+            "description": [],
+            "signature": [
+              "((controlGroup: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupRendererProps.onLoadComplete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlGroup",
                 "description": [],
                 "signature": [
                   {
@@ -3718,79 +4014,45 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupRendererProps.getCreationOptions",
-            "type": "Function",
+            "id": "def-public.ControlGroupRendererProps.timeRange",
+            "type": "Object",
             "tags": [],
-            "label": "getCreationOptions",
+            "label": "timeRange",
             "description": [],
             "signature": [
-              "(builder: { addDataControlFromField: (initialInput: Partial<",
               {
-                "pluginId": "controls",
+                "pluginId": "@kbn/es-query",
                 "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlGroupInput",
-                "text": "ControlGroupInput"
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
               },
-              ">, newPanelInput: { title?: string | undefined; panelId?: string | undefined; fieldName: string; dataViewId: string; } & Partial<",
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlPanelState",
-                "text": "ControlPanelState"
-              },
-              "<",
-              "ControlInput",
-              ">>) => Promise<void>; }) => Promise<Partial<",
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlGroupInput",
-                "text": "ControlGroupInput"
-              },
-              ">>"
+              " | undefined"
             ],
             "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupRendererProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
               {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlGroupRendererProps.getCreationOptions.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "builder",
-                "description": [],
-                "signature": [
-                  "{ addDataControlFromField: (initialInput: Partial<",
-                  {
-                    "pluginId": "controls",
-                    "scope": "common",
-                    "docId": "kibControlsPluginApi",
-                    "section": "def-common.ControlGroupInput",
-                    "text": "ControlGroupInput"
-                  },
-                  ">, newPanelInput: { title?: string | undefined; panelId?: string | undefined; fieldName: string; dataViewId: string; } & Partial<",
-                  {
-                    "pluginId": "controls",
-                    "scope": "common",
-                    "docId": "kibControlsPluginApi",
-                    "section": "def-common.ControlPanelState",
-                    "text": "ControlPanelState"
-                  },
-                  "<",
-                  "ControlInput",
-                  ">>) => Promise<void>; }"
-                ],
-                "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
             ],
-            "returnComment": []
+            "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4004,6 +4266,21 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "OptionsListSortingType",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.selectedOptions",
             "type": "Array",
             "tags": [],
@@ -4102,14 +4379,13 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.sort",
-            "type": "Object",
+            "id": "def-public.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
             "tags": [],
-            "label": "sort",
+            "label": "hideActionBar",
             "description": [],
             "signature": [
-              "SortingType",
-              " | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -4124,6 +4400,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -4244,6 +4534,36 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.AddOptionsListControlProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AddOptionsListControlProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.AddDataControlProps",
+            "text": "AddDataControlProps"
+          },
+          " & Partial<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.OptionsListEmbeddableInput",
+            "text": "OptionsListEmbeddableInput"
+          },
+          ">"
+        ],
+        "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "controls",
         "id": "def-public.CONTROL_GROUP_TYPE",
@@ -4472,6 +4792,56 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.DataControlInput",
+        "type": "Type",
+        "tags": [],
+        "label": "DataControlInput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          " & { query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined; filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; timeslice?: [number, number] | undefined; controlStyle?: ",
+          "ControlStyle",
+          " | undefined; ignoreParentSettings?: ",
+          "ParentIgnoreSettings",
+          " | undefined; } & { fieldName: string; parentFieldName?: string | undefined; childFieldName?: string | undefined; dataViewId: string; }"
+        ],
+        "path": "src/plugins/controls/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.OPTIONS_LIST_CONTROL",
         "type": "string",
         "tags": [],
@@ -4516,7 +4886,289 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.controlGroupInputBuilder",
+        "type": "Object",
+        "tags": [],
+        "label": "controlGroupInputBuilder",
+        "description": [],
+        "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.controlGroupInputBuilder.addDataControlFromField",
+            "type": "Function",
+            "tags": [],
+            "label": "addDataControlFromField",
+            "description": [],
+            "signature": [
+              "(initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, controlProps: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.AddDataControlProps",
+                "text": "AddDataControlProps"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addDataControlFromField.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addDataControlFromField.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controlProps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.AddDataControlProps",
+                    "text": "AddDataControlProps"
+                  }
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.controlGroupInputBuilder.addOptionsListControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addOptionsListControl",
+            "description": [],
+            "signature": [
+              "(initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, controlProps: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.AddOptionsListControlProps",
+                "text": "AddOptionsListControlProps"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addOptionsListControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addOptionsListControl.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "controlProps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.AddOptionsListControlProps",
+                    "text": "AddOptionsListControlProps"
+                  }
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.controlGroupInputBuilder.addRangeSliderControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addRangeSliderControl",
+            "description": [],
+            "signature": [
+              "(initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, controlProps: ",
+              "AddRangeSliderControlProps",
+              ") => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addRangeSliderControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addRangeSliderControl.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "controlProps",
+                "description": [],
+                "signature": [
+                  "AddRangeSliderControlProps"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.controlGroupInputBuilder.addTimeSliderControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addTimeSliderControl",
+            "description": [],
+            "signature": [
+              "(initialInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.controlGroupInputBuilder.addTimeSliderControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/control_group_input_builder.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -4803,9 +5455,9 @@
           ", \"id\">) => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -4851,9 +5503,9 @@
           "(serializable: ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ") => Omit<",
@@ -4880,9 +5532,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               }
             ],
@@ -5224,6 +5876,21 @@
         "children": [
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "OptionsListSortingType",
+              " | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.selectedOptions",
             "type": "Array",
             "tags": [],
@@ -5322,14 +5989,13 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.sort",
-            "type": "Object",
+            "id": "def-common.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
             "tags": [],
-            "label": "sort",
+            "label": "hideActionBar",
             "description": [],
             "signature": [
-              "SortingType",
-              " | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -5344,6 +6010,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -5567,9 +6247,9 @@
           " & ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           "; ignoreParentSettings: ",
@@ -5577,9 +6257,9 @@
           " & ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           "; }"

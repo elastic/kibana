@@ -15,6 +15,8 @@ import {
   from,
   Observable,
   Subscription,
+  map,
+  distinctUntilChanged,
 } from 'rxjs';
 
 import {
@@ -48,6 +50,29 @@ export interface DataViewEditorServiceConstructorArgs {
   };
 }
 
+interface DataViewEditorState {
+  matchedIndices: MatchedIndicesSet;
+  rollupIndicesCaps: RollupIndicesCapsResponse;
+  isLoadingSourcesInternal: boolean;
+  loadingTimestampFields: boolean;
+  timestampFieldOptions: TimestampOption[];
+  rollupIndexName?: string | null;
+}
+
+const defaultDataViewEditorState: DataViewEditorState = {
+  matchedIndices: { ...matchedIndiciesDefault },
+  rollupIndicesCaps: {},
+  isLoadingSourcesInternal: false,
+  loadingTimestampFields: false,
+  timestampFieldOptions: [],
+  rollupIndexName: undefined,
+};
+
+export const stateSelectorFactory =
+  <S>(state$: Observable<S>) =>
+  <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
+    state$.pipe(map(selector), distinctUntilChanged(equalityFn));
+
 export class DataViewEditorService {
   constructor({
     services: { http, dataViews },
@@ -68,13 +93,19 @@ export class DataViewEditorService {
     this.rollupCapsResponse = this.getRollupIndexCaps();
     this.dataViewNames$ = from(this.loadDataViewNames(initialName));
 
+    this.state$ = new BehaviorSubject<DataViewEditorState>({
+      ...defaultDataViewEditorState,
+    });
+
+    const stateSelector = stateSelectorFactory(this.state$);
+
     // public observables
-    this.matchedIndices$ = this.matchedIndicesInternal$.asObservable();
-    this.rollupIndicesCaps$ = this.rollupIndicesCapsInternal$.asObservable();
-    this.isLoadingSources$ = this.isLoadingSourcesInternal$.asObservable();
-    this.loadingTimestampFields$ = this.loadingTimestampFieldsInternal$.asObservable();
-    this.timestampFieldOptions$ = this.timestampFieldOptionsInternal$.asObservable();
-    this.rollupIndex$ = this.rollupIndexInternal$.asObservable();
+    this.matchedIndices$ = stateSelector((state) => state.matchedIndices);
+    this.rollupIndicesCaps$ = stateSelector((state) => state.rollupIndicesCaps);
+    this.isLoadingSources$ = stateSelector((state) => state.isLoadingSourcesInternal);
+    this.loadingTimestampFields$ = stateSelector((state) => state.loadingTimestampFields);
+    this.timestampFieldOptions$ = stateSelector((state) => state.timestampFieldOptions);
+    this.rollupIndex$ = stateSelector((state) => state.rollupIndexName);
 
     // when list of matched indices is updated always update timestamp fields
     this.loadTimestampFieldsSub = this.matchedIndices$.subscribe(() => this.loadTimestampFields());
@@ -99,6 +130,7 @@ export class DataViewEditorService {
   private type = INDEX_PATTERN_TYPE.DEFAULT;
 
   // state
+  private state = { ...defaultDataViewEditorState };
   private indexPattern = '';
   private allowHidden = false;
 
@@ -109,24 +141,19 @@ export class DataViewEditorService {
   private matchedIndicesForProviderSub: Subscription;
   private rollupIndexForProviderSub: Subscription;
 
-  // used for validating rollup data views - must match one and only one data view
-  private rollupIndicesCapsInternal$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
-  rollupIndicesCaps$: Observable<RollupIndicesCapsResponse>;
-  private isLoadingSourcesInternal$ = new BehaviorSubject<boolean>(false);
-  isLoadingSources$: Observable<boolean>;
+  private state$: BehaviorSubject<DataViewEditorState>;
 
-  private loadingTimestampFieldsInternal$ = new BehaviorSubject<boolean>(false);
+  // used for validating rollup data views - must match one and only one data view
+  rollupIndicesCaps$: Observable<RollupIndicesCapsResponse>;
+  isLoadingSources$: Observable<boolean>;
   loadingTimestampFields$: Observable<boolean>;
-  private timestampFieldOptionsInternal$ = new Subject<TimestampOption[]>();
   timestampFieldOptions$: Observable<TimestampOption[]>;
 
   // current matched rollup index
-  private rollupIndexInternal$ = new BehaviorSubject<string | undefined | null>(undefined);
   rollupIndex$: Observable<string | undefined | null>;
   // alernates between value and undefined so validation can treat new value as thought its a promise
   private rollupIndexForProvider$ = new Subject<string | undefined | null>();
 
-  private matchedIndicesInternal$ = new BehaviorSubject<MatchedIndicesSet>(matchedIndiciesDefault);
   matchedIndices$: Observable<MatchedIndicesSet>;
 
   // alernates between value and undefined so validation can treat new value as thought its a promise
@@ -137,15 +164,20 @@ export class DataViewEditorService {
   private currentLoadingTimestampFields = 0;
   private currentLoadingMatchedIndices = 0;
 
+  private updateState = (newState: Partial<DataViewEditorState>) => {
+    this.state = { ...this.state, ...newState };
+    this.state$.next(this.state);
+  };
+
   private getRollupIndexCaps = async () => {
-    let response: RollupIndicesCapsResponse = {};
+    let rollupIndicesCaps: RollupIndicesCapsResponse = {};
     try {
-      response = await this.http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
+      rollupIndicesCaps = await this.http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
     } catch (e) {
       // Silently swallow failure responses such as expired trials
     }
-    this.rollupIndicesCapsInternal$.next(response);
-    return response;
+    this.updateState({ rollupIndicesCaps });
+    return rollupIndicesCaps;
   };
 
   private getIsRollupIndex = async () => {
@@ -165,7 +197,7 @@ export class DataViewEditorService {
     const indexRequests = [];
     let newRollupIndexName: string | undefined | null;
 
-    this.loadingTimestampFieldsInternal$.next(true);
+    this.updateState({ loadingTimestampFields: true });
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = this.getIndicesCached({
@@ -194,24 +226,19 @@ export class DataViewEditorService {
       indexRequests
     )) as MatchedItem[][];
 
-    const matchedIndicesResult = getMatchedIndices(
-      allSources,
-      partialMatched,
-      exactMatched,
-      allowHidden
-    );
+    const matchedIndices = getMatchedIndices(allSources, partialMatched, exactMatched, allowHidden);
 
     // verify we're looking at the current result
     if (currentLoadingMatchedIndicesIdx === this.currentLoadingMatchedIndices) {
       if (type === INDEX_PATTERN_TYPE.ROLLUP) {
         const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
         newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : null;
-        this.rollupIndexInternal$.next(newRollupIndexName);
+        this.updateState({ rollupIndexName: newRollupIndexName });
       } else {
-        this.rollupIndexInternal$.next(null);
+        this.updateState({ rollupIndexName: null });
       }
 
-      this.matchedIndicesInternal$.next(matchedIndicesResult);
+      this.updateState({ matchedIndices });
     }
   };
 
@@ -237,7 +264,7 @@ export class DataViewEditorService {
     });
     await this.loadMatchedIndices(this.indexPattern, this.allowHidden, allSrcs, this.type);
 
-    this.isLoadingSourcesInternal$.next(false);
+    this.updateState({ isLoadingSourcesInternal: false });
   };
 
   private loadDataViewNames = async (initialName?: string) => {
@@ -297,9 +324,8 @@ export class DataViewEditorService {
   };
 
   private loadTimestampFields = async () => {
-    if (this.matchedIndicesInternal$.getValue().exactMatchedIndices.length === 0) {
-      this.timestampFieldOptionsInternal$.next([]);
-      this.loadingTimestampFieldsInternal$.next(false);
+    if (this.state.matchedIndices.exactMatchedIndices.length === 0) {
+      this.updateState({ timestampFieldOptions: [], loadingTimestampFields: false });
       return;
     }
     const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
@@ -309,19 +335,18 @@ export class DataViewEditorService {
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-      getFieldsOptions.rollupIndex = this.rollupIndexInternal$.getValue() || '';
+      getFieldsOptions.rollupIndex = this.state.rollupIndexName || '';
     }
 
-    let timestampOptions: TimestampOption[] = [];
+    let timestampFieldOptions: TimestampOption[] = [];
     try {
-      timestampOptions = await this.getTimestampOptionsForWildcardCached(
+      timestampFieldOptions = await this.getTimestampOptionsForWildcardCached(
         getFieldsOptions,
         this.requireTimestampField
       );
     } finally {
       if (currentLoadingTimestampFieldsIdx === this.currentLoadingTimestampFields) {
-        this.timestampFieldOptionsInternal$.next(timestampOptions);
-        this.loadingTimestampFieldsInternal$.next(false);
+        this.updateState({ timestampFieldOptions, loadingTimestampFields: false });
       }
     }
   };

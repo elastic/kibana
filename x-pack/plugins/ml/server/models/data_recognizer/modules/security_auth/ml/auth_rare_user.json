@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Authentication - looks for an unusual user name in the authentication logs. An unusual user name is one way of detecting credentialed access by means of a new or dormant user account. A user account that is normally inactive, because the user has left the organization, which becomes active, may be due to credentialed access using a compromised account password. Threat actors will sometimes also create new users as a means of persisting in a compromised web application.",
   "groups": [
     "security",
@@ -28,6 +27,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-security-auth"
+    "created_by": "ml-module-security-auth",
+    "security_app_display_name": "Rare User Logon"
   }
 }

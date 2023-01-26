@@ -8,7 +8,8 @@
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { AuditAction } from '@kbn/core-saved-objects-server';
-import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
+import { setMapsAreEqual, setsAreEqual } from '@kbn/core-saved-objects-utils-server';
+import type { EcsEvent, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '@kbn/spaces-plugin/server';
@@ -139,7 +140,7 @@ const expectNoAuthorizationCheck = (
 const expectAuditEvent = (
   auditLogger: AuditLogger,
   action: string,
-  outcome: EcsEventOutcome,
+  outcome: EcsEvent['outcome'],
   savedObject?: Required<AuditEvent>['kibana']['saved_object']
 ) => {
   expect(auditLogger.log).toHaveBeenCalledWith(
@@ -732,15 +733,34 @@ describe('SecureSpacesClientWrapper', () => {
 
     function expectAuthorizationCheck(
       securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>,
-      targetTypes: string[],
-      targetSpaces: string[]
+      aliases: Array<{ targetSpace: string; targetType: string }>
     ) {
-      expect(securityExtension!.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(securityExtension!.checkAuthorization).toHaveBeenCalledWith({
-        types: new Set(targetTypes), // unique types of the alias targets
-        spaces: new Set(targetSpaces), // unique spaces of the alias targets
-        actions: new Set(['bulk_update']),
+      expect(securityExtension.performAuthorization).toHaveBeenCalledTimes(1);
+
+      const targetTypes = aliases.map((alias) => alias.targetType);
+      const targetSpaces = aliases.map((alias) => alias.targetSpace);
+
+      const expectedActions = new Set(['bulk_update']);
+      const expectedSpaces = new Set(targetSpaces);
+      const expectedTypes = new Set(targetTypes);
+      const expectedEnforceMap = new Map<string, Set<string>>();
+      aliases.forEach((alias) => {
+        expectedEnforceMap.set(alias.targetType, new Set([alias.targetSpace]));
       });
+
+      const {
+        actions: actualActions,
+        spaces: actualSpaces,
+        types: actualTypes,
+        enforceMap: actualEnforceMap,
+        options: actualOptions,
+      } = securityExtension.performAuthorization.mock.calls[0][0];
+
+      expect(setsAreEqual(expectedActions, actualActions)).toBeTruthy();
+      expect(setsAreEqual(expectedSpaces, actualSpaces)).toBeTruthy();
+      expect(setsAreEqual(expectedTypes, actualTypes)).toBeTruthy();
+      expect(setMapsAreEqual(expectedEnforceMap, actualEnforceMap)).toBeTruthy();
+      expect(actualOptions).toBeUndefined();
     }
 
     describe('when security is not enabled', () => {
@@ -764,12 +784,7 @@ describe('SecureSpacesClientWrapper', () => {
         const { wrapper, baseClient, forbiddenError, securityExtension } = setup({
           securityEnabled,
         });
-        securityExtension!.checkAuthorization.mockResolvedValue({
-          // These values don't actually matter, the call to enforceAuthorization matters
-          status: 'unauthorized',
-          typeMap: new Map(),
-        });
-        securityExtension!.enforceAuthorization.mockImplementation(() => {
+        securityExtension!.performAuthorization.mockImplementation(() => {
           throw new Error('Oh no!');
         });
         const aliases = [alias1, alias2];
@@ -777,14 +792,14 @@ describe('SecureSpacesClientWrapper', () => {
           forbiddenError
         );
 
-        expectAuthorizationCheck(securityExtension!, ['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuthorizationCheck(securityExtension!, aliases);
         expectAuditEvents(securityExtension!, aliases, { error: true });
         expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
       });
 
       it('updates the legacy URL aliases when authorized', async () => {
         const { wrapper, baseClient, securityExtension } = setup({ securityEnabled });
-        securityExtension!.checkAuthorization.mockResolvedValue({
+        securityExtension!.performAuthorization.mockResolvedValue({
           // These values don't actually matter, the call to enforceAuthorization matters
           status: 'fully_authorized',
           typeMap: new Map(),
@@ -793,7 +808,7 @@ describe('SecureSpacesClientWrapper', () => {
         const aliases = [alias1, alias2];
         await wrapper.disableLegacyUrlAliases(aliases);
 
-        expectAuthorizationCheck(securityExtension!, ['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuthorizationCheck(securityExtension!, aliases);
         expectAuditEvents(securityExtension!, aliases, { error: false });
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledTimes(1);
         expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledWith(aliases);

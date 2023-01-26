@@ -9,11 +9,12 @@ import * as t from 'io-ts';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  historicalSummarySchema,
   indicatorDataSchema,
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
-} from '../../types/schema';
+} from '@kbn/slo-schema';
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
@@ -21,6 +22,7 @@ type KQLCustomIndicator = t.TypeOf<typeof kqlCustomIndicatorSchema>;
 type Indicator = t.TypeOf<typeof indicatorSchema>;
 type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
 type IndicatorData = t.TypeOf<typeof indicatorDataSchema>;
+type HistoricalSummary = t.TypeOf<typeof historicalSummarySchema>;
 
 export type {
   Indicator,
@@ -29,4 +31,5 @@ export type {
   APMTransactionDurationIndicator,
   KQLCustomIndicator,
   IndicatorData,
+  HistoricalSummary,
 };

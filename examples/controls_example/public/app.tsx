@@ -8,35 +8,39 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiSpacer } from '@elastic/eui';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
-
-interface Props {
-  dataView: DataView;
-}
-
-const ControlsExamples = ({ dataView }: Props) => {
-  return (
-    <KibanaPageTemplate>
-      <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
-      <KibanaPageTemplate.Section>
-        <BasicReduxExample dataView={dataView} />
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
-  );
-};
+import { EditExample } from './edit_example';
+import { SearchExample } from './search_example';
 
 export const renderApp = async (
-  { data }: ControlsExampleStartDeps,
+  { data, navigation }: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  const dataViews = await data.dataViews.find('kibana_sample_data_ecommerce');
-  if (dataViews.length > 0) {
-    ReactDOM.render(<ControlsExamples dataView={dataViews[0]} />, element);
-  }
+  const dataViews = await data.dataViews.find('kibana_sample_data_logs');
+  const examples =
+    dataViews.length > 0 ? (
+      <>
+        <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
+        <EuiSpacer size="xl" />
+        <EditExample />
+        <EuiSpacer size="xl" />
+        <BasicReduxExample dataViewId={dataViews[0].id!} />
+      </>
+    ) : (
+      <div>{'Install web logs sample data to run controls examples.'}</div>
+    );
+
+  ReactDOM.render(
+    <KibanaPageTemplate>
+      <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
+      <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
+    </KibanaPageTemplate>,
+    element
+  );
   return () => ReactDOM.unmountComponentAtNode(element);
 };

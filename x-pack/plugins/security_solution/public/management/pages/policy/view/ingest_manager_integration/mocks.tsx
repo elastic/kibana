@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SecuritySolutionQueryClient } from '../../../../../common/containers/query_client/query_client_provider';
+import { deepFreeze } from '@kbn/std';
 import type { AppContextTestRender, UiRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { createFleetContextReduxStore } from './components/with_security_context/store';
@@ -61,9 +61,10 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
   });
 
   const mockedContext = createAppRootMockRenderer();
+  const { coreStart, depsStart, queryClient, startServices } = mockedContext;
   const store = createFleetContextReduxStore({
-    coreStart: mockedContext.coreStart,
-    depsStart: mockedContext.depsStart,
+    coreStart,
+    depsStart,
     reducersObject: {
       management: managementReducer,
       app: (state, action: AppAction | UpdateExperimentalFeaturesTestAction) => {
@@ -81,8 +82,6 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const queryClient = new SecuritySolutionQueryClient();
-
   const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
     useEffect(() => {
       return () => {
@@ -94,15 +93,16 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
       };
     }, []);
 
+    startServices.application.capabilities = deepFreeze({
+      ...startServices.application.capabilities,
+      siem: { show: true, crud: true },
+    });
+
     return (
       <I18nProvider>
         <EuiThemeProvider>
-          <KibanaContextProvider services={mockedContext.startServices}>
-            <RenderContextProviders
-              store={store}
-              depsStart={mockedContext.depsStart}
-              queryClient={queryClient}
-            >
+          <KibanaContextProvider services={startServices}>
+            <RenderContextProviders store={store} depsStart={depsStart} queryClient={queryClient}>
               {children}
             </RenderContextProviders>
           </KibanaContextProvider>

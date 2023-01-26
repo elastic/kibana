@@ -7,7 +7,13 @@
 
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { Operation, OperationDescriptor, DatasourcePublicAPI } from '../../types';
+import {
+  Operation,
+  OperationDescriptor,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  UserMessage,
+} from '../../types';
 import type {
   State,
   XYState,
@@ -15,9 +21,10 @@ import type {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
+  XYPersistedState,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { IconChartBar } from '@kbn/chart-icons';
+import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
@@ -31,7 +38,7 @@ import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
-import { layerTypes } from '../..';
+import { layerTypes, Visualization } from '../..';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -1983,20 +1990,13 @@ describe('xy_visualization', () => {
           layerId: 'annotations',
         });
         expect(config.groups[0].accessors).toEqual([
-          { color: '#f04e98', columnId: 'an1', triggerIcon: 'color' },
+          {
+            color: '#f04e98',
+            columnId: 'an1',
+            customIcon: IconCircle,
+            triggerIconType: 'custom',
+          },
         ]);
-        expect(config.groups[0].invalid).toEqual(false);
-      });
-
-      it('When data layer is empty, should return invalid state', () => {
-        const state = getStateWithAnnotationLayer();
-        (state.layers[0] as XYDataLayerConfig).xAccessor = undefined;
-        const config = xyVisualization.getConfiguration({
-          state,
-          frame,
-          layerId: 'annotations',
-        });
-        expect(config.groups[0].invalid).toEqual(true);
       });
     });
 
@@ -2053,7 +2053,7 @@ describe('xy_visualization', () => {
           },
           'b'
         );
-        expect(accessorConfig.triggerIcon).toEqual('color');
+        expect(accessorConfig.triggerIconType).toEqual('color');
         expect(accessorConfig.color).toEqual('red');
       });
 
@@ -2061,7 +2061,7 @@ describe('xy_visualization', () => {
         const palette = paletteServiceMock.get('default');
         (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
-        expect(accessorConfig.triggerIcon).toEqual('color');
+        expect(accessorConfig.triggerIconType).toEqual('color');
         // black is the color returned from the palette mock
         expect(accessorConfig.color).toEqual('black');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
@@ -2113,7 +2113,7 @@ describe('xy_visualization', () => {
         const yConfigs = callConfigForYConfigs({});
         expect(yConfigs!.accessors.length).toEqual(2);
         yConfigs!.accessors.forEach((accessor) => {
-          expect(accessor.triggerIcon).toBeUndefined();
+          expect(accessor.triggerIconType).toBeUndefined();
         });
       });
 
@@ -2124,7 +2124,7 @@ describe('xy_visualization', () => {
           },
           'b'
         );
-        expect(accessorConfig.triggerIcon).toEqual('disabled');
+        expect(accessorConfig.triggerIconType).toEqual('disabled');
       });
 
       it('should show current palette for breakdown dimension', () => {
@@ -2165,544 +2165,640 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    let mockDatasource: ReturnType<typeof createMockDatasource>;
-    let frame: ReturnType<typeof createMockFramePublicAPI>;
+  describe('#getUserMessages', () => {
+    describe('errors', () => {
+      let mockDatasource: ReturnType<typeof createMockDatasource>;
+      let frame: ReturnType<typeof createMockFramePublicAPI>;
 
-    beforeEach(() => {
-      frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      beforeEach(() => {
+        frame = createMockFramePublicAPI();
+        mockDatasource = createMockDatasource('testDatasource');
 
-      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        label: 'MyOperation',
-      } as OperationDescriptor);
+        mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+          dataType: 'string',
+          label: 'MyOperation',
+        } as OperationDescriptor);
 
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-    });
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+      });
 
-    it("should not return an error when there's only one dimension (X or Y)", () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: [],
-            },
-          ],
-        })
-      ).not.toBeDefined();
-    });
-    it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: [],
-            },
-            {
-              layerId: 'second',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: [],
-            },
-          ],
-        })
-      ).not.toBeDefined();
-    });
-    it('should not return an error when mixing different valid configurations in multiple layers', () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: ['a'],
-            },
-            {
-              layerId: 'second',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: ['a'],
-              splitAccessor: 'a',
-            },
-          ],
-        })
-      ).not.toBeDefined();
-    });
-    it("should not return an error when there's only one splitAccessor dimension configured", () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: [],
-              splitAccessor: 'a',
-            },
-          ],
-        })
-      ).not.toBeDefined();
+      const getErrorMessages = (
+        vis: Visualization<XYState, XYPersistedState>,
+        state: XYState,
+        frameMock = { datasourceLayers: {} } as Partial<FramePublicAPI>
+      ) =>
+        vis.getUserMessages!(state, { frame: frameMock as FramePublicAPI })
+          .filter(({ severity }) => severity === 'error')
+          .map((error) => ({ shortMessage: error.shortMessage, longMessage: error.longMessage }));
 
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: [],
-              splitAccessor: 'a',
-            },
-            {
-              layerId: 'second',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: [],
-              splitAccessor: 'a',
-            },
-          ],
-        })
-      ).not.toBeDefined();
-    });
-    it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: [],
-            },
-            {
-              layerId: 'second',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        })
-      ).toEqual([
-        {
-          shortMessage: 'Missing Vertical axis.',
-          longMessage: 'Layer 1 requires a field for the Vertical axis.',
-        },
-      ]);
-    });
-    it('should return an error with batched messages for the same error with multiple layers', () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: ['a'],
-            },
-            {
-              layerId: 'second',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: [],
-              splitAccessor: 'a',
-            },
-            {
-              layerId: 'third',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: undefined,
-              accessors: [],
-              splitAccessor: 'a',
-            },
-          ],
-        })
-      ).toEqual([
-        {
-          shortMessage: 'Missing Vertical axis.',
-          longMessage: 'Layers 2, 3 require a field for the Vertical axis.',
-        },
-      ]);
-    });
-    it("should return an error when some layers are complete but other layers aren't", () => {
-      expect(
-        xyVisualization.getErrorMessages({
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: [],
-            },
-            {
-              layerId: 'second',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: ['a'],
-            },
-            {
-              layerId: 'third',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: ['a'],
-            },
-          ],
-        })
-      ).toEqual([
-        {
-          shortMessage: 'Missing Vertical axis.',
-          longMessage: 'Layer 1 requires a field for the Vertical axis.',
-        },
-      ]);
-    });
-
-    it('should return an error when accessor type is of the wrong type', () => {
-      expect(
-        xyVisualization.getErrorMessages(
-          {
+      it("should not return an error when there's only one dimension (X or Y)", () => {
+        expect(
+          getErrorMessages(xyVisualization, {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: 'd',
                 xAccessor: 'a',
-                accessors: ['b'], // just use a single accessor to avoid too much noise
+                accessors: [],
               },
             ],
-          },
-          { datasourceLayers: frame.datasourceLayers, dataViews: {} as DataViewsState }
-        )
-      ).toEqual([
-        {
-          shortMessage: 'Wrong data type for Vertical axis.',
-          longMessage:
-            'The dimension MyOperation provided for the Vertical axis has the wrong data type. Expected number but have string',
-        },
-      ]);
-    });
-
-    it('should return an error if two incompatible xAccessors (multiple layers) are used', () => {
-      // current incompatibility is only for date and numeric histograms as xAccessors
-      const datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-        second: createMockDatasource('testDatasource').publicAPIMock,
-      };
-      datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
-        id === 'a'
-          ? ({
-              dataType: 'date',
-              scale: 'interval',
-            } as unknown as OperationDescriptor)
-          : null
-      );
-      datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
-        id === 'e'
-          ? ({
-              dataType: 'number',
-              scale: 'interval',
-            } as unknown as OperationDescriptor)
-          : null
-      );
-      expect(
-        xyVisualization.getErrorMessages(
-          {
+          })
+        ).toHaveLength(0);
+      });
+      it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
+        expect(
+          getErrorMessages(xyVisualization, {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: 'd',
                 xAccessor: 'a',
-                accessors: ['b'],
+                accessors: [],
               },
               {
                 layerId: 'second',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: 'd',
-                xAccessor: 'e',
-                accessors: ['b'],
+                xAccessor: 'a',
+                accessors: [],
               },
             ],
-          },
-          { datasourceLayers, dataViews: {} as DataViewsState }
-        )
-      ).toEqual([
-        {
-          shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage:
-            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
-        },
-      ]);
-    });
-
-    it('should return an error if string and date histogram xAccessors (multiple layers) are used together', () => {
-      // current incompatibility is only for date and numeric histograms as xAccessors
-      const datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-        second: createMockDatasource('testDatasource').publicAPIMock,
-      };
-      datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
-        id === 'a'
-          ? ({
-              dataType: 'date',
-              scale: 'interval',
-            } as unknown as OperationDescriptor)
-          : null
-      );
-      datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
-        id === 'e'
-          ? ({
-              dataType: 'string',
-              scale: 'ordinal',
-            } as unknown as OperationDescriptor)
-          : null
-      );
-      expect(
-        xyVisualization.getErrorMessages(
-          {
+          })
+        ).toHaveLength(0);
+      });
+      it('should not return an error when mixing different valid configurations in multiple layers', () => {
+        expect(
+          getErrorMessages(xyVisualization, {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: 'd',
                 xAccessor: 'a',
-                accessors: ['b'],
+                accessors: ['a'],
               },
               {
                 layerId: 'second',
                 layerType: layerTypes.DATA,
                 seriesType: 'area',
-                splitAccessor: 'd',
-                xAccessor: 'e',
-                accessors: ['b'],
+                xAccessor: undefined,
+                accessors: ['a'],
+                splitAccessor: 'a',
               },
             ],
-          },
-          { datasourceLayers, dataViews: {} as DataViewsState }
-        )
-      ).toEqual([
-        {
-          shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage:
-            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
-        },
-      ]);
-    });
+          })
+        ).toHaveLength(0);
+      });
+      it("should not return an error when there's only one splitAccessor dimension configured", () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          })
+        ).toHaveLength(0);
 
-    describe('Annotation layers', () => {
-      function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
-        return {
-          layers: [
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          })
+        ).toHaveLength(0);
+      });
+      it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+              },
+            ],
+          })
+        ).toEqual([
+          {
+            shortMessage: 'Missing Vertical axis.',
+            longMessage: 'Layer 1 requires a field for the Vertical axis.',
+          },
+        ]);
+      });
+      it('should return an error with batched messages for the same error with multiple layers', () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'third',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          })
+        ).toEqual([
+          {
+            shortMessage: 'Missing Vertical axis.',
+            longMessage: 'Layers 2, 3 require a field for the Vertical axis.',
+          },
+        ]);
+      });
+      it("should return an error when some layers are complete but other layers aren't", () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'third',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+            ],
+          })
+        ).toEqual([
+          {
+            shortMessage: 'Missing Vertical axis.',
+            longMessage: 'Layer 1 requires a field for the Vertical axis.',
+          },
+        ]);
+      });
+
+      it('should return an error when accessor type is of the wrong type', () => {
+        expect(
+          getErrorMessages(
+            xyVisualization,
             {
-              layerId: 'layerId',
-              layerType: 'annotations',
-              indexPatternId: 'first',
-              annotations: [
+              ...exampleState(),
+              layers: [
                 {
-                  label: 'Event',
-                  id: '1',
-                  type: 'query',
-                  timeField: 'start_date',
-                  ...annotation,
+                  layerId: 'first',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessor: 'd',
+                  xAccessor: 'a',
+                  accessors: ['b'], // just use a single accessor to avoid too much noise
                 },
               ],
             },
-          ],
-        } as XYState;
-      }
+            { datasourceLayers: frame.datasourceLayers, dataViews: {} as DataViewsState }
+          )
+        ).toEqual([
+          {
+            shortMessage: 'Wrong data type for Vertical axis.',
+            longMessage:
+              'The dimension MyOperation provided for the Vertical axis has the wrong data type. Expected number but have string',
+          },
+        ]);
+      });
 
-      function getFrameMock() {
-        return createMockFramePublicAPI({
-          datasourceLayers: { first: mockDatasource.publicAPIMock },
-          dataViews: createMockDataViewsState({
-            indexPatterns: { first: createMockedIndexPattern() },
-          }),
-        });
-      }
-      it('should return error if current annotation contains non-existent field as timeField', () => {
-        const xyState = createStateWithAnnotationProps({
-          timeField: 'non-existent',
-        });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
-        expect(errors).toHaveLength(1);
-        expect(errors![0]).toEqual(
-          expect.objectContaining({
-            shortMessage: 'Time field non-existent not found in data view my-fake-index-pattern',
-          })
+      it('should return an error if two incompatible xAccessors (multiple layers) are used', () => {
+        // current incompatibility is only for date and numeric histograms as xAccessors
+        const datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+          second: createMockDatasource('testDatasource').publicAPIMock,
+        };
+        datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+          id === 'a'
+            ? ({
+                dataType: 'date',
+                scale: 'interval',
+              } as unknown as OperationDescriptor)
+            : null
         );
-      });
-      it('should return error if current annotation contains non existent field as textField', () => {
-        const xyState = createStateWithAnnotationProps({
-          textField: 'non-existent',
-        });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
-        expect(errors).toHaveLength(1);
-        expect(errors![0]).toEqual(
-          expect.objectContaining({
-            shortMessage: 'Text field non-existent not found in data view my-fake-index-pattern',
-          })
+        datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+          id === 'e'
+            ? ({
+                dataType: 'number',
+                scale: 'interval',
+              } as unknown as OperationDescriptor)
+            : null
         );
-      });
-      it('should contain error if current annotation contains at least one non-existent field as tooltip field', () => {
-        const xyState = createStateWithAnnotationProps({
-          extraFields: ['bytes', 'memory', 'non-existent'],
-        });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
-        expect(errors).toHaveLength(1);
-        expect(errors![0]).toEqual(
-          expect.objectContaining({
-            shortMessage: 'Tooltip field non-existent not found in data view my-fake-index-pattern',
-          })
-        );
-      });
-      it('should contain error if current annotation contains invalid query', () => {
-        const xyState = createStateWithAnnotationProps({
-          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
-        });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
-        expect(errors).toHaveLength(1);
-        expect(errors![0]).toEqual(
-          expect.objectContaining({
-            shortMessage: expect.stringContaining(
-              'Expected "(", "{", value, whitespace but """ found.'
-            ),
-          })
-        );
-      });
-      it('should contain multiple errors if current annotation contains multiple non-existent fields', () => {
-        const xyState = createStateWithAnnotationProps({
-          timeField: 'non-existent',
-          textField: 'non-existent',
-          extraFields: ['bytes', 'memory', 'non-existent'],
-          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
-        });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
-        expect(errors).toHaveLength(4);
-      });
-      it('should contain error if current annotation contains no time field set', () => {
-        const xyState = createStateWithAnnotationProps({
-          timeField: undefined,
-        });
-        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
-        expect(errors).toHaveLength(1);
-        expect(errors![0]).toEqual(
-          expect.objectContaining({
-            shortMessage: expect.stringContaining('Time field is missing'),
-          })
-        );
-      });
-    });
-  });
-
-  describe('#getWarningMessages', () => {
-    let mockDatasource: ReturnType<typeof createMockDatasource>;
-    let frame: ReturnType<typeof createMockFramePublicAPI>;
-
-    beforeEach(() => {
-      frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
-
-      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'd', fields: [] },
-        { columnId: 'a', fields: [] },
-        { columnId: 'b', fields: [] },
-        { columnId: 'c', fields: [] },
-      ]);
-
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          columns: [
-            { id: 'a', name: 'A', meta: { type: 'number' } },
-            { id: 'b', name: 'B', meta: { type: 'number' } },
-          ],
-          rows: [
-            { a: 1, b: [2, 0] },
-            { a: 3, b: 4 },
-            { a: 5, b: 6 },
-            { a: 7, b: 8 },
-          ],
-        },
-      };
-    });
-    it('should return a warning when numeric accessors contain array', () => {
-      const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-      (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
-        label: 'Label B',
-      });
-      const warningMessages = xyVisualization.getWarningMessages!(
-        {
-          ...exampleState(),
-          layers: [
+        expect(
+          getErrorMessages(
+            xyVisualization,
             {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'area',
-              xAccessor: 'a',
-              accessors: ['b'],
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessor: 'd',
+                  xAccessor: 'a',
+                  accessors: ['b'],
+                },
+                {
+                  layerId: 'second',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessor: 'd',
+                  xAccessor: 'e',
+                  accessors: ['b'],
+                },
+              ],
             },
-          ],
-        },
-        frame
-      );
-      expect(warningMessages).toHaveLength(1);
-      expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
-        <FormattedMessage
-          defaultMessage="{label} contains array values. Your visualization may not render as expected."
-          id="xpack.lens.xyVisualization.arrayValues"
-          values={
-            Object {
-              "label": <strong>
-                Label B
-              </strong>,
-            }
+            { datasourceLayers, dataViews: {} as DataViewsState }
+          )
+        ).toEqual([
+          {
+            shortMessage: 'Wrong data type for Horizontal axis.',
+            longMessage:
+              'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
+          },
+        ]);
+      });
+
+      it('should return an error if string and date histogram xAccessors (multiple layers) are used together', () => {
+        // current incompatibility is only for date and numeric histograms as xAccessors
+        const datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+          second: createMockDatasource('testDatasource').publicAPIMock,
+        };
+        datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+          id === 'a'
+            ? ({
+                dataType: 'date',
+                scale: 'interval',
+              } as unknown as OperationDescriptor)
+            : null
+        );
+        datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+          id === 'e'
+            ? ({
+                dataType: 'string',
+                scale: 'ordinal',
+              } as unknown as OperationDescriptor)
+            : null
+        );
+        expect(
+          getErrorMessages(
+            xyVisualization,
+            {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessor: 'd',
+                  xAccessor: 'a',
+                  accessors: ['b'],
+                },
+                {
+                  layerId: 'second',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessor: 'd',
+                  xAccessor: 'e',
+                  accessors: ['b'],
+                },
+              ],
+            },
+            { datasourceLayers, dataViews: {} as DataViewsState }
+          )
+        ).toEqual([
+          {
+            shortMessage: 'Wrong data type for Horizontal axis.',
+            longMessage:
+              'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
+          },
+        ]);
+      });
+
+      describe('Annotation layers', () => {
+        const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
+
+        function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
+          return {
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: undefined,
+                xAccessor: DATE_HISTORGRAM_COLUMN_ID,
+                accessors: ['b'],
+              },
+              {
+                layerId: 'layerId',
+                layerType: 'annotations',
+                indexPatternId: 'first',
+                annotations: [
+                  {
+                    label: 'Event',
+                    id: '1',
+                    type: 'query',
+                    timeField: 'start_date',
+                    ...annotation,
+                  },
+                ],
+              },
+            ],
+          } as XYState;
+        }
+
+        function getFrameMock() {
+          const datasourceMock = createMockDatasource('testDatasource');
+          datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
+            id === DATE_HISTORGRAM_COLUMN_ID
+              ? ({
+                  label: DATE_HISTORGRAM_COLUMN_ID,
+                  dataType: 'date',
+                  scale: 'interval',
+                } as OperationDescriptor)
+              : ({
+                  dataType: 'number',
+                  label: 'MyOperation',
+                } as OperationDescriptor)
+          );
+
+          return createMockFramePublicAPI({
+            datasourceLayers: { first: datasourceMock.publicAPIMock },
+            dataViews: createMockDataViewsState({
+              indexPatterns: { first: createMockedIndexPattern() },
+            }),
+          });
+        }
+        test('When data layer is empty, should return error on dimension', () => {
+          const state: State = {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                splitAccessor: undefined,
+                xAccessor: undefined, // important
+                accessors: ['b'],
+              },
+              {
+                layerId: 'annotations',
+                layerType: layerTypes.ANNOTATIONS,
+                indexPatternId: 'indexPattern1',
+                annotations: [exampleAnnotation],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          };
+          expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() }))
+            .toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "displayLocations": Array [
+                  Object {
+                    "dimensionId": "an1",
+                    "id": "dimensionTrigger",
+                  },
+                ],
+                "fixableInEditor": true,
+                "longMessage": "",
+                "severity": "error",
+                "shortMessage": "Annotations require a time based chart to work. Add a date histogram.",
+              },
+            ]
+          `);
+        });
+
+        it('should return error if current annotation contains non-existent field as timeField', () => {
+          const xyState = createStateWithAnnotationProps({
+            timeField: 'non-existent',
+          });
+          const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          expect(errors).toHaveLength(1);
+          expect(errors![0]).toEqual(
+            expect.objectContaining({
+              shortMessage: 'Time field non-existent not found in data view my-fake-index-pattern',
+            })
+          );
+        });
+        it('should return error if current annotation contains non existent field as textField', () => {
+          const xyState = createStateWithAnnotationProps({
+            textField: 'non-existent',
+          });
+          const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          expect(errors).toHaveLength(1);
+          expect(errors![0]).toEqual(
+            expect.objectContaining({
+              shortMessage: 'Text field non-existent not found in data view my-fake-index-pattern',
+            })
+          );
+        });
+        it('should contain error if current annotation contains at least one non-existent field as tooltip field', () => {
+          const xyState = createStateWithAnnotationProps({
+            extraFields: ['bytes', 'memory', 'non-existent'],
+          });
+          const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          expect(errors).toHaveLength(1);
+          expect(errors![0]).toEqual(
+            expect.objectContaining({
+              shortMessage:
+                'Tooltip field non-existent not found in data view my-fake-index-pattern',
+            })
+          );
+        });
+        it('should contain error if current annotation contains invalid query', () => {
+          const xyState = createStateWithAnnotationProps({
+            filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+          });
+          const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          expect(errors).toHaveLength(1);
+          expect(errors![0]).toEqual(
+            expect.objectContaining({
+              shortMessage: expect.stringContaining(
+                'Expected "(", "{", value, whitespace but """ found.'
+              ),
+            })
+          );
+        });
+        it('should contain multiple errors if current annotation contains multiple non-existent fields', () => {
+          const xyState = createStateWithAnnotationProps({
+            timeField: 'non-existent',
+            textField: 'non-existent',
+            extraFields: ['bytes', 'memory', 'non-existent'],
+            filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+          });
+          const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          expect(errors).toHaveLength(4);
+        });
+        it('should contain error if current annotation contains no time field set', () => {
+          const xyState = createStateWithAnnotationProps({
+            timeField: undefined,
+          });
+          const errors = getErrorMessages(xyVisualization, xyState, getFrameMock());
+          expect(errors).toHaveLength(1);
+          expect(errors![0]).toEqual(
+            expect.objectContaining({
+              shortMessage: expect.stringContaining('Time field is missing'),
+            })
+          );
+        });
+      });
+    });
+
+    describe('warnings', () => {
+      let mockDatasource: ReturnType<typeof createMockDatasource>;
+      let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+      beforeEach(() => {
+        frame = createMockFramePublicAPI();
+        mockDatasource = createMockDatasource('testDatasource');
+
+        mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+          { columnId: 'd', fields: [] },
+          { columnId: 'a', fields: [] },
+          { columnId: 'b', fields: [] },
+          { columnId: 'c', fields: [] },
+        ]);
+
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            columns: [
+              { id: 'a', name: 'A', meta: { type: 'number' } },
+              { id: 'b', name: 'B', meta: { type: 'number' } },
+            ],
+            rows: [
+              { a: 1, b: [2, 0] },
+              { a: 3, b: 4 },
+              { a: 5, b: 6 },
+              { a: 7, b: 8 },
+            ],
+          },
+        };
+      });
+
+      const onlyWarnings = (messages: UserMessage[]) =>
+        messages.filter(({ severity }) => severity === 'warning');
+
+      it('should return a warning when numeric accessors contain array', () => {
+        const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
+        (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+          label: 'Label B',
+        });
+        const warningMessages = onlyWarnings(
+          xyVisualization.getUserMessages!(
+            {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  xAccessor: 'a',
+                  accessors: ['b'],
+                },
+              ],
+            },
+            { frame }
+          )
+        );
+        expect(warningMessages).toHaveLength(1);
+        expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": <FormattedMessage
+              defaultMessage="{label} contains array values. Your visualization may not render as expected."
+              id="xpack.lens.xyVisualization.arrayValues"
+              values={
+                Object {
+                  "label": <strong>
+                    Label B
+                  </strong>,
+                }
+              }
+            />,
+            "severity": "warning",
+            "shortMessage": "",
           }
-        />
-      `);
+        `);
+      });
     });
   });
+
   describe('#getUniqueLabels', () => {
     it('creates unique labels for single annotations layer with repeating labels', async () => {
       const xyState = {

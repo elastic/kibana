@@ -72,7 +72,9 @@ export const FleetIntegrationArtifactsCard = memo<FleetIntegrationArtifactCardPr
       { policies: [policyId, 'all'] },
       searchableFields,
       {
-        onError: (error) => toasts.addDanger(labels.artifactsSummaryApiError(error.message)),
+        onError: (error) => {
+          toasts.addDanger(labels.artifactsSummaryApiError(error.message));
+        },
       }
     );
 

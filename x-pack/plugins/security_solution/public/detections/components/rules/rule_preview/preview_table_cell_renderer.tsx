@@ -7,9 +7,9 @@
 
 import type React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { CellValueElementProps } from '../../../../../common/types';
 import { RenderCellValue } from '../../../configurations/security_solution_detections';
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
-> = (props) => RenderCellValue({ ...props, enableActions: false });
+> = (props) => RenderCellValue({ ...props, enableActions: false, asPlainText: true });

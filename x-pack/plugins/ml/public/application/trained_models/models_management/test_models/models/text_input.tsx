@@ -44,6 +44,7 @@ export const TextInput: FC<{
         onChange={(e) => {
           setInputText(e.target.value);
         }}
+        data-test-subj={`mlTestModelInputText`}
       />
     </EuiFormRow>
   );

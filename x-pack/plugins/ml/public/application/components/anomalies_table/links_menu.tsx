@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison, { RisonValue } from 'rison-node';
+import rison, { RisonValue } from '@kbn/rison';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {

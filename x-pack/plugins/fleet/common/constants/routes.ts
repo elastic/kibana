@@ -144,7 +144,6 @@ export const AGENT_API_ROUTES = {
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
-  CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
   ACTION_STATUS_PATTERN: `${API_ROOT}/agents/action_status`,
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
@@ -175,7 +174,6 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
-  UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
   RESET_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies`,
   RESET_ONE_PATTERN: `${INTERNAL_ROOT}/reset_preconfigured_agent_policies/{agentPolicyId}`,
 };

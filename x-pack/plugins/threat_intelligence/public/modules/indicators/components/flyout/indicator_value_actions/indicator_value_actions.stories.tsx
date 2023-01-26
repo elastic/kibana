@@ -20,12 +20,12 @@ const indicator: Indicator = generateMockFileIndicator();
 const field: string = 'threat.indicator.name';
 
 export const Default: Story<void> = () => {
-  const kqlBarIntegration = {
+  const context = {
     kqlBarIntegration: true,
   };
   return (
     <StoryProvidersComponent>
-      <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+      <IndicatorsFlyoutContext.Provider value={context}>
         <IndicatorValueActions indicator={indicator} field={field} />
       </IndicatorsFlyoutContext.Provider>
     </StoryProvidersComponent>
@@ -33,12 +33,12 @@ export const Default: Story<void> = () => {
 };
 
 export const WithoutFilterInOut: Story<void> = () => {
-  const kqlBarIntegration = {
+  const context = {
     kqlBarIntegration: false,
   };
   return (
     <StoryProvidersComponent>
-      <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+      <IndicatorsFlyoutContext.Provider value={context}>
         <IndicatorValueActions indicator={indicator} field={field} />
       </IndicatorsFlyoutContext.Provider>
     </StoryProvidersComponent>

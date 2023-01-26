@@ -19,7 +19,7 @@ import {
   SnapshotRequest,
   InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
-import {
+import type {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
@@ -88,7 +88,6 @@ export function useTimeline(
     interval: displayInterval ?? '',
     to: endTime,
     from: startTime,
-    ignoreLookback: true,
     forceInterval: true,
   };
 

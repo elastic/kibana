@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.isResponseError",
+        "id": "def-common.isResponseError",
         "type": "Function",
         "tags": [],
         "label": "isResponseError",
@@ -29,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
-            "id": "def-server.isResponseError.$1",
+            "id": "def-common.isResponseError.$1",
             "type": "Unknown",
             "tags": [],
             "label": "error",
@@ -48,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.isUnauthorizedError",
+        "id": "def-common.isUnauthorizedError",
         "type": "Function",
         "tags": [],
         "label": "isUnauthorizedError",
@@ -64,7 +72,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
-            "id": "def-server.isUnauthorizedError.$1",
+            "id": "def-common.isUnauthorizedError.$1",
             "type": "Unknown",
             "tags": [],
             "label": "error",
@@ -85,7 +93,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.ElasticsearchErrorDetails",
+        "id": "def-common.ElasticsearchErrorDetails",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchErrorDetails",
@@ -98,7 +106,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
-            "id": "def-server.ElasticsearchErrorDetails.error",
+            "id": "def-common.ElasticsearchErrorDetails.error",
             "type": "Object",
             "tags": [],
             "label": "error",
@@ -118,7 +126,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/es-errors",
-        "id": "def-server.UnauthorizedError",
+        "id": "def-common.UnauthorizedError",
         "type": "Type",
         "tags": [],
         "label": "UnauthorizedError",
@@ -135,14 +143,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -18,9 +18,9 @@ import type {
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { EuiLoadingContent } from '@elastic/eui';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
-import { UrlStateProvider } from '../util/url_state';
 
 import { MlPage } from '../components/ml_page';
 

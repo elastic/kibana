@@ -15,9 +15,13 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
+import { Action } from '@kbn/ui-actions-plugin/public';
 
 export interface PanelOptionsMenuProps {
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   isViewMode: boolean;
   closeContextMenu: boolean;
   title?: string;
@@ -25,8 +29,12 @@ export interface PanelOptionsMenuProps {
 }
 
 interface State {
-  actionContextMenuPanel?: EuiContextMenuPanelDescriptor[];
+  actionContextMenuPanel?: {
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  };
   isPopoverOpen: boolean;
+  showNotification: boolean;
 }
 
 export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, State> {
@@ -47,6 +55,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
     this.state = {
       actionContextMenuPanel: undefined,
       isPopoverOpen: false,
+      showNotification: false,
     };
   }
 
@@ -54,8 +63,21 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
     this.mounted = true;
     this.setState({ actionContextMenuPanel: undefined });
     const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
+    const showNotification = actionContextMenuPanel.actions.some(
+      (action) => action.showNotification
+    );
     if (this.mounted) {
-      this.setState({ actionContextMenuPanel });
+      this.setState({ actionContextMenuPanel, showNotification });
+    }
+  }
+
+  public async componentDidUpdate() {
+    const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
+    const showNotification = actionContextMenuPanel.actions.some(
+      (action) => action.showNotification
+    );
+    if (this.mounted && this.state.showNotification !== showNotification) {
+      this.setState({ showNotification });
     }
   }
 
@@ -95,7 +117,10 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
 
     return (
       <EuiPopover
-        className="embPanel__optionsMenuPopover"
+        className={
+          'embPanel__optionsMenuPopover' +
+          (this.state.showNotification ? ' embPanel__optionsMenuPopover-notification' : '')
+        }
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
@@ -109,7 +134,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       >
         <EuiContextMenu
           initialPanelId="mainMenu"
-          panels={this.state.actionContextMenuPanel || []}
+          panels={this.state.actionContextMenuPanel?.panels || []}
         />
       </EuiPopover>
     );

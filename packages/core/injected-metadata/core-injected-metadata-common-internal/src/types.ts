@@ -9,6 +9,7 @@
 import type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @internal */
 export interface InjectedMetadataClusterInfo {
@@ -65,5 +66,10 @@ export interface InjectedMetadata {
       defaults: Record<string, any>; // unreferencing UiSettingsParams here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
+    globalUiSettings: {
+      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      user: Record<string, any>; // unreferencing UserProvidedValues here
+    };
   };
+  customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo'>;
 }

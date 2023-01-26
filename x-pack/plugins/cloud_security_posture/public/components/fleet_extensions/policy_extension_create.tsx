@@ -5,32 +5,13 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiForm } from '@elastic/eui';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_EKS } from '../../../common/constants';
-import { DeploymentTypeSelect, InputType } from './deployment_type_select';
-import { EksFormWrapper } from './eks_form';
-import { getEnabledInputType, getUpdatedDeploymentType, getUpdatedEksVar } from './utils';
+import { CspPolicyTemplateForm } from './policy_template_form';
 
 export const CspCreatePolicyExtension = memo<PackagePolicyCreateExtensionComponentProps>(
-  ({ newPolicy, onChange }) => {
-    const selectedDeploymentType = getEnabledInputType(newPolicy.inputs);
-
-    const updateDeploymentType = (inputType: InputType) =>
-      onChange(getUpdatedDeploymentType(newPolicy, inputType));
-
-    const updateEksVar = (key: string, value: string) =>
-      onChange(getUpdatedEksVar(newPolicy, key, value));
-
-    return (
-      <EuiForm style={{ marginTop: 0 }}>
-        <DeploymentTypeSelect type={selectedDeploymentType} onChange={updateDeploymentType} />
-        {selectedDeploymentType === CLOUDBEAT_EKS && (
-          <EksFormWrapper inputs={newPolicy.inputs} onChange={updateEksVar} />
-        )}
-      </EuiForm>
-    );
-  }
+  ({ newPolicy, onChange }) => (
+    <CspPolicyTemplateForm newPolicy={newPolicy} onChange={onChange} edit={false} />
+  )
 );
 
 CspCreatePolicyExtension.displayName = 'CspCreatePolicyExtension';

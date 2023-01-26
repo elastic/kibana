@@ -32,4 +32,5 @@ export interface AddToPolicyParams {
 export type CreatePackagePolicyParams = React.FunctionComponent<{
   from: EditPackagePolicyFrom;
   queryParamsPolicyId?: string;
+  prerelease: boolean;
 }>;

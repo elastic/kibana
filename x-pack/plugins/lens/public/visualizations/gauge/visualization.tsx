@@ -25,7 +25,13 @@ import {
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
+import type {
+  DatasourceLayers,
+  OperationMetadata,
+  Suggestion,
+  UserMessage,
+  Visualization,
+} from '../../types';
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
@@ -76,35 +82,52 @@ function computePaletteParams(params: CustomPaletteParams) {
   };
 }
 
-const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): UserMessage[] => {
   if (!row || !state) {
-    return;
+    return [];
   }
+
+  const errors: UserMessage[] = [];
+
   const minAccessor = state?.minAccessor;
   const maxAccessor = state?.maxAccessor;
   const minValue = minAccessor ? getValueFromAccessor(minAccessor, row) : undefined;
   const maxValue = maxAccessor ? getValueFromAccessor(maxAccessor, row) : undefined;
   if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
     if (maxValue < minValue) {
-      return {
-        invalid: true,
-        invalidMessage: i18n.translate(
+      errors.push({
+        severity: 'error',
+        displayLocations: [
+          { id: 'dimensionTrigger', dimensionId: minAccessor! },
+          { id: 'dimensionTrigger', dimensionId: maxAccessor! },
+        ],
+        fixableInEditor: true,
+        shortMessage: i18n.translate(
           'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
           {
             defaultMessage: 'Minimum value may not be greater than maximum value',
           }
         ),
-      };
+        longMessage: '',
+      });
     }
     if (maxValue === minValue) {
-      return {
-        invalid: true,
-        invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
+      errors.push({
+        severity: 'error',
+        displayLocations: [
+          { id: 'dimensionTrigger', dimensionId: minAccessor! },
+          { id: 'dimensionTrigger', dimensionId: maxAccessor! },
+        ],
+        fixableInEditor: true,
+        shortMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
           defaultMessage: 'Minimum and maximum values may not be equal',
         }),
-      };
+        longMessage: '',
+      });
     }
   }
+
+  return errors;
 };
 
 const toExpression = (
@@ -228,7 +251,6 @@ export const getGaugeVisualization = ({
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
       palette = displayStops.map(({ color }) => color);
     }
-    const invalidProps = checkInvalidConfiguration(row, state) || {};
 
     return {
       groups: [
@@ -250,12 +272,12 @@ export const getGaugeVisualization = ({
                 palette
                   ? {
                       columnId: metricAccessor,
-                      triggerIcon: 'colorBy',
+                      triggerIconType: 'colorBy',
                       palette,
                     }
                   : {
                       columnId: metricAccessor,
-                      triggerIcon: 'none',
+                      triggerIconType: 'none',
                     },
               ]
             : [],
@@ -290,7 +312,6 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
           suggestedValue: () => (state.metricAccessor ? getMinValue(row, accessors) : undefined),
-          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -317,7 +338,6 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
           suggestedValue: () => (state.metricAccessor ? getMaxValue(row, accessors) : undefined),
-          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -466,67 +486,92 @@ export const getGaugeVisualization = ({
   toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) =>
     toExpression(paletteService, state, datasourceLayers, undefined, datasourceExpressionsByLayers),
 
-  getErrorMessages(state) {
-    // not possible to break it?
-    return undefined;
-  },
-
-  getWarningMessages(state, frame) {
+  getUserMessages(state, { frame }) {
     const { maxAccessor, minAccessor, goalAccessor, metricAccessor } = state;
     if (!maxAccessor && !minAccessor && !goalAccessor && !metricAccessor) {
       // nothing configured yet
-      return;
+      return [];
     }
     if (!metricAccessor) {
       return [];
     }
 
-    const row = frame?.activeData?.[state.layerId]?.rows?.[0];
-    if (!row || checkInvalidConfiguration(row, state)) {
+    const row = frame.activeData?.[state.layerId]?.rows?.[0];
+    if (!row) {
       return [];
     }
+
+    const errors = getErrorMessages(row, state);
+    if (errors.length) {
+      return errors;
+    }
+
     const metricValue = row[metricAccessor];
     const maxValue = maxAccessor && row[maxAccessor];
     const minValue = minAccessor && row[minAccessor];
     const goalValue = goalAccessor && row[goalAccessor];
 
-    const warnings = [];
+    const warnings: UserMessage[] = [];
     if (typeof minValue === 'number') {
       if (minValue > metricValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minValueGreaterMetricShortMessage"
-            defaultMessage="Minimum value is greater than metric value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.minValueGreaterMetricShortMessage"
+              defaultMessage="Minimum value is greater than metric value."
+            />
+          ),
+        });
       }
       if (minValue > goalValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.minimumValueGreaterGoalShortMessage"
-            defaultMessage="Minimum value is greater than goal value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.minimumValueGreaterGoalShortMessage"
+              defaultMessage="Minimum value is greater than goal value."
+            />
+          ),
+        });
       }
     }
 
     if (typeof maxValue === 'number') {
       if (metricValue > maxValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.metricValueGreaterMaximumShortMessage"
-            defaultMessage="Metric value is greater than maximum value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.metricValueGreaterMaximumShortMessage"
+              defaultMessage="Metric value is greater than maximum value."
+            />
+          ),
+        });
       }
 
       if (typeof goalValue === 'number' && goalValue > maxValue) {
-        warnings.push([
-          <FormattedMessage
-            id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
-            defaultMessage="Goal value is greater than maximum value."
-          />,
-        ]);
+        warnings.push({
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }],
+          shortMessage: '',
+          longMessage: (
+            <FormattedMessage
+              id="xpack.lens.gaugeVisualization.goalValueGreaterMaximumShortMessage"
+              defaultMessage="Goal value is greater than maximum value."
+            />
+          ),
+        });
       }
     }
 
@@ -565,6 +610,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.metricLabel', {
           defaultMessage: 'Metric',
         }),
+        dimensionType: 'metric',
       });
     }
 
@@ -574,6 +620,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.maxValueLabel', {
           defaultMessage: 'Maximum value',
         }),
+        dimensionType: 'max',
       });
     }
 
@@ -583,6 +630,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.minValueLabel', {
           defaultMessage: 'Minimum value',
         }),
+        dimensionType: 'min',
       });
     }
 
@@ -592,6 +640,7 @@ export const getGaugeVisualization = ({
         name: i18n.translate('xpack.lens.gauge.goalValueLabel', {
           defaultMessage: 'Goal value',
         }),
+        dimensionType: 'goal',
       });
     }
     return {

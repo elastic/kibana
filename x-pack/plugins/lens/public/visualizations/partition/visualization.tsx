@@ -25,8 +25,14 @@ import type {
   Suggestion,
   VisualizeEditorContext,
   VisualizationInfo,
+  UserMessage,
 } from '../../types';
-import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
+import {
+  getColumnToLabelMap,
+  getSortedGroups,
+  toExpression,
+  toPreviewExpression,
+} from './to_expression';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -40,6 +46,7 @@ import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
+import { DatasourcePublicAPI } from '../..';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -72,22 +79,26 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
-const applyPaletteToAccessorConfigs = (
-  columns: AccessorConfig[],
-  layer: PieLayerState,
-  palette: PieVisualizationState['palette'],
-  paletteService: PaletteRegistry
-) => {
-  const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
+export const getDefaultColorForMultiMetricDimension = ({
+  layer,
+  columnId,
+  paletteService,
+  datasource,
+}: {
+  layer: PieLayerState;
+  columnId: string;
+  paletteService: PaletteRegistry;
+  datasource: DatasourcePublicAPI | undefined;
+}) => {
+  const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
 
-  columns.forEach((accessorConfig) => {
-    if (firstNonCollapsedColumnId === accessorConfig.columnId) {
-      accessorConfig.triggerIcon = 'colorBy';
-      accessorConfig.palette = paletteService
-        .get(palette?.name || 'default')
-        .getCategoricalColors(10, palette?.params);
-    }
-  });
+  return paletteService.get('default').getCategoricalColor([
+    {
+      name: columnToLabelMap[columnId],
+      rankAtDepth: layer.metrics.indexOf(columnId),
+      totalSeriesAtDepth: layer.metrics.length,
+    },
+  ]) as string;
 };
 
 export const getPieVisualization = ({
@@ -158,14 +169,21 @@ export const getPieVisualization = ({
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedGroups(datasource, layer);
       // When we add a column it could be empty, and therefore have no order
-      const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
+      const accessors = originalOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
       }));
 
-      if (accessors.length) {
-        applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
-      }
+      const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
+
+      accessors.forEach((accessorConfig) => {
+        if (firstNonCollapsedColumnId === accessorConfig.columnId) {
+          accessorConfig.triggerIconType = 'colorBy';
+          accessorConfig.palette = paletteService
+            .get(state.palette?.name || 'default')
+            .getCategoricalColors(10, state.palette?.params);
+        }
+      });
 
       const primaryGroupConfigBaseProps = {
         groupId: 'primaryGroups',
@@ -256,9 +274,9 @@ export const getPieVisualization = ({
 
     const getSecondaryGroupConfig = (): VisualizationDimensionGroupConfig | undefined => {
       const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
-      const accessors = originalSecondaryOrder.map((accessor) => ({
+      const accessors = originalSecondaryOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
+        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
       }));
 
       const secondaryGroupConfigBaseProps = {
@@ -297,8 +315,29 @@ export const getPieVisualization = ({
     };
 
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
-      const accessors = layer.metrics.map((columnId) => ({ columnId }));
-      applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
+      const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0);
+
+      const accessors: AccessorConfig[] = layer.metrics.map<AccessorConfig>((columnId, index) => ({
+        columnId,
+        ...(layer.allowMultipleMetrics
+          ? hasSliceBy
+            ? {
+                triggerIconType: 'disabled',
+              }
+            : {
+                triggerIconType: 'color',
+                color:
+                  layer.colorsByDimension?.[columnId] ??
+                  getDefaultColorForMultiMetricDimension({
+                    layer,
+                    columnId,
+                    paletteService,
+                    datasource,
+                  }) ??
+                  undefined,
+              }
+          : {}),
+      }));
 
       const groupLabel = layer.allowMultipleMetrics
         ? i18n.translate('xpack.lens.pie.groupMetricLabel', {
@@ -381,9 +420,13 @@ export const getPieVisualization = ({
     let newLayer = { ...layerToChange };
 
     if (layerToChange.collapseFns?.[columnId]) {
-      const newCollapseFns = { ...layerToChange.collapseFns };
-      delete newCollapseFns[columnId];
-      newLayer.collapseFns = newCollapseFns;
+      newLayer.collapseFns = { ...layerToChange.collapseFns };
+      delete newLayer.collapseFns[columnId];
+    }
+
+    if (layerToChange.colorsByDimension?.[columnId]) {
+      newLayer.colorsByDimension = { ...layerToChange.colorsByDimension };
+      delete newLayer.colorsByDimension[columnId];
     }
 
     newLayer = {
@@ -451,6 +494,10 @@ export const getPieVisualization = ({
     );
   },
 
+  hasLayerSettings(props) {
+    return props.state.shape !== 'mosaic';
+  },
+
   renderLayerSettings(domElement, props) {
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
@@ -460,66 +507,6 @@ export const getPieVisualization = ({
       </KibanaThemeProvider>,
       domElement
     );
-  },
-
-  getWarningMessages(state, frame) {
-    if (state?.layers.length === 0 || !frame.activeData) {
-      return;
-    }
-    const warningMessages = [];
-
-    for (const layer of state.layers) {
-      const { layerId, metrics } = layer;
-      const rows = frame.activeData[layerId]?.rows;
-      const numericColumn = frame.activeData[layerId]?.columns.find(
-        ({ meta }) => meta?.type === 'number'
-      );
-
-      if (!rows || !metrics.length) {
-        break;
-      }
-
-      if (
-        numericColumn &&
-        state.shape === 'waffle' &&
-        layer.primaryGroups.length &&
-        checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
-      ) {
-        warningMessages.push(
-          <FormattedMessage
-            id="xpack.lens.pie.smallValuesWarningMessage"
-            defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
-          />
-        );
-      }
-
-      const metricsWithArrayValues = metrics
-        .map((metricColId) => {
-          if (rows.some((row) => Array.isArray(row[metricColId]))) {
-            return metricColId;
-          }
-        })
-        .filter(Boolean) as string[];
-
-      if (metricsWithArrayValues.length) {
-        const labels = metricsWithArrayValues.map(
-          (colId) => frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
-        );
-        warningMessages.push(
-          <FormattedMessage
-            key={labels.join(',')}
-            id="xpack.lens.pie.arrayValues"
-            defaultMessage="The following dimensions contain array values: {label}. Your visualization may not render as
-        expected."
-            values={{
-              label: <strong>{labels.join(', ')}</strong>,
-            }}
-          />
-        );
-      }
-    }
-
-    return warningMessages;
   },
 
   getSuggestionFromConvertToLensContext(props) {
@@ -546,7 +533,7 @@ export const getPieVisualization = ({
     return suggestion;
   },
 
-  getErrorMessages(state) {
+  getUserMessages(state, { frame }) {
     const hasTooManyBucketDimensions = state.layers
       .map((layer) => {
         const totalBucketDimensions =
@@ -559,9 +546,12 @@ export const getPieVisualization = ({
       })
       .some(Boolean);
 
-    return hasTooManyBucketDimensions
+    const errors: UserMessage[] = hasTooManyBucketDimensions
       ? [
           {
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'visualization' }],
             shortMessage: i18n.translate('xpack.lens.pie.tooManyDimensions', {
               defaultMessage: 'Your visualization has too many dimensions.',
             }),
@@ -580,6 +570,75 @@ export const getPieVisualization = ({
           },
         ]
       : [];
+
+    const warningMessages: UserMessage[] = [];
+    if (state?.layers.length > 0 && frame.activeData) {
+      for (const layer of state.layers) {
+        const { layerId, metrics } = layer;
+        const rows = frame.activeData[layerId]?.rows;
+        const numericColumn = frame.activeData[layerId]?.columns.find(
+          ({ meta }) => meta?.type === 'number'
+        );
+
+        if (!rows || !metrics.length) {
+          break;
+        }
+
+        if (
+          numericColumn &&
+          state.shape === 'waffle' &&
+          layer.primaryGroups.length &&
+          checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
+        ) {
+          warningMessages.push({
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.pie.smallValuesWarningMessage"
+                defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
+              />
+            ),
+          });
+        }
+
+        const metricsWithArrayValues = metrics
+          .map((metricColId) => {
+            if (rows.some((row) => Array.isArray(row[metricColId]))) {
+              return metricColId;
+            }
+          })
+          .filter(Boolean) as string[];
+
+        if (metricsWithArrayValues.length) {
+          const labels = metricsWithArrayValues.map(
+            (colId) =>
+              frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
+          );
+          warningMessages.push({
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                key={labels.join(',')}
+                id="xpack.lens.pie.arrayValues"
+                defaultMessage="The following dimensions contain array values: {label}. Your visualization may not render as
+          expected."
+                values={{
+                  label: <strong>{labels.join(', ')}</strong>,
+                }}
+              />
+            ),
+          });
+        }
+      }
+    }
+
+    return [...errors, ...warningMessages];
   },
 
   getVisualizationInfo(state: PieVisualizationState) {
@@ -590,6 +649,7 @@ export const getPieVisualization = ({
       dimensions.push({
         id: metric,
         name: metricLabel,
+        dimensionType: 'metric',
       });
     });
 
@@ -599,6 +659,7 @@ export const getPieVisualization = ({
           name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
             defaultMessage: 'Horizontal axis',
           }),
+          dimensionType: 'horizontal_axis',
           id: accessor,
         });
       });
@@ -608,19 +669,23 @@ export const getPieVisualization = ({
       let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
         defaultMessage: 'Group by',
       });
+      let dimensionType = 'group_by';
       if (state.shape === 'mosaic') {
         name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
           defaultMessage: 'Vertical axis',
         });
+        dimensionType = 'vertical_axis';
       }
       if (state.shape === 'donut' || state.shape === 'pie') {
         name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
           defaultMessage: 'Slice by',
         });
+        dimensionType = 'slice_by';
       }
       layer.primaryGroups.forEach((accessor) => {
         dimensions.push({
           name,
+          dimensionType,
           id: accessor,
         });
       });

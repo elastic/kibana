@@ -306,7 +306,7 @@ export const getGroupByObject = (
       groupByKeysObjectMapping[groupSet] = unflattenObject(
         Array.isArray(groupBy)
           ? groupBy.reduce((result, group, index) => {
-              return { ...result, [group]: groupSetKeys[index] };
+              return { ...result, [group]: groupSetKeys[index]?.trim() };
             }, {})
           : { [groupBy]: groupSet }
       );

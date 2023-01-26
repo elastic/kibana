@@ -189,7 +189,7 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
             <>
               <AssignUsers

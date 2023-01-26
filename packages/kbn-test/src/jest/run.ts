@@ -22,16 +22,46 @@ import { existsSync } from 'fs';
 import { run } from 'jest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { map } from 'lodash';
 import getopts from 'getopts';
+import jestFlags from './jest_flags.json';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
 export function runJest(configName = 'jest.config.js') {
-  const argv = getopts(process.argv.slice(2));
+  const unknownFlag: string[] = [];
+  const argv = getopts(process.argv.slice(2), {
+    ...jestFlags,
+    unknown(v) {
+      unknownFlag.push(v);
+      return false;
+    },
+  });
+
+  if (argv.help) {
+    run();
+    process.exit(0);
+  }
+
+  if (unknownFlag.length) {
+    const flags = unknownFlag.join(', ');
+
+    throw createFailError(
+      `unexpected flag: ${flags}
+
+  If this flag is valid you might need to update the flags in "packages/kbn-test/src/jest/run.js".
+
+  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
+  flags jest supports
+
+`
+    );
+  }
+
   const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({

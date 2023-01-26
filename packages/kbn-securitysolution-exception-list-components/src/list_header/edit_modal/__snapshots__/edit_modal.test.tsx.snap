@@ -14,13 +14,13 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
-          class="euiModal euiModal--maxWidth-default"
+          class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
           tabindex="0"
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
+            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -31,22 +31,20 @@ Object {
             />
           </button>
           <div
-            class="euiModalHeader"
+            class="euiModalHeader emotion-euiModalHeader"
           >
-            <div
-              class="euiModalHeader__title"
+            <h1
+              class="euiTitle euiModalHeader__title emotion-euiTitle-m"
               data-test-subj="editModalTitle"
             >
-              <h1>
-                Edit list name
-              </h1>
-            </div>
+              Edit list name
+            </h1>
           </div>
           <div
-            class="euiModalBody"
+            class="euiModalBody emotion-euiModalBody"
           >
             <div
-              class="euiModalBody__overflow"
+              class="euiModalBody__overflow emotion-euiModalBody__overflow"
             >
               <form
                 class="euiForm"
@@ -124,7 +122,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiModalFooter"
+            class="euiModalFooter emotion-euiModalFooter"
           >
             <button
               class="euiButtonEmpty css-9t7nyf-empty-primary"

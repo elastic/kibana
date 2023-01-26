@@ -12,24 +12,28 @@ import type { RouteProps } from 'react-router-dom';
 import { matchPath, Redirect } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
+import type { DocLinks } from '@kbn/doc-links';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   ALERTS_PATH,
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
   EXCEPTIONS_PATH,
+  HOSTS_PATH,
   LANDING_PATH,
+  NETWORK_PATH,
   RULES_PATH,
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
+  USERS_PATH,
 } from '../common/constants';
-import type { Ecs } from '../common/ecs';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
-import { NoPrivilegesPage } from './app/no_privileges';
+import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
@@ -191,6 +195,13 @@ export const isThreatIntelligencePath = (pathname: string): boolean => {
   });
 };
 
+export const isExplorePage = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `(${HOSTS_PATH}|${USERS_PATH}|${NETWORK_PATH})`,
+    strict: false,
+  });
+};
+
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
   capabilities: Capabilities
@@ -200,11 +211,13 @@ export const getSubPluginRoutesByCapabilities = (
       if (isSubPluginAvailable(key, capabilities)) {
         return [...acc, ...value.routes];
       }
+      const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;
+
       return [
         ...acc,
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
-          component: () => <NoPrivilegesPage subPluginKey={key} />,
+          component: () => <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />,
         })),
       ];
     }, []),

@@ -13,11 +13,21 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   id,
   connector_type_id: actionTypeId,
   params,
+  frequency,
 }) => ({
   group,
   id,
   params,
   actionTypeId,
+  ...(frequency
+    ? {
+        frequency: {
+          summary: frequency.summary,
+          notifyWhen: frequency.notify_when,
+          throttle: frequency.throttle,
+        },
+      }
+    : {}),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({

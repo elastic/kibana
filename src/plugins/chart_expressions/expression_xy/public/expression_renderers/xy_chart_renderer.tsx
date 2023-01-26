@@ -18,18 +18,25 @@ import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
-import type { XYChartProps } from '../../common';
-import type { BrushEvent, FilterEvent } from '../types';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
+import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
+import type {
+  BrushEvent,
+  FilterEvent,
+  GetCompatibleCellValueActions,
+  MultiFilterEvent,
+} from '../types';
 
 export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;
@@ -157,6 +164,28 @@ const extractCounterEvents = (
   }
 };
 
+/**
+ * Retrieves the compatible CELL_VALUE_TRIGGER actions indexed by layer
+ **/
+const getLayerCellValueActions = async (
+  layers: CommonXYDataLayerConfig[],
+  getCompatibleCellValueActions?: IInterpreterRenderHandlers['getCompatibleCellValueActions']
+) => {
+  if (!layers || !getCompatibleCellValueActions) {
+    return [];
+  }
+  return await Promise.all(
+    layers.map((layer) => {
+      const data =
+        layer.splitAccessors?.map((accessor) => {
+          const column = layer.table.columns.find(({ id }) => id === accessor);
+          return { columnMeta: column?.meta };
+        }) ?? [];
+      return (getCompatibleCellValueActions as GetCompatibleCellValueActions)(data);
+    })
+  );
+};
+
 export const getXyChartRenderer = ({
   getStartDeps,
 }: XyChartRendererDeps): ExpressionRenderDefinition<XYChartProps> => ({
@@ -183,6 +212,14 @@ export const getXyChartRenderer = ({
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
+    const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+      handlers.event({ name: 'multiFilter', data });
+    };
+
+    const layerCellValueActions = await getLayerCellValueActions(
+      getDataLayers(config.args.layers),
+      handlers.getCompatibleCellValueActions as GetCompatibleCellValueActions | undefined
+    );
 
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
@@ -231,6 +268,8 @@ export const getXyChartRenderer = ({
               minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
               interactive={handlers.isInteractive()}
               onClickValue={onClickValue}
+              onClickMultiValue={onClickMultiValue}
+              layerCellValueActions={layerCellValueActions}
               onSelectRange={onSelectRange}
               renderMode={handlers.getRenderMode()}
               syncColors={config.syncColors}

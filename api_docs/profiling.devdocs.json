@@ -13,7 +13,23 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "profiling",
+        "id": "def-server.ProfilingConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProfilingConfig",
+        "description": [],
+        "signature": [
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; password: string; hosts: string; }> | undefined; readonly enabled: boolean; }"
+        ],
+        "path": "x-pack/plugins/profiling/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "profiling",

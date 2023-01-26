@@ -42,6 +42,9 @@ jest.mock('../../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
+    sendGetSettings: jest.fn().mockResolvedValue({
+      data: { item: {} },
+    }),
     useGetPackageInfoByKey: jest.fn(),
     sendCreatePackagePolicy: jest
       .fn()
@@ -109,7 +112,11 @@ describe('when on the package policy create page', () => {
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicySinglePage from="package" queryParamsPolicyId={queryParamsPolicyId} />
+        <CreatePackagePolicySinglePage
+          from="package"
+          queryParamsPolicyId={queryParamsPolicyId}
+          prerelease={false}
+        />
       </Route>
     ));
   let mockPackageInfo: any;
@@ -125,7 +132,6 @@ describe('when on the package policy create page', () => {
           name: 'nginx',
           title: 'Nginx',
           version: '1.3.0',
-          release: 'ga',
           description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
           policy_templates: [
             {
@@ -147,7 +153,6 @@ describe('when on the package policy create page', () => {
               type: 'logs',
               dataset: 'nginx.access',
               title: 'Nginx access logs',
-              release: 'experimental',
               ingest_pipeline: 'default',
               streams: [
                 {
@@ -239,7 +244,6 @@ describe('when on the package policy create page', () => {
                 dataset: 'nginx.access',
                 type: 'logs',
               },
-              release: 'experimental',
               enabled: true,
               vars: {
                 paths: {
@@ -379,6 +383,7 @@ describe('when on the package policy create page', () => {
           monitoring_enabled: ['logs', 'metrics'],
           name: 'Agent policy 2',
           namespace: 'default',
+          inactivity_timeout: 1209600,
         },
         { withSysMonitoring: false }
       );
@@ -409,6 +414,7 @@ describe('when on the package policy create page', () => {
             monitoring_enabled: ['logs', 'metrics'],
             name: 'Agent policy 2',
             namespace: 'default',
+            inactivity_timeout: 1209600,
           },
           { withSysMonitoring: true }
         );
@@ -537,7 +543,6 @@ describe('when on the package policy create page', () => {
                 streams: [
                   {
                     ...newPackagePolicy.inputs[0].streams[0],
-                    release: 'experimental',
                     vars: {
                       paths: {
                         type: 'text',

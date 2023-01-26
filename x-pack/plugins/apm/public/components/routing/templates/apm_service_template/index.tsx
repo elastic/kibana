@@ -8,13 +8,18 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingLogo,
   EuiPageHeaderProps,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
+import { useHistory } from 'react-router-dom';
 import {
   isMobileAgentName,
   isRumAgentName,
@@ -27,11 +32,13 @@ import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
+import { BetaBadge } from '../../../shared/beta_badge';
+import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
@@ -77,6 +84,8 @@ function TemplateWithContext({
     query,
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/*');
+  const history = useHistory();
+  const location = useLocation();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -84,7 +93,9 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  const { agentName } = useApmServiceContext();
+  const { agentName, serviceAgentStatus } = useApmServiceContext();
+
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
   useBreadcrumb(
     () => ({
@@ -96,6 +107,12 @@ function TemplateWithContext({
     }),
     [query, router, selectedTab, serviceName, title]
   );
+
+  if (isMobileAgentName(agentName)) {
+    replace(history, {
+      pathname: location.pathname.replace('/services/', '/mobile-services/'),
+    });
+  }
 
   return (
     <ApmMainTemplate
@@ -119,11 +136,6 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
-                {isMobileAgentName(agentName) && (
-                  <EuiFlexItem grow={false}>
-                    <TechnicalPreviewBadge />
-                  </EuiFlexItem>
-                )}
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -134,10 +146,21 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>
-        {children}
-      </ServiceAnomalyTimeseriesContextProvider>
+      {isPendingServiceAgent ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="l" />
+            <EuiLoadingLogo logo="logoObservability" size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>
+          <SearchBar {...searchBarOptions} />
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
+        </>
+      )}
     </ApmMainTemplate>
   );
 }
@@ -154,9 +177,7 @@ export function isMetricsTabHidden({
   if (isServerlessAgent(runtimeName)) {
     return !isAwsLambdaEnabled;
   }
-  return (
-    !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName)
-  );
+  return !agentName || isRumAgentName(agentName);
 }
 
 export function isInfraTabHidden({
@@ -167,10 +188,7 @@ export function isInfraTabHidden({
   runtimeName?: string;
 }) {
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isServerlessAgent(runtimeName)
   );
 }
 
@@ -194,6 +212,22 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     path: { serviceName },
     query: queryFromUrl,
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
+
+  const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
+    (callApmApi) => {
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/alerts_count',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+          },
+        }
+      );
+    },
+    [serviceName]
+  );
 
   const query = omit(
     queryFromUrl,
@@ -244,7 +278,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
-      hidden: isMobileAgentName(agentName),
     },
     {
       key: 'metrics',
@@ -270,7 +303,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="editorBold" />,
+      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
@@ -298,8 +331,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       append: isServerlessAgent(runtimeName) && (
         <TechnicalPreviewBadge icon="beaker" />
       ),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'alerts',
@@ -307,6 +339,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
+      prepend:
+        serviceAlertsCount.alertsCount > 0 ? (
+          <EuiBadge iconType="alert" color="danger">
+            {serviceAlertsCount.alertsCount}
+          </EuiBadge>
+        ) : null,
       append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
@@ -317,9 +355,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, append }) => ({
+    .map(({ href, key, label, prepend, append }) => ({
       href,
       label,
+      prepend,
       append,
       isSelected: key === selectedTab,
     }));

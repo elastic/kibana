@@ -59,7 +59,7 @@ export const RawOutput: FC<{
 
   return (
     <>
-      <MLJobEditor value={rawResponse ?? ''} readOnly={true} />
+      <MLJobEditor data-test-subj={'mlTestModelRawOutput'} value={rawResponse ?? ''} readOnly />
     </>
   );
 };

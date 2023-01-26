@@ -8,7 +8,7 @@
 
 import { SavedObjectsClient } from '@kbn/core/server';
 import { findActiveGuide } from './guide_state_utils';
-import { PluginState, PluginStatus } from '../../common/types';
+import type { PluginState, PluginStatus } from '../../common';
 import {
   pluginStateSavedObjectsId,
   pluginStateSavedObjectsType,

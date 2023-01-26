@@ -8,10 +8,9 @@
 import { flowRight } from 'lodash';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
-
-import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
+import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToLogsType = RouteComponentProps<{}>;

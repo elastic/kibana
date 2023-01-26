@@ -13,27 +13,32 @@ import type { MutableRefObject } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
-  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
+  ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type {
+  ClickTriggerEvent,
+  BrushTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -87,7 +92,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -103,6 +108,8 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
   lensInspector: LensInspector;
   indexPatternService: IndexPatternServiceAPI;
+  getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -137,7 +144,11 @@ export interface TableSuggestionColumn {
 export interface DataSourceInfo {
   layerId: string;
   dataView?: DataView;
-  columns: Array<{ id: string; role: 'split' | 'metric'; operation: OperationDescriptor }>;
+  columns: Array<{
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
+  }>;
 }
 
 export interface VisualizationInfo {
@@ -147,7 +158,7 @@ export interface VisualizationInfo {
     chartType?: string;
     icon?: IconType;
     label?: string;
-    dimensions: Array<{ name: string; id: string }>;
+    dimensions: Array<{ name: string; id: string; dimensionType: string }>;
   }>;
 }
 
@@ -243,6 +254,11 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
+  searchQuery?: Query;
+  searchFilters?: Filter[];
+  title?: string;
+  visTypeTitle?: string;
+  isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {
@@ -259,6 +275,49 @@ interface DimensionLink {
     groupId: string;
     layerId: string;
   };
+}
+
+type UserMessageDisplayLocation =
+  | {
+      // NOTE: We want to move toward more errors that do not block the render!
+      id:
+        | 'toolbar'
+        | 'embeddableBadge'
+        | 'visualization' // blocks render
+        | 'visualizationOnEmbeddable' // blocks render in embeddable only
+        | 'visualizationInEditor' // blocks render in editor only
+        | 'textBasedLanguagesQueryInput'
+        | 'banner';
+    }
+  | { id: 'dimensionTrigger'; dimensionId: string };
+
+export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+
+export interface UserMessage {
+  uniqueId?: string;
+  severity: 'error' | 'warning';
+  shortMessage: string;
+  longMessage: React.ReactNode | string;
+  fixableInEditor: boolean;
+  displayLocations: UserMessageDisplayLocation[];
+}
+
+export type RemovableUserMessage = UserMessage & { uniqueId: string };
+
+export interface UserMessageFilters {
+  severity?: UserMessage['severity'];
+  dimensionId?: string;
+}
+
+export type UserMessagesGetter = (
+  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
+  filters: UserMessageFilters
+) => UserMessage[];
+
+export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
+
+export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
+  return Boolean(message.uniqueId);
 }
 
 /**
@@ -280,7 +339,6 @@ export interface Datasource<T = unknown, P = unknown> {
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
-  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
@@ -384,6 +442,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     layerId: string,
     indexPatterns: IndexPatternMap,
+    dateRange: DateRange,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
@@ -421,28 +480,16 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
 
-  getErrorMessages: (
-    state: T,
-    indexPatterns: Record<string, IndexPattern>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-        fixAction?: { label: string; newState: () => Promise<T> };
-      }>
-    | undefined;
-
   /**
-   * The frame calls this function to display warnings about visualization
+   * The frame calls this function to display messages to the user
    */
-  getWarningMessages?: (
+  getUserMessages: (
     state: T,
-    frame: FramePublicAPI,
-    adapters: Adapters,
-    setState: StateSetter<T>
-  ) => React.ReactNode[] | undefined;
-
-  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
+    deps: {
+      frame: FrameDatasourceAPI;
+      setState: StateSetter<T>;
+    }
+  ) => UserMessage[];
 
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
@@ -452,7 +499,7 @@ export interface Datasource<T = unknown, P = unknown> {
     warning: SearchResponseWarning,
     request: SearchRequest,
     response: estypes.SearchResponse
-  ) => Array<string | React.ReactNode> | undefined;
+  ) => UserMessage[];
 
   /**
    * Checks if the visualization created is time based, for example date histogram
@@ -465,7 +512,8 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T,
     indexPatterns: IndexPatternMap,
     layerId: string,
-    columnId: string
+    columnId: string,
+    dateRange?: DateRange
   ) => boolean;
   /**
    * Are these datasources equivalent?
@@ -492,8 +540,8 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceInfo: (
     state: T,
     references?: SavedObjectReference[],
-    dataViews?: DataView[]
-  ) => DataSourceInfo[];
+    dataViewsService?: DataViewsPublicPluginStart
+  ) => Promise<DataSourceInfo[]>;
 }
 
 export interface DatasourceFixAction<T> {
@@ -558,7 +606,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   showNoDataPopover: () => void;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application'
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
   query: Query;
   dateRange: DateRange;
@@ -606,10 +654,11 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  dateRange: DateRange;
   indexPatterns: IndexPatternMap;
   hideTooltip?: boolean;
   invalid?: boolean;
-  invalidMessage?: string;
+  invalidMessage?: string | React.ReactNode;
 };
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
@@ -779,7 +828,15 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
+  triggerIconType?:
+    | 'color'
+    | 'disabled'
+    | 'colorBy'
+    | 'none'
+    | 'invisible'
+    | 'aggregate'
+    | 'custom';
+  customIcon?: IconType;
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
@@ -813,9 +870,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
   // orders are always higher in the hierarchy than non-specified ones.
   nestingOrder?: number;
-  // some type of layers can produce groups even if invalid. Keep this information to visually show the user that.
-  invalid?: boolean;
-  invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
   supportStaticValue?: boolean;
@@ -1150,6 +1204,11 @@ export interface Visualization<T = unknown, P = unknown> {
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
+  /**
+   * Allows the visualization to announce whether or not it has any settings to show
+   */
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+
   renderLayerSettings?: (
     domElement: Element,
     props: VisualizationLayerSettingsProps<T>
@@ -1187,7 +1246,7 @@ export interface Visualization<T = unknown, P = unknown> {
     label: string;
     hideTooltip?: boolean;
     invalid?: boolean;
-    invalidMessage?: string;
+    invalidMessage?: string | React.ReactNode;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
@@ -1219,32 +1278,12 @@ export interface Visualization<T = unknown, P = unknown> {
     datasourceLayers: DatasourceLayers,
     datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
+
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessages: (
-    state: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
-  ) =>
-    | Array<{
-        shortMessage: string;
-        longMessage: React.ReactNode;
-      }>
-    | undefined;
-
-  validateColumn?: (
-    state: T,
-    frame: Pick<FramePublicAPI, 'dataViews'>,
-    layerId: string,
-    columnId: string,
-    group?: VisualizationDimensionGroupConfig
-  ) => { invalid: boolean; invalidMessage?: string };
-
-  /**
-   * The frame calls this function to display warnings about visualization
-   */
-  getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
@@ -1305,6 +1344,12 @@ export function isLensFilterEvent(event: ExpressionRendererEvent): event is Clic
   return event.name === 'filter';
 }
 
+export function isLensMultiFilterEvent(
+  event: ExpressionRendererEvent
+): event is MultiClickTriggerEvent {
+  return event.name === 'multiFilter';
+}
+
 export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
@@ -1317,7 +1362,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is BrushTriggerEvent {
+): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -1358,3 +1403,14 @@ export type LensTopNavMenuEntryGenerator = (props: {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;
+
+export interface LensCellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<LensCellValueAction[]>;

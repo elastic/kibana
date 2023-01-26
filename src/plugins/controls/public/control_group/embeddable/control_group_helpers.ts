@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupInput } from '../types';
+import { ControlsPanels } from '../types';
 import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
 
-export const getNextPanelOrder = (initialInput: Partial<ControlGroupInput>) => {
+export const getNextPanelOrder = (panels?: ControlsPanels) => {
   let nextOrder = 0;
-  if (Object.keys(initialInput.panels ?? {}).length > 0) {
+  if (Object.keys(panels ?? {}).length > 0) {
     nextOrder =
-      Object.values(initialInput.panels ?? {}).reduce((highestSoFar, panel) => {
+      Object.values(panels ?? {}).reduce((highestSoFar, panel) => {
         if (panel.order > highestSoFar) highestSoFar = panel.order;
         return highestSoFar;
       }, 0) + 1;

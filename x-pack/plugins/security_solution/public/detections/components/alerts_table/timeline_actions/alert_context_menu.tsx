@@ -13,7 +13,8 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
@@ -21,7 +22,6 @@ import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import type { Ecs } from '../../../../../common/ecs';
 import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import * as i18n from '../translations';
@@ -124,12 +124,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           data-test-subj="timeline-context-menu-button"
           size="s"
           iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
           onClick={onButtonClick}
           isDisabled={disabled}
         />
       </EuiToolTip>
     );
-  }, [disabled, onButtonClick, ariaLabel]);
+  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -258,7 +259,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
               anchorPosition="downLeft"
               repositionOnScroll
             >
-              <EuiContextMenuPanel size="s" items={items} />
+              <EuiContextMenuPanel size="s" items={items} data-test-subj="actions-context-menu" />
             </EuiPopover>
           </EventsTdContent>
         </div>
@@ -425,7 +426,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    memoRuleIndices == null;
+    (memoRuleIndices == null && memoDataViewId == null);
 
   return (
     <AddExceptionFlyout

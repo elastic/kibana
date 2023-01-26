@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Authentication - looks for a user logging in from an IP address that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different locations. An unusual source IP address for a username could also be due to lateral movement when a compromised account is used to pivot between hosts.",
   "groups": [
     "security",
@@ -29,6 +28,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-security-auth"
+    "created_by": "ml-module-security-auth",
+    "security_app_display_name": "Unusual Source IP for a User to Logon from"
   }
 }

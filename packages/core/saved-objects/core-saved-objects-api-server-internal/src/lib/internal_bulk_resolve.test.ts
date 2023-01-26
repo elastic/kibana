@@ -13,12 +13,17 @@ import {
 } from './internal_bulk_resolve.test.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import {
+  setMapsAreEqual,
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  setsAreEqual,
+} from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
@@ -35,12 +40,8 @@ import {
 import {
   authMap,
   enforceError,
-  typeMapsAreEqual,
-  setsAreEqual,
-  setupCheckAuthorized,
-  setupCheckUnauthorized,
-  setupEnforceFailure,
-  setupEnforceSuccess,
+  setupPerformAuthFullyAuthorized,
+  setupPerformAuthEnforceFailure,
   setupRedactPassthrough,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
@@ -464,22 +465,18 @@ describe('internalBulkResolve', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupPerformAuthEnforceFailure(mockSecurityExt);
 
       await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
     });
 
     test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+      setupPerformAuthFullyAuthorized(mockSecurityExt);
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 
       const bulkIds = objects.map((obj) => obj.id);
       const expectedNamespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
@@ -498,57 +495,38 @@ describe('internalBulkResolve', () => {
       ]);
     });
 
-    test(`calls checkAuthorization with type, actions, namespace, and object namespaces`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+    test(`calls performAuthorization with correct actions, types, spaces, and enforce map`, async () => {
+      setupPerformAuthFullyAuthorized(mockSecurityExt);
 
       await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
       const expectedActions = new Set(['bulk_get']);
       const expectedSpaces = new Set([namespace]);
       const expectedTypes = new Set([objects[0].type]);
+      const expectedEnforceMap = new Map<string, Set<string>>();
+      expectedEnforceMap.set(objects[0].type, new Set([namespace]));
 
       const {
         actions: actualActions,
         spaces: actualSpaces,
         types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+        enforceMap: actualEnforceMap,
+        options: actualOptions,
+      } = mockSecurityExt.performAuthorization.mock.calls[0][0];
 
       expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
       expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
       expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_get',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([[objects[0].type, new Set([namespace])]]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      expect(setMapsAreEqual(actualEnforceMap, expectedEnforceMap)).toBeTruthy();
+      expect(actualOptions).toBeUndefined();
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+      setupPerformAuthFullyAuthorized(mockSecurityExt);
       setupRedactPassthrough(mockSecurityExt);
 
       await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.performAuthorization).toHaveBeenCalledTimes(1);
 
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(objects.length);
       objects.forEach((obj, i) => {
@@ -565,8 +543,7 @@ describe('internalBulkResolve', () => {
     });
 
     test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+      setupPerformAuthFullyAuthorized(mockSecurityExt);
 
       await internalBulkResolve(params);
 
@@ -581,8 +558,7 @@ describe('internalBulkResolve', () => {
     });
 
     test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupPerformAuthEnforceFailure(mockSecurityExt);
 
       await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Hapi from '@hapi/hapi';
 import type {
   DocLinksServiceSetup,
   IBasePath,
@@ -17,8 +16,11 @@ import type {
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
+  KibanaRequest,
+  FakeRawRequest,
+  Headers,
 } from '@kbn/core/server';
-import { KibanaRequest, CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -323,14 +325,16 @@ export class ReportingCore {
     }
   }
 
-  public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    const fakeRequest = CoreKibanaRequest.from({
+  public getFakeRequest(
+    headers: Headers,
+    spaceId: string | undefined,
+    logger = this.logger
+  ): KibanaRequest {
+    const rawRequest: FakeRawRequest = {
+      headers,
       path: '/',
-      route: { settings: {} },
-      url: { href: '/' },
-      raw: { req: { url: '/' } },
-      ...baseRequest,
-    } as Hapi.Request);
+    };
+    const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {

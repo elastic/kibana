@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   Chart,
   Settings,
@@ -27,6 +28,9 @@ import {
   Placement,
   Direction,
   XYChartElementEvent,
+  Tooltip,
+  XYChartSeriesIdentifier,
+  TooltipValue,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -47,7 +51,13 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
+import type {
+  FilterEvent,
+  BrushEvent,
+  FormatFactory,
+  LayerCellValueActions,
+  MultiFilterEvent,
+} from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
@@ -94,7 +104,7 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-import { Tooltip } from './tooltip';
+import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 
 import './xy_chart.scss';
@@ -121,6 +131,8 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
@@ -131,6 +143,10 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   uiState?: PersistedState;
   timeFormat: string;
 };
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 function getValueLabelsStyling(isHorizontal: boolean): {
   displayValue: RecursivePartial<DisplayValueStyle>;
@@ -172,6 +188,9 @@ function createSplitPoint(
   table: Datatable
 ) {
   const splitPointRowIndex = rows.findIndex((row) => {
+    if (Array.isArray(value)) {
+      return value.includes(row[accessor]);
+    }
     return row[accessor] === value;
   });
   if (splitPointRowIndex !== -1) {
@@ -196,6 +215,8 @@ export function XYChart({
   paletteService,
   minInterval,
   onClickValue,
+  onClickMultiValue,
+  layerCellValueActions,
   onSelectRange,
   interactive = true,
   syncColors,
@@ -532,6 +553,54 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
+  const filterSelectedTooltipValues = (
+    tooltipSelectedValues: Array<
+      TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>
+    >
+  ) => {
+    const layerIndexes: number[] = [];
+    tooltipSelectedValues.forEach((v) => {
+      const index = dataLayers.findIndex((l) =>
+        v.seriesIdentifier.seriesKeys.some((key: string | number) =>
+          l.accessors.some(
+            (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+          )
+        )
+      );
+      if (!layerIndexes.includes(index) && index !== -1) {
+        layerIndexes.push(index);
+      }
+    });
+
+    if (!layerIndexes.length) return;
+    layerIndexes.forEach((layerIndex) => {
+      const layer = dataLayers[layerIndex];
+      const { table } = layer;
+
+      if (layer.splitAccessors?.length !== 1) return;
+
+      const splitAccessor = getAccessorByDimension(layer.splitAccessors[0], table.columns);
+      const filterValues = tooltipSelectedValues
+        .map((v) => v.datum?.[splitAccessor])
+        .filter(nonNullable);
+
+      const splitPoints = filterValues
+        .map((v) =>
+          createSplitPoint(splitAccessor, v, formattedDatatables[layer.layerId].table.rows, table)
+        )
+        .filter(nonNullable);
+      if (splitPoints.length) {
+        onClickMultiValue({
+          data: {
+            column: splitPoints[0].column,
+            value: splitPoints.map(({ value }) => value),
+            table,
+          },
+        });
+      }
+    });
+  };
+
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
@@ -720,6 +789,8 @@ export function XYChart({
     overflowX: 'hidden',
     position: uiState ? 'absolute' : 'relative',
   });
+  // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
+  const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors) && interactive;
 
   return (
     <div css={chartContainerStyle}>
@@ -743,6 +814,60 @@ export function XYChart({
         }}
       >
         <Chart ref={chartRef}>
+          <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
+            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            headerFormatter={
+              !args.detailedTooltip
+                ? ({ value }) => (
+                    <TooltipHeader
+                      value={value}
+                      formatter={safeXAccessorLabelRenderer}
+                      xDomain={rawXDomain}
+                    />
+                  )
+                : undefined
+            }
+            actions={
+              !args.detailedTooltip && hasTooltipActions
+                ? [
+                    {
+                      disabled: (selected) => selected.length < 1,
+                      label: (selected) =>
+                        selected.length === 0
+                          ? i18n.translate('expressionXY.tooltipActions.emptyFilterSelection', {
+                              defaultMessage: 'Select at least one series to filter',
+                            })
+                          : i18n.translate('expressionXY.tooltipActions.filterValues', {
+                              defaultMessage: 'Filter {seriesNumber} series',
+                              values: { seriesNumber: selected.length },
+                            }),
+                      onSelect: filterSelectedTooltipValues,
+                    },
+                  ]
+                : undefined
+            }
+            customTooltip={
+              args.detailedTooltip
+                ? ({ header, values }) => (
+                    <CustomTooltip
+                      header={header}
+                      values={values}
+                      titles={titles}
+                      fieldFormats={fieldFormats}
+                      formatFactory={formatFactory}
+                      formattedDatatables={formattedDatatables}
+                      splitAccessors={{
+                        splitColumnAccessor: splitColumnId,
+                        splitRowAccessor: splitRowId,
+                      }}
+                      layers={dataLayers}
+                      xDomain={isTimeViz ? rawXDomain : undefined}
+                    />
+                  )
+                : undefined
+            }
+            type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
+          />
           <Settings
             noResults={
               <EmptyPlaceholder
@@ -787,37 +912,6 @@ export function XYChart({
               markSizeRatio: args.markSizeRatio,
             }}
             baseTheme={chartBaseTheme}
-            tooltip={{
-              boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-              headerFormatter: !args.detailedTooltip
-                ? ({ value }) => (
-                    <TooltipHeader
-                      value={value}
-                      formatter={safeXAccessorLabelRenderer}
-                      xDomain={rawXDomain}
-                    />
-                  )
-                : undefined,
-              customTooltip: args.detailedTooltip
-                ? ({ header, values }) => (
-                    <Tooltip
-                      header={header}
-                      values={values}
-                      titles={titles}
-                      fieldFormats={fieldFormats}
-                      formatFactory={formatFactory}
-                      formattedDatatables={formattedDatatables}
-                      splitAccessors={{
-                        splitColumnAccessor: splitColumnId,
-                        splitRowAccessor: splitRowId,
-                      }}
-                      layers={dataLayers}
-                      xDomain={isTimeViz ? rawXDomain : undefined}
-                    />
-                  )
-                : undefined,
-              type: args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None,
-            }}
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
             xDomain={xDomain}
@@ -828,6 +922,7 @@ export function XYChart({
                 ? getLegendAction(
                     dataLayers,
                     onClickValue,
+                    layerCellValueActions,
                     fieldFormats,
                     formattedDatatables,
                     titles,
