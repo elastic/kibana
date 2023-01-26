@@ -15,8 +15,8 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-export const getDeltaPercent = (current: number, previous: number) => {
-  if (previous === 0) {
+export const getDeltaPercent = (current: number, previous: number | null) => {
+  if (previous === 0 || previous === null) {
     return 0;
   }
 
@@ -31,7 +31,7 @@ export const ThresholdIndicator = ({
 }: {
   loading: boolean;
   current: number;
-  previous: number;
+  previous: number | null;
   previousFormatted: string;
   currentFormatted: string;
 }) => {
@@ -78,21 +78,23 @@ export const ThresholdIndicator = ({
           <strong>{currentFormatted}</strong>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={getToolTipContent()}
-          title={i18n.translate('xpack.synthetics.stepDetails.palette.previous', {
-            defaultMessage: 'Average(24h): {previous}',
-            values: { previous: previousFormatted },
-          })}
-        >
-          {hasDelta ? (
-            <EuiIcon type={delta > 0 ? 'sortUp' : 'sortDown'} size="m" color={getColor()} />
-          ) : (
-            <EuiIcon type="minus" size="m" color="subdued" />
-          )}
-        </EuiToolTip>
-      </EuiFlexItem>
+      {previous !== null && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={getToolTipContent()}
+            title={i18n.translate('xpack.synthetics.stepDetails.palette.previous', {
+              defaultMessage: 'Median(24h): {previous}',
+              values: { previous: previousFormatted },
+            })}
+          >
+            {hasDelta ? (
+              <EuiIcon type={delta > 0 ? 'sortUp' : 'sortDown'} size="m" color={getColor()} />
+            ) : (
+              <EuiIcon type="minus" size="m" color="subdued" />
+            )}
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
