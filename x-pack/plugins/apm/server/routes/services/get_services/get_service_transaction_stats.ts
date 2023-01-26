@@ -10,6 +10,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SERVICE_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import {
@@ -101,6 +102,11 @@ export async function getServiceTransactionStats({
                   size: maxNumServices,
                 },
                 aggs: {
+                  overflowCount: {
+                    max: {
+                      field: SERVICE_OVERFLOW_COUNT,
+                    },
+                  },
                   transactionType: {
                     terms: {
                       field: TRANSACTION_TYPE,
@@ -157,6 +163,7 @@ export async function getServiceTransactionStats({
           end,
           value: topTransactionTypeBucket.doc_count,
         }),
+        overflowCount: bucket.overflowCount.value,
       };
     }) ?? []
   );

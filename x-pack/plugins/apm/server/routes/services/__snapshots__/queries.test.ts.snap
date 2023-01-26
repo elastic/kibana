@@ -87,6 +87,11 @@ Array [
           "aggs": Object {
             "services": Object {
               "aggs": Object {
+                "overflowCount": Object {
+                  "max": Object {
+                    "field": "service.aggregation.overflow_count",
+                  },
+                },
                 "transactionType": Object {
                   "aggs": Object {
                     "avg_duration": Object {

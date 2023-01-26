@@ -157,6 +157,7 @@ export async function getServiceAggregatedTransactionStats({
           end,
           value: topTransactionTypeBucket.doc_count,
         }),
+        overflowCount: bucket.overflowCount.value,
       };
     }) ?? []
   );

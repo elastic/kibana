@@ -129,11 +129,15 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName, transactionType }) => (
+      render: (
+        _,
+        { serviceName, agentName, transactionType, overflowCount }
+      ) => (
         <ServiceLink
           agentName={agentName}
           query={{ ...query, transactionType }}
           serviceName={serviceName}
+          overflowCount={overflowCount}
         />
       ),
     },

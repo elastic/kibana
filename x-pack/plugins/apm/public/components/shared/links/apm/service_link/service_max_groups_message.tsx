@@ -11,9 +11,9 @@ import React from 'react';
 export const OTHER_SERVICE_NAME = '_other';
 
 export function ServiceMaxGroupsMessage({
-  remainingServices,
+  remainingServices = 1,
 }: {
-  remainingServices: number;
+  remainingServices?: number;
 }) {
   return (
     <FormattedMessage
