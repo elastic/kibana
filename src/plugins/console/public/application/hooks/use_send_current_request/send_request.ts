@@ -8,6 +8,7 @@
 
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
@@ -34,6 +35,25 @@ export interface RequestResult<V = unknown> {
 
 const getContentType = (response: Response | undefined) =>
   (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
+
+const extractStatusCodeAndText = (response: Response | undefined, path: string) => {
+  const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
+  // Kibana API requests don't go through the proxy, so we can use the response status code and text.
+  if (isKibanaApiRequest) {
+    return {
+      statusCode: response?.status ?? 500,
+      statusText: response?.statusText ?? 'error',
+    };
+  }
+
+  // For ES requests, we need to extract the status code and text from the response
+  // headers, due to the way the proxy set up to avoid mirroring the status code which could be 401
+  // and trigger a login prompt. See for more details: https://github.com/elastic/kibana/issues/140536
+  const statusCode = parseInt(response?.headers.get('x-console-proxy-status-code') ?? '500', 10);
+  const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
+
+  return { statusCode, statusText };
+};
 
 let CURRENT_REQ_ID = 0;
 export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
@@ -79,11 +99,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           asResponse: true,
         });
 
-        const statusCode = parseInt(
-          response?.headers.get('x-console-proxy-status-code') ?? '500',
-          10
-        );
-        const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
+        const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
         if (reqId !== CURRENT_REQ_ID) {
           // Skip if previous request is not resolved yet. This can happen when issuing multiple requests at the same time and with slow networks
@@ -131,11 +147,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         let value;
         const { response, body } = error as IHttpFetchError;
 
-        const statusCode = parseInt(
-          response?.headers.get('x-console-proxy-status-code') ?? '500',
-          10
-        );
-        const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
+        const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
         if (body) {
           value = JSON.stringify(body, null, 2);
