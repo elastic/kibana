@@ -50,6 +50,7 @@ import type {
   HostMetadata,
   LogsEndpointAction,
   ResponseActionRequestBody,
+  ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -585,8 +586,9 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
         expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
-        expect(actionDocs[0].body!.EndpointActions.data.parameters?.command).toEqual('ls -al');
-        expect(actionDocs[0].body!.EndpointActions.data.parameters?.timeout).toEqual(1000);
+        const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
+        expect(parameters.command).toEqual('ls -al');
+        expect(parameters.timeout).toEqual(1000);
         expect(actionDocs[1].body!.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
