@@ -62,6 +62,7 @@
     "@kbn/language-documentation-popover",
     "@kbn/core-saved-objects-common",
     "@kbn/core-ui-settings-browser",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",
