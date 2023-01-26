@@ -66,7 +66,6 @@ import {
   getFiltersInLayer,
   getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
-  getDeprecatedSamplingWarningMessage,
   isColumnInvalid,
   cloneLayer,
 } from './utils';
@@ -871,7 +870,6 @@ export function getFormBasedDatasource({
           core.docLinks,
           setState
         ),
-        ...getDeprecatedSamplingWarningMessage(core),
       ];
 
       return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
