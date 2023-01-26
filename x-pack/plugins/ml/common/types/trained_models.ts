@@ -236,3 +236,22 @@ export interface NodesOverviewResponse {
   _nodes: { total: number; failed: number; successful: number };
   nodes: NodeDeploymentStatsResponse[];
 }
+
+export interface HuggingFaceTrainedModel {
+  model_id: string;
+  title: string;
+  description: string;
+  model_type: string;
+  task_type: string;
+  source: {
+    type: string;
+    last_modified: string;
+    total_definition_length: number;
+    total_parts: number;
+    metadata: {
+      repo_id: string;
+      revision: string;
+      tags: string[];
+    };
+  };
+}

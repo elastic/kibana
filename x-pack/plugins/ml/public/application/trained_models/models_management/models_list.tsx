@@ -9,6 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -49,6 +50,7 @@ import { useRefresh } from '../../routing/use_refresh';
 import { BUILT_IN_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { UploadTrainedModelFlyout } from './upload_model';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -122,6 +124,8 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [showTestFlyout, setShowTestFlyout] = useState<string | null>(null);
+  const [showUploadButton, setShowUploadButton] = useState<boolean>(false);
+  const [showUploadFlyout, setShowUploadFlyout] = useState<boolean>(false);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -197,6 +201,15 @@ export const ModelsList: FC<Props> = ({
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
+  );
+
+  useEffect(
+    function checkHuggingFaceServer() {
+      trainedModelsApiService.huggingFaceServerExists().then(({ exists }) => {
+        setShowUploadButton(exists);
+      });
+    },
+    [trainedModelsApiService]
   );
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -497,6 +510,13 @@ export const ModelsList: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
             </EuiFlexItem>
+            {showUploadButton ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => setShowUploadFlyout(!showUploadFlyout)}>
+                  Import trained model
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
           </>
         )}
       </EuiFlexGroup>
@@ -540,6 +560,15 @@ export const ModelsList: FC<Props> = ({
           onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
+      {showUploadFlyout ? (
+        <UploadTrainedModelFlyout
+          refreshModels={() => fetchModelsData()}
+          onClose={() => {
+            setShowUploadFlyout(false);
+            fetchModelsData();
+          }}
+        />
+      ) : null}
     </>
   );
 };

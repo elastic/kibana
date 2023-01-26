@@ -203,6 +203,7 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
     fieldNames,
     dataViewListItems,
     reloadExamples,
+    selectedDataView,
     selectedDataViewId,
     setSelectedDataViewId,
     selectedField,

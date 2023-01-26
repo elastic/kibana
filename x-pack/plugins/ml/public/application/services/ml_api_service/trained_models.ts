@@ -17,6 +17,7 @@ import type {
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
+  HuggingFaceTrainedModel,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -183,6 +184,20 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${apiBasePath}/trained_models/pipeline_simulate`,
         method: 'POST',
         body,
+      });
+    },
+
+    getHuggingFaceTrainedModels() {
+      return httpService.http<{ models: HuggingFaceTrainedModel[] }>({
+        path: `${apiBasePath}/trained_models/hugging_face_model_list`,
+        method: 'GET',
+      });
+    },
+
+    huggingFaceServerExists() {
+      return httpService.http<{ exists: boolean }>({
+        path: `${apiBasePath}/trained_models/hugging_face_server_exists`,
+        method: 'GET',
       });
     },
   };

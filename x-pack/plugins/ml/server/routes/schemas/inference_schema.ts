@@ -49,6 +49,11 @@ export const inferTrainedModelBody = schema.object({
   inference_config: schema.maybe(schema.any()),
 });
 
+export const huggingFaceImport = schema.object({
+  hubModelId: schema.string(),
+  start: schema.boolean(),
+});
+
 export const pipelineSimulateBody = schema.object({
   pipeline: schema.any(),
   docs: schema.arrayOf(schema.any()),

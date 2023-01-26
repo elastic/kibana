@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
+import type { MlConfigType } from '../../config';
 import {
   getInferenceQuerySchema,
   modelIdSchema,
@@ -16,6 +18,7 @@ import {
   inferTrainedModelQuery,
   inferTrainedModelBody,
   threadingParamsSchema,
+  huggingFaceImport,
   pipelineSimulateBody,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
@@ -23,8 +26,12 @@ import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
+import { HuggingFace } from '../models/trained_models';
 
-export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
+export function trainedModelsRoutes(
+  { router, routeGuard }: RouteInitialization,
+  config$: Observable<MlConfigType>
+) {
   /**
    * @apiGroup TrainedModels
    *
@@ -461,6 +468,93 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         });
         return response.ok({
           body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Import hugging face trained model.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/hugging_face_import',
+      validate: {
+        body: huggingFaceImport,
+      },
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      const { hubModelId, start } = request.body;
+      try {
+        const hf = new HuggingFace(config$, request, client);
+        const responseWithHeaders = await hf.importModel(hubModelId);
+
+        return response.ok(responseWithHeaders);
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/hugging_face_model_list',
+      validate: false,
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const hf = new HuggingFace(config$, request, client);
+        const body = await hf.getModelList();
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/hugging_face_server_exists',
+      validate: false,
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const hf = new HuggingFace(config$, request, client);
+        const exists = await hf.serverExists();
+        return response.ok({
+          body: { exists },
         });
       } catch (e) {
         return response.customError(wrapError(e));

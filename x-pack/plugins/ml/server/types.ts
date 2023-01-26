@@ -79,3 +79,7 @@ export interface RouteInitialization {
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
 }
+
+export interface MlConfigType {
+  trainedModelsServerUrl?: string;
+}
