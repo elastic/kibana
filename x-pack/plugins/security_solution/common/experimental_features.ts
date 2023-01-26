@@ -20,7 +20,7 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: false,
+  chartEmbeddablesEnabled: true,
 
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
@@ -84,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables top charts on Alerts Page
    */
-  alertsPageChartsEnabled: false,
+  alertsPageChartsEnabled: true,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
