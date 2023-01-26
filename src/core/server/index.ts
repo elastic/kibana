@@ -47,6 +47,7 @@ import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilitie
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
+import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 
 export { bootstrap } from '@kbn/core-root-server-internal';
 
@@ -389,7 +390,6 @@ export type {
 
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UiSettingsType,
   UserProvidedValues,
   DeprecationSettings,
