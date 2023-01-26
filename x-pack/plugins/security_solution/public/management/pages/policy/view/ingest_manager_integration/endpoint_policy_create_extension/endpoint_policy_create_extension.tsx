@@ -90,13 +90,12 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEnterprise = useLicense().isEnterprise();
 
-    // / Endpoint Radio Options (NGAV and EDRs)
-    const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('NGAV');
+    const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('EDRComplete');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
     const [selectedEnvironment, setSelectedEnvironment] = useState<Environment>('endpoint');
 
     // Show NGAV license note when Gold and below
-    // Show other licenses note when Platinum and Below
+    // Show EDR licenses note when Platinum and Below
     const showNote =
       (endpointPreset === 'NGAV' && !isPlatinumPlus) ||
       (['EDREssential', 'EDRComplete'].includes(endpointPreset) && !isEnterprise);

@@ -101,13 +101,14 @@ describe('Onboarding Component new section', () => {
       expect(mockedOnChange).toHaveBeenCalledTimes(2);
     });
 
-    it('make sure NGAV is the default value for endpoint environment', async () => {
+    it('make sure EDR Complete is the default value for endpoint environment', async () => {
       renderResult = mockedContext.render(
         <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
       );
-      expect(renderResult.getByDisplayValue('NGAV')).toBeChecked();
+      expect(renderResult.getByDisplayValue('DataCollection')).not.toBeChecked();
+      expect(renderResult.getByDisplayValue('NGAV')).not.toBeChecked();
       expect(renderResult.getByDisplayValue('EDREssential')).not.toBeChecked();
-      expect(renderResult.getByDisplayValue('EDRComplete')).not.toBeChecked();
+      expect(renderResult.getByDisplayValue('EDRComplete')).toBeChecked();
     });
 
     it('make sure interactive only is the default value for cloud environment', async () => {
