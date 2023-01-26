@@ -209,6 +209,7 @@ export class Alert<
           meta: {
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
           },
           state: {
             ...(this.state.start ? { start: this.state.start } : {}),

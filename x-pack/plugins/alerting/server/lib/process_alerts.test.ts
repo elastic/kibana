@@ -386,7 +386,9 @@ describe('processAlerts', () => {
   describe('recoveredAlerts', () => {
     test('considers alert recovered if it has no scheduled actions', () => {
       const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
-      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const recoveredAlert = new Alert<AlertInstanceState, AlertInstanceContext>('2', {
+        meta: { uuid: 'abc' },
+      });
 
       const existingAlerts = {
         '1': activeAlert,
