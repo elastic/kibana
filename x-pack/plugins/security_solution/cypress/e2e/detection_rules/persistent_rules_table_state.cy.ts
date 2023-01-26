@@ -28,6 +28,7 @@ import {
   expectCustomRules,
   expectRulesManagementTab,
   expectRulesMonitoringTab,
+  expectNoTags,
 } from '../../tasks/alerts_detection_rules';
 import {
   RULES_MANAGEMENT_TABLE,
@@ -90,6 +91,7 @@ function expectRulesTableState(): void {
 
 function expectDefaultRulesTableState(): void {
   expectFilterSearchTerm('');
+  expectNoTags();
   expectTableSorting('Enabled', 'desc');
   expectRowsPerPage(20);
   expectTablePage(1);
@@ -335,6 +337,7 @@ describe('Persistent rules table state', () => {
         });
 
         expectFilterSearchTerm('');
+        expectNoTags();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(2);
@@ -395,6 +398,7 @@ describe('Persistent rules table state', () => {
         visit(SECURITY_DETECTIONS_RULES_MANAGEMENT_URL);
 
         expectFilterSearchTerm('');
+        expectNoTags();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(1);

@@ -375,6 +375,14 @@ export const expectTags = (tags: string[]) => {
   }
 };
 
+export const expectNoTags = () => {
+  cy.get(RULES_TAGS_FILTER_BTN).contains('Tags').click();
+
+  cy.get(RULES_TAGS_FILTER_POPOVER)
+    .find('.euiSelectableListItem[data-test-selected="true"]')
+    .should('not.exist');
+};
+
 export const expectCustomRules = () =>
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
 
