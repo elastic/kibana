@@ -187,10 +187,13 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
+      console.debug('Try init');
       if (isInitializedRef.current || !packageInfo) {
+        console.debug('Cant or wont call init');
         return;
       }
 
+      console.debug('Call init');
       // Fetch all packagePolicies having the package name
       const { data: packagePolicyData } = await sendGetPackagePolicies({
         perPage: SO_SEARCH_LIMIT,
@@ -210,6 +213,7 @@ export function useOnSubmit({
           integrationToEnable
         )
       );
+      console.debug('Called init');
     }
     init();
   }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable]);

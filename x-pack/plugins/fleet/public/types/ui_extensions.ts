@@ -10,7 +10,9 @@ import type { ComponentType, LazyExoticComponent } from 'react';
 
 import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
 
-import type { Agent, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
+import type { PackagePolicyValidationResults } from '../services';
+
+import type { Agent, AgentPolicy, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -18,6 +20,33 @@ export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint)
 /** Internal storage for registered UI Extension Points */
 export interface UIExtensionsStorage {
   [key: string]: Partial<Record<UIExtensionPoint['view'], UIExtensionPoint>>;
+}
+
+export type PackagePolicyReplaceDefineStepExtensionComponent =
+  ComponentType<PackagePolicyReplaceDefineStepExtensionComponentProps>;
+
+// export interface PackagePolicyReplaceDefineStepExtensionComponentProps {
+//   agentPolicy?: any;
+//   packageInfo: PackageInfo;
+//   packagePolicy: NewPackagePolicy;
+//   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+//   // validationResults: PackagePolicyValidationResults;
+//   validationResults: any;
+//   submitAttempted: boolean;
+//   isEditPage?: boolean;
+//   noAdvancedToggle?: boolean;
+// }
+// export type PackagePolicyReplaceDefineStepExtensionComponentProps = Pick<
+//   PackagePolicyEditExtensionComponentProps,
+//   'newPolicy' | 'onChange'
+// >;
+export interface PackagePolicyReplaceDefineStepExtensionComponentProps
+  extends Pick<PackagePolicyEditExtensionComponentProps, 'newPolicy' | 'onChange'> {
+  isEditPage?: boolean;
+  validationResults?: PackagePolicyValidationResults;
+  // agentPolicy?: AgentPolicy;
+  // packageInfo: PackageInfo;
+  // packagePolicy: NewPackagePolicy;
 }
 
 /**
@@ -71,6 +100,12 @@ export type PackageGenericErrorsListComponent = ComponentType<PackageGenericErro
 export interface PackageGenericErrorsListProps {
   /** A list of errors from a package */
   packageErrors: FleetServerAgentComponentUnit[];
+}
+
+export interface PackagePolicyReplaceDefineStepExtension {
+  package: string;
+  view: 'package-policy-replace-define-step';
+  Component: LazyExoticComponent<PackagePolicyReplaceDefineStepExtensionComponent>;
 }
 
 /** Extension point registration contract for Integration Policy Edit views */
@@ -184,6 +219,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
+  | PackagePolicyReplaceDefineStepExtension
   | PackagePolicyEditExtension
   | PackagePolicyResponseExtension
   | PackagePolicyEditTabsExtension

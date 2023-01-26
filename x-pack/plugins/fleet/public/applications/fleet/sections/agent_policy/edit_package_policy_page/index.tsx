@@ -240,6 +240,10 @@ export const EditPackagePolicyForm = memo<{
   };
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
   const extensionTabsView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-edit-tabs'
@@ -277,64 +281,77 @@ export const EditPackagePolicyForm = memo<{
   const configurePackage = useMemo(
     () =>
       agentPolicy && packageInfo ? (
-        <>
-          {selectedTab === 0 && packageInfo.name !== 'cloud_security_posture' && (
-            <StepDefinePackagePolicy
-              agentPolicy={agentPolicy}
-              packageInfo={packageInfo}
-              packagePolicy={packagePolicy}
-              updatePackagePolicy={updatePackagePolicy}
+        replaceDefineStepView ? (
+          <ExtensionWrapper>
+            <replaceDefineStepView.Component
+              // agentPolicy={agentPolicy}
+              // packageInfo={packageInfo}
+              newPolicy={packagePolicy}
+              onChange={handleExtensionViewOnChange}
               validationResults={validationResults!}
-              submitAttempted={formState === 'INVALID'}
               isEditPage={true}
             />
-          )}
-
-          {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!extensionView && selectedTab === 0 && (
-            <StepConfigurePackagePolicy
-              packageInfo={packageInfo}
-              packagePolicy={packagePolicy}
-              updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
-              submitAttempted={formState === 'INVALID'}
-              isEditPage={true}
-            />
-          )}
-
-          {extensionView &&
-            packagePolicy.policy_id &&
-            packagePolicy.package?.name &&
-            originalPackagePolicy && (
-              <ExtensionWrapper>
-                {selectedTab > 0 && tabsViews ? (
-                  React.createElement(tabsViews[selectedTab - 1].Component, {
-                    policy: originalPackagePolicy,
-                    newPolicy: packagePolicy,
-                    onChange: handleExtensionViewOnChange,
-                  })
-                ) : (
-                  <extensionView.Component
-                    policy={originalPackagePolicy}
-                    newPolicy={packagePolicy}
-                    onChange={handleExtensionViewOnChange}
-                  />
-                )}
-              </ExtensionWrapper>
+          </ExtensionWrapper>
+        ) : (
+          <>
+            {selectedTab === 0 && (
+              <StepDefinePackagePolicy
+                agentPolicy={agentPolicy}
+                packageInfo={packageInfo}
+                packagePolicy={packagePolicy}
+                updatePackagePolicy={updatePackagePolicy}
+                validationResults={validationResults!}
+                submitAttempted={formState === 'INVALID'}
+                isEditPage={true}
+              />
             )}
-        </>
+            {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
+            {!extensionView && selectedTab === 0 && (
+              <StepConfigurePackagePolicy
+                packageInfo={packageInfo}
+                packagePolicy={packagePolicy}
+                updatePackagePolicy={updatePackagePolicy}
+                validationResults={validationResults!}
+                submitAttempted={formState === 'INVALID'}
+                isEditPage={true}
+              />
+            )}
+
+            {extensionView &&
+              packagePolicy.policy_id &&
+              packagePolicy.package?.name &&
+              originalPackagePolicy && (
+                <ExtensionWrapper>
+                  {selectedTab > 0 && tabsViews ? (
+                    React.createElement(tabsViews[selectedTab - 1].Component, {
+                      policy: originalPackagePolicy,
+                      newPolicy: packagePolicy,
+                      onChange: handleExtensionViewOnChange,
+                    })
+                  ) : (
+                    <extensionView.Component
+                      policy={originalPackagePolicy}
+                      newPolicy={packagePolicy}
+                      onChange={handleExtensionViewOnChange}
+                    />
+                  )}
+                </ExtensionWrapper>
+              )}
+          </>
+        )
       ) : null,
     [
       agentPolicy,
       packageInfo,
+      replaceDefineStepView,
       packagePolicy,
-      updatePackagePolicy,
-      validationResults,
-      formState,
-      originalPackagePolicy,
-      extensionView,
       handleExtensionViewOnChange,
+      validationResults,
       selectedTab,
+      updatePackagePolicy,
+      formState,
+      extensionView,
+      originalPackagePolicy,
       tabsViews,
     ]
   );

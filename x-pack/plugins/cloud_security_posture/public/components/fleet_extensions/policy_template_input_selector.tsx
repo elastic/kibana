@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { PostureInput } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
@@ -17,17 +17,38 @@ interface Props {
   setInput: (inputType: PostureInput) => void;
 }
 
-export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
-  const baseOptions = getPolicyTemplateInputOptions(input.policy_template);
-  const options = baseOptions.map((option) => ({
-    ...option,
-    disabled: option.disabled || disabled,
-    label: option.label,
-    icon: option.icon,
-  }));
+const InputsLabelKSPM = () => (
+  <FormattedMessage
+    id="xpack.csp.fleetIntegration.configureKspmIntegrationDescription"
+    defaultMessage="Select the Kuberentes cluster type you want to monitor and then fill in the name and description to help identify this integration"
+  />
+);
+
+const InputsLabelCSPM = () => (
+  <FormattedMessage
+    id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
+    defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
+  />
+);
+
+export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props) => {
+  const baseOptions = useMemo(
+    () => getPolicyTemplateInputOptions(input.policy_template),
+    [input.policy_template]
+  );
+
+  const options = useMemo(
+    () => baseOptions.map((option) => ({ ...option, disabled: option.disabled || disabled })),
+    [baseOptions, disabled]
+  );
 
   return (
-    <div>
+    <>
+      <EuiText color={'subdued'} size="s">
+        {input.policy_template === 'kspm' && <InputsLabelKSPM />}
+        {input.policy_template === 'cspm' && <InputsLabelCSPM />}
+      </EuiText>
+      <EuiSpacer />
       <RadioGroup
         disabled={disabled}
         idSelected={input.type}
@@ -35,40 +56,6 @@ export const PolicyInputSelector = ({ input, disabled, setInput }: Props) => {
         onChange={(inputType) => setInput(inputType as PostureInput)}
         size="m"
       />
-      <PolicyInputInfo type={input.type} />
-    </div>
+    </>
   );
 };
-
-const PolicyInputInfo = ({ type }: { type: PostureInput }) => {
-  switch (type) {
-    case 'cloudbeat/cis_aws':
-    case 'cloudbeat/cis_eks':
-      return <AWSSetupInfoContent />;
-    default:
-      return null;
-  }
-};
-
-const AWSSetupInfoContent = () => (
-  <>
-    <EuiSpacer />
-    <EuiTitle size="xs">
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.setupInfoContentTitle"
-          defaultMessage="Setup Access"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer />
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.awsIntegration.setupInfoContent"
-        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-    method of providing the AWS credentials this integration will use. You can follow these
-    step-by-step instructions to generate the necessary credentials."
-      />
-    </EuiText>
-  </>
-);

@@ -14,12 +14,12 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { PostureInput } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import { NewPackagePolicyPostureInput } from './utils';
 
 export const isAwsInput = (input: NewPackagePolicyInput): input is Props['input'] =>
   input.type === 'cloudbeat/cis_eks' || input.type === 'cloudbeat/cis_aws';
@@ -203,9 +203,8 @@ const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
 }));
 
 interface Props {
-  newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' }>;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updateVars(type: PostureInput, updatedVars: Record<string, { value: string }>): void;
 }
 
 const getInputVarsFields = (
@@ -227,7 +226,7 @@ const getInputVarsFields = (
 const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
   input.streams[0].vars?.['aws.credentials.type'].value;
 
-export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
+export const AwsCredentialsForm = ({ input, updateVars }: Props) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value so we default to the first option.
   const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
@@ -241,11 +240,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
         onChange={(optionId) =>
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
-              'aws.credentials.type': { value: optionId },
-            })
-          )
+          updateVars(input.type, { 'aws.credentials.type': { value: optionId } })
         }
       />
       <EuiSpacer size="m" />
@@ -254,9 +249,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <EuiSpacer />
       <AwsInputVarFields
         fields={fields}
-        onChange={(key, value) =>
-          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
-        }
+        onChange={(key, value) => updateVars(input.type, { [key]: { value } })}
       />
     </>
   );
@@ -276,6 +269,7 @@ const AwsCredentialTypeSelector = ({
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
+
 const AwsInputVarFields = ({
   fields,
   onChange,

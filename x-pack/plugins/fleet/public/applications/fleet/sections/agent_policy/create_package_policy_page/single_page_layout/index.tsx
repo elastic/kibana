@@ -267,24 +267,37 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
 
+  console.log({ packagePolicy, validationResults, formState });
   const stepConfigurePackagePolicy = useMemo(
     () =>
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
+      ) : replaceDefineStepView ? (
+        <ExtensionWrapper>
+          <replaceDefineStepView.Component
+            newPolicy={packagePolicy}
+            onChange={handleExtensionViewOnChange}
+            validationResults={validationResults}
+            integrationInfo={integrationInfo}
+            // agentPolicy={agentPolicy}
+            // packageInfo={packageInfo}
+          />
+        </ExtensionWrapper>
       ) : packageInfo ? (
         <>
-          {packageInfo.name !== 'cloud_security_posture' && (
-            <StepDefinePackagePolicy
-              agentPolicy={agentPolicy}
-              packageInfo={packageInfo}
-              packagePolicy={packagePolicy}
-              updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
-              submitAttempted={formState === 'INVALID'}
-            />
-          )}
-
+          <StepDefinePackagePolicy
+            agentPolicy={agentPolicy}
+            packageInfo={packageInfo}
+            packagePolicy={packagePolicy}
+            updatePackagePolicy={updatePackagePolicy}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
             <StepConfigurePackagePolicy
@@ -311,17 +324,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         <div />
       ),
     [
-      isInitialized,
       isPackageInfoLoading,
-      agentPolicy,
-      packageInfo,
+      isInitialized,
       packagePolicy,
-      updatePackagePolicy,
-      validationResults,
-      formState,
-      integrationInfo?.name,
-      extensionView,
       handleExtensionViewOnChange,
+      validationResults,
+      packageInfo,
+      agentPolicy,
+      updatePackagePolicy,
+      formState,
+      replaceDefineStepView,
+      extensionView,
+      integrationInfo?.name,
     ]
   );
 
