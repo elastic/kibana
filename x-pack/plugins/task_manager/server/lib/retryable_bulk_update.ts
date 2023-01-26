@@ -29,27 +29,9 @@ export async function retryableBulkUpdate({
   store,
 }: RetryableBulkUpdateOpts): Promise<BulkUpdateTaskResult> {
   const resultMap: Record<string, BulkUpdateResult> = {};
-  const tasksToUpdate = (await getTasks(taskIds))
-    .reduce<ConcreteTaskInstance[]>((acc, task) => {
-      if (isErr(task)) {
-        resultMap[task.error.id] = buildBulkUpdateErr(task.error);
-      } else {
-        acc.push(task.value);
-      }
-      return acc;
-    }, [])
-    .filter(filter)
-    .map(map);
-  const bulkUpdateResult = await store.bulkUpdate(tasksToUpdate);
-  for (const result of bulkUpdateResult) {
-    const taskId = getId(result);
-    resultMap[taskId] = result;
-  }
 
-  let retry = 1;
-  while (retry++ <= MAX_RETRIES && getRetriableTaskIds(resultMap).length > 0) {
-    const retriesToGet = getRetriableTaskIds(resultMap);
-    const retriesToUpdate = (await getTasks(retriesToGet))
+  async function attemptToUpdate(taskIdsToAttempt: string[]) {
+    const tasksToUpdate = (await getTasks(taskIdsToAttempt))
       .reduce<ConcreteTaskInstance[]>((acc, task) => {
         if (isErr(task)) {
           resultMap[task.error.id] = buildBulkUpdateErr(task.error);
@@ -60,11 +42,18 @@ export async function retryableBulkUpdate({
       }, [])
       .filter(filter)
       .map(map);
-    const retryResult = await store.bulkUpdate(retriesToUpdate);
-    for (const result of retryResult) {
+    const bulkUpdateResult = await store.bulkUpdate(tasksToUpdate);
+    for (const result of bulkUpdateResult) {
       const taskId = getId(result);
       resultMap[taskId] = result;
     }
+  }
+
+  await attemptToUpdate(taskIds);
+
+  let retry = 1;
+  while (retry++ <= MAX_RETRIES && getRetriableTaskIds(resultMap).length > 0) {
+    await attemptToUpdate(getRetriableTaskIds(resultMap));
   }
 
   return Object.values(resultMap).reduce<BulkUpdateTaskResult>(
