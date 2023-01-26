@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner, EuiProgress, EuiIcon } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
@@ -69,10 +69,9 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
     });
 
     const logoImage = this.props.customLogo ? (
-      <img
+      <EuiImage
         src={this.props.customLogo}
-        width="24"
-        height="24"
+        size={24}
         alt="logo"
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
           defaultMessage: 'User logo',
